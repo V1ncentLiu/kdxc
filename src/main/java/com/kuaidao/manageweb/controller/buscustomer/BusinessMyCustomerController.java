@@ -1,19 +1,35 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
-import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
+import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
+import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
+import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,24 +38,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
-import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
-import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
  * @author yangbiao 接口层 Created on 2019-2-12 15:06:38 商务模块--我的客户
@@ -124,6 +122,12 @@ public class BusinessMyCustomerController {
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
+        }
+
+        // 项目
+        JSONResult<List<ProjectInfoDTO>> proallJson = projectInfoFeignClient.allProject();
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proAllSelect", proallJson.getData());
         }
 
         JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();

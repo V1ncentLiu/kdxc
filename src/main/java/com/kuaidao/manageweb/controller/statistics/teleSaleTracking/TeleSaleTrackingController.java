@@ -472,7 +472,7 @@ public class TeleSaleTrackingController {
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");
         headTitleList.add("客户级别");
-        headTitleList.add("资源数");
+        headTitleList.add("资源数(不含释放及转组资源)");
         headTitleList.add("回访次数");
         headTitleList.add("回访资源数");
         headTitleList.add("人均天回访次数");
@@ -485,7 +485,7 @@ public class TeleSaleTrackingController {
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");
         headTitleList.add("客户级别");
-        headTitleList.add("资源数");
+        headTitleList.add("资源数(不含释放及转组资源)");
         headTitleList.add("回访次数");
         headTitleList.add("回访资源数");
         headTitleList.add("人均天回访次数");
@@ -497,7 +497,7 @@ public class TeleSaleTrackingController {
         headTitleList.add("序号");
         headTitleList.add("电销组");
         headTitleList.add("客户级别");
-        headTitleList.add("资源数");
+        headTitleList.add("资源数(不含释放及转组资源)");
         headTitleList.add("回访次数");
         headTitleList.add("回访资源数");
         headTitleList.add("人均天回访次数");

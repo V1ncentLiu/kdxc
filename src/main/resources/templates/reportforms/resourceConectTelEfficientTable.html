@@ -16,7 +16,7 @@
             <el-breadcrumb-item>电销组资源接通有效率表</el-breadcrumb-item>
         </el-breadcrumb>
         <el-row class="marginB20">
-            <el-button type="primary" @click="searchTable">昨天</el-button>
+            <el-button type="primary" @click="searchYesterday">昨天</el-button>
             <el-button type="success" @click="searchWeek">近七天</el-button>
             <el-button type="warning" @click="searchMonth">本月</el-button>
             <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
@@ -30,34 +30,34 @@
                         <el-select v-model="form.resourceId" placeholder="资源类别" style="width: 100%;" clearable
                             filterable>
                             <el-option v-for="item in resourceClassList" :key="item.id" :label="item.name"
-                                :value="item.id">
+                                :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="媒介:">
                         <el-select v-model="form.mediumId" placeholder="媒介" style="width: 100%;" clearable filterable>
-                            <el-option v-for="item in mediumList" :key="item.id" :label="item.name" :value="item.id">
+                            <el-option v-for="item in mediumList" :key="item.id" :label="item.name" :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源项目:">
-                        <el-select v-model="form.resourceItemId" placeholder="资源项目" style="width: 100%;" clearable
+                        <el-select v-model="form.resourceProjectId" placeholder="资源项目" style="width: 100%;" clearable
                             filterable>
-                            <el-option v-for="item in resourceItemList" :key="item.id" :label="item.name"
+                            <el-option v-for="item in resourceItemList" :key="item.id" :label="item.projectName"
                                 :value="item.id">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="起止时间:">
                         <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime"
-                            placeholder="选择日期"></el-date-picker>
+                            placeholder="选择日期" value-format="yyyy-MM-dd HH:mm"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="—" class="widthauto">
                         <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime"
-                            placeholder="选择日期"></el-date-picker>
+                            placeholder="选择日期" value-format="yyyy-MM-dd HH:mm"></el-date-picker>
                     </el-form-item>
                     <el-row v-show="isShow">
-                        <el-form-item label="电销分公司:">
+                        <!-- <el-form-item label="电销分公司:">
                             <el-select v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)"
                                 style="width: 100%;" clearable filterable>
                                 <el-option v-for="item in dxBusinessList" :key="item.id" :label="item.name"
@@ -72,88 +72,237 @@
                                     :value="item.id">
                                 </el-option>
                             </el-select>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="电销组:">
-                            <el-select v-model="teleGorupId" placeholder="电销组" style="width: 100%;" clearable
-                                filterable>
-                                <el-option v-for="item in dxList" :key="item.id" :label="item.name" :value="item.id">
+                            <el-select v-model="form.teleGorupId" placeholder="电销组" style="width: 100%;" clearable
+                                filterable :disabled="isDisabled">
+                                <el-option v-for="item in saleGroupList" :key="item.id" :label="item.name"
+                                    :value="item.id">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                     </el-row>
-
-                    <div class="mainSearchBtnBox">
-                        <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索
-                        </el-button>
-                        <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
-                                v-if="isShow">收起</span><span v-else>展开更多</span><i
-                                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                    </div>
                 </el-form>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索
+                    </el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
+                            v-if="isShow">收起</span><span v-else>展开更多</span><i
+                            :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
             </div>
             <el-row class="marginB20">
-                <el-tabs type="card" v-model="tableActive" @tab-click="handleClick" >
-                    <el-tab-pane label="资源有效" name="0"></el-tab-pane>
-                    <el-tab-pane label="首日资源有效" name="1"></el-tab-pane>
-                </el-tabs>
-            </el-row>
-            <el-row>
-                <el-table ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
+                <el-tabs type="card" v-model="tableActive" @tab-click="handleClick('tab')">
+                    <el-tab-pane label="资源有效" name="0">
+                        <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
                     v-loading="loading" :span-method="arraySpanMethod">
-                    <!-- <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun">
-                    </el-table-column> -->
-                    <el-table-column prop="orgName" align="center" label="电销组">
-                    </el-table-column>
-                    <el-table-column prop="zylb" align="center" label="资源类别">
-                       <template slot-scope="scope" >
-                            {{scope.row.total == ''?scope.row.zylb:scope.row.total}}
+                    <el-table-column  prop="orgName" align="center" label="电销组">
+                        <template slot-scope="scope">
+                          <span class="act">{{scope.row.orgName}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="mj" align="center" label="媒介">
+                    <el-table-column prop="resourceCategoryName" align="center" label="资源类别">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="zyxm" align="center" label="资源项目">
+                    <el-table-column prop="resourceMediumName" align="center" label="媒介">
                     </el-table-column>
-                    <el-table-column prop="callClueCount" align="center" label="下发资源量">
+                    <el-table-column prop="projectTypeName" align="center" label="资源项目">
                     </el-table-column>
-                    <el-table-column prop="calledClueCount" align="center" :label="tableActive == 0 ?'跟访资源量':'首日跟访资源量'">
+                    <el-table-column prop="issuedResources" align="center" label="下发资源量">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.issuedResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="clueCallecdPrecent" align="center" :label="tableActive == 0 ?'首次接通资源量':'首日接通资源量'">
+                    <el-table-column prop="followResources" align="center" label="跟访资源量">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
+                        </template>
                     </el-table-column>
-                    <!-- :formatter="percentFormat" -->
-                    <!-- :formatter="timeFormat"  -->
-                    <el-table-column prop="validCallTime" align="center"  label="接通资源量" v-if = 'tableActive == 0'>
+                    <el-table-column prop="firstResources" align="center" label="首次接通资源量">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.firstResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'未接通资源量':'首日未接通资源量'" >
+                    <el-table-column prop="connectResources" align="center" label="接通资源量">
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'接通有效资源量':'首日接通有效资源量'">
+                    <el-table-column prop="notConnectResources" align="center"
+                        label="未接通资源量">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'接通无效资源量':'首日接通无效资源量'">
+                    <el-table-column prop="connectEffectiveResources" align="center"
+                        label="接通有效资源量">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectEffectiveResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'未接通有效资源量':'首日未接通有效资源量'">
+                    <el-table-column prop="connectNotEffectiveResources" align="center"
+                        label="接通无效资源量">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectNotEffectiveResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'未接通无效资源量':'首日未接通无效资源量'">
+                    <el-table-column prop="notConnectEffectiveResources" align="center"
+                        label="未接通有效资源量">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectEffectiveResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" :label="tableActive == 0 ?'跟访率':'首日跟访率'">
+                    <el-table-column prop="notConnectNotEffectiveResources" align="center"
+                        label="未接通无效资源量">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectNotEffectiveResources}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首次接通率" v-if = 'tableActive == 0'>
+                    <el-table-column prop="followRate" align="center" label="跟访率"
+                        :formatter="percentFormat">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.followRate | perFormat}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" :label="tableActive == 0 ?'资源接通率':'首日资源接通率'">
+                    <el-table-column prop="firstRate" align="center" label="首次接通率" 
+                        :formatter="percentFormat">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.firstRate | perFormat}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" :label="tableActive == 0 ?'资源有效率':'首日资源有效率'">
+                    <el-table-column prop="resourceConnectRate" align="center"
+                        label="资源接通率" :formatter="percentFormat">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceConnectRate | perFormat}}</span>
+                        </template>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" :label="tableActive == 0 ?'接通有效率':'首日接通有效率'">
+                    <el-table-column prop="resourceEffectiveRate" align="center"
+                        label="资源有效率" :formatter="percentFormat">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceEffectiveRate | perFormat}}</span>
+                        </template>
                     </el-table-column>
-                    
-                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+                    <el-table-column prop="connectionRate" align="center" label="接通有效率"
+                        :formatter="percentFormat">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectionRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                    <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
+                    </el-tab-pane>
+                    <el-tab-pane label="首日资源有效" name="1">
+                        <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
+                        v-loading="loading" :span-method="arraySpanMethod">
+                        <el-table-column  prop="orgName" align="center" label="电销组">
+                          <template slot-scope="scope">
+                            <span class="act">{{scope.row.orgName}}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="resourceCategoryName" align="center" label="资源类别">
+                            <template slot-scope="scope">
+                              <span :class="{'act':scope.row.total != ''}">
+                                {{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}
+                              </span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="resourceMediumName" align="center" label="媒介">
+                        </el-table-column>
+                        <el-table-column prop="projectTypeName" align="center" label="资源项目">
+                        </el-table-column>
+                        <el-table-column prop="issuedResources" align="center" label="下发资源量">
+                            <template slot-scope="scope">
+                              <span :class="{'act':scope.row.total != ''}">{{scope.row.issuedResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="followResources" align="center" label="首日跟访资源量">
+                            <template slot-scope="scope">
+                              <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="connectResources" align="center"
+                            label="首日接通资源量">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="notConnectResources" align="center"
+                            label="首日未接通资源量">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="connectEffectiveResources" align="center"
+                            label="首日接通有效资源量">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.connectEffectiveResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="connectNotEffectiveResources" align="center"
+                            label="首日接通无效资源量">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.connectNotEffectiveResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="notConnectEffectiveResources" align="center"
+                            label="首日未接通有效资源量">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectEffectiveResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="notConnectNotEffectiveResources" align="center"
+                            label="首日未接通无效资源量">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectNotEffectiveResources}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="followRate" align="center" label="首日跟访率"
+                            :formatter="percentFormat">
+                            <template slot-scope="scope">
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.followRate|perFormat}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="resourceConnectRate" align="center"
+                            label="首日资源接通率" :formatter="percentFormat">
+                            <template slot-scope="scope">
+                              <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceConnectRate|perFormat}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="resourceEffectiveRate" align="center"
+                            label="首日资源有效率" :formatter="percentFormat">
+                            <template slot-scope="scope">
+                              <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceEffectiveRate|perFormat}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="connectionRate" align="center" label="首日接通有效率"
+                            :formatter="percentFormat">
+                            <template slot-scope="scope">
+                              <span :class="{'act':scope.row.total != ''}">{{scope.row.connectionRate|perFormat}}</span>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
+                    </el-tab-pane>
+                </el-tabs>
             </el-row>
+            <!-- <el-row>
+                <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
+            </el-row> -->
         </div>
     </div>
     <!-- import common js-->
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
+<style>
+  .act{
+    font-weight: bold;
+  }
+</style>
 <script th:inline="javascript">
-       var queryOrg = [[${queryOrg}]]; // 电销组
-        var proSelect = [[${proSelect}]]; //项目组
+    var resourceClassList = [[${clueCategoryList}]]; // 资源类别
+    var mediumList = [[${mediumList}]]; //媒介
+    var resourceItemList = [[${projectList}]]; //资源项目
+    var saleGroupList = [[${saleGroupList}]]; //电销组
+    var orgId = [[${curOrgId}]]; //电销组id
 
     function List() {
         this.dataStore = [];
@@ -161,7 +310,6 @@
             //根据当前数组的长度插入新的数据
             this.dataStore[this.length()] = data;
         }
-
         this.length = function () {
             //获得数组的长度
             var length = this.dataStore.length;
@@ -213,88 +361,23 @@
     }
     var mainDivVM = new Vue({
         el: '#maindiv',
+        filters: {
+          perFormat (val) {
+            if (!val) { // 如果没有值或值为0
+                return 0 + "%";
+            }
+            val = (val * 1000) / 10 + "%";
+            return val;
+          },
+        },
         data: function () {
             return {
-                tableActive:0,
-                teleCompanyId: '', //电销分公司id
-                teleDeptId: '', //电销事业部id
-                teleGorupId: '', //电销组id
-                dxBusinessList: '', //电销分公司list
-                dxCauseBList: '', //电销事业部List
-                dxList: '', //电销组List
-                resourceClassList: [{
-                        id: 1,
-                        value: 1,
-                        name: '全部'
-                    },
-                    {
-                        id: 2,
-                        value: 2,
-                        name: '联展'
-                    },
-                    {
-                        id: 3,
-                        value: 3,
-                        name: '优化'
-                    },
-                    {
-                        id: 4,
-                        value: 4,
-                        name: '信息流'
-                    },
-                ],
-                mediumList: [{
-                        id: 1,
-                        value: 1,
-                        name: '全部'
-                    },
-                    {
-                        id: 2,
-                        value: 2,
-                        name: '百度'
-                    },
-                    {
-                        id: 3,
-                        value: 3,
-                        name: '搜狐'
-                    },
-                    {
-                        id: 4,
-                        value: 4,
-                        name: '360'
-                    },
-                    {
-                        id: 5,
-                        value: 5,
-                        name: '搜狗'
-                    },
-                ],
-                resourceItemList: [{
-                        id: 1,
-                        value: 1,
-                        name: '全部'
-                    },
-                    {
-                        id: 2,
-                        value: 2,
-                        name: '项目1'
-                    },
-                    {
-                        id: 3,
-                        value: 3,
-                        name: '项目2'
-                    },
-                    {
-                        id: 4,
-                        value: 4,
-                        name: '项目3'
-                    },
-                    {
-                        id: 5,
-                        value: 5,
-                        name: '项目4'
-                    },
-                ],
+                tableActive: 0, //tab切换
+                isDisabled: false, //是否禁用电销组
+                saleGroupList: saleGroupList, //电销组List
+                resourceClassList: resourceClassList, //资源类别List
+                mediumList: mediumList, //媒介List
+                resourceItemList: resourceItemList, //资源项目
                 isShow: false,
                 loading: false,
                 form: {
@@ -302,155 +385,221 @@
                     endTime: '',
                     resourceId: '', //资源类别
                     mediumId: '', //媒介
-                    resourceItemId: '', //资源项目
+                    resourceProjectId: '', //资源项目
+                    teleGorupId: orgId, //电销组id
                 },
                 export: {
                     startTime: '',
                     endTime: '',
                     orgId: ''
                 },
-                tableData: [
-                    
-                ],
-                orgTeleArr: queryOrg, // 电销组
+                tableData: [],
                 pager: {
                     total: 0,
                     currentPage: 1,
-                    pageSize: 2
+                    pageSize: 3
                 },
+                startTimeEnd: '',
+                endTimeEnd: '',
+                resourceClassIdEnd: '',
+                mediumIdEnd: '',
+                resourceProjectIdEnd: '',
+                orgIdEnd: ''
             }
         },
         methods: {
-            //获取媒介
-            getMediumOptions() {
-                var _this = this
-                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', {
-                    groupCode: 'medium'
-                }).then(function (response) {
-                    if (response.data.code == '0') {
-                        _this.mediumList = response.data.data
-                       
-                    }
-                });
-            },
-            //电销联动
-            showTele(type) {
-                var param = {};
-                if (type == 1) {
-                    param.orgType = "1";
-                    param.parentId = mainDivVM.teleDeptId;
-                } else if (type == 7) {
-                    param.orgType = "7";
-                    param.parentId = mainDivVM.teleCompanyId;
-                } else if (type == 0) {
-                    param.orgType = "8";
-                }
-                axios.post('/organization/organization/queryOrgByType', param).then(function (response) {
-                        console.log(response);
-                        if (type == 1) {
-                            mainDivVM.dxList = response.data.data;
-                        } else if (type == 7) {
-                            mainDivVM.dxCauseBList = response.data.data;
-                        } else {
-                            mainDivVM.dxBusinessList = response.data.data;
+            formatTreeList(list) {
+                var b = list.reduce((r, x) => ((r[x.orgId] || (r[x.orgId] = [])).push(x), r), {});
+                var c = Object.keys(b).map(x => b[x]);
+                var newArray = []
+                for (var i = 0; i < c.length; i++) {
+                    for (var j = 0; j < c[i].length; j++) {
+                        for (var k = j + 1; k < c[i].length; k++) {
+                            if (c[i][j].resourceCategoryName == c[i][k].resourceCategoryName) {
+                                c[i][k].resourceCategoryName = ''
+                                if (c[i][j].resourceMediumName == c[i][k].resourceMediumName) {
+                                    c[i][k].resourceMediumName = ''
+                                }
+                            }
                         }
-                    }).catch(function (error) {
-                        console.log(error);
-                    })
-                    .then(function () {
-                        // always executed
-                    });
+                        newArray.push(c[i][j])
+                    }
+                }
+                return newArray
+            },
+            //tab、分页切换
+            handleClick(type) {
+                this.form.startTime = this.startTimeEnd;
+                this.form.endTime = this.endTimeEnd;
+                this.form.resourceId = this.resourceClassIdEnd;
+                this.form.mediumId = this.mediumIdEnd;
+                this.form.resourceProjectId = this.resourceProjectIdEnd;
+                this.form.teleGorupId = this.orgIdEnd;
+                if (type == 'tab') {
+                    this.searchTable(1);
+                } else {
+                    this.searchTable();
+                }
             },
             toogleClick() {
                 this.isShow = !this.isShow
             },
-            searchTable() {
+            searchTable(firstPage) {
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if (endTime) {
-                    if (this.minuteFormat(startTime) > this.minuteFormat(endTime)) {
+                if (endTime && startTime) {
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
+                    if (startTime > endTime) {
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
                         });
                         return;
                     }
-                }
-                var date = new Date();
-                var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                date.setMonth(date.getMonth() - 5);
-                var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                var currentDateRes = new Date(currentDate);
-                var beforeSixMonthRes = new Date(beforeSixMonth);
-                if (startTime < beforeSixMonthRes || endTime > currentDateRes) {
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth() - 6);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if (startTime < beforeSixMonthRes || endTime > currentDateRes) {
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
+                } else {
                     this.$message({
-                        message: '请选择近6个月内的时间',
+                        message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
                 }
 
-
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
-                param.orgId = this.form.orgId; // 电销组
-                console.log(param);
+                if (firstPage) {
+                    param.pageNum = firstPage;
+                } else {
+                    param.pageNum = this.pager.currentPage;
+                }
+                param.resourceCategory = this.form.resourceId;
+                param.resourceMedium = this.form.mediumId;
+                param.projectType = this.form.resourceProjectId;
+                param.orgId = this.form.teleGorupId
+
+
                 this.loading = true;
-                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime', param).then(function (
-                    response) {
-                    // console.log(response, 'response');
-                    // if (!response) {
-                    //     mainDivVM.$message({
-                    //         message: "接口调用失败",
-                    //         type: 'error'
-                    //     });
-                    //     return;
-                    // }
+                var url = ''
+                if (this.tableActive == 0) {
+                    url = '/statistics/teleGroupResourceEfficiency/getResourceConectTelEfficientList'
+                } else if (this.tableActive == 1) {
+                    url = '/statistics/teleGroupResourceEfficiency/getFirstResourceConectTelEfficientList'
+                }
+                axios.post(url, param).then(function (response) {
+                    if (!response) {
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return;
+                    }
                     var resobj = response.data;
-                    // console.log(resobj)
-                    // if (!resobj) {
-                    //     mainDivVM.$message({
-                    //         message: "接口调用失败",
-                    //         type: 'error'
-                    //     });
-                    //     return;
-                    // }
-                    // if (resobj.code != '0') {
-                    //     mainDivVM.loading = false;
-                    //     mainDivVM.$message({
-                    //         message: resobj.msg,
-                    //         type: 'error'
-                    //     });
-                    //     return;
-                    // } else if (resobj.data && resobj.data.data) {
+                    if (!resobj) {
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return;
+                    }
+                    if (resobj.code != '0') {
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return;
+                    }else if (resobj.data && resobj.data.tableData) {
+                        var resobjData = resobj.data;
+                        var tableData = resobjData.tableData;
+                        if( tableData.data.length && resobj.data.totalData ){
+                            for (var i = 0; i < resobjData.totalData.length; i++) {
+                                Vue.set(resobjData.totalData[i], 'total', '合计')
+                            }
+                            for (var j = 0; j < tableData.data.length; j++) {
+                                Vue.set(tableData.data[j], 'total', '')
+                                Vue.set(tableData.data[j], 'orgName', '')
+                            }
+                           
+                            mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
+                        }else{
+                            mainDivVM.tableData = tableData.data;
+                        }
+        
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
 
-                    var resobjData = resobj.data.data;
-                    // 表格数据渲染
-                    // mainDivVM.tableData = resobjData;
-                    // 插入合计一行
-                    mainDivVM.summaryFun();
-                    mainDivVM.pager.currentPage = resobj.data.currentPage;
-                    mainDivVM.pager.total = resobj.data.total;
-                    mainDivVM.loading = false;
-
-                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    // } 
-                    // else {
-                    //     mainDivVM.loading = false;
-                    // }
+                        //重新赋值
+                        mainDivVM.startTimeEnd = mainDivVM.form.startTime;
+                        mainDivVM.endTimeEnd = mainDivVM.form.endTime;
+                        mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
+                        mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
+                        mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
+                        mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
+                    } else {
+                        mainDivVM.loading = false;
+                        mainDivVM.startTimeEnd = mainDivVM.form.startTime;
+                        mainDivVM.endTimeEnd = mainDivVM.form.endTime;
+                        mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
+                        mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
+                        mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
+                        mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
+                    }
                 }).catch(function (error) {
-                    console.log('error', error);
+                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
-                    mainDivVM.loading = false;
+                    mainDivVM.startTimeEnd = mainDivVM.form.startTime;
+                    mainDivVM.endTimeEnd = mainDivVM.form.endTime;
+                    mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
+                    mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
+                    mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
+                    mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
                 });
+            },
+            limitTime(start, end) {
+                var startTime = this.minuteFormat(start);
+                var endTime = this.minuteFormat(end);
+                var date = new Date();
+                data = this.minuteFormat(date); // 现在的时间
+                data = data.slice(0, 8);
+                if (startTime) {
+                    var s = startTime.slice(0, 8);
+                    if (s < data) {
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if (endTime) {
+                    var e = endTime.slice(0, 8);
+                    if (e < data) {
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;
+                    }
+                    return end;
+                }
             },
             arraySpanMethod({
                 row,
@@ -458,26 +607,18 @@
                 rowIndex,
                 columnIndex
             }) { // 合并第一行
-            if(row.total && row.total == '合计'){
+                if (row.total && row.total == '合计') {
                     if (columnIndex === 1) {
-                        return [1,3]
-                    }else if(columnIndex === 2){
-                    	return [0,0]
-                    }else if(columnIndex === 3){
-                    	return [0,0]
+                        return [1, 3]
+                    } else if (columnIndex === 2) {
+                        return [0, 0]
+                    } else if (columnIndex === 3) {
+                        return [0, 0]
                     }
-            }
-               
-            },
-            gotoTeam(row) { // 页面跳转
-                var orgId = row.orgId;
-                if (orgId === "合计") {
-                    window.location.href = "/statistics/teleStatement/telemarketingCallTableSum";
-                } else {
-                    window.location.href = "/statistics/teleStatement/telemarketingCallTableTeam?orgId=" +
-                        orgId;
                 }
+
             },
+
             indexFun(index) { // 表格序号
                 return index;
             },
@@ -498,201 +639,37 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            summaryFun() {
-                var tableData = [{
-                	 id: '1-1',
-                     orgName: '秦-1-1-1',
-                     total: '合计',
-                     zylb: '',
-                     mj: '',
-                     zyxm: '',
-                     calledCount: 10,
-                     callPercent: 10,
-                     callClueCount: 10,
-                     calledClueCount: 10,
-                     clueCallecdPrecent: 10,
-                     validCallTime: 155799,
-                    },
-                    {
-                        id: '1-2',
-                        orgName: '秦-1-1-1',
-                        total: '合计',
-                        zylb: '合计',
-                        mj: '',
-                        zyxm: '',
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-3',
-                        orgName: '秦-1-1-1',
-                        total: '合计',
-                        zylb: '合计',
-                        mj: '',
-                        zyxm: '',
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-4',
-                        orgName: '秦-1-1-1',
-                        total: '合计',
-                        zylb: '合计',
-                        mj: '',
-                        zyxm: '',
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    }
-                ];
-                var totalArr = [{
-                	 id: '1-1',
-                     orgName: '',
-                     total: '',
-                     zylb: '竞价',
-                     mj: '百度',
-                     zyxm: '项目',
-                     calledCount: 10,
-                     callPercent: 10,
-                     callClueCount: 10,
-                     calledClueCount: 10,
-                     clueCallecdPrecent: 10,
-                     validCallTime: 155799,
-                    },
-                    {
-                        id: '1-2',
-                        orgName: '',
-                        total: '',
-                        zylb: '竞价',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    }, {
-                        id: '1-2',
-                        orgName: '',
-                        total: '',
-                        zylb: '',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-2',
-                        orgName: '',
-                        total: '',
-                        zylb: '竞价',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-3',
-                        orgName: '',
-                        total: '',
-                        zylb: '竞价',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-3',
-                        orgName: '',
-                        total: '',
-                        zylb: '竞价',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-3',
-                        orgName: '',
-                        total: '',
-                        zylb: '竞价',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    },
-                    {
-                        id: '1-4',
-                        orgName: '',
-                        total: '',
-                        zylb: '竞价',
-                        mj: '百度',
-                        zyxm: '项目1',
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                    }
-                ];
-
+            //根据id将合计插入对应id上边
+            summaryFun(totalData, tableData) {
                 var list = new List();
-                for (var i = 0; i < totalArr.length; i++) {
-                    list.append(totalArr[i]);
-                }
                 for (var i = 0; i < tableData.length; i++) {
-                    for (var j = 0; j < totalArr.length; j++) {
-                        if (tableData[i].id == totalArr[j].id) {
-                            list.insertBefore(tableData[i], totalArr[j])
+                    list.append(tableData[i]);
+                }
+                for (var i = 0; i < totalData.length; i++) {
+                    for (var j = 0; j < tableData.length; j++) {
+                        if (totalData[i].orgId == tableData[j].orgId) {
+                            list.insertBefore(totalData[i], tableData[j])
                         }
                     }
                 }
-
                 var arr = []
                 list.forEach(function (data) {
                     arr.push(data)
                 });
                 mainDivVM.tableData = this.repeatArr(arr)
-                
-
-
             },
             //去重
             repeatArr(arr) {
                 var x = new Set(arr);
                 return [...x];
             },
-
+            //白分比格式话
             percentFormat(row, column) {
                 var percent = row[column.property];
-                percent = parseInt(percent) * 100 + "%";
+                if (!percent) { // 如果没有值或值为0
+                    return 0 + "%";
+                }
+                percent = (percent * 1000) / 10 + "%";
                 return percent;
             },
             timeFormat(row, column) { // 时间格式化：时分秒
@@ -728,7 +705,7 @@
                     " 23:59";
                 this.form.startTime = startTime;
                 this.form.endTime = endTime;
-                this.searchTable();
+                this.searchTable(1);
             },
             searchWeek() { // 近七天
                 var a = new Date();
@@ -744,7 +721,7 @@
                     startTime.getDate() + " 00:00";
                 this.form.endTime = endTime.getFullYear() + "-" + (endTime.getMonth() + 1) + "-" + endTime
                     .getDate() + " 23:59";
-                this.searchTable();
+                this.searchTable(1);
             },
             searchMonth() { // 本月 
                 var a = new Date();
@@ -756,26 +733,29 @@
                 var c = f.valueOf();
                 var startTime = new Date(c);
                 this.form.startTime = startTime.getFullYear() + "-" + (startTime.getMonth() + 1) + "-" +
-                    startTime.getDate() + " 00:00";;
+                    startTime.getDate() + " 00:00";
                 this.form.endTime = year + "-" + (month + 1) + "-" + date + " 23:59";
-                this.searchTable();
+                this.searchTable(1);
             },
+            //导出
             exportRs() {
                 var param = {};
-                param.startTime = this.export.startTime;
-                param.endTime = this.export.endTime;
-                param.orgId = this.export.orgId;
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime', param, {
+                param.startTime = this.minuteFormat(this.startTimeEnd);
+                param.endTime = this.minuteFormat(this.endTimeEnd);
+                param.resourceCategory = this.resourceClassIdEnd;
+                param.resourceMedium = this.mediumIdEnd;
+                param.projectType = this.resourceProjectIdEnd;
+                param.orgId = this.orgIdEnd
+
+                axios.post('/statistics/teleGroupResourceEfficiency/exportResourceTelEfficiency', param, {
                         responseType: 'blob'
                     })
                     .then(function (response) {
-                        console.log(response);
                         var data = response.data;
                         var fileName = response.headers.filename;
                         saveAs(data, decodeURI(fileName));
                     })
                     .catch(function (error) {
-                        console.log(error);
                         mainDivVM.$message({
                             message: "导出失败，请稍后重试",
                             type: "error"
@@ -784,14 +764,15 @@
             }
         },
         created() {
-            this.getMediumOptions() //媒介
-            this.showTele(0) //电销筛选联动
             // 默认进入显示当天时间
             var today = new Date();
             today.setTime(today.getTime());
             var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() +
                 " 00:00";
             var endTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + " 23:59";
+            if (orgId) {
+                this.isDisabled = true;
+            }
             this.form.startTime = startTime;
             this.form.endTime = endTime;
             this.searchTable();

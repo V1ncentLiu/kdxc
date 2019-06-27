@@ -54,7 +54,7 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        if((roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8){
+        if(row.clueId != null &&((roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8)){
           text ="***"
         }else{
           text = row.customerPhone;
@@ -258,10 +258,6 @@ var myCallRecordVm = new Vue({
             this.initCallRecordData();
     	},
     	downloadAudio(id,url,callSource){
-    		if(callSource=='2'){
-    			location.href=url;
-    			return;
-    		}
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
