@@ -147,7 +147,9 @@ public class PublicCustomerResourcesController {
             OrganizationQueryDTO dto = new OrganizationQueryDTO();
             dto.setSystemCode(SystemCodeConstant.HUI_JU);
             dto.setOrgType(OrgTypeConstant.DXZ);
-            dto.setBusinessLine(user.getBusinessLine());
+            if (!RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
+                dto.setBusinessLine(user.getBusinessLine());
+            }
             JSONResult<List<OrganizationRespDTO>> dzList =
                     organizationFeignClient.queryOrgByParam(dto);
             long endTime2 = System.currentTimeMillis();
