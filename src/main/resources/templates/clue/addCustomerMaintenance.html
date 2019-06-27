@@ -392,8 +392,9 @@
                     <div slot="append" v-show="lineFormShow" class="lineFormShow">
                         <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
                             <div style="float: left; width: 48px;">&nbsp;</div>
+                            <!-- :picker-options="expireTimeOption" -->
                             <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
-                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" :picker-options="expireTimeOption" style="width: 90%;display: block;margin:0 auto;"></el-date-picker>
+                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
                             </el-form-item>
                             <div style="width: 24%;float: left;text-align: center;">
                                 <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
@@ -1264,6 +1265,17 @@
             }
         },
         methods: {
+            chooseToday(val){  
+                // console.log(new Date().getTime() - new Date(val).getTime() < 86400000) 
+                // new Date().getTime() - new Date(val).getTime() < 86400000 //true是今天
+                if(!(new Date().getTime() - new Date(val).getTime() < 86400000)){ 
+                    this.formInline.callTime="";
+                    this.$message({
+                        message: '请选择当天日期',
+                        type: 'warning'
+                    });
+                }
+            },
             showAddDomain(){//点击添加手机号
                 this.showAddDomainBtn=false;
                 this.phoneShow=true;
