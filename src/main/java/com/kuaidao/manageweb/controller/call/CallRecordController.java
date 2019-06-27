@@ -290,7 +290,7 @@ public class CallRecordController {
             } else {
                 // 其他角色
                 Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
-                if (teleGroupId == null) {
+                if (teleGroupId != null) {
                     List<UserInfoDTO> userList = getTeleSaleByOrgId(teleGroupId);
                     if (CollectionUtils.isEmpty(userList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
@@ -299,10 +299,10 @@ public class CallRecordController {
                             .collect(Collectors.toList());
                     myCallRecordReqDTO.setAccountIdList(idList);
                 } else {
-                    Integer businessLine = curLoginUser.getBusinessLine();
-                    if (businessLine == null) {
-                        return new JSONResult<Map<String, Object>>().success(null);
-                    }
+//                    Integer businessLine = curLoginUser.getBusinessLine();
+//                    if (businessLine == null) {
+//                        return new JSONResult<Map<String, Object>>().success(null);
+//                    }
                     List<UserInfoDTO> userInfoList = getTeleSaleByOrgId(curLoginUser.getOrgId());
                     if (CollectionUtils.isEmpty(userInfoList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
