@@ -147,9 +147,7 @@ public class PublicCustomerResourcesController {
             OrganizationQueryDTO dto = new OrganizationQueryDTO();
             dto.setSystemCode(SystemCodeConstant.HUI_JU);
             dto.setOrgType(OrgTypeConstant.DXZ);
-            if (!RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
-                dto.setBusinessLine(user.getBusinessLine());
-            }
+            dto.setBusinessLine(user.getBusinessLine());
             JSONResult<List<OrganizationRespDTO>> dzList =
                     organizationFeignClient.queryOrgByParam(dto);
             long endTime2 = System.currentTimeMillis();
@@ -253,12 +251,12 @@ public class PublicCustomerResourcesController {
         String roleCode = roleInfoDTO.getRoleCode();
         logger.info("共有池权限roleCode:{}", roleCode);
         logger.info("共有池权限roleName:{}", roleName);
-        if (RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.DXCYGW.name().equals(roleCode)
-                || RoleCodeEnum.DXFZ.name().equals(roleCode)) {
+        if (RoleCodeEnum.DXZJ.name().equals(roleCode)
+                || RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             logger.info("共有池电销相关角色:{}", roleCode);
             dto.setRoleCode(roleInfoDTO.getRoleCode());
-            dto.setBusinessLine(user.getBusinessLine());
         }
+        dto.setBusinessLine(user.getBusinessLine());
         return publicCustomerFeignClient.queryListPage(dto);
     }
 
