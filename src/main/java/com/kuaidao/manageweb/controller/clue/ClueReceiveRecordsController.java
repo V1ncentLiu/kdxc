@@ -2,12 +2,15 @@ package com.kuaidao.manageweb.controller.clue;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationErrorCodeEnum;
 import com.kuaidao.aggregation.dto.clue.ClueReceiveRecordsDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -43,6 +46,7 @@ public class ClueReceiveRecordsController {
      * 
      * @return
      */
+    @RequiresPermissions("PublicCustomer:receive")
     @RequestMapping("/receiveClueByClueIds")
     @ResponseBody
     @LogRecord(description = "公有池领取", operationType = OperationType.RECEIVE,
