@@ -101,7 +101,7 @@ public class CallRecordController {
         } else {
             Integer businessLine = curLoginUser.getBusinessLine();
             if (businessLine != null) {
-                request.setAttribute("teleGroupList", getTeleGroupByBusinessLine(businessLine));
+                request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
             }
         }
         request.setAttribute("userId", curLoginUser.getId().toString());
@@ -131,6 +131,46 @@ public class CallRecordController {
         return orgGroupJr.getData();
     }
 
+    private List<OrganizationDTO> getTeleGroupByRoleCode(UserInfoDTO user) {
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null
+            && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
+            // 如果是电销副总展现事业部下所有组
+            Long orgId = user.getOrgId();
+            OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+            organizationQueryDTO.setParentId(orgId);
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+            // 查询下级电销组(查询使用)
+            JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            List<OrganizationDTO> data = listDescenDantByParentId.getData();
+            return data;
+        } else if (roleList != null
+            && RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
+            // 如果是电销副总展现事业部下所有组
+            Long orgId = user.getOrgId();
+            OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+            organizationQueryDTO.setParentId(orgId);
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+            // 查询下级电销组(查询使用)
+            JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            List<OrganizationDTO> data = listDescenDantByParentId.getData();
+            return data;
+        }
+        return  null;
+    }
+    /**
+     * 获取当前登录账号
+     *
+     * @param orgDTO
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
     private List<OrganizationDTO> getCurTeleGroupList(Long orgId) {
         OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(orgId));
         List<OrganizationDTO> teleGroupIdList = new ArrayList<>();
@@ -176,7 +216,7 @@ public class CallRecordController {
         }else {
             Integer businessLine = curLoginUser.getBusinessLine();
             if(businessLine!=null) {
-                request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(businessLine));
+                request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
             }
         }
         return "call/tmTalkTimeCallRecord";
