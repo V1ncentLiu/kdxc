@@ -435,7 +435,7 @@
                             <!--</el-select>-->
                             <!--</el-form-item>-->
                             <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
-                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;">
+                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;" @change="chooseTodayAfter">
                                 </el-date-picker>
                             </el-form-item>
                             <!--<el-form-item class="lineInherit">
@@ -1266,12 +1266,29 @@
         },
         methods: {
             chooseToday(val){  
-                // console.log(new Date().getTime() - new Date(val).getTime() < 86400000) 
-                // new Date().getTime() - new Date(val).getTime() < 86400000 //true是今天
-                if(!(new Date().getTime() - new Date(val).getTime() < 86400000)){ 
+                var dateNow=new Date();
+                dateToday = moment(dateNow).format("YYYY-MM-DD");
+                valToday = moment(val).format("YYYY-MM-DD");
+                // console.log(dateToday)
+                // console.log(valToday)
+                if(dateToday!==valToday){ 
                     this.formInline.callTime="";
                     this.$message({
                         message: '请选择当天日期',
+                        type: 'warning'
+                    });
+                }
+            },
+            chooseTodayAfter(val){  
+                var dateNow=new Date();
+                dateToday = moment(dateNow).format("YYYY-MM-DD HHmm");
+                valToday = moment(val).format("YYYY-MM-DD HHmm");
+                console.log(dateToday)
+                console.log(valToday)
+                if(dateToday>valToday){ 
+                    this.formInline.nextVisitTime="";
+                    this.$message({
+                        message: '请选择此时及以后的日期时间',
                         type: 'warning'
                     });
                 }
