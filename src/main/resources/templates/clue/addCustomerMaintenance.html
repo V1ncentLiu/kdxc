@@ -2210,6 +2210,50 @@
           var decideNamePhone = this.form.decisionMakerOther;
           clueCustomer.decideNamePhone = decideNamePhone;
           var phoneArr = this.dynamicValidateForm.domains;
+          // 判断手机号重复
+            var customerPhone = this.form.customerPhone;
+            var ary = [];
+            console.log(phoneArr)
+            for (var i = 0; i < phoneArr.length; i++) {
+                // 判断弹框里的值是否与页面的手机号1重复
+                if (phoneArr[i].value == customerPhone) {
+                    this.$message({
+                        message: '请不要提交重复手机号',
+                        type: 'warning'
+                    });
+                    this.saveDisabled = false;//保存按钮可点击
+                    return;
+                }
+                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                ary.push(phoneArr[i].value);//把输入的手机号放入一个数组
+                var s = ary.join(",") + ",";
+                console.log(ary)
+                for (var j = 0; j < ary.length; j++) {
+                    console.log(ary[j])
+                    if (ary[j] != "") {
+                        if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
+                            this.$message({
+                                message: '请不要提交重复手机号',
+                                type: 'warning'
+                            });
+                            this.saveDisabled = false;//保存按钮可点击
+                            return;
+                        }
+                    }
+
+                }
+                // 如果输入的是非数字
+                if (/^[0-9]*$/.test(phoneArr[i].value) == false) {
+                    this.$message({
+                        message: '手机号请输入数字',
+                        type: 'warning'
+                    });
+                    this.saveDisabled = false;//保存按钮可点击
+                    return;
+                }
+
+            }
+            // 判断手机号重复结束
           if (phoneArr.length > 0) {
             for (var i = 0; i < phoneArr.length; i++) {
               if (i == 0) {
