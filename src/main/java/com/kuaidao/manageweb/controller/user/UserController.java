@@ -129,6 +129,9 @@ public class UserController {
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setOrgId(req.getOrgId());
         userRole.setRoleCode(req.getRoleCode());
+        if(req.getStatusList() != null && req.getStatusList().size()>0){
+            userRole.setStatusList(req.getStatusList());
+        }
         if (userInfoDTO.getBusinessLine() != null) {
             userRole.setBusinessLine(userInfoDTO.getBusinessLine());
         }
