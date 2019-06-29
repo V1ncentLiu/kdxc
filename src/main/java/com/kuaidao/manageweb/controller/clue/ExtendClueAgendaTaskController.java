@@ -1174,8 +1174,17 @@ public class ExtendClueAgendaTaskController {
                         pushClueReq.setCusName("未知");
                     }
                     pushClueReq.setSex(clueAgendaTaskDTO1.getSex());
-                    pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone());
-                    pushClueReq.setPhone2(clueAgendaTaskDTO1.getPhone2());
+                    //手机号相同则只存储phone1
+                    if((StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone())
+                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone().trim()))
+                        && (StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2())
+                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2().trim()))
+                        && clueAgendaTaskDTO1.getPhone().trim().equals(clueAgendaTaskDTO1.getPhone2().trim())){
+                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().trim());
+                    } else {
+                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().trim());
+                        pushClueReq.setPhone2(clueAgendaTaskDTO1.getPhone2().trim());
+                    }
                     pushClueReq.setWechat(clueAgendaTaskDTO1.getWechat());
                     pushClueReq.setWechat2(clueAgendaTaskDTO1.getWechat2());
                     pushClueReq.setQq(clueAgendaTaskDTO1.getQq());
