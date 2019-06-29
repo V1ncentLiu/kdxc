@@ -307,25 +307,22 @@ public class MyCustomerClueController {
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
-            CallRecordRespDTO callRecordRespDTO = null;
-            Optional<CallRecordRespDTO>  optional =callRecord.getData().stream()
-                .filter(a -> StringUtils.isNotBlank(a.getStartTime()))
-                .max(Comparator.comparing(CallRecordRespDTO::getStartTime));
-//            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream()
-//                    .filter(a -> StringUtils.isNotBlank(a.getStartTime()))
-//                    .max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
-            if(optional !=null && optional.isPresent()){
-                callRecordRespDTO = optional.get();
-            }
-            if (callRecordRespDTO != null) {
-                String date =
-                        convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime()) * 1000L);
-                request.setAttribute("teleEndTime", date);
-            } else {
-                request.setAttribute("teleEndTime", new Date());
-            }
+//            CallRecordRespDTO callRecordRespDTO = null;
+//            Optional<CallRecordRespDTO>  optional =callRecord.getData().stream()
+//                .filter(a -> StringUtils.isNotBlank(a.getStartTime()))
+//                .max(Comparator.comparing(CallRecordRespDTO::getStartTime));
+//            if(optional !=null && optional.isPresent()){
+//                callRecordRespDTO = optional.get();
+//            }
+//            if (callRecordRespDTO != null) {
+//                String date =
+//                        convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime()) * 1000L);
+//                request.setAttribute("teleEndTime", date);
+//            } else {
+//                request.setAttribute("teleEndTime", new Date());
+//            }
         } else {
-            request.setAttribute("teleEndTime", new Date());
+           // request.setAttribute("teleEndTime", new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
