@@ -115,7 +115,7 @@
                     <!-- 手机号 -->
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
-                            <el-input v-model="form.phone" maxLength="11" @keyup.native="phoneNumber" style="width: 70%;" v-show="isshowPhone"></el-input>
+                            <el-input v-model="form.phone" maxLength="30" style="width: 70%;" v-show="isshowPhone"></el-input>
                             <span style="height: 37px;display: block;float: left;">{{form.customerPhone}}</span>
                             <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             <el-button type="primary" size="mini" @click="showAddDomain" v-show="showAddDomainBtn" style="padding: 7px 2px 7px 7px;"><i class="el-icon-plus"></i></el-button>
@@ -132,15 +132,15 @@
                             :prop="'domains.' + index + '.value'"
                             >
                             <div v-if="editPhone == 0 && domain.edit ==1">
-                                <el-input  v-model="domain.value" disabled maxLength="11" @keyup.native="phoneNumber" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model="domain.value" disabled maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                             <div v-if="editPhone == 0 && domain.edit ==0">
-                                <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model="domain.value" maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                             <div v-else-if="editPhone == 1">
-                                <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model="domain.value" maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                         </el-form-item>                        
@@ -1094,15 +1094,16 @@
                         {required: true, message: '开店区域城市不能为空', trigger: 'blur'}
                     ],
                     phone: [
-
+                        {required: true, message: '手机号不能为空', trigger: 'blur'},
                         {
                             validator: function (rule, value, callback) {
                                 if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
                                     if (value == null && value == "null") {
                                         callback(new Error("手机号不能为空"));
-                                    } else if (value.length < 11) {
-                                        callback(new Error("手机号位数为11位"));
-                                    }
+                                    } 
+                                    // else if (value.length < 11) {
+                                    //     callback(new Error("手机号位数为11位"));
+                                    // }
 
                                     addCustomerVM.form.customerAge = null;
                                 } else {
@@ -1462,15 +1463,15 @@
                         valid = error;
                     });
                 }
-                if (valid) {
-                    if (valid) {
-                        this.$refs[form].validateField(["phone"], (error) => {
-                            if (error) {
-                                valid = false;
-                            }
-                        });
-                    }
-                }
+                // if (valid) {
+                //     if (valid) {
+                //         this.$refs[form].validateField(["phone"], (error) => {
+                //             if (error) {
+                //                 valid = false;
+                //             }
+                //         });
+                //     }
+                // }
 
                 if (valid) {
                     this.saveDisabled = true;
@@ -1545,12 +1546,12 @@
                     clueCustomer.decideNamePhone = decideNamePhone;
                     var phoneArr = this.dynamicValidateForm.domains;
                     // 判断手机号重复
-                    var customerPhone = this.form.customerPhone;
+                    // var customerPhone = this.form.customerPhone;
                     var ary = [];
                     console.log(phoneArr)
                     for (var i = 0; i < phoneArr.length; i++) {
                         // 判断弹框里的值是否与页面的手机号1重复
-                        if (phoneArr[i].value == customerPhone) {
+                        if (phoneArr[i].value == clueCustomer.phone) {
                             this.$message({
                                 message: '请不要提交重复手机号',
                                 type: 'warning'
@@ -2128,12 +2129,28 @@
           });
         }
         if (valid) {
-          this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
-            if (error) {
-              valid = false;
-              this.$alert('客户姓名或开店区域不能为空', '提示');
-            }
-          });
+            this.$refs[form].validateField(["phone"], (error) => {
+                if (error) {
+                    valid = false;
+                    this.$alert('手机号不能为空', '提示');
+                }
+            });
+        }
+        if (valid) {
+            this.$refs[form].validateField(["customerName"], (error) => {
+                if (error) {
+                    valid = false;
+                    this.$alert('客户姓名不能为空', '提示');
+                }
+            });
+        }
+        if (valid) {
+            this.$refs[form].validateField(["province", "city"], (error) => {
+                if (error) {
+                  valid = false;
+                  this.$alert('开店区域不能为空', '提示');
+                }
+            });
         }
 
         if (valid) {
@@ -2210,12 +2227,12 @@
           clueCustomer.decideNamePhone = decideNamePhone;
           var phoneArr = this.dynamicValidateForm.domains;
           // 判断手机号重复
-            var customerPhone = this.form.customerPhone;
+            // var customerPhone = this.form.customerPhone;
             var ary = [];
             console.log(phoneArr)
             for (var i = 0; i < phoneArr.length; i++) {
                 // 判断弹框里的值是否与页面的手机号1重复
-                if (phoneArr[i].value == customerPhone) {
+                if (phoneArr[i].value == clueCustomer.phone) {
                     this.$message({
                         message: '请不要提交重复手机号',
                         type: 'warning'
