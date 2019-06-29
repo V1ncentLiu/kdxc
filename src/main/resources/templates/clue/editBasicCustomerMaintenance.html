@@ -39,14 +39,11 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
+                    <!-- <el-col :span="8">
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                             <a>
                                 <el-input v-model="form.phone" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;" v-show="isshowPhone"></el-input>
                                 {{form.customerPhone}}
-                                <!-- <i class="el-icon-phone-outline" @click="gettelNumberIcon(form.customerPhone)"></i> -->
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                             </a>
                             <span v-if="buttonType === 'A'">
@@ -58,9 +55,42 @@
                                 <span v-else-if="form.customerPhone2 !=null && form.customerPhone2 !=''">查看多个手机号</span></span>
                             </span>
                         </el-form-item>
+                    </el-col> -->
+                    <!-- 手机号 -->
+                    <el-col :span="8">
+                        <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
+                            <el-input v-model="form.phone" maxLength="30" style="width: 70%;" v-show="isshowPhone"></el-input>
+                            <span style="height: 37px;display: block;float: left;">{{form.customerPhone}}</span>
+                            <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            <el-button type="primary" size="mini" @click="showAddDomain" v-show="showAddDomainBtn" style="padding: 7px 2px 7px 7px;"><i class="el-icon-plus"></i></el-button>
+                            <el-button type="primary" size="mini" @click="addDomain" v-show="phoneShow" style="padding: 7px 2px 7px 7px;margin: 0;"><i class="el-icon-plus"></i></el-button>
+                        </el-form-item>
                     </el-col>
-
-                    <el-col :span="16">
+                    <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" v-show="phoneShow">
+                        <el-form-item
+                            style="float: left;width: 33.3333%;"
+                            :label-width="formLabelWidth"
+                            v-for="(domain, index) in dynamicValidateForm.domains"
+                            :label="'手机号' + (parseInt(index)+2) + '：'" 
+                            :key="domain.key"
+                            :prop="'domains.' + index + '.value'"
+                            >
+                            <div v-if="editPhone == 0 && domain.edit ==1">
+                                <el-input  v-model="domain.value" disabled maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            </div>
+                            <div v-if="editPhone == 0 && domain.edit ==0">
+                                <el-input  v-model="domain.value" maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            </div>
+                            <div v-else-if="editPhone == 1">
+                                <el-input  v-model="domain.value" maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            </div>
+                        </el-form-item>                        
+                    </el-form>
+                    <!-- 手机号结束 -->
+                    <el-col :span="8">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
                             <el-input v-model="form.wechat" autocomplete="off" style="width: 236px;margin-right: 10px;" maxLength="20"></el-input>
                             <span v-if="form.wechat2 || form.wechatUrl">
@@ -71,8 +101,6 @@
                             </span>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth">
                             <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
@@ -85,8 +113,6 @@
                                       maxLength="30"></el-input>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth">
                             <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;" clearable>
@@ -99,8 +125,6 @@
                             <el-input type="number" min="1" v-model="form.customerAge" autocomplete="off" maxLength="3" @keyup.native="agenumber"></el-input>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="职业：" :label-width="formLabelWidth">
                             <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;" clearable>
@@ -117,8 +141,6 @@
                             <el-input v-model="form.cateringType" v-show="form.experience!=''&&form.experience!='0'" autocomplete="off" maxLength="50" placeholder="请输入曾从事餐饮类型" style="margin-top:10px;"></el-input>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="选址情况：" :label-width="formLabelWidth">
                             <el-select v-model="form.address" placeholder="请选择" style="width: 100%;" clearable>
@@ -178,31 +200,29 @@
                             <span>{{clueBase.typeName}}</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                    <el-col :span="8">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth" >
                             <span>{{clueBase.categoryName}}</span>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth" >
                             <span>{{this.formatTimeFn(clueBase.messageTime)}}</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                </el-row>
+                <el-row>                    
+                    <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth" class="messagePointStyle">
                             <span class="breakWord">{{clueBase.messagePoint}}</span>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="搜索词：" :label-width="formLabelWidth" >
                             <span>{{clueBase.searchWord}}</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                    <el-col :span="8">
                         <el-form-item label="地域信息：" :label-width="formLabelWidth">
                             <span>{{intention.address}}</span>
                         </el-form-item>
@@ -229,21 +249,18 @@
                             <span>{{form.area}}</span>
                         </el-form-item>
                     </el-col>
-                </el-row>
-
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="意向品类：" :label-width="formLabelWidth" >
                             <span>{{form.intentionCategory}}</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth" >
                             <span>{{form.radioProject==1? form.insideProject:form.outsideProject}}</span>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="开店紧迫性：" :label-width="formLabelWidth"  >
                             <span>{{this.formatTimeFn(form.urgency)}}</span>
@@ -673,6 +690,8 @@
     el: '#addCustomer',
     data: function () {
       return {
+        showAddDomainBtn:true,
+        phoneShow:false,//手机号2默认不显示
         audioShow:false,//播放器默认不显示
         expireTimeOption: {
           disabledDate(date) { //disabledDate 文档上：设置禁用状态，参数为当前日期，要求返回 Boolean
@@ -786,22 +805,22 @@
           ],
           phone: [
 
-            {
-              validator: function (rule, value, callback) {
-                if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
-                  if (value == null && value == "null") {
-                    callback(new Error("手机号不能为空"));
-                  } else if (value.length < 11) {
-                    callback(new Error("手机号位数为11位"));
-                  }
+            // {
+            //   validator: function (rule, value, callback) {
+            //     if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
+            //       if (value == null && value == "null") {
+            //         callback(new Error("手机号不能为空"));
+            //       } else if (value.length < 11) {
+            //         callback(new Error("手机号位数为11位"));
+            //       }
 
-                  addCustomerVM.form.customerAge = null;
-                } else {
-                  callback();
-                }
+            //       addCustomerVM.form.customerAge = null;
+            //     } else {
+            //       callback();
+            //     }
 
-              }, required: true, trigger: 'change'
-            }
+            //   }, required: true, trigger: 'change'
+            // }
           ],
 
           customerAge: [
@@ -913,6 +932,10 @@
       }
     },
     methods: {
+        showAddDomain(){//点击添加手机号
+            this.showAddDomainBtn=false;
+            this.phoneShow=true;
+        },
       getPhones(cus){
         var phones = '';
         phones = cus.phone;
@@ -1129,6 +1152,50 @@
           var decideNamePhone = this.form.decisionMakerOther;
           clueCustomer.decideNamePhone = decideNamePhone;
           var phoneArr = this.dynamicValidateForm.domains;
+          // 判断手机号重复
+            // var customerPhone = this.form.customerPhone;
+            var ary = [];
+            console.log(phoneArr)
+            for (var i = 0; i < phoneArr.length; i++) {
+                // 判断弹框里的值是否与页面的手机号1重复
+                if (phoneArr[i].value == clueCustomer.phone && clueCustomer.phone!="") {
+                    this.$message({
+                        message: '请不要提交重复手机号',
+                        type: 'warning'
+                    });
+                    this.saveDisabled = false;//保存按钮可点击
+                    return;
+                }
+                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                ary.push(phoneArr[i].value);//把输入的手机号放入一个数组
+                var s = ary.join(",") + ",";
+                console.log(ary)
+                for (var j = 0; j < ary.length; j++) {
+                    console.log(ary[j])
+                    if (ary[j] != "") {
+                        if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
+                            this.$message({
+                                message: '请不要提交重复手机号',
+                                type: 'warning'
+                            });
+                            this.saveDisabled = false;//保存按钮可点击
+                            return;
+                        }
+                    }
+
+                }
+                // 如果输入的是非数字
+                if (/^[0-9]*$/.test(phoneArr[i].value) == false) {
+                    this.$message({
+                        message: '手机号请输入数字',
+                        type: 'warning'
+                    });
+                    this.saveDisabled = false;//保存按钮可点击
+                    return;
+                }
+
+            }
+            // 判断手机号重复结束
           if (phoneArr.length > 0) {
             for (var i = 0; i < phoneArr.length; i++) {
               if (i == 0) {
@@ -1662,12 +1729,19 @@
         this.dynamicValidateForm.domains = phoneArr;
         console.log(phoneArr)
         if (phoneArr.length > 0) {
-          this.buttonType = 'B';//按钮状态
+          this.buttonType = 'B';//按钮状态 
+          if(phoneArr[0].value!=""){
+            this.showAddDomainBtn=false;//点击增加手机号组按钮
+            this.phoneShow=true;//增加手机号组显示
+          } 
         } else {
           this.buttonType = 'A';//按钮状态
         }
+        console.log(phoneArr[0].value)
         if (phoneArr.length > 1) {
           this.deleteShow = true;// 删除默认显示
+          this.showAddDomainBtn=false;//点击增加手机号组按钮
+          this.phoneShow=true;//增加手机号组显示
         } else {
           this.deleteShow = false;// 删除默认不显示
         }
