@@ -326,8 +326,10 @@ var myCallRecordVm = new Vue({
                 return;
             }
             var param ={};
-            param.id = selectedValue;
-            axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+          param.orgId = selectedValue;
+          param.roleCode="DXCYGW";
+          param.statusList =[1,3];
+            axios.post('/user/userManager/listByOrgAndRole', param)
             .then(function (response) {
                   var result =  response.data;
                   var table=result.data;
