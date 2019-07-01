@@ -256,7 +256,7 @@ public class TeleGroupResourceEfficiencyController {
      */
     private String formatPercent(BigDecimal callPercent) {
         if(callPercent!=null) {
-            callPercent = callPercent.multiply(new BigDecimal(100));
+            callPercent = callPercent.multiply(new BigDecimal(100)).setScale(0,BigDecimal.ROUND_DOWN);
         }else {
             callPercent = BigDecimal.ZERO;
         }
