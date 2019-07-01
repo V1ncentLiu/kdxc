@@ -37,42 +37,41 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.typeName}}</el-button>
+                            <span>{{clueBase.typeName}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.categoryName}}</el-button>
+                            <span>{{clueBase.categoryName}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
+                            <span>{{this.formatTimeFn(clueBase.messageTime)}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                            label="搜索词：" :label-width="formLabelWidth">
-                            <div class="lineFeed">{{clueBase.searchWord}}</div>
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            <span>{{clueBase.searchWord}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="地域信息：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{intention.address}}</el-button>
+                            <span>{{intention.address}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
+                            <span class="lineFeed">{{clueBase.messagePoint}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="24">
                         <el-form-item label="备注：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.remark}}</el-button>
+                            <span class="lineFeed">{{clueBase.remark}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -116,7 +115,7 @@
                     <!-- 手机号 -->
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
-                            <el-input v-model="form.phone" maxLength="11" @keyup.native="phoneNumber" style="width: 70%;" v-show="isshowPhone"></el-input>
+                            <el-input v-model.trim="form.phone" maxLength="30" style="width: 70%;" v-show="isshowPhone"></el-input>
                             <span style="height: 37px;display: block;float: left;">{{form.customerPhone}}</span>
                             <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             <el-button type="primary" size="mini" @click="showAddDomain" v-show="showAddDomainBtn" style="padding: 7px 2px 7px 7px;"><i class="el-icon-plus"></i></el-button>
@@ -133,15 +132,15 @@
                             :prop="'domains.' + index + '.value'"
                             >
                             <div v-if="editPhone == 0 && domain.edit ==1">
-                                <el-input  v-model="domain.value" disabled maxLength="11" @keyup.native="phoneNumber" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model.trim="domain.value" disabled maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                             <div v-if="editPhone == 0 && domain.edit ==0">
-                                <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model.trim="domain.value" maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                             <div v-else-if="editPhone == 1">
-                                <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model.trim="domain.value" maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                         </el-form-item>                        
@@ -392,8 +391,9 @@
                     <div slot="append" v-show="lineFormShow" class="lineFormShow">
                         <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
                             <div style="float: left; width: 48px;">&nbsp;</div>
+                            <!-- :picker-options="expireTimeOption" -->
                             <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
-                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" :picker-options="expireTimeOption" style="width: 90%;display: block;margin:0 auto;"></el-date-picker>
+                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
                             </el-form-item>
                             <div style="width: 24%;float: left;text-align: center;">
                                 <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
@@ -434,7 +434,7 @@
                             <!--</el-select>-->
                             <!--</el-form-item>-->
                             <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
-                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;">
+                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;" @change="chooseTodayAfter">
                                 </el-date-picker>
                             </el-form-item>
                             <!--<el-form-item class="lineInherit">
@@ -739,10 +739,8 @@
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
     .lineFeed {
-        width: 230px;
         word-break: break-all;
         word-wrap: break-word;
-        color: #c0c4cc;
         cursor: not-allowed;
     }
 
@@ -1096,15 +1094,16 @@
                         {required: true, message: '开店区域城市不能为空', trigger: 'blur'}
                     ],
                     phone: [
-
+                        {required: true, message: '手机号不能为空', trigger: 'blur'},
                         {
                             validator: function (rule, value, callback) {
                                 if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
                                     if (value == null && value == "null") {
                                         callback(new Error("手机号不能为空"));
-                                    } else if (value.length < 11) {
-                                        callback(new Error("手机号位数为11位"));
-                                    }
+                                    } 
+                                    // else if (value.length < 11) {
+                                    //     callback(new Error("手机号位数为11位"));
+                                    // }
 
                                     addCustomerVM.form.customerAge = null;
                                 } else {
@@ -1264,6 +1263,34 @@
             }
         },
         methods: {
+            chooseToday(val){  
+                var dateNow=new Date();
+                dateToday = moment(dateNow).format("YYYY-MM-DD");
+                valToday = moment(val).format("YYYY-MM-DD");
+                // console.log(dateToday)
+                // console.log(valToday)
+                if(dateToday!==valToday){ 
+                    this.formInline.callTime="";
+                    this.$message({
+                        message: '请选择当天日期',
+                        type: 'warning'
+                    });
+                }
+            },
+            chooseTodayAfter(val){  
+                var dateNow=new Date();
+                dateToday = moment(dateNow).format("YYYY-MM-DD HHmm");
+                valToday = moment(val).format("YYYY-MM-DD HHmm");
+                console.log(dateToday)
+                console.log(valToday)
+                if(dateToday>valToday){ 
+                    this.formInline.nextVisitTime="";
+                    this.$message({
+                        message: '请选择此时及以后的日期时间',
+                        type: 'warning'
+                    });
+                }
+            },
             showAddDomain(){//点击添加手机号
                 this.showAddDomainBtn=false;
                 this.phoneShow=true;
@@ -1355,8 +1382,8 @@
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus = '';
                 this.formInline.visitStatus = "1";
-                this.formInline.callTime =new Date(teleEndTime);
-
+                //this.formInline.callTime =new Date(teleEndTime);
+                this.formInline.callTime =new Date();
             },
             gettelNumberIcon(tel) {
                 //外呼手机
@@ -1436,15 +1463,15 @@
                         valid = error;
                     });
                 }
-                if (valid) {
-                    if (valid) {
-                        this.$refs[form].validateField(["phone"], (error) => {
-                            if (error) {
-                                valid = false;
-                            }
-                        });
-                    }
-                }
+                // if (valid) {
+                //     if (valid) {
+                //         this.$refs[form].validateField(["phone"], (error) => {
+                //             if (error) {
+                //                 valid = false;
+                //             }
+                //         });
+                //     }
+                // }
 
                 if (valid) {
                     this.saveDisabled = true;
@@ -1456,6 +1483,7 @@
                     //手机号
                     if (this.form.phone != null && this.form.phone != '') {
                         clueCustomer.phone = this.form.phone
+                        clueCustomer.phoneCreateTime = new Date();
                     } else {
                         clueCustomer.phone = this.form.customerPhone;
                     }
@@ -1517,6 +1545,50 @@
                     var decideNamePhone = this.form.decisionMakerOther;
                     clueCustomer.decideNamePhone = decideNamePhone;
                     var phoneArr = this.dynamicValidateForm.domains;
+                    // 判断手机号重复
+                    // var customerPhone = this.form.customerPhone;
+                    var ary = [];
+                    console.log(phoneArr)
+                    for (var i = 0; i < phoneArr.length; i++) {
+                        // 判断弹框里的值是否与页面的手机号1重复
+                        if (phoneArr[i].value == clueCustomer.phone && clueCustomer.phone!="") {
+                            this.$message({
+                                message: '请不要提交重复手机号',
+                                type: 'warning'
+                            });
+                            this.saveDisabled = false;//保存按钮可点击
+                            return;
+                        }
+                        // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                        ary.push(phoneArr[i].value);//把输入的手机号放入一个数组
+                        var s = ary.join(",") + ",";
+                        console.log(ary)
+                        for (var j = 0; j < ary.length; j++) {
+                            console.log(ary[j])
+                            if (ary[j] != "") {
+                                if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
+                                    this.$message({
+                                        message: '请不要提交重复手机号',
+                                        type: 'warning'
+                                    });
+                                    this.saveDisabled = false;//保存按钮可点击
+                                    return;
+                                }
+                            }
+
+                        }
+                        // 如果输入的是非数字
+                        // if (/^[0-9]*$/.test(phoneArr[i].value) == false) {
+                        //     this.$message({
+                        //         message: '手机号请输入数字',
+                        //         type: 'warning'
+                        //     });
+                        //     this.saveDisabled = false;//保存按钮可点击
+                        //     return;
+                        // }
+
+                    }
+                    // 判断手机号重复结束
                     if (phoneArr.length > 0) {
                         for (var i = 0; i < phoneArr.length; i++) {
                             if (i == 0) {
@@ -2056,13 +2128,32 @@
             valid = error;
           });
         }
-        if (valid) {
-          this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
-            if (error) {
-              valid = false;
-              this.$alert('客户姓名或开店区域不能为空', '提示');
+        if(this.isshowPhone){
+            if (valid) {
+                this.$refs[form].validateField(["phone"], (error) => {
+                    if (error) {
+                        valid = false;
+                        this.$alert('手机号不能为空', '提示');
+                    }
+                });
             }
-          });
+        }
+        
+        if (valid) {
+            this.$refs[form].validateField(["customerName"], (error) => {
+                if (error) {
+                    valid = false;
+                    this.$alert('客户姓名不能为空', '提示');
+                }
+            });
+        }
+        if (valid) {
+            this.$refs[form].validateField(["province", "city"], (error) => {
+                if (error) {
+                  valid = false;
+                  this.$alert('开店区域不能为空', '提示');
+                }
+            });
         }
 
         if (valid) {
@@ -2074,7 +2165,8 @@
           var customerPhone = this.form.customerPhone;
           //手机号
           if (this.form.phone != null && this.form.phone != '') {
-            clueCustomer.phone = this.form.phone
+            clueCustomer.phone = this.form.phone;
+            clueCustomer.phoneCreateTime = new Date();
             customerPhone = this.form.phone;
           } else {
             clueCustomer.phone = this.form.customerPhone;
@@ -2137,6 +2229,50 @@
           var decideNamePhone = this.form.decisionMakerOther;
           clueCustomer.decideNamePhone = decideNamePhone;
           var phoneArr = this.dynamicValidateForm.domains;
+          // 判断手机号重复
+            // var customerPhone = this.form.customerPhone;
+            var ary = [];
+            console.log(phoneArr)
+            for (var i = 0; i < phoneArr.length; i++) {
+                // 判断弹框里的值是否与页面的手机号1重复
+                if (phoneArr[i].value == clueCustomer.phone && clueCustomer.phone!="") {
+                    this.$message({
+                        message: '请不要提交重复手机号',
+                        type: 'warning'
+                    });
+                    this.saveDisabled = false;//保存按钮可点击
+                    return;
+                }
+                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                ary.push(phoneArr[i].value);//把输入的手机号放入一个数组
+                var s = ary.join(",") + ",";
+                console.log(ary)
+                for (var j = 0; j < ary.length; j++) {
+                    console.log(ary[j])
+                    if (ary[j] != "") {
+                        if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
+                            this.$message({
+                                message: '请不要提交重复手机号',
+                                type: 'warning'
+                            });
+                            this.saveDisabled = false;//保存按钮可点击
+                            return;
+                        }
+                    }
+
+                }
+                // 如果输入的是非数字
+                // if (/^[0-9]*$/.test(phoneArr[i].value) == false) {
+                //     this.$message({
+                //         message: '手机号请输入数字',
+                //         type: 'warning'
+                //     });
+                //     this.saveDisabled = false;//保存按钮可点击
+                //     return;
+                // }
+
+            }
+            // 判断手机号重复结束
           if (phoneArr.length > 0) {
             for (var i = 0; i < phoneArr.length; i++) {
               if (i == 0) {
@@ -2314,10 +2450,6 @@
         });
       },
       downloadAudio(id, url, callSource) {
-        if (callSource == '2') {
-          location.href = url;
-          return;
-        }
         var param = {};
         param.id = id;
         axios.post('/call/callRecord/getRecordFile', param)
@@ -2444,6 +2576,8 @@
       if (customer) {
         this.form.customerName = customer.cusName;
         this.form.customerPhone = customer.phone;
+        this.form.phoneCreateTime = customer.phoneCreateTime;
+
         this.form.customerPhone2 = customer.phone2;
         this.form.customerSex = customer.sex == null ? "" : customer.sex + "";
         this.form.wechat = customer.wechat;
@@ -2466,6 +2600,7 @@
         this.form.decisionMakerOther = customer.decideNamePhone;
         // debugger;
         var phoneArr = [];
+
         if (customer.phone2) {
           var phone2 = {};
           phone2.value = customer.phone2;
@@ -2528,10 +2663,15 @@
         this.dynamicValidateForm.domains = phoneArr;
         console.log(phoneArr)
         if (phoneArr.length > 0) {
-          this.buttonType = 'B';//按钮状态  
+          this.buttonType = 'B';//按钮状态 
+          if(phoneArr[0].value!=""){
+            this.showAddDomainBtn=false;//点击增加手机号组按钮
+            this.phoneShow=true;//增加手机号组显示
+          } 
         } else {
           this.buttonType = 'A';//按钮状态
         }
+        console.log(phoneArr[0].value)
         if (phoneArr.length > 1) {
           this.deleteShow = true;// 删除默认显示
           this.showAddDomainBtn=false;//点击增加手机号组按钮
