@@ -128,6 +128,16 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="资源类型:">
+                        <el-select v-model="form.type" placeholder="资源类型" clearable filterable>
+                            <el-option
+                                v-for="item in typeArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="行业类别:">
                         <el-select v-model="form.tradeType" placeholder="行业类别" clearable filterable>
                             <el-option
@@ -405,6 +415,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     resourceProject:'',
                     medium:'',
                     resourceType:'',
+                    type:'',
                     tradeType:'',
                     resourceStage:'',
                     resourcePerson:'',
@@ -431,6 +442,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 dxBusinessList:[],
                 industryCategoryArr:[],
                 categoryArr:[],
+                typeArr:[],
                 mediumArry:[],
                 phaseArr:[],
                 dxList:[],
@@ -457,6 +469,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     resourceProject:'',
                     medium:'',
                     resourceType:'',
+                    type:'',
                     tradeType:'',
                     resourceStage:'',
                     resourcePerson:'',
@@ -527,6 +540,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.source=this.form.medium;
                 param.phone=this.form.phone;
                 param.category=this.form.resourceType;
+                param.type=this.form.type;
                 param.industryCategory=this.form.tradeType;
                 param.status = this.form.status;
                 param.clueId = this.form.clueId;
@@ -840,6 +854,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.source=this.form.medium;
                 param.phone=this.form.phone;
                 param.category=this.form.resourceType;
+                param.type=this.form.type;
                 param.industryCategory=this.form.tradeType;
                 param.status = this.form.status;
                 param.clueId = this.form.clueId;
@@ -980,6 +995,12 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             	param.groupCode="clueCategory";
               axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
             	  ocmVM.categoryArr=response.data.data;
+              });
+             //初始资源类型数据
+              param={};
+            	param.groupCode="clueType";
+              axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            	  ocmVM.typeArr=response.data.data;
               });
               //初始行业类别
               param={};
