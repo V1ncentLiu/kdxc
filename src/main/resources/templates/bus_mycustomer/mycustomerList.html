@@ -3278,8 +3278,14 @@
             },
             initList() {
                 var param = this.queryForm;
-                param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
+                // param.pageSize = this.pager.pageSize;
+                // param.pageNum = this.pager.currentPage;
+                var pageSize = this.pager.pageSize;
+                 var pageNum = this.pager.currentPage;
+                 // 存储
+                 localStorage.setItem('myCustomerListPageSize', pageSize);                 
+                 param.pageNum=pageNum;
+                 param.pageSize=pageSize;
                 axios.post('/aggregation/businessMyCustomer/queryPage', param).then(function (response) {
                     if (null === response || response.data == null || response.data.code != '0') {
                         if (response.data.code != '0') {
@@ -3380,6 +3386,10 @@
                     this.$set(this.pager,"currentPage",otherVal.currentPage);
                     this.storeId = otherVal.clueId;
                     this.scrollTop = otherVal.scrollTop;
+                }
+                var localVal=localStorage.getItem('myCustomerListPageSize');
+                if(localVal){
+                    this.pager.pageSize = localVal;
                 }
             };
             //初始化数据列表
