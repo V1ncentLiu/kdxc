@@ -378,10 +378,35 @@ var homePageVM=new Vue({
         	if(!this.validClientNo(cno)){
         		return;
         	}
+        	var bindType = this.loginClientForm.bindPhoneType;
+        	if(bindType==1){
+        		//tr 普通登陸
+        		var whiteList = [
+              	   915157337459918,915157338827184,915157339205499,915157339500788
+              	   ,915157339774915,915390540464159,115450274113949,115450274246648
+              	   ,115450529284536,115451100381743,915319637549027,915319637639747
+              	   ,915319638079196,915320465997397,915320621197701,214991403833604
+              	   ,115410338236403,115565818271983];
+             	var  curOrgId = this.user.orgId;
+             	var isLimit = false;
+            	for(var i=0;i<whiteList.length;i++){
+            		if(curOrgId==whiteList[i]){
+            			isLimit = true;
+            			break;
+            		}
+            	}
+        		if(!isLimit){
+        			//限制普通電話登陸
+        		    this.$message({message:"天润不支持普通电话模式登录！",type:'warning'});
+        			return;
+        			
+        		}
+            	
+        	}
         	var loginType = "2";
 			var enterpriseId = this.enterpriseId;
 			var bindPhone = this.loginClientForm.bindPhone;
-			var bindType = this.loginClientForm.bindPhoneType;
+			
 			var token = this.token;
 			var params = {};
 			params.bindTel = bindPhone;

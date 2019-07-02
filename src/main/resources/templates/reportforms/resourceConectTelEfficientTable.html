@@ -91,11 +91,11 @@
                             :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
             </div>
-            <el-row class="marginB20">
+            <el-row class="marginB20" v-loading="loading">
                 <el-tabs type="card" v-model="tableActive" @tab-click="handleClick('tab')">
                     <el-tab-pane label="资源有效" name="0">
                         <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
-                    v-loading="loading" :span-method="arraySpanMethod">
+                     :span-method="arraySpanMethod">
                     <el-table-column  prop="orgName" align="center" label="电销组">
                         <template slot-scope="scope">
                           <span class="act">{{scope.row.orgName}}</span>
@@ -126,6 +126,9 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="connectResources" align="center" label="接通资源量">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
+                        </template>
                     </el-table-column>
                     <el-table-column prop="notConnectResources" align="center"
                         label="未接通资源量">
@@ -188,11 +191,11 @@
                         </template>
                     </el-table-column>
                 </el-table>
-                    <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
+                    <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
                     </el-tab-pane>
                     <el-tab-pane label="首日资源有效" name="1">
                         <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
-                        v-loading="loading" :span-method="arraySpanMethod">
+                         :span-method="arraySpanMethod">
                         <el-table-column  prop="orgName" align="center" label="电销组">
                           <template slot-scope="scope">
                             <span class="act">{{scope.row.orgName}}</span>
@@ -280,13 +283,10 @@
                             </template>
                         </el-table-column>
                     </el-table>
-                    <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
+                    <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
                     </el-tab-pane>
                 </el-tabs>
             </el-row>
-            <!-- <el-row>
-                <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
-            </el-row> -->
         </div>
     </div>
     <!-- import common js-->
@@ -397,7 +397,7 @@
                 pager: {
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3
+                    pageSize: 20
                 },
                 startTimeEnd: '',
                 endTimeEnd: '',
