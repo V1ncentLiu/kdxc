@@ -488,7 +488,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         },
         methods: {
             handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
                 this.multipleSelection = val;
             },
             submitForm(formName){//表格搜索
@@ -509,7 +508,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.clueId = cid;
                 axios.post('/aggregation/tracking/queryList', param)
                 .then(function (response) {
-                    console.log(response.data)
+                    // console.log(response.data)
                     if (response.data.code == 0) {
                         ocmVM.trackingParam.tableData = response.data.data
                         ocmVM.trackingParam.trackingDialogVisible = true;
@@ -524,8 +523,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 var param = {};
                 var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
-                // 存储
-                localStorage.setItem('distributiveResourcePageSize', pageSize);
                 param.pageNum=pageNum;
                 param.pageSize=pageSize;
                 param.createTimeStart=this.form.starTime;
@@ -750,7 +747,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
  	        	   param.orgType="8";
  	           }
                 axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
-             	   console.log(response);
+             	//    console.log(response);
              	   if(type==1){
              		  ocmVM.dxList = response.data.data;
      	           }else if(type ==7){
@@ -972,7 +969,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         	document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
-            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = this.getSessionStore("distributiveResourceStoreForm");
@@ -983,15 +979,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     this.storeId = otherVal.clueId;
                     this.scrollTop = otherVal.scrollTop;
                 }
-                var localVal=localStorage.getItem('distributiveResourcePageSize');
-                if(localVal){
-                    this.pager.pageSize = localVal;
-                }
             }
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
         	this.initColumn();
          	this.initTableData();
-            var  param={};
-       	   param.groupCode="medium";
+            var param={};
+            param.groupCode="medium";
              axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
             	 ocmVM.mediumArry=response.data.data;
             });
