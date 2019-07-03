@@ -565,8 +565,6 @@ var phoneButton = false;
                 }
             },
             gettelNumberIcon(tel,clueId) {
-                console.log(tel)
-                console.log(clueId)
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;
@@ -620,7 +618,6 @@ var phoneButton = false;
                     });
                     return;
                 }
-                console.log(rows[0])
                 window.location.href='/phonetraffic/toEditPage?clueId='+rows[0].clueId;
             },
             releaseClue(){
@@ -765,7 +762,7 @@ var phoneButton = false;
                 });
             },
             recordClick(row) {
-                console.log(row);
+                // console.log(row);
                 this.recordDialog=true;
             },
             resetForm(formName) {
@@ -818,7 +815,7 @@ var phoneButton = false;
                 param.stage = 1;
                 axios.post('/aggregation/tracking/queryList', param)
                     .then(function (response) {
-                        console.log(response.data)
+                        // console.log(response.data)
                         if (response.data.code == 0) {
                         	customerManVM.trackingParam.tableData = response.data.data
                             customerManVM.trackingParam.trackingDialogVisible = true;
@@ -971,7 +968,6 @@ var phoneButton = false;
             document.getElementById('myCustom').style.display = 'block';
         },
         created(){
-            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = this.getSessionStore("customManagementStoreForm");
@@ -983,6 +979,8 @@ var phoneButton = false;
                     this.scrollTop = otherVal.scrollTop;
                 }
             }
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
     		//初始化数据列表
     		this.initTableData();
     		//客户状态

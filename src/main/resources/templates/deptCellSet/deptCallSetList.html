@@ -78,11 +78,12 @@
                     </template>
                 </el-table-column>
             </el-table>
+            <table-pagination :pager="pager"  @change="initList"></table-pagination>
         </div>
     </template>
 
 
-    <table-pagination :pager="pager"  @change="initList"></table-pagination>
+    
 
     <el-dialog title="添加部门呼叫设置" :visible.sync="addDialogVisible" @opened="addOpened" width="540px">
         <template>
@@ -711,6 +712,10 @@
             }
         },
         created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
             this.initOrgs();
             this.initList();
             this.initTree();
