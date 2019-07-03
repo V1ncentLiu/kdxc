@@ -210,7 +210,6 @@ function bellToRing(type,token) { //响铃
 }
 
 function calling(type,token) {//通话状态
-    console.log("通话状态,type:" + type)
     switch (type){
         case 1:{//外呼座席接通，呼叫客户中
             outboundState()

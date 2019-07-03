@@ -52,7 +52,7 @@ var clientVm = new Vue({
       	        		  callback();
       	        	  }
         			 
-        		 },trigger:'blur'},
+        		 },trigger:'blur'}/*,
         		 {validator:function(rule,value,callback){
         		
         			  var param = {clientNo:value};
@@ -83,7 +83,7 @@ var clientVm = new Vue({
                        }).then(function(){
                        });
         			 
-        		 },trigger:'blur'}
+        		 },trigger:'blur'}*/
         	 ],
         	 bindPhone:[
         		 { required: true, message: '绑定电话号码不能为空'},
@@ -492,6 +492,10 @@ var clientVm = new Vue({
          
      },
      created(){
+          // 取页数存储
+          var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+          if(localVal){this.pager.pageSize = localVal;}
+
           this.initClientData();
      },
      mounted(){
