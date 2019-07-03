@@ -118,6 +118,7 @@ public class FirstResourceAllocationController {
             curList.add(ra.getInformationFlow());
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
+            curList.add(ra.getBrand());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -190,6 +191,7 @@ public class FirstResourceAllocationController {
             curList.add(ra.getInformationFlow());
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
+            curList.add(ra.getBrand());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -269,6 +271,7 @@ public class FirstResourceAllocationController {
             curList.add(ra.getInformationFlow());
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
+            curList.add(ra.getBrand());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -478,6 +481,7 @@ public class FirstResourceAllocationController {
         headTitleList.add("信息流");
         headTitleList.add("官网");
         headTitleList.add("行业");
+        headTitleList.add("品牌");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         return headTitleList;
@@ -495,6 +499,7 @@ public class FirstResourceAllocationController {
         headTitleList.add("信息流");
         headTitleList.add("官网");
         headTitleList.add("行业");
+        headTitleList.add("品牌");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         return headTitleList;
@@ -513,6 +518,7 @@ public class FirstResourceAllocationController {
         headTitleList.add("信息流");
         headTitleList.add("官网");
         headTitleList.add("行业");
+        headTitleList.add("品牌");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         return headTitleList;
@@ -548,6 +554,9 @@ public class FirstResourceAllocationController {
         // 网民未接
         Long netizensMissed =
                 list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
+        // 品牌
+        Long brand =
+                list.stream().mapToLong(FirstResourceAllocationDto::getBrand).sum();
         firstResourceAllocationDto.setOrgId(0L);
         firstResourceAllocationDto.setOrgName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
@@ -557,6 +566,7 @@ public class FirstResourceAllocationController {
         firstResourceAllocationDto.setInformationFlow(informationFlow);
         firstResourceAllocationDto.setOfficialWebsite(officialWebsite);
         firstResourceAllocationDto.setIndustry(industry);
+        firstResourceAllocationDto.setBrand(brand);
         firstResourceAllocationDto.setOther(other);
         firstResourceAllocationDto.setNetizensMissed(netizensMissed);
         return firstResourceAllocationDto;
@@ -665,6 +675,7 @@ public class FirstResourceAllocationController {
         totalList.add(resTotal.getInformationFlow());
         totalList.add(resTotal.getOfficialWebsite());
         totalList.add(resTotal.getIndustry());
+        totalList.add(resTotal.getBrand());
         totalList.add(resTotal.getOther());
         totalList.add(resTotal.getNetizensMissed());
         dataList.add(totalList);
