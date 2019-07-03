@@ -226,8 +226,10 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-    	
-      this.initCallRecordData();
+        // 取页数存储
+        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+        if(localVal){this.pager.pageSize = localVal;} 	
+        this.initCallRecordData();
    },
    mounted(){
      	document.getElementById('myCallRecordVm').style.display = 'block';

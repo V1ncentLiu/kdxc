@@ -50,10 +50,10 @@ Vue.component('table-pagination',{
           },
     },
     created(){
-        var localVal=parseInt(localStorage.getItem('allChangePageSize'));
-        if(localVal){
-            this.pager.pageSize = localVal;
-        }
+        // var localVal=parseInt(localStorage.getItem('allChangePageSize'));
+        // if(localVal){
+        //     this.pager.pageSize = localVal;
+        // }
    }
 });
 
