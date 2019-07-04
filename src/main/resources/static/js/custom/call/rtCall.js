@@ -169,6 +169,8 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 		if(clueId){
 			userField.clueId = clueId;
 		}
+		var orgId =homePageVM.user.orgId;
+		userField.orgId = orgId;
 		userField.accountType = homePageVM.accountType;
 		param.userField=userField;
 	

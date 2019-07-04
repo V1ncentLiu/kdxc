@@ -338,15 +338,16 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getRemark()); // 备注
                 curList.add(taskDTO.getTeleDirectorName()); // 电销组总监
                 curList.add(taskDTO.getTeleGorupName()); // 电销组
-                String flag = null;
-                if (taskDTO.getIsRepeatPhone() != null) {
-                    if (taskDTO.getIsRepeatPhone() == 0) {
-                        flag = "否";
-                    } else {
-                        flag = "是";
-                    }
-                }
-                curList.add(flag); // 是否重复
+                // String flag = null;
+                // if (taskDTO.getIsRepeatPhone() != null) {
+                // if (taskDTO.getIsRepeatPhone() == 0) {
+                // flag = "否";
+                // } else {
+                // flag = "是";
+                // }
+                // }
+                // 只要下发的肯定都是否（产品定的，都是否）
+                curList.add("否"); // 是否重复
                 dataList.add(curList);
             }
         }

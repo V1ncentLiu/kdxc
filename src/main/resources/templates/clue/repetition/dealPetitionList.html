@@ -676,9 +676,8 @@
                 	  this.$message("开始时间不能大于结束时间");
            	         return;
                 }
-                console.log(param);
                 axios.post('/clue/cluerepetition/dealPetitionList',param).then(function (response) {
-                	  console.log(response);
+                	//   console.log(response);
                     if(null===response||response.data==null||response.data.code!='0'){
                     	orgVM.$message({
                             message: response.data.msg,
@@ -687,7 +686,7 @@
 	                  	  return ;
                    }else{
                   	 orgVM.dataTable = response.data.data.data; 
-                  	 console.log(response.data.data.data);
+                  	//  console.log(response.data.data.data);
                   	 orgVM.pager.currentPage= response.data.data.currentPage;
                   	 orgVM.pager.total= response.data.data.total;
                    } 
@@ -718,7 +717,7 @@
         		var param={};
 		        param.repeatId=str;
                 axios.post('/clue/cluerepetition/dealPetitionById',param).then(function (response) {
-                  	  console.log(response);
+                  	//   console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var clueRepetitionDTO = response.data.data;
                     	  orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
@@ -773,7 +772,7 @@
   		             var param={};
   		             param.ids=ids;
  	                 axios.post('/invitearea/deleInviteArea',param).then(function (response) {
- 	                  	  console.log(response);
+ 	                  	//   console.log(response);
  	                      if(null !==response && response.data !=null && response.data.code=='0'){
  	                    	  window.location.href="/invitearea/inviteAreaList"; 
  	                     }else{
@@ -833,7 +832,7 @@
 	        	   param.orgType="8";
 	           }
                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
-            	   console.log(response);
+            	//    console.log(response);
             	   if(type==1){
             		   orgVM.dxList = response.data.data;
     	           }else if(type ==7){
@@ -927,6 +926,8 @@
             },
         },
         created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
         	this.showTele(0);
         	this.queryRepeatPage();
         	 // 初始化电销人员
@@ -938,7 +939,7 @@
                 orgVM.repeattelePerArr=response.data.data;
             });
         	document.getElementById('organizationManage').style.display = 'block';
-        }//created方法 结束
+        }
     })
 </script>
 </html>

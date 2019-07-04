@@ -285,6 +285,7 @@ public class MyCustomerClueController {
                         accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
                                 .collect(Collectors.toList());
                     }
+                    accountList.add(user.getId()); //电销总监，能够看见自身已经手下全部电销顾问的记录
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
@@ -408,6 +409,8 @@ public class MyCustomerClueController {
         } else {
             request.setAttribute("repeatClueStatus", 0);
         }
+
+        request.setAttribute("zjFalg",request.getParameter("zjFalg"));
         return "clue/addCustomerMaintenance";
     }
 
@@ -443,6 +446,7 @@ public class MyCustomerClueController {
                         accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
                                 .collect(Collectors.toList());
                     }
+                    accountList.add(user.getId());
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
@@ -546,6 +550,7 @@ public class MyCustomerClueController {
         } else {
             request.setAttribute("repeatClueStatus", 0);
         }
+
         if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
             return "clue/editBasicCustomerMaintenance";
         } else {
@@ -583,6 +588,7 @@ public class MyCustomerClueController {
                         accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
                                 .collect(Collectors.toList());
                     }
+                   accountList.add(user.getId());
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }

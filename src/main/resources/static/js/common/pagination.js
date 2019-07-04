@@ -34,19 +34,19 @@ Vue.component('table-pagination',{
      },
 
     methods:{
-        handleSizeChange(val) {
-             //下拉框  每页 10,20条切换 调用
-             this.pager.currentPage = 1;
-             this.pager.pageSize=val;
-             this.$emit('change');
-          },
-          handleCurrentChange(val) {
-              //点击 页码
-           this.pager.currentPage = val;
-           this.$emit('change');
-          },
+      handleSizeChange(val) {
+          //下拉框  每页 10,20条切换 调用
+          this.pager.currentPage = 1;
+          this.pager.pageSize=val;
+          localStorage.setItem('allChangePageSize', val);
+          this.$emit('change');
+      },
+      handleCurrentChange(val) {
+          //点击 页码
+        this.pager.currentPage = val;
+        this.$emit('change');
+      },
     }
-   
 });
 
 
