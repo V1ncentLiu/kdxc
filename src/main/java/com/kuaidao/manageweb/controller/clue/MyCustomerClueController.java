@@ -408,6 +408,8 @@ public class MyCustomerClueController {
         } else {
             request.setAttribute("repeatClueStatus", 0);
         }
+
+        request.setAttribute("zjFalg",request.getParameter("zjFalg"));
         return "clue/addCustomerMaintenance";
     }
 
