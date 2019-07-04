@@ -939,16 +939,16 @@ public class ConsoleController {
     }
 
     /**
-     * 获取日维度的看板计数
+     * 查询看板计数
      *
      */
     @PostMapping("/busGroupDayQuery")
     @ResponseBody
-    public JSONResult<BusGroupDTO> busGroupDayQuery() {
+    public JSONResult<BusGroupDTO> busGroupDayQuery(Integer flag) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Map map = new HashMap();
         map.put("busDirectorId",curLoginUser.getId());
-        map.put("flag", 1);
+        map.put("flag", flag);
         JSONResult<BusGroupDTO> jsonResult = busGroupDashboardFeignClient.busGroupDataQuery(map);
         if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
             return new JSONResult<BusGroupDTO>().fail(jsonResult.getCode(), jsonResult.getMsg());
