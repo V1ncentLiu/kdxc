@@ -573,6 +573,10 @@ var clientVm = new Vue({
          
      },
      created(){
+          // 取页数存储
+          var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+          if(localVal){this.pager.pageSize = localVal;}
+
           this.initClientData();
      },
      mounted(){

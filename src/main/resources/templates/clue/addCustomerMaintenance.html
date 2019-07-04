@@ -552,7 +552,7 @@
             </el-row>
             <div class="padding20 f-tac btnBoxFixed">
                 <el-button type="primary" :disabled="saveDisabled" @click="submitForm('form')">保存客户信息</el-button>
-                <el-button type="success" :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
+                <el-button type="success" v-show="showConfirmButtonFlag"  :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
                 </el-button>
                 <el-button @click="rebackClue">取 消</el-button>
             </div>
@@ -951,6 +951,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
   var clueId = [[${clueId}]];//资源ID
+  var zjFalg = [[${zjFalg}]];//电销总监标志
   var customer = [[${customer}]];//客户信息
   var base = [[${base}]];//资源基本信息
   var intention = [[${intention}]];//资源投资意向信息
@@ -974,6 +975,10 @@
     if(loginUserId == teleSaleId){
       editPhone = 0;
     }
+    showConfirmButtonFlag = true;
+    if(zjFalg){
+        showConfirmButtonFlag = false;
+    }
   var addCustomerVM = new Vue({
     el: '#addCustomer',
     data: function () {
@@ -986,7 +991,9 @@
             return date.getTime() <= Date.now() - 8.64e7 || date.getTime() >= Date.now();
           }
         },
+        showConfirmButtonFlag:showConfirmButtonFlag,
         editPhone:editPhone,
+
         repeatWeDialogForm:{},
         repeatCustomer:{},
         repeatWechatVisible:false,
@@ -1100,7 +1107,7 @@
                                 if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
                                     if (value == null && value == "null") {
                                         callback(new Error("手机号不能为空"));
-                                    } 
+                                    }
                                     // else if (value.length < 11) {
                                     //     callback(new Error("手机号位数为11位"));
                                     // }
@@ -1696,7 +1703,11 @@
                       .then(function (response) {
                         addCustomerVM.$message({
                           message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                            window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                              if(zjFalg){
+                                  window.location.href = "/tele/customerManager/initcustomerManager";
+                              }else{
+                                  window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                              }
                           }
                         });
                       });
@@ -1707,7 +1718,11 @@
                       addCustomerVM.$message({
                         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
                           // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                          window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                          if(zjFalg){
+                              window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                          }else{
+                              window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                          }
                           // addCustomerVM.saveDisabled = false;
                         }
                       });
@@ -1719,7 +1734,12 @@
                 }
             },
             rebackClue() {
-                window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                if(zjFalg){
+                    window.location.href = "/tele/customerManager/initcustomerManager";
+                }else{
+                    window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                }
+                // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
             },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -2138,7 +2158,7 @@
                 });
             }
         }
-        
+
         if (valid) {
             this.$refs[form].validateField(["customerName"], (error) => {
                 if (error) {
