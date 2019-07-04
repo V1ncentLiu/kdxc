@@ -446,6 +446,7 @@ public class MyCustomerClueController {
                         accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
                                 .collect(Collectors.toList());
                     }
+                    accountList.add(user.getId());
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
