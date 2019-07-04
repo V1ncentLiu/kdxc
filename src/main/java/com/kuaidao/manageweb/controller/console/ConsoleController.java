@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.console;
 
-import com.kuaidao.common.constant.DicCodeEnum;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,9 +34,11 @@ import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -160,7 +161,9 @@ public class ConsoleController {
         } else if (RoleCodeEnum.SWJL.name().equals(roleCode)) {
             // 商务经理
             // 项目
-            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+            ProjectInfoPageParam param = new ProjectInfoPageParam();
+            param.setIsNotSign(-1);
+            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
             if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
@@ -675,15 +678,14 @@ public class ConsoleController {
          * visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
          */
 
-        /*List<Long> accountIdList =
-                getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
-        if (CollectionUtils.isEmpty(accountIdList)) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该用户下没有下属");
-        }
-        visitRecordReqDTO.setBusManagerIdList(accountIdList);
-        visitRecordReqDTO.setStatus(1);*/
+        /*
+         * List<Long> accountIdList = getAccountIdList(curLoginUser.getOrgId(),
+         * RoleCodeEnum.SWJL.name()); if (CollectionUtils.isEmpty(accountIdList)) { return new
+         * JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该用户下没有下属"); }
+         * visitRecordReqDTO.setBusManagerIdList(accountIdList); visitRecordReqDTO.setStatus(1);
+         */
 
-        //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+        // 商务经理外调，发起外调的商务总监进行审核,根据组id查询
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -701,11 +703,12 @@ public class ConsoleController {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                         "该用户下没有下属");
             }
-            busGroupIdList = data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            busGroupIdList =
+                    data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
             visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
             visitRecordReqDTO.setStatus(1);
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
-            //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+            // 商务经理外调，发起外调的商务总监进行审核,根据组id查询
             List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
             if (CollectionUtils.isEmpty(accountIdList)) {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
@@ -736,19 +739,18 @@ public class ConsoleController {
     public JSONResult<List<SignRecordRespDTO>> listSignRecord(
             @RequestBody SignRecordReqDTO reqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        /*List<Long> businessGroupIdList = new ArrayList<>();
-        businessGroupIdList.add(curLoginUser.getOrgId());
-        // reqDTO.setBusinessGroupIdList(businessGroupIdList);
-        List<Long> accountIdList =
-                getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
-        if (CollectionUtils.isEmpty(accountIdList)) {
-            // return new
-            // JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属");
-            return new JSONResult<List<SignRecordRespDTO>>().success(new ArrayList<>());
-        }
-        reqDTO.setBusinessManagerIdList(accountIdList);*/
+        /*
+         * List<Long> businessGroupIdList = new ArrayList<>();
+         * businessGroupIdList.add(curLoginUser.getOrgId()); //
+         * reqDTO.setBusinessGroupIdList(businessGroupIdList); List<Long> accountIdList =
+         * getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name()); if
+         * (CollectionUtils.isEmpty(accountIdList)) { // return new //
+         * JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属"); return new
+         * JSONResult<List<SignRecordRespDTO>>().success(new ArrayList<>()); }
+         * reqDTO.setBusinessManagerIdList(accountIdList);
+         */
 
-        //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+        // 商务经理外调，发起外调的商务总监进行审核,根据组id查询
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -767,7 +769,8 @@ public class ConsoleController {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                         "该用户下没有下属");
             }
-            businessGroupIdList = data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            businessGroupIdList =
+                    data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
             reqDTO.setBusinessGroupIdList(businessGroupIdList);
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
