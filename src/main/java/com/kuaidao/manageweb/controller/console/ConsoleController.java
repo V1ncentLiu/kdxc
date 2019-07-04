@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.console;
 
-import com.kuaidao.common.constant.DicCodeEnum;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,19 +7,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 
-import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
-import com.kuaidao.manageweb.feign.busgroup.BusGroupDashboardFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
@@ -41,6 +41,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -48,9 +49,11 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
+import com.kuaidao.manageweb.feign.busgroup.BusGroupDashboardFeignClient;
 import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
@@ -129,6 +132,8 @@ public class ConsoleController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private BusGroupDashboardFeignClient busGroupDashboardFeignClient;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /***
      * 跳转控制台页面
@@ -956,4 +961,20 @@ public class ConsoleController {
         BusGroupDTO data = jsonResult.getData();
         return new JSONResult<BusGroupDTO>().success(data);
     }
+    
+    /**
+     * 统计电销人员今日数量
+     * 
+     * @param reqDTO
+     * @return
+     */
+//    @PostMapping("/getTeleCountNum")
+//    @ResponseBody
+//    public JSONResult<Integer> getTeleCountNum(@RequestBody TeleConsoleReqDTO reqDTO) {
+//        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+//        DashboardTeleSale string = (DashboardTeleSale)redisTemplate.opsForValue().get((Constants.TODAY_TELE_SALE + curLoginUser.getId()));
+//        JSONObject jsonObject = JSONObject.parseObject(string);
+//       // JSONObject phoneArea = (JSONObject) redisTemplate.opsForValue().get(redisKey);
+//        return clueBasicFeignClient.countAssignClueNum(reqDTO);
+//    }
 }
