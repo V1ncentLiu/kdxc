@@ -133,6 +133,7 @@ function recodeCallTime(callSource,clueId){
 //abx外呼
 function axbOutboundCall(outboundInputPhone,callSource,clueId,callback){
 	console.log("axb outbound call");
+	getPhoneLocale(outboundInputPhone,callSource);
 	var axbParam = {};
 		axbParam.clueId = clueId;
 		axbParam.customerPhone = outboundInputPhone;
@@ -147,6 +148,7 @@ function axbOutboundCall(outboundInputPhone,callSource,clueId,callback){
      		   if (typeof callback === 'function') {
  	            callback();
      		   }
+     		   
           }else{
         	  clearTimer();//清除定时器
          		homePageVM.$message({message:data.msg,type:'error'});
