@@ -16,7 +16,7 @@ var mainDivVM = new Vue({
         activeName5:'1',
         activeName6:'1',
         activeName7:'1',
-        visitedNum:'',//当月到访数   
+        visitedNum:'',//当月到访数
         signedNum:'',//当月签约数
         secondVisitedNum:'',//当月二次到访数
         secondSignedNum:'',//当月二次来访签约数
@@ -29,14 +29,14 @@ var mainDivVM = new Vue({
         showTabNotVisitData:false,
         editableTabs:[],
         showHisVisitRecordDialog:false,
-        //公告  
-        afficheBox:false,     
-        items: [ 
+        //公告
+        afficheBox:false,
+        items: [
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
             // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
             // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
-        ], 
-        //未读消息             
+        ],
+        //未读消息
         consoleNewsParam:{
             newsBox:false,
             newsData: [
@@ -47,7 +47,7 @@ var mainDivVM = new Vue({
         },
         //赠送类型
         giveTypeList:giveTypeList,
-        //待处理邀约来访记录        
+        //待处理邀约来访记录
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
         suppWrap: true,
@@ -533,9 +533,9 @@ var mainDivVM = new Vue({
                            callback(new Error("请输入正整数"));
                            mainDivVM.addVisitRecord.visitPeopleNum =null;
                      }else{
-                         callback(); 
+                         callback();
                      }
-                                                      
+
                 }, trigger: 'change'}
               ]
         },
@@ -640,7 +640,7 @@ var mainDivVM = new Vue({
         })
       },
         gotoBusinessMyCustomer(){//跳转我的客户
-            window.location.href="/aggregation/businessMyCustomer/listPage"; 
+            window.location.href="/aggregation/businessMyCustomer/listPage";
         },
         // 工作台
         handleClick(tab, event) {
@@ -678,24 +678,24 @@ var mainDivVM = new Vue({
                     }
                 }else{
                     mainDivVM.consoleNewsParam.newsBox=false
-                }                
-            }); 
+                }
+            });
             // 当月到访数 当月签约数 当月二次到访数 当月二次来访签约数 未收齐尾款笔数
             param={};
             axios.post('/console/console/countCurMonthNum',param).then(function (response) {
-                console.log('当月到访数 当月签约数 当月二次到访数 当月二次来访签约数 未收齐尾款笔数')                
-                console.log(response.data)                
+                console.log('当月到访数 当月签约数 当月二次到访数 当月二次来访签约数 未收齐尾款笔数')
+                console.log(response.data)
                 mainDivVM.visitedNum=response.data.data.visitedNum;
                 mainDivVM.signedNum=response.data.data.signedNum;
                 mainDivVM.secondVisitedNum=response.data.data.secondVisitedNum;
                 mainDivVM.secondSignedNum=response.data.data.secondSignedNum;
                 mainDivVM.unPaymentNum=response.data.data.unPaymentNum;
-            });    
+            });
             // 工作天数
             param={};
             axios.post('/console/console/getWorkDay',param).then(function (response) {
-                console.log('工作天数')                
-                console.log(response.data)                
+                console.log('工作天数')
+                console.log(response.data)
                 mainDivVM.workDay=response.data.data;
             });
         },
@@ -904,7 +904,7 @@ var mainDivVM = new Vue({
             // 设置 clueid
             this.$refs['addVisitRecord'].validate((valid) => {
                 if (valid) {
-                    this.btnDisabled = true; 
+                    this.btnDisabled = true;
                     axios.post("/busVisitRecord/insert", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -913,11 +913,11 @@ var mainDivVM = new Vue({
                                         mainDivVM.initList();
                                         mainDivVM.addVisitRecordDialogVisible = false;
                                         mainDivVM.addVisitRecord.clueId = "";
-                                        mainDivVM.btnDisabled = false; 
+                                        mainDivVM.btnDisabled = false;
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
-                                mainDivVM.btnDisabled = false; 
+                                mainDivVM.btnDisabled = false;
                             }
                         }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
@@ -955,7 +955,7 @@ var mainDivVM = new Vue({
                     if(param.vistitTime){
                         param.vistitTime = new Date(param.vistitTime)
                     }
-                    this.btnDisabled = true;  
+                    this.btnDisabled = true;
                     axios.post("/busVisitRecord/update", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -965,11 +965,11 @@ var mainDivVM = new Vue({
                                         mainDivVM.updateVisitRecordDialogVisible = false;
                                         mainDivVM.updateVisitRecord.clueId = "";
                                         mainDivVM.updateVisitRecord.id = "";
-                                        mainDivVM.btnDisabled = false; 
+                                        mainDivVM.btnDisabled = false;
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
-                                mainDivVM.btnDisabled = false; 
+                                mainDivVM.btnDisabled = false;
                             }
                         }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
@@ -1469,7 +1469,7 @@ var mainDivVM = new Vue({
                         }else{
                         	mainDivVM.updateFormSigning.giveType = null;
                         }
-                        
+
                         mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                         mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
@@ -1532,9 +1532,13 @@ var mainDivVM = new Vue({
             return payModeArr;
         },
 
-        submitForm(formName) {                
-            this.formSigning.visitTime = new Date( this.formSigning.visitTime);
-            this.formSigning.payTime = new Date( this.formSigning.payTime);
+        submitForm(formName) {
+            if( this.formSigning.visitTime){
+              this.formSigning.visitTime = new Date( this.formSigning.visitTime);
+             }
+            if( this.formSigning.payTime){
+                this.formSigning.payTime = new Date( this.formSigning.payTime);
+            }
             this.formSigning.payMode = mainDivVM.tansPayModeNameToValue(this.formSigning.payModes);
             var param = this.formSigning;
             param.amountPerformance = this.formSigningAmountPerformance;
@@ -1551,11 +1555,11 @@ var mainDivVM = new Vue({
                                         mainDivVM.initList();
                                         mainDivVM.dialogFormSigningVisible = false;
                                         mainDivVM.formSigning.clueId = "";
-                                        mainDivVM.btnDisabled = false; 
+                                        mainDivVM.btnDisabled = false;
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
-                                mainDivVM.btnDisabled = false; 
+                                mainDivVM.btnDisabled = false;
                             }
                         }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
@@ -1573,13 +1577,13 @@ var mainDivVM = new Vue({
                param.payTime = new Date( param.payTime)
            }
            if(param.giveType ==null || param.giveType ==""){
-        	   param.giveType=-1;  
+        	   param.giveType=-1;
            }
            this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
             // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
-                    this.btnDisabled = true; 
+                    this.btnDisabled = true;
                     axios.post("/businesssign/update", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -1587,11 +1591,11 @@ var mainDivVM = new Vue({
                                         mainDivVM.pager.pageNum = 1
                                         mainDivVM.initList();
                                         mainDivVM.dialogUpdateFormSigningVisible = false;
-                                        mainDivVM.btnDisabled = false; 
+                                        mainDivVM.btnDisabled = false;
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
-                                mainDivVM.btnDisabled = false; 
+                                mainDivVM.btnDisabled = false;
                             }
                         }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
@@ -1632,7 +1636,7 @@ var mainDivVM = new Vue({
             this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
     　　},
     },
-    created(){        
+    created(){
         // 工作台
         this.initBoard();
         // 待处理邀约来访记录
