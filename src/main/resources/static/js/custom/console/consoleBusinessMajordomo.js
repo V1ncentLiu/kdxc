@@ -198,7 +198,7 @@ var mainDivVM = new Vue({
 
             // 日维度的看板数据
             param={};
-            param.flag = 1;
+            //param.flag = 1;
             axios.post('/console/console/busGroupDayQuery',param).then(function (response) {
                 console.log('日维度的看板数据');
                 console.log(response.data);
@@ -211,8 +211,8 @@ var mainDivVM = new Vue({
 
             // 非日维度的看板数据
             param={};
-            param.flag = 2;
-            axios.post('/console/console/busGroupDayQuery',param).then(function (response) {
+            //param.flag = 2;
+            axios.post('/console/console/busGroupNotDayQuery',param).then(function (response) {
                 console.log('非日维度的看板数据');
                 console.log(response.data);
                 var result = response.data.data;
