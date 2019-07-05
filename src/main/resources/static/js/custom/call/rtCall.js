@@ -133,20 +133,33 @@ function recodeCallTime(callSource,clueId){
 //abx外呼
 function axbOutboundCall(outboundInputPhone,callSource,clueId,callback){
 	console.log("axb outbound call");
+	homePageVM.$message({message:"外呼中",type:'success'});
+	 if(callSource==1){
+	     homePageVM.dialogOutboundVisible =true;
+		 $('#outboundPhoneLocaleArea').html("");
+		 getPhoneLocale(outboundInputPhone,callSource);
+	  }else if(callSource==2) {
+		 homePageVM.tmOutboundCallDialogVisible =true;
+		 $('#tmOutboundPhoneLocaleArea').html("");
+		 //查询手机号归属地
+		 getPhoneLocale(outboundInputPhone,callSource);
+	}
+	
 	var axbParam = {};
-		axbParam.clueId = clueId;
-		axbParam.customerPhone = outboundInputPhone;
-		axbParam.accountType = homePageVM.accountType;
-		 axios.post('/client/client/axbOutCall',axbParam)
+	axbParam.clueId = clueId;
+	axbParam.customerPhone = outboundInputPhone;
+	axbParam.accountType = homePageVM.accountType;
+	  axios.post('/client/client/axbOutCall',axbParam)
       .then(function (response) {
           var data =  response.data;
           if(data.code=='0'){
      		  //10分钟后红色字体显示
      		 // intervalTimer("outboundCallTime",1,2);
-     		  homePageVM.$message({message:"外呼中",type:'success'});
+     		  
      		   if (typeof callback === 'function') {
  	            callback();
      		   }
+     		   
           }else{
         	  clearTimer();//清除定时器
          		homePageVM.$message({message:data.msg,type:'error'});
