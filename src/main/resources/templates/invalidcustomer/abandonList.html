@@ -164,7 +164,7 @@
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else>
             </el-table-column>
         </el-table>
-        <table-pagination :pager="pager"  @change="initList"></table-pagination>
+        <table-pagination :pager="pager" v-if="paginationShow" @change="initList"></table-pagination>
     </div>
     <!-- 释放人员信息 -->
     <el-dialog title="释放人员信息" :visible.sync="dialogFormVisible">
@@ -212,6 +212,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            paginationShow: false,
             isShow:false,
             dialogFormVisible: false,
             dialogChooseList: false,
@@ -245,7 +246,21 @@
                 total: 0,
                 currentPage: 1,
                 pageSize: 20,
-            }
+            },
+            storeForm:{
+                starTime:'',
+                endTime:'',
+                medium:'',
+                resourcePerson:'',
+                abandonReason:'',
+                resourceType:'',
+                resourceStyle:'',
+                resourceProject:'',
+                phone:'',
+                customerName:''
+            },
+            storeId: '',
+            scrollTop: 0,
         },
         methods: {
             handleSelectionChange(val) {//选择节点的事件
@@ -303,7 +318,18 @@
             },
             //展现详情
             showClueDetailInfo (row, column) {
-                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+                // 存储选中信息--start
+                var clueId=row.clueId;  
+                setSessionStore("abandonListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("abandonListOtherVal", otherVal);
+                // 存储选中信息--end  
+                // window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
             },
             sortNumber(a,b) {
                 //对数组中元素，按照数字 从小到大 排序
@@ -355,6 +381,27 @@
                         mainDivVM.pager.currentPage= response.data.data.currentPage;
                         mainDivVM.pager.total= response.data.data.total;
                         mainDivVM.pager.pageSize =  response.data.data.pageSize;
+
+                        // 取出存储的id
+                        if(!mainDivVM.paginationShow){
+                           if(mainDivVM.storeId){
+                               mainDivVM.$nextTick(function(){
+                                  var storage = [];
+                                  mainDivVM.tableData.forEach(function(item, index){
+                                      if(item.clueId === mainDivVM.storeId ){
+                                          storage.push(mainDivVM.tableData[index]);
+                                      }
+                                  })
+                                  // mainDivVM.toggleSelection(storage);
+                                  mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
+                              })
+                          }
+                        }else{
+                          removeSessionStore ("abandonListStoreForm");
+                          removeSessionStore ("abandonListOtherVal");
+                        }
+                        mainDivVM.paginationShow = true;
+                        mainDivVM.storeForm = mainDivVM.queryForm;
                     }
                 })
             },
@@ -367,6 +414,18 @@
             },
         },
         created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("abandonListStoreForm");
+                var otherVal = getSessionStore("abandonListOtherVal");
+                if(storeVal && otherVal){
+                    this.queryForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.initList();
