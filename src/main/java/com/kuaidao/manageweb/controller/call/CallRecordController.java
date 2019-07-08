@@ -99,7 +99,10 @@ public class CallRecordController {
         if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
         } else {
-            request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
+            Integer businessLine = curLoginUser.getBusinessLine();
+            if (businessLine != null) {
+                request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
+            }
         }
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
@@ -157,6 +160,17 @@ public class CallRecordController {
         }
         return  null;
     }
+    /**
+     * 获取当前登录账号
+     *
+     * @param orgDTO
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
     private List<OrganizationDTO> getCurTeleGroupList(Long orgId) {
         OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(orgId));
         List<OrganizationDTO> teleGroupIdList = new ArrayList<>();
@@ -200,7 +214,10 @@ public class CallRecordController {
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             request.setAttribute("teleGroupList",getCurTeleGroupList(orgId));
         }else {
-            request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
+            Integer businessLine = curLoginUser.getBusinessLine();
+            if(businessLine!=null) {
+                request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
+            }
         }
         return "call/tmTalkTimeCallRecord";
     }
@@ -265,7 +282,7 @@ public class CallRecordController {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                             "该电销总监下无顾问");
                 }
-                List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                List<Long> idList = userList.parallelStream().map(user -> user.getId())
                         .collect(Collectors.toList());
                 idList.add(curLoginUser.getId());
                 myCallRecordReqDTO.setAccountIdList(idList);
@@ -278,7 +295,7 @@ public class CallRecordController {
                     if (CollectionUtils.isEmpty(userList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
-                    List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                    List<Long> idList = userList.parallelStream().map(user -> user.getId())
                             .collect(Collectors.toList());
                     myCallRecordReqDTO.setAccountIdList(idList);
                 } else {
@@ -290,7 +307,7 @@ public class CallRecordController {
                     if (CollectionUtils.isEmpty(userInfoList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
-                    List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                    List<Long> idList = userInfoList.parallelStream().map(user -> user.getId())
                             .collect(Collectors.toList());
                     myCallRecordReqDTO.setAccountIdList(idList);
                 }
@@ -367,7 +384,7 @@ public class CallRecordController {
             if(CollectionUtils.isEmpty(userList)) {
                 return new JSONResult<Map<String,Object>>().success(null);
             }
-            List<Long> idList = userList.parallelStream().filter(a->a.getStatus() ==1 || a.getStatus() == 3).map(user->user.getId()).collect(Collectors.toList());
+            List<Long> idList = userList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
             myCallRecordReqDTO.setAccountIdList(idList);
         }else {
             if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -376,7 +393,7 @@ public class CallRecordController {
                 if(CollectionUtils.isEmpty(userList)) {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该电销总监下无顾问");
                 }
-                List<Long> idList = userList.parallelStream().filter(a->a.getStatus() ==1 || a.getStatus() == 3).map(user->user.getId()).collect(Collectors.toList());
+                List<Long> idList = userList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
                 idList.add(curLoginUser.getId());
                 myCallRecordReqDTO.setAccountIdList(idList);
 
@@ -389,7 +406,7 @@ public class CallRecordController {
                 if (CollectionUtils.isEmpty(userInfoList)) {
                     return new JSONResult<Map<String,Object>>().success(null);
                 }
-                List<Long> idList = userInfoList.parallelStream().filter(a->a.getStatus() ==1 || a.getStatus() == 3).map(user->user.getId()).collect(Collectors.toList());
+                List<Long> idList = userInfoList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
                 myCallRecordReqDTO.setAccountIdList(idList);
             }
         }
