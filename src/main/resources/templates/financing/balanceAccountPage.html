@@ -280,7 +280,9 @@
 	                </el-form-item>
 	          <el-form-item label="结算比例：" :label-width="formLabelWidth1" ><span style="color: red;">{{ratio}}%</span>
 	          </el-form-item>
-	          <el-form-item label="佣金："  :label-width="formLabelWidth1"><span style="color: red;">{{commissionMoney}}</span>
+	          <el-form-item label="佣金："  :label-width="formLabelWidth1">
+              <!-- <span style="color: red;">{{commissionMoney}}</span> -->
+              <el-input  type="number" v-model="apply.commissionMoney" placeholder="" style="width: 290px;margin-right: 10px;" oninput="if(value.length>8)value=value.slice(0,8)"  maxLength="10"></el-input>元
 	          </el-form-item>
             <div v-if="lowestCommissionShow">
                 <el-form-item label="保底服务费：" :label-width="formLabelWidth1"><span style="color: red;">{{lowestCommission}}</span>
@@ -342,9 +344,8 @@ var clueVM = new Vue({
             doubtRemarkShow:false,
             backRemarks:"",
             backVisable:false,
-            submitApplyVisible:false,
+            submitApplyVisible:true,
             ratio:"",
-            commissionMoney:"",
             viewDoubtForm: {
             	doubtRemark: ''
             },
@@ -361,7 +362,8 @@ var clueVM = new Vue({
             apply: {
             	money: "",
             	isDoubt:"0",
-            	doubtRemark:""
+            	doubtRemark:"",
+                commissionMoney:""
 	        },
 	        form: {
 	          	type: [],
@@ -823,10 +825,10 @@ var clueVM = new Vue({
                         return;
             	   }
             	   if(status=="提交对账" || status=="已对账"){
-            		   this.commissionMoney = null;
+            		   this.apply.commissionMoney = null;
                 	   this.apply.money = rows[0].money ;
                 	   this.apply.isDoubt = rows[0].isDoubt ;
-                	   this.commissionMoney = rows[0].commissionMoney ;
+                	   this.apply.commissionMoney = rows[0].commissionMoney ;
                 	   if(rows[0].isDoubt ==1){
                 		   this.doubtRemarkShow = true;
                 		   this.apply.doubtRemark = rows[0].doubtRemark ;
@@ -835,7 +837,7 @@ var clueVM = new Vue({
                 		   this.apply.doubtRemark = null;
                 	   }
             	   }else{
-            		   this.commissionMoney = null;
+            		   this.apply.commissionMoney = null;
                 	   this.apply.money = null ;
                 	   this.apply.isDoubt = 0 ;
                 	   this.apply.doubtRemark = null ;
@@ -860,7 +862,7 @@ var clueVM = new Vue({
                       param.isDoubt = clueVM.apply.isDoubt;
                       param.doubtRemark = clueVM.apply.doubtRemark;
                       param.ratio = clueVM.ratio;
-                      param.commissionMoney =clueVM.commissionMoney;
+                      param.commissionMoney =clueVM.apply.commissionMoney;
                       this.btnDisabled = true;
                       axios.post('/financing/balanceaccount/settlementConfirm',param)
                         .then(function (response) {
@@ -963,6 +965,7 @@ var clueVM = new Vue({
                 	  
                   },
                   repeatApplyNumber(){
+        	    debugger;
         	          //保底服务费
                       var lowestCommission =  parseInt(this.lowestCommission);
                       //已对账确认佣金
@@ -972,9 +975,9 @@ var clueVM = new Vue({
                       //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金=保底服务费-已对账的佣金
                       //否则佣金等于结算金额*结算比例
                       if(lowestCommission > sum){
-                          this.commissionMoney = lowestCommission - confirmCommission;
+                          this.apply.commissionMoney = lowestCommission - confirmCommission;
                       }else{
-                          this.commissionMoney = commissionMoney;
+                          this.apply.commissionMoney = commissionMoney;
                       }
 
              		},
