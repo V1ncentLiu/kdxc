@@ -147,7 +147,8 @@
             <!--</el-table-column>-->
         <!--</el-table>-->
         <el-table  ref="multipleTable" border  tooltip-effect="light" @selection-change="handleSelectionChange" @row-dblclick="showClueDetailInfo" style="width: 100%"  :data="tableData" >
-            <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>
+            <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>            
+            <el-table-column type="index" width="55" align="center" label="序号"></el-table-column>
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                              v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'sex'">
                 <template slot-scope="scope">
@@ -179,7 +180,7 @@
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else>
             </el-table-column>
         </el-table>
-        <table-pagination :pager="pager"  @change="initList"></table-pagination>
+        <table-pagination v-if="paginationShow" :pager="pager"  @change="initList"></table-pagination>
     </div>
     <el-dialog title="分配资源"  :visible.sync="allocationDialogFormVisible"  width="20%">
         <template>
@@ -466,7 +467,8 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
-          oldPage:1,
+            paginationShow: false,
+            oldPage:1,
             isShow:false,
         	loading:false,
             dialogChooseList: false,
@@ -566,6 +568,26 @@
             phone4:'',
             phone5:'',
             receiveTable:[],
+            storeForm:{
+                releaseReasons:[],
+                releaseReason:"",
+                customerStatus:"",
+                teleGorupId:"",
+                teleSaleIds:[],
+                project:"",
+                isRepeatPhone:"",
+                createTime1:"",
+                createTime2:"",
+                releaseTime1:"",
+                releaseTime2:"",
+                searchWord:"",
+                phone:"",
+                type:"",
+                category:"",
+                address:""
+            },
+            storeId: '',
+            scrollTop: 0,
         },
         methods: {
        		//日期数据格式化方法
@@ -916,8 +938,38 @@
                         mainDivVM.pager.currentPage= response.data.data.currentPage;
                         mainDivVM.pager.total= response.data.data.total;
                         mainDivVM.pager.pageSize =  response.data.data.pageSize;
+                        // 取出存储的id
+                        if(!mainDivVM.paginationShow){
+                           if(mainDivVM.storeId){
+                               mainDivVM.$nextTick(function(){
+                                  var storage = [];
+                                  mainDivVM.tableData.forEach(function(item, index){
+                                      if(item.clueId === mainDivVM.storeId ){
+                                          storage.push(mainDivVM.tableData[index]);
+                                      }
+                                  })
+                                  mainDivVM.toggleSelection(storage);
+                                  mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
+                              })
+                          }
+                        }else{
+                          removeSessionStore ("publicCustomerStoreForm");
+                          removeSessionStore ("publicCustomerOtherVal");
+                        }
+                        mainDivVM.paginationShow = true;
+                        mainDivVM.storeForm = mainDivVM.queryForm;
+
                     }
                 })
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
             },
             openReceive(){//领取                
                 if(this.multipleSelection.length==0){
@@ -994,7 +1046,18 @@
             },
             //展现详情
             showClueDetailInfo (row, column) {
-                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId+"&commonPool=1";
+                // 存储选中信息--start
+                var clueId=row.clueId;  
+                setSessionStore("publicCustomerStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("publicCustomerOtherVal", otherVal);
+                // 存储选中信息--end  
+                // window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId+"&commonPool=1";
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId+"&commonPool=1";
             },
             repeatPhonesClick(row) {//重复手机号按钮点击
                 console.log(row);
@@ -1077,6 +1140,17 @@
             },
         },
         created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("publicCustomerStoreForm");
+                var otherVal = getSessionStore("publicCustomerOtherVal");
+                if(storeVal && otherVal){
+                    this.queryForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
