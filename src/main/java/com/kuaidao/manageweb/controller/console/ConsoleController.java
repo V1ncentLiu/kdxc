@@ -1,6 +1,8 @@
 package com.kuaidao.manageweb.controller.console;
 
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.dashboard.dto.bussale.BusSaleDTO;
+import com.kuaidao.manageweb.feign.console.sale.DashboardSaleFeignClient;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -129,6 +131,8 @@ public class ConsoleController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private BusGroupDashboardFeignClient busGroupDashboardFeignClient;
+    @Autowired
+    DashboardSaleFeignClient dashboardSaleFeignClient;
 
     /***
      * 跳转控制台页面
@@ -169,6 +173,16 @@ public class ConsoleController {
             if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
+
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(curLoginUser.getId());
+            JSONResult<BusSaleDTO> dashboard = dashboardSaleFeignClient
+                .findDataByUserId(idEntityLong);
+            BusSaleDTO data = dashboard.getData();
+            if(data==null){
+                data = new BusSaleDTO();
+            }
+            request.setAttribute("dashboardSale", data);
             // 查询赠送类型集合
             request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
             path = "console/consoleBusinessManager";
