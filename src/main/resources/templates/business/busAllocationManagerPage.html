@@ -132,7 +132,7 @@
                
                
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -217,20 +217,21 @@ var purTypeList = [[${purTypeList}]] // 意向品类
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            paginationShow: false,
             isShow:false,
-        		searchForm: {
-	        		cusName: '',
-	        		teleGorupId: '',
-	        		teleSaleId: '',
-	        		projectId: '',
-	        		province: '',
-	        		delFalg: '',
-	        		startTime: '',
-	        		endTime: '',
-	        		startReserveTime: '',
-	        		endReserveTime: '',
-	        		sortField: '',
-	        		sortType: ''
+    		searchForm: {
+        		cusName: '',
+        		teleGorupId: '',
+        		teleSaleId: '',
+        		projectId: '',
+        		province: '',
+        		delFalg: '',
+        		startTime: '',
+        		endTime: '',
+        		startReserveTime: '',
+        		endReserveTime: '',
+        		sortField: '',
+        		sortType: ''
             },
             allocationForm: {
             	saleId:'',
@@ -280,11 +281,27 @@ var clueVM = new Vue({
             multipleSelection:[],
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
+            storeForm: {
+                cusName: '',
+                teleGorupId: '',
+                teleSaleId: '',
+                projectId: '',
+                province: '',
+                delFalg: '',
+                startTime: '',
+                endTime: '',
+                startReserveTime: '',
+                endReserveTime: '',
+                sortField: '',
+                sortType: ''
+            },
+            storeId: '',
+            scrollTop: 0,
         },
         methods: {
-          clickRow(row){//点击单行选中复选框
+            clickRow(row){//点击单行选中复选框
                 this.$refs.multipleTable.toggleRowSelection(row)
-          },
+            },
         	searchTable() {
                 var param ={};
                 var startTime = this.searchForm.startTime;
@@ -325,17 +342,48 @@ var clueVM = new Vue({
                 console.info(param);
                 axios.post('/business/busAllocation/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      clueVM.dataTable= table.data;
-                      clueVM.pager.total =  table.total;
-                      clueVM.pager.currentPage = table.currentPage;
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    clueVM.dataTable= table.data;
+                    clueVM.pager.total =  table.total;
+                    clueVM.pager.currentPage = table.currentPage;
+
+                      // 取出存储的id
+                    if(!clueVM.paginationShow){
+                       if(clueVM.storeId){
+                           clueVM.$nextTick(function(){
+                              var storage = [];
+                              clueVM.dataTable.forEach(function(item, index){
+                                  if(item.clueId === clueVM.storeId ){
+                                      storage.push(clueVM.dataTable[index]);
+                                  }
+                              })
+                              clueVM.toggleSelection(storage);
+                              clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop = clueVM.scrollTop;
+                          })
+                      }
+                    }else{
+                      removeSessionStore ("busAllocationManagerStoreForm");
+                      removeSessionStore ("busAllocationManagerOtherVal");
+                    }
+                    clueVM.paginationShow = true;
+                    clueVM.storeForm = clueVM.searchForm;
+
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
+              },
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
               },
               //选择行
               handleSelectionChange(val) {
@@ -647,7 +695,18 @@ var clueVM = new Vue({
             	   
                  },// method end
                  showCustomerDetail(row, column){ // 客户详情
-                	 window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+                    // 存储选中信息--start
+                    var clueId=row.clueId;  
+                    setSessionStore("busAllocationManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId,
+                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    }
+                    setSessionStore("busAllocationManagerOtherVal", otherVal);
+                    // 存储选中信息--end  
+                    // window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+                    window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+clueId;
                  },
               //根据电销组查询电销总监
               getSaleList() {
@@ -693,6 +752,17 @@ var clueVM = new Vue({
         },
         created(){
             console.info("create method");
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("busAllocationManagerStoreForm");
+                var otherVal = getSessionStore("busAllocationManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.searchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
