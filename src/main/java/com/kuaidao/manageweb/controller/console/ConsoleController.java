@@ -157,7 +157,7 @@ public class ConsoleController {
         	IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getId());
             JSONResult<DashboardTeleSaleDto> jsonResult = dashboardTeleSaleFeignClient
-                .findDataByUserId(idEntityLong);
+                .findDashboardTeleSaleByUserId(idEntityLong);
             DashboardTeleSaleDto dashboardTeleSaleDto = new DashboardTeleSaleDto();
             if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
             	dashboardTeleSaleDto = jsonResult.getData();
