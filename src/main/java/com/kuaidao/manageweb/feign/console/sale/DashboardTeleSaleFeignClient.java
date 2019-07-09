@@ -24,8 +24,8 @@ public interface DashboardTeleSaleFeignClient {
     /**
      * 看板数据查询-电销顾问
      */
-	@PostMapping("/findDataByUserId")
-    public JSONResult<DashboardTeleSaleDto> findDataByUserId(IdEntityLong idEntityLong);
+	@PostMapping("/findDashboardTeleSaleByUserId")
+    public JSONResult<DashboardTeleSaleDto> findDashboardTeleSaleByUserId(IdEntityLong idEntityLong);
 
 
     @Component
@@ -40,7 +40,7 @@ public interface DashboardTeleSaleFeignClient {
         }
 
         @Override
-        public JSONResult findDataByUserId(IdEntityLong idEntityLong) {
+        public JSONResult findDashboardTeleSaleByUserId(IdEntityLong idEntityLong) {
             return fallBackError("电销顾问："+idEntityLong.getId());
         }
 
