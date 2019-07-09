@@ -27,7 +27,8 @@ public interface DashboardSaleFeignClient {
     /**
      * 看板数据查询-商务经理
      */
-    public JSONResult<BusSaleDTO> findDataByUserId(IdEntityLong idEntityLong);
+    @PostMapping("/findDataByUserId")
+    public JSONResult<BusSaleDTO> findDataByUserId(@RequestBody IdEntityLong idEntityLong);
 
 
     @Component
