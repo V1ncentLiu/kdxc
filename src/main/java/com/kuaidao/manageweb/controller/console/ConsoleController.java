@@ -1,8 +1,5 @@
 package com.kuaidao.manageweb.controller.console;
 
-import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.dashboard.dto.bussale.BusSaleDTO;
-import com.kuaidao.manageweb.feign.console.sale.DashboardSaleFeignClient;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,10 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 
-import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
-import com.kuaidao.manageweb.feign.busgroup.BusGroupDashboardFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
@@ -43,6 +40,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -50,14 +48,20 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
+import com.kuaidao.dashboard.dto.bussale.BusSaleDTO;
+import com.kuaidao.dashboard.dto.tele.DashboardTeleSaleDto;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
+import com.kuaidao.manageweb.feign.busgroup.BusGroupDashboardFeignClient;
 import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.PendingVisitFeignClient;
+import com.kuaidao.manageweb.feign.console.sale.DashboardSaleFeignClient;
+import com.kuaidao.manageweb.feign.console.sale.DashboardTeleSaleFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -133,7 +137,8 @@ public class ConsoleController {
     private BusGroupDashboardFeignClient busGroupDashboardFeignClient;
     @Autowired
     DashboardSaleFeignClient dashboardSaleFeignClient;
-
+    @Autowired
+    DashboardTeleSaleFeignClient dashboardTeleSaleFeignClient;
     /***
      * 跳转控制台页面
      *
@@ -149,6 +154,15 @@ public class ConsoleController {
         String path = "";
 
         if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+        	IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(curLoginUser.getId());
+            JSONResult<DashboardTeleSaleDto> jsonResult = dashboardTeleSaleFeignClient
+                .findDataByUserId(idEntityLong);
+            DashboardTeleSaleDto dashboardTeleSaleDto = new DashboardTeleSaleDto();
+            if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
+            	dashboardTeleSaleDto = jsonResult.getData();
+            }
+            request.setAttribute("dashboardTelSale", dashboardTeleSaleDto);
             // 电销顾问
             path = "console/consoleTelemarketing";
         } else if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
