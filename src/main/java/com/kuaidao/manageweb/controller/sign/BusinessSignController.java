@@ -384,6 +384,15 @@ public class BusinessSignController {
     signDTO.setRebutReason(null);
     signDTO.setRebutTime(null);
     signDTO.setAmountReceived(null);
+    if(StringUtils.isBlank(signDTO.getSignProvince())){
+      signDTO.setSignProvince("");
+    }
+    if(StringUtils.isBlank(signDTO.getSignCity())){
+      signDTO.setSignCity("");
+    }
+    if(StringUtils.isBlank(signDTO.getSignDictrict())){
+      signDTO.setSignDictrict("");
+    }
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
 

@@ -470,6 +470,9 @@
             
         },
         created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            
         	this.getQuery();
         },
         mounted(){

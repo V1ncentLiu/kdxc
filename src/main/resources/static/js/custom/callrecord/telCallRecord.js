@@ -54,7 +54,7 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        if(row.clueId != null &&((roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8)){
+        if(row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) )){
           text ="***"
         }else{
           text = row.customerPhone;
@@ -326,8 +326,10 @@ var myCallRecordVm = new Vue({
                 return;
             }
             var param ={};
-            param.id = selectedValue;
-            axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+          param.orgId = selectedValue;
+          param.roleCode="DXCYGW";
+          param.statusList =[1,3];
+            axios.post('/user/userManager/listByOrgAndRole', param)
             .then(function (response) {
                   var result =  response.data;
                   var table=result.data;

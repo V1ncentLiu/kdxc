@@ -590,7 +590,6 @@ var wdrVM = new Vue({
                 }
             },
             handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
                 this.multipleSelection = val;
             }, 
             submitForm(formName){//表格搜索
@@ -942,7 +941,7 @@ var wdrVM = new Vue({
             param.list = wdrVM.exportdataTable;
             axios.post('/exetend/agendaTaskManager/exportFaultClue',param,{responseType:'blob'})
             .then(function (response) {
-              console.log(response)
+            //   console.log(response)
               var data =  response.data;
               var fileName = response.headers.filename;
               saveAs(data,decodeURI(fileName));
@@ -974,7 +973,7 @@ var wdrVM = new Vue({
 	              }
 
 	              axios.post('/exetend/agendaTaskManager/importInvitearea',param).then(function (response) {
-	                console.log(response);
+	                // console.log(response);
 	                if(null !==response && response.data !=null && response.data.code=='0'){
 	                  if(response.data.data !=null  && response.data.data.length !=0){
 	                    wdrVM.confirmBtnDisabled = false;
@@ -1028,7 +1027,6 @@ var wdrVM = new Vue({
 
         },
         created(){
-            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = this.getSessionStore("waitDistributStoreForm");
@@ -1040,6 +1038,8 @@ var wdrVM = new Vue({
                     this.scrollTop = otherVal.scrollTop;
                 }
             };
+			var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+			if(localVal){this.pager.pageSize = localVal;}
             this.initColumn();
         	this.initTableData();        	
             //初始化媒介

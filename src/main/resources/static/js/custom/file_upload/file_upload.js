@@ -168,10 +168,11 @@ var uploader = new plupload.Uploader({
     filters: {
         mime_types : [ //只允许上传图片和zip,rar文件
             // { title : "Image files", extensions : "jpg,gif,png,bmp" },
-            { title : "Image files", extensions : "jpg,png,mp3,mp4" }
+            // { title : "Image files", extensions : "jpg,png,mp3,mp4,WAV,WMA,3GPP,M4A,APE,MIDI,AMR" }
+            { title : "Image files", extensions : "jpg,png,jpeg,gif,bmp,mp3,mp4,wav,wma,3gpp,m4a,ape,midi,amr" }
             // { title : "Zip files", extensions : "zip,rar" }
         ],
-        max_file_size : '10mb', //最大只能上传10mb的文件
+        max_file_size : '500mb', //最大只能上传500mb的文件
         prevent_duplicates : false //不允许选取重复文件
     },
 

@@ -603,7 +603,6 @@ function handleState(token) {
                     typeButton.transfer();
                     $("#phoneCallText").show().attr("disabled", false);*/
                     calling(3,token)
-                    console.log(token)
                     break;
                 case 'hold' : //保持开始
                     /*stateShow = '保持';

@@ -523,18 +523,23 @@
             	  this.openStaffNumTable(this.selectedOrgId); 
               },
               closeStaffNumDialog(){//
-            	this.$refs['staffNumSearch'].resetFields();
-            	this.selectedOrgId='';//把当前的组织ID设为''
-            	this.pagerStaffNum.pageSize = 20;
+                this.$refs['staffNumSearch'].resetFields();
+                this.selectedOrgId='';//把当前的组织ID设为''
+                var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+                if(localVal){
+                  this.pagerStaffNum.pageSize = localVal;
+                }else{
+                  this.pagerStaffNum.pageSize = 20;
+                }
                 this.pagerStaffNum.currentPage = 1;
               }
-              
-              
         },
        mounted(){
            document.getElementById('organizationManage').style.display = 'block';
        },
         created(){
+          var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+          if(localVal){this.pager.pageSize = localVal;this.pagerStaffNum.pageSize = localVal;}
         	this.clickOrgNode(this.dataTree[0],null,null);
         	
         }//created方法 结束

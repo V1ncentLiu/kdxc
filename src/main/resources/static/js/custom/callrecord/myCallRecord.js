@@ -44,7 +44,7 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        if(row.clueId != null &&((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8)){
+        if(row.clueId != null &&( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")))){
           text ="***"
         }else{
           text = row.customerPhone;
@@ -306,7 +306,10 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-      this.initCallRecordData();
+        // 取页数存储
+        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+        if(localVal){this.pager.pageSize = localVal;}
+        this.initCallRecordData();
    },
    mounted(){
      	document.getElementById('myCallRecordVm').style.display = 'block';

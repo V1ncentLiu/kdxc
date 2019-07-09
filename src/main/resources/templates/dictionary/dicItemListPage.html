@@ -359,8 +359,8 @@
                 console.info(param);
                 axios.post('/dictionary/DictionaryItem/queryDictionaryItems', param)
                     .then(function (response) {
-                        var data = response.data
-                        paginationVm.tableData3 = data.data.data;
+                        var data = response.data.data;
+                        paginationVm.tableData3 = data.data;
                         paginationVm.total = data.total;
                         paginationVm.currentPage = data.currentPage;
                         paginationVm.pageNum = 1
@@ -403,6 +403,7 @@
                 //下拉框  每页 10,20条切换 调用
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
+                localStorage.setItem('allChangePageSize', val);
                 this.initTableData(1);
             },
             handleCurrentChange(val) {
@@ -436,8 +437,9 @@
 
         created() {
             console.info("create method");
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pageSize = localVal;}
             this.initTableData(1);
-
         },
         mounted() {
             console.info("mounted method");
