@@ -15,11 +15,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
@@ -62,6 +67,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -75,7 +81,7 @@ import freemarker.template.Template;
 @RequestMapping("/financing/balanceaccount")
 @Controller
 public class BalanceAccountController {
-
+	private static Logger logger = LoggerFactory.getLogger(BalanceAccountController.class);
     @Autowired
     private ReconciliationConfirmFeignClient reconciliationConfirmFeignClient;
     @Autowired
@@ -108,37 +114,54 @@ public class BalanceAccountController {
     @RequiresPermissions("financing:balanceaccountManager:view")
     public String balanceAccountPage(HttpServletRequest request) {
         UserInfoDTO user = getUser();
+        Date busAreaStartdate = new Date();
         // 查询所有商务大区
         List<OrganizationRespDTO> busAreaList =
                 getOrgList(null, OrgTypeConstant.SWDQ, user.getBusinessLine());
         request.setAttribute("busAreaList", busAreaList);
+        Date busendStartdate = new Date();
+        logger.info("所有商务大区查询时间"+(busendStartdate.getTime()-busAreaStartdate.getTime()));
         // 查询所有商务组
         List<OrganizationRespDTO> busGroupList =
                 getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
         request.setAttribute("busGroupList", busGroupList);
+        Date busGrouptdate = new Date();
+        logger.info("所有商务组查询时间"+(busGrouptdate.getTime()-busendStartdate.getTime()));
         // 查询所有电销事业部
         List<OrganizationRespDTO> teleDeptList =
                 getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
         request.setAttribute("teleDeptList", teleDeptList);
+        Date teleDeptdate = new Date();
+        logger.info("所有电销事业部查询时间"+(teleDeptdate.getTime()-busGrouptdate.getTime()));
         // 查询所有电销组
         List<OrganizationRespDTO> teleGroupList =
                 getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
         request.setAttribute("teleGroupList", teleGroupList);
+        Date teleGroupdate = new Date();
+        logger.info("所有电销组查询时间"+(teleGroupdate.getTime()-teleDeptdate.getTime()));
         // 查询所有商务经理
         List<UserInfoDTO> busSaleList =
                 getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
         request.setAttribute("busSaleList", busSaleList);
+        Date busSaledate = new Date();
+        logger.info("所有商务经理查询时间"+(busSaledate.getTime()-teleGroupdate.getTime()));
         // 查询所有电销创业顾问
         List<UserInfoDTO> teleSaleList =
                 getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
         request.setAttribute("teleSaleList", teleSaleList);
+        Date teleSaledate = new Date();
+        logger.info("所有电销创业顾问查询时间"+(teleSaledate.getTime()-busSaledate.getTime()));
 
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
+        Date allProjectdate = new Date();
+        logger.info("查询所有项目查询时间"+(allProjectdate.getTime()-teleSaledate.getTime()));
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
         request.setAttribute("provinceList", getproviceList.getData());
+        Date getprovicetdate = new Date();
+        logger.info("查询所有省查询时间"+(getprovicetdate.getTime()-allProjectdate.getTime()));
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("financing:balanceaccountManager");
@@ -146,7 +169,8 @@ public class BalanceAccountController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
-
+        Date queryFieldByRoleAndMenuReqdate = new Date();
+        logger.info("角色查询页面字段查询时间"+(queryFieldByRoleAndMenuReqdate.getTime()-getprovicetdate.getTime()));
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
@@ -155,10 +179,13 @@ public class BalanceAccountController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        Date queryFieldByUserAndMenuReqdate = new Date();
+        logger.info("用户查询页面字段查询时间"+(queryFieldByUserAndMenuReqdate.getTime()-queryFieldByRoleAndMenuReqdate.getTime()));
         // 查询签约店型集合
         request.setAttribute("vistitStoreTypeList",
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        logger.info("财务对账申请总共时间"+(queryFieldByUserAndMenuReqdate.getTime()-busAreaStartdate.getTime()));
         return "financing/balanceAccountPage";
     }
 
@@ -181,8 +208,10 @@ public class BalanceAccountController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         pageParam.setBusinessLine(user.getBusinessLine());
+        Date date = new Date();
         JSONResult<PageBean<ReconciliationConfirmDTO>> list =
                 reconciliationConfirmFeignClient.applyList(pageParam);
+        logger.info("财务对账列表总共时间"+(new Date().getTime()-date.getTime()));
         return list;
     }
 
