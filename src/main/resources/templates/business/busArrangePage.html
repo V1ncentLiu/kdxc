@@ -15,9 +15,9 @@
     </el-breadcrumb>
     
     <el-row class="marginB20">
-    		<!--<shiro:hasPermission name="business:busAllocationManager:allocation">-->
-		        <el-button type="success" @click="">导出</el-button>
-		    <!--</shiro:hasPermission>-->
+    		<shiro:hasPermission name="business:busArrangePage:export">
+		        <el-button type="success" @click="exportFun">导出排班表</el-button>
+		    </shiro:hasPermission>
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -129,6 +129,24 @@ var clueVM = new Vue({
             formLabelWidth1: '120px',
         },
         methods: {
+          exportFun(){
+            var param = this.searchForm;
+            param.pageNum='';
+            param.pageSize='';
+            axios.post('/business/arrange/exportBusArrange',param,{responseType:'blob'})
+            .then(function (response) {
+              console.log(response)
+              var data =  response.data;
+              var fileName = response.headers.filename;
+              saveAs(data,decodeURI(fileName));
+            })
+            .catch(function (error) {
+              console.log(error);
+            }).then(function(){
+              clueVM.loading=false;
+            });
+
+          },
           clickRow(row){//点击单行选中复选框
                 this.$refs.multipleTable.toggleRowSelection(row)
           },

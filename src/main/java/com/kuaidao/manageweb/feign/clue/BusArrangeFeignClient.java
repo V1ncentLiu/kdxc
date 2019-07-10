@@ -5,6 +5,7 @@ import com.kuaidao.aggregation.dto.clue.BusArrangeParam;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -27,6 +28,9 @@ public interface BusArrangeFeignClient {
 	 */
 	@PostMapping("/arrangeList")
 	public JSONResult<PageBean<BusArrangeDTO>> arrangeList(@RequestBody BusArrangeParam param);
+
+	@PostMapping("/exportBusArrangeList")
+	public JSONResult<List<BusArrangeDTO>> exportBusArrangeList(@RequestBody BusArrangeParam param);
 	@Component
 	static class HystrixClientFallback implements BusArrangeFeignClient {
 
@@ -41,7 +45,10 @@ public interface BusArrangeFeignClient {
 		public JSONResult<PageBean<BusArrangeDTO>> arrangeList(@RequestBody BusArrangeParam param) {
 			return fallBackError("查询商务排班表集合");
 		}
-
+		@Override
+		public JSONResult<List<BusArrangeDTO>> exportBusArrangeList(@RequestBody BusArrangeParam param) {
+			return fallBackError("导出商务排班表集合");
+		}
 	}
 
 
