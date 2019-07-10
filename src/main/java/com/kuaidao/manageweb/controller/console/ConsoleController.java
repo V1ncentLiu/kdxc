@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
+import com.kuaidao.manageweb.feign.dashboard.DashboardTeleGroupFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +141,8 @@ public class ConsoleController {
     DashboardSaleFeignClient dashboardSaleFeignClient;
     @Autowired
     DashboardTeleSaleFeignClient dashboardTeleSaleFeignClient;
+    @Autowired
+    private DashboardTeleGroupFeignClient dashboardTeleGroupFeignClient;
     /***
      * 跳转控制台页面
      *
@@ -176,7 +179,7 @@ public class ConsoleController {
             request.setAttribute("saleList", userList);
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getId());
-            JSONResult<DashboardTeleGroupDto> dashboard = dashboardSaleFeignClient.findTeleGroupDataByUserId(idEntityLong);
+            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByUserId(idEntityLong);
             DashboardTeleGroupDto data = dashboard.getData();
             if (data == null) {
                 data = new DashboardTeleGroupDto();
