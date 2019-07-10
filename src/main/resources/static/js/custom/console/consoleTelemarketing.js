@@ -106,6 +106,18 @@ var mainDivVM = new Vue({
         showClueDetailInfo (row, column) {
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
         },
+      customerEidt(row){
+        var clueId=row.clueId;
+        //客户维护界面
+        this.setSessionStore("storeForm", this.storeForm);
+        var otherVal = {
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        this.setSessionStore("otherVal", otherVal);
+        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+      },
         // 快速领取新资源
         initList(){
             var param = {};
@@ -249,9 +261,9 @@ var mainDivVM = new Vue({
             });
         },
         // 今日待跟进客户资源
-        customerEidt(clueId,phone){
+        customerEidt(row){
             //客户维护界面   
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId;
         },
         // 今日待跟进客户资源
         initTableData(){
