@@ -21,6 +21,9 @@
     		<shiro:hasPermission name="business:busAllocationManager:allocation">
 		        <el-button type="success" @click="toTransferClue">外调经理</el-button>
 		    </shiro:hasPermission>
+		    <shiro:hasPermission name="business:busAllocationManager:cancel">
+		      <el-button type="info" @click="openCancelForm">标记取消</el-button>
+		    </shiro:hasPermission>
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -196,6 +199,22 @@
             </div>
         </template>
     </el-dialog>
+    
+     <!-- 标记取消-->
+	  <el-dialog title="取消原因"    :visible.sync="cancelFormVisible" width="540px">
+	    <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
+	      <el-row>
+	        <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
+	        <el-form-item label="取消原因：" :label-width="formLabelWidth1" prop="cancelReason">
+	          <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
+	        </el-form-item>
+	      </el-row>
+	    </el-form>
+	    <div slot="footer" class="dialog-footer">
+	      <el-button type="primary" @click="submitCancelForm('cancelDigForm')">提 交</el-button>
+	      <el-button @click="cancelFormVisible= false" >取 消</el-button>
+	    </div>
+	  </el-dialog>
     <!-- dialog -->
      
 </div>
@@ -218,6 +237,7 @@ var clueVM = new Vue({
         el: '#clueManage',
         data: {
             paginationShow: false,
+            cancelFormVisible:false,
             isShow:false,
     		searchForm: {
         		cusName: '',
@@ -243,6 +263,9 @@ var clueVM = new Vue({
             	remark:'',
             	message:''
               },
+              cancelDigForm:{
+                  cancelReason:'',
+                },
             dataTable:[],
             teleGorupOptions:saleGroupList,
             teleSaleOptions:[],
@@ -278,6 +301,11 @@ var clueVM = new Vue({
                     { required: true, message: '请选择商务经理', trigger: 'change' }
                 ]
               },
+              cancelRules:{
+                  cancelReason: [
+                    { required: true, message: '请填写取消原因', trigger: 'blur' }
+                  ]
+                },
             multipleSelection:[],
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
@@ -749,6 +777,78 @@ var clueVM = new Vue({
                     this.isShow=true
                 }          
               },
+            //打开取消邀约对话框
+              openCancelForm() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                  this.$message({
+                    message: '请选择邀约数据进行取消',
+                    type: 'warning'
+                  });
+                  return;
+                }
+                if(this.$refs['cancelDigForm']) {
+                  this.$refs['cancelDigForm'].resetFields();
+                }
+                this.cancelDigForm.cancelReason="";
+                this.cancelFormVisible=true;
+              },
+              //取消邀约数据
+              submitCancelForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                    var rows = this.multipleSelection;
+                    if(rows.length==0){
+                      this.$message({
+                        message: '请选择邀约数据进行取消',
+                        type: 'warning'
+                      });
+                      return;
+                    }
+                    var rowIds = [];
+                    for(var i=0;i<rows.length;i++){
+                      var curRow = rows[i];
+                      rowIds.push(curRow.id);
+                    }
+                    var reason= clueVM.cancelDigForm.cancelReason;
+                    this.$confirm('确定要取消选中的邀约来访吗？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                    }).then(() => {
+                      //删除
+                      var param  = {cancelIdList:rowIds,cancelReason:reason};
+                      axios.post('/business/busAllocation/cancelAppiontment',param)
+                      .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                          clueVM.$message({message:'取消成功',type:'success',duration:1000,onClose:function(){
+                              clueVM.cancelFormVisible=false;
+                              clueVM.searchTable();
+                            }});
+                        }else{
+                          clueVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                          });
+                        }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      })
+                      .then(function () {
+
+                      });
+                    }).catch(() => {
+
+                    });
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+
+              },//end
         },
         created(){
             console.info("create method");
