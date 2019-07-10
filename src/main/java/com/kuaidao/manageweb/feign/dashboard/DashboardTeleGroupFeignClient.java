@@ -42,7 +42,7 @@ public interface DashboardTeleGroupFeignClient {
 
         @Override
         public JSONResult findTeleGroupDataByUserId(IdEntityLong idEntityLong) {
-            return fallBackError("电销总监：" + idEntityLong.getId());
+            return fallBackError("电销总监：" + idEntityLong.getId()+"获取看板");
         }
     }
 
