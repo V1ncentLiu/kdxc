@@ -44,7 +44,7 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        if(row.clueId != null &&((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8)){
+        if(row.clueId != null &&( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")))){
           text ="***"
         }else{
           text = row.customerPhone;
