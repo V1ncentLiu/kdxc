@@ -240,6 +240,11 @@ public class BusArrangeController {
     outputStream.close();
 
   }
+
+  /**
+   * 商务排班表表头
+   * @return
+   */
   private List<Object> getHeadTitleList() {
     List<Object> headTitleList = new ArrayList<>();
     headTitleList.add("序号");
@@ -260,6 +265,12 @@ public class BusArrangeController {
     headTitleList.add("备注");
     return headTitleList;
   }
+
+  /**
+   * 格式化时间
+   * @param date
+   * @return
+   */
   private String getTimeStr(Date date) {
     if (date == null) {
       return "";
