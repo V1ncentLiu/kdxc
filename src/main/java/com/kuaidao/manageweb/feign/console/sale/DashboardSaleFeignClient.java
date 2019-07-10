@@ -31,11 +31,6 @@ public interface DashboardSaleFeignClient {
     @PostMapping("/findDataByUserId")
     public JSONResult<BusSaleDTO> findDataByUserId(@RequestBody IdEntityLong idEntityLong);
 
-    /**
-     * 看板数据查询-电销总监
-     */
-    @PostMapping("/findTeleGroupDataByUserId")
-    public JSONResult<DashboardTeleGroupDto> findTeleGroupDataByUserId(@RequestBody IdEntityLong idEntityLong);
 
     @Component
     class HystrixClientFallback implements DashboardSaleFeignClient {
@@ -53,10 +48,6 @@ public interface DashboardSaleFeignClient {
             return fallBackError("商务经理：" + idEntityLong.getId());
         }
 
-        @Override
-        public JSONResult findTeleGroupDataByUserId(IdEntityLong idEntityLong) {
-            return fallBackError("电销总监：" + idEntityLong.getId());
-        }
     }
 
 

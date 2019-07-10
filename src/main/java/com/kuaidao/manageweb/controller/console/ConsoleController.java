@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,7 +174,14 @@ public class ConsoleController {
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(curLoginUser.getId());
+            JSONResult<DashboardTeleGroupDto> dashboard = dashboardSaleFeignClient.findTeleGroupDataByUserId(idEntityLong);
+            DashboardTeleGroupDto data = dashboard.getData();
+            if (data == null) {
+                data = new DashboardTeleGroupDto();
+            }
+            request.setAttribute("dashboardTeleGroup", data);
             // 查询字典类别集合
             request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
             // 查询字典类别集合
