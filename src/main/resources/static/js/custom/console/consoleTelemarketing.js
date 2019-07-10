@@ -356,12 +356,12 @@ var mainDivVM = new Vue({
                 }                
             }); 
             // 今日领取资源数
-            param={};
-            axios.post('/console/console/countReceiveClueNum',param).then(function (response) {
-                console.log('今日领取资源数')
-                console.log(response.data)
-                mainDivVM.receiveTodayNum=response.data.data;
-            });
+//            param={};
+//            axios.post('/console/console/countReceiveClueNum',param).then(function (response) {
+//                console.log('今日领取资源数')
+//                console.log(response.data)
+//                mainDivVM.receiveTodayNum=response.data.data;
+//            });
 //            // 今日分配资源数
 //            param={};
 //            axios.post('/console/console/countAssignClueNum',param).then(function (response) {
