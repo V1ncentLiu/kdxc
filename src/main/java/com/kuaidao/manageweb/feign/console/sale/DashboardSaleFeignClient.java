@@ -6,6 +6,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.dashboard.dto.bussale.BusSaleDTO;
 import java.lang.reflect.InvocationTargetException;
+import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -30,6 +31,11 @@ public interface DashboardSaleFeignClient {
     @PostMapping("/findDataByUserId")
     public JSONResult<BusSaleDTO> findDataByUserId(@RequestBody IdEntityLong idEntityLong);
 
+    /**
+     * 看板数据查询-电销总监
+     */
+    @PostMapping("/findTeleGroupDataByUserId")
+    public JSONResult<DashboardTeleGroupDto> findTeleGroupDataByUserId(@RequestBody IdEntityLong idEntityLong);
 
     @Component
     class HystrixClientFallback implements DashboardSaleFeignClient {
@@ -44,9 +50,13 @@ public interface DashboardSaleFeignClient {
 
         @Override
         public JSONResult findDataByUserId(IdEntityLong idEntityLong) {
-            return fallBackError("商务经理："+idEntityLong.getId());
+            return fallBackError("商务经理：" + idEntityLong.getId());
         }
 
+        @Override
+        public JSONResult findTeleGroupDataByUserId(IdEntityLong idEntityLong) {
+            return fallBackError("电销总监：" + idEntityLong.getId());
+        }
     }
 
 
