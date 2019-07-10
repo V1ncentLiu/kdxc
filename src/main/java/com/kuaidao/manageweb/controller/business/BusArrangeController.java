@@ -10,6 +10,11 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.BusArrangeFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -23,10 +28,17 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -132,6 +144,159 @@ public class BusArrangeController {
     }
     JSONResult<PageBean<BusArrangeDTO>> busArrangeList= busArrangeFeignClient.arrangeList(pageParam);
     return busArrangeList;
+  }
+  /**
+   * 导出
+   *
+   * @param reqDTO
+   * @return
+   */
+  @RequiresPermissions("business:busArrangePage:export")
+  @PostMapping("/exportBusArrange")
+  @LogRecord(description = "商务排班表导出", operationType = OperationType.EXPORT,
+      menuName = MenuEnum.TRUCKING_ORDER_PAGE)
+  public void exportBusArrange(@RequestBody BusArrangeParam reqDTO,
+      HttpServletResponse response) throws Exception {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    Long orgId = curLoginUser.getOrgId();
+    List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+    if (roleList != null && roleList.size() != 0) {
+      RoleInfoDTO roleInfoDTO = roleList.get(0);
+      String roleCode = roleInfoDTO.getRoleCode();
+      if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(orgId);
+        req.setRoleCode(RoleCodeEnum.SWZJ.name());
+        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+          logger.error(
+              "商务排班表-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+              req, userJr);
+        }
+        List<UserInfoDTO> userInfoDTOList = userJr.getData();
+        if (userInfoDTOList != null && userInfoDTOList.size() != 0) {
+          List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId)
+              .collect(Collectors.toList());
+          reqDTO.setBusDirectorIdList(idList);
+        }
+
+      } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {// 商务总监
+        List<Long> idList = new ArrayList<>();
+        idList.add(curLoginUser.getId());
+        reqDTO.setBusDirectorIdList(idList);
+      }
+    }
+
+    JSONResult<List<BusArrangeDTO>> busArrangeListJson =
+        busArrangeFeignClient.exportBusArrangeList(reqDTO);
+    List<List<Object>> dataList = new ArrayList<List<Object>>();
+    dataList.add(getHeadTitleList());
+
+    if (JSONResult.SUCCESS.equals(busArrangeListJson.getCode())
+        && busArrangeListJson.getData() != null
+        && busArrangeListJson.getData().size() != 0) {
+      List<ProjectInfoDTO> allProject= getAllProjectList();
+      Map<Long,List<ProjectInfoDTO>> proMap = allProject.parallelStream().collect(Collectors.groupingBy(ProjectInfoDTO::getId));
+      List<BusArrangeDTO> arrangeList = busArrangeListJson.getData();
+      int size = arrangeList.size();
+      for (int i = 0; i < size; i++) {
+        BusArrangeDTO busArrangeDTO = arrangeList.get(i);
+        List<Object> curList = new ArrayList<>();
+        curList.add(i + 1);
+        curList.add(getTimeStr(busArrangeDTO.getReserveTime()));
+        curList.add(busArrangeDTO.getCusName());
+        curList.add(busArrangeDTO.getSignProvince());
+        curList.add(busArrangeDTO.getSignCity());
+        curList.add(busArrangeDTO.getSignDictrict());
+        curList.add(busArrangeDTO.getTeleSaleName());
+        curList.add(busArrangeDTO.getSignProjectName());
+        curList.add(busArrangeDTO.getCompanyName());
+        curList.add(busArrangeDTO.getTeleGorupName());
+        if(StringUtils.isNotBlank(busArrangeDTO.getTeleProjectId())){
+          curList.add(transFormTeleProjectName(proMap,busArrangeDTO.getTeleProjectId()));
+        }else {
+          curList.add("");
+        }
+        //curList.add(busArrangeDTO.getTeleProjectName());
+        curList.add(busArrangeDTO.getTeleDirectorName());
+        curList.add(busArrangeDTO.getBusSaleName());
+        dataList.add(curList);
+      }
+
+    } else {
+      logger.error("export bussiness_arrange param{{}},res{{}}", reqDTO, busArrangeListJson);
+    }
+
+    XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+
+
+    String name = "商务排班表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+    response.addHeader("Content-Disposition",
+        "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+    response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+    response.setContentType("application/octet-stream");
+    ServletOutputStream outputStream = response.getOutputStream();
+    wbWorkbook.write(outputStream);
+    outputStream.close();
+
+  }
+  private List<Object> getHeadTitleList() {
+    List<Object> headTitleList = new ArrayList<>();
+    headTitleList.add("序号");
+    headTitleList.add("来访日期");
+    headTitleList.add("客户姓名");
+    headTitleList.add("签约省份");
+    headTitleList.add("签约城市");
+    headTitleList.add("签约区/县");
+    headTitleList.add("电销顾问");
+    headTitleList.add("签约项目");
+    headTitleList.add("所属公司");
+    headTitleList.add("电销组");
+    headTitleList.add("电销项目");
+    headTitleList.add("电销组总监");
+    headTitleList.add("商务经理");
+    headTitleList.add("是否到访");
+    headTitleList.add("洽谈结果");
+    headTitleList.add("备注");
+    return headTitleList;
+  }
+  private String getTimeStr(Date date) {
+    if (date == null) {
+      return "";
+    }
+    return DateUtil.convert2String(date, DateUtil.ymdhms);
+  }
+
+  /**
+   * 获取电销项目项目名称
+   * @param proMap
+   * @param teleProjectIds
+   * @return
+   */
+  private String transFormTeleProjectName(Map<Long,List<ProjectInfoDTO>> proMap,String teleProjectIds){
+    String[] idArr = teleProjectIds.split(",",-1);
+    StringBuilder projectName = new StringBuilder();
+    String name = "";
+    for(int i =0 ;i < idArr.length; i++){
+      if(proMap.containsKey(Long.valueOf(idArr[i]))){
+        projectName.append(proMap.get(Long.valueOf(idArr[i])).get(0).getProjectName()+",");
+      }
+    }
+    name = projectName.toString();
+    if(name.length() >0){
+      return name.substring(0,name.length()-1);
+    }else {
+      return "";
+    }
+
+  }
+  /**
+   * 获取所有项目
+   * @return
+   */
+  private List<ProjectInfoDTO> getAllProjectList() {
+    JSONResult<List<ProjectInfoDTO>> projectInfoJr = projectInfoFeignClient.allProject();
+    return projectInfoJr.getData();
   }
   /**
    * 根据角色获取对应角色下的商务组
