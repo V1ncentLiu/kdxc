@@ -93,6 +93,7 @@ public class ClueReceiveRecordsController {
                         }
                         if (!RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
                             userRoleInfo.setRoleCode(RoleCodeEnum.DXZJ.name());
+                            userRoleInfo.setOrgId(user.getOrgId());
                             JSONResult<List<UserInfoDTO>> ceoUserInfoJsons =
                                     userInfoFeignClient.listByOrgAndRole(userRoleInfo);
                             if (ceoUserInfoJsons.getCode().equals(JSONResult.SUCCESS)
