@@ -2,6 +2,7 @@ var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
         btnDisabled: false,
+        cancelFormVisible:false,
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -37,6 +38,9 @@ var mainDivVM = new Vue({
             remark:'',
             message:''
         },
+        cancelDigForm:{
+            cancelReason:'',
+          },
         allocationVisible: false,
         formLabelWidth: '130px',
         allocationFormRules: {
@@ -44,6 +48,11 @@ var mainDivVM = new Vue({
                 { required: true, message: '请选择商务经理', trigger: 'change' }
             ]
         },
+        cancelRules:{
+            cancelReason: [
+              { required: true, message: '请填写取消原因', trigger: 'blur' }
+            ]
+          },
         saleOptions:busSaleList,
         // 待审签约记录
         showbutton:false,
@@ -355,6 +364,78 @@ var mainDivVM = new Vue({
         allocationCloseDialog(){//分发资源关闭
             this.$refs['allocationForm'].resetFields();
         },
+        //打开取消邀约对话框
+        openCancelForm() {
+          var rows = this.multipleSelection;
+          if(rows.length==0){
+            this.$message({
+              message: '请选择邀约数据进行取消',
+              type: 'warning'
+            });
+            return;
+          }
+          if(this.$refs['cancelDigForm']) {
+            this.$refs['cancelDigForm'].resetFields();
+          }
+          this.cancelDigForm.cancelReason="";
+          this.cancelFormVisible=true;
+        },
+        //取消邀约数据
+        submitCancelForm(formName) {
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              var rows = this.multipleSelection;
+              if(rows.length==0){
+                this.$message({
+                  message: '请选择邀约数据进行取消',
+                  type: 'warning'
+                });
+                return;
+              }
+              var rowIds = [];
+              for(var i=0;i<rows.length;i++){
+                var curRow = rows[i];
+                rowIds.push(curRow.id);
+              }
+              var reason= mainDivVM.cancelDigForm.cancelReason;
+              this.$confirm('确定要取消选中的邀约来访吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                //删除
+                var param  = {cancelIdList:rowIds,cancelReason:reason};
+                axios.post('/business/busAllocation/cancelAppiontment',param)
+                .then(function (response) {
+                  var data =  response.data;
+                  if(data.code=='0'){
+                    mainDivVM.$message({message:'取消成功',type:'success',duration:1000,onClose:function(){
+                        mainDivVM.cancelFormVisible=false;
+                        mainDivVM.searchTable();
+                      }});
+                  }else{
+                    mainDivVM.$message({
+                      message: "接口调用失败",
+                      type: 'error'
+                    });
+                  }
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+
+                });
+              }).catch(() => {
+
+              });
+            } else {
+              console.log('error submit!!');
+              return false;
+            }
+          });
+
+        },//end
         // 待审签约记录
         initSignRecordData(){
             var param = {};

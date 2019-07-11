@@ -89,7 +89,7 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -166,13 +166,14 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                paginationShow: false,
                 dialogFormVisible: false,
                 multipleSelection: [],//选择行
                 pager:{
 	                total: 0,
 	                currentPage: 1,
 	                pageSize: 20,
-	            },
+	              },
                 form: {
                     assignName:'',
                     startTime:'',
@@ -191,7 +192,13 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
                 formLabelWidth: '120px',
                 dataTable: [],
                 dialogTableData:[],
-
+                storeForm: {
+                    assignName:'',
+                    startTime:'',
+                    endTime:'',
+                },
+                storeId: '',
+                scrollTop: 0,
             }        	  
         },
         methods: {
@@ -206,7 +213,7 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
                 console.log(index, row);
             },            
             deleteFun() {
-            	var rows = this.multipleSelection;
+            	  var rows = this.multipleSelection;
                 if(rows.length==0){
                     this.$message({
                        message: '请选择数据进行删除',
@@ -221,15 +228,15 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
                     rowIds.push(curRow.id);
                     rowNames.push("【"+curRow.assignName+"】");
                 }
-             this.$confirm('确定要删除 '+rowNames.join(" ")+'规则？', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning'
-             }).then(() => {
+                this.$confirm('确定要删除 '+rowNames.join(" ")+'规则？', '提示', {
+                   confirmButtonText: '确定',
+                   cancelButtonText: '取消',
+                   type: 'warning'
+                }).then(() => {
              	  //删除
-             	var param  = {idList:rowIds};
-                 axios.post('/trafficAssignRule/rule/delete',param)
-                 .then(function (response) {
+             	  var param  = {idList:rowIds};
+                axios.post('/trafficAssignRule/rule/delete',param)
+                .then(function (response) {
                      var data =  response.data;
                      if(data.code=='0'){
                     	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
@@ -249,9 +256,9 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
                  .then(function () {
                  	
                  });
-             }).catch(() => {
+              }).catch(() => {
                     
-             });
+              });
             },
             //修改状态
             updateStatus(id,status,msg) {
@@ -279,7 +286,7 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
               });
             },
             searchTable() {
-            	var startTime=this.form.startTime;
+            	  var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime && startTime>endTime){
                     this.$message({
@@ -294,19 +301,49 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
                 console.info(param);
                 axios.post('/trafficAssignRule/rule/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      ocmVM.dataTable= table.data;
-                      ocmVM.pager.total =  table.total;
-                      ocmVM.pager.currentPage = table.currentPage;
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    ocmVM.dataTable= table.data;
+                    ocmVM.pager.total =  table.total;
+                    ocmVM.pager.currentPage = table.currentPage;
+
+                    // 取出存储的id
+                    if(!ocmVM.paginationShow){
+                       if(ocmVM.storeId){
+                           ocmVM.$nextTick(function(){
+                              var storage = [];
+                              ocmVM.dataTable.forEach(function(item, index){
+                                  if(item.id === ocmVM.storeId ){
+                                      storage.push(ocmVM.dataTable[index]);
+                                  }
+                              })
+                              ocmVM.toggleSelection(storage);
+                              ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                          })
+                      }
+                    }else{
+                      removeSessionStore ("ruleManagerStoreForm");
+                      removeSessionStore ("ruleManagerOtherVal");
+                    }
+                    ocmVM.paginationShow = true;
+                    ocmVM.storeForm = ocmVM.form;
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
-              },
-              viewFun(){//双击查看详情
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.dataTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.dataTable.clearSelection();
+                }
+            },
+            viewFun(){//双击查看详情
             	  var rows = this.multipleSelection;
                   if(rows.length!=1){
                       this.$message({
@@ -339,7 +376,18 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
                     });
                     return;
                 }else{
-                	document.location.href='/trafficAssignRule/rule/initUpdate?id='+rows[0].id;
+                    // 存储选中信息--start
+                    var clueId=rows[0].id;  
+                    setSessionStore("ruleManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId,
+                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    }
+                    setSessionStore("ruleManagerOtherVal", otherVal);
+                    // 存储选中信息--end
+                    // document.location.href='/trafficAssignRule/rule/initUpdate?id='+rows[0].id;
+                	  document.location.href='/trafficAssignRule/rule/initUpdate?id='+clueId;
                 }                
             },
           //状态转换方法
@@ -397,6 +445,17 @@ var clueTypeList=[[${clueTypeList}]];//资源类型集合
              },
         },
         created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("ruleManagerStoreForm");
+                var otherVal = getSessionStore("ruleManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

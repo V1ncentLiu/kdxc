@@ -224,6 +224,9 @@
             <div class="rightbox f-fr">
                 <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
                 <span class="f-fr" @click="gotoBusAllocation">进入待分配来访客户</span>
+                <shiro:hasPermission name="business:busAllocationManager:cancel">
+	                <el-button type="primary" size="small"  class="f-fr btn" @click="openCancelForm">标记取消</el-button>
+			    </shiro:hasPermission>
                 <el-button type="primary" size="small"  class="f-fr btn" @click="toAllocationClue">快速分配资源</el-button>
             </div>
         </div>
@@ -281,6 +284,21 @@
                 </div>
             </template>
         </el-dialog>
+        <!-- 标记取消-->
+	  <el-dialog title="取消原因"    :visible.sync="cancelFormVisible" width="540px">
+	    <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
+	      <el-row>
+	        <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
+	        <el-form-item label="取消原因：" :label-width="formLabelWidth" prop="cancelReason">
+	          <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
+	        </el-form-item>
+	      </el-row>
+	    </el-form>
+	    <div slot="footer" class="dialog-footer">
+	      <el-button type="primary" @click="submitCancelForm('cancelDigForm')">提 交</el-button>
+	      <el-button @click="cancelFormVisible= false" >取 消</el-button>
+	    </div>
+	  </el-dialog>
     </el-row>
     <!-- 待分配邀约来访记录 end-->
     <!-- 待审批到访 -->
@@ -659,6 +677,7 @@
         </el-dialog>
     </el-row>
     <!-- 待审签约记录 end-->
+    
 </div>
 
 <!-- import common js-->

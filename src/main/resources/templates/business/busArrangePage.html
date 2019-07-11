@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="clueManage" class="clueManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商务排班表</el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB20">
+    		<shiro:hasPermission name="business:busArrangePage:export">
+		        <el-button type="success" @click="exportFun">导出排班表</el-button>
+		    </shiro:hasPermission>
+	  </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+        	  <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm">
+      				  <el-form-item label="电销组:" prop="teleGorupId">
+        				    <el-select v-model="searchForm.teleGorupId" clearable  placeholder="电销组" filterable>
+          				      <el-option
+          					      v-for="item in teleGorupOptions"
+          					      :key="item.id"
+          					      :label="item.name"
+          					      :value="item.id">
+          					    </el-option>
+        				    </el-select>
+      				  </el-form-item>
+              <el-form-item label="商务组:" prop="busGroupId">
+                <el-select v-model="searchForm.busGroupId" clearable @change="currentBusSale"
+                           placeholder="商务组" filterable>
+                  <el-option v-for="item in busGroupOptions" :key="item.id" :label="item.name"
+                             :value="item.id"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="商务经理:" prop="busSaleId">
+                <el-select v-model="searchForm.busSaleId" clearable placeholder="商务经理" filterable>
+                  <el-option v-for="item in busSaleOptions" :key="item.id" :label="item.name"
+                             :value="item.id"></el-option>
+                </el-select>
+              </el-form-item>
+                <el-form-item label="来访时间:">
+                  <el-date-picker  v-model="searchForm.startReserveTime" format="yyyy-MM-dd HH:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                  <el-date-picker  v-model="searchForm.endReserveTime" format="yyyy-MM-dd HH:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                  <el-form-item label="签约项目:">
+                    <el-select filterable v-model="searchForm.signProjectId" placeholder="签约项目" clearable>
+                      <el-option
+                          v-for="item in projectOptions"
+                          :key="item.id"
+                          :label="item.projectName"
+                          :value="item.id">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="客户姓名:" prop="cusName">
+                    <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
+                  </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox"> 
+          			    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div> 
+          	</el-form>
+        </div>
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange" @row-click="clickRow" style="width: 100%"  :data="dataTable" @sort-change="sort_change">
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="reserveTime" label="来访日期" sortable :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名" width="120"></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="签约省份" width="80"></el-table-column>
+                <el-table-column align="center" prop="signCity" label="签约城市" width="80"></el-table-column>
+                <el-table-column align="center" prop="signDictrict" label="签约区/县" width="80"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目" ></el-table-column>
+                <el-table-column align="center" prop="companyName" label="所属公司" width="120"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="120"></el-table-column>
+                <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject" width="120"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销组总监" width="90"></el-table-column>
+                <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var dxList=[[${dxList}]];//电销组
+var projectList=[[${projectList}]];//项目
+var swList = [[${swList}]];//商务组
+var clueVM = new Vue({
+        el: '#clueManage',
+        data: {
+            isShow:false,
+        		searchForm: {
+	        		teleGorupId: '',
+              busGroupId: '',
+              busSaleId: '',
+              startReserveTime: '',
+              endReserveTime: '',
+              signProjectId: '',
+              cusName: ''
+            },
+            dataTable:[],
+            teleGorupOptions:dxList,
+            projectOptions:projectList,
+            busGroupOptions:swList,
+            busSaleOptions:[],
+            submitDisable: false,
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            multipleSelection:[],
+            formLabelWidth: '150px',
+            formLabelWidth1: '120px',
+        },
+        methods: {
+          exportFun(){
+            var param = this.searchForm;
+            param.pageNum='';
+            param.pageSize='';
+            axios.post('/business/arrange/exportBusArrange',param,{responseType:'blob'})
+            .then(function (response) {
+              console.log(response)
+              var data =  response.data;
+              var fileName = response.headers.filename;
+              saveAs(data,decodeURI(fileName));
+            })
+            .catch(function (error) {
+              console.log(error);
+            }).then(function(){
+              clueVM.loading=false;
+            });
+
+          },
+          clickRow(row){//点击单行选中复选框
+                this.$refs.multipleTable.toggleRowSelection(row)
+          },
+        	searchTable() {
+                var param ={};
+                var startReserveTime = this.searchForm.startReserveTime;
+                var endReserveTime = this.searchForm.endReserveTime;
+            	  var vilad=false;
+                if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
+                	vilad=true;
+                }
+                if(vilad){
+                	this.$message({
+                        message: '开始时间不能大于结束时间',
+                        type: 'warning'
+                      });
+                    return;
+                }
+                param.startReserveTime = startReserveTime;
+                param.endReserveTime = endReserveTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.teleGorupId = this.searchForm.teleGorupId;
+                param.busGroupId = this.searchForm.busGroupId;
+                param.signProjectId = this.searchForm.signProjectId;
+                param.cusName = this.searchForm.cusName;
+                param.busSaleId = this.searchForm.busSaleId;
+                param.sortField = this.searchForm.sortField;
+                param.sortType = this.searchForm.sortType;
+                console.info(param);
+                axios.post('/business/arrange/arrangeList', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      clueVM.dataTable= table.data;
+                      clueVM.pager.total =  table.total;
+                      clueVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+               //品尝项目转换方法
+               transformProject(row, column, cellValue, index) {
+            	   var text="";
+              	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+              	    }
+                    return text;
+               },
+               //日期数据格式化方法
+               dateFormat( row, column, cellValue, index) {
+                 if (cellValue == undefined) {
+                    return "";
+                 }
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+               },
+                currentBusSale(seleVal){
+                  if(null==seleVal||seleVal==""){
+                    return ;
+                  }
+                  clueVM.busSaleOptions = [];
+                  param={};
+                  param.orgId=seleVal;
+                  param.roleCode="SWJL";
+                  param.statusList =[1,3];
+                  axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
+                    clueVM.busSaleOptions=response.data.data;
+                  });
+                },
+              //排序
+              sort_change(column) {
+            	  var sortField="";
+            	  var sortType="";
+                  if (column.prop === 'createTime') {
+                	  sortField="a.create_Time";
+                  } else if (column.prop === 'reserveTime') {
+                	  sortField="a.reserve_Time";
+                  }
+                  if (column.order === 'descending') {
+                  	sortType="desc";
+                  } else if (column.order === 'ascending') {
+                  	sortType="asc";
+                  }
+                  this.searchForm.sortField=sortField;
+                  this.searchForm.sortType=sortType;
+                  this.searchTable();
+              },
+              toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+              },
+        },
+        created(){
+            console.info("create method");
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+           document.getElementById('clueManage').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>

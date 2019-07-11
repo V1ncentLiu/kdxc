@@ -67,7 +67,7 @@ button a {
             </el-button> 
           </el-col> 
           <el-col :span="7"> 
-            <el-input placeholder="请输入菜单名称进行查询" v-model="inputModuleName" class="input-with-select"> 
+            <el-input placeholder="请输入菜单名称进行查询" v-model="searchForm.inputModuleName" class="input-with-select"> 
               <el-button slot="append" icon="el-icon-search" @click="getQuery">搜索</el-button>
             </el-input> 
           </el-col> 
@@ -82,7 +82,7 @@ button a {
             <el-table-column align="center" prop="iconName" label="图标名称" width="120px"></el-table-column> 
             <el-table-column align="center" prop="iconUrl" label="图标地址" width="450px"></el-table-column> 
             <el-table-column align="center" prop="url" label="菜单地址" width="400px"></el-table-column> </el-table> 
-            <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination> 
           </el-row> 
         </div>
         </el-col> 
@@ -112,6 +112,7 @@ if(null!=moduleData){
         el: '#moduleManage',
         data: function() {
             return {
+                paginationShow: false,
                 dataTree:moduleData,
                 expandedKeys:expandedKeys,
                 dataTable: [],
@@ -130,25 +131,23 @@ if(null!=moduleData){
                 },
                 selectedNode:selectModule,
                 formLabelWidth: '120px',
-                inputModuleName:''
+                searchForm: {
+                  inputModuleName:''
+                },
+                storeForm: {
+                  inputModuleName:''
+                },
+                storeId: '',
+                scrollTop: 0,
             }             
         },
         methods: {
-            toggleSelection(rows) {
-                if (rows) {
-                    rows.forEach(row => {
-                        this.$refs.multipleTable.toggleRowSelection(row);
-                    });
-                } else {
-                  this.$refs.multipleTable.clearSelection();
-                }
-            },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
             //选中菜单数据节点
             clickModuleNode(data,node,obj){
-              this.inputModuleName='';
+              this.searchForm.inputModuleName='';
               this.selectedNode = data;
               this.getQuery();
             },
@@ -171,7 +170,7 @@ if(null!=moduleData){
                 var param = {};
                 var parentId = this.selectedNode.id;
                 param.parentId = parentId;
-                param.name = this.inputModuleName;
+                param.name = this.searchForm.inputModuleName;
                 param.pageNum=pageNum;
                 param.pageSize=pageSize;
                 axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
@@ -184,6 +183,28 @@ if(null!=moduleData){
                             moduleVM.pager.total= resData.total;
                             moduleVM.pager.currentPage = resData.currentPage;
                             moduleVM.pager.pageSize = resData.pageSize;
+
+                            // 取出存储的id
+                            if(!moduleVM.paginationShow){
+                               if(moduleVM.storeId){
+                                   moduleVM.$nextTick(function(){
+                                      var storage = [];
+                                      moduleVM.dataTable.forEach(function(item, index){
+                                          if(item.id === moduleVM.storeId ){
+                                              storage.push(moduleVM.dataTable[index]);
+                                          }
+                                      })
+                                      moduleVM.toggleSelection(storage);
+                                      moduleVM.$el.querySelector('.el-table__body-wrapper').scrollTop = moduleVM.scrollTop;
+                                  })
+                              }
+                            }else{
+                              removeSessionStore ("moduleManagerStoreForm");
+                              removeSessionStore ("moduleManagerOtherVal");
+                            }
+                            moduleVM.paginationShow = true;
+                            moduleVM.storeForm = moduleVM.searchForm;
+
                         }else{
                         	console.error(data);
                         }
@@ -196,6 +217,15 @@ if(null!=moduleData){
                     .then(function () {
                       // always executed
                     });  
+            },            
+            toggleSelection(rows) {
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                    });
+                } else {
+                  this.$refs.multipleTable.clearSelection();
+                }
             },
              modifyChildModule(){
               //修改菜单数据	
@@ -207,7 +237,18 @@ if(null!=moduleData){
                      });
                     return;
                 }
-                window.location.href="/module/moduleManager/queryModuleById?moduleId="+rows[0].id; 
+                // 存储选中信息--start
+                var clueId=rows[0].id;  
+                setSessionStore("moduleManagerStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("moduleManagerOtherVal", otherVal);
+                // 存储选中信息--end 
+                // window.location.href="/module/moduleManager/queryModuleById?moduleId="+rows[0].id; 
+                window.location.href="/module/moduleManager/queryModuleById?moduleId="+clueId; 
              },
             deleteFun() {
                var deleInfo=moduleVM.multipleSelection;
@@ -267,6 +308,17 @@ if(null!=moduleData){
             },
         },
         created(){
+          // 进入页面判断有是否有存储值
+          if(!this.paginationShow){
+              var storeVal = getSessionStore("moduleManagerStoreForm");
+              var otherVal = getSessionStore("moduleManagerOtherVal");
+              if(storeVal && otherVal){
+                  this.searchForm = storeVal;
+                  this.$set(this.pager,"currentPage",otherVal.currentPage);
+                  this.storeId = otherVal.clueId;
+                  this.scrollTop = otherVal.scrollTop;
+              }
+          };
           var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
           if(localVal){this.pager.pageSize = localVal;}
         	if(null!=selectModule&&selectModule){
@@ -279,7 +331,7 @@ if(null!=moduleData){
               var param = {};
               var parentId = selectModule.id;
               param.parentId = parentId;
-              param.name = this.inputModuleName;
+              param.name = this.searchForm.inputModuleName;
               param.pageNum=pageNum;
               param.pageSize=pageSize;
               axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
