@@ -194,7 +194,14 @@ public class BusPendingAllocationController {
             menuName = MenuEnum.BUS_ALLOCATION_CLUE)
     public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto,
             HttpServletRequest request) {
-
+        UserInfoDTO user = getUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        String roleCode = roleList.get(0).getRoleCode();
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            dto.setIsSwzj(1);
+        }else {
+            dto.setIsSwzj(0);
+        }
         // 取消邀约来访数据
         return appiontmentFeignClient.cancelAppiontment(dto);
     }
