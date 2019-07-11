@@ -141,7 +141,7 @@
         </el-table-column>
 
       </el-table>
-      <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
   </div>
   <!-- dialog -->
@@ -451,6 +451,7 @@
   var appiontmentVM = new Vue({
     el: '#appiontmentManage',
     data: {
+      paginationShow: false,
       isShow:false,
       btnDisabled: false,  
       appiontmentSearchForm: {
@@ -536,6 +537,22 @@
           { required: true, message: '预约时间不能为空', trigger: 'change' }
         ]
       },
+      storeForm: {
+        startTime: '',
+        endTime: '',
+        teleDeptId: '',
+        teleGorupId: '',
+        teleSaleId: '',
+        projectId: '',
+        cusName: '',
+        cusPhone:'',
+        clueId:'',
+        qq:"",
+        wechat:"",
+        email:"",
+      },
+      storeId: '',
+      scrollTop: 0,
     },
     methods: {
     	transCusPhone(row) {
@@ -596,11 +613,43 @@
 
           appiontmentVM.pager.total =  table.total;
           appiontmentVM.pager.currentPage = table.currentPage;
+
+          // 取出存储的id
+           if(!appiontmentVM.paginationShow){
+               if(appiontmentVM.storeId){
+                   appiontmentVM.$nextTick(function(){
+                      var storage = [];
+                      appiontmentVM.dataTable.forEach(function(item, index){
+                          if(item.clueId === appiontmentVM.storeId ){
+                              storage.push(appiontmentVM.dataTable[index]);
+                          }
+                      })
+                      appiontmentVM.toggleSelection(storage);
+
+                      appiontmentVM.$el.querySelector('.el-table__body-wrapper').scrollTop = appiontmentVM.scrollTop;
+                         
+                  })
+              }
+           }else{
+              removeSessionStore ("appiontmentManagerStoreForm");
+              removeSessionStore ("appiontmentManagerOtherVal");
+           }
+          appiontmentVM.paginationShow = true;
+          appiontmentVM.storeForm = appiontmentVM.appiontmentSearchForm;
         })
         .catch(function (error) {
           console.log(error);
         });
 
+      },
+      toggleSelection(rows) { // table select 默认选中fn
+          if (rows) {
+              rows.forEach(row => {
+                  this.$refs.multipleTable.toggleRowSelection(row,true);
+              });
+          } else {
+              this.$refs.multipleTable.clearSelection();
+          }
       },
       //选择行
       handleSelectionChange(val) {
@@ -1051,7 +1100,17 @@
           });
           return;
         }
-        window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId;
+        // 存储选中信息--start
+        var clueId=rows[0].clueId; 
+        setSessionStore("appiontmentManagerStoreForm", this.storeForm);
+        var otherVal = {
+            "currentPage": this.pager.currentPage,
+            "clueId": clueId,
+            "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        setSessionStore("appiontmentManagerOtherVal", otherVal);
+        // 存储选中信息--end  
+        window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+clueId;
       },
       //查看重复手机号资源
       repeatPhonesClick(row) {
@@ -1199,6 +1258,17 @@
     },
     created(){
       console.info("create method");
+      // 进入页面判断有是否有存储值
+      if(!this.paginationShow){
+          var storeVal = getSessionStore("appiontmentManagerStoreForm");
+          var otherVal = getSessionStore("appiontmentManagerOtherVal");
+          if(storeVal && otherVal){
+              this.appiontmentSearchForm = storeVal;
+              this.$set(this.pager,"currentPage",otherVal.currentPage);
+              this.storeId = otherVal.clueId;
+              this.scrollTop = otherVal.scrollTop;
+          }
+      };
       // 取页数存储
       var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
       if(localVal){this.pager.pageSize = localVal;}

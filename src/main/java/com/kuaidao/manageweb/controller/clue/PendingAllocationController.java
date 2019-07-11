@@ -162,6 +162,8 @@ public class PendingAllocationController {
         // 查询字典话务二级客户状态集合
         request.setAttribute("phCustomerStatusSubList",
                 getDictionaryByCode(DicCodeEnum.PHCUSTOMERSTATUSSUB.getCode()));
+        // 查询字典客户级别集合
+        request.setAttribute("levelList", getDictionaryByCode(DicCodeEnum.CUSLEVEL.getCode()));
 
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
