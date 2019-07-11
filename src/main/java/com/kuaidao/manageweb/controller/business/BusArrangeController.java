@@ -209,7 +209,7 @@ public class BusArrangeController {
         curList.add(busArrangeDTO.getSignCity());
         curList.add(busArrangeDTO.getSignDictrict());
         curList.add(busArrangeDTO.getTeleSaleName());
-        curList.add(busArrangeDTO.getSignProjectName());
+        curList.add(busArrangeDTO.getTasteProjectName());
         curList.add(busArrangeDTO.getCompanyName());
         curList.add(busArrangeDTO.getTeleGorupName());
         if(StringUtils.isNotBlank(busArrangeDTO.getTeleProjectId())){
