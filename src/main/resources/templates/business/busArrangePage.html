@@ -22,16 +22,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
         	  <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm">
-      				  <el-form-item label="电销组:" prop="teleGorupId">
-        				    <el-select v-model="searchForm.teleGorupId" clearable  placeholder="电销组" filterable>
-          				      <el-option
-          					      v-for="item in teleGorupOptions"
-          					      :key="item.id"
-          					      :label="item.name"
-          					      :value="item.id">
-          					    </el-option>
-        				    </el-select>
-      				  </el-form-item>
+
               <el-form-item label="商务组:" prop="busGroupId">
                 <el-select v-model="searchForm.busGroupId" clearable @change="currentBusSale"
                            placeholder="商务组" filterable>
@@ -45,6 +36,9 @@
                              :value="item.id"></el-option>
                 </el-select>
               </el-form-item>
+              <el-form-item label="客户姓名:" prop="cusName">
+                <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
+              </el-form-item>
                 <el-form-item label="来访时间:">
                   <el-date-picker  v-model="searchForm.startReserveTime"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"  type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
@@ -52,6 +46,26 @@
                   <el-date-picker  v-model="searchForm.endReserveTime"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"  type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
+                  <el-form-item label="电销组:" prop="teleGorupId">
+                    <el-select v-model="searchForm.teleGorupId" clearable  placeholder="电销组" @change="getSaleList" filterable>
+                      <el-option
+                          v-for="item in teleGorupOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="电销顾问:" prop="teleSaleId">
+                    <el-select v-model="searchForm.teleSaleId" clearable placeholder="电销顾问" filterable>
+                      <el-option
+                          v-for="item in teleSaleOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
                   <el-form-item label="签约项目:">
                     <el-select filterable v-model="searchForm.tasteProjectId" placeholder="签约项目" clearable>
                       <el-option
@@ -61,9 +75,6 @@
                           :value="item.id">
                       </el-option>
                     </el-select>
-                  </el-form-item>
-                  <el-form-item label="客户姓名:" prop="cusName">
-                    <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
                   </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox"> 
@@ -117,13 +128,15 @@ var clueVM = new Vue({
               startReserveTime: '',
               endReserveTime: '',
               tasteProjectId: '',
-              cusName: ''
+              cusName: '',
+              teleSaleId:''
             },
             dataTable:[],
             teleGorupOptions:dxList,
             projectOptions:projectList,
             busGroupOptions:swList,
             busSaleOptions:[],
+            teleSaleOptions:[],
             submitDisable: false,
             pager:{
                 total: 0,
@@ -135,6 +148,23 @@ var clueVM = new Vue({
             formLabelWidth1: '120px',
         },
         methods: {
+          //根据电销组查询电销顾问
+          getSaleList() {
+            var param ={};
+            clueVM.teleSaleOptions =[],
+            param.orgId = this.searchForm.teleGorupId;
+            console.info(param);
+            axios.post('/business/busAllocation/getSaleList', param)
+            .then(function (response) {
+              var result =  response.data;
+              console.info(result);
+              var table=result.data;
+              clueVM.teleSaleOptions= table;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
           exportFun(){
             var param ={};
             var startReserveTime = this.searchForm.startReserveTime;
@@ -160,6 +190,7 @@ var clueVM = new Vue({
             param.cusName = this.searchForm.cusName;
             param.busSaleId = this.searchForm.busSaleId;
             param.sortField = this.searchForm.sortField;
+            param.teleSaleId = this.searchForm.teleSaleId;
             param.sortType = this.searchForm.sortType;
             param.pageNum='';
             param.pageSize='';
@@ -204,6 +235,7 @@ var clueVM = new Vue({
                 param.tasteProjectId = this.searchForm.tasteProjectId;
                 param.cusName = this.searchForm.cusName;
                 param.busSaleId = this.searchForm.busSaleId;
+                param.teleSaleId = this.searchForm.teleSaleId;
                 param.sortField = this.searchForm.sortField;
                 param.sortType = this.searchForm.sortType;
                 console.info(param);
