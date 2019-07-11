@@ -46,10 +46,10 @@
                 </el-select>
               </el-form-item>
                 <el-form-item label="来访时间:">
-                  <el-date-picker  v-model="searchForm.startReserveTime" format="yyyy-MM-dd HH:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
+                  <el-date-picker  v-model="searchForm.startReserveTime"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"  type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                  <el-date-picker  v-model="searchForm.endReserveTime" format="yyyy-MM-dd HH:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
+                  <el-date-picker  v-model="searchForm.endReserveTime"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"  type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
                   <el-form-item label="签约项目:">
@@ -165,8 +165,8 @@ var clueVM = new Vue({
                       });
                     return;
                 }
-                param.startReserveTime = startReserveTime;
-                param.endReserveTime = endReserveTime;
+                param.startReserveTime = new Date(startReserveTime);
+                param.endReserveTime = new Date(endReserveTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.teleGorupId = this.searchForm.teleGorupId;
@@ -273,6 +273,12 @@ var clueVM = new Vue({
         },
         created(){
             console.info("create method");
+          var a = new Date();
+          var year = a.getFullYear();
+          var month = a.getMonth();
+          var date = a.getDate();
+          this.searchForm.startReserveTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
+          this.searchForm.endReserveTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
