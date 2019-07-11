@@ -242,11 +242,17 @@ var clueVM = new Vue({
                 axios.post('/business/arrange/arrangeList', param)
                 .then(function (response) {
                       var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      clueVM.dataTable= table.data;
-                      clueVM.pager.total =  table.total;
-                      clueVM.pager.currentPage = table.currentPage;
+                      debugger;
+                  console.info("@@@@"+result);
+                  if(result.code=='0') {
+                    console.info(result);
+                    var table = result.data;
+                    clueVM.dataTable = table.data;
+                    clueVM.pager.total = table.total;
+                    clueVM.pager.currentPage = table.currentPage;
+                  }else {
+                    clueVM.$message({message:result.msg,type:'error'});
+                  }
                 })
                 .catch(function (error) {
                      console.log(error);
