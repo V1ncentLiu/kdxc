@@ -219,7 +219,12 @@ public class BusArrangeController {
         }
         //curList.add(busArrangeDTO.getTeleProjectName());
         curList.add(busArrangeDTO.getTeleDirectorName());
-        curList.add(busArrangeDTO.getBusSaleName());
+        if(busArrangeDTO.getIsAllocate() ==1){
+          curList.add(busArrangeDTO.getBusSaleName());
+        }else {
+          curList.add("");
+        }
+
         dataList.add(curList);
       }
 
@@ -227,7 +232,7 @@ public class BusArrangeController {
       logger.error("export bussiness_arrange param{{}},res{{}}", reqDTO, busArrangeListJson);
     }
 
-    XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+    XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
 
 
     String name = "商务排班表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";

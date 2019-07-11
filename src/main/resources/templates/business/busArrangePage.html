@@ -136,7 +136,31 @@ var clueVM = new Vue({
         },
         methods: {
           exportFun(){
-            var param = this.searchForm;
+            var param ={};
+            var startReserveTime = this.searchForm.startReserveTime;
+            var endReserveTime = this.searchForm.endReserveTime;
+            var vilad=false;
+            if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
+              vilad=true;
+            }
+            if(vilad){
+              this.$message({
+                message: '开始时间不能大于结束时间',
+                type: 'warning'
+              });
+              return;
+            }
+            param.startReserveTime = new Date(startReserveTime);
+            param.endReserveTime = new Date(endReserveTime);
+            param.pageSize = this.pager.pageSize;
+            param.pageNum = this.pager.currentPage;
+            param.teleGorupId = this.searchForm.teleGorupId;
+            param.busGroupId = this.searchForm.busGroupId;
+            param.tasteProjectId = this.searchForm.tasteProjectId;
+            param.cusName = this.searchForm.cusName;
+            param.busSaleId = this.searchForm.busSaleId;
+            param.sortField = this.searchForm.sortField;
+            param.sortType = this.searchForm.sortType;
             param.pageNum='';
             param.pageSize='';
             axios.post('/business/arrange/exportBusArrange',param,{responseType:'blob'})
