@@ -121,12 +121,12 @@ public class BalanceAccountController {
         request.setAttribute("busAreaList", busAreaList);
         Long busendStartdate = System.currentTimeMillis();
         logger.info("所有商务大区查询时间"+(busendStartdate-busAreaStartdate));
-        // 查询所有商务组
-        List<OrganizationRespDTO> busGroupList =
-                getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
-        request.setAttribute("busGroupList", busGroupList);
+//        // 查询所有商务组
+//        List<OrganizationRespDTO> busGroupList =
+//                getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
+//        request.setAttribute("busGroupList", busGroupList);
         Long busGrouptdate = System.currentTimeMillis();
-        logger.info("所有商务组查询时间"+(busGrouptdate-busendStartdate));
+//        logger.info("所有商务组查询时间"+(busGrouptdate-busendStartdate));
         // 查询所有电销事业部
         List<OrganizationRespDTO> teleDeptList =
                 getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
@@ -134,21 +134,21 @@ public class BalanceAccountController {
         Long teleDeptdate = System.currentTimeMillis();
         logger.info("所有电销事业部查询时间"+(teleDeptdate-busGrouptdate));
         // 查询所有电销组
-        List<OrganizationRespDTO> teleGroupList =
-                getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
-        request.setAttribute("teleGroupList", teleGroupList);
+//        List<OrganizationRespDTO> teleGroupList =
+//                getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
+//        request.setAttribute("teleGroupList", teleGroupList);
         Long teleGroupdate = System.currentTimeMillis();
         logger.info("所有电销组查询时间"+(teleGroupdate-teleDeptdate));
         // 查询所有商务经理
-        List<UserInfoDTO> busSaleList =
-                getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
-        request.setAttribute("busSaleList", busSaleList);
+//        List<UserInfoDTO> busSaleList =
+//                getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
+//        request.setAttribute("busSaleList", busSaleList);
         Long busSaledate = System.currentTimeMillis();
         logger.info("所有商务经理查询时间"+(busSaledate-teleGroupdate));
         // 查询所有电销创业顾问
-        List<UserInfoDTO> teleSaleList =
-                getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
-        request.setAttribute("teleSaleList", teleSaleList);
+//        List<UserInfoDTO> teleSaleList =
+//                getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
+//        request.setAttribute("teleSaleList", teleSaleList);
         Long teleSaledate = System.currentTimeMillis();
         logger.info("所有电销创业顾问查询时间"+(teleSaledate-busSaledate));
 
@@ -635,4 +635,41 @@ public class BalanceAccountController {
         return "financing/settleAccountsPage";
     }
 
+    /***
+     * 获取商务小组商务经理电销小组电销顾问
+     * 
+     * @return
+     */
+    @PostMapping("/getBusAndTel")
+    @ResponseBody
+    public Map getBusAndTel(@RequestBody ReconciliationConfirmReq req,HttpServletRequest request) {
+    	UserInfoDTO user = CommUtil.getCurLoginUser();
+    	 // 查询所有商务组
+        List<OrganizationRespDTO> busGroupList =
+                getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
+        request.setAttribute("busGroupList", busGroupList);
+        Long busGrouptdate = System.currentTimeMillis();
+        // 查询所有电销组
+        List<OrganizationRespDTO> teleGroupList =
+                getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
+        request.setAttribute("teleGroupList", teleGroupList);
+        Long teleGroupdate = System.currentTimeMillis();
+        // 查询所有商务经理
+        List<UserInfoDTO> busSaleList =
+                getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
+        request.setAttribute("busSaleList", busSaleList);
+        Long busSaledate = System.currentTimeMillis();
+        logger.info("所有商务经理查询时间"+(busSaledate-teleGroupdate));
+        // 查询所有电销创业顾问
+        List<UserInfoDTO> teleSaleList =
+                getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
+        
+        request.setAttribute("teleSaleList", teleSaleList);
+        Map map = new HashMap();
+        map.put("busGroupList", busGroupList);
+        map.put("teleGroupList", teleGroupList);
+        map.put("busSaleList", busSaleList);
+        map.put("teleSaleList", teleSaleList);
+        return map;
+    }
 }

@@ -1170,6 +1170,20 @@ var clueVM = new Vue({
                      this.busSaleOptions=[];
                      this.searchForm.busSaleId='';
                 },
+                getBusAndTel(){
+                	var param ={};
+                	axios.post('/financing/balanceaccount/getBusAndTel', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          clueVM.busSaleOptions= result.busSaleList;
+                          clueVM.busGroupOptions = result.busGroupList;
+                          clueVM.teleSaleOptions = result.teleSaleList;
+                          clueVM.teleGorupOptions = result.teleGroupList;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                }
                 
         },
         created(){
@@ -1189,7 +1203,8 @@ var clueVM = new Vue({
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.initColumn();
-            this.searchTable();          
+            this.searchTable();  
+            this.getBusAndTel()
         },
         mounted(){
            console.info("mounted method");
