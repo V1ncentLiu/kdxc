@@ -2,6 +2,7 @@ var fieldMenuVM = new Vue({
         el: '#userManage',
         data: function() {
             return {
+                paginationShow: false,
                 dataTable:[],
                 pager:{
                     total: 0,
@@ -19,7 +20,9 @@ var fieldMenuVM = new Vue({
                 oldMenuCode:'',//旧 菜单吗
                 oldMenuName:'',//旧 菜单名称
                 formLabelWidth: '150px',
-                inputMenuName:'',//菜单搜索框
+                searchForm: {
+                    inputMenuName:'',//菜单搜索框
+                },
                 addOrModifyDialogTitle:'',
                 confirmBtnDisabled:false,//提交按钮 是否禁用
                 submitUrl:'',//提交时url
@@ -90,13 +93,13 @@ var fieldMenuVM = new Vue({
                                 });
                 			  
                 		  },trigger:'blur'}
-                		
-                		
                 	]
-                
-                		
-                	
-                }//rules end
+                },
+                storeForm: {
+                    inputMenuName:'',//菜单搜索框
+                },
+                storeId: '',
+                scrollTop: 0,
             }        	  
         },
         methods: {
@@ -248,17 +251,39 @@ var fieldMenuVM = new Vue({
             	 var pageSize = this.pager.pageSize;
                  var pageNum = this.pager.currentPage;
                  var param = {};
-                 param.menuName=this.inputMenuName;
+                 param.menuName=this.searchForm.inputMenuName;
                  axios.post('/customfield/customField/listMenuPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
-                     .then(function (response) {
-                         var data =  response.data;
-                         if(data.code=='0'){
-                             var resData = data.data;
-                             fieldMenuVM.dataTable= resData.data;
-                             //3.分页组件
-                             fieldMenuVM.pager.total= resData.total;
-                             fieldMenuVM.pager.currentPage = resData.currentPage;
-                             fieldMenuVM.pager.pageSize = resData.pageSize;
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                            var resData = data.data;
+                            fieldMenuVM.dataTable= resData.data;
+                            //3.分页组件
+                            fieldMenuVM.pager.total= resData.total;
+                            fieldMenuVM.pager.currentPage = resData.currentPage;
+                            fieldMenuVM.pager.pageSize = resData.pageSize;
+
+                            // 取出存储的id
+                            if(!fieldMenuVM.paginationShow){
+                               if(fieldMenuVM.storeId){
+                                   fieldMenuVM.$nextTick(function(){
+                                      var storage = [];
+                                      fieldMenuVM.dataTable.forEach(function(item, index){
+                                          if(item.id === fieldMenuVM.storeId ){
+                                              storage.push(fieldMenuVM.dataTable[index]);
+                                          }
+                                      })
+                                      fieldMenuVM.toggleSelection(storage);
+                                      fieldMenuVM.$el.querySelector('.el-table__body-wrapper').scrollTop = fieldMenuVM.scrollTop;
+                                  })
+                              }
+                            }else{
+                              removeSessionStore ("customfieldStoreForm");
+                              removeSessionStore ("customfieldOtherVal");
+                            }
+                            fieldMenuVM.paginationShow = true;
+                            fieldMenuVM.storeForm = fieldMenuVM.searchForm;
+
                          }else{
                         	 console.error(data);
                          }
@@ -271,10 +296,30 @@ var fieldMenuVM = new Vue({
                        // always executed
                      }); 
             },
+            toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
+              },
             goToFieldSettingPage(row){
             	console.info(row);
-            	var id = row.id;
-            	location.href= "/customfield/customField/customFieldPage?id="+id;
+            	// var id = row.id;
+                // 存储选中信息--start
+                var clueId=row.id;  
+                setSessionStore("customfieldStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("customfieldOtherVal", otherVal);
+                // 存储选中信息--end  
+                // location.href= "/customfield/customField/customFieldPage?id="+id;
+            	location.href= "/customfield/customField/customFieldPage?id="+clueId;
             },
             closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
           	  this.$refs['customMenuForm'].resetFields();
@@ -292,6 +337,17 @@ var fieldMenuVM = new Vue({
             
         },//methods end
         created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("customfieldStoreForm");
+                var otherVal = getSessionStore("customfieldOtherVal");
+                if(storeVal && otherVal){
+                    this.searchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
         	this.initCustomFiledMenu();

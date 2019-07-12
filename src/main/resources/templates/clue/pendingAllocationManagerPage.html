@@ -81,8 +81,8 @@
                     <el-form-item label="搜索词:" prop="searchWord">
                         <el-input v-model="clueSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
                     </el-form-item>
-                    <el-form-item label="地址:" prop="address">
-                        <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
+                    <el-form-item label="地域信息:" prop="address">
+                        <el-input v-model="clueSearchForm.address" placeholder="地域信息" class="input-with-select"></el-input>
                     </el-form-item>
                   <el-form-item label="资源ID:">
                     <el-input v-model="clueSearchForm.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
@@ -142,7 +142,7 @@
     	        </el-table-column>
     	        
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -158,6 +158,16 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <!-- <el-form-item label="客户级别：" :label-width="formLabelWidth"  prop="cusLevel">
+                    <el-select v-model="allocationForm.cusLevel"  style="width: 290px;">
+                    	<el-option key="-1" label="不处理" value="-1"> </el-option>
+                        <el-option v-for="item in levelOptions" 
+                			:key="item.value" 
+                			:label="item.name" 
+                			:value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item> -->
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" :disabled="isDisabled" @click="allocationClue('allocationForm')">提 交</el-button>
@@ -456,9 +466,11 @@ var customerStatusList=[[${customerStatusList}]];//电销一级客户状态
 var customerStatusSubList=[[${customerStatusSubList}]];//电销二级客户状态
 var phCustomerStatusList=[[${phCustomerStatusList}]];//话务一级客户状态
 var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户状态
+var levelList=[[${levelList}]];//客户级别
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            paginationShow: false,
             isDisabled:false,//默认不可点击    
             isShow:false,
     		clueSearchForm: {
@@ -478,7 +490,8 @@ var clueVM = new Vue({
             wechat:''
             },
             allocationForm: {
-            	saleId:''
+            	saleId:'',
+            	//cusLevel:''
             },
             transferForm: {
             	id:''
@@ -544,6 +557,7 @@ var clueVM = new Vue({
             teleGorupOptions:teleGorupList,
             saleGroupOptions:saleGroupList,
             categoryOptions:clueCategoryList,
+            levelOptions:levelList,
             typeOptions:clueTypeList,
             teleSaleOptions:[],
             releaseTable:[],
@@ -560,12 +574,43 @@ var clueVM = new Vue({
             multipleSelection:[],
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
+            storeForm: {
+                phone: '',
+                cusName: '',
+                category: '',
+                teleGorupId: '',
+                type: '',
+                startTime: '',
+                endTime: '',
+                messagePoint: '',
+                searchWord: '',
+                address: '',
+                clueId:'',
+                qq:'',
+                email:'',
+                wechat:''
+            },
+            storeId: '',
+            scrollTop: 0,
                 
         },
         methods: {
             //展现详情
+            // showClueDetailInfo (row, column) {
+            //     window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.id;
+            // },
             showClueDetailInfo (row, column) {
-                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.id;
+                // 存储选中信息--start
+                var clueId=row.id;  
+                setSessionStore("pendingAllocationManagerStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("pendingAllocationManagerOtherVal", otherVal);
+                // 存储选中信息--end  
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
             },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
@@ -601,24 +646,55 @@ var clueVM = new Vue({
                 console.info(param);
                 axios.post('/clue/pendingAllocation/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      var data= table.data;
-                      for(var i=0;i<data.length;i++){
-                    	  data[i].category=clueVM.transformCategory(data[i].category);
-                    	  data[i].type=clueVM.transformType(data[i].type);
-                    	  data[i].createTime=clueVM.dateFormat(data[i].createTime);
-                    	  data[i].messageTime=clueVM.dateFormat(data[i].messageTime);
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    var data= table.data;
+                    for(var i=0;i<data.length;i++){
+                      data[i].category=clueVM.transformCategory(data[i].category);
+                      data[i].type=clueVM.transformType(data[i].type);
+                      data[i].createTime=clueVM.dateFormat(data[i].createTime);
+                      data[i].messageTime=clueVM.dateFormat(data[i].messageTime);
+                    }
+                    clueVM.dataTable= data;
+                    clueVM.pager.total =  table.total;
+                    clueVM.pager.currentPage = table.currentPage;
+
+                    // 取出存储的id
+                    if(!clueVM.paginationShow){
+                       if(clueVM.storeId){
+                           clueVM.$nextTick(function(){
+                              var storage = [];
+                              clueVM.dataTable.forEach(function(item, index){
+                                  if(item.id === clueVM.storeId ){
+                                      storage.push(clueVM.dataTable[index]);
+                                  }
+                              })
+                              clueVM.toggleSelection(storage);
+                              clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop = clueVM.scrollTop;
+                          })
                       }
-                      clueVM.dataTable= data;
-                      clueVM.pager.total =  table.total;
-                      clueVM.pager.currentPage = table.currentPage;
+                    }else{
+                      removeSessionStore ("pendingAllocationManagerStoreForm");
+                      removeSessionStore ("pendingAllocationManagerOtherVal");
+                    }
+                    clueVM.paginationShow = true;
+                    clueVM.storeForm = clueVM.clueSearchForm;
+
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
+              },
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
               },
               //选择行
               handleSelectionChange(val) {
@@ -1148,6 +1224,17 @@ var clueVM = new Vue({
         },
         created(){
             console.info("create method");
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("pendingAllocationManagerStoreForm");
+                var otherVal = getSessionStore("pendingAllocationManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.clueSearchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

@@ -192,7 +192,7 @@
     	         	v-else>
     	        </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!--查看疑意-->
@@ -239,26 +239,27 @@ var giveTypeList =[[${giveTypeList}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
-          isShow:false,
-      		searchForm: {
-	       		busAreaId: '',
-	       		busGroupId: '',
-	       		busSaleId: '',
-	       		teleDeptId: '',
-	       		teleGorupId: '',
-	       		teleSaleId: '',
-	       		status: '',
-	       		signProjectId: '',
-	       		cusName: '',
-	       		signProvince: '',
-	       		payType: '',
-	       		phone: '',
-	       		startTime: '',
-	       		endTime: '',
-	       		payStartTime: '',
-	       		payEndTime: '',
-	       		statementNo: '',
-	       		signNo: ''
+            paginationShow: false,
+            isShow:false,
+        		searchForm: {
+  	       		busAreaId: '',
+  	       		busGroupId: '',
+  	       		busSaleId: '',
+  	       		teleDeptId: '',
+  	       		teleGorupId: '',
+  	       		teleSaleId: '',
+  	       		status: '',
+  	       		signProjectId: '',
+  	       		cusName: '',
+  	       		signProvince: '',
+  	       		payType: '',
+  	       		phone: '',
+  	       		startTime: '',
+  	       		endTime: '',
+  	       		payStartTime: '',
+  	       		payEndTime: '',
+  	       		statementNo: '',
+  	       		signNo: ''
             },
             viewDoubtForm: {
             	doubtRemark: ''
@@ -270,7 +271,7 @@ var clueVM = new Vue({
             dialogFormVisible: false,
             form: {
 	          	type: [],
-	        },
+	          },
             busAreaOptions:busAreaList,
             busGroupOptions:[],
             busSaleOptions:[],
@@ -311,39 +312,61 @@ var clueVM = new Vue({
                 pageSize: 20,
             },
             allocationFormRules: {
-            	saleId: [
-                    { required: true, message: '请选择商务经理', trigger: 'change' }
-                ]
-              },
+          	saleId: [
+                  { required: true, message: '请选择商务经理', trigger: 'change' }
+              ]
+            },
             transferFormRules: {
             	saleId: [
-                    { required: true, message: '请选择商务经理', trigger: 'change' }
-                ]
-              },
+                  { required: true, message: '请选择商务经理', trigger: 'change' }
+              ]
+            },
             multipleSelection:[],
             viewDoubtVisable:false,
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
+            storeForm: {
+              busAreaId: '',
+              busGroupId: '',
+              busSaleId: '',
+              teleDeptId: '',
+              teleGorupId: '',
+              teleSaleId: '',
+              status: '',
+              signProjectId: '',
+              cusName: '',
+              signProvince: '',
+              payType: '',
+              phone: '',
+              startTime: '',
+              endTime: '',
+              payStartTime: '',
+              payEndTime: '',
+              statementNo: '',
+              signNo: ''
+            },
+            storeId: '',
+            scrollTop: 0,
         },
         methods: {
-        	searchTable() {
+        	  searchTable() {
                 var param ={};
                 var startTime = this.searchForm.startTime;
                 var endTime = this.searchForm.endTime;
                 var payStartTime = this.searchForm.payStartTime;
                 var payEndTime = this.searchForm.payEndTime;
-            	var vilad=false;
+            	  var vilad=false;
                 if(startTime&&endTime&&startTime> endTime){
-                	vilad=true;
+                	  vilad=true;
                 }
                 if(payStartTime&&payEndTime&&payStartTime> payEndTime){
-                	vilad=true;
+                	  vilad=true;
                 }
                 if(vilad){
-                	this.$message({
+                	  this.$message({
                         message: '开始时间不能大于结束时间',
                         type: 'warning'
-                      });
+                    });
                     return;
                 }
                 param.startTime = startTime;
@@ -372,40 +395,69 @@ var clueVM = new Vue({
                 console.info(param);
                 axios.post('/financing/reconciliationConfirm/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      clueVM.pager.total =  table.total;
-                      clueVM.pager.currentPage = table.currentPage;
-                      //查询已结算佣金总计
-                      axios.post('/financing/reconciliationConfirm/sumCommissionMoney', param)
-                      .then(function (response) {
-                            var result =  response.data;
-                            console.info(result);
-                            clueVM.count= result.data;
-                      })
-                      .catch(function (error) {
-                           console.log(error);
-                      });
-                      
-                      var data= table.data;
-                      for(var i=0;i<data.length;i++){
-                    	  data[i].status=clueVM.transformStatus(null,null,data[i].status,null);
-                    	  data[i].signType=clueVM.transformSignType(null,null,data[i].signType,null);
-                    	  data[i].signShopType=clueVM.transformSignShopType(null,null,data[i].signShopType,null);
-                    	  data[i].payType=clueVM.transformPayType(null,null,data[i].payType,null);
-                    	  data[i].payMode=clueVM.transformPayMode(null,null,data[i].payMode,null);
-                    	  data[i].isRemoteSign=clueVM.transformSex(null,null,data[i].isRemoteSign,null);
-                    	  if(data[i].ratio){
-	                    	  data[i].ratio=data[i].ratio+"%";
-                    	  }
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    clueVM.pager.total =  table.total;
+                    clueVM.pager.currentPage = table.currentPage;
+                    //查询已结算佣金总计
+                    axios.post('/financing/reconciliationConfirm/sumCommissionMoney', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          console.info(result);
+                          clueVM.count= result.data;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                    
+                    var data= table.data;
+                    for(var i=0;i<data.length;i++){
+                  	  data[i].status=clueVM.transformStatus(null,null,data[i].status,null);
+                  	  data[i].signType=clueVM.transformSignType(null,null,data[i].signType,null);
+                  	  data[i].signShopType=clueVM.transformSignShopType(null,null,data[i].signShopType,null);
+                  	  data[i].payType=clueVM.transformPayType(null,null,data[i].payType,null);
+                  	  data[i].payMode=clueVM.transformPayMode(null,null,data[i].payMode,null);
+                  	  data[i].isRemoteSign=clueVM.transformSex(null,null,data[i].isRemoteSign,null);
+                  	  if(data[i].ratio){
+                    	  data[i].ratio=data[i].ratio+"%";
+                  	  }
+                    }
+                    clueVM.dataTable= data;
+                    // 取出存储的id
+                    if(!clueVM.paginationShow){
+                       if(clueVM.storeId){
+                           clueVM.$nextTick(function(){
+                              var storage = [];
+                              clueVM.dataTable.forEach(function(item, index){
+                                  if(item.accountId === clueVM.storeId ){
+                                      storage.push(clueVM.dataTable[index]);
+                                  }
+                              })
+                              clueVM.toggleSelection(storage);
+                              clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop = clueVM.scrollTop;
+                          })
                       }
-                      clueVM.dataTable= data;
+                    }else{
+                      removeSessionStore ("reconciliationConfirmStoreForm");
+                      removeSessionStore ("reconciliationConfirmOtherVal");
+                    }
+                    clueVM.paginationShow = true;
+                    clueVM.storeForm = clueVM.searchForm;
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
+              },
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
               },
               //选择行
               handleSelectionChange(val) {
@@ -543,6 +595,7 @@ var clueVM = new Vue({
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                 
                 	//对账确认
 	            	var param  = {};
    	           	  	param.idList=idList;
@@ -551,8 +604,11 @@ var clueVM = new Vue({
                           var data =  response.data;
                           if(data.code=='0'){
                           	clueVM.$message({message:'对账成功',type:'success',duration:1000,onClose:function(){
-                          		clueVM.allocationVisible = false;
-                          		clueVM.searchTable();
+                              
+                          		// clueVM.allocationVisible = false;
+                          		// clueVM.searchTable();
+                              window.location.href="/financing/reconciliationConfirm/initManager";
+                              
                       	    }});
                           }else{
                           	clueVM.$message({
@@ -560,6 +616,7 @@ var clueVM = new Vue({
                                   type: 'error'
                                 }); 
                           }
+                          
                       })
                       .catch(function (error) {
                         console.log(error);
@@ -570,6 +627,16 @@ var clueVM = new Vue({
                 }).catch(() => {
                        
                 });
+                // 存储选中信息--start
+                var clueId=rows[0].accountId;  
+                setSessionStore("reconciliationConfirmStoreForm", clueVM.storeForm);
+                var otherVal = {
+                    "currentPage": clueVM.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("reconciliationConfirmOtherVal", otherVal);
+                // 存储选中信息--end
 	            	
                },
                //结算确认
@@ -594,11 +661,14 @@ var clueVM = new Vue({
    	            	   var curRow = rows[i];
    	            	   idList.push(curRow.accountId);
    	               }
+                   
+                  // 存储选中信息--end
    	            this.$confirm('确认手工操作为已结算吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+
                 	//结算确认
 	            	var param  = {};
    	           	  	param.idList=idList;
@@ -607,8 +677,11 @@ var clueVM = new Vue({
                           var data =  response.data;
                           if(data.code=='0'){
                           	clueVM.$message({message:'结算成功',type:'success',duration:1000,onClose:function(){
-                          		clueVM.allocationVisible = false;
-                          		clueVM.searchTable();
+                              
+                          		// clueVM.allocationVisible = false;
+                          		// clueVM.searchTable();
+                              window.location.href="/financing/reconciliationConfirm/initManager";
+                               
                       	    }});
                           }else{
                           	clueVM.$message({
@@ -616,6 +689,7 @@ var clueVM = new Vue({
                                   type: 'error'
                                 }); 
                           }
+                          
                       })
                       .catch(function (error) {
                         console.log(error);
@@ -626,6 +700,16 @@ var clueVM = new Vue({
                 }).catch(() => {
                        
                 });
+                // 存储选中信息--start
+                  var clueId=rows[0].accountId;  
+                  setSessionStore("reconciliationConfirmStoreForm", clueVM.storeForm);
+                  var otherVal = {
+                      "currentPage": clueVM.pager.currentPage,
+                      "clueId": clueId,
+                      "scrollTop": clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop
+                  }
+                  setSessionStore("reconciliationConfirmOtherVal", otherVal);
+                
                },
                changeTeleDept(selectedValue){//电销事业部
                    this.clearTeleDeptList();
@@ -819,6 +903,17 @@ var clueVM = new Vue({
         },
         created(){
             console.info("create method");
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("reconciliationConfirmStoreForm");
+                var otherVal = getSessionStore("reconciliationConfirmOtherVal");
+                if(storeVal && otherVal){
+                    this.searchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

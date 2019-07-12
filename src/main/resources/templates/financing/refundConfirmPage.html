@@ -232,7 +232,7 @@
                 <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
                 <el-table-column align="center" prop="createName" label="退款申请人"></el-table-column>
             </el-table>
-             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+             <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- 驳回编辑 -->
@@ -377,6 +377,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                paginationShow: false,
                 isShow:false,
                 pager:{//pager
                     total: 0,
@@ -478,6 +479,23 @@
                 },
                 recordTable:[],//付款明细data
                 recordDialog:false,//付款明细弹窗
+                storeForm: {
+                    busAreaId:'',
+                    busGroupId:'',
+                    busManagerId:'',
+                    signProvince:'',
+                    signType:'',
+                    phone:'',
+                    signNo:'',
+                    customerName:'',
+                    startTime:'',
+                    endTime:'',
+                    teleDeptId:'',
+                    teleGroupId:'',
+                    teleId:''
+                },
+                storeId: '',
+                scrollTop: 0,
             }             
         },
         methods: {
@@ -552,9 +570,10 @@
                          .then(function (response) {
                              var data =  response.data
                              if(data.code=='0'){
-                                 mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                     mainDivVM.searchTable();
-                                   }});
+                                mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    // mainDivVM.searchTable();
+                                    window.location.href='/financing/refund/refundConfirmPage';
+                                }});
                                 
                              }else{
                                  mainDivVM.$message({message:'操作失败',type:'error'});
@@ -574,6 +593,16 @@
                         });          
                     });
                 }
+                // 存储选中信息--start
+                var clueId=rows[0].signId;  
+                setSessionStore("refundConfirmStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("refundConfirmOtherVal", otherVal);
+                // 存储选中信息--end
             },
             handleSelectionChange(val) {//选择节点的事件
                 console.log(val)
@@ -598,12 +627,33 @@
                 .then(function (response) {
                     var data =  response.data
                     if(data.code=='0'){
-                       var resData = data.data;
-                       mainDivVM.tableData= resData.data;
-                     //3.分页组件
-                       mainDivVM.pager.total= resData.total;
-                       mainDivVM.pager.currentPage = resData.currentPage;
-                       mainDivVM.pager.pageSize = resData.pageSize;
+                        var resData = data.data;
+                        mainDivVM.tableData= resData.data;
+                        //3.分页组件
+                        mainDivVM.pager.total= resData.total;
+                        mainDivVM.pager.currentPage = resData.currentPage;
+                        mainDivVM.pager.pageSize = resData.pageSize;
+
+                        // 取出存储的id
+                        if(!mainDivVM.paginationShow){
+                            if(mainDivVM.storeId){
+                               mainDivVM.$nextTick(function(){
+                                  var storage = [];
+                                  mainDivVM.tableData.forEach(function(item, index){
+                                      if(item.signId === mainDivVM.storeId ){
+                                          storage.push(mainDivVM.tableData[index]);
+                                      }
+                                  })
+                                  mainDivVM.toggleSelection(storage);
+                                  mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
+                              })
+                          }
+                        }else{
+                          removeSessionStore ("refundConfirmStoreForm");
+                          removeSessionStore ("refundConfirmOtherVal");
+                        }
+                        mainDivVM.paginationShow = true;
+                        mainDivVM.storeForm = mainDivVM.form;
                         
                     }else{
                         mainDivVM.$message({message:data.msg,type:'error'});
@@ -615,8 +665,15 @@
                      console.log(error);
                 }).then(function(){
                 });
-                
-                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.tableData.toggleRowSelection(row,true);
+                    });
+                } else {
+                  this.$refs.tableData.clearSelection();
+                }
             },
             showReason(row){//驳回原因
                 this.rejectReason='';
@@ -932,6 +989,7 @@
                  }
             },
             submitRejectRefundDialogForm(formName){//提交驳回原因
+                var rows = this.multipleSelection;
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var param ={};  
@@ -965,7 +1023,8 @@
                             	mainDivVM.rejectRefundDialogForm.rejectReason='';
                                 mainDivVM.rejectRefundDialogVisible = false;
                                 mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                	  mainDivVM.searchTable();
+                                	  // mainDivVM.searchTable();
+                                      window.location.href='/financing/refund/refundConfirmPage';
                                 }});
                             }else{
                             	mainDivVM.$message({message:resData.msg,type:'error'});
@@ -984,6 +1043,16 @@
                         return false;
                     }
                 });
+                // 存储选中信息--start
+                var clueId=rows[0].signId;  
+                setSessionStore("refundConfirmStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("refundConfirmOtherVal", otherVal);
+                // 存储选中信息--end
             },
             openMarkRefundDialog(){
             	var rows = this.multipleSelection;
@@ -1022,7 +1091,8 @@
                               var data =  response.data
                               if(data.code=='0'){
                                   mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                      mainDivVM.searchTable();
+                                      // mainDivVM.searchTable();
+                                      window.location.href='/financing/refund/refundConfirmPage';
                                     }});
                                  
                               }else{
@@ -1041,9 +1111,18 @@
                              type: 'info',
                              message: '已取消操作'
                          });          
-                     });
-                    
+                     });                    
                 }
+                // 存储选中信息--start
+                var clueId=rows[0].signId;  
+                setSessionStore("refundConfirmStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("refundConfirmOtherVal", otherVal);
+                // 存储选中信息--end
             },
             recordClick(row) {//查看明细
                  // row.signNo;
@@ -1145,7 +1224,18 @@
             },
           
         },
-        created(){    
+        created(){  
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("refundConfirmStoreForm");
+                var otherVal = getSessionStore("refundConfirmOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };    
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
