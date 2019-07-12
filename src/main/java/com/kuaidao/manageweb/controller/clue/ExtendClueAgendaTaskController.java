@@ -1176,14 +1176,14 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setSex(clueAgendaTaskDTO1.getSex());
                     //手机号相同则只存储phone1
                     if((StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone())
-                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone().trim()))
+                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone().replaceAll(" ", "")))
                         && (StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2())
-                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2().trim()))
-                        && clueAgendaTaskDTO1.getPhone().trim().equals(clueAgendaTaskDTO1.getPhone2().trim())){
-                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().trim());
+                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", "")))
+                        && clueAgendaTaskDTO1.getPhone().replaceAll(" ", "").equals(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""))){
+                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
                     } else {
-                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().trim());
-                        pushClueReq.setPhone2(clueAgendaTaskDTO1.getPhone2().trim());
+                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
+                        pushClueReq.setPhone2(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""));
                     }
                     pushClueReq.setWechat(clueAgendaTaskDTO1.getWechat());
                     pushClueReq.setWechat2(clueAgendaTaskDTO1.getWechat2());
