@@ -48,6 +48,7 @@ import com.kuaidao.aggregation.dto.clue.RepeatClueRecordQueryDTO;
 import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
@@ -153,6 +154,20 @@ public class MyCustomerClueController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("ossUrl", ossUrl);
+        // 添加重单字段限制的业务线
+        String repetitionBusinessLine = getSysSetting(SysConstant.REPETITION_BUSINESSLINE);
+     // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proSelect", proJson.getData());
+        }
+        boolean isShowRepetition = false;
+        if((","+repetitionBusinessLine+",").contains(","+user.getBusinessLine()+",")) {
+        	isShowRepetition = true;
+        }
+        request.setAttribute("isShowRepetition", isShowRepetition);
         return "clue/myCustom";
     }
 
@@ -423,7 +438,9 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerInfoReadOnly")
     public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam(required = false) String commonPool) {
+            @RequestParam(required = false) String commonPool,
+            @RequestParam(required = false) String repeatFlag
+        ) {
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
         String role = null;
@@ -488,14 +505,20 @@ public class MyCustomerClueController {
                 request.setAttribute("customer", new ArrayList());
             }
             if (null != clueInfo.getData().getClueBasic()) {
-                request.setAttribute("base", clueInfo.getData().getClueBasic());
+                ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
+                request.setAttribute("base", clueBasic);
             } else {
-                request.setAttribute("customer", new ArrayList());
+                request.setAttribute("base", new ArrayList());
             }
             if (null != clueInfo.getData().getClueIntention()) {
                 request.setAttribute("intention", clueInfo.getData().getClueIntention());
             } else {
-                request.setAttribute("customer", new ArrayList());
+                request.setAttribute("intention", new ArrayList());
+            }
+            if (null !=  clueInfo.getData().getClueRelate()) {
+                request.setAttribute("relate", clueInfo.getData().getClueRelate());
+            }else{
+                request.setAttribute("relate", new ArrayList());
             }
         }
         // 获取资源跟进记录数据
@@ -537,6 +560,7 @@ public class MyCustomerClueController {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
         request.setAttribute("commonPool", commonPool);
+        request.setAttribute("repeatFlag", repeatFlag);
         request.setAttribute("loginUserId", user.getId());
 
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
