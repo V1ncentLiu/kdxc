@@ -4,7 +4,9 @@ package com.kuaidao.manageweb.controller.clue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
@@ -32,13 +35,17 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -70,7 +77,8 @@ public class ClueRepetitionController {
 
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     /**
      * 重单列表页面
@@ -81,6 +89,13 @@ public class ClueRepetitionController {
     public String queryRepeatPage(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
+     // 添加重单字段限制的业务线
+        boolean isShowRepetition = false;
+        String repetitionBusinessLine = getSysSetting(SysConstant.REPETITION_BUSINESSLINE);
+        if((","+repetitionBusinessLine+",").contains(","+user.getBusinessLine()+",")) {
+        	isShowRepetition = true;
+        }
+        request.setAttribute("isShowRepetition", isShowRepetition);
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
@@ -397,5 +412,20 @@ public class ClueRepetitionController {
     public JSONResult<ClueRepetitionDTO> getRepeatDetailsByRepeatId(
             @RequestBody ClueRepetitionDTO clueRepetitionDTO) {
         return clueRepetitionFeignClient.getRepeatDetailsByRepeatId(clueRepetitionDTO);
+    }
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
     }
 }
