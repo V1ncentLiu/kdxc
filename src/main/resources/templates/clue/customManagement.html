@@ -546,7 +546,6 @@
     <!-- 分配资源 -->
     <el-dialog title="分配资源" :visible.sync="allocateFormVisible" width="540px">
       <el-form :model="formAllocat" ref="formAllocat">
-        <el-row>
             <el-form-item 
                 label="电销顾问：" 
                 prop="telSales"
@@ -563,6 +562,16 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+          <el-form-item label="客户级别：" :label-width="formLabelWidth">
+              <el-select v-model="formAllocat.cusLevel" placeholder="不变化" style="width: 80%;">
+                  <el-option
+                          v-for="item in cusLevelArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                  </el-option>
+              </el-select>
+          </el-form-item>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
@@ -704,7 +713,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 allocateFormVisible: false, //分配资源
                 dailogTitleType:'',
                 formAllocat:{
-                    telSales:''
+                    telSales:'',
+                    cusLevel:''
                 },
                 transferFormVisible: false, //转移资源
                 formTransfer:{
@@ -1223,6 +1233,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   if (valid) {
                    var telSale=this.formAllocat.telSales;
                    var rows = this.multseleSelection;
+                   var cusLevel = this.formAllocat.cusLevel;
                    var idArr=[];
                    for(var i=0;i<rows.length;i++){
                 	   idArr.push(rows[i].clueId);
@@ -1230,6 +1241,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    var  param={};
                    param.idList=idArr;
                    param.teleSaleId=telSale;
+                   param.cusLevel = cusLevel;
                    this.allocateFormVisible = false;
 
                    this.btnDisabled = true; 

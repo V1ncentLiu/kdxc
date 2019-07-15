@@ -395,6 +395,67 @@
                     </el-select>
                 </el-form-item>
             </el-row>
+            
+            
+            
+            
+            
+            <div v-if="isShowRepetition ==true">
+	            <el-row>
+	                <el-form-item label="运作区域：" :label-width="formLabelWidth" prop="operatingArea">
+	                    <el-input v-model="repeatApplyForm.operatingArea"  style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="50"></el-input>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="考察时间：" :label-width="formLabelWidth" prop="investigateTime">
+	                    <el-date-picker
+	                        style="width: 60%;"
+	                        v-model="repeatApplyForm.investigateTime"
+	                        type="datetime"
+	                        placeholder="选择日期时间">
+	                    </el-date-picker>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="考察地点：" :label-width="formLabelWidth" prop="investigateArea">
+	                    <el-input v-model="repeatApplyForm.investigateArea"  style="width: 60%;" @keyup.native="repeatApplyNumber"  maxLength="50"></el-input>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="investigateProjectId">
+	                    <el-select filterable  v-model="repeatApplyForm.investigateProjectId" multiple style="width: 60%;">
+	                        <el-option
+	                            v-for="item in proSelect"
+	                             :key="item.id"
+	                             :label="item.projectName"
+	                             :value="item.id">
+	                        </el-option>
+	                    </el-select>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="协商结果：" :label-width="formLabelWidth" prop="consultResults">
+	                    <el-select filterable  v-model="repeatApplyForm.consultResults" placeholder="选择项目" style="width: 60%;">
+	                        <el-option
+	                            v-for="item in consultResultsArr"
+	                            :key="item.value"
+	                            :label="item.name"
+	                            :value="item.value">
+	                        </el-option>
+	                    </el-select>
+	                </el-form-item>
+	            </el-row>
+            </div>
+            
+            
+            
+            
+            
+            
             <el-row>
                 <el-form-item label="备注：" :label-width="formLabelWidth" prop="textarea">
                     <el-input
@@ -650,6 +711,8 @@
 <script th:inline="javascript" >
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
+var proSelect = [[${proSelect}]];//可签约项目
+var isShowRepetition = [[${isShowRepetition}]];//业务线
     var mycustomVM=new Vue({
         el: '#myCustom',
         data: function() {
@@ -665,6 +728,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 repeatPhonesDialog:false,
                 tmOutboundCallDialogVisible:false,
                 loading:false,
+                isShowRepetition:isShowRepetition,
                 dailogTitleType:'',
                 form: {
                     isTransfer:'',
@@ -698,6 +762,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     email:""
                     
                 },
+                consultResultsArr:[
+                	{value:"0",name:"平分"},
+                    {value:"1",name:"判定"}
+                ],
                 comArr:[
                    {value:"",name:"全部"},
                    {value:"1",name:"是"},
@@ -709,7 +777,12 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     employee:'',
                     repeatPhone:'',
                     repeatClue:'',
-                    textarea:''
+                    textarea:'',
+                    operatingArea:'',
+                    consultResults:'0',
+                    investigateProjectId:'',
+                    investigateArea:'',
+                    investigateTime:''
                 },
                 releaseForm:{
                     reason:''
@@ -835,6 +908,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         createPerson:'李四',
                     }
                 ],
+                proSelect:proSelect,
                 repeatPhonesTable:[],
                 repeatPhonesTable2:[],
                 repeatPhonesTable3:[],
@@ -888,7 +962,48 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     ],
                     repeatClue: [
                         { required: true, message: '请选择重单资源', trigger: 'blur' }
-                    ]
+                    ],
+                    operatingArea: [
+                        { required: true, message: '请输入运作区域', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    investigateTime: [
+                        { required: true, message: '请选择考察时间', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    investigateArea: [
+                        { required: true, message: '请输入考察地点', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    investigateProjectId: [
+                        { required: true, message: '请选择考察项目', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'change'}
+                    ],
+                    consultResults: [
+                        { required: true, message: '请选择协商结果', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'change'}
+                    ],
+                    
                 },
                 releaseRules:{
                     reason: [
@@ -1178,7 +1293,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  }
                    var repeatPhone= this.repeatApplyForm.repeatPhone;
                    var employee= this.repeatApplyForm.employee;
-   
                    var param={};
                    param.telemarketingId=employee
                    this.repeatApplyForm.repeatClue="";
@@ -1225,6 +1339,12 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         
                         var textarea= this.repeatApplyForm.textarea;
                         
+                        var operatingArea = this.repeatApplyForm.operatingArea ;
+    	   				var investigateTime  = this.repeatApplyForm.investigateTime   ;
+    	   				var investigateArea = this.repeatApplyForm.investigateArea ;
+    	   				var investigateProjectId = this.repeatApplyForm.investigateProjectId.join(',')   ;
+    	   				var consultResults = this.repeatApplyForm.consultResults ;
+    	   				
                         var  param={};
                         
                         param.clueId=clue;
@@ -1236,6 +1356,11 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         param.repeatUserId=employee;
                         
                         param.repeatPhone=repeatPhone;
+                        param.operatingArea = operatingArea ;
+                        param.investigateTime = investigateTime;
+                        param.investigateArea = investigateArea;
+                        param.investigateProjectId = investigateProjectId;
+                        param.consultResults = consultResults;
                         param.remark=textarea;
                         this.dialogFormVisible = false;
 
