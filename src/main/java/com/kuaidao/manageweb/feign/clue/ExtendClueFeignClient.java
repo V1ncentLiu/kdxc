@@ -154,13 +154,13 @@ public interface ExtendClueFeignClient {
         @Override
         public JSONResult<List<ClueDistributionedTaskDTO>> findClues(
                 ClueDistributionedTaskQueryDTO queryDto) {
-            return fallBackError("导出线索：资源沟通记录");
+            return fallBackError("导出线索：资源情况");
         }
 
         @Override
         public JSONResult<List<ClueDistributionedTaskDTO>> findCommunicateRecords(
                 ClueDistributionedTaskQueryDTO queryDto) {
-            return fallBackError("导出线索：资源情况");
+            return fallBackError("导出线索：资源沟通记录");
         }
 
     }

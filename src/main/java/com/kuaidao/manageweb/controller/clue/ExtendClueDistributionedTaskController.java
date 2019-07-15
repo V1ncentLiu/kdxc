@@ -7,6 +7,8 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -348,6 +350,16 @@ public class ExtendClueDistributionedTaskController {
                 // }
                 // 只要下发的肯定都是否（产品定的，都是否）
                 curList.add("否"); // 是否重复
+                // 是否自建
+                String  inputName = "否 ";
+                if (AggregationConstant.YES.equals(taskDTO.getInputType())) {
+                    inputName = "是";
+                }
+                curList.add(inputName);
+                // 首次分配话务组
+                curList.add(taskDTO.getFirstAsssignTrafficGroupName());
+                // 首次分配电销组
+                curList.add(taskDTO.getFirstAsssignTeleGroupName());
                 dataList.add(curList);
             }
         }
@@ -552,6 +564,9 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("电销组总监");
         headTitleList.add("电销组");
         headTitleList.add("是否重复");
+        headTitleList.add("是否自建");
+        headTitleList.add("首次分配话务组");
+        headTitleList.add("首次分配电销组");
         return headTitleList;
     }
 

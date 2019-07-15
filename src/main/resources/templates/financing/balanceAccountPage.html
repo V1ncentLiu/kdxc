@@ -7,26 +7,26 @@
     </style>
 </head>
 <body>
-<div id="clueManage" class="clueManage mainPadding" style="display: none;">  
+<div id="clueManage" class="clueManage mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>财务管理</el-breadcrumb-item>
         <el-breadcrumb-item>对账结算申请</el-breadcrumb-item>
     </el-breadcrumb>
-    
+
     <el-row class="marginB20 ">
     		<el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
-    		  <shiro:hasPermission name="financing:balanceaccountManager:rejectApply"> 
+    		  <shiro:hasPermission name="financing:balanceaccountManager:rejectApply">
 		    <el-button type="danger" @click="rejectback">驳回</el-button>
 		      </shiro:hasPermission>
-    		 <shiro:hasPermission name="financing:balanceaccountManager:settlementConfirm">  
+    		 <shiro:hasPermission name="financing:balanceaccountManager:settlementConfirm">
 		    <el-button type="warning" @click="settlementConfirmButton">提交对账确认</el-button>
-		     </shiro:hasPermission>  
+		     </shiro:hasPermission>
 			  <el-button type="success" @click="down">下载结算单</el-button>
 	  </el-row>
-	  <div class="mainSearchBg">        
+	  <div class="mainSearchBg">
         <div class="mainSearchFormBox">
-            <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm"> 
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm">
                 <el-form-item label="商务大区:"  prop="busAreaId">
                   <el-select v-model="searchForm.busAreaId" clearable filterable  placeholder="商务大区" @change="changeBusArea"  @clear="clearBusAreaList" >
                     <el-option
@@ -87,7 +87,7 @@
                     </el-form-item>
                     <el-form-item label="客户姓名:" prop="cusName">
                       <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
-                    </el-form-item>                
+                    </el-form-item>
                     <el-form-item label="付款时间：">
                       <el-date-picker  v-model="searchForm.payStartTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                     </el-form-item>
@@ -153,7 +153,7 @@
                     <el-form-item label="签约单编号:" prop="signNo">
                       <el-input v-model="searchForm.signNo" placeholder="签约单编号"></el-input>
                     </el-form-item>
-                    
+
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -166,7 +166,7 @@
             <el-table class="tableBox" ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange" style="width: 100%" :data="dataTable">
                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-               
+
                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isDoubt'">
     	               <template slot-scope="scope">
                		  	<div v-if="scope.row.isDoubt === 1">
@@ -178,7 +178,7 @@
     	        </el-table-column>
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-else-if="item.fieldCode == 'status'">
-    	               <template slot-scope="scope">{{scope.row.status}} 
+    	               <template slot-scope="scope">{{scope.row.status}}
                		  	<div v-if="scope.row.status ==='驳回商务'">
                             <el-button type="text" size="small" @click="backRemark(scope.row)">
                             	驳回原因
@@ -195,7 +195,7 @@
     	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='待处理'">
     	               	<a style="color:#222">{{scope.row.statementNo}} </a>
     	               </div>
-    	               
+
                     </template>
     	        </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
@@ -227,21 +227,21 @@
     </el-dialog>
     <el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
 	  <el-form :model="form">
-	    
+
 		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
 		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
 		      </el-checkbox>
-		  
+
 		     </el-checkbox-group>
 		  </el-form-item>
-	    
+
 	  </el-form>
-	  
+
 	  <div slot="footer" class="dialog-footer">
       <el-button type="primary" @click="confirmColumn">确 定</el-button>
-	    <el-button @click="dialogFormVisible = false">取 消</el-button>	    
+	    <el-button @click="dialogFormVisible = false">取 消</el-button>
 	  </div>
 	</el-dialog>
 	 <!--驳回-->
@@ -264,16 +264,16 @@
     </el-dialog>
     <!-- dialog -->
     <el-dialog title="提交对账确认" :visible.sync="submitApplyVisible" width="540px" @close="closeSubmitApplyDialog">
-        <el-form :model="apply" ref="apply" :rules="allpyrules" class="width500"> 
+        <el-form :model="apply" ref="apply" :rules="allpyrules" class="width500">
 	        <el-form-item label="结算金额：" :label-width="formLabelWidth1" prop="money">
-	             <el-input  type="number" v-model="apply.money" placeholder="" style="width: 290px;margin-right: 10px;" oninput="if(value.length>8)value=value.slice(0,8)" @keyup.native="repeatApplyNumber" maxLength="10"></el-input>元
+	             <el-input  type="number" v-model="apply.money" placeholder="" style="width: 290px;margin-right: 10px;" oninput="if(value.length>8)value=value.slice(0,8)" @input="repeatApplyNumber" maxLength="10"></el-input>元
 	         </el-form-item>
 	         <el-form-item label="是否有疑意："   :label-width="formLabelWidth1" prop="isDoubt">
 	          <el-radio-group @change="isdoubtbutton" v-model="apply.isDoubt">
 	          	<el-radio  :label="0">否</el-radio>
 	             <el-radio  :label="1">是</el-radio>
 	          </el-radio-group>
-	             
+
 	         </el-form-item>
 	         <el-form-item label="疑意：" prop="doubtRemark" :label-width="formLabelWidth1" v-show="doubtRemarkShow">
 	                    <el-input type="textarea" v-model="apply.doubtRemark" maxlength="100" :rows="3" placeholder="请填写疑意" style="width: 290px;"></el-input>
@@ -544,7 +544,7 @@ var clueVM = new Vue({
                 param.phone = this.searchForm.phone;
                 param.signNo = this.searchForm.signNo;
                 param.statementNo = this.searchForm.statementNo;
-                
+
                 //列表只查询正常数据，取消删除数据不查询
                 //param.delFalg = this.searchForm.delFalg;
                 console.info(param);
@@ -594,7 +594,7 @@ var clueVM = new Vue({
                 .catch(function (error) {
                      console.log(error);
                 });
-                
+
               },
               toggleSelection(rows) { // table select 默认选中fn
                   if (rows) {
@@ -629,7 +629,7 @@ var clueVM = new Vue({
        		},
                //
                transformratio(row, column, cellValue, index) {
-                
+
                  return (cellValue+"").substring(0,2)+"%";
                },
                //是否转换方法
@@ -742,7 +742,7 @@ var clueVM = new Vue({
                           type: 'warning'
                         });
                        return;
-                   } 
+                   }
             	   var status = rows[0].status;
             	   if(status =="待处理" || status =="驳回商务" ){
             		   this.$message({
@@ -808,7 +808,7 @@ var clueVM = new Vue({
                           param.idList=idList;
           	           		param.remark = this.rejectform.remark;
           	           		param.payDetailId=rows[0].payId;
-                          this.btnDisabled = true;  
+                          this.btnDisabled = true;
                           axios.post('/financing/balanceaccount/rejectApply',param)
                              .then(function (response) {
                                  var data =  response.data;
@@ -823,8 +823,8 @@ var clueVM = new Vue({
                                  	clueVM.$message({
                                          message: "接口调用失败",
                                          type: 'error'
-                                       }); 
-                                       clueVM.btnDisabled = false; 
+                                       });
+                                       clueVM.btnDisabled = false;
                                  }
                              })
                              .catch(function (error) {
@@ -832,16 +832,16 @@ var clueVM = new Vue({
                                clueVM.$message({
                                   message: "驳回失败",
                                   type: 'error'
-                                }); 
-                               clueVM.btnDisabled = false; 
+                                });
+                               clueVM.btnDisabled = false;
                              })
                              .then(function () {
-                             	
+
                              });
                        }
             	   })
-           	   
-	            	
+
+
                },
                settlementConfirmButton(){
             	   var rows = this.multipleSelection;
@@ -920,7 +920,7 @@ var clueVM = new Vue({
                         for(var i=0;i<rows.length;i++){
                           var curRow = rows[i];
                           idList.push(curRow.accountId);
-                        } 
+                        }
                       var param  = {};
                       param.idList=idList;
                       param.money = clueVM.apply.money;
@@ -943,7 +943,7 @@ var clueVM = new Vue({
                               clueVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
-                              }); 
+                              });
                               clueVM.btnDisabled = false;
                             }
                         })
@@ -972,7 +972,7 @@ var clueVM = new Vue({
                //驳回原因
                backRemark(row){
             	   clueVM.backVisable = true;
-            	   clueVM.backRemarks = row.remark; 
+            	   clueVM.backRemarks = row.remark;
                },
                confirmColumn(){
                  	//处理用户选择的列
@@ -981,7 +981,7 @@ var clueVM = new Vue({
                		this.$message({
                            message: "请至少保留一列",
                            type: 'error'
-                         }); 
+                         });
                		return;
                	}
                  	this.dialogFormVisible = false;
@@ -1007,7 +1007,7 @@ var clueVM = new Vue({
                    if(idList.length!=0){
    	                axios.post('/customfield/customField/saveUserField', param)
    	                .then(function (response) {
-   	                	
+
    	                })
    	                .catch(function (error) {
    	                     console.log(error);
@@ -1032,38 +1032,42 @@ var clueVM = new Vue({
    	              	this.form.type = type;
    	              	this.confirmColumn();
                  	}
-                 	
+
                  },
                  sortNumber(a,b) {
                      //对数组中元素，按照数字 从小到大 排序
                      return a.split("_")[0] - b.split("_")[0];
                   },
                   saveNotVisit(){
-                	  
-                  },
-                  repeatApplyNumber(){
-        	    debugger;
-        	          //保底服务费
-                      var lowestCommission =  parseInt(this.lowestCommission);
-                      //已对账确认佣金
-                      var confirmCommission  = this.confirmCommission;
-                      var  commissionMoney = this.apply.money*this.ratio/100;
-                      var sum  = commissionMoney + confirmCommission;
-                      //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金=保底服务费-已对账的佣金
-                      //否则佣金等于结算金额*结算比例
-                      if(lowestCommission > sum){
-                          this.apply.commissionMoney = lowestCommission - confirmCommission;
-                      }else{
-                          this.apply.commissionMoney = commissionMoney;
-                      }
 
-             		},
+                  },
+            repeatApplyNumber() {
+          	    debugger;
+                var commissionMoney = this.apply.money * this.ratio / 100;
+                if (!this.lowestCommissionShow) {
+                    clueVM.apply.commissionMoney = commissionMoney;
+                }
+                if (this.lowestCommissionShow) {
+                    //保底服务费
+                    var lowestCommission = parseInt(this.lowestCommission);
+                    //已对账确认佣金
+                    var confirmCommission = clueVM.confirmCommission;
+                    var sum = commissionMoney + confirmCommission;
+                    //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金=保底服务费-已对账的佣金
+                    //否则佣金等于结算金额*结算比例
+                    if (lowestCommission > sum) {
+                        clueVM.apply.commissionMoney = lowestCommission - confirmCommission;
+                    } else {
+                        clueVM.apply.commissionMoney = commissionMoney;
+                    }
+                }
+            },
                 toogleClick(){
                     if(this.isShow){
                         this.isShow=false
                     }else{
                         this.isShow=true
-                    }          
+                    }
                 },
                 closeSubmitApplyDialog(){//关闭提交对账确认
                     clueVM.lowestCommissionShow = false;
@@ -1106,7 +1110,7 @@ var clueVM = new Vue({
                     this.teleGorupOptions=[];
                     this.searchForm.teleGorupId='';
                     this.clearTeleGroupList();
-                    
+
                 },
                 clearTeleGroupList(){
                      this.teleSaleOptions=[];
@@ -1167,7 +1171,7 @@ var clueVM = new Vue({
                     this.busGroupOptions=[];
                     this.searchForm.busGroupId='';
                     this.clearBusGroupList();
-                    
+
                 },
                 clearBusGroupList(){
                      this.busSaleOptions=[];
@@ -1187,7 +1191,7 @@ var clueVM = new Vue({
                          console.log(error);
                     });
                 }
-                
+
         },
         created(){
             console.info("create method");
@@ -1206,7 +1210,7 @@ var clueVM = new Vue({
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.initColumn();
-            this.searchTable();  
+            this.searchTable();
             this.getBusAndTel()
         },
         mounted(){
@@ -1214,6 +1218,6 @@ var clueVM = new Vue({
            document.getElementById('clueManage').style.display = 'block';
         }
     })
-    
+
 </script>
 </html>

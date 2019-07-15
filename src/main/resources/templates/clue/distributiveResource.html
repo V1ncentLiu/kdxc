@@ -244,6 +244,14 @@
                         <div v-else-if="scope.row.status ==1">是</div>
                     </template>
                 </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.cusName}}
+                        <span v-if="scope.row.inputType ==1">
+                             <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                         </span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'firstCall'">
                     <template slot-scope="scope">
                         <div v-if="scope.row.firstCall == 0">否</div>
@@ -894,7 +902,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }).catch(function (error) {
                     console.log(error);
                 }).then(function(){
-                    signRecordVM.loading=false;
                 });
             },
 
