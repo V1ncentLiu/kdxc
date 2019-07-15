@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -80,7 +81,7 @@ public interface ExtendClueFeignClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/import")
-    public JSONResult<List<PushClueReq>> importclue(@RequestBody List<PushClueReq> list);
+    public JSONResult<Map<String, Object>> importclue(@RequestBody List<PushClueReq> list);
 
     /**
      * 导出线索：线索情况
@@ -146,7 +147,7 @@ public interface ExtendClueFeignClient {
         }
 
         @Override
-        public JSONResult<List<PushClueReq>> importclue(List<PushClueReq> list) {
+        public JSONResult<Map<String, Object>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
             return fallBackError("导入资源");
         }
