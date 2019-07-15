@@ -1,8 +1,5 @@
 package com.kuaidao.manageweb.config;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.annotation.PostConstruct;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import lombok.Data;
@@ -25,36 +22,19 @@ public class BusinessCallrecordLimit {
     /**
      * 郑州商学院
      */
-    private Long zzBusOrgId;
+    private String zzBusOrgId;
     /**
      *  石家庄商学院
      */
-    private Long sjzBusOrgId;
+    private String sjzBusOrgId;
     /**
      * 合肥商学院
      */
-    private Long hfBusOrgId;
+    private String hfBusOrgId;
     
     /**
      * 商机盒子天津商学院
      */
     private Long sjhzTjBusOrgId;
     
-    private Set<Long> orgIdSet = new HashSet<>();
-    
-    @PostConstruct
-    public void initSet() {
-        addOrgId(qhdBusOrgId);
-        addOrgId(zzBusOrgId);
-        addOrgId(sjzBusOrgId);
-        addOrgId(hfBusOrgId);
-        addOrgId(sjhzTjBusOrgId);
-    }
-    
-    public void addOrgId(Long orgId) {
-        if(orgId!=null) {
-            orgIdSet.add(orgId);
-        }
-    }
-
 }

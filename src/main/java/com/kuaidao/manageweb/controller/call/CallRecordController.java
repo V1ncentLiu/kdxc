@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.call;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Splitter;
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -29,10 +30,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -57,9 +60,6 @@ public class CallRecordController {
 
     @Autowired
     OrganizationFeignClient organizationFeignClient;
-    /*
-    @Value("${callrecord.businessOrgIds}")
-    private  String businessOrgIds;*/
     
     @Autowired
     BusinessCallrecordLimit businessCallrecordLimit;
@@ -99,24 +99,68 @@ public class CallRecordController {
     @RequiresPermissions("aggregation:telCallRecord:view")
     @RequestMapping("/telCallRecord")
     public String telCallRecord(HttpServletRequest request) {
-        logger.info("ss{{}}",businessCallrecordLimit);
+        logger.info("businessCallrecordLimit {{}}",businessCallrecordLimit);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-            request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
-        } else {
-            request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
+        //商学院处理
+        boolean isBusinessAcademy = false;
+        Long curOrgId = curLoginUser.getOrgId();
+        Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+            Integer businessLine = curLoginUser.getBusinessLine();  
+            isBusinessAcademy  = true;
+            request.setAttribute("teleGroupList", getTeleGroupByBusinessLine(businessLine));
         }
+       //郑州商学院
+        if(!isBusinessAcademy) {
+            String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
+            if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
+                isBusinessAcademy  = true;
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
+                request.setAttribute("teleGroupList", getCurTeleGroupList(Long.parseLong(orgIdList.get(1))));
+            }
+        }
+        
+        
+        //石家庄商学院
+        if(!isBusinessAcademy) {
+            String sjzBusOrgId = businessCallrecordLimit.getSjzBusOrgId();
+            if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
+                isBusinessAcademy  = true;
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
+                request.setAttribute("teleGroupList",  getCurTeleGroupList(Long.parseLong(orgIdList.get(1))));
+            }
+        }
+       
+    
+        //合肥商学院 
+        if(!isBusinessAcademy) {
+            String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
+            if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
+                isBusinessAcademy  = true;
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
+                request.setAttribute("teleGroupList",getCurTeleGroupList(Long.parseLong(orgIdList.get(1))));
+            }
+        }
+         
+        if(!isBusinessAcademy) {
+            //非商学院
+            if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
+            } else {
+                request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
+            }
+        }
+       
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
 
         return "call/telCallRecord";
     }
-
 
     /**
      * 获取该业务下 的所有电销组
@@ -326,28 +370,48 @@ public class CallRecordController {
      */
     private Map<String, Object>  setBusAccountIdList(CallRecordReqDTO myCallRecordReqDTO,Long curOrgId,Integer businessLine) {
         Map<String, Object> resMap = new HashMap<>();
-        Set<Long> orgIdSet = businessCallrecordLimit.getOrgIdSet();
-        if(!orgIdSet.contains(curOrgId)) {
-            resMap.put("isBusinessAcademy",false);
-            return  resMap; 
-        }
-        //判断是否 秦皇岛商学院 商机盒子商学院
-        Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
+        //判断是否 秦皇岛商学院听业务线下所有； 商机盒子商学院 听业务线下所有
         List<UserInfoDTO>  userInfoList = new ArrayList<>();
+        boolean isBusinessAcademy = false   ;
+        Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
         if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
               userInfoList  = getTeleSaleByBusinessLine(businessLine);
-        }else if(curOrgId.equals(businessCallrecordLimit.getZzBusOrgId())) {
-          //郑州商学院
-            userInfoList = getTeleSaleByOrgId(curOrgId);
-        }else if(curOrgId.equals(businessCallrecordLimit.getSjzBusOrgId())) {
-            //石家庄商学院
-            userInfoList = getTeleSaleByOrgId(curOrgId);
-        }else if(curOrgId.equals(businessCallrecordLimit.getHfBusOrgId())) {
-            //合肥商学院 
-           userInfoList = getTeleSaleByOrgId(curOrgId);
+              isBusinessAcademy = true;
+        }
+       //郑州商学院 听郑州
+        if (!isBusinessAcademy) {
+            String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
+            if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
         }
         
-        resMap.put("isBusinessAcademy", true);
+        if (!isBusinessAcademy) {
+            //石家庄商学院 听石家庄
+            String sjzBusOrgId = businessCallrecordLimit.getSjzBusOrgId();
+            if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
+        }
+        
+        if (!isBusinessAcademy) {
+            //合肥商学院 听合肥的
+             String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
+            if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
+        }
+        
+        resMap.put("isBusinessAcademy", isBusinessAcademy);
+        if (!isBusinessAcademy) {
+           return resMap; 
+        }
         if (CollectionUtils.isEmpty(userInfoList)) {
             resMap.put("result",new JSONResult<Map<String, Object>>().success(null));
             return resMap;
