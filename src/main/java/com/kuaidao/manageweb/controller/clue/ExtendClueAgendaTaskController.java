@@ -1292,6 +1292,8 @@ public class ExtendClueAgendaTaskController {
                         illegalDataList.add(clueAgendaTaskDTO2);
                     }
                 }
+            } else {
+                return  new JSONResult().fail("-1","导入失败");
             }
         }
         return new JSONResult<>().success(illegalDataList);
