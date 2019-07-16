@@ -1,31 +1,5 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -86,6 +60,30 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -1155,6 +1153,21 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
+            if(dto.getClueCustomer().getPhoneCreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+                dto.getClueCustomer().setPhoneCreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone2CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+                dto.getClueCustomer().setPhone2CreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone3CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+                dto.getClueCustomer().setPhone3CreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone4CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+                dto.getClueCustomer().setPhone4CreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone5CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+                dto.getClueCustomer().setPhone5CreateUser(user.getId());
+            }
         }
         return myCustomerFeignClient.updateCustomerBasicInfoClue(dto);
     }
@@ -1178,6 +1191,21 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
+            if(dto.getClueCustomer().getPhoneCreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+                dto.getClueCustomer().setPhoneCreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone2CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+                dto.getClueCustomer().setPhone2CreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone3CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+                dto.getClueCustomer().setPhone3CreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone4CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+                dto.getClueCustomer().setPhone4CreateUser(user.getId());
+            }
+            if(dto.getClueCustomer().getPhone5CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+                dto.getClueCustomer().setPhone5CreateUser(user.getId());
+            }
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }
