@@ -1,25 +1,5 @@
 package com.kuaidao.manageweb.controller.statistics.callrecord;
 
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -34,16 +14,31 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTalkTimeQueryDTO;
 import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
 import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * 通话时长  
- * @author  Devin.Chen
- * @date 2019-05-18 16:11:24
- * @version V1.0
+ * 电销顾问通话时长
  */
 @RestController
 @RequestMapping("/callrecord/teleSaleTalkTime")
@@ -111,7 +106,6 @@ public class TeleSaleTalkTimeController {
     
     /**
      * 获取当前组织机构
-    * @param teleSaleTalkTimeQueryDTO
     * @return
      */
     private List<Long> getOrgList(){
@@ -286,7 +280,7 @@ public class TeleSaleTalkTimeController {
              busGroupReqDTO.setParentId(curOrgId);
              busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
              busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
-             JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+             JSONResult<List<OrganizationRespDTO>> orgJr = getOrgGroupByOrgId(curOrgId,OrgTypeConstant.DXZ);
              if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
                  logger.error("listTeleSaleTalkTime queryOrgByParam,param{{}},res{{}}",busGroupReqDTO,orgJr);
                  return new JSONResult<PageBean<TeleTalkTimeRespDTO>>().fail(orgJr.getCode(),orgJr.getMsg());
@@ -335,7 +329,7 @@ public class TeleSaleTalkTimeController {
              busGroupReqDTO.setParentId(curOrgId);
              busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
              busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
-             JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+             JSONResult<List<OrganizationRespDTO>> orgJr = getOrgGroupByOrgId(curOrgId,OrgTypeConstant.DXZ);
              if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
                  logger.error("exportTeleSaleTalkTimeNoPage queryOrgByParam,param{{}},res{{}}",busGroupReqDTO,orgJr);
                  isReqData = false;
@@ -514,8 +508,21 @@ public class TeleSaleTalkTimeController {
         busGroupReqDTO.setParentId(orgId);
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
-        return orgJr;
+        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        if (!JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
+            return null;
+        }
+        List<OrganizationRespDTO> list = new ArrayList<>();
+        if(listJSONResult != null && listJSONResult.getData().size() > 0){
+            List<OrganizationDTO> data = listJSONResult.getData();
+            for(OrganizationDTO organizationDTO : data){
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(organizationDTO.getId());
+                organizationRespDTO.setName(organizationDTO.getName());
+                list.add(organizationRespDTO);
+            }
+        }
+        return new JSONResult<List<OrganizationRespDTO>>().success(list);
     }
     
     /**
