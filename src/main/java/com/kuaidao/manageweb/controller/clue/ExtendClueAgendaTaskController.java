@@ -581,7 +581,10 @@ public class ExtendClueAgendaTaskController {
                 rowDto.setIsOptimize(Constants.IS_OPTIMIZE);
                 dataList.add(rowDto);
             }
-        } // outer foreach end
+        } else {
+            logger.error("导入资源模板错误");
+            return new JSONResult<>().fail("-1","导入资源模板错误");
+        }// outer foreach end
         logger.info("upload custom filed, valid success num{{}}", dataList.size());
         /*
          * JSONResult uploadRs = customFieldFeignClient.saveBatchCustomField(dataList);
