@@ -122,6 +122,20 @@
                  <el-table-column align="center" prop="repeatId" type="selection" width="55"></el-table-column> 
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="cusPhone" label="申请时间"></el-table-column>
+                <el-table-column align="center" prop="cusPhone" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="applyUser" label="重单顾问人员" width="300">
+                <template slot-scope="scope">
+                	<span  v-for="(item, index) in scope.row.clueRepetitionDTOs">
+                	<span v-if="index ==0">
+                	<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
+                	</span>
+                	<span v-if="index !=0">
+                	|&nbsp;<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
+                	</span>
+                	</span>
+                </template>
+                </el-table-column>
                 <el-table-column align="center" prop="cusName" label="客户姓名">
                     <template slot-scope="scope">
                         {{scope.row.cusName}}
@@ -132,9 +146,9 @@
                 </el-table-column>
                 <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
+                <el-table-column align="center" prop="isSign" label="协商结果" :formatter="transSignStatus"></el-table-column>
                 <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
                 <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
-                <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
         
                 <el-table-column  align="center"  label="比例">
                 <template slot-scope="scope">
@@ -153,18 +167,7 @@
     	            	</span>
                 	</span>
                 </template>
-                </el-table-column>
-                <el-table-column align="center" prop="applyUser" label="重单顾问人员" width="300">
-                <template slot-scope="scope">
-                	<span  v-for="(item, index) in scope.row.clueRepetitionDTOs">
-                	<span v-if="index ==0">
-                	<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
-                	</span>
-                	<span v-if="index !=0">
-                	|&nbsp;<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
-                	</span>
-                	</span>
-                </template>
+                <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                 </el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
