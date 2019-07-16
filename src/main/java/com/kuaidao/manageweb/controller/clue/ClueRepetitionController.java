@@ -251,6 +251,14 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/dealPetitionListPage")
     public String dealPetitionListPage(HttpServletRequest request) {
+    	UserInfoDTO user = getUser();
+    	// 添加重单字段限制的业务线
+        String repetitionBusinessLine = getSysSetting(SysConstant.REPETITION_BUSINESSLINE);
+    	boolean isShowRepetition = false;
+        if((","+repetitionBusinessLine+",").contains(","+user.getBusinessLine()+",")) {
+        	isShowRepetition = true;
+        }
+        request.setAttribute("isShowRepetition", isShowRepetition);
         return "clue/repetition/dealPetitionList";
     }
 
@@ -279,9 +287,9 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/dealPetitionById")
     @ResponseBody
-    public JSONResult<PageBean<ClueRepetitionDTO>> dealPetitionById(HttpServletRequest request,
+    public JSONResult<ClueRepetitionDTO> dealPetitionById(HttpServletRequest request,
             @RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-        JSONResult<PageBean<ClueRepetitionDTO>> list =
+        JSONResult<ClueRepetitionDTO> list =
                 clueRepetitionFeignClient.dealPetitionById(clueRepetitionDTO);
         return list;
     }

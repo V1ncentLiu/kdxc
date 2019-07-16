@@ -123,7 +123,7 @@
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="cusPhone" label="申请时间"></el-table-column>
-                <el-table-column align="center" prop="cusPhone" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="applyUser" label="重单顾问人员" width="300">
                 <template slot-scope="scope">
                 	<span  v-for="(item, index) in scope.row.clueRepetitionDTOs">
@@ -146,7 +146,7 @@
                 </el-table-column>
                 <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
-                <el-table-column align="center" prop="isSign" label="协商结果" :formatter="transSignStatus"></el-table-column>
+                <el-table-column align="center" prop="consultResults" label="协商结果" :formatter="transConsultResults"></el-table-column>
                 <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
                 <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
         
@@ -167,6 +167,7 @@
     	            	</span>
                 	</span>
                 </template>
+                </el-table-column>
                 <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                 </el-table-column>
             </el-table>
@@ -182,6 +183,18 @@
             </el-form-item>
             <el-form-item label="客户姓名：" :label-width="formLabelWidth160" >{{cusNameId}}
             </el-form-item>
+            <div v-if="isShowRepetition ==true">
+            	<el-form-item label="运作区域：" :label-width="formLabelWidth" >{{operatingArea}}
+	            </el-form-item>
+				<el-form-item label="考察时间：" :label-width="formLabelWidth" >{{investigateTime}}
+	            </el-form-item>
+	            <el-form-item label="考察地点：" :label-width="formLabelWidth" >{{investigateArea}}
+	            </el-form-item>
+	            <el-form-item label="考察项目：" :label-width="formLabelWidth" >{{projectName}}
+	            </el-form-item>
+	            <el-form-item label="协商结果：" :label-width="formLabelWidth" >{{consultResults}}
+	            </el-form-item>
+            </div>
             <el-form-item label="申请备注：" :label-width="formLabelWidth160" >{{remarkId}}
             </el-form-item>
             <el-form-item label="处理结果："  :label-width="formLabelWidth160" >
@@ -314,7 +327,7 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-
+var isShowRepetition =[[${isShowRepetition}]];
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
@@ -330,6 +343,12 @@
         	repeatName:"",
         	cusNameId:"",
         	clueId:"",
+        	isShowRepetition:isShowRepetition,
+        	operatingArea:"",
+        	investigateTime:"",
+        	investigateArea:"",
+        	projectName:"",
+        	consultResults:"",
         	repeatId:"",
         	searchContent:"",
         	teleCompanyId:"",
@@ -503,6 +522,34 @@
                 }
                 return text;
             },
+            dateTimeFormats(date) {
+    			if(date !=null && date !=''){
+    				return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    			}else{
+    				return "";
+    			}
+               
+    		},
+    		consultResultsNum(num) {
+    			if(num !=null ){
+    				if(num ==0){
+    					return  "平分";
+    				}else if(num ==1){
+    					return  "判定";
+    				}
+    			}
+    			return "";
+    		},
+            transConsultResults(row, column, cellValue, index) {
+            	  var text="";
+                  if("undefined" != cellValue && cellValue != null && cellValue==0){
+                	  text="平分"
+                  }else if("undefined" != cellValue && cellValue != null && cellValue==1){
+                	  text="判定"
+                  }
+                  return text;
+              },
+            
             repeatApplyChange(){
             	this.repeatApplyForm.repeadclue = "";
             	this.searchClueDisable =true;
@@ -736,6 +783,13 @@
                    			  orgVM.isShow =true;
                    			 
                    		  }
+                   		if(isShowRepetition){
+                  		  orgVM.operatingArea = clueRepetitionDTO.operatingArea ;
+                  		  orgVM.investigateTime = orgVM.dateTimeFormats(clueRepetitionDTO.investigateTime) ;
+                  		  orgVM.investigateArea = clueRepetitionDTO.investigateArea ;
+                  		  orgVM.projectName = clueRepetitionDTO.projectName ;
+                  		  orgVM.consultResults = orgVM.consultResultsNum(clueRepetitionDTO.consultResults) ;
+                  	  }
                    		 if(clueRepetitionDTO.clueRepetitionDTOs !=null){
                       		orgVM.form.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs; 
                        }
