@@ -19,7 +19,7 @@
     <el-row class="borderbox">
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
             <el-breadcrumb separator="  " class="elBreadcrumb marginB20">
-                <el-breadcrumb-item><font color="red" class="fs16">资源ID：<span th:text="${clueId}"></span></font></el-breadcrumb-item>
+                <el-breadcrumb-item><font color="red" class="fs16">资源ID：<span th:text="${clueId}"></span></font> <span v-show="repeatShowFalg">[{{teleReceiveSource}}] {{teleReceiveTime}}</span></el-breadcrumb-item>
                 <el-breadcrumb-item><el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button></el-breadcrumb-item>
             </el-breadcrumb>
             <div class="marginB20 fs16 paddingT20">资源信息</div>
@@ -59,10 +59,24 @@
                     </el-col>
                 </el-row>
                 <el-row>
-                    
-                    <el-col :span="24">
+                    <el-col :span="8">
                         <el-form-item label="备注：" :label-width="formLabelWidth120">
                             <el-button type="text" disabled>{{clueBase.remark}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-show="repeatShowFalg">
+                        <el-form-item label="创建人：" :label-width="formLabelWidth120">
+                            <el-button type="text" disabled>{{clueBase.createUserName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-show="repeatShowFalg">
+                        <el-form-item label="创建时间：" :label-width="formLabelWidth120">
+                            <el-button type="text" disabled>{{clueBase.createTime}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-show="repeatShowFalg">
+                        <el-form-item label="创建角色：" :label-width="formLabelWidth120">
+                            <el-button type="text" disabled>{{clueBase.createUserRole}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -87,6 +101,22 @@
                             <div v-show="showPhone">
                                 <font color="red">{{form.customerPhone}}</font>
                                 <span @click="dialogFormVisible = true" v-if="form.customerPhone2 !=null && form.customerPhone2 !=''" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="创建人：" prop="customerPhoneCreateUser" :label-width="formLabelWidth120" >
+                        <div v-show="showPhone">
+                            <font color="red">{{form.customerPhoneCreateUser}}</font>
+                        </div>
+                        <div v-show="!showPhone">
+                            <font color="red">领取后显示</font>
+                        </div>
+                        </el-form-item>
+                        <el-form-item label="角色：" prop="customerPhoneCreateUserRoleMame" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.customerPhoneCreateUserRoleMame}}</font>
                             </div>
                             <div v-show="!showPhone">
                                 <font color="red">领取后显示</font>
@@ -352,18 +382,110 @@
     <el-dialog title="查看手机号" :visible.sync="dialogFormVisible">
         <!--展示phone2  phone3  phone4 phone5-->
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <el-form-item v-show="form.phone2!=null" label="手机号2：" :label-width="formLabelWidth"  >
-                <el-button type="text" disabled>{{form.phone2}}</el-button>
-            </el-form-item>
-            <el-form-item   v-show="form.phone3!=null" label="手机号3：" :label-width="formLabelWidth"  >
-                <el-button type="text" disabled>{{form.phone3}}</el-button>
-            </el-form-item>
-            <el-form-item  v-show="form.phone4!=null" label="手机号4：" :label-width="formLabelWidth"  >
-                <el-button type="text" disabled>{{form.phone4}}</el-button>
-            </el-form-item>
-            <el-form-item  v-show="form.phone5!=null" label="手机号5：" :label-width="formLabelWidth"  >
-                <el-button type="text" disabled>{{form.phone5}}</el-button>
-            </el-form-item>
+            <!--<el-form-item v-show="form.phone2!=null" label="手机号2：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone2}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone2!=null" label="手机号2创建人：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.customerPhone2CreateUser}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone2!=null" label="手机号2创建人角色：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.customerPhone2CreateUserRoleMame}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item   v-show="form.phone3!=null" label="手机号3：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone3}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone3!=null" label="手机号3创建人：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone3CreateUser}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone3!=null" label="手机号3创建人角色：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone3CreateUserRoleMame}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item  v-show="form.phone4!=null" label="手机号4：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone4}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone4!=null" label="手机号4创建人：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone4CreateUser}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone4!=null" label="手机号4创建人角色：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone4CreateUserRoleMame}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item  v-show="form.phone5!=null" label="手机号5：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone5}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone5!=null" label="手机号5创建人：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone5CreateUser}}</el-button>-->
+            <!--</el-form-item>-->
+            <!--<el-form-item v-show="form.phone5!=null" label="手机号5创建人角色：" :label-width="formLabelWidth"  >-->
+                <!--<el-button type="text" disabled>{{form.phone5CreateUserRoleMame}}</el-button>-->
+            <!--</el-form-item>-->
+            <el-row v-show="form.phone2!=null">
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="手机号2：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone2}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.customerPhone2CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.customerPhone2CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-show="form.phone3!=null">
+                <el-col :span="8">
+                    <el-form-item label="手机号3：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone3}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone3CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone3CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-show="form.phone4!=null">
+                <el-col :span="8">
+                    <el-form-item label="手机号3：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone4}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone4CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone4CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-show="form.phone3!=null">
+                <el-col :span="8">
+                    <el-form-item label="手机号3：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone5}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone5CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone5CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
         </el-form>
     </el-dialog>
     <!-- dialog -->
@@ -667,25 +789,63 @@
 var clueId=[[${clueId}]];//资源ID
 var customer=[[${customer}]];//客户信息
 var base=[[${base}]];//资源基本信息
+var relate=[[${relate}]];//关联信息
 var intention=[[${intention}]];//资源投资意向信息
 var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
 var clueFileList=[[${clueFileList}]];//上传文件
-var commonPool=[[${commonPool}]];//上传文件
+var commonPool=[[${commonPool}]];//共有池控制标识
+var repeatFlag=[[${repeatFlag}]];//重单审批控制标识
 var callRecord=[[${callRecord}]];//上传文件
 var loginUserId=[[${loginUserId}]];
 var showPhone = true;
 var ossUrl = [[${ossUrl}]];//上传文件地址
+
 if(commonPool==1){
     showPhone = false;
 }
+
+var repeatShowFalg = false;
+if(repeatFlag==1){
+    repeatShowFalg = true;
+}
+
 var repeatClueList = [[${repeatClueList}]];
 var repeatClueStatus = [[${repeatClueStatus}]];
 var repeatStatus =false;
 if(repeatClueStatus == 1 ){
   repeatStatus = true;
 }
+
+var teleReceiveSource = "";
+var teleReceiveTime ="";
+if(relate){
+    teleReceiveTime = relate.teleReceiveTime;
+    teleReceiveSource = transTeleReceiveSource(relate.teleReceiveSource);
+}
+
+function transTeleReceiveSource(source){
+    if(!source){
+        return "";
+    }
+    var reStr = "";
+    if(source==1){
+        reStr = "分配"
+    }else  if(source==2){
+        reStr = "分配"
+    }else  if(source==3){
+        reStr = "领取"
+    }else  if(source==4){
+        reStr = "自建"
+    }else  if(source==5){
+        reStr = "分发"
+    }
+    return reStr;
+}
+
+
+
 var isEdit=false;
 
 function crtTimeFtt(val, row) {
@@ -735,11 +895,23 @@ if(customer==null){
     vform= {
         customerName:"",
             customerPhone:"",
+            customerPhoneCreateUser:"",
+            customerPhoneCreateUserRoleMame:"",
             customerPhone2:"",
+            customerPhone2CreateUser:"",
+            customerPhone2CreateUserRoleMame:"",
             phone2:"",
+            phone2CreateUserRoleMame:"",
+            phone2CreateUser:"",
             phone3:"",
+            phone3CreateUser:"",
+            phone3CreateUserRoleMame:"",
             phone4:"",
+            phone4CreateUser:"",
+            phone4CreateUserRoleMame:"",
             phone5:"",
+            phone5CreateUser:"",
+            phone5CreateUserRoleMame:"",
             customerSex:"",
             wechat:'',
             wechat2:'',
@@ -781,11 +953,23 @@ if(customer==null){
     vform={
         customerName:customer.cusName,
         customerPhone:customer.phone,
+        customerPhoneCreateUser:customer.phoneCreateUserName,
+        customerPhoneCreateUserRoleMame:customer.phoneCreateUserRoleMame,
         customerPhone2:customer.phone2,
+        customerPhone2CreateUser:customer.phone2CreateUserName,
+        customerPhone2CreateUserRoleMame:customer.phone2CreateUserRoleMame,
         phone2:customer.phone2,
+        phone2CreateUser:customer.phone2CreateUserName,
+        phone2CreateUserRoleMame:customer.phone2CreateUserRoleMame,
         phone3:customer.phone3,
+        phone3CreateUser:customer.phone3CreateUserName,
+        phone3CreateUserRoleMame:customer.phone3CreateUserRoleMame,
         phone4:customer.phone4,
+        phone4CreateUser:customer.phone4CreateUserName,
+        phone4CreateUserRoleMame:customer.phone4CreateUserRoleMame,
         phone5:customer.phone5,
+        phone5CreateUser:customer.phone5CreateUserName,
+        phone5CreateUserRoleMame:customer.phone5CreateUserRoleMame,
         customerSex:customer.sex,
         wechat:customer.wechat,
         wechat2:customer.wechat2,
@@ -855,6 +1039,9 @@ if(base==null){
               repeatWechatVisible:false,
               dialogFormVisible1: false,
               repeatStatus:repeatStatus,
+              repeatShowFalg:repeatShowFalg,
+                teleReceiveSource:teleReceiveSource,
+                teleReceiveTime:teleReceiveTime,
               repeatClueList:repeatClueList,
                 audioShow:false,//播放器默认不显示
             	loginUserId:loginUserId,
