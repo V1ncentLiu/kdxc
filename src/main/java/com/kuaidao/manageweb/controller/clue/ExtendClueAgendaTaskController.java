@@ -802,8 +802,8 @@ public class ExtendClueAgendaTaskController {
                         // 去掉前后空格后是否为空
                         if (clueAgendaTaskDTO1.getSourceTypeName() != null
                                 && !"".equals(clueAgendaTaskDTO1.getSourceTypeName())) {
-                            String sourceType = sourceTypeMap
-                                    .get(clueAgendaTaskDTO1.getSourceTypeName().toUpperCase());
+                            String sourceType =
+                                    sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName());
                             if (StringUtils.isNotBlank(sourceType)) {
                                 clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceType));
                             } else {
@@ -1237,10 +1237,16 @@ public class ExtendClueAgendaTaskController {
         logger.info("clue import:{{}}", list1);
         logger.info("clue not import:{{}}", illegalDataList);
         if (list1 != null && list1.size() > 0) {
-            JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
+            JSONResult<Map<String, Object>> jsonResult = extendClueFeignClient.importclue(list1);
             // 导入失败数据进入导入失败列表
             if (null != jsonResult && jsonResult.getCode().equals("0")) {
-                List<PushClueReq> list2 = jsonResult.getData();
+                Map<String, Object> data = jsonResult.getData();
+                Map<String, Integer> numMap = (Map<String, Integer>) data.get("num");
+                Integer trash = numMap.get("trash");// 废弃数
+                Integer assign = numMap.get("assign");// 已分发
+                Integer notAssign = numMap.get("notAssign");// 待分发
+
+                List<PushClueReq> list2 = (List<PushClueReq>) data.get("list");
                 if (list2 != null && list2.size() > 0) {
                     for (PushClueReq pushClueReq : list2) {
                         ClueAgendaTaskDTO clueAgendaTaskDTO2 = new ClueAgendaTaskDTO();
