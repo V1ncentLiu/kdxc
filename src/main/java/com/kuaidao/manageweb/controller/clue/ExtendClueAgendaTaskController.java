@@ -623,7 +623,7 @@ public class ExtendClueAgendaTaskController {
         Map<Long, String> projectMap2 = new HashMap<Long, String>();
         // 遍历项目list集生成<name,id>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
-            projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
+            projectMap.put(projectInfoDTO.getProjectName().toUpperCase(), projectInfoDTO.getId());
         }
         // 遍历项目list集生成<id,name>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
@@ -647,13 +647,13 @@ public class ExtendClueAgendaTaskController {
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 广告位<name,value>
         Map<String, String> sourceTypeMap =
-                dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+                dicMapUpper(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 资源类型<value,name>
         Map<String, String> sourceTypeMap2 =
                 dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 媒介<name,value>
         Map<String, String> sourceMap =
-                dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+                dicMapUpper(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
         // 资源类型<value,name>
         Map<String, String> sourceMap2 =
                 dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
@@ -840,7 +840,8 @@ public class ExtendClueAgendaTaskController {
                         // 去掉前后空格后是否为空
                         if (clueAgendaTaskDTO1.getSourceName() != null
                                 && !"".equals(clueAgendaTaskDTO1.getSourceName())) {
-                            String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
+                            String source =
+                                    sourceMap.get(clueAgendaTaskDTO1.getSourceName().toUpperCase());
                             if (StringUtils.isNotBlank(source)) {
                                 clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
                             } else {
@@ -876,8 +877,8 @@ public class ExtendClueAgendaTaskController {
                         // 去掉前后空格后是否为空
                         if (clueAgendaTaskDTO1.getProjectName() != null
                                 && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                            clueAgendaTaskDTO1.setProjectId(
-                                    projectMap.get(clueAgendaTaskDTO1.getProjectName()));
+                            clueAgendaTaskDTO1.setProjectId(projectMap
+                                    .get(clueAgendaTaskDTO1.getProjectName().toUpperCase()));
                             if (clueAgendaTaskDTO1.getProjectId() == null) {
                                 islegal = false;
                                 if (StringUtils.isBlank(reasonIsNotMatch)) {
@@ -1020,7 +1021,8 @@ public class ExtendClueAgendaTaskController {
                         // 去掉前后空格后是否为空
                         if (clueAgendaTaskDTO1.getSourceName() != null
                                 && !"".equals(clueAgendaTaskDTO1.getSourceName())) {
-                            String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
+                            String source =
+                                    sourceMap.get(clueAgendaTaskDTO1.getSourceName().toUpperCase());
                             if (StringUtils.isNotBlank(source)) {
                                 clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
                             } else {
@@ -1177,12 +1179,14 @@ public class ExtendClueAgendaTaskController {
                         pushClueReq.setCusName("未知");
                     }
                     pushClueReq.setSex(clueAgendaTaskDTO1.getSex());
-                    //手机号相同则只存储phone1
-                    if((StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone())
-                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone().replaceAll(" ", "")))
-                        && (StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2())
-                        && StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", "")))
-                        && clueAgendaTaskDTO1.getPhone().replaceAll(" ", "").equals(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""))){
+                    // 手机号相同则只存储phone1
+                    if ((StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone()) && StringUtils
+                            .isNotBlank(clueAgendaTaskDTO1.getPhone().replaceAll(" ", "")))
+                            && (StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2())
+                                    && StringUtils.isNotBlank(
+                                            clueAgendaTaskDTO1.getPhone2().replaceAll(" ", "")))
+                            && clueAgendaTaskDTO1.getPhone().replaceAll(" ", "")
+                                    .equals(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""))) {
                         pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
                     } else {
                         pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
@@ -1236,10 +1240,16 @@ public class ExtendClueAgendaTaskController {
         logger.info("clue import:{{}}", list1);
         logger.info("clue not import:{{}}", illegalDataList);
         if (list1 != null && list1.size() > 0) {
-            JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
+            JSONResult<Map<String, Object>> jsonResult = extendClueFeignClient.importclue(list1);
             // 导入失败数据进入导入失败列表
             if (null != jsonResult && jsonResult.getCode().equals("0")) {
-                List<PushClueReq> list2 = jsonResult.getData();
+                Map<String, Object> data = jsonResult.getData();
+                Map<String, Integer> numMap = (Map<String, Integer>) data.get("num");
+                Integer trash = numMap.get("trash");// 废弃数
+                Integer assign = numMap.get("assign");// 已分发
+                Integer notAssign = numMap.get("notAssign");// 待分发
+
+                List<PushClueReq> list2 = (List<PushClueReq>) data.get("list");
                 if (list2 != null && list2.size() > 0) {
                     for (PushClueReq pushClueReq : list2) {
                         ClueAgendaTaskDTO clueAgendaTaskDTO2 = new ClueAgendaTaskDTO();
@@ -1303,6 +1313,22 @@ public class ExtendClueAgendaTaskController {
             List<DictionaryItemRespDTO> data = result.getData();
             for (DictionaryItemRespDTO itemRespDTO : data) {
                 map.put(itemRespDTO.getName(), itemRespDTO.getValue());
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 数据字典-词条转换Map（name-value）(全大写)
+     *
+     * @return
+     */
+    public Map dicMapUpper(JSONResult<List<DictionaryItemRespDTO>> result) {
+        Map map = new HashMap();
+        if (JSONResult.SUCCESS.equals(result.getCode())) {
+            List<DictionaryItemRespDTO> data = result.getData();
+            for (DictionaryItemRespDTO itemRespDTO : data) {
+                map.put(itemRespDTO.getName().toUpperCase(), itemRespDTO.getValue());
             }
         }
         return map;
