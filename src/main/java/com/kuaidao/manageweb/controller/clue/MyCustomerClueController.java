@@ -353,7 +353,13 @@ public class MyCustomerClueController {
                 && clueInfo.getData() != null) {
 
             if (null != clueInfo.getData().getClueCustomer()) {
-                request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+                ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
+                clueCustomerDTO.setPhoneCreateTime(null);
+                clueCustomerDTO.setPhone2CreateTime(null);
+                clueCustomerDTO.setPhone3CreateTime(null);
+                clueCustomerDTO.setPhone4CreateTime(null);
+                clueCustomerDTO.setPhone5CreateTime(null);
+                request.setAttribute("customer", clueCustomerDTO);
             } else {
                 request.setAttribute("customer", new ArrayList());
             }
@@ -498,7 +504,18 @@ public class MyCustomerClueController {
                 && clueInfo.getData() != null) {
 
             if (null != clueInfo.getData().getClueCustomer()) {
-                request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+                if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
+                    ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
+                    clueCustomerDTO.setPhoneCreateTime(null);
+                    clueCustomerDTO.setPhone2CreateTime(null);
+                    clueCustomerDTO.setPhone3CreateTime(null);
+                    clueCustomerDTO.setPhone4CreateTime(null);
+                    clueCustomerDTO.setPhone5CreateTime(null);
+                    request.setAttribute("customer", clueCustomerDTO);
+                }else {
+                    request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+                }
+
             } else {
                 request.setAttribute("customer", new ArrayList());
             }
