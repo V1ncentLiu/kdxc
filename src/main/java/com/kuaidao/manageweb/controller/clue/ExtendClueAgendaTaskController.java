@@ -583,8 +583,8 @@ public class ExtendClueAgendaTaskController {
             }
         } else {
             logger.error("导入资源模板错误");
-            return new JSONResult<>().fail("-1","导入资源模板错误");
-        }// outer foreach end
+            return new JSONResult<>().fail("-1", "导入资源模板错误");
+        } // outer foreach end
         logger.info("upload custom filed, valid success num{{}}", dataList.size());
         /*
          * JSONResult uploadRs = customFieldFeignClient.saveBatchCustomField(dataList);
@@ -615,8 +615,8 @@ public class ExtendClueAgendaTaskController {
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
         // 存放非法的数据
         List<ClueAgendaTaskDTO> illegalDataList = new ArrayList<ClueAgendaTaskDTO>();
-        //存放结果
-        Map<String,Object> result = new HashMap<>();
+        // 存放结果
+        Map<String, Object> result = new HashMap<>();
         // 项目处理
         ProjectInfoPageParam projectInfoPageParam = new ProjectInfoPageParam();
         List<ProjectInfoDTO> proList =
@@ -624,7 +624,7 @@ public class ExtendClueAgendaTaskController {
         Map<String, Long> projectMap = new HashMap<String, Long>();
         Map<Long, String> projectMap2 = new HashMap<Long, String>();
         // 遍历项目list集生成<name,id>map
-        if(null!=proList && proList.size()>0) {
+        if (null != proList && proList.size() > 0) {
             for (ProjectInfoDTO projectInfoDTO : proList) {
                 projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
             }
@@ -636,13 +636,13 @@ public class ExtendClueAgendaTaskController {
         List<ClueAgendaTaskDTO> list = clueAgendaTaskDTO.getList();
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
 
-        result.put("total",list.size());//总条数
-        //初始化
-        result.put("trash",0);
-        result.put("assign",0);
-        result.put("notAssign",0);
-        result.put("success",0);
-        result.put("fail",0);
+        result.put("total", list.size());// 总条数
+        // 初始化
+        result.put("trash", 0);
+        result.put("assign", 0);
+        result.put("notAssign", 0);
+        result.put("success", 0);
+        result.put("fail", 0);
         // 匹配字典数据
         // 资源类型<name,value>
         Map<String, String> typeMap =
@@ -816,8 +816,8 @@ public class ExtendClueAgendaTaskController {
                         // 去掉前后空格后是否为空
                         if (clueAgendaTaskDTO1.getSourceTypeName() != null
                                 && !"".equals(clueAgendaTaskDTO1.getSourceTypeName())) {
-                            String sourceType =
-                                    sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName());
+                            String sourceType = sourceTypeMap
+                                    .get(clueAgendaTaskDTO1.getSourceTypeName().toUpperCase());
                             if (StringUtils.isNotBlank(sourceType)) {
                                 clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceType));
                             } else {
@@ -1253,18 +1253,19 @@ public class ExtendClueAgendaTaskController {
         if (list1 != null && list1.size() > 0) {
             JSONResult<Map<String, Object>> jsonResult = extendClueFeignClient.importclue(list1);
             // 导入失败数据进入导入失败列表
-            if (null != jsonResult && jsonResult.getCode().equals("0") && null!=jsonResult.getData()) {
+            if (null != jsonResult && jsonResult.getCode().equals("0")
+                    && null != jsonResult.getData()) {
                 Map<String, Object> data = jsonResult.getData();
                 Map<String, Integer> numMap = (Map<String, Integer>) data.get("num");
                 Integer trash = numMap.get("trash");// 废弃数
                 Integer assign = numMap.get("assign");// 已分发
                 Integer notAssign = numMap.get("notAssign");// 待分发
-                result.put("trash",trash);
-                result.put("assign",assign);
-                result.put("notAssign",notAssign);
-                result.put("success",list1.size());
-                //如果有导入失败数据
-                if(null != jsonResult.getData().get("list")) {
+                result.put("trash", trash);
+                result.put("assign", assign);
+                result.put("notAssign", notAssign);
+                result.put("success", list1.size());
+                // 如果有导入失败数据
+                if (null != jsonResult.getData().get("list")) {
                     List<PushClueReq> list2 = (List<PushClueReq>) data.get("list");
                     if (list2 != null && list2.size() > 0) {
                         for (PushClueReq pushClueReq : list2) {
@@ -1272,15 +1273,15 @@ public class ExtendClueAgendaTaskController {
                             clueAgendaTaskDTO2.setDate(pushClueReq.getCreateTime());
                             clueAgendaTaskDTO2.setTypeName(typeMap2.get(pushClueReq.getType()));
                             clueAgendaTaskDTO2
-                                .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
+                                    .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
+                            clueAgendaTaskDTO2.setSourceTypeName(
+                                    sourceTypeMap2.get(pushClueReq.getSourceType()));
                             clueAgendaTaskDTO2
-                                .setSourceTypeName(sourceTypeMap2.get(pushClueReq.getSourceType()));
+                                    .setSourceName(sourceMap2.get(pushClueReq.getSource()));
                             clueAgendaTaskDTO2
-                                .setSourceName(sourceMap2.get(pushClueReq.getSource()));
-                            clueAgendaTaskDTO2
-                                .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
+                                    .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
                             clueAgendaTaskDTO2.setIndustryCategoryName(
-                                industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                                    industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
                             clueAgendaTaskDTO2.setCusName(pushClueReq.getCusName());
                             clueAgendaTaskDTO2.setPhone(pushClueReq.getPhone());
                             clueAgendaTaskDTO2.setPhone2(pushClueReq.getPhone2());
@@ -1298,29 +1299,29 @@ public class ExtendClueAgendaTaskController {
                             }
                             clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
                             if (pushClueReq.getMessageTime() != null) {
-                                clueAgendaTaskDTO2.setMessageTime1(DateUtil
-                                    .convert2String(pushClueReq.getMessageTime(), DateUtil.ymdhms));
+                                clueAgendaTaskDTO2.setMessageTime1(DateUtil.convert2String(
+                                        pushClueReq.getMessageTime(), DateUtil.ymdhms));
                             }
 
                             clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
                             clueAgendaTaskDTO2.setSearchWord(pushClueReq.getSearchWord());
                             if (pushClueReq.getReserveTime() != null) {
-                                clueAgendaTaskDTO2.setReserveTime1(DateUtil
-                                    .convert2String(pushClueReq.getReserveTime(), DateUtil.ymdhms));
+                                clueAgendaTaskDTO2.setReserveTime1(DateUtil.convert2String(
+                                        pushClueReq.getReserveTime(), DateUtil.ymdhms));
                             }
-                            clueAgendaTaskDTO2
-                                .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
+                            clueAgendaTaskDTO2.setAccountName(
+                                    accountNameMap2.get(pushClueReq.getAccountName()));
                             clueAgendaTaskDTO2.setUrlAddress(pushClueReq.getUrlAddress());
                             illegalDataList.add(clueAgendaTaskDTO2);
                         }
                     }
                 }
             } else {
-                return  new JSONResult().fail("-1","导入失败");
+                return new JSONResult().fail("-1", "导入失败");
             }
         }
-        result.put("fail",illegalDataList.size());
-        result.put("illegalDataList",illegalDataList);
+        result.put("fail", illegalDataList.size());
+        result.put("illegalDataList", illegalDataList);
         return new JSONResult<>().success(result);
     }
 
