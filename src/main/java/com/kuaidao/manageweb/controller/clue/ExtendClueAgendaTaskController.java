@@ -637,7 +637,12 @@ public class ExtendClueAgendaTaskController {
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
 
         result.put("total",list.size());//总条数
-
+        //初始化
+        result.put("trash",0);
+        result.put("assign",0);
+        result.put("notAssign",0);
+        result.put("success",0);
+        result.put("fail",0);
         // 匹配字典数据
         // 资源类型<name,value>
         Map<String, String> typeMap =
