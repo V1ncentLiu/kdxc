@@ -626,7 +626,8 @@ public class ExtendClueAgendaTaskController {
         // 遍历项目list集生成<name,id>map
         if (null != proList && proList.size() > 0) {
             for (ProjectInfoDTO projectInfoDTO : proList) {
-                projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
+                projectMap.put(projectInfoDTO.getProjectName().toUpperCase(),
+                        projectInfoDTO.getId());
             }
             // 遍历项目list集生成<id,name>map
             for (ProjectInfoDTO projectInfoDTO : proList) {
