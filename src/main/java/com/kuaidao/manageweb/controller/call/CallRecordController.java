@@ -120,7 +120,7 @@ public class CallRecordController {
             if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
-                request.setAttribute("teleGroupList", getCurTeleGroupList(Long.parseLong(orgIdList.get(1))));
+                request.setAttribute("teleGroupList", getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
             }
         }
         
@@ -131,7 +131,7 @@ public class CallRecordController {
             if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
-                request.setAttribute("teleGroupList",  getCurTeleGroupList(Long.parseLong(orgIdList.get(1))));
+                request.setAttribute("teleGroupList",  getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
             }
         }
        
@@ -142,7 +142,7 @@ public class CallRecordController {
             if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
-                request.setAttribute("teleGroupList",getCurTeleGroupList(Long.parseLong(orgIdList.get(1))));
+                request.setAttribute("teleGroupList",getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
             }
         }
          
@@ -160,6 +160,17 @@ public class CallRecordController {
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
 
         return "call/telCallRecord";
+    }
+    
+    public List<OrganizationDTO> getDescenDantTeleGroupByOrgId(Long parentOrgId){
+        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(parentOrgId);
+        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+        // 查询下级电销组(查询使用)
+        JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+            organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+        List<OrganizationDTO> data = listDescenDantByParentId.getData();
+        return data;
     }
 
     /**
