@@ -19,7 +19,7 @@
         <el-breadcrumb-item>我的工作台</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row>
-        <div class="tip">感谢您辛苦工作的第<em>{{workDay}}</em>天，累计业绩达<em>--</em>元，继续努力！</div>
+        <div class="tip">感谢您辛苦工作的第<em>{{workDay}}</em>天，累计业绩达<em>{{dashboardSale.cumulativePerformance}}</em>元，继续努力！</div>
         <!-- 系统公告 -->
         <div class="affiche marginB20" v-if="afficheBox">
             <span class="f-fl"><img th:src="@{/images/icon_notice.png}" alt="" class="f-fl" style="margin-right: 10px;">系统公告：</span>  
@@ -35,36 +35,34 @@
         <ul class="board board3">
             <li class="border_wraper">
                 <div class="wraper_li bg1 bg11">
-                    <div class="toptitle">今日到访数</div>
-                    <div class="con">--</div>
+                    <div class="toptitle">今日首访数</div>
+                    <div class="con">{{dashboardSale.dayFirstVisit}}</div>
                 </div>
                 <div class="wraper_li f-fr bg2 bg22">
                     <div class="toptitle">当月首访数</div>
-                    <!-- <div class="con">{{visitedNum}}</div> -->
-                    <div class="con">--</div>
+                    <div class="con">{{dashboardSale.monthFirstVisit}}</div>
                 </div>
                 <div class="wraper_li bg3 bg33">
                     <div class="toptitle">今日签约数</div>
-                    <div class="con">--</div>
+                    <div class="con">{{dashboardSale.daySign}}</div>
                 </div>
                 <div class="wraper_li f-fr bg1 bg11">
                     <div class="toptitle">当月签约数</div>
-                    <!-- <div class="con">{{signedNum}}</div> -->
-                    <div class="con">--</div>
+                    <div class="con">{{dashboardSale.monthSign}}</div>
                 </div>
             </li>
             <li class="border_wraper">
                 <div class="wraper_dl f-fl">
                     <p class="top_title"><em></em>当月签约率</p>
-                    <el-progress type="circle" :percentage="0" :stroke-width="20" :width="168" color="#697df5"></el-progress>
+                    <el-progress type="circle" :percentage="dashboardSale.signL" :stroke-width="20" :width="168" color="#697df5"></el-progress>
                 </div>
                 <div class="wraper_dl f-fl">
                     <p class="top_title"><em></em>当月首访签约率</p>
-                    <el-progress type="circle" :percentage="0" :stroke-width="20" :width="168" color="#a978f5"></el-progress>
+                    <el-progress type="circle" :percentage="dashboardSale.firstVisitL" :stroke-width="20" :width="168" color="#a978f5"></el-progress>
                 </div>
                 <div class="wraper_dl f-fl">
                     <p class="top_title"><em></em>当月全款率</p>
-                    <el-progress type="circle" :percentage="0" :stroke-width="20" :width="168" color="#32c3bf"></el-progress>
+                    <el-progress type="circle" :percentage="dashboardSale.payAllL" :stroke-width="20" :width="168" color="#32c3bf"></el-progress>
                 </div>
             </li>
         </ul>
@@ -72,9 +70,8 @@
             <li class="boardStyle2 bgColor1">
                 <div class="cnt">
                     <div class="f-fl">
-                        <div class="toptitle">当月二次到访数</div>
-                        <!-- <div class="con">{{secondVisitedNum}}</div> -->
-                        <div class="con">--</div>
+                        <div class="toptitle">当月二次来访数</div>
+                        <div class="con">{{dashboardSale.monthSecondVisit}}</div>
                     </div>
                     <div class="f-fr"><img th:src="@{/images/icon_jrsfs.png}" alt=""></div>
                 </div>
@@ -84,7 +81,7 @@
                     <div class="f-fl">
                         <div class="toptitle">当月二次来访签约数</div>
                         <!-- <div class="con">{{secondSignedNum}}</div> -->
-                        <div class="con">--</div>
+                        <div class="con">{{dashboardSale.monthSecondVisitSign}}</div>
                     </div>
                     <div class="f-fr"><img th:src="@{/images/icon_jrqys.png}" alt=""></div>
                 </div>
@@ -94,7 +91,7 @@
                     <div class="f-fl">
                         <div class="toptitle">未收齐尾款笔数</div>
                         <!-- <div class="con">{{unPaymentNum}}</div> -->
-                        <div class="con">--</div>
+                        <div class="con">{{dashboardSale.noTailSign}}</div>
                     </div>
                     <div class="f-fr"><img th:src="@{/images/icon_payment.png}" alt=""></div>
                 </div>
@@ -103,7 +100,7 @@
                 <div class="cnt">
                     <div class="f-fl">
                         <div class="toptitle">未收齐尾款金额</div>
-                        <div class="con">--<em>元</em></div>
+                        <div class="con">{{dashboardSale.noTailSignAcount}}<em>元</em></div>
                     </div>
                     <div class="f-fr"><img th:src="@{/images/icon_payment.png}" alt=""></div>
                 </div>
@@ -111,8 +108,8 @@
             <li class="boardStyle2 bgColor5">
                 <div class="cnt">
                     <div class="f-fl">
-                        <div class="toptitle">服务客户数</div>
-                        <div class="con">--</div>
+                        <div class="toptitle">累计服务客户数</div>
+                        <div class="con">{{dashboardSale.totalCustomer}}</div>
                     </div>
                     <div class="f-fr"><img th:src="@{/images/icon_customer.png}" alt=""></div>
                 </div>
@@ -125,42 +122,42 @@
                         <li class="tabLi1">
                             <img th:src="@{/images/icon_achievement.png}" alt="">
                             <div class="name">业绩</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.monthPerformance}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi2">
                             <img th:src="@{/images/icon_ranking.png}" alt="">
                             <div class="name">组内排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.monthTeamRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi4">
                             <img th:src="@{/images/icon_dqpm.png}" alt="">
                             <div class="name">大区排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.monthAreaRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi5">
                             <img th:src="@{/images/icon_gspm.png}" alt="">
                             <div class="name">公司排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.monthCompanyRank}}</span>名</div>
                         </li>
                         <li class="tabLi2">
                             <img th:src="@{/images/icon_jzc.png}" alt="">
                             <div class="name">距组内上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.monthTeamPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi4">
                             <img th:src="@{/images/icon_disparity.png}" alt="">
                             <div class="name">距大区上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.monthAreaPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi5">
                             <img th:src="@{/images/icon_jgsc.png}" alt="">
                             <div class="name">距公司上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.monthCompanyPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                     </ul>
@@ -170,43 +167,43 @@
                         <li class="tabLi1">
                             <img th:src="@{/images/icon_achievement.png}" alt="">
                             <div class="name">业绩</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.quarterPerformance}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi2">
                             <img th:src="@{/images/icon_ranking.png}" alt="">
                             <div class="name">组内排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.quarterTeamRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi4">
                             <img th:src="@{/images/icon_dqpm.png}" alt="">
                             <div class="name">大区排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.quarterAreaRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi5">
                             <img th:src="@{/images/icon_gspm.png}" alt="">
                             <div class="name">公司排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.quarterCompanyRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi2">
                             <img th:src="@{/images/icon_jzc.png}" alt="">
                             <div class="name">距组内上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.quarterTeamPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi4">
                             <img th:src="@{/images/icon_disparity.png}" alt="">
                             <div class="name">距大区上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.quarterAreaPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi5">
                             <img th:src="@{/images/icon_jgsc.png}" alt="">
                             <div class="name">距公司上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.quarterCompanyPerformanceDifference}}</span><em>元</em></div>
                         </li>
                     </ul>
                 </el-tab-pane>
@@ -215,43 +212,43 @@
                         <li class="tabLi1">
                             <img th:src="@{/images/icon_achievement.png}" alt="">
                             <div class="name">业绩</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.yearPerformance}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi2">
                             <img th:src="@{/images/icon_ranking.png}" alt="">
                             <div class="name">组内排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.yearTeamRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi4">
                             <img th:src="@{/images/icon_dqpm.png}" alt="">
                             <div class="name">大区排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.yearAreaRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi5">
                             <img th:src="@{/images/icon_gspm.png}" alt="">
                             <div class="name">公司排名</div>
-                            <div class="num">第<span>--</span>名</div>
+                            <div class="num">第<span>{{dashboardSale.yearCompanyRank}}</span>名</div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi2">
                             <img th:src="@{/images/icon_jzc.png}" alt="">
                             <div class="name">距组内上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.yearTeamPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi4">
                             <img th:src="@{/images/icon_disparity.png}" alt="">
                             <div class="name">距大区上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.yearAreaPerformanceDifference}}</span><em>元</em></div>
                             <div class="line"></div>
                         </li>
                         <li class="tabLi5">
                             <img th:src="@{/images/icon_jgsc.png}" alt="">
                             <div class="name">距公司上一名业绩差</div>
-                            <div class="num"><span>--</span><em>元</em></div>
+                            <div class="num"><span>{{dashboardSale.yearCompanyPerformanceDifference}}</span><em>元</em></div>
                         </li>
                     </ul>
                 </el-tab-pane>
@@ -1824,6 +1821,7 @@
     var proSelect=[[${proSelect}]];
     var companySelect=[[${companySelect}]];
     var giveTypeList =[[${giveTypeList}]];
+    var dashboardSale = [[${dashboardSale}]]
 </script>
 <script th:src="@{/js/custom/console/consoleBusinessManager.js?v=1.0.0}"></script>
 </body>
