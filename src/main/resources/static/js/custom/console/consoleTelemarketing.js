@@ -56,8 +56,8 @@ var mainDivVM = new Vue({
         monthFirstVisit:dashboardTelSale.monthFirstVisit, //当月首访数
         monthSign:dashboardTelSale.monthSign, //当月签约数
         monthAllPerformance:dashboardTelSale.monthAllPerformance, //月业绩
-        mounthGroupRanking:dashboardTelSale.mounthGroupRanking, //月组内排名
-        mounthCompanyRanking:dashboardTelSale.mounthCompanyRanking, //月公司排名
+        monthGroupRanking:dashboardTelSale.monthGroupRanking, //月组内排名
+        monthCompanyRanking:dashboardTelSale.monthCompanyRanking, //月公司排名
         monthGroupPerformanceDifference:dashboardTelSale.monthGroupPerformanceDifference, //月距离组内上一名业绩差
         monthCompanyPerformanceDifference:dashboardTelSale.monthCompanyPerformanceDifference, //月距离公司上一名业绩差
         quarterAllPerformance:dashboardTelSale.quarterAllPerformance, //季度业绩
