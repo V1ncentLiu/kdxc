@@ -50,14 +50,17 @@ var mainDivVM = new Vue({
         receiveTodayNum:dashboardTelSale.todayReceiveResources,//今日领取资源数
         assignTodayNum:dashboardTelSale.todayDistributionResources,//今日分配资源数
         todayCallDuration:'',//今日通话时长
+        todayTalkTimeh:'',//今日通话时长
+        todayTalkTimem:'',//今日通话时长
+        todayTalkTimes:'',//今日通话时长
         todayAppiontmentNum:dashboardTelSale.todayFirstInvitation,//今日邀约数
         todayFirstVisit:dashboardTelSale.todayFirstVisit,//今日首访数
         todaySign:dashboardTelSale.todaySign, //今日签约数
         monthFirstVisit:dashboardTelSale.monthFirstVisit, //当月首访数
         monthSign:dashboardTelSale.monthSign, //当月签约数
         monthAllPerformance:dashboardTelSale.monthAllPerformance, //月业绩
-        mounthGroupRanking:dashboardTelSale.mounthGroupRanking, //月组内排名
-        mounthCompanyRanking:dashboardTelSale.mounthCompanyRanking, //月公司排名
+        monthGroupRanking:dashboardTelSale.monthGroupRanking, //月组内排名
+        monthCompanyRanking:dashboardTelSale.monthCompanyRanking, //月公司排名
         monthGroupPerformanceDifference:dashboardTelSale.monthGroupPerformanceDifference, //月距离组内上一名业绩差
         monthCompanyPerformanceDifference:dashboardTelSale.monthCompanyPerformanceDifference, //月距离公司上一名业绩差
         quarterAllPerformance:dashboardTelSale.quarterAllPerformance, //季度业绩
@@ -71,6 +74,9 @@ var mainDivVM = new Vue({
         yearGroupPerformanceDifference:dashboardTelSale.yearGroupPerformanceDifference, //年距离组内上一名业绩差
         yearCompanyPerformanceDifference:dashboardTelSale.yearCompanyPerformanceDifference, //年距离公司上一名业绩差
         totalInvitation:dashboardTelSale.totalInvitation,//累计邀约数
+        cumulativeNonDrinkPerformance:dashboardTelSale.cumulativeNonDrinkPerformance,//小物种非饮品
+        todayAppiontmentNum:dashboardTelSale.cumulativePerformance,//饮品业绩
+        totalPerformance:'',
         workDay:'',//工作天数
         //公告
         afficheBox:false,
@@ -493,8 +499,10 @@ var mainDivVM = new Vue({
         this.initTableData();
         // 工作台
         this.initBoard();
-    	this.todayCallDuration = this.fomatSeconds2(dashboardTelSale.todayCallDuration);
-
+        this.todayTalkTimeh = this.fomatSecondsh(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimem = this.fomatSecondsm(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
+        this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';

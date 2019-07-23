@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(name = "dashboard-service-wxd", path = "/dashboard/dashboardBusGroup", fallback = BusGroupDashboardFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "dashboard-service", path = "/dashboard/dashboardBusGroup", fallback = BusGroupDashboardFeignClient.HystrixClientFallback.class)
 public interface BusGroupDashboardFeignClient {
 
     /**

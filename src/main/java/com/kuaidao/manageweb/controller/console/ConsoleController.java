@@ -931,7 +931,10 @@ public class ConsoleController {
         }
 
         Date createTime = data.getCreateTime();
-        int diffDay = DateUtil.diffDay(createTime, new Date()) + 1;
+        logger.info(DateUtil.getStartOrEndOfDay(createTime,LocalTime.MIN).toString());
+        logger.info(DateUtil.getStartOrEndOfDay(new Date(),LocalTime.MAX).toString());
+//        int diffDay = DateUtil.diffDay(createTime,new Date())+1;
+        int diffDay = DateUtil.differentDays(createTime,new Date())+1;
         return new JSONResult<String>().success(diffDay + "");
 
     }
