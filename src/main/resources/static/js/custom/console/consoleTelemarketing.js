@@ -74,6 +74,9 @@ var mainDivVM = new Vue({
         yearGroupPerformanceDifference:dashboardTelSale.yearGroupPerformanceDifference, //年距离组内上一名业绩差
         yearCompanyPerformanceDifference:dashboardTelSale.yearCompanyPerformanceDifference, //年距离公司上一名业绩差
         totalInvitation:dashboardTelSale.totalInvitation,//累计邀约数
+        cumulativeNonDrinkPerformance:dashboardTelSale.cumulativeNonDrinkPerformance,//小物种非饮品
+        todayAppiontmentNum:dashboardTelSale.cumulativePerformance,//饮品业绩
+        totalPerformance:'',
         workDay:'',//工作天数
         //公告
         afficheBox:false,
@@ -499,7 +502,7 @@ var mainDivVM = new Vue({
         this.todayTalkTimeh = this.fomatSecondsh(dashboardTelSale.todayCallDuration);
         this.todayTalkTimem = this.fomatSecondsm(dashboardTelSale.todayCallDuration);
         this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
-
+        this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
