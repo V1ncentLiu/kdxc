@@ -75,7 +75,7 @@ var mainDivVM = new Vue({
         yearCompanyPerformanceDifference:dashboardTelSale.yearCompanyPerformanceDifference, //年距离公司上一名业绩差
         totalInvitation:dashboardTelSale.totalInvitation,//累计邀约数
         cumulativeNonDrinkPerformance:dashboardTelSale.cumulativeNonDrinkPerformance,//小物种非饮品
-        todayAppiontmentNum:dashboardTelSale.cumulativePerformance,//饮品业绩
+        cumulativePerformance:dashboardTelSale.cumulativePerformance,//饮品业绩
         totalPerformance:'',
         workDay:'',//工作天数
         //公告
