@@ -50,6 +50,9 @@ var mainDivVM = new Vue({
         receiveTodayNum:dashboardTelSale.todayReceiveResources,//今日领取资源数
         assignTodayNum:dashboardTelSale.todayDistributionResources,//今日分配资源数
         todayCallDuration:'',//今日通话时长
+        todayTalkTimeh:'',//今日通话时长
+        todayTalkTimem:'',//今日通话时长
+        todayTalkTimes:'',//今日通话时长
         todayAppiontmentNum:dashboardTelSale.todayFirstInvitation,//今日邀约数
         todayFirstVisit:dashboardTelSale.todayFirstVisit,//今日首访数
         todaySign:dashboardTelSale.todaySign, //今日签约数
@@ -493,7 +496,9 @@ var mainDivVM = new Vue({
         this.initTableData();
         // 工作台
         this.initBoard();
-    	this.todayCallDuration = this.fomatSeconds2(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimeh = this.fomatSecondsh(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimem = this.fomatSecondsm(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
 
     },
     mounted(){

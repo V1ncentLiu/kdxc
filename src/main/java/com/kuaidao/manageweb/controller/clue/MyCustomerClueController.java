@@ -1,5 +1,32 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -60,30 +87,6 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -1068,6 +1071,9 @@ public class MyCustomerClueController {
             UserOrgRoleReq userRole = new UserOrgRoleReq();
             userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
             userRole.setOrgId(user.getOrgId());
+            List<Integer> statusList = new ArrayList();
+            statusList.add(1);
+            userRole.setStatusList(statusList);
             JSONResult<List<UserInfoDTO>> userInfoJson =
                     userInfoFeignClient.listByOrgAndRole(userRole);
             if (userInfoJson != null && JSONResult.SUCCESS.equals(userInfoJson.getCode())
