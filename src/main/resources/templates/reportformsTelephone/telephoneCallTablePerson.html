@@ -10,7 +10,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>电销顾问通话时长表</el-breadcrumb-item>
+        <el-breadcrumb-item>话务通话时长表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
@@ -30,8 +30,8 @@
                 <el-form-item label="—" class="widthauto">
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="电销组:"> 
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
+                <el-form-item label="话务组:"> 
+                    <el-select v-model="form.orgId" placeholder="话务组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -40,8 +40,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" clearable filterable>
+                <el-form-item label="话务专员:">  
+                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in teleIdList"
                             :key="item.id"
@@ -50,12 +50,6 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-               <el-form-item label="通话类型:">
-                   <el-select v-model="form.callType" placeholder="通话类型" style="width: 100%;" clearable filterable>
-                       <el-option label="呼入" value="1"></el-option>
-                       <el-option label="呼出" value="3"></el-option>
-                   </el-select>
-               </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
                 </div>  
@@ -71,25 +65,16 @@
                 </el-table-column>
                 <el-table-column prop="dateId" align="center" :formatter="dateFormat" label="日期">
                 </el-table-column>
-                <el-table-column prop="userName" align="center" label="电销">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="通话次数">
-                </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="通话接通次数" :formatter="nullToZero">
-                </el-table-column>
-                <el-table-column prop="callPercent" align="center" label="通话接通率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callClueCount" align="center" label="通话量">
-                </el-table-column>
-                <el-table-column prop="calledClueCount" align="center" label="接通量" :formatter="nullToZero">
-                </el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长">
-                </el-table-column>
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长">
-                </el-table-column>
+                <el-table-column prop="userName" align="center" label="话务专员"></el-table-column>
+                <el-table-column prop="userName" align="center" label="话务组"></el-table-column>
+                <el-table-column prop="callCount" align="center" label="拨打次数"></el-table-column>
+                <el-table-column prop="calledCount" align="center" label="接通次数" :formatter="nullToZero"></el-table-column>
+                <el-table-column prop="callPercent" align="center" label="接通率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="callClueCount" align="center" label="拨打量"></el-table-column>
+                <el-table-column prop="calledClueCount" align="center" label="接通量" :formatter="nullToZero"></el-table-column>
+                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长"></el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -207,7 +192,6 @@
                 }
                 param.orgId =  this.form.orgId; // 电销组
                 param.userId =  this.form.userId; // 电销顾问
-                param.callType =  this.form.callType; // 通话类型
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
                     if(!response){
