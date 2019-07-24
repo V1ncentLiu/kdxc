@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -424,7 +425,8 @@ public class PhoneTrafficController {
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("proSelect", proJson.getData());
+            List<ProjectInfoDTO> projectInfoDTOList = proJson.getData().parallelStream().filter(pro -> pro.getIsNotSign() !=null && pro.getIsNotSign() == 0).collect( Collectors.toList());
+            request.setAttribute("proSelect", projectInfoDTOList);
         } else {
             request.setAttribute("proSelect", new ArrayList());
         }
