@@ -49,7 +49,7 @@ var mainDivVM = new Vue({
         activeName5:'1',
         receiveTodayNum:dashboardTelSale.todayReceiveResources,//今日领取资源数
         assignTodayNum:dashboardTelSale.todayDistributionResources,//今日分配资源数
-        todayCallDuration:'',//今日通话时长
+        todayCallDuration:dashboardTelSale.todayCallDuration,//今日通话时长
         todayTalkTimeh:'',//今日通话时长
         todayTalkTimem:'',//今日通话时长
         todayTalkTimes:'',//今日通话时长
