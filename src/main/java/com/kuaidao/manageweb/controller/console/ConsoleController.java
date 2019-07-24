@@ -179,7 +179,7 @@ public class ConsoleController {
             List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
             IdEntityLong idEntityLong = new IdEntityLong();
-            idEntityLong.setId(curLoginUser.getId());
+            idEntityLong.setId(curLoginUser.getOrgId());
             JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByUserId(idEntityLong);
             DashboardTeleGroupDto data = dashboard.getData();
             if (data == null) {
