@@ -274,6 +274,12 @@ public class ExtendClueAgendaTaskController {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
+        // 推广总监，优化主管，内勤经理可以在查看待分配资源列表中资源专员为管理员的数据
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+            idList.add(SysConstant.GLY_USER_ID);
+        }
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
