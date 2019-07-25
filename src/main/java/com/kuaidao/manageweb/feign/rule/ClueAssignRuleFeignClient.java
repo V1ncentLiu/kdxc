@@ -102,6 +102,16 @@ public interface ClueAssignRuleFeignClient {
     public JSONResult<List<ClueAssignRuleDTO>> listNoPage(
             @RequestBody ClueAssignRulePageParam pageParam);
 
+    /**
+     * 有效规则集合
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/allValidRule")
+    public JSONResult<List<ClueAssignRuleDTO>> allValidRule(
+            @RequestBody ClueAssignRulePageParam pageParam);
+
 
 
     @Component
@@ -155,6 +165,11 @@ public interface ClueAssignRuleFeignClient {
         @Override
         public JSONResult<List<ClueAssignRuleDTO>> listNoPage(ClueAssignRulePageParam pageParam) {
             return fallBackError("查询资源分配规则集合");
+        }
+
+        @Override
+        public JSONResult<List<ClueAssignRuleDTO>> allValidRule(ClueAssignRulePageParam pageParam) {
+            return fallBackError("有效规则集合");
         }
 
 
