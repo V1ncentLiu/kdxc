@@ -87,4 +87,8 @@ public class Constants {
      * 带走资源
      ***/
     public static Integer TAKE_AWAY_CLUE = 1;
+    /** redis前缀 看板计数-电销顾问计数-今日 **/
+    public static final String TODAY_TELE_SALE = "huiju:dashboard:todaytelesale:";
+    /** redis前缀 看板计数-电销顾问计数-今日 **/
+    public static final String NOTTODAY_TELE_SALE = "huiju:dashboard:nottodaytelesale:";
 }

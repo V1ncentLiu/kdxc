@@ -1,6 +1,7 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        dashboardSale:dashboardSale,
         btnDisabled: false,
         notVisitButtonAble: false,
         editRebutNoVisitDialog:false,//编辑驳回未到访弹窗

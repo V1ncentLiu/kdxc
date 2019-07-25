@@ -2,6 +2,7 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        dashboardTeleGroup:dashboardTeleGroup,
         btnDisabled: false,
         dataTable:[],
         pager:{
