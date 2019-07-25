@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.rule.ClueAssignRuleDTO;
+import com.kuaidao.aggregation.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.aggregation.dto.rule.RuleReportDTO;
 import com.kuaidao.aggregation.dto.rule.RuleReportPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -35,6 +37,7 @@ import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.rule.RuleReportFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -56,6 +59,8 @@ public class RuleReportController {
     private static Logger logger = LoggerFactory.getLogger(RuleReportController.class);
     @Autowired
     private RuleReportFeignClient ruleReportFeignClient;
+    @Autowired
+    private ClueAssignRuleFeignClient clueAssignRuleFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -82,6 +87,22 @@ public class RuleReportController {
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList",
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
+        // 所有规则
+        ClueAssignRulePageParam pageParam = new ClueAssignRulePageParam();
+        UserInfoDTO user = getUser();
+        // 插入当前用户、角色信息
+        pageParam.setUserId(user.getId());
+        pageParam.setOrgId(user.getOrgId());
+
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null) {
+
+            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+        }
+        JSONResult<List<ClueAssignRuleDTO>> allValidRule =
+                clueAssignRuleFeignClient.allValidRule(pageParam);
+        request.setAttribute("ruleList", allValidRule.getData());
+
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.DXZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
