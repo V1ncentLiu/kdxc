@@ -35,9 +35,16 @@
                 <el-form-item label="客户手机号:" prop="phone">
                     <el-input v-model="clueSearchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
                 </el-form-item>
-                <el-form-item label="客户姓名:" prop="cusName">
-                    <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
-                </el-form-item>
+                <el-form-item label="资源类别:" prop="category">
+                    <el-select v-model="clueSearchForm.category" clearable filterable placeholder="资源类别">
+                      <el-option
+                          v-for="item in categoryOptions"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                </el-form-item> 
                 <el-form-item label="电销组:" prop="teleGorupId">
                     <el-select v-model="clueSearchForm.teleGorupId" clearable placeholder="电销组" style="width: 100%;">
                       <el-option
@@ -56,7 +63,7 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="资源类型:" prop="type">
-                        <el-select v-model="clueSearchForm.type" clearable placeholder="资源类型" style="width: 100%;">
+                        <el-select v-model="clueSearchForm.type" clearable filterable placeholder="资源类型" style="width: 100%;">
                           <el-option
                               v-for="item in typeOptions"
                               :key="item.value"
@@ -65,16 +72,9 @@
                           </el-option>
                         </el-select>
                     </el-form-item>
-        		    <el-form-item label="资源类别:" prop="category">
-        			    <el-select v-model="clueSearchForm.category" clearable placeholder="资源类别">
-        			      <el-option
-        				      v-for="item in categoryOptions"
-        				      :key="item.value"
-        				      :label="item.name"
-        				      :value="item.value">
-        				  </el-option>
-        			    </el-select>
-        		    </el-form-item>                
+        		    <el-form-item label="客户姓名:" prop="cusName">
+                        <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+                    </el-form-item>               
                     <el-form-item label="留言重点:" prop="messagePoint">
                         <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
                     </el-form-item>
@@ -133,6 +133,9 @@
                         {{scope.row.cusName}}
                         <span v-if="scope.row.inputType ==1">
                             <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
+                        <span v-else-if="scope.row.phtraCustomerStatus ==4">
+                            <input type='hidden'><img th:src="@{/images/fromTraffic.png}"  style="margin:0 10px;width:44px;cursor: pointer;vertical-align: middle;" alt="">
                         </span>
                     </template>
                 </el-table-column>

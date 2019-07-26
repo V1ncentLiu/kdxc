@@ -110,10 +110,15 @@
                         </el-option> 
                       </el-select> 
                     </el-form-item>
-									<el-form-item label="微信:">
-										<el-input v-model="form.wechat" placeholder="微信"></el-input>
-									</el-form-item>
-								</el-row>
+
+					<el-form-item label="微信:">
+						<el-input v-model="form.wechat" placeholder="微信"></el-input>
+					</el-form-item>
+
+					<el-form-item label="搜索词:">
+						<el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+					</el-form-item>
+				</el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button> 
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -318,28 +323,30 @@
 						border
 						:data="exportdataTable"  >
 					<el-table-column align="center" prop="date" label="日期" ></el-table-column>
-					<el-table-column align="center" prop="typeName" label="资源类型" width="120px"></el-table-column>
-					<el-table-column align="center" prop="categoryName" label="资源类别" width="120px"></el-table-column>
-					<el-table-column align="center" prop="sourceTypeName" label="广告位"></el-table-column>
-					<el-table-column align="center" prop="sourceName" label="媒介"></el-table-column>
-					<el-table-column align="center" prop="projectName" label="资源项目(项目名称)"></el-table-column>
-					<el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
+					<el-table-column align="center" prop="sourceName" label="媒介" width="120px"></el-table-column>
+					<el-table-column align="center" prop="sourceTypeName" label="广告位" width="120px"></el-table-column>
+					<el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
+					<el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
+					<el-table-column align="center" prop="projectName" label="项目"></el-table-column>
+					<el-table-column align="center" prop="code" label="编码"></el-table-column>
 					<el-table-column align="center" prop="cusName" label="姓名"></el-table-column>
 					<el-table-column align="center" prop="phone" label="手机" width="110px"></el-table-column>
-					<el-table-column align="center" prop="phone2" label="手机2" width="110px"></el-table-column>
-					<el-table-column align="center" prop="wechat" label="微信" width="150px"></el-table-column>
-					<el-table-column align="center" prop="wechat2" label="微信2" width="150px"></el-table-column>
+					<el-table-column align="center" prop="email" label="邮箱" width="110px"></el-table-column>
 					<el-table-column align="center" prop="qq" label="QQ" width="150px"></el-table-column>
-					<el-table-column align="center" prop="email" label="邮箱"></el-table-column>
-					<el-table-column align="center" prop="sex1" label="性别" width="70px"></el-table-column>
-					<el-table-column align="center" prop="age1" label="年龄" width="70px"></el-table-column>
-					<el-table-column align="center" prop="address" label="开店区域"></el-table-column>
-					<el-table-column align="center" prop="messageTime1" label="留言时间"></el-table-column>
-					<el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+					<el-table-column align="center" prop="phone2" label="手机2" width="150px"></el-table-column>
+					<el-table-column align="center" prop="wechat" label="微信" width="150px"></el-table-column>
+					<el-table-column align="center" prop="address" label="地址"></el-table-column>
+					<el-table-column align="center" prop="messageTime1" label="留言时间" width="70px"></el-table-column>
+					<el-table-column align="center" prop="messagePoint" label="留言内容" width="70px"></el-table-column>
 					<el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+					<el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
+					<el-table-column align="center" prop="remark" label="备注"></el-table-column>
+					<el-table-column align="center" prop="wechat2" label="微信2"></el-table-column>
 					<el-table-column align="center" prop="reserveTime1" label="预约回访时间"></el-table-column>
 					<el-table-column align="center" prop="urlAddress" label="url地址"></el-table-column>
 					<el-table-column align="center" prop="accountName" label="账户名称"></el-table-column>
+					<el-table-column align="center" prop="sex1" label="性别"></el-table-column>
+					<el-table-column align="center" prop="age1" label="年龄"></el-table-column>
 					<el-table-column align="center" prop="importFailReason" label="导入失败原因" v-if="importFailReasonShow"></el-table-column>
 				</el-table>
 			</el-row>
@@ -542,6 +549,7 @@ var wdrVM = new Vue({
 				param.phone=this.form.phone;
 				param.isRecall=this.form.isRecall;
 				param.wechat = this.form.wechat;
+				param.searchWord=this.form.searchWord;
      		    axios.post('/exetend/agendaTaskManager/queryPageAgendaTask',param).then(function (response) {
      				if(!response){
      					wdrVM.$message({

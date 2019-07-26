@@ -99,7 +99,8 @@ public class ClientController {
     public String trClientIndex(HttpServletRequest request) {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        queryDTO.setOrgType(OrgTypeConstant.DXZ);
+//      queryDTO.setOrgType(OrgTypeConstant.DXZ);
+        //查询全部
         JSONResult<List<OrganizationRespDTO>> orgListJr =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
