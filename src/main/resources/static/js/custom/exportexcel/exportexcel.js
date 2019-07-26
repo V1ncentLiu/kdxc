@@ -1,4 +1,4 @@
-function exportFunnew(falgNew,param){
+function distributeExportFun(falgNew,param){
     var methodStr;
     if(falgNew==1){ // 沟通情况
         methodStr = 'findCommunicateRecords';
@@ -14,16 +14,15 @@ function exportFunnew(falgNew,param){
             type: 'success',
             title: '提示',
             message: '下载完成',
-            position: 'bottom-right',
-            duration: 0
+            position: 'bottom-right'
         });
     }).catch(function (error) {
         console.log(error);
+        homePageVM.$message.error(error);
         homePageVM.$notify.error({
             title: '提示',
             message: '下载失败',
-            position: 'bottom-right',
-            duration: 0
+            position: 'bottom-right'
         });
     }).then(function(){
     });
