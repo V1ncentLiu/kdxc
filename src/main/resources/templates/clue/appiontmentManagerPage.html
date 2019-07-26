@@ -1120,13 +1120,22 @@
         param.id = row.clueId;
         param.cusPhone = row.phone;
         param.clueId = row.clueId;
-        if((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7){
+        if( (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7){
           this.$message({
             message: "当前资源已释放到公有池，不允许进行重复手机号资源的查看",
             type: 'error'
           });
           return;
         }
+        //电销顾问角色
+        if((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId)){
+            this.$message({
+                message:'此资源已经被转给其他顾问，您不可再进行详细信息查看',
+                type:'error'
+            });
+            return;
+        }
+
         this.repeatPhonesDialog=true;
         // axios.post('/clue/appiontment/repeatPhonelist', param)
         axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {

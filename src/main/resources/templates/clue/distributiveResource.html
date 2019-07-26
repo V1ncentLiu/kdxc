@@ -22,15 +22,16 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
-        
         <shiro:hasPermission name="DistributiveResource:recall">
-	        	<el-button type="success" @click="toRecall">撤回</el-button>
+	        <el-button type="success" @click="toRecall">撤回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportCRecord">
-            <el-button icon="el-icon-upload2" type="warning" @click="exportFun(1)">导出资源沟通记录</el-button>
+            <el-button v-if="isExport1" icon="el-icon-upload2" type="warning" @click="exportFun(1)">导出资源沟通记录</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源沟通记录中</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportClues">
-            <el-button icon="el-icon-upload2" type="warning" @click="exportFun(2)">导出资源情况</el-button>
+            <el-button v-if="isExport2" icon="el-icon-upload2" type="warning" @click="exportFun(2)">导出资源情况</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源情况中</el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
@@ -210,6 +211,10 @@
                     <el-form-item label="邮箱:">
                         <el-input v-model="form.email" placeholder="邮箱"></el-input>
                     </el-form-item>
+                    <el-form-item label="搜索词:">
+                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>
+
                     <el-form-item label="站点ID是否为空:">
                         <el-select v-model="form.siteIsNull" placeholder="站点ID是否为空" clearable >
                             <el-option
@@ -409,6 +414,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                isExport1:true,
+                isExport2:true,
                 oldPage:1,
                 paginationShow: false,
                 isShow:false,
@@ -568,6 +575,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.qq = this.form.qq;
                 param.email = this.form.email;
                 param.wechat = this.form.wechat;
+                param.searchWord=this.form.searchWord;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(pageNum > 5000){
@@ -785,7 +793,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            confirmColumn(){
            	this.dialogChooseList = false;
            	//处理用户选择的列
-           	console.info(this.fieldFrom.type);
+           	// console.info(this.fieldFrom.type);
            	if(this.fieldFrom.type.length==0){
            		this.$message({
                        message: "请至少保留一列",
@@ -811,7 +819,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            	var param ={};
              param.fieldIdList = idList;
              param.menuCode = "DistributiveResource";
-             console.info(param);
+             // console.info(param);
              if(idList.length!=0){
                  axios.post('/customfield/customField/saveUserField', param)
                  .then(function (response) {
@@ -901,21 +909,32 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         return;
                     }
                 }
-                var methodStr;
                 if(falg==1){ // 沟通情况
-                    methodStr = 'findCommunicateRecords';
+                    this.isExport1=false;
+                    // 存localstorage
+                    localStorage.setItem('distributeExport1','1');
                 }else{ // 资源记录
-                    methodStr = 'findClues';
+                    this.isExport2=false;
+                    // 存localstorage
+                    localStorage.setItem('distributeExport2','2');
                 }
-                axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
-                .then(function (response) {
-                    var data =  response.data;
-                    var fileName = response.headers.filename;
-                    saveAs(data,decodeURI(fileName));
-                }).catch(function (error) {
-                    console.log(error);
-                }).then(function(){
-                });
+                // var methodStr;
+                // if(falg==1){ // 沟通情况
+                //     methodStr = 'findCommunicateRecords';
+                // }else{ // 资源记录
+                //     methodStr = 'findClues';
+                // }
+                // axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
+                // .then(function (response) {
+                //     var data =  response.data;
+                //     var fileName = response.headers.filename;
+                //     saveAs(data,decodeURI(fileName));
+                // }).catch(function (error) {
+                //     console.log(error);
+                // }).then(function(){
+                // });
+                var falgNew=falg;
+                window.parent.distributeExportFun(falgNew,param)
             },
 
             toRecall() {
@@ -988,6 +1007,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         	document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
+            var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+            var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+            if(storageDistributeExport1){
+                this.isExport1=false;
+            }else{
+                this.isExport1=true;
+            }
+            if(storageDistributeExport2){
+                this.isExport2=false;
+            }else{
+                this.isExport2=true;
+            }
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = this.getSessionStore("distributiveResourceStoreForm");
