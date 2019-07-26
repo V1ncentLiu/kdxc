@@ -15,24 +15,29 @@ function distributeExportFun(falgNew,param){
                 type: 'success',
                 title: '提示',
                 message: '资源沟通记录下载完成',
-                position: 'bottom-right'
+                position: 'bottom-right',
+                duration: 0
             });
+            localStorage.removeItem("distributeExport1");
         }else{ // 资源记录
             homePageVM.$notify({
                 type: 'success',
                 title: '提示',
                 message: '资源情况下载完成',
-                position: 'bottom-right'
+                position: 'bottom-right',
+                duration: 0
             });
+            localStorage.removeItem("distributeExport2");
         }        
     }).catch(function (error) {
         console.log(error);
-        homePageVM.$message.error(error);
         homePageVM.$notify.error({
             title: '提示',
-            message: '下载失败',
+            message: error + ',下载失败',
             position: 'bottom-right'
         });
+        localStorage.removeItem("distributeExport1");
+        localStorage.removeItem("distributeExport2");
     }).then(function(){
     });
 }
