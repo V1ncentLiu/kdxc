@@ -31,11 +31,19 @@ function distributeExportFun(falgNew,param){
         }        
     }).catch(function (error) {
         console.log(error);
-        homePageVM.$notify.error({
-            title: '提示',
-            message: error + ',下载失败',
-            position: 'bottom-right'
-        });
+        if(falgNew==1){ // 沟通情况
+            homePageVM.$notify.error({
+                title: '提示',
+                message: error + ',资源沟通记录下载失败',
+                position: 'bottom-right'
+            });
+        }else{ // 资源记录
+            homePageVM.$notify.error({
+                title: '提示',
+                message: error + ',资源情况下载失败',
+                position: 'bottom-right'
+            });
+        }        
         localStorage.removeItem("distributeExport1");
         localStorage.removeItem("distributeExport2");
     }).then(function(){
