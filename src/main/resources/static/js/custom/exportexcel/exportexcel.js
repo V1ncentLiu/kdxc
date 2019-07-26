@@ -10,12 +10,21 @@ function distributeExportFun(falgNew,param){
         var data =  response.data;
         var fileName = response.headers.filename;
         saveAs(data,decodeURI(fileName));
-        homePageVM.$notify({
-            type: 'success',
-            title: '提示',
-            message: '下载完成',
-            position: 'bottom-right'
-        });
+        if(falgNew==1){ // 沟通情况
+            homePageVM.$notify({
+                type: 'success',
+                title: '提示',
+                message: '资源沟通记录下载完成',
+                position: 'bottom-right'
+            });
+        }else{ // 资源记录
+            homePageVM.$notify({
+                type: 'success',
+                title: '提示',
+                message: '资源情况下载完成',
+                position: 'bottom-right'
+            });
+        }        
     }).catch(function (error) {
         console.log(error);
         homePageVM.$message.error(error);
