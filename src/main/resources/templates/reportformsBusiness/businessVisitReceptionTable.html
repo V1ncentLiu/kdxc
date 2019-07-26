@@ -26,13 +26,13 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
-                <el-form-item label="预约来访日期:">
+                <el-form-item label="统计日期:">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="来访项目:">  
+                <el-form-item label="商务大区:">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -42,7 +42,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销分公司:">  
+                <el-form-item label="商务组:">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -52,33 +52,13 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销事业部:">  
+                <el-form-item label="商务经理:">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.cusLevelList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
-                        <el-option
-                            v-for="item in clientRank"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -101,13 +81,16 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="countResource" label="来访项目" width="200"></el-table-column>
-                <el-table-column prop="countResource" label="正常邀约数" width="200"></el-table-column>
-                <el-table-column prop="countClueId" label="取消邀约数"></el-table-column>
-                <el-table-column prop="countDistinctClue" label="删除邀约数"></el-table-column>
-                <el-table-column prop="countDistinctClue" label="邀约次数"></el-table-column>
-                <el-table-column prop="dayOfPer" label="取消邀约次数" :formatter="numFormat"></el-table-column>
-                <el-table-column prop="dayOfPer" label="删除邀约次数" :formatter="numFormat"></el-table-column>
+                <el-table-column prop="countResource" label="商务经理" width="200"></el-table-column>
+                <el-table-column prop="countResource" label="来访次数" width="200"></el-table-column>
+                <el-table-column prop="countClueId" label="来访资源数"></el-table-column>
+                <el-table-column prop="countDistinctClue" label="首访数占比" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="countDistinctClue" label="签约单数"></el-table-column>
+                <el-table-column prop="dayOfPer" label="订金率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="dayOfPer" label="退款单数" :formatter="numFormat"></el-table-column>
+                <el-table-column prop="countDistinctClue" label="退款率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="dayOfPer" label="平均每客户来访次数" :formatter="numFormat"></el-table-column>
+                <el-table-column prop="dayOfPer" label="人均天接待来访次数" :formatter="numFormat"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -371,6 +354,15 @@
                 // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
                 // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
                 // return sums;
+            },
+            //百分比格式话
+            percentFormat(row, column) {
+                var percent = row[column.property];
+                if (!percent) { // 如果没有值或值为0
+                    return 0 + "%";
+                }
+                percent = (percent * 1000) / 10 + "%";
+                return percent;
             },
             numFormat(row, column){
                 var percent = row[column.property];
