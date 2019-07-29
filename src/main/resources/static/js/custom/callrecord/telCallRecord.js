@@ -45,7 +45,6 @@ var myCallRecordVm = new Vue({
         	bindPhone:'',
         	accountId:'',
         	teleGroupId:'',
-        		
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
