@@ -44,9 +44,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务专员:">  
-                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in teleMarketArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -54,7 +54,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -136,41 +136,41 @@
                     newResource: ''
                 },
                 tableData: [
-                    {
-                        orgId: "1",
-                        orgName: '合计',
-                        callCount: 1000,
-                        calledCount: 10,
-                        callPercent: 0.1,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        userAvgDayValidCallTime: 155799
-                    }, {
-                        orgId: "2",
-                        orgName: '电销组2',
-                        callCount: 1000,
-                        calledCount: 10,
-                        callPercent: 0,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        userAvgDayValidCallTime: 0
-                    },
-                    {
-                        orgId: "3",
-                        orgName: '电销组3',
-                        callCount: 1000,
-                        calledCount: 10,
-                        // callPercent: 0,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        // userAvgDayValidCallTime: 155799
-                    }
+                    // {
+                    //     orgId: "1",
+                    //     orgName: '合计',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 0.1,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 155799
+                    // }, {
+                    //     orgId: "2",
+                    //     orgName: '电销组2',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 0,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 0
+                    // },
+                    // {
+                    //     orgId: "3",
+                    //     orgName: '电销组3',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     // callPercent: 0,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     // userAvgDayValidCallTime: 155799
+                    // }
                 ],
                 orgTeleArr: queryOrg, // 话务组
                 teleMarketArr: []
@@ -448,7 +448,10 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-            if(curOrgId){this.isDisabled= true;}
+            if(curOrgId){
+                this.isDisabled= true;
+                this.currentTelSale(curOrgId);
+            }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
 
