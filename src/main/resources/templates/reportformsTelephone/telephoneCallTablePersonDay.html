@@ -2,8 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
-    <style>
-    </style>
 </head>
 <body>
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
@@ -47,7 +45,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务专员:">  
-                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in teleMarketArr"
                             :key="item.id"
@@ -66,21 +64,19 @@
                 :data="tableData"
                 border
                 style="width: 100%"
-                v-loading="loading">
-                <el-table-column prop="id" type="index" label="序号" align="center" width="55">
-                </el-table-column>
-                <el-table-column prop="dateId" align="center" :formatter="dateFormat" label="日期">
+                v-loading="loading"
+                :span-method="arraySpanMethod">
+                <el-table-column prop="id" type="index" label="序号" align="center" width="55" :index="indexFun">
                 </el-table-column>
                 <el-table-column
-                    prop="orgName"
+                    prop="dateId"
                     align="center"
                     label="统计日期">
                     <template slot-scope="scope">
                         <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)"  v-else>{{scope.row.orgName | timeFormatFilter}}</el-button>
+                        <span type="text" size="small" v-else>{{scope.row.dateId | dateFormatFilter}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="userName" align="center" label="话务组"></el-table-column>
                 <el-table-column prop="callCount" align="center" label="拨打次数"></el-table-column>
                 <el-table-column prop="calledCount" align="center" label="接通次数" :formatter="nullToZero"></el-table-column>
                 <el-table-column prop="callPercent" align="center" label="接通率" :formatter="percentFormat"></el-table-column>
@@ -88,7 +84,7 @@
                 <el-table-column prop="calledClueCount" align="center" label="接通量" :formatter="nullToZero"></el-table-column>
                 <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat"></el-table-column>
                 <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长"></el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="天均总有效通话时长"></el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" :papernum="[3,5,10]" @change="searchTable()"></table-pagination>
         </el-row>
@@ -103,22 +99,34 @@
     }
 </style>
 <script th:inline="javascript">
-    var queryOrg=[[${teleGroupList}]]; // 电销组
+    var queryOrg=[[${teleGroupList}]]; // 话务组
     var parentParam = [[${parentParam}]];
+    var curOrgId = [[${curOrgId}]];
+    var curUserId = [[${curUserId}]];
+    parentParam = {
+        startTime: '',
+        endTime: '',
+        orgId: '',
+        userId: '',
+        newResource: '1'
+    };
     var mainDivVM = new Vue({
         el: '#maindiv',
         filters: {
-          timeFormatFilter (val) {
-            var time = row[column.property];
-            if(!time){return "00时00分00秒";}
-            var timeResult = this.timeFun (time); 
-            return timeResult;
+            dateFormatFilter (date) { 
+                if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay; 
           },
         },
         data: function() {
             return {
                 loading: false,
                 isDisabled: false, // 输入框禁止选择
+                isDisabledUserId: false,
                 btnDisabled: false,
                 pager:{ 
                     total: 0,
@@ -128,14 +136,14 @@
                 form: {
                     startTime: '',
                     endTime: '',
-                    orgId: curOrgId,
+                    orgId: '',
                     userId: '',
                     newResource: ''
                 },
                 export: {
                     startTime: '',
                     endTime: '',
-                    orgId: curOrgId,
+                    orgId: '',
                     userId: '',
                     newResource: ''
                 },
@@ -322,18 +330,27 @@
                     });
                 });
             },
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [1, 2];
+                    }
+                }
+            },
+            indexFun (index) { // 表格序号
+                return index;
+            },
+            nullToZero(row, column, value, index){
+                if(value){
+                    return value;
+                }
+                return 0;
+            },
             goBack () {
                 window.history.go(-1);
             },
-            dateFormat (row, column) { 
-                var date = row[column.property];
-                 if (!date) {return "";}
-                var d = date.toString();
-                var oYear = d.slice(0,4);
-                var oMonth = d.slice(4,6);
-                var oDay = d.slice(6);
-                return oYear+"-"+oMonth+"-"+oDay;
-            }, 
             timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
                 if(!time){return "00时00分00秒";}
@@ -446,23 +463,29 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
 
-            // this.form.startTime=this.dateTimeFormat(parentParam.startTime);
-            // this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
-            // this.form.orgId=parentParam.orgId; 
-            // this.form.userId=parentParam.userId; 
-            // this.form.orgId = this.form.orgId ? this.form.orgId.toString():"";
-            // this.export.startTime = parentParam.startTime;
-            // this.export.endTime = parentParam.endTime;
-            // this.export.orgId = this.form.orgId;
-            // this.export.userId = this.form.userId;
+            this.form.startTime=parentParam.startTime?this.dateTimeFormat(parentParam.startTime) : startTime;
+            this.form.endTime=parentParam.endTime?this.dateTimeFormat(parentParam.endTime) : endTime;
+
+            this.form.newResource = parentParam.newResource;
+            if(curOrgId){
+                this.isDisabled = true;
+                this.isDisabledUserId = true;
+                this.form.orgId = curOrgId ? this.form.orgId.toString():"";
+                this.form.userId = curUserId ? this.form.userId.toString():"";
+            }else{
+                this.form.orgId=parentParam.orgId; 
+                this.form.userId = parentParam.userId;
+            }
+
+            this.export = this.form;
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.currentTelSale(this.export.orgId);
+            // this.currentTelSale(this.export.orgId); 
             // this.searchTable();
         },
         mounted(){

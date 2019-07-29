@@ -2,8 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
-    <style>
-    </style>
 </head>
 <body>
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
@@ -61,9 +59,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
+            <el-table
                 style="width: 100%"
                 border
                 :data="tableData"
@@ -112,6 +108,7 @@
     var queryOrg=[[${teleGroupList}]]; // 话务组
     console.log(queryOrg);
     var curOrgId = [[${curOrgId}]];
+    console.log(curOrgId, 'curOrgId')
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -344,12 +341,14 @@
             	return 0;
             },
             gotoTeam (row) { // 页面跳转
-                var orgId = row.orgId; // 电销组id
-                var orgName = row.orgName; // 电销组name
+                var orgId = row.orgId; // 话务组id
+                var userId = this.export.userId; // 话务专员id
+                var newResource = this.export.newResource;
+                newResource = 1;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(orgId){
-                    window.location.href="/statistics/trafficCallTime/telephoneCallTablePerson?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/statistics/trafficCallTime/telephoneCallTablePerson?orgId=" + orgId + "&userId="+ userId +"&newResource="+ newResource +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             percentFormat (row, column) { // 百分比格式化fn
