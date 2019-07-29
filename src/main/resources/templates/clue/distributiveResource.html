@@ -414,6 +414,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                timer:null,//计时器
                 isExport1:true,
                 isExport2:true,
                 oldPage:1,
@@ -917,7 +918,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     this.isExport2=false;
                     // 存localstorage
                     localStorage.setItem('distributeExport2','2');
-                }
+                }     
+                this.timedown();           
                 // var methodStr;
                 // if(falg==1){ // 沟通情况
                 //     methodStr = 'findCommunicateRecords';
@@ -936,7 +938,27 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 var falgNew=falg;
                 window.parent.distributeExportFun(falgNew,param)
             },
-
+            timedown(){
+                console.log(0)
+                clearInterval(this.timer);
+                var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+                var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+                if(storageDistributeExport1){
+                    this.isExport1=false;
+                }else{
+                    this.isExport1=true;
+                }
+                if(storageDistributeExport2){
+                    this.isExport2=false;
+                }else{
+                    this.isExport2=true;
+                }  
+                if(storageDistributeExport1||storageDistributeExport2){
+                    this.timer=setInterval(this.timedown,1000)
+                }else{
+                    clearInterval(this.timer)
+                } 
+            },
             toRecall() {
                 var rows = this.multipleSelection;
                 if(rows.length!=1){
@@ -1003,8 +1025,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },
         },
         mounted(){
-
-        	document.getElementById('optimizeClueManagement').style.display = 'block';
+        	document.getElementById('optimizeClueManagement').style.display = 'block';            
         },
         created(){
             var storageDistributeExport1 = localStorage.getItem("distributeExport1");
@@ -1018,6 +1039,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 this.isExport2=false;
             }else{
                 this.isExport2=true;
+            }
+            if(storageDistributeExport1 || storageDistributeExport2){
+                this.timedown();
             }
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
