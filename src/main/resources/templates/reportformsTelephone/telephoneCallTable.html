@@ -16,7 +16,7 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button> 
-         <shiro:hasPermission name="statistics:teleSaleTalkTime:export"> 
+        <shiro:hasPermission name="statistics:teleSaleTalkTime:export"> 
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
         </shiro:hasPermission>
     </el-row>
@@ -30,13 +30,13 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="是否新资源:">  
-                    <el-select v-model="form.isTransfer" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.newResource" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="2"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务组:">  
-                    <el-select v-model="form.orgId" placeholder="话务组" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="话务组" style="width: 100%;" clearable filterable :disabled="isDisabled" @change="currentTelSale">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -46,7 +46,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务专员:">  
-                    <el-select v-model="form.orgId" placeholder="话务专员" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -75,7 +75,8 @@
                     align="center"
                     label="话务组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
+                        <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)"  v-else>{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="callCount" align="center" label="拨打次数">
@@ -95,7 +96,7 @@
                 <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="天均总有效通话时长">
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()" papernum="[3,5,10]"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -103,16 +104,13 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <style>
-.el-table--border th:nth-of-type(n+19) .cell {
-    font-weight: bold;
-}
 .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {
     font-weight: bold;
 }
 </style>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 话务组
-    // var queryOrg=[[${teleGroupList}]]; // 话务专员
+    console.log(queryOrg);
     var curOrgId = [[${curOrgId}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -130,54 +128,75 @@
                     startTime: '',
                     endTime: '',
                     orgId: curOrgId,
-                    isNewResource: ''
+                    userId: '',
+                    newResource: ''
                 },
                 export: {
                     startTime: '',
                     endTime: '',
-                    orgId: curOrgId
+                    orgId: curOrgId,
+                    userId: '',
+                    newResource: ''
                 },
                 tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '电销组1',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0.1,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 0
-                    // },
-                    // {
-                    //     orgId: "3",
-                    //     orgName: '电销组3',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     // callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     // userAvgDayValidCallTime: 155799
-                    // }
+                    {
+                        orgId: "1",
+                        orgName: '合计',
+                        callCount: 1000,
+                        calledCount: 10,
+                        callPercent: 0.1,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                        userAvgDayValidCallTime: 155799
+                    }, {
+                        orgId: "2",
+                        orgName: '电销组2',
+                        callCount: 1000,
+                        calledCount: 10,
+                        callPercent: 0,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                        userAvgDayValidCallTime: 0
+                    },
+                    {
+                        orgId: "3",
+                        orgName: '电销组3',
+                        callCount: 1000,
+                        calledCount: 10,
+                        // callPercent: 0,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                        // userAvgDayValidCallTime: 155799
+                    }
                 ],
                 orgTeleArr: queryOrg, // 话务组
+                teleMarketArr: []
             }             
         },
-        methods: {  
+        methods: {
+            currentTelSale(seleVal){ // 根据话务组选择话务专员
+                if(null==seleVal||seleVal==""){return;}
+                var param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/statistics/trafficCallTime/getSaleList',param).then(function (response) {  
+                    var result =  response.data;
+                    if(result.data){
+                        mainDivVM.teleMarketArr = result.data;
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "话务专员请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -248,11 +267,11 @@
                             type: 'error'
                         });
                         return ;
-                    }else if(resobj.data && resobj.data.tableData && resobj.data.totalData ){
+                    }else if(resobj.data && resobj.data.tableData){
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
-                        if(tableData.data && tableData.data.length){
+                        if( tableData.data.length && resobj.data.totalData ){
                             var totalData = resobjData.totalData;
                             mainDivVM.tableData.unshift(totalData);
                         }
@@ -264,13 +283,25 @@
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
                     }else{
                         mainDivVM.loading = false;
-                    }  
+                        // mainDivVM.startTimeEnd = mainDivVM.form.startTime;
+                        // mainDivVM.endTimeEnd = mainDivVM.form.endTime;
+                        // mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
+                        // mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
+                        // mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
+                        // mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
+                    }
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
+                    // mainDivVM.startTimeEnd = mainDivVM.form.startTime;
+                    // mainDivVM.endTimeEnd = mainDivVM.form.endTime;
+                    // mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
+                    // mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
+                    // mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
+                    // mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
                 });
             },
             limitTime (start, end) {
@@ -317,13 +348,10 @@
                 var orgName = row.orgName; // 电销组name
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                if(orgId === "0" && orgName === "合计"){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
-                }else if(orgId){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
+                if(orgId){
+                    window.location.href="/statistics/trafficCallTime/telephoneCallTablePerson?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
-            
             percentFormat (row, column) { // 百分比格式化fn
                 var percent = row[column.property];
                 if(!percent){ // 如果没有值或值为0
@@ -431,9 +459,11 @@
             if(curOrgId){this.isDisabled= true;}
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
+
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            this.searchTable();
+
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
