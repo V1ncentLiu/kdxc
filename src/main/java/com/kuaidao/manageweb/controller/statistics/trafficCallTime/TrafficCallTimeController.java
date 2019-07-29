@@ -79,18 +79,18 @@ public class TrafficCallTimeController {
         pageParams(orgId,startTime,endTime,userId,newResource,request);
         //加载话务组
         initOrgList(request);
-        return "reportformsTelephone/telephoneCallTableTeam";
+        return "reportformsTelephone/telephoneCallTablePerson";
     }
 
     /**
      * 组+人+天 三级页面跳转
      */
-    @RequestMapping("/telephoneCallTableTeam")
+    @RequestMapping("/telephoneCallTablePersonDay")
     public String telephoneCallTableTeam(Long orgId,Long startTime,Long endTime,Long userId,Integer newResource,HttpServletRequest request) {
         pageParams(orgId,startTime,endTime,userId,newResource,request);
         //加载话务组
         initOrgList(request);
-        return "reportformsTelephone/telephoneCallTablePerson";
+        return "reportformsTelephone/telephoneCallTablePersonDay";
     }
     /**
      * 组分页
