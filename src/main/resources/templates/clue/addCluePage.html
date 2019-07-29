@@ -293,7 +293,7 @@
                     required: true, message: '手机号不能为空', trigger: 'blur',
                 }"
             >
-                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
+                <el-input v-model.trim="domain.value" maxLength="30" @keyup.native="phoneNumber" @change.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
                 <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
@@ -306,7 +306,7 @@
         <template>
             <el-form :model="wechatForm" ref="wechatForm" > 
               <el-form-item label="微信2：" :label-width="formLabelWidth1" >
-                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+                  <el-input v-model.trim="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
               	<el-upload
@@ -1151,8 +1151,12 @@ if(notOptList){
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
             	this.form.wechatUrl=this.wechatForm.wechatUrl;
-            	addClueVM.$message({ message: "提交成功", type: 'success' }); 
-            	this.wechatVisible = false;
+                if(this.wechatForm.wechat2!==""){
+                    addClueVM.$message({ message: "提交成功", type: 'success' }); 
+                    this.wechatVisible = false;
+                }else{
+                    addClueVM.$message({ message: "提交内容不能为空", type: 'error' }); 
+                }            	
             },
             removeDomain(item) {
                 var index = this.dynamicValidateForm.domains.indexOf(item);
@@ -1202,7 +1206,7 @@ if(notOptList){
     　　　     	this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                 this.form.phone=this.form.phone.replace('.','');
                 // if(this.form.phone.length==11){
-                if(this.form.phone.length!=""){
+                if(this.form.phone!=""&&this.form.phone.length!=0){
                     this.isDisabled=false;
                 }else{
                     this.isDisabled=true;
