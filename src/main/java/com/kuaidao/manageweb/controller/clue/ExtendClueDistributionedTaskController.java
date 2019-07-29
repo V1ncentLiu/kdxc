@@ -588,16 +588,23 @@ public class ExtendClueDistributionedTaskController {
 
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
         String roleCode = user.getRoleList().get(0).getRoleCode();
-        UserOrgRoleReq userRole = new UserOrgRoleReq();
-        if (RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.YWGLY.name().equals(roleCode)
-                || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
-            userRole.setBusinessLine(BusinessLineConstant.TGZX);
+        if (RoleCodeEnum.HWY.name().equals(roleCode)) {
+            userList.add(user);
         } else {
-            userRole.setOrgId(user.getOrgId());
-        }
-        JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
-        if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()) {
-            userList = userZxzjList.getData();
+            UserOrgRoleReq userRole = new UserOrgRoleReq();
+            if (RoleCodeEnum.GLY.name().equals(roleCode)
+                    || RoleCodeEnum.YWGLY.name().equals(roleCode)
+                    || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
+                userRole.setBusinessLine(BusinessLineConstant.TGZX);
+            } else {
+                userRole.setOrgId(user.getOrgId());
+            }
+            JSONResult<List<UserInfoDTO>> userZxzjList =
+                    userInfoFeignClient.listByOrgAndRole(userRole);
+            if (JSONResult.SUCCESS.equals(userZxzjList.getCode())
+                    && null != userZxzjList.getData()) {
+                userList = userZxzjList.getData();
+            }
         }
         return userList;
 
