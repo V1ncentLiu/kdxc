@@ -240,9 +240,11 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 param.orgId = this.form.orgId;
+                param.userId = this.form.userId;
+                param.newResource = this.form.newResource;
                 this.loading = true; 
-                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
-                    if(!response){
+                axios.post('/statistics/trafficCallTime/getGroupPageList',param).then(function (response) {
+                    if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
@@ -250,14 +252,7 @@
                         return ;
                     }
                     var resobj= response.data;
-                    if(!resobj){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    if(resobj.code!='0'){
+                    if(resobj.code != '0'){
                         mainDivVM.loading = false;
                         mainDivVM.$message({
                             message: resobj.msg,
@@ -278,6 +273,8 @@
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.newResource = mainDivVM.form.newResource;
                     }else{
                         mainDivVM.loading = false;
                         // mainDivVM.startTimeEnd = mainDivVM.form.startTime;
@@ -293,12 +290,6 @@
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
-                    // mainDivVM.startTimeEnd = mainDivVM.form.startTime;
-                    // mainDivVM.endTimeEnd = mainDivVM.form.endTime;
-                    // mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
-                    // mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
-                    // mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
-                    // mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
                 });
             },
             limitTime (start, end) {
@@ -434,7 +425,9 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 param.orgId =  this.export.orgId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                param.userId =  this.export.userId; 
+                param.newResource =  this.export.newResource; 
+                axios.post('/statistics/trafficCallTime/exportGroupList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -462,7 +455,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
