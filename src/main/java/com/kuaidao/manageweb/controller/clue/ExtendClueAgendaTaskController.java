@@ -46,7 +46,6 @@ import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
@@ -367,8 +366,12 @@ public class ExtendClueAgendaTaskController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
         String roleCode = user.getRoleList().get(0).getRoleCode();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        if (RoleCodeEnum.GLY.name().equals(roleCode)
-                || RoleCodeEnum.YWGLY.name().equals(roleCode)) {
+        if (RoleCodeEnum.HWY.name().equals(roleCode)) {
+            userList.add(user);
+            return userList;
+        } else if (RoleCodeEnum.GLY.name().equals(roleCode)
+                || RoleCodeEnum.YWGLY.name().equals(roleCode)
+                || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
             userRole.setBusinessLine(BusinessLineConstant.TGZX);
         } else {
             userRole.setOrgId(user.getOrgId());
@@ -534,7 +537,7 @@ public class ExtendClueAgendaTaskController {
             } // inner foreach end
             dataList.add(rowDto);
         }
-      // outer foreach end
+        // outer foreach end
         logger.info("upload custom filed, valid success num{{}}", dataList.size());
         /*
          * JSONResult uploadRs = customFieldFeignClient.saveBatchCustomField(dataList);
@@ -726,8 +729,7 @@ public class ExtendClueAgendaTaskController {
                 if (clueAgendaTaskDTO1.getCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getCategoryName())) {
                     // 去掉前后空格
-                    clueAgendaTaskDTO1
-                            .setCategoryName(clueAgendaTaskDTO1.getCategoryName().trim());
+                    clueAgendaTaskDTO1.setCategoryName(clueAgendaTaskDTO1.getCategoryName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTO1.getCategoryName() != null
                             && !"".equals(clueAgendaTaskDTO1.getCategoryName())) {
@@ -833,13 +835,12 @@ public class ExtendClueAgendaTaskController {
                 if (clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
                     // 去掉前后空格
-                    clueAgendaTaskDTO1
-                            .setProjectName(clueAgendaTaskDTO1.getProjectName().trim());
+                    clueAgendaTaskDTO1.setProjectName(clueAgendaTaskDTO1.getProjectName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTO1.getProjectName() != null
                             && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                        clueAgendaTaskDTO1.setProjectId(projectMap
-                                .get(clueAgendaTaskDTO1.getProjectName().toUpperCase()));
+                        clueAgendaTaskDTO1.setProjectId(
+                                projectMap.get(clueAgendaTaskDTO1.getProjectName().toUpperCase()));
                         if (clueAgendaTaskDTO1.getProjectId() == null) {
                             islegal = false;
                             if (StringUtils.isBlank(reasonIsNotMatch)) {
@@ -890,13 +891,11 @@ public class ExtendClueAgendaTaskController {
                 if (clueAgendaTaskDTO1.getAccountName() != null
                         && !"".equals(clueAgendaTaskDTO1.getAccountName())) {
                     // 去掉前后空格
-                    clueAgendaTaskDTO1
-                            .setAccountName(clueAgendaTaskDTO1.getAccountName().trim());
+                    clueAgendaTaskDTO1.setAccountName(clueAgendaTaskDTO1.getAccountName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTO1.getAccountName() != null
                             && !"".equals(clueAgendaTaskDTO1.getAccountName())) {
-                        String account =
-                                accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
+                        String account = accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
                         if (StringUtils.isNotBlank(account)) {
                             clueAgendaTaskDTO1.setAccountNameVaule(account);
                         } else {
