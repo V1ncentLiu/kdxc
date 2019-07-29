@@ -79,7 +79,7 @@ public class TrafficCallTimeController {
         pageParams(orgId,startTime,endTime,userId,newResource,request);
         //加载话务组
         initOrgList(request);
-        return "reportformsTelephone/telephoneCallTablePerson";
+        return "reportformsTelephone/telephoneCallTableTeam";
     }
 
     /**
@@ -90,7 +90,7 @@ public class TrafficCallTimeController {
         pageParams(orgId,startTime,endTime,userId,newResource,request);
         //加载话务组
         initOrgList(request);
-        return "reportformsTelephone/telephoneCallTableTeam";
+        return "reportformsTelephone/telephoneCallTablePerson";
     }
     /**
      * 组分页
