@@ -45,7 +45,6 @@ var myCallRecordVm = new Vue({
         	bindPhone:'',
         	accountId:'',
         	teleGroupId:'',
-        		
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
@@ -54,7 +53,8 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
+        // if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
+        if((roleCode =='DXCYGW' && row.accountId!=userId) || ((row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
           text ="***"
         }else{
           text = row.customerPhone;
