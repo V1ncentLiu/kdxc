@@ -1256,9 +1256,9 @@ public class ExtendClueAgendaTaskController {
         headTitleList.add("预约时间");
         headTitleList.add("url地址");
         headTitleList.add("账户名称");
-        headTitleList.add("导入失败原因");
         headTitleList.add("性别");
         headTitleList.add("年龄");
+        headTitleList.add("导入失败原因");
         return headTitleList;
     }
 
