@@ -72,7 +72,7 @@
                     label="话务组">
                     <template slot-scope="scope">
                         <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)"  v-else>{{scope.row.orgName}}</el-button>
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)" v-else>{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="callCount" align="center" label="拨打次数">
@@ -100,6 +100,10 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <style>
+.el-table tr:nth-of-type(n+2) td:nth-of-type(2) span{
+    white-space: normal;
+    word-break: break-all;
+}
 .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {
     font-weight: bold;
 }
@@ -115,7 +119,7 @@
             return {
                 loading: false,
                 isDisabled: false, // 输入框禁止选择
-                btnDisabled: false,
+                // btnDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -264,7 +268,7 @@
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
                         if( tableData.data.length && resobj.data.totalData ){
-                            var totalData = resobjData.totalData;
+                            var totalData = resobjData.totalData[0];
                             mainDivVM.tableData.unshift(totalData);
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
@@ -275,6 +279,7 @@
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
                         mainDivVM.export.userId = mainDivVM.form.userId;
                         mainDivVM.export.newResource = mainDivVM.form.newResource;
+                        console.log(mainDivVM.tableData)
                     }else{
                         mainDivVM.loading = false;
                         // mainDivVM.startTimeEnd = mainDivVM.form.startTime;
@@ -335,7 +340,6 @@
                 var orgId = row.orgId; // 话务组id
                 var userId = this.export.userId; // 话务专员id
                 var newResource = this.export.newResource;
-                newResource = 1;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(orgId){

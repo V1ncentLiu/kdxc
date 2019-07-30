@@ -100,16 +100,10 @@
 </style>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 话务组
-    var parentParam = [[${parentParam}]];
+    var parentParam = [[${trafficCallTimeQueryDto}]];
     var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
-    parentParam = {
-        startTime: '',
-        endTime: '',
-        orgId: '',
-        userId: '',
-        newResource: '1'
-    };
+    console.log(parentParam)
     var mainDivVM = new Vue({
         el: '#maindiv',
         filters: {
@@ -237,11 +231,12 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId =  this.form.orgId; // 电销组
-                param.userId =  this.form.userId; // 电销顾问
+                param.orgId = this.form.orgId;
+                param.userId = this.form.userId;
+                param.newResource = this.form.newResource;
                 this.loading = true; 
-                axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
-                    if(!response){
+                axios.post('/statistics/trafficCallTime/getGroupPersonDayPageList',param).then(function (response) {
+                    if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
@@ -249,30 +244,33 @@
                         return ;
                     }
                     var resobj= response.data;
-                    if(!resobj){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    if(resobj.code!='0'){
+                    if(resobj.code != '0'){
                         mainDivVM.loading = false;
                         mainDivVM.$message({
                             message: resobj.msg,
                             type: 'error'
                         });
                         return ;
-                    }  
-                    var resobjData = resobj.data.data          
-                    mainDivVM.tableData = resobjData;
-                    mainDivVM.pager.currentPage = resobj.data.currentPage;
-                    mainDivVM.pager.total = resobj.data.total;
-                    mainDivVM.loading = false;
-                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    mainDivVM.export.userId = mainDivVM.form.userId;
+                    }else if(resobj.data && resobj.data.tableData){
+                        var resobjData = resobj.data;    
+                        var tableData = resobjData.tableData;
+                        mainDivVM.tableData = tableData.data;
+                        if( tableData.data.length && resobj.data.totalData ){
+                            var totalData = resobjData.totalData[0];
+                            mainDivVM.tableData.unshift(totalData);
+                        }
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.newResource = mainDivVM.form.newResource;
+                        console.log(mainDivVM.tableData)
+                    }else{
+                        mainDivVM.loading = false;
+                    }
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
