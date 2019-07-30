@@ -981,10 +981,18 @@ public class ExtendClueAgendaTaskController {
                                 .setPhone2(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""));
                         }
                     }
-                    pushClueReq.setWechat(clueAgendaTaskDTO1.getWechat());
-                    pushClueReq.setWechat2(clueAgendaTaskDTO1.getWechat2());
-                    pushClueReq.setQq(clueAgendaTaskDTO1.getQq());
-                    pushClueReq.setEmail(clueAgendaTaskDTO1.getEmail());
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getWechat()) && StringUtils.isNotBlank(clueAgendaTaskDTO1.getWechat().trim())) {
+                        pushClueReq.setWechat(clueAgendaTaskDTO1.getWechat().trim());
+                    }
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getWechat2()) && StringUtils.isNotBlank(clueAgendaTaskDTO1.getWechat2().trim())) {
+                        pushClueReq.setWechat2(clueAgendaTaskDTO1.getWechat2().trim());
+                    }
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getQq()) && StringUtils.isNotBlank(clueAgendaTaskDTO1.getQq().trim())) {
+                        pushClueReq.setQq(clueAgendaTaskDTO1.getQq().trim());
+                    }
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getEmail()) && StringUtils.isNotBlank(clueAgendaTaskDTO1.getEmail().trim())) {
+                        pushClueReq.setEmail(clueAgendaTaskDTO1.getEmail().trim());
+                    }
                     pushClueReq.setRemark(clueAgendaTaskDTO1.getAddress());
                     pushClueReq.setSearchWord(clueAgendaTaskDTO1.getSearchWord());
                     pushClueReq.setSource(String.valueOf(clueAgendaTaskDTO1.getSource()));
