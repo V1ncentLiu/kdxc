@@ -14,7 +14,6 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.trafficCallTime.TrafficCallTimeFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyAllDataDto;
 import com.kuaidao.stastics.dto.trafficCallTime.TrafficCallTimeDto;
 import com.kuaidao.stastics.dto.trafficCallTime.TrafficCallTimeQueryDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -312,7 +311,7 @@ public class TrafficCallTimeController {
         if(RoleCodeEnum.HWY.name().equals(roleCode)){
             curUserId = String.valueOf(curLoginUser.getId());
         }
-        if(RoleCodeEnum.HWZG.name().equals(roleCode)) {
+        if(RoleCodeEnum.HWZG.name().equals(roleCode) || RoleCodeEnum.HWY.name().equals(roleCode)) {
             curOrgId =  String.valueOf(curLoginUser.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
