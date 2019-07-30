@@ -306,8 +306,12 @@ public class TrafficCallTimeController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String  curOrgId = "";
+        String curOrgId = "";
+        String curUserId = "";
         List<OrganizationDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.HWY.name().equals(roleCode)){
+            curUserId = String.valueOf(curLoginUser.getId());
+        }
         if(RoleCodeEnum.HWZG.name().equals(roleCode)) {
             curOrgId =  String.valueOf(curLoginUser.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
@@ -322,6 +326,7 @@ public class TrafficCallTimeController {
         }
         request.setAttribute("teleGroupList",teleGroupList);
         request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("curUserId",curUserId);
     }
 
     /**
