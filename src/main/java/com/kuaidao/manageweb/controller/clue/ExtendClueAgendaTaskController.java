@@ -259,7 +259,8 @@ public class ExtendClueAgendaTaskController {
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<String> updateClue(HttpServletRequest request,
             @RequestBody PushClueReq pushClueReq) {
-
+        UserInfoDTO user = getUser();
+        pushClueReq.setCreateUser(user.getId());
         JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
 
         return clueInfo;
@@ -780,22 +781,24 @@ public class ExtendClueAgendaTaskController {
                                 reasonIsNotMatch.append("、广告位");
                             }
                         }
-                    } else {
-                        islegal = false;
-                        if (StringUtils.isBlank(reasonIsNull)) {
-                            reasonIsNull.append("广告位");
-                        } else {
-                            reasonIsNull.append("、广告位");
-                        }
                     }
-                } else {
-                    islegal = false;
-                    if (StringUtils.isBlank(reasonIsNull)) {
-                        reasonIsNull.append("广告位");
-                    } else {
-                        reasonIsNull.append("、广告位");
-                    }
+//                    else {
+//                        islegal = false;
+//                        if (StringUtils.isBlank(reasonIsNull)) {
+//                            reasonIsNull.append("广告位");
+//                        } else {
+//                            reasonIsNull.append("、广告位");
+//                        }
+//                    }
                 }
+//                else {
+//                    islegal = false;
+//                    if (StringUtils.isBlank(reasonIsNull)) {
+//                        reasonIsNull.append("广告位");
+//                    } else {
+//                        reasonIsNull.append("、广告位");
+//                    }
+//                }
                 if (clueAgendaTaskDTO1.getSourceName() != null
                         && !"".equals(clueAgendaTaskDTO1.getSourceName())) {
                     // 去掉前后空格
@@ -968,8 +971,15 @@ public class ExtendClueAgendaTaskController {
                                     .equals(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""))) {
                         pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
                     } else {
-                        pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
-                        pushClueReq.setPhone2(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""));
+                        if ((StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone()) && StringUtils
+                            .isNotBlank(clueAgendaTaskDTO1.getPhone().replaceAll(" ", "")))){
+                            pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone().replaceAll(" ", ""));
+                        }
+                        if ((StringUtils.isNotBlank(clueAgendaTaskDTO1.getPhone2()) && StringUtils
+                            .isNotBlank(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", "")))){
+                            pushClueReq
+                                .setPhone2(clueAgendaTaskDTO1.getPhone2().replaceAll(" ", ""));
+                        }
                     }
                     pushClueReq.setWechat(clueAgendaTaskDTO1.getWechat());
                     pushClueReq.setWechat2(clueAgendaTaskDTO1.getWechat2());
