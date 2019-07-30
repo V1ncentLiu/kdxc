@@ -20,7 +20,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">          
 			<el-form :inline="true" class="demo-form-inline mainSearchForm">
-                <el-form-item label="处理状态:" label-width="55px">
+                <el-form-item label="处理状态:"  >
   					<el-select filterable v-model="status" placeholder="处理状态" clearable>
       				    <el-option
       				      v-for="item in statusList"
@@ -30,7 +30,7 @@
       				    </el-option>
   					</el-select>
                 </el-form-item>
-                <el-form-item label="是否重单:" label-width="75px">
+                <el-form-item label="是否重单:" >
   					<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
   				    <el-option
   				      v-for="item in repetitionList"
@@ -40,18 +40,36 @@
   				    </el-option>
   					</el-select>
                 </el-form-item>
-                <el-form-item label="客户姓名:" label-width="75px">
+                <el-form-item label="客户姓名:" >
   					<el-input v-model="cusName" placeholder="客户姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="客户手机号:" label-width="85px">
+                <el-form-item label="客户手机号:" >
   					<el-input v-model="cusPhone" placeholder="客户手机号"></el-input>
                 </el-form-item>
                 <!-- <div class="mainSearchBtnBox">  -->
-                <el-form-item label="">
-				    <el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px">搜索</el-button>
-                </el-form-item>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                <!-- </div> -->
+                <!--<el-form-item label="">-->
+				    <!--<el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px">搜索</el-button>-->
+                <!--</el-form-item>-->
+          <el-row v-show="isShowSearch">
+              <el-form-item label="是否签约:" prop="isSign">
+                  <el-select v-model="isSign" clearable placeholder="是否签约">
+                      <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
+                                 :value="item.value"></el-option>
+                  </el-select>
+              </el-form-item>
+              <el-form-item label="是否补齐尾款:">
+                  <el-select v-model="isTailMoney" placeholder="是否补齐尾款" clearable>
+                      <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
+                                 :value="item.value">
+                      </el-option>
+                  </el-select>
+              </el-form-item>
+          </el-row>
+          <div class="mainSearchBtnBox">
+              <el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px">搜索</el-button>
+              <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+              <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShowSearch">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShowSearch,'greycolor paddingL6 el-icon-arrow-down':!isShowSearch}"></i></span>
+          </div>
             </el-form>
         </div>
         <el-table 
@@ -351,6 +369,9 @@ var isShowRepetition =[[${isShowRepetition}]];
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+          isTailMoney:"",
+          isSign:"",
+          isShowSearch:false,
         	dailogTitleType:"",
         	operatingArea:"",
         	investigateTime:"",
@@ -398,6 +419,14 @@ var isShowRepetition =[[${isShowRepetition}]];
             phone3:'',
             phone4:'',
             phone5:'',
+          isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+          isSignOptions: [{
+            value: 0,
+            name: "未签约"
+          }, {
+            value: 1,
+            name: "已签约"
+          }],
         	statusList:[
         		 {
                		value: '0',
@@ -428,6 +457,13 @@ var isShowRepetition =[[${isShowRepetition}]];
              
         },
         methods: {
+          toogleClick(){
+            if(this.isShowSearch){
+              this.isShowSearch=false
+            }else{
+              this.isShowSearch=true
+            }
+          },
         	//日期数据格式化方法
     		dateFormat:function(row, column) {
     			var date = row[column.property];
@@ -475,6 +511,8 @@ var isShowRepetition =[[${isShowRepetition}]];
                 param.cusName=this.cusName;
                 param.cusPhone=this.cusPhone;
                 param.status=this.status;
+                param.isSign = this.isSign;
+                param.isTailMoney = this.isTailMoney;
                 console.log(param);
                 axios.post('/clue/cluerepetition/queryRepeatList',param).then(function (response) {
                 	  console.log(response);
