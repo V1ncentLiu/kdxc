@@ -96,9 +96,11 @@ public class TrafficCallTimeController {
      * 组分页
      */
     @PostMapping("/getGroupPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getGroupPageList(@RequestBody TrafficCallTimeQueryDto trafficCallTimeQueryDto){
         initAuth(trafficCallTimeQueryDto);
-        return trafficCallTimeFeignClient.getGroupPageList(trafficCallTimeQueryDto);
+        JSONResult<Map<String, Object>> groupPageList = trafficCallTimeFeignClient.getGroupPageList(trafficCallTimeQueryDto);
+        return groupPageList;
     }
 
     /**
@@ -151,6 +153,7 @@ public class TrafficCallTimeController {
      * 组+人 分页
      */
     @PostMapping("/getGroupPersonPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getGroupPersonPageList(@RequestBody TrafficCallTimeQueryDto trafficCallTimeQueryDto){
         initAuth(trafficCallTimeQueryDto);
         return trafficCallTimeFeignClient.getGroupPersonPageList(trafficCallTimeQueryDto);
@@ -192,6 +195,7 @@ public class TrafficCallTimeController {
      * 组+人+天 分页
      */
     @PostMapping("/getGroupPersonDayPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getGroupPersonDayPageList(@RequestBody TrafficCallTimeQueryDto trafficCallTimeQueryDto){
         initAuth(trafficCallTimeQueryDto);
         return trafficCallTimeFeignClient.getGroupPersonDayPageList(trafficCallTimeQueryDto);
