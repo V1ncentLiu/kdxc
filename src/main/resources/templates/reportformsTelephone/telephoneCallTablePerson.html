@@ -31,7 +31,7 @@
                 <el-form-item label="是否新资源:">  
                     <el-select v-model="form.newResource" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
-                        <el-option label="否" value="2"></el-option>
+                        <el-option label="否" value="0"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务组:">
@@ -55,7 +55,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn"  :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -119,7 +119,7 @@
         data: function() {
             return {
                 loading: false,
-                isDisabled: false, // 输入框禁止选择
+                isDisabled: true, // 话务组筛选框
                 isDisabledUserId: false,
                 // btnDisabled: false,
                 pager:{ 
@@ -473,7 +473,7 @@
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curOrgId){ // 有角色
-                this.isDisabled = true;
+                // this.isDisabled = true;
                 this.form.orgId = curOrgId ? this.form.orgId.toString():"";
                 if(userId){
                     this.isDisabledUserId = true;
@@ -486,23 +486,21 @@
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
                 this.form.endTime = this.dateTimeFormat(parentParam.endTime);
-                this.form.newResource = parentParam.newResource?parentParam.newResource:'';
+                this.form.newResource = parentParam.newResource != null?parentParam.newResource:'';
 
-                this.export.orgId = this.form.orgId; 
-                this.export.userId = this.form.userId;
-                this.export.newResource = this.form.newResource;
                 this.export.startTime = parentParam.startTime;
                 this.export.endTime = parentParam.endTime;
             }else{
                 this.form.startTime = startTime;
                 this.form.endTime = endTime;  
-
-                this.export.orgId = this.form.orgId; 
-                this.export.userId = this.form.userId;
-                this.export.newResource = this.form.newResource;
                 this.export.startTime = this.minuteFormat(this.form.startTime);
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
+
+            this.export.orgId = this.form.orgId; 
+            this.export.userId = this.form.userId;
+            this.export.newResource = this.form.newResource;
+
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
