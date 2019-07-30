@@ -1093,13 +1093,21 @@
           });
           return;
         }
-        if((roleCode =='DXCYGW' && (rows[0].teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(rows[0].teleGorupId+"")) || rows[0].phase ==7){
+
+        if((roleCode =='DXCYGW' && (rows[0].teleSaleId+"") != userId)  || rows[0].phase ==7){
           this.$message({
             message: "当前资源已释放到公有池，不允许进行详细信息的查看",
             type: 'error'
           });
           return;
         }
+        if(roleCode =='DXZJ' && orgId !=(rows[0].teleGorupId+"")){
+              this.$message({
+                  message: "此资源已经被转给其他顾问，您不可再进行详细信息查看",
+                  type: 'error'
+              });
+              return;
+          }
         // 存储选中信息--start
         var clueId=rows[0].clueId; 
         setSessionStore("appiontmentManagerStoreForm", this.storeForm);
