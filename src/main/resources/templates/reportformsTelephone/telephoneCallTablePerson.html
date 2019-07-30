@@ -113,7 +113,7 @@
     var parentParam = [[${trafficCallTimeQueryDto}]];
     var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
-    console.log(parentParam);
+    console.log(parentParam,curOrgId,curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -271,7 +271,7 @@
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
                         mainDivVM.export.userId = mainDivVM.form.userId;
                         mainDivVM.export.newResource = mainDivVM.form.newResource;
-                        console.log(mainDivVM.tableData)
+       
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -454,7 +454,7 @@
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId; 
                 param.newResource =  this.export.newResource; 
-                axios.post('/statistics/trafficCallTime/getGroupPersonPageList',param,{responseType:'blob'})
+                axios.post('/statistics/trafficCallTime/exportGroupPersonList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -478,10 +478,12 @@
                 if(userId){
                     this.isDisabledUserId = true;
                     this.form.userId = curUserId ? this.form.userId.toString():"";
+                }else{
+                    this.form.userId = parentParam.userId ?parentParam.userId:'';
                 }
             }else{
                 this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
-                this.form.userId = parentParam.userId?parentParam.userId:'';
+                this.form.userId = parentParam.userId ?parentParam.userId:'';
             }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
