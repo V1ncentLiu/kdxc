@@ -103,7 +103,7 @@
     var parentParam = [[${trafficCallTimeQueryDto}]];
     var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
-    console.log(parentParam)
+    console.log(parentParam,curOrgId,curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         filters: {
@@ -462,30 +462,42 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-
-            this.form.startTime=parentParam.startTime?this.dateTimeFormat(parentParam.startTime) : startTime;
-            this.form.endTime=parentParam.endTime?this.dateTimeFormat(parentParam.endTime) : endTime;
-
-            this.form.newResource = parentParam.newResource;
-            if(curOrgId){
+            if(curOrgId){ // 有角色
                 this.isDisabled = true;
-                this.isDisabledUserId = true;
                 this.form.orgId = curOrgId ? this.form.orgId.toString():"";
-                this.form.userId = curUserId ? this.form.userId.toString():"";
+                if(userId){
+                    this.isDisabledUserId = true;
+                    this.form.userId = curUserId ? this.form.userId.toString():"";
+                }
             }else{
-                this.form.orgId=parentParam.orgId; 
-                this.form.userId = parentParam.userId;
+                this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
+                this.form.userId = parentParam.userId ? parentParam.userId:'';
             }
+            if(parentParam && parentParam.startTime){
+                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
+                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
+                this.form.newResource = parentParam.newResource?parentParam.newResource:'';
 
-            this.export = this.form;
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+                this.export.orgId = this.form.orgId; 
+                this.export.userId = this.form.userId;
+                this.export.newResource = this.form.newResource;
+                this.export.startTime = parentParam.startTime;
+                this.export.endTime = parentParam.endTime;
+            }else{
+                this.form.startTime = startTime;
+                this.form.endTime = endTime;  
 
+                this.export.orgId = this.form.orgId; 
+                this.export.userId = this.form.userId;
+                this.export.newResource = this.form.newResource;
+                this.export.startTime = this.minuteFormat(this.form.startTime);
+                this.export.endTime = this.minuteFormat(this.form.endTime);
+            }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.currentTelSale(this.export.orgId); 
-            // this.searchTable();
+            this.currentTelSale(this.export.orgId); 
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
