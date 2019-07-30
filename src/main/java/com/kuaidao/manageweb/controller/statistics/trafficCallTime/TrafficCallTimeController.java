@@ -67,6 +67,13 @@ public class TrafficCallTimeController {
         pageParams(orgId,startTime,endTime,userId,newResource,request);
         //加载话务组
         initOrgList(request);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.HWY.name().equals(roleCode)){
+            return "reportformsTelephone/telephoneCallTablePerson";
+        }
         return "reportformsTelephone/telephoneCallTable";
     }
 
