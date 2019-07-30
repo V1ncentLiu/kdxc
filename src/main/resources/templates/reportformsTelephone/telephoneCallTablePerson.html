@@ -31,7 +31,7 @@
                 <el-form-item label="是否新资源:">  
                     <el-select v-model="form.newResource" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
-                        <el-option label="否" value="2"></el-option>
+                        <el-option label="否" value="0"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务组:">
@@ -55,7 +55,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn"  :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -73,7 +73,7 @@
                     align="center"
                     label="话务专员">
                     <template slot-scope="scope">
-                        <span type="text" size="small" v-if="scope.row.userName == '合计'">{{scope.row.userName}}</span>
+                        <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
                         <el-button type="text" size="small" @click="gotoPerson(scope.row)"  v-else>{{scope.row.userName}}</el-button>
                     </template>
                 </el-table-column>
@@ -112,14 +112,16 @@
     var queryOrg=[[${teleGroupList}]]; // 话务组
     var parentParam = [[${trafficCallTimeQueryDto}]];
     var curOrgId = [[${curOrgId}]];
+    var curUserId = [[${curUserId}]];
     console.log(parentParam);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
-                isDisabled: false, // 输入框禁止选择
-                btnDisabled: false,
+                isDisabled: true, // 话务组筛选框
+                isDisabledUserId: false,
+                // btnDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -140,47 +142,47 @@
                     newResource: ''
                 },
                 tableData: [
-                    {
-                        userId: "1",
-                        userName: '合计',
-                        orgName:'合计',
-                        dateId: 1564385355,
-                        callCount: 1000,
-                        calledCount: 10,
-                        callPercent: 0.1,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        userAvgDayValidCallTime: 155799
-                    }, {
-                        userId: "2",
-                        dateId: 1564385355,
-                        userName: '张三',
-                        orgName:'电销组2',
-                        callCount: 1000,
-                        calledCount: 10,
-                        callPercent: 0,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        userAvgDayValidCallTime: 0
-                    },
-                    {
-                        userId: "3",
-                        dateId: 1564385355,
-                        userName: '李四',
-                        orgName:'电销组2',
-                        callCount: 1000,
-                        calledCount: 10,
-                        // callPercent: 0,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        // userAvgDayValidCallTime: 155799
-                    }
+                    // {
+                    //     userId: "1",
+                    //     userName: '合计',
+                    //     orgName:'合计',
+                    //     dateId: 1564385355,
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 0.1,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 155799
+                    // }, {
+                    //     userId: "2",
+                    //     dateId: 1564385355,
+                    //     userName: '张三',
+                    //     orgName:'电销组2',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 0,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 0
+                    // },
+                    // {
+                    //     userId: "3",
+                    //     dateId: 1564385355,
+                    //     userName: '李四',
+                    //     orgName:'电销组2',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     // callPercent: 0,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     // userAvgDayValidCallTime: 155799
+                    // }
                 ],
                 orgTeleArr: queryOrg, // 话务组
                 teleMarketArr: []      
@@ -222,11 +224,12 @@
                     });
                     return;
                 }   
-                
+    
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
+  
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
@@ -350,7 +353,6 @@
                 var userId = item.userId;// 话务专员id
                 var orgId = this.export.orgId;// 话务组id
                 var newResource = this.export.newResource;
-                newResource = 1;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(orgId){
@@ -470,29 +472,40 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-
-            this.form.startTime=parentParam.startTime?this.dateTimeFormat(parentParam.startTime) : startTime;
-            this.form.endTime=parentParam.endTime?this.dateTimeFormat(parentParam.endTime) : endTime;
-
-            this.form.newResource = parentParam.newResource;
-
-            this.form.userId = parentParam.userId;
-            if(curOrgId){
-                this.isDisabled = true;
+            if(curOrgId){ // 有角色
+                // this.isDisabled = true;
                 this.form.orgId = curOrgId ? this.form.orgId.toString():"";
+                if(userId){
+                    this.isDisabledUserId = true;
+                    this.form.userId = curUserId ? this.form.userId.toString():"";
+                }
             }else{
-                this.form.orgId=parentParam.orgId; 
+                this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
+                this.form.userId = parentParam.userId?parentParam.userId:'';
+            }
+            if(parentParam && parentParam.startTime){
+                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
+                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
+                this.form.newResource = parentParam.newResource != null?parentParam.newResource.toString():'';
+
+                this.export.startTime = parentParam.startTime;
+                this.export.endTime = parentParam.endTime;
+            }else{
+                this.form.startTime = startTime;
+                this.form.endTime = endTime;  
+                this.export.startTime = this.minuteFormat(this.form.startTime);
+                this.export.endTime = this.minuteFormat(this.form.endTime);
             }
 
-            this.export = this.form;
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.export.orgId = this.form.orgId; 
+            this.export.userId = this.form.userId;
+            this.export.newResource = this.form.newResource;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.currentTelSale(this.export.orgId); 
-            // this.searchTable();
+            this.currentTelSale(this.export.orgId); 
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
