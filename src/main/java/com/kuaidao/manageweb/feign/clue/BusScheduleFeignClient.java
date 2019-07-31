@@ -15,7 +15,7 @@ import com.kuaidao.common.entity.JSONResult;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/business/schedule",
+@FeignClient(name = "aggregation-service", path = "/aggregation/business/schedule",
         fallback = BusScheduleFeignClient.HystrixClientFallback.class)
 public interface BusScheduleFeignClient {
 

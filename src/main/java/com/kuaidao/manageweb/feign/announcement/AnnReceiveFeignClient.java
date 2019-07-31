@@ -28,7 +28,7 @@ import java.util.Map;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service-ff",path="/sys/annoReceive",fallback = AnnReceiveFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service",path="/sys/annoReceive",fallback = AnnReceiveFeignClient.HystrixClientFallback.class)
 public interface AnnReceiveFeignClient {
 
     @PostMapping("/queryAnnReceive")

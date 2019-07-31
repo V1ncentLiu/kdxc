@@ -22,7 +22,7 @@ import java.util.Map;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service-ff",path="/sys/mcenter",fallback = MessageCenterFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service",path="/sys/mcenter",fallback = MessageCenterFeignClient.HystrixClientFallback.class)
 public interface MessageCenterFeignClient {
 
 

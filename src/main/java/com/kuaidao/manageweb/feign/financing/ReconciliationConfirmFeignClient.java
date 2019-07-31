@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/reconciliationConfirm",
+@FeignClient(name = "aggregation-service", path = "/aggregation/reconciliationConfirm",
         fallback = ReconciliationConfirmFeignClient.HystrixClientFallback.class)
 public interface ReconciliationConfirmFeignClient {
 

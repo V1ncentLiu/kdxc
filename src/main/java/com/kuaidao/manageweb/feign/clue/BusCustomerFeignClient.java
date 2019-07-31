@@ -19,7 +19,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/busCustomer",
+@FeignClient(name = "aggregation-service", path = "/aggregation/busCustomer",
         fallback = BusCustomerFeignClient.HystrixClientFallback.class)
 public interface BusCustomerFeignClient {
 

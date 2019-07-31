@@ -14,7 +14,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/assignrule/infoAssign",
+@FeignClient(name = "aggregation-service", path = "/aggregation/assignrule/infoAssign",
         fallback = InfoAssignFeignClient.HystrixClientFallback.class)
 public interface InfoAssignFeignClient {
 

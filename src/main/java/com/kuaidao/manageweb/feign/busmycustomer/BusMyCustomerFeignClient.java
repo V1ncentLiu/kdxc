@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/busmycustomer",
+@FeignClient(name = "aggregation-service", path = "/aggregation/busmycustomer",
         fallback = BusMyCustomerFeignClient.HystrixClientFallback.class)
 public interface BusMyCustomerFeignClient {
 

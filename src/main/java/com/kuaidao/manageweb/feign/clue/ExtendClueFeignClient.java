@@ -20,7 +20,7 @@ import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/extend/clueManager",
+@FeignClient(name = "aggregation-service", path = "/aggregation/extend/clueManager",
         fallback = ExtendClueFeignClient.HystrixClientFallback.class)
 public interface ExtendClueFeignClient {
 
