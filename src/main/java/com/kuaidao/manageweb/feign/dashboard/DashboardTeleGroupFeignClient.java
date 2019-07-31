@@ -26,8 +26,8 @@ public interface DashboardTeleGroupFeignClient {
     /**
      * 看板数据查询-电销总监
      */
-    @PostMapping("/findTeleGroupDataByUserId")
-    public JSONResult<DashboardTeleGroupDto> findTeleGroupDataByUserId(@RequestBody IdEntityLong idEntityLong);
+    @PostMapping("/findTeleGroupDataByOrgId")
+    public JSONResult<DashboardTeleGroupDto> findTeleGroupDataByOrgId(@RequestBody IdEntityLong idEntityLong);
 
     @Component
     class HystrixClientFallback implements DashboardTeleGroupFeignClient {
@@ -41,7 +41,7 @@ public interface DashboardTeleGroupFeignClient {
         }
 
         @Override
-        public JSONResult findTeleGroupDataByUserId(IdEntityLong idEntityLong) {
+        public JSONResult findTeleGroupDataByOrgId(IdEntityLong idEntityLong) {
             return fallBackError("电销总监：" + idEntityLong.getId()+"获取看板");
         }
     }
