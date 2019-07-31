@@ -68,7 +68,7 @@ public interface ExtendClueFeignClient {
     public JSONResult<String> distributedUpdateClue(@RequestBody PushClueReq pushClueReq);
 
     /**
-     * 撤回资源
+     * 单条撤回资源
      *
      * @return
      */
@@ -76,12 +76,19 @@ public interface ExtendClueFeignClient {
     public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong);
 
     /**
+     * 批量撤回资源
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/recallClues")
+    public JSONResult<String> recallClues(@RequestBody IdListLongReq clueIds);
+    /**
      * 导入资源
      *
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/import")
-    public JSONResult<Map<String, Object>> importclue(@RequestBody List<PushClueReq> list);
+    public JSONResult<List<PushClueReq>> importclue(@RequestBody List<PushClueReq> list);
 
     /**
      * 导出线索：线索情况
@@ -143,11 +150,15 @@ public interface ExtendClueFeignClient {
         @Override
         public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong) {
             // TODO Auto-generated method stub
-            return fallBackError("撤回资源");
+            return fallBackError("单条撤回资源");
         }
-
         @Override
-        public JSONResult<Map<String, Object>> importclue(List<PushClueReq> list) {
+        public JSONResult<String> recallClues(@RequestBody IdListLongReq list) {
+            // TODO Auto-generated method stub
+            return fallBackError("批量撤回资源");
+        }
+        @Override
+        public JSONResult<List<PushClueReq>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
             return fallBackError("导入资源");
         }
