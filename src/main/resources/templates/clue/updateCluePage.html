@@ -49,7 +49,7 @@
                     <el-col :span="12">
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -62px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model="form.phone" autocomplete="off" style="width: 260px;margin-right: 10px;" @keyup.native="number" @change.native="number" maxLength="15"></el-input>
+                            <el-input v-model.trim="form.phone" autocomplete="off" style="width: 260px;margin-right: 10px;" @keyup.native="number" @change.native="number" maxLength="30"></el-input>
                             <!-- <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button> -->
                             <span v-if="buttonType === 'A'">
                                 <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
@@ -62,7 +62,7 @@
                     <el-col :span="12">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -50px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model="form.wechat" autocomplete="off" style="width: 260px;margin-right: 10px;" maxLength="20"></el-input>
+                            <el-input v-model.trim="form.wechat" autocomplete="off" style="width: 260px;margin-right: 10px;" maxLength="20"></el-input>
                            	<span v-if="form.wechat2 || form.wechatUrl">
                                 <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
                             </span>
@@ -76,24 +76,56 @@
                 	<el-col :span="12">
                         <el-form-item label="QQ：" prop="qq" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -45px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 260px;"></el-input>
+                            <el-input v-model.trim="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" @change.native="qqnumber" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
                 	<el-col :span="12">                        
                         <el-form-item label="邮箱：" prop="email" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -50px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model="form.email" autocomplete="off" maxLength="100" style="width: 260px;"></el-input>
+                            <el-input v-model.trim="form.email" autocomplete="off" maxLength="100" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row><p style="padding-left: 120px;font-size: 14px;color: red;padding-bottom: 10px;">（手机、微信、QQ、邮箱至少填一项）</p></el-row>
                 <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                         <el-date-picker
+                                style="width: 260px;"
+                                v-model="form.messageTime"
+                                type="datetime"
+                                placeholder="输入留言时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            <el-input v-model="form.messagePoint" placeholder="输入留言内容" autocomplete="off"  maxLength="300" style="width: 260px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
                 	<el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                           <el-input v-model="form.searchWord" autocomplete="off" maxlength="50" style="width: 260px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                	<el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark" >
+                           <el-input  v-model="form.remark" autocomplete="off" maxLength="50" style="width: 260px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">资源信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
                         <el-form-item label="年龄：" :label-width="formLabelWidth" prop="age" >
                            <el-input type="number" v-model="form.age" autocomplete="off" maxLength="3" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
-                	<el-col :span="12">
+                    <el-col :span="12">
                     <el-form-item label="开店区域：" :label-width="formLabelWidth" style="float: left;margin-right: 10px;">
                       <el-select filterable v-model="form.province" placeholder="省" style="width: 125px;"  @change="currentProvince" clearable>
                         <el-option
@@ -127,21 +159,11 @@
                     </el-col>
                 </el-row>
                 <el-row>
-                	<el-col :span="12">
+                    <el-col :span="12">
                         <el-form-item label="预约回访时间：" :label-width="formLabelWidth" prop="reserveTime" >
-                        	<el-date-picker v-model="form.reserveTime"  type="datetime" placeholder="输入客户方便联系的时间" style="width: 260px;"></el-date-picker>
+                            <el-date-picker v-model="form.reserveTime"  type="datetime" placeholder="输入客户方便联系的时间" style="width: 260px;"></el-date-picker>
                         </el-form-item>
                     </el-col>
-                	<el-col :span="12">
-                        <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark" >
-                           <el-input  v-model="form.remark" autocomplete="off" maxLength="50" style="width: 260px;"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </div>
-            <div class="marginB20 fs16 paddingT20">资源信息</div>
-            <div class="borderbox padding20">
-                <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth" prop="type">
                             <el-select v-model="form.type" placeholder="请选择" style="width: 260px;">
@@ -154,6 +176,8 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
+                </el-row>
+                <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category" >
                             <el-select v-model="form.category" placeholder="请选择" style="width: 260px;" clearable filterable  @change="categoryChange">
@@ -165,9 +189,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
+                    </el-col>                
                     <el-col :span="12">
                         <el-form-item label="广告位：" :label-width="formLabelWidth" prop="sourceType">
                             <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;" clearable filterable :disabled="sourceTypeDisabled">
@@ -180,6 +202,8 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
+                </el-row>
+                <el-row>
                     <el-col :span="12">
                         <el-form-item label="媒介：" :label-width="formLabelWidth" prop="source">
                             <el-select v-model="form.source" placeholder="请选择" style="width: 260px;" clearable filterable>
@@ -191,9 +215,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
+                    </el-col>               
                     <el-col :span="12">
                         <el-form-item label="资源项目(项目名称)：" :label-width="formLabelWidth" prop="projectId">
                             <el-select v-model="form.projectId" placeholder="请选择" style="width: 260px;" clearable filterable :disabled="projectDisabled">
@@ -206,6 +228,8 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
+                </el-row>                
+                <el-row>
                     <el-col :span="12">
                         <el-form-item label="行业类别：" :label-width="formLabelWidth">
                             <el-select v-model="form.industryCategory" clearable placeholder="请选择" style="width: 260px;" filterable>
@@ -217,31 +241,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                         <el-date-picker
-                                style="width: 260px;"
-                                v-model="form.messageTime"
-                                type="datetime"
-                                placeholder="输入留言时间">
-                            </el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <el-input v-model="form.messagePoint" placeholder="输入留言内容" autocomplete="off"  maxLength="300" style="width: 260px;"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                           <el-input v-model="form.searchWord" autocomplete="off" maxlength="50" style="width: 260px;"></el-input>
-                        </el-form-item>
-                    </el-col>
+                    </el-col>                                    
                   <el-col :span="12">
                     <el-form-item label="URL地址：" :label-width="formLabelWidth">
                       <el-input v-model="form.urlAddress" autocomplete="off" maxlength="2000" style="width: 260px;"></el-input>
@@ -284,7 +284,7 @@
                     required: true, message: '手机号不能为空', trigger: 'blur',
                 }"
             >
-                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
+                <el-input v-model.trim="domain.value" maxLength="30" @keyup.native="phoneNumber" @change.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
                 <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
@@ -297,7 +297,7 @@
         <template>
             <el-form :model="wechatForm" ref="wechatForm" > 
               <el-form-item label="微信2：" :label-width="formLabelWidth1" >
-                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+                  <el-input v-model.trim="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
               	<el-upload
@@ -443,13 +443,14 @@
                         <el-form-item label="邮箱：" :label-width="formLabelWidth"> {{viewForm.email}}</el-form-item> 
                     </el-col> 
                     <el-col :span="12"> 
-                        <el-form-item label="年龄：" :label-width="formLabelWidth"> {{viewForm.age}}</el-form-item> 
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth"> {{viewForm.messageTimeName}} </el-form-item> 
                     </el-col> 
                     <el-col :span="12"> 
-                        <el-form-item label="开店区域：" :label-width="formLabelWidth"><span v-if="viewForm.province">{{viewForm.province}}</span><span v-if="viewForm.province">&nbsp;&nbsp;{{viewForm.city}}</span><span v-if="viewForm.province">&nbsp;&nbsp;{{viewForm.district}}</span></el-form-item>
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.messagePoint}}</span></el-form-item> 
                     </el-col> 
+                
                     <el-col :span="12"> 
-                        <el-form-item label="预约回访时间：" :label-width="formLabelWidth"> {{viewForm.reserveTimeName}}</el-form-item> 
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.searchWord}}</span></el-form-item> 
                     </el-col> 
                     <el-col :span="12"> 
                         <el-form-item label="备注：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.remark}}</span></el-form-item> 
@@ -458,50 +459,43 @@
             </div>
             <div class="fs16 marginB10" style="padding-top: 20px;">资源信息</div>
             <div class="borderbox" style="padding:10px 0;">
-                <el-row> 
+                <el-row>
+                    <el-col :span="12"> 
+                        <el-form-item label="年龄：" :label-width="formLabelWidth"> {{viewForm.age}}</el-form-item> 
+                    </el-col> 
+                    <el-col :span="12"> 
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth"><span v-if="viewForm.province">{{viewForm.province}}</span><span v-if="viewForm.province">&nbsp;&nbsp;{{viewForm.city}}</span><span v-if="viewForm.province">&nbsp;&nbsp;{{viewForm.district}}</span></el-form-item>
+                    </el-col> 
+                    <el-col :span="12"> 
+                        <el-form-item label="预约回访时间：" :label-width="formLabelWidth"> {{viewForm.reserveTimeName}}</el-form-item>
+                    </el-col> 
                     <el-col :span="12"> 
                         <el-form-item label="资源类型："  :label-width="formLabelWidth">{{viewForm.typeName}}</el-form-item> 
                     </el-col> 
                     <el-col :span="12"> 
                         <el-form-item label="资源类别：" :label-width="formLabelWidth"> {{viewForm.categoryName}}</el-form-item>
                     </el-col> 
-                </el-row>
-                <el-row> 
+                
                     <el-col :span="12"> 
                         <el-form-item label="广告位：" :label-width="formLabelWidth"> {{viewForm.sourceTypeName}} </el-form-item> 
                     </el-col> 
                     <el-col :span="12"> 
                         <el-form-item label="媒介：" :label-width="formLabelWidth"> {{viewForm.sourceName}} </el-form-item> 
                     </el-col> 
-                </el-row>
-                <el-row> 
+                
                     <el-col :span="12"> 
                         <el-form-item label="资源项目(项目名称)：" :label-width="formLabelWidth">  {{viewForm.projectIdName}} </el-form-item> 
                     </el-col> 
                     <el-col :span="12"> 
                         <el-form-item label="行业类别：" :label-width="formLabelWidth">  {{viewForm.industryCategoryName}} </el-form-item> 
                     </el-col> 
-                </el-row>
-                <el-row> 
-                    <el-col :span="12"> 
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth"> {{viewForm.messageTimeName}} </el-form-item> 
-                    </el-col> 
-                    <el-col :span="12"> 
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.messagePoint}}</span></el-form-item> 
-                    </el-col> 
-                </el-row>
-                <el-row> 
-                    <el-col :span="12"> 
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.searchWord}}</span></el-form-item> 
-                    </el-col> 
                     <el-col :span="12"> 
                         <el-form-item label="账户名称：" :label-width="formLabelWidth"> {{viewForm.accountNameName}} </el-form-item> 
                     </el-col> 
-                </el-row>
-                <el-row> 
+                
                     <el-col :span="24"> 
                         <el-form-item label="URL地址：" :label-width="formLabelWidth"> {{viewForm.urlAddress}} </el-form-item> 
-                    </el-col> 
+                    </el-col>
                 </el-row>
             </div>
             <div class="padding20 f-tac">            
@@ -648,16 +642,16 @@ if(notOptList){
                             // else{
                             //      callback();
                             // }
-                            if(value){
-                                if(/^[0-9]*$/.test(value) == false){
-                                    callback(new Error("请输入数字"));
-                                    return
-                                }
-                                if(value.length!==11){                                
-                                    callback(new Error("请输入11位数字"));
-                                    return
-                                }
-                            }
+                            // if(value){
+                            //     if(/^[0-9]*$/.test(value) == false){
+                            //         callback(new Error("请输入数字"));
+                            //         return
+                            //     }
+                            //     if(value.length!==11){                                
+                            //         callback(new Error("请输入11位数字"));
+                            //         return
+                            //     }
+                            // }
                             
                             callback();                              
                         }, trigger: 'blur'}
@@ -719,7 +713,8 @@ if(notOptList){
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
-                        value: ''
+                        value: '',
+                        key:Date.now(),
                     }]
                 },
                 optsex: [{
@@ -1155,8 +1150,12 @@ if(notOptList){
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
             	this.form.wechatUrl=this.wechatForm.wechatUrl;
-            	addClueVM.$message({ message: "提交成功", type: 'success' }); 
-            	this.wechatVisible = false;
+                if(this.wechatForm.wechat2!==""){
+                	addClueVM.$message({ message: "提交成功", type: 'success' }); 
+                    this.wechatVisible = false;
+                }else{
+                    addClueVM.$message({ message: "提交内容不能为空", type: 'error' });
+                }            	
             },
             removeDomain(item) {
                 var index = this.dynamicValidateForm.domains.indexOf(item);
@@ -1203,9 +1202,10 @@ if(notOptList){
                 this.buttonType='A';
             },
             number(){
-    　　　     			 this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
+    　　　     	this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                 this.form.phone=this.form.phone.replace('.','');
-                if(this.form.phone.length==11){
+                // if(this.form.phone.length==11){
+                if(this.form.phone!=""&&this.form.phone.length!=0){
                     this.isDisabled=false;
                 }else{
                     this.isDisabled=true;
@@ -1386,7 +1386,8 @@ if(notOptList){
 	        	this.form.cusName=clueInfo.clueCustomer.cusName;
 	        	this.form.phone=clueInfo.clueCustomer.phone;
 	        	
-	        	if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length==11){
+                // if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length==11){
+	        	if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length>0){
 	        		this.isDisabled=false;
 	        	}
 	        	this.form.wechat=clueInfo.clueCustomer.wechat;
@@ -1424,9 +1425,10 @@ if(notOptList){
                 if(phoneArr.length>0){
                     this.buttonType = 'B';//按钮状态
                 }else{
-                	var phone5 = {};
-                    phone5.value = "";
-                	this.dynamicValidateForm.domains.push(phone5);
+                  var phone2 = {};
+                  phone2.value = '';
+                  phone2.key = Date.now();
+                  this.dynamicValidateForm.domains.push(phone2);
                     this.buttonType = 'A';//按钮状态
                 }
                 if(phoneArr.length>1){                    

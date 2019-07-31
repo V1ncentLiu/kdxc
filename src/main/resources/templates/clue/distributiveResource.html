@@ -22,15 +22,16 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
-        
         <shiro:hasPermission name="DistributiveResource:recall">
-	        	<el-button type="success" @click="toRecall">撤回</el-button>
+	        <el-button type="success" @click="toRecall">撤回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportCRecord">
-            <el-button icon="el-icon-upload2" type="warning" @click="exportFun(1)">导出资源沟通记录</el-button>
+            <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportFun(1)">导出资源沟通记录</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源沟通记录中</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportClues">
-            <el-button icon="el-icon-upload2" type="warning" @click="exportFun(2)">导出资源情况</el-button>
+            <el-button v-if="isExport2" icon="el-icon-download" type="warning" @click="exportFun(2)">导出资源情况</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源情况中</el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
@@ -209,6 +210,20 @@
                     </el-form-item>
                     <el-form-item label="邮箱:">
                         <el-input v-model="form.email" placeholder="邮箱"></el-input>
+                    </el-form-item>
+                    <el-form-item label="搜索词:">
+                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="站点是否为空:">
+                        <el-select v-model="form.siteIsNull" placeholder="站点是否为空" clearable >
+                            <el-option
+                                v-for="item in comArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
@@ -399,6 +414,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                timer:null,//计时器
+                isExport1:true,
+                isExport2:true,
                 oldPage:1,
                 paginationShow: false,
                 isShow:false,
@@ -433,7 +451,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     firstCall:"",
                     qq:"",
                     wechat:"",
-                    email:""
+                    email:"",
+                    siteIsNull:""
                 },
                 pager:{
                     total: 0,
@@ -487,7 +506,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     firstCall:"",
                     qq:"",
                     wechat:"",
-                    email:""
+                    email:"",
+                    siteIsNull:""
                 },
                 storeId: '',
                 scrollTop: 0,
@@ -552,9 +572,11 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
+                param.siteIsNull = this.form.siteIsNull;
                 param.qq = this.form.qq;
                 param.email = this.form.email;
                 param.wechat = this.form.wechat;
+                param.searchWord=this.form.searchWord;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(pageNum > 5000){
@@ -772,7 +794,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            confirmColumn(){
            	this.dialogChooseList = false;
            	//处理用户选择的列
-           	console.info(this.fieldFrom.type);
+           	// console.info(this.fieldFrom.type);
            	if(this.fieldFrom.type.length==0){
            		this.$message({
                        message: "请至少保留一列",
@@ -798,7 +820,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            	var param ={};
              param.fieldIdList = idList;
              param.menuCode = "DistributiveResource";
-             console.info(param);
+             // console.info(param);
              if(idList.length!=0){
                  axios.post('/customfield/customField/saveUserField', param)
                  .then(function (response) {
@@ -888,23 +910,55 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         return;
                     }
                 }
-                var methodStr;
                 if(falg==1){ // 沟通情况
-                    methodStr = 'findCommunicateRecords';
+                    this.isExport1=false;
+                    // 存localstorage
+                    localStorage.setItem('distributeExport1','1');
                 }else{ // 资源记录
-                    methodStr = 'findClues';
-                }
-                axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
-                .then(function (response) {
-                    var data =  response.data;
-                    var fileName = response.headers.filename;
-                    saveAs(data,decodeURI(fileName));
-                }).catch(function (error) {
-                    console.log(error);
-                }).then(function(){
-                });
+                    this.isExport2=false;
+                    // 存localstorage
+                    localStorage.setItem('distributeExport2','2');
+                }     
+                this.timedown();           
+                // var methodStr;
+                // if(falg==1){ // 沟通情况
+                //     methodStr = 'findCommunicateRecords';
+                // }else{ // 资源记录
+                //     methodStr = 'findClues';
+                // }
+                // axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
+                // .then(function (response) {
+                //     var data =  response.data;
+                //     var fileName = response.headers.filename;
+                //     saveAs(data,decodeURI(fileName));
+                // }).catch(function (error) {
+                //     console.log(error);
+                // }).then(function(){
+                // });
+                var falgNew=falg;
+                window.parent.distributeExportFun(falgNew,param)
             },
-
+            timedown(){
+                console.log(0)
+                clearInterval(this.timer);
+                var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+                var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+                if(storageDistributeExport1){
+                    this.isExport1=false;
+                }else{
+                    this.isExport1=true;
+                }
+                if(storageDistributeExport2){
+                    this.isExport2=false;
+                }else{
+                    this.isExport2=true;
+                }  
+                if(storageDistributeExport1||storageDistributeExport2){
+                    this.timer=setInterval(this.timedown,1000)
+                }else{
+                    clearInterval(this.timer)
+                } 
+            },
             toRecall() {
                 var rows = this.multipleSelection;
                 if(rows.length!=1){
@@ -916,7 +970,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }else{
                 	if(rows[0].phase>3){
                 		this.$message({
-                            message: '已分配电销经理，不可撤回',
+                            message: '已分配电销顾问，不可撤回',
                             type: 'warning'
                         });
                         return;
@@ -971,10 +1025,24 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },
         },
         mounted(){
-
-        	document.getElementById('optimizeClueManagement').style.display = 'block';
+        	document.getElementById('optimizeClueManagement').style.display = 'block';            
         },
         created(){
+            var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+            var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+            if(storageDistributeExport1){
+                this.isExport1=false;
+            }else{
+                this.isExport1=true;
+            }
+            if(storageDistributeExport2){
+                this.isExport2=false;
+            }else{
+                this.isExport2=true;
+            }
+            if(storageDistributeExport1 || storageDistributeExport2){
+                this.timedown();
+            }
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = this.getSessionStore("distributiveResourceStoreForm");
