@@ -54,8 +54,6 @@ var myCallRecordVm = new Vue({
       transCusPhone(row) {
         var text="";
         // if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
-        if((roleCode =='DXCYGW' && row.accountId!=userId) || ((row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
-       // if((roleCode =='DXCYGW' && (row.accountId !=undefined && row.accountId!=userId)) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
         if((roleCode =='DXCYGW' && (row.accountId !=undefined && row.accountId!=userId)) || ((row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
           text ="***"
         }else{
