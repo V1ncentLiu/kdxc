@@ -180,7 +180,7 @@ public class ConsoleController {
             request.setAttribute("saleList", userList);
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getOrgId());
-            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByUserId(idEntityLong);
+            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByOrgId(idEntityLong);
             DashboardTeleGroupDto data = dashboard.getData();
             if (data == null) {
                 data = new DashboardTeleGroupDto();
