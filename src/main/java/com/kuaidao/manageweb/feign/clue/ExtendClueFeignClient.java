@@ -81,7 +81,7 @@ public interface ExtendClueFeignClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/import")
-    public JSONResult<Map<String, Object>> importclue(@RequestBody List<PushClueReq> list);
+    public JSONResult<List<PushClueReq>> importclue(@RequestBody List<PushClueReq> list);
 
     /**
      * 导出线索：线索情况
@@ -147,7 +147,7 @@ public interface ExtendClueFeignClient {
         }
 
         @Override
-        public JSONResult<Map<String, Object>> importclue(List<PushClueReq> list) {
+        public JSONResult<List<PushClueReq>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
             return fallBackError("导入资源");
         }
