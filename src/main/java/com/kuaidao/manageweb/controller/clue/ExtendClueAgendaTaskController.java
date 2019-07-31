@@ -359,18 +359,35 @@ public class ExtendClueAgendaTaskController {
      * @param IdListLongReq
      * @return
      */
-    @RequestMapping("/recallClues")
+    @RequestMapping("/deleteResource")
     @ResponseBody
-    @LogRecord(description = "批量撤回资源", operationType = OperationType.UPDATE,
+    @LogRecord(description = "删除资源", operationType = OperationType.UPDATE,
         menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
-    public JSONResult<String> recallClues(HttpServletRequest request,
+    public JSONResult<String> deleteResource(HttpServletRequest request,
         @RequestBody IdListLongReq clueIds) {
 
-        JSONResult<String> clueInfo = extendClueFeignClient.recallClues(clueIds);
+        JSONResult<String> clueInfo = extendClueFeignClient.deleteResource(clueIds);
 
         return clueInfo;
     }
+  /**
+   * 删除资源
+   *
+   * @param request
+   * @param IdListLongReq
+   * @return
+   */
+  @RequestMapping("/recallClues")
+  @ResponseBody
+  @LogRecord(description = "批量撤回资源", operationType = OperationType.UPDATE,
+      menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+  public JSONResult<String> recallClues(HttpServletRequest request,
+      @RequestBody IdListLongReq clueIds) {
 
+    JSONResult<String> clueInfo = extendClueFeignClient.recallClues(clueIds);
+
+    return clueInfo;
+  }
     /**
      * 查询所有资源专员
      * 
