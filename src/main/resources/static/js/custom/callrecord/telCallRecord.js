@@ -3,6 +3,7 @@ var myCallRecordVm = new Vue({
     data: {
         audioShow:false,
         isShow:false,
+      isDXZDisabled:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -44,7 +45,7 @@ var myCallRecordVm = new Vue({
         	cno:'',
         	bindPhone:'',
         	accountId:'',
-        	teleGroupId:'',
+        	teleGroupId:ownOrgId,
         		
         },
         tmList:tmList,//组内电销顾问
@@ -355,7 +356,7 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-    	
+      if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
       this.initCallRecordData();
    },
    mounted(){

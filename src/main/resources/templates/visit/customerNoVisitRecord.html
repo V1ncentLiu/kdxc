@@ -126,7 +126,17 @@
                             format="yyyy-MM-dd HH:mm"
                             placeholder="选择日期时间">
                         </el-date-picker>
-                    </el-form-item>   
+                    </el-form-item>
+                    <el-form-item label="商务小组:">
+                        <el-select v-model="form.busGroupId" placeholder="商务小组" clearable filterable :disabled="isSWZDisabled">
+                            <el-option
+                                v-for="item in businessGroupList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>    
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initCustomerVisitRecord" class="searchBtn">搜索</el-button>
@@ -240,6 +250,7 @@
     var proviceList = [[${proviceList}]];
     var companyList = [[${companyList}]];
     var orgSelect = [[${orgSelect}]];
+    var ownOrgId=[[${ownOrgId}]];//商务总监商务组
 </script>
 <script>
   var customerVisitRecordVm =   new Vue({
@@ -254,6 +265,7 @@
                 notSignedReasonDialog:false,
                 reasonDialog:false,
                 form: {
+                  busGroupId:ownOrgId,
                 	teleGroupId:'',
                 	teleSaleId: '',
                 	projectId: '',
@@ -593,6 +605,26 @@
                 }
                 return valText;
             },
+          queryBusGroupList(){//根据组织机构Id查询所有商务组
+            axios.post('/organization/organization/queryBusGroupList', {})
+            .then(function (response) {
+              var result =  response.data;
+              if(result.code=='0'){
+                var table=result.data;
+                customerVisitRecordVm.businessGroupList= table;
+              }else{
+                console.error(response);
+              }
+
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+
+          },
+          initSelect(){//初始下拉框
+            this.queryBusGroupList();
+          },
             toogleClick(){
                 if(this.isShow){
                     this.isShow=false
@@ -609,8 +641,9 @@
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            
+          this.initSelect();
         	this.initCustomerVisitRecord();
+          if(ownOrgId){this.isSWZDisabled= true;}//商务总监商务组筛选按钮不可点击
         }
     })
 </script>

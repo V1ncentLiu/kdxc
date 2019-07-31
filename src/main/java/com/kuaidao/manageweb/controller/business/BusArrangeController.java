@@ -76,6 +76,7 @@ public class BusArrangeController {
   @RequiresPermissions("business:busArrangePage:view")
   @RequestMapping("/busArrangePage")
   public String busArrangePage(HttpServletRequest request) {
+    String ownOrgId = "";
     UserInfoDTO user = CommUtil.getCurLoginUser();
     List<RoleInfoDTO> roleList = user.getRoleList();
     RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -97,6 +98,8 @@ public class BusArrangeController {
     if (RoleCodeEnum.SWZJ.name().equals(roleInfoDTO.getRoleCode())) {
       List<OrganizationDTO> swList = getCurTeleGroupList(user.getOrgId());
       request.setAttribute("swList", swList);
+      ownOrgId = String.valueOf(user.getOrgId());
+      request.setAttribute("ownOrgId", ownOrgId);
     } else {
       List<OrganizationDTO> swList = getTeleGroupByRoleCode(user);
       request.setAttribute("swList",swList);
@@ -399,7 +402,6 @@ public class BusArrangeController {
   /**
    * 获取当前登录账号
    *
-   * @param orgDTO
    * @return
    */
   private UserInfoDTO getUser() {
