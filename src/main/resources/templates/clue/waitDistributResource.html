@@ -29,14 +29,14 @@
 		<shiro:hasPermission name="waitDistributResource:importExcel">
 			<el-button type="success" @click="dialogBatchVisible = true">导入资源</el-button>
 		</shiro:hasPermission>
-		<shiro:hasPermission name="waitDistributResource:delete">
-			<el-button type="success" @click="deleteResource">删除</el-button>
-		</shiro:hasPermission>
 		<!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
 		<el-button type="warning" style="position: relative;">
 			<a href="/excel-templates/importClue.xlsx" download="资源导入模板" style="color:#fff;position: absolute;width: 100%;height: 100%;top: 0;left: 0;text-align: center;line-height: 35px;"></a>
 			下载导入模板
 		</el-button>
+		<shiro:hasPermission name="waitDistributResource:delete">
+			<el-button type="success" @click="deleteResource">删除</el-button>
+		</shiro:hasPermission>
 		<!-- <shiro:hasPermission name="waitDistributResource:recall">
       <el-button type="danger" @click="toRecall">撤回</el-button>
     </shiro:hasPermission> -->
@@ -522,7 +522,7 @@
         var clueIds = [];
         if(rows.length < 1){
           this.$message({
-            message: '请选择至少一条数据进行撤回',
+            message: '请选择至少一条数据进行删除',
             type: 'warning'
           });
           return;
@@ -548,8 +548,8 @@
               return ;
             }
             var resobj= response.data;
-            ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
-                ocmVM.initTableData();
+            wdrVM.$message({message:'删除成功',type:'success',duration:2000,onClose:function(){
+                wdrVM.initTableData();
               }});
           });
         }).catch(() => {
