@@ -626,11 +626,21 @@ public class TeleStatementController {
         busGroupReqDTO.setParentId(orgId);
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
-        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        if(!JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             return null;
         }
-        return orgJr.getData();
+        List<OrganizationRespDTO> list = new ArrayList<>();
+        if(listJSONResult != null && listJSONResult.getData().size() > 0){
+            List<OrganizationDTO> data = listJSONResult.getData();
+            for(OrganizationDTO organizationDTO : data){
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(organizationDTO.getId());
+                organizationRespDTO.setName(organizationDTO.getName());
+                list.add(organizationRespDTO);
+            }
+        }
+        return list;
     }
     
     
@@ -828,20 +838,6 @@ public class TeleStatementController {
         return user;
     }
 
-
-    /**
-     * 获取电销组
-     */
-    private List<OrganizationRespDTO> getSaleGroupList() {
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setOrgType(OrgTypeConstant.DXZ);
-        // 查询下级电销组
-        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
-        List<OrganizationRespDTO> data = queryOrgByParam.getData();
-        return data;
-    }
-
     /***
      * 下属电销员工列表
      *
@@ -856,62 +852,5 @@ public class TeleStatementController {
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole;
     }
-    
-    
-    /**
-     * 
-    * @return
-     */
-    @RequestMapping("/firstRATable")
-    public String firstRATable() {
-        return "reportforms/firstRATable";
-    }
-    
-    /**
-     * 
-    * @return
-     */
-    @RequestMapping("/firstRATableSum")
-    public String firstRATableSum() {
-        return "reportforms/firstRATableSum";
-    }
-    /**
-     * 
-    * @return
-     */
-    @RequestMapping("/firstRATableTeam")
-    public String firstRATableTeam() {
-        return "reportforms/firstRATableTeam";
-    }
-    
-    /**
-     * 
-    * @return
-     */
-    @RequestMapping("/firstRATablePerson")
-    public String firstRATablePerson() {
-        return "reportforms/firstRATablePerson";
-    }
 
-
-    /**
-     *资源接通有效率表
-     * @return
-     */
-    @RequestMapping("/resourceConnectEfficientTable")
-    public String resourceConectEfficientTable() {
-        return "reportforms/resourceConnectEfficientTable";
-    }
-
-    /**
-     *电销组资源接通有效率表
-     * @return
-     */
-    @RequestMapping("/resourceConectTelEfficientTable")
-    public String resourceConectTelEfficientTable() {
-        return "reportforms/resourceConectTelEfficientTable";
-    }
-
-
-    
 }

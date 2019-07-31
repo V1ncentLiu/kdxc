@@ -47,13 +47,36 @@ var mainDivVM = new Vue({
         activeName3:'1',
         activeName4:'1',
         activeName5:'1',
-        receiveTodayNum:'',//今日领取资源数
-        assignTodayNum:'',//今日分配资源数
-        todayTalkTime:'',//今日通话时长
+        receiveTodayNum:dashboardTelSale.todayReceiveResources,//今日领取资源数
+        assignTodayNum:dashboardTelSale.todayDistributionResources,//今日分配资源数
+        todayCallDuration:dashboardTelSale.todayCallDuration,//今日通话时长
         todayTalkTimeh:'',//今日通话时长
         todayTalkTimem:'',//今日通话时长
         todayTalkTimes:'',//今日通话时长
-        todayAppiontmentNum:'',//今日邀约数
+        todayAppiontmentNum:dashboardTelSale.todayFirstInvitation,//今日邀约数
+        todayFirstVisit:dashboardTelSale.todayFirstVisit,//今日首访数
+        todaySign:dashboardTelSale.todaySign, //今日签约数
+        monthFirstVisit:dashboardTelSale.monthFirstVisit, //当月首访数
+        monthSign:dashboardTelSale.monthSign, //当月签约数
+        monthAllPerformance:dashboardTelSale.monthAllPerformance, //月业绩
+        monthGroupRanking:dashboardTelSale.monthGroupRanking, //月组内排名
+        monthCompanyRanking:dashboardTelSale.monthCompanyRanking, //月公司排名
+        monthGroupPerformanceDifference:dashboardTelSale.monthGroupPerformanceDifference, //月距离组内上一名业绩差
+        monthCompanyPerformanceDifference:dashboardTelSale.monthCompanyPerformanceDifference, //月距离公司上一名业绩差
+        quarterAllPerformance:dashboardTelSale.quarterAllPerformance, //季度业绩
+        quarterGroupRank:dashboardTelSale.quarterGroupRank, //季度组内排名
+        quarterCompanyRank:dashboardTelSale.quarterCompanyRank, //季度公司排名
+        quarterGroupPerformanceDifference:dashboardTelSale.quarterGroupPerformanceDifference, //季度距离组内上一名业绩差
+        quarterCompanyPerformanceDifference:dashboardTelSale.quarterCompanyPerformanceDifference, //季度距离公司上一名业绩差
+        yearAllPerformance:dashboardTelSale.yearAllPerformance, //年业绩
+        yearGroupRank:dashboardTelSale.yearGroupRank, //年度组内排名
+        yearCompanyRank:dashboardTelSale.yearCompanyRank, //年度公司排名
+        yearGroupPerformanceDifference:dashboardTelSale.yearGroupPerformanceDifference, //年距离组内上一名业绩差
+        yearCompanyPerformanceDifference:dashboardTelSale.yearCompanyPerformanceDifference, //年距离公司上一名业绩差
+        totalInvitation:dashboardTelSale.totalInvitation,//累计邀约数
+        cumulativeNonDrinkPerformance:dashboardTelSale.cumulativeNonDrinkPerformance,//小物种非饮品
+        cumulativePerformance:dashboardTelSale.cumulativePerformance,//饮品业绩
+        totalPerformance:'',
         workDay:'',//工作天数
         //公告
         afficheBox:false,
@@ -106,6 +129,18 @@ var mainDivVM = new Vue({
         showClueDetailInfo (row, column) {
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
         },
+      customerEidt(row){
+        var clueId=row.clueId;
+        //客户维护界面
+        this.setSessionStore("storeForm", this.storeForm);
+        var otherVal = {
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        this.setSessionStore("otherVal", otherVal);
+        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+      },
         // 快速领取新资源
         initList(){
             var param = {};
@@ -249,9 +284,9 @@ var mainDivVM = new Vue({
             });
         },
         // 今日待跟进客户资源
-        customerEidt(clueId,phone){
+        customerEidt(row){
             //客户维护界面   
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId;
         },
         // 今日待跟进客户资源
         initTableData(){
@@ -339,34 +374,34 @@ var mainDivVM = new Vue({
                 }                
             }); 
             // 今日领取资源数
-            param={};
-            axios.post('/console/console/countReceiveClueNum',param).then(function (response) {
-                console.log('今日领取资源数')
-                console.log(response.data)
-                mainDivVM.receiveTodayNum=response.data.data;
-            });
-            // 今日分配资源数
-            param={};
-            axios.post('/console/console/countAssignClueNum',param).then(function (response) {
-                console.log('今日分配资源数')
-                console.log(response.data)
-                mainDivVM.assignTodayNum=response.data.data;
-            });
-            // 今日通话时长
-            param={};
-            axios.post('/call/callRecord/countTodayTalkTime',param).then(function (response) {
-                mainDivVM.todayTalkTime=mainDivVM.fomatSeconds2(response.data.data);
-                mainDivVM.todayTalkTimeh=mainDivVM.fomatSecondsh(response.data.data);
-                mainDivVM.todayTalkTimem=mainDivVM.fomatSecondsm(response.data.data);
-                mainDivVM.todayTalkTimes=mainDivVM.fomatSecondss(response.data.data);
-            }); 
-            // 今日邀约数
-            param={};
-            axios.post('/console/console/countTodayAppiontmentNum',param).then(function (response) {
-                console.log('今日邀约数')
-                console.log(response.data)
-                mainDivVM.todayAppiontmentNum=response.data.data;
-            }); 
+//            param={};
+//            axios.post('/console/console/countReceiveClueNum',param).then(function (response) {
+//                console.log('今日领取资源数')
+//                console.log(response.data)
+//                mainDivVM.receiveTodayNum=response.data.data;
+//            });
+//            // 今日分配资源数
+//            param={};
+//            axios.post('/console/console/countAssignClueNum',param).then(function (response) {
+//                console.log('今日分配资源数')
+//                console.log(response.data)
+//                mainDivVM.assignTodayNum=response.data.data;
+//            });
+//            // 今日通话时长
+//            param={};
+//            axios.post('/call/callRecord/countTodayTalkTime',param).then(function (response) {
+//                mainDivVM.todayTalkTime=mainDivVM.fomatSeconds2(response.data.data);
+//                mainDivVM.todayTalkTimeh=mainDivVM.fomatSecondsh(response.data.data);
+//                mainDivVM.todayTalkTimem=mainDivVM.fomatSecondsm(response.data.data);
+//                mainDivVM.todayTalkTimes=mainDivVM.fomatSecondss(response.data.data);
+//            }); 
+//            // 今日邀约数
+//            param={};
+//            axios.post('/console/console/countTodayAppiontmentNum',param).then(function (response) {
+//                console.log('今日邀约数')
+//                console.log(response.data)
+//                mainDivVM.todayAppiontmentNum=response.data.data;
+//            }); 
             // 工作天数
             param={};
             axios.post('/console/console/getWorkDay',param).then(function (response) {
@@ -383,11 +418,11 @@ var mainDivVM = new Vue({
              if(hour<10){
              	t+="0";
              }
-              t+=hour+"时:"
+              t+=hour+"小时"
               if(min < 10){
               	t += "0";
               }
-              t += min + "分:";
+              t += min + "分";
               if(sec < 10){
               	t += "0";
              }
@@ -464,7 +499,10 @@ var mainDivVM = new Vue({
         this.initTableData();
         // 工作台
         this.initBoard();
-
+        this.todayTalkTimeh = this.fomatSecondsh(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimem = this.fomatSecondsm(dashboardTelSale.todayCallDuration);
+        this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
+        this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';

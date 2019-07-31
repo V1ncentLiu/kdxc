@@ -1,26 +1,5 @@
 package com.kuaidao.manageweb.controller.statistics.firstResourceAllocation;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -31,7 +10,6 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.FirstResourceAllocation.FirstResourceAllocationFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationDto;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
@@ -44,6 +22,28 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/statistics/firstResourceAllocation")
@@ -57,8 +57,6 @@ public class FirstResourceAllocationController {
     private CustomFieldFeignClient customFieldFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
-    @Autowired
-    private UserInfoFeignClient userInfoFeignClient;
 
     /**
      * 组页面查询
@@ -634,12 +632,21 @@ public class FirstResourceAllocationController {
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setParentId(orgId);
         busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationRespDTO>> orgJr =
-                organizationFeignClient.queryOrgByParam(busGroupReqDTO);
-        if (!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        if (!JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             return null;
         }
-        return orgJr.getData();
+        List<OrganizationRespDTO> list = new ArrayList<>();
+        if(listJSONResult != null && listJSONResult.getData().size() > 0){
+            List<OrganizationDTO> data = listJSONResult.getData();
+            for(OrganizationDTO organizationDTO : data){
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(organizationDTO.getId());
+                organizationRespDTO.setName(organizationDTO.getName());
+                list.add(organizationRespDTO);
+            }
+        }
+        return list;
     }
 
     private UserInfoDTO getUser() {

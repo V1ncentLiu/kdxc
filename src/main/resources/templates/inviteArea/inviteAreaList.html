@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>日志管理</title>
+    <title>商务布局管理</title>
     <style>
       .el-message-box__btns {text-align: center;}
         .el-message-box__btns button:nth-child(2){margin-right: -125px;}
@@ -26,7 +26,7 @@
         <el-col :span="14" style="text-align: right;">
             <el-form :inline="true">
                 <el-form-item label="商务小组:" label-width="55px">
-          					<el-select filterable v-model="businessGroupId" placeholder="请选择商务小组" style="margin-right: 10px;" clearable>
+          					<el-select filterable v-model="searchForm.businessGroupId" placeholder="请选择商务小组" style="margin-right: 10px;" clearable>
           					    <el-option
           					      v-for="item in swList"
           					      :key="item.id"
@@ -36,7 +36,7 @@
           					</el-select>
                 </el-form-item>
                 <el-form-item label="电销组:" label-width="55px">
-          					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组" style="margin-right: 10px;" clearable>
+          					<el-select filterable v-model="searchForm.telemarketingTeamId" placeholder="请选择电销组" style="margin-right: 10px;" clearable>
         					    <el-option
         					      v-for="item in dxList"
         					      :key="item.id"
@@ -61,12 +61,12 @@
             :data="dataTable"  @selection-change="handleSelectionChange">
              <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
              <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-            <el-table-column align="center" prop="businessGroup" label="商务小组" width="150px"></el-table-column>
-            <el-table-column align="center" prop="provinces" label="区域" width="150px"></el-table-column>
+            <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+            <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
             <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
             <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
         </el-table>
-         <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+         <table-pagination :pager="pager" v-if="paginationShow" @change="inviteAreaListPage"></table-pagination>
     </el-row>
       
     </el-row>
@@ -144,15 +144,18 @@
 
     var swList=[[${swList}]];
     var dxList=[[${dxList}]];
-   var orgVM =  new Vue({
+    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-            dataNum:"",
+          paginationShow: false,
+          dataNum:"",
         	loading:false,
         	fileList:[],//上传文件列表
         	dialogBatchVisible:false,
-        	telemarketingTeamId:"",
-        	businessGroupId:"",
+          searchForm:{
+            telemarketingTeamId:"",
+            businessGroupId:""
+          },
         	addOrModifyDialogTitle:"",
         	dialogFormVisible:false,
         	exportFormVisible:false,
@@ -186,17 +189,23 @@
                 currentPage: 1,
                 pageSize: 20,
             },
+            storeForm:{
+              telemarketingTeamId:"",
+              businessGroupId:""
+            },
+            storeId: '',
+            scrollTop: 0,
              
         },
         methods: {
-        	inviteAreaListPage(){//查询按钮
+        	    inviteAreaListPage(){//查询按钮
             	  var param = {}; 
             	  var pageSize = this.pager.pageSize;
                   var pageNum = this.pager.currentPage;
                   param.pageNum = pageNum;
                   param.pageSize = pageSize;
-                  param.businessGroupId=this.businessGroupId;
-                  param.telemarketingTeamId=this.telemarketingTeamId;
+                  param.businessGroupId=this.searchForm.businessGroupId;
+                  param.telemarketingTeamId=this.searchForm.telemarketingTeamId;
                   console.log(param);
                   axios.post('/invitearea/inviteAreaListPage',param).then(function (response) {
                   	  console.log(response);
@@ -207,6 +216,27 @@
                     	 orgVM.dataTable =response.data.data.data; 
                     	 orgVM.pager.currentPage= response.data.data.currentPage;
                     	 orgVM.pager.total= response.data.data.total;
+
+                       // 取出存储的id
+                      if(!orgVM.paginationShow){
+                         if(orgVM.storeId){
+                             orgVM.$nextTick(function(){
+                                var storage = [];
+                                orgVM.dataTable.forEach(function(item, index){
+                                    if(item.id === orgVM.storeId ){
+                                        storage.push(orgVM.dataTable[index]);
+                                    }
+                                })
+                                orgVM.toggleSelection(storage);
+                                orgVM.$el.querySelector('.el-table__body-wrapper').scrollTop = orgVM.scrollTop;
+                            })
+                        }
+                      }else{
+                        removeSessionStore ("inviteAreaListStoreForm");
+                        removeSessionStore ("inviteAreaListOtherVal");
+                      }
+                      orgVM.paginationShow = true;
+                      orgVM.storeForm = orgVM.searchForm;
                      } 
                   })
                   .catch(function (error) {
@@ -216,6 +246,15 @@
                   });  
                   
               } ,
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
+              },
             
               updateButton(){
             	  //修改菜单数据	
@@ -228,16 +267,25 @@
                       return;
                   }
                 var ids="";
-	            if(null!=rows){
-	             for ( var i = 0; i <rows.length; i++){
-	            	if("" == ids){
-	            		ids = rows[i].id
-	            	}else{
-	            		ids = ids+","+rows[i].id
-	            	}
-	             }
-	            }
-	            window.location.href="/invitearea/updateInviteAreaPage?ids="+ids; 
+    	            if(null!=rows){
+    	             for ( var i = 0; i <rows.length; i++){
+    	            	if("" == ids){
+    	            		ids = rows[i].id
+    	            	}else{
+    	            		ids = ids+","+rows[i].id
+    	            	}
+    	             }
+	              }
+                // 存储选中信息--start  
+                setSessionStore("inviteAreaListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": ids,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("inviteAreaListOtherVal", otherVal);
+                // 存储选中信息--end  
+  	            window.location.href="/invitearea/updateInviteAreaPage?ids="+ids; 
               },
               deleButton(){
             	  var rows = this.multipleSelection;
@@ -427,6 +475,17 @@
               }
         },
         created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("inviteAreaListStoreForm");
+                var otherVal = getSessionStore("inviteAreaListOtherVal");
+                if(storeVal && otherVal){
+                    this.searchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

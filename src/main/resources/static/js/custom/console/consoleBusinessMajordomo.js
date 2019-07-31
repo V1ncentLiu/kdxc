@@ -2,6 +2,7 @@ var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
         btnDisabled: false,
+        cancelFormVisible:false,
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -14,8 +15,38 @@ var mainDivVM = new Vue({
         direcotorTomorrowArriveTime:'',//预计明日到访数
         workDay:'',
         //公告   
-        afficheBox:false,     
-        items: [ 
+        afficheBox:false,
+        //日维度的看板计数
+        dayFirstVisit : '',
+        waitAllotNum : '',
+        daySign : '',
+        tomorrowFirstVisit : '',
+        //非日维度看板计数
+        totalPerformance : '',
+        monthPerformance : '',
+        quarterPerformance : '',
+        yearPerformance : '',
+        monthSignRate: '',
+        monthFirstvisitSignrate : '',
+        monthFullPaymentRate : '',
+        monthSecondVisit : '',
+        monthSecondVisitSign : '',
+        noTailSign : '',
+        noTailAmount : '',
+        totalCustomer : '',
+        monthAreaRank : '',
+        quarterAreaRank : '',
+        yearAreaRank : '',
+        monthCompanyRank : '',
+        quarterCompanyRank : '',
+        yearCompanyRank : '',
+        monthAreaPerformanceDifference : '',
+        quarterAreaPerformanceDifference : '',
+        yearAreaPerformanceDifference : '',
+        monthCompanyPerformanceDifference : '',
+        quarterCompanyPerformanceDifference : '',
+        yearCompanyPerformanceDifference : '',
+        items: [
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
             // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
             // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
@@ -37,6 +68,9 @@ var mainDivVM = new Vue({
             remark:'',
             message:''
         },
+        cancelDigForm:{
+            cancelReason:'',
+          },
         allocationVisible: false,
         formLabelWidth: '130px',
         allocationFormRules: {
@@ -44,6 +78,11 @@ var mainDivVM = new Vue({
                 { required: true, message: '请选择商务经理', trigger: 'change' }
             ]
         },
+        cancelRules:{
+            cancelReason: [
+              { required: true, message: '请填写取消原因', trigger: 'blur' }
+            ]
+          },
         saleOptions:busSaleList,
         // 待审签约记录
         showbutton:false,
@@ -92,6 +131,13 @@ var mainDivVM = new Vue({
 
     },
     methods: {
+      formatNum(value) {
+        if(!value&&value!==0) return 0;
+
+        let str = value.toString();
+        let reg = str.indexOf(".") > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g;
+        return str.replace(reg,"$1,");
+      },
         gotoBusAllocation(){//跳转待分配来访客户
             window.location.href="/business/busAllocation/initAppiontmentList"; 
         },
@@ -164,6 +210,52 @@ var mainDivVM = new Vue({
                 console.log('工作天数')                
                 console.log(response.data)                
                 mainDivVM.workDay=response.data.data;
+            });
+
+            // 日维度的看板数据
+            param={};
+            //param.flag = 1;
+            axios.post('/console/console/busGroupDayQuery',param).then(function (response) {
+                console.log('日维度的看板数据');
+                console.log(response.data);
+                var result = response.data.data;
+                mainDivVM.dayFirstVisit = result.dayFirstVisit;
+                mainDivVM.waitAllotNum = result.waitAllotNum;
+                mainDivVM.daySign = result.daySign;
+                mainDivVM.tomorrowFirstVisit = result.tomorrowFirstVisit;
+            });
+
+            // 非日维度的看板数据
+            param={};
+            //param.flag = 2;
+            axios.post('/console/console/busGroupNotDayQuery',param).then(function (response) {
+                console.log('非日维度的看板数据');
+                console.log(response.data);
+                var result = response.data.data;
+                mainDivVM.totalPerformance = result.totalPerformance;
+                mainDivVM.monthPerformance = result.monthPerformance;
+                mainDivVM.quarterPerformance = result.quarterPerformance;
+                mainDivVM.yearPerformance = result.yearPerformance;
+                mainDivVM.monthSignRate = result.monthSignRate;
+                mainDivVM.monthFirstvisitSignrate = result.monthFirstvisitSignrate;
+                mainDivVM.monthFullPaymentRate = result.monthFullPaymentRate;
+                mainDivVM.monthSecondVisit = result.monthSecondVisit;
+                mainDivVM.monthSecondVisitSign = result.monthSecondVisitSign;
+                mainDivVM.noTailSign = result.noTailSign;
+                mainDivVM.noTailAmount = result.noTailAmount;
+                mainDivVM.totalCustomer = result.totalCustomer;
+                mainDivVM.monthAreaRank = result.monthAreaRank;
+                mainDivVM.quarterAreaRank = result.quarterAreaRank;
+                mainDivVM.yearAreaRank = result.yearAreaRank;
+                mainDivVM.monthCompanyRank = result.monthCompanyRank;
+                mainDivVM.quarterCompanyRank = result.quarterCompanyRank;
+                mainDivVM.yearCompanyRank = result.yearCompanyRank;
+                mainDivVM.monthAreaPerformanceDifference = result.monthAreaPerformanceDifference;
+                mainDivVM.quarterAreaPerformanceDifference = result.quarterAreaPerformanceDifference;
+                mainDivVM.yearAreaPerformanceDifference = result.yearAreaPerformanceDifference;
+                mainDivVM.monthCompanyPerformanceDifference = result.monthCompanyPerformanceDifference;
+                mainDivVM.quarterCompanyPerformanceDifference = result.quarterCompanyPerformanceDifference;
+                mainDivVM.yearCompanyPerformanceDifference = result.yearCompanyPerformanceDifference;
             });
         },
         // 待分配邀约来访记录
@@ -355,6 +447,78 @@ var mainDivVM = new Vue({
         allocationCloseDialog(){//分发资源关闭
             this.$refs['allocationForm'].resetFields();
         },
+        //打开取消邀约对话框
+        openCancelForm() {
+          var rows = this.multipleSelection;
+          if(rows.length==0){
+            this.$message({
+              message: '请选择邀约数据进行取消',
+              type: 'warning'
+            });
+            return;
+          }
+          if(this.$refs['cancelDigForm']) {
+            this.$refs['cancelDigForm'].resetFields();
+          }
+          this.cancelDigForm.cancelReason="";
+          this.cancelFormVisible=true;
+        },
+        //取消邀约数据
+        submitCancelForm(formName) {
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              var rows = this.multipleSelection;
+              if(rows.length==0){
+                this.$message({
+                  message: '请选择邀约数据进行取消',
+                  type: 'warning'
+                });
+                return;
+              }
+              var rowIds = [];
+              for(var i=0;i<rows.length;i++){
+                var curRow = rows[i];
+                rowIds.push(curRow.id);
+              }
+              var reason= mainDivVM.cancelDigForm.cancelReason;
+              this.$confirm('确定要取消选中的邀约来访吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                //删除
+                var param  = {cancelIdList:rowIds,cancelReason:reason};
+                axios.post('/business/busAllocation/cancelAppiontment',param)
+                .then(function (response) {
+                  var data =  response.data;
+                  if(data.code=='0'){
+                    mainDivVM.$message({message:'取消成功',type:'success',duration:1000,onClose:function(){
+                        mainDivVM.cancelFormVisible=false;
+                        mainDivVM.searchTable();
+                      }});
+                  }else{
+                    mainDivVM.$message({
+                      message: "接口调用失败",
+                      type: 'error'
+                    });
+                  }
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+
+                });
+              }).catch(() => {
+
+              });
+            } else {
+              console.log('error submit!!');
+              return false;
+            }
+          });
+
+        },//end
         // 待审签约记录
         initSignRecordData(){
             var param = {};

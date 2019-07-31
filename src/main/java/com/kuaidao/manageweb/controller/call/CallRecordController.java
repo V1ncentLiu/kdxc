@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.call;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Splitter;
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -13,6 +14,7 @@ import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.manageweb.config.BusinessCallrecordLimit;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -25,11 +27,15 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -54,6 +60,9 @@ public class CallRecordController {
 
     @Autowired
     OrganizationFeignClient organizationFeignClient;
+    
+    @Autowired
+    BusinessCallrecordLimit businessCallrecordLimit;
 
     /**
      * 记录拨打时间
@@ -90,27 +99,79 @@ public class CallRecordController {
     @RequiresPermissions("aggregation:telCallRecord:view")
     @RequestMapping("/telCallRecord")
     public String telCallRecord(HttpServletRequest request) {
-
+        logger.info("businessCallrecordLimit {{}}",businessCallrecordLimit);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-            request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
-        } else {
-            Integer businessLine = curLoginUser.getBusinessLine();
-            if (businessLine != null) {
+        //商学院处理
+        boolean isBusinessAcademy = false;
+        Long curOrgId = curLoginUser.getOrgId();
+        Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+            Integer businessLine = curLoginUser.getBusinessLine();  
+            isBusinessAcademy  = true;
+            request.setAttribute("teleGroupList", getTeleGroupByBusinessLine(businessLine));
+        }
+       //郑州商学院
+        if(!isBusinessAcademy) {
+            String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
+            if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
+                isBusinessAcademy  = true;
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
+                request.setAttribute("teleGroupList", getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
+            }
+        }
+        
+        
+        //石家庄商学院
+        if(!isBusinessAcademy) {
+            String sjzBusOrgId = businessCallrecordLimit.getSjzBusOrgId();
+            if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
+                isBusinessAcademy  = true;
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
+                request.setAttribute("teleGroupList",  getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
+            }
+        }
+       
+    
+        //合肥商学院 
+        if(!isBusinessAcademy) {
+            String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
+            if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
+                isBusinessAcademy  = true;
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
+                request.setAttribute("teleGroupList",getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
+            }
+        }
+         
+        if(!isBusinessAcademy) {
+            //非商学院
+            if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
+            } else {
                 request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
             }
         }
+       
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
 
         return "call/telCallRecord";
     }
-
+    
+    public List<OrganizationDTO> getDescenDantTeleGroupByOrgId(Long parentOrgId){
+        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(parentOrgId);
+        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+        // 查询下级电销组(查询使用)
+        JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+            organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+        List<OrganizationDTO> data = listDescenDantByParentId.getData();
+        return data;
+    }
 
     /**
      * 获取该业务下 的所有电销组
@@ -160,17 +221,6 @@ public class CallRecordController {
         }
         return  null;
     }
-    /**
-     * 获取当前登录账号
-     *
-     * @param orgDTO
-     * @return
-     */
-    private UserInfoDTO getUser() {
-        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
-        UserInfoDTO user = (UserInfoDTO) attribute;
-        return user;
-    }
     private List<OrganizationDTO> getCurTeleGroupList(Long orgId) {
         OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(orgId));
         List<OrganizationDTO> teleGroupIdList = new ArrayList<>();
@@ -214,10 +264,7 @@ public class CallRecordController {
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             request.setAttribute("teleGroupList",getCurTeleGroupList(orgId));
         }else {
-            Integer businessLine = curLoginUser.getBusinessLine();
-            if(businessLine!=null) {
-                request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
-            }
+            request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
         }
         return "call/tmTalkTimeCallRecord";
     }
@@ -268,6 +315,7 @@ public class CallRecordController {
     @ResponseBody
     public JSONResult<Map<String, Object>> listAllTmCallRecord(
             @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
+        logger.info("callrecord limit {{}}",businessCallrecordLimit);
         // 根据角色查询 下属顾问
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
@@ -275,47 +323,113 @@ public class CallRecordController {
         // 电销顾问
         List<Long> accountIdList = myCallRecordReqDTO.getAccountIdList();
         if (CollectionUtils.isEmpty(accountIdList)) {
-            if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-                // 电销总监
-                List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
-                if (CollectionUtils.isEmpty(userList)) {
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                            "该电销总监下无顾问");
-                }
-                List<Long> idList = userList.parallelStream().map(user -> user.getId())
-                        .collect(Collectors.toList());
-                idList.add(curLoginUser.getId());
-                myCallRecordReqDTO.setAccountIdList(idList);
-
-            } else {
-                // 其他角色
-                Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
-                if (teleGroupId != null) {
-                    List<UserInfoDTO> userList = getTeleSaleByOrgId(teleGroupId);
-                    if (CollectionUtils.isEmpty(userList)) {
-                        return new JSONResult<Map<String, Object>>().success(null);
-                    }
-                    List<Long> idList = userList.parallelStream().map(user -> user.getId())
-                            .collect(Collectors.toList());
-                    myCallRecordReqDTO.setAccountIdList(idList);
-                } else {
-//                    Integer businessLine = curLoginUser.getBusinessLine();
-//                    if (businessLine == null) {
-//                        return new JSONResult<Map<String, Object>>().success(null);
-//                    }
-                    List<UserInfoDTO> userInfoList = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                    if (CollectionUtils.isEmpty(userInfoList)) {
-                        return new JSONResult<Map<String, Object>>().success(null);
-                    }
-                    List<Long> idList = userInfoList.parallelStream().map(user -> user.getId())
-                            .collect(Collectors.toList());
-                    myCallRecordReqDTO.setAccountIdList(idList);
-                }
+            //9期 商学院处理
+           Integer businessLine = curLoginUser.getBusinessLine();
+           Map<String,Object> busMap =  setBusAccountIdList(myCallRecordReqDTO,orgId,businessLine);
+           Boolean isBusLimit =  (Boolean)busMap.get("isBusinessAcademy");
+           if (isBusLimit &&  busMap.get("result")!=null) {
+              return (JSONResult)busMap.get("result");
             }
+           
+           if (!isBusLimit) {
+               if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                   // 电销总监
+                   List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
+                   if (CollectionUtils.isEmpty(userList)) {
+                       return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                               "该电销总监下无顾问");
+                   }
+                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   idList.add(curLoginUser.getId());
+                   myCallRecordReqDTO.setAccountIdList(idList);
+
+               } else {
+                   // 其他角色
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   if (teleGroupId != null) {
+                       List<UserInfoDTO> userList = getTeleSaleByOrgId(teleGroupId);
+                       if (CollectionUtils.isEmpty(userList)) {
+                           return new JSONResult<Map<String, Object>>().success(null);
+                       }
+                       List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                               .collect(Collectors.toList());
+                       myCallRecordReqDTO.setAccountIdList(idList);
+                   } else {
+                       List<UserInfoDTO> userInfoList = getTeleSaleByOrgId(curLoginUser.getOrgId());
+                       if (CollectionUtils.isEmpty(userInfoList)) {
+                           return new JSONResult<Map<String, Object>>().success(null);
+                       }
+                       List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                               .collect(Collectors.toList());
+                       myCallRecordReqDTO.setAccountIdList(idList);
+                   }
+               }
+           } 
+            
         }
 
         return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
 
+    }
+    
+    /**
+     * 商学院逻辑处理
+    * @param myCallRecordReqDTO
+    * @param curOrgId
+    * @return
+     */
+    private Map<String, Object>  setBusAccountIdList(CallRecordReqDTO myCallRecordReqDTO,Long curOrgId,Integer businessLine) {
+        Map<String, Object> resMap = new HashMap<>();
+        //判断是否 秦皇岛商学院听业务线下所有； 商机盒子商学院 听业务线下所有
+        List<UserInfoDTO>  userInfoList = new ArrayList<>();
+        boolean isBusinessAcademy = false   ;
+        Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+              userInfoList  = getTeleSaleByBusinessLine(businessLine);
+              isBusinessAcademy = true;
+        }
+       //郑州商学院 听郑州
+        if (!isBusinessAcademy) {
+            String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
+            if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
+        }
+        
+        if (!isBusinessAcademy) {
+            //石家庄商学院 听石家庄
+            String sjzBusOrgId = businessCallrecordLimit.getSjzBusOrgId();
+            if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
+        }
+        
+        if (!isBusinessAcademy) {
+            //合肥商学院 听合肥的
+             String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
+            if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
+        }
+        
+        resMap.put("isBusinessAcademy", isBusinessAcademy);
+        if (!isBusinessAcademy) {
+           return resMap; 
+        }
+        if (CollectionUtils.isEmpty(userInfoList)) {
+            resMap.put("result",new JSONResult<Map<String, Object>>().success(null));
+            return resMap;
+        }
+        List<Long> idList = userInfoList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
+        myCallRecordReqDTO.setAccountIdList(idList);
+        return resMap;
     }
 
     /**
@@ -372,7 +486,6 @@ public class CallRecordController {
 
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
-        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         String roleCode = CommUtil.getRoleCode(curLoginUser);
         //电销顾问
         List<Long> accountIdList = myCallRecordReqDTO.getAccountIdList();
@@ -384,7 +497,7 @@ public class CallRecordController {
             if(CollectionUtils.isEmpty(userList)) {
                 return new JSONResult<Map<String,Object>>().success(null);
             }
-            List<Long> idList = userList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
+            List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
             myCallRecordReqDTO.setAccountIdList(idList);
         }else {
             if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -393,20 +506,16 @@ public class CallRecordController {
                 if(CollectionUtils.isEmpty(userList)) {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该电销总监下无顾问");
                 }
-                List<Long> idList = userList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
+                List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
                 idList.add(curLoginUser.getId());
                 myCallRecordReqDTO.setAccountIdList(idList);
 
             }else {
-//                Integer businessLine = curLoginUser.getBusinessLine();
-//                if(businessLine==null) {
-//                    return new JSONResult<Map<String,Object>>().success(null);
-//                }
                 List<UserInfoDTO>  userInfoList  = getTeleSaleByOrgId(curLoginUser.getOrgId());
                 if (CollectionUtils.isEmpty(userInfoList)) {
                     return new JSONResult<Map<String,Object>>().success(null);
                 }
-                List<Long> idList = userInfoList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
+                List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
                 myCallRecordReqDTO.setAccountIdList(idList);
             }
         }

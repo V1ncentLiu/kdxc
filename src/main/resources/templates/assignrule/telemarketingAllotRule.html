@@ -88,17 +88,18 @@
                 :data="dataTable" 
                 >
                 <el-table-column align="center" type="selection"  @selection-change="handleSelectionChange" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat"  width="170"></el-table-column>
-                <el-table-column align="center" prop="createName" label="创建人"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat"  width="130"></el-table-column>
+                <el-table-column align="center" prop="createName" label="创建人" width="80"></el-table-column>
                 <el-table-column align="center" prop="category" label="资源类别"></el-table-column>
-                <el-table-column align="center" prop="type" label="资源类型"></el-table-column>
+                <el-table-column align="center" prop="type" label="资源类型" width="100"></el-table-column>
                 <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
-                <el-table-column align="center" prop="startTime" label="生效时间" :formatter="dateFormat"  width="170"></el-table-column>
-                <el-table-column align="center" prop="endTime" label="截止时间"   :formatter="dateFormat"  width="170"></el-table-column>
-                <el-table-column align="center" prop="area" label="地区"></el-table-column>
-                <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus"></el-table-column>
-                <el-table-column align="center" prop="handle" label="操作">
+                <el-table-column align="center" prop="startTime" label="生效时间" :formatter="dateFormat"  width="130"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="截止时间"   :formatter="dateFormat"  width="130"></el-table-column>
+                <el-table-column align="center" prop="area" label="地区" width="80"></el-table-column>
+                <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus" width="80"></el-table-column>
+                <el-table-column align="center" prop="handle" label="操作" width="80">
                     <template slot-scope="scope">
                         <div v-if="scope.row.status === 1">
                             <el-button  @click="updateStatus(scope.row.id,0,'停用')" type="danger"  size="small">
@@ -114,7 +115,7 @@
                     </template>
                 </el-table-column>
             </el-table>
-             <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+             <table-pagination :pager="pager" v-if="paginationShow" @change="initTableData"></table-pagination> 
         </el-row>
      </div>
 </div>
@@ -134,6 +135,7 @@
         el: '#informationAllot',
         data: function() {
             return {
+                paginationShow: false,
                 isShow:false,
                 form: {
                     companyId:'',
@@ -155,93 +157,115 @@
                 value: '',//下拉选项默认值
                 value1: '',//下拉选项默认值
                 value2: '',//下拉选项默认值 
-               multseleSelection:[],
+                multseleSelection:[],
+                storeForm: {
+                    companyId:'',
+                    deptId:'',
+                    orgId:'',
+                    startTime:'',
+                    endTime:'',
+                    assignName:''
+                },
+                storeId: '',
+                scrollTop: 0,
             }        	  
         },
         methods: {
-        	initTableData(){
-           	 //初始化列表	
-              var pageSize = this.pager.pageSize;
-           	 
-              var pageNum = this.pager.currentPage;
-              
-              var companyId= this.form.companyId;
-              
-              var deptId= this.form.deptId;
-              
-              var orgId= this.form.orgId;
-              
-              var startTime= this.form.startTime;
-              
-              var endTime= this.form.endTime;
-
-              var assignName= this.form.assignName;
-
-              if(endTime){
-                if(endTime<startTime){
-                    this.$message({
-                        type: 'warning',
-                        message: '结束时间不能早于开始时间'
-                    });
-                    return ;
-                } 
-              }
-              
+        	  initTableData(){
+           	    //初始化列表	
+                var pageSize = this.pager.pageSize;           	 
+                var pageNum = this.pager.currentPage;              
+                var companyId= this.form.companyId;              
+                var deptId= this.form.deptId;              
+                var orgId= this.form.orgId;              
+                var startTime= this.form.startTime;              
+                var endTime= this.form.endTime;
+                var assignName= this.form.assignName;
+                if(endTime){
+                  if(endTime<startTime){
+                      this.$message({
+                          type: 'warning',
+                          message: '结束时间不能早于开始时间'
+                      });
+                      return ;
+                  } 
+                }           
           
-              var  param={};
-              
-              param.assignName=assignName;
-              
-              param.startTime=startTime;
-              
-              param.endTime=endTime;
-              
-              param.teleCompany=companyId;
-              
-              param.teleDepart=deptId;
-              
-              param.telemarketingId=orgId;
-              
-              param.pageSize=pageSize;
-              
-              param.pageNum=pageNum;
-              
-              if(0==pageNum){
-                   pageNum=1;	
-                 }
-                  axios.post('/assignrule/teleAssignRule/queryTeleAssignRuleList',param).then(function (response) {
-        				if(null==response){
-        					alert("返回异常");
-        					return ;
-        				}
-        				var resobj= response.data;
-        				if(null==resobj){
-        					alert("返回异常");
-        					return ;
-        				} 
-        				if(resobj.code!='0'){
-        					alert(response.data.message);
-        					return ;
-        				}
-        				var pageData=resobj.data;
-        				teleRuleVM.pager.total=pageData.total;
-        				teleRuleVM.pager.currentPage = pageData.currentPage;
-        				teleRuleVM.pager.pageSize = pageData.pageSize;
-        				teleRuleVM.dataTable =pageData.data; 	
-        			})
+                var  param={};              
+                param.assignName=assignName;              
+                param.startTime=startTime;              
+                param.endTime=endTime;              
+                param.teleCompany=companyId;              
+                param.teleDepart=deptId;              
+                param.telemarketingId=orgId;              
+                param.pageSize=pageSize;              
+                param.pageNum=pageNum;              
+                if(0==pageNum){
+                    pageNum=1;	
+                }
+                axios.post('/assignrule/teleAssignRule/queryTeleAssignRuleList',param).then(function (response) {
+            				if(null==response){
+            					alert("返回异常");
+            					return ;
+            				}
+            				var resobj= response.data;
+            				if(null==resobj){
+            					alert("返回异常");
+            					return ;
+            				} 
+            				if(resobj.code!='0'){
+            					alert(response.data.message);
+            					return ;
+            				}
+            				var pageData=resobj.data;
+            				teleRuleVM.pager.total=pageData.total;
+            				teleRuleVM.pager.currentPage = pageData.currentPage;
+            				teleRuleVM.pager.pageSize = pageData.pageSize;
+            				teleRuleVM.dataTable =pageData.data; 	
+
+                    // 取出存储的id
+                    if(!teleRuleVM.paginationShow){
+                       if(teleRuleVM.storeId){
+                           teleRuleVM.$nextTick(function(){
+                              var storage = [];
+                              teleRuleVM.dataTable.forEach(function(item, index){
+                                  if(item.id === teleRuleVM.storeId ){
+                                      storage.push(teleRuleVM.dataTable[index]);
+                                  }
+                              })
+                              teleRuleVM.toggleSelection(storage);
+                              teleRuleVM.$el.querySelector('.el-table__body-wrapper').scrollTop = teleRuleVM.scrollTop;
+                          })
+                      }
+                    }else{
+                      removeSessionStore ("telemarketingAllotRuleStoreForm");
+                      removeSessionStore ("telemarketingAllotRuleOtherVal");
+                    }
+                    teleRuleVM.paginationShow = true;
+                    teleRuleVM.storeForm = teleRuleVM.form;
+          			})
             		
            	},
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
             searchTable() {//查询表格方法
 
             },
-    		//日期数据格式化方法
-    		dateFormat:function(row, column) {
-    			var date = row[column.property];
-               	if (date == undefined) {
-    	               return "";
-              	}
-               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
-    		},
+        		//日期数据格式化方法
+        		dateFormat:function(row, column) {
+        			var date = row[column.property];
+                   	if (date == undefined) {
+        	               return "";
+                  	}
+                   	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+        		},
             handleSelectionChange(val) {
                 this.multseleSelection = val;
             },
@@ -325,7 +349,7 @@
             },
             openUpdatePage(){
                 //修改菜单数据	
-            	var rows = this.multseleSelection;
+            	  var rows = this.multseleSelection;
                 if(rows.length!=1){
                     this.$message({
                        message: '请选择一条数据进行修改',
@@ -333,7 +357,18 @@
                      });
                     return;
                 }
-              window.location.href='/assignrule/teleAssignRule/preUpdateTeleAssignRule?ruleId='+ rows[0].id;
+                // 存储选中信息--start
+                var clueId=rows[0].id;  
+                setSessionStore("telemarketingAllotRuleStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("telemarketingAllotRuleOtherVal", otherVal);
+                // 存储选中信息--end 
+                // window.location.href='/assignrule/teleAssignRule/preUpdateTeleAssignRule?ruleId='+ rows[0].id;
+                window.location.href='/assignrule/teleAssignRule/preUpdateTeleAssignRule?ruleId='+clueId ;
             },
             toogleClick(){
                 if(this.isShow){
@@ -344,11 +379,23 @@
             },
         },
    	  created(){
-        // 取页数存储
-        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;}
-     		//初始化数据列表
-     		this.initTableData();
+          // 进入页面判断有是否有存储值
+          if(!this.paginationShow){
+              var storeVal = getSessionStore("telemarketingAllotRuleStoreForm");
+              var otherVal = getSessionStore("telemarketingAllotRuleOtherVal");
+              if(storeVal && otherVal){
+                  this.form = storeVal;
+                  this.$set(this.pager,"currentPage",otherVal.currentPage);
+                  this.storeId = otherVal.clueId;
+                  this.scrollTop = otherVal.scrollTop;
+              }
+          };
+          // 取页数存储
+          // 取页数存储
+          var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+          if(localVal){this.pager.pageSize = localVal;}
+     		  //初始化数据列表
+     		  this.initTableData();
    	  },
       mounted(){
           document.getElementById('informationAllot').style.display = 'block';

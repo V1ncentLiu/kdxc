@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
@@ -130,6 +131,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
@@ -138,6 +140,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
@@ -153,6 +156,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
@@ -261,6 +265,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
@@ -269,6 +274,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
@@ -282,6 +288,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
@@ -348,6 +355,16 @@ public class ExtendClueDistributionedTaskController {
                 // }
                 // 只要下发的肯定都是否（产品定的，都是否）
                 curList.add("否"); // 是否重复
+                // 是否自建
+                String inputName = "否 ";
+                if (AggregationConstant.YES.equals(taskDTO.getInputType())) {
+                    inputName = "是";
+                }
+                curList.add(inputName);
+                // 首次分配话务组
+                curList.add(taskDTO.getFirstAsssignTrafficGroupName());
+                // 首次分配电销组
+                curList.add(taskDTO.getFirstAsssignTeleGroupName());
                 dataList.add(curList);
             }
         }
@@ -378,6 +395,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
@@ -387,6 +405,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
@@ -400,6 +419,7 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
@@ -552,6 +572,9 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("电销组总监");
         headTitleList.add("电销组");
         headTitleList.add("是否重复");
+        headTitleList.add("是否自建");
+        headTitleList.add("首次分配话务组");
+        headTitleList.add("首次分配电销组");
         return headTitleList;
     }
 
@@ -566,7 +589,11 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
         String roleCode = user.getRoleList().get(0).getRoleCode();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        if (RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.YWGLY.name().equals(roleCode)
+        if (RoleCodeEnum.HWY.name().equals(roleCode)) {
+            userList.add(user);
+            return userList;
+        } else if (RoleCodeEnum.GLY.name().equals(roleCode)
+                || RoleCodeEnum.YWGLY.name().equals(roleCode)
                 || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
             userRole.setBusinessLine(BusinessLineConstant.TGZX);
         } else {

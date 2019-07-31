@@ -21,6 +21,9 @@
     		<shiro:hasPermission name="business:busAllocationManager:allocation">
 		        <el-button type="success" @click="toTransferClue">外调经理</el-button>
 		    </shiro:hasPermission>
+		    <shiro:hasPermission name="business:busAllocationManager:cancel">
+		      <el-button type="info" @click="openCancelForm">标记取消</el-button>
+		    </shiro:hasPermission>
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -132,7 +135,7 @@
                
                
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -196,6 +199,22 @@
             </div>
         </template>
     </el-dialog>
+    
+     <!-- 标记取消-->
+	  <el-dialog title="取消原因"    :visible.sync="cancelFormVisible" width="540px">
+	    <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
+	      <el-row>
+	        <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
+	        <el-form-item label="取消原因：" :label-width="formLabelWidth1" prop="cancelReason">
+	          <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
+	        </el-form-item>
+	      </el-row>
+	    </el-form>
+	    <div slot="footer" class="dialog-footer">
+	      <el-button type="primary" @click="submitCancelForm('cancelDigForm')">提 交</el-button>
+	      <el-button @click="cancelFormVisible= false" >取 消</el-button>
+	    </div>
+	  </el-dialog>
     <!-- dialog -->
      
 </div>
@@ -217,20 +236,22 @@ var purTypeList = [[${purTypeList}]] // 意向品类
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            paginationShow: false,
+            cancelFormVisible:false,
             isShow:false,
-        		searchForm: {
-	        		cusName: '',
-	        		teleGorupId: '',
-	        		teleSaleId: '',
-	        		projectId: '',
-	        		province: '',
-	        		delFalg: '',
-	        		startTime: '',
-	        		endTime: '',
-	        		startReserveTime: '',
-	        		endReserveTime: '',
-	        		sortField: '',
-	        		sortType: ''
+    		searchForm: {
+        		cusName: '',
+        		teleGorupId: '',
+        		teleSaleId: '',
+        		projectId: '',
+        		province: '',
+        		delFalg: '',
+        		startTime: '',
+        		endTime: '',
+        		startReserveTime: '',
+        		endReserveTime: '',
+        		sortField: '',
+        		sortType: ''
             },
             allocationForm: {
             	saleId:'',
@@ -242,6 +263,9 @@ var clueVM = new Vue({
             	remark:'',
             	message:''
               },
+              cancelDigForm:{
+                  cancelReason:'',
+                },
             dataTable:[],
             teleGorupOptions:saleGroupList,
             teleSaleOptions:[],
@@ -277,14 +301,35 @@ var clueVM = new Vue({
                     { required: true, message: '请选择商务经理', trigger: 'change' }
                 ]
               },
+              cancelRules:{
+                  cancelReason: [
+                    { required: true, message: '请填写取消原因', trigger: 'blur' }
+                  ]
+                },
             multipleSelection:[],
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
+            storeForm: {
+                cusName: '',
+                teleGorupId: '',
+                teleSaleId: '',
+                projectId: '',
+                province: '',
+                delFalg: '',
+                startTime: '',
+                endTime: '',
+                startReserveTime: '',
+                endReserveTime: '',
+                sortField: '',
+                sortType: ''
+            },
+            storeId: '',
+            scrollTop: 0,
         },
         methods: {
-          clickRow(row){//点击单行选中复选框
+            clickRow(row){//点击单行选中复选框
                 this.$refs.multipleTable.toggleRowSelection(row)
-          },
+            },
         	searchTable() {
                 var param ={};
                 var startTime = this.searchForm.startTime;
@@ -325,17 +370,48 @@ var clueVM = new Vue({
                 console.info(param);
                 axios.post('/business/busAllocation/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      clueVM.dataTable= table.data;
-                      clueVM.pager.total =  table.total;
-                      clueVM.pager.currentPage = table.currentPage;
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    clueVM.dataTable= table.data;
+                    clueVM.pager.total =  table.total;
+                    clueVM.pager.currentPage = table.currentPage;
+
+                      // 取出存储的id
+                    if(!clueVM.paginationShow){
+                       if(clueVM.storeId){
+                           clueVM.$nextTick(function(){
+                              var storage = [];
+                              clueVM.dataTable.forEach(function(item, index){
+                                  if(item.clueId === clueVM.storeId ){
+                                      storage.push(clueVM.dataTable[index]);
+                                  }
+                              })
+                              clueVM.toggleSelection(storage);
+                              clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop = clueVM.scrollTop;
+                          })
+                      }
+                    }else{
+                      removeSessionStore ("busAllocationManagerStoreForm");
+                      removeSessionStore ("busAllocationManagerOtherVal");
+                    }
+                    clueVM.paginationShow = true;
+                    clueVM.storeForm = clueVM.searchForm;
+
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
+              },
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
               },
               //选择行
               handleSelectionChange(val) {
@@ -647,7 +723,18 @@ var clueVM = new Vue({
             	   
                  },// method end
                  showCustomerDetail(row, column){ // 客户详情
-                	 window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+                    // 存储选中信息--start
+                    var clueId=row.clueId;  
+                    setSessionStore("busAllocationManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId,
+                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    }
+                    setSessionStore("busAllocationManagerOtherVal", otherVal);
+                    // 存储选中信息--end  
+                    // window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+                    window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+clueId;
                  },
               //根据电销组查询电销总监
               getSaleList() {
@@ -690,9 +777,92 @@ var clueVM = new Vue({
                     this.isShow=true
                 }          
               },
+            //打开取消邀约对话框
+              openCancelForm() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                  this.$message({
+                    message: '请选择邀约数据进行取消',
+                    type: 'warning'
+                  });
+                  return;
+                }
+                if(this.$refs['cancelDigForm']) {
+                  this.$refs['cancelDigForm'].resetFields();
+                }
+                this.cancelDigForm.cancelReason="";
+                this.cancelFormVisible=true;
+              },
+              //取消邀约数据
+              submitCancelForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                    var rows = this.multipleSelection;
+                    if(rows.length==0){
+                      this.$message({
+                        message: '请选择邀约数据进行取消',
+                        type: 'warning'
+                      });
+                      return;
+                    }
+                    var rowIds = [];
+                    for(var i=0;i<rows.length;i++){
+                      var curRow = rows[i];
+                      rowIds.push(curRow.id);
+                    }
+                    var reason= clueVM.cancelDigForm.cancelReason;
+                    this.$confirm('确定要取消选中的邀约来访吗？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                    }).then(() => {
+                      //删除
+                      var param  = {cancelIdList:rowIds,cancelReason:reason};
+                      axios.post('/business/busAllocation/cancelAppiontment',param)
+                      .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                          clueVM.$message({message:'取消成功',type:'success',duration:1000,onClose:function(){
+                              clueVM.cancelFormVisible=false;
+                              clueVM.searchTable();
+                            }});
+                        }else{
+                          clueVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                          });
+                        }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      })
+                      .then(function () {
+
+                      });
+                    }).catch(() => {
+
+                    });
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+
+              },//end
         },
         created(){
             console.info("create method");
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("busAllocationManagerStoreForm");
+                var otherVal = getSessionStore("busAllocationManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.searchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

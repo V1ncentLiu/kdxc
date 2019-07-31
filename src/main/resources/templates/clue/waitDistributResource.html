@@ -110,10 +110,15 @@
                         </el-option> 
                       </el-select> 
                     </el-form-item>
-									<el-form-item label="微信:">
-										<el-input v-model="form.wechat" placeholder="微信"></el-input>
-									</el-form-item>
-								</el-row>
+
+					<el-form-item label="微信:">
+						<el-input v-model="form.wechat" placeholder="微信"></el-input>
+					</el-form-item>
+
+					<el-form-item label="搜索词:">
+						<el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+					</el-form-item>
+				</el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button> 
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -308,7 +313,7 @@
 
 	<el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="1000px" @close="submitExportclose">
 		<el-form>
-			<div id="totalNumId" class="marginB10">{{dataNum}}</div>
+			<div id="totalNumId" class="marginB10" v-html = "dataNum"></div>
 			<el-row>
 				<el-table
 						ref="multipleTable"
@@ -318,35 +323,38 @@
 						border
 						:data="exportdataTable"  >
 					<el-table-column align="center" prop="date" label="日期" ></el-table-column>
-					<el-table-column align="center" prop="typeName" label="资源类型" width="120px"></el-table-column>
-					<el-table-column align="center" prop="categoryName" label="资源类别" width="120px"></el-table-column>
-					<el-table-column align="center" prop="sourceTypeName" label="广告位"></el-table-column>
-					<el-table-column align="center" prop="sourceName" label="媒介"></el-table-column>
-					<el-table-column align="center" prop="projectName" label="资源项目(项目名称)"></el-table-column>
-					<el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
+					<el-table-column align="center" prop="sourceName" label="媒介" width="120px"></el-table-column>
+					<el-table-column align="center" prop="sourceTypeName" label="广告位" width="120px"></el-table-column>
+					<el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
+					<el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
+					<el-table-column align="center" prop="projectName" label="项目"></el-table-column>
+					<el-table-column align="center" prop="code" label="编码"></el-table-column>
 					<el-table-column align="center" prop="cusName" label="姓名"></el-table-column>
 					<el-table-column align="center" prop="phone" label="手机" width="110px"></el-table-column>
-					<el-table-column align="center" prop="phone2" label="手机2" width="110px"></el-table-column>
-					<el-table-column align="center" prop="wechat" label="微信" width="150px"></el-table-column>
-					<el-table-column align="center" prop="wechat2" label="微信2" width="150px"></el-table-column>
+					<el-table-column align="center" prop="email" label="邮箱" width="110px"></el-table-column>
 					<el-table-column align="center" prop="qq" label="QQ" width="150px"></el-table-column>
-					<el-table-column align="center" prop="email" label="邮箱"></el-table-column>
-					<el-table-column align="center" prop="sex1" label="性别" width="70px"></el-table-column>
-					<el-table-column align="center" prop="age1" label="年龄" width="70px"></el-table-column>
-					<el-table-column align="center" prop="address" label="开店区域"></el-table-column>
-					<el-table-column align="center" prop="messageTime1" label="留言时间"></el-table-column>
-					<el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+					<el-table-column align="center" prop="phone2" label="手机2" width="150px"></el-table-column>
+					<el-table-column align="center" prop="wechat" label="微信" width="150px"></el-table-column>
+					<el-table-column align="center" prop="address" label="地址"></el-table-column>
+					<el-table-column align="center" prop="messageTime1" label="留言时间" width="70px"></el-table-column>
+					<el-table-column align="center" prop="messagePoint" label="留言内容" width="70px"></el-table-column>
 					<el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+					<el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
+					<el-table-column align="center" prop="remark" label="备注"></el-table-column>
+					<el-table-column align="center" prop="wechat2" label="微信2"></el-table-column>
 					<el-table-column align="center" prop="reserveTime1" label="预约回访时间"></el-table-column>
 					<el-table-column align="center" prop="urlAddress" label="url地址"></el-table-column>
 					<el-table-column align="center" prop="accountName" label="账户名称"></el-table-column>
+					<el-table-column align="center" prop="sex1" label="性别"></el-table-column>
+					<el-table-column align="center" prop="age1" label="年龄"></el-table-column>
 					<el-table-column align="center" prop="importFailReason" label="导入失败原因" v-if="importFailReasonShow"></el-table-column>
 				</el-table>
 			</el-row>
 		</el-form>
 		<div slot="footer" class="dialog-footer">
 			<el-button  :disabled="confirmBtnDisabled" @click="downloadFaultClue" v-show="downloadButtonShow"><span data="1" id="downloadButton">下载失败数据</span></el-button>
-			<el-button  :disabled="confirmBtnDisabled" type="primary" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
+			<el-button  :disabled="confirmBtnDisabled" type="primary" @click="submitExport" v-show="importButtonShow"><span data="1" id="showButton">导入</span></el-button>
+			<el-button  :disabled="confirmBtnDisabled" type="primary" @click="resultShow" v-show="iknowButtonShow"><span data="1" id="iknowButton">知道了</span></el-button>
 		</div>
 	</el-dialog>
 	
@@ -397,6 +405,15 @@
             </el-form-item>
          </el-form>
     </el-dialog>
+		<!-- dialog -->
+		<el-dialog title="导入数据" :visible.sync="resultVisible">
+			<el-form :model="dialogForm" ref="dialogForm">
+				<div class="marginB10" v-html = "resultMessage"></div>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button  type="primary" @click="resetTable"><span data="1" id="resultButton">知道了</span></el-button>
+			</div>
+		</el-dialog>
 </div>
 </body>
 <div th:include="_footer_include :: #jsLib"></div>
@@ -416,10 +433,14 @@ var wdrVM = new Vue({
                 phoneVisible: false,
                 wechatVisible: false,
               	fileShow:true,
+              	resultVisible:false,
                 multipleSelection: [],//选择行
 				dataNum:"",
+				resultMessage:"",
 				exportFormVisible:false,
 				downloadButtonShow: false,
+        importButtonShow:true,
+        iknowButtonShow:false,
 				importFailReasonShow:false,
 				dialogBatchVisible:false,
 				confirmBtnDisabled:false,
@@ -528,6 +549,7 @@ var wdrVM = new Vue({
 				param.phone=this.form.phone;
 				param.isRecall=this.form.isRecall;
 				param.wechat = this.form.wechat;
+				param.searchWord=this.form.searchWord;
      		    axios.post('/exetend/agendaTaskManager/queryPageAgendaTask',param).then(function (response) {
      				if(!response){
      					wdrVM.$message({
@@ -932,8 +954,15 @@ var wdrVM = new Vue({
             }
             this.$refs.upload.submit();
           },
-          submitExportclose(){
+					resultShow(){
+            wdrVM.exportFormVisible = false;
+            wdrVM.resultVisible = true;
+					},
+					resetTable(){
             window.location.href="/exetend/agendaTaskManager/waitDistributResource";
+					},
+          submitExportclose(){
+            wdrVM.exportFormVisible = false;
           },
           downloadFaultClue(){
             var param = {};
@@ -975,20 +1004,38 @@ var wdrVM = new Vue({
 	              axios.post('/exetend/agendaTaskManager/importInvitearea',param).then(function (response) {
 	                // console.log(response);
 	                if(null !==response && response.data !=null && response.data.code=='0'){
-	                  if(response.data.data !=null  && response.data.data.length !=0){
+	                  if(response.data.data !=null  && response.data.data["illegalDataList"].length !=0){
 	                    wdrVM.confirmBtnDisabled = false;
-	                    $("#showButton").html("知道了");
-	                    $("#showButton").attr("data",2);
+	                    wdrVM.importButtonShow = false;
+	                    wdrVM.iknowButtonShow = true;
 	                    wdrVM.downloadButtonShow = true;
 	                    wdrVM.importFailReasonShow = true;
 	                    wdrVM.loading = false;
 	                    wdrVM.addOrModifyDialogTitle="导入失败";
 
-	                    wdrVM.exportdataTable =response.data.data;
-	                    wdrVM.dataNum="以下内容导入失败，请重新导入"
+	                    wdrVM.exportdataTable =response.data.data["illegalDataList"];
+	                    wdrVM.dataNum="本次共" + response.data.data["total"].toString() +
+													"条资源，导入成功" + response.data.data["success"].toString() +
+													"条，导入失败" + response.data.data["fail"].toString() + "条！" +
+													" <br> 以下内容导入失败，请重新导入"
+                      wdrVM.resultMessage="本次共" + response.data.data["total"].toString() +
+                          "条资源，导入成功" + response.data.data["success"].toString() +
+                          "条，导入失败" + response.data.data["fail"].toString() + "条！" +
+                          "<br> 其中导入成功资源，<br>" + response.data.data["assign"].toString() +
+													"条已分配，" + response.data.data["notAssign"].toString() +
+													"条待分配，" + response.data.data["trash"].toString() +
+													"条进入废弃池。"
 	                  }else{
 	                    wdrVM.$message({message:'导入成功',type:'success',duration:2000,onClose:function(){
 	                      wdrVM.exportFormVisible = false;
+                        wdrVM.resultVisible = true;
+                        wdrVM.resultMessage="本次共" + response.data.data["total"].toString() +
+                            "条资源，导入成功" + response.data.data["success"].toString() +
+                            "条，导入失败" + response.data.data["fail"].toString() + "条！" +
+                            "<br> 其中导入成功资源，<br>" + response.data.data["assign"].toString() +
+                            "条已分配，" + response.data.data["notAssign"].toString() +
+                            "条待分配，" + response.data.data["trash"].toString() +
+                            "条进入废弃池。"
 	                    }});
 	                  }
 

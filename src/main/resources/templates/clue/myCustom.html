@@ -271,6 +271,9 @@
                         <span v-if="scope.row.inputType ==1">
                             <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         </span>
+                        <span v-else-if="scope.row.phtraCustomerStatus ==4">
+                            <input type='hidden'><img th:src="@{/images/fromTraffic.png}"  style="margin:0 10px;width:44px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
                     </template>
                 </el-table-column>
 
@@ -395,6 +398,67 @@
                     </el-select>
                 </el-form-item>
             </el-row>
+            
+            
+            
+            
+            
+            <div v-if="isShowRepetition ==true">
+	            <el-row>
+	                <el-form-item label="运作区域：" :label-width="formLabelWidth" prop="operatingArea">
+	                    <el-input v-model="repeatApplyForm.operatingArea"  style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="50"></el-input>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="考察时间：" :label-width="formLabelWidth" prop="investigateTime">
+	                    <el-date-picker
+	                        style="width: 60%;"
+	                        v-model="repeatApplyForm.investigateTime"
+	                        type="datetime"
+	                        placeholder="选择日期时间">
+	                    </el-date-picker>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="考察地点：" :label-width="formLabelWidth" prop="investigateArea">
+	                    <el-input v-model="repeatApplyForm.investigateArea"  style="width: 60%;" @keyup.native="repeatApplyNumber"  maxLength="50"></el-input>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="investigateProjectId">
+	                    <el-select filterable  v-model="repeatApplyForm.investigateProjectId" multiple style="width: 60%;">
+	                        <el-option
+	                            v-for="item in proSelect"
+	                             :key="item.id"
+	                             :label="item.projectName"
+	                             :value="item.id">
+	                        </el-option>
+	                    </el-select>
+	                </el-form-item>
+	            </el-row>
+	            
+	            <el-row>
+	                <el-form-item label="协商结果：" :label-width="formLabelWidth" prop="consultResults">
+	                    <el-select filterable  v-model="repeatApplyForm.consultResults" placeholder="选择项目" style="width: 60%;">
+	                        <el-option
+	                            v-for="item in consultResultsArr"
+	                            :key="item.value"
+	                            :label="item.name"
+	                            :value="item.value">
+	                        </el-option>
+	                    </el-select>
+	                </el-form-item>
+	            </el-row>
+            </div>
+            
+            
+            
+            
+            
+            
             <el-row>
                 <el-form-item label="备注：" :label-width="formLabelWidth" prop="textarea">
                     <el-input
@@ -450,15 +514,15 @@
         </el-table>
     </el-dialog>
     <!-- 重复手机号 -->
-    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'"    :visible.sync="repeatPhonesDialog" width="1000px">
+    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1160px">
         <div v-show="showPhoneTable">
         <p style="margin:10px 0;">手机号{{phone}}重复手机号资源</p>
         <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
             <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                     <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -478,20 +542,20 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>  
-            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
+            <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>  
+            <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column> 
         </el-table>
         </div>
         <div v-show="showPhoneTable2">
         <p style="margin:10px 0;">手机号{{phone2}}重复手机号资源</p>
         <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
             <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                     <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -511,20 +575,20 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+            <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
         </el-table>
         </div>
         <div v-show="showPhoneTable3">
         <p style="margin:10px 0;">手机号{{phone3}}重复手机号资源</p>
         <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
             <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                     <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -544,20 +608,20 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+            <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
         </el-table>
         </div>
         <div v-show="showPhoneTable4">
         <p style="margin:10px 0;">手机号{{phone4}}重复手机号资源</p>
         <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
             <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                     <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -577,20 +641,20 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+            <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
         </el-table>
         </div>
         <div v-show="showPhoneTable5">
         <p style="margin:10px 0;">手机号{{phone5}}重复手机号资源</p>
         <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
             <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                     <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -610,10 +674,10 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+            <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
         </el-table>
         </div>
     </el-dialog>
@@ -650,6 +714,8 @@
 <script th:inline="javascript" >
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
+var proSelect = [[${proSelect}]];//可签约项目
+var isShowRepetition = [[${isShowRepetition}]];//业务线
     var mycustomVM=new Vue({
         el: '#myCustom',
         data: function() {
@@ -665,6 +731,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 repeatPhonesDialog:false,
                 tmOutboundCallDialogVisible:false,
                 loading:false,
+                isShowRepetition:isShowRepetition,
                 dailogTitleType:'',
                 form: {
                     isTransfer:'',
@@ -698,6 +765,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     email:""
                     
                 },
+                consultResultsArr:[
+                	{value:"0",name:"平分"},
+                    {value:"1",name:"判定"}
+                ],
                 comArr:[
                    {value:"",name:"全部"},
                    {value:"1",name:"是"},
@@ -709,7 +780,12 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     employee:'',
                     repeatPhone:'',
                     repeatClue:'',
-                    textarea:''
+                    textarea:'',
+                    operatingArea:'',
+                    consultResults:'0',
+                    investigateProjectId:'',
+                    investigateArea:'',
+                    investigateTime:''
                 },
                 releaseForm:{
                     reason:''
@@ -835,6 +911,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         createPerson:'李四',
                     }
                 ],
+                proSelect:proSelect,
                 repeatPhonesTable:[],
                 repeatPhonesTable2:[],
                 repeatPhonesTable3:[],
@@ -888,7 +965,48 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     ],
                     repeatClue: [
                         { required: true, message: '请选择重单资源', trigger: 'blur' }
-                    ]
+                    ],
+                    operatingArea: [
+                        { required: true, message: '请输入运作区域', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    investigateTime: [
+                        { required: true, message: '请选择考察时间', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    investigateArea: [
+                        { required: true, message: '请输入考察地点', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    investigateProjectId: [
+                        { required: true, message: '请选择考察项目', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'change'}
+                    ],
+                    consultResults: [
+                        { required: true, message: '请选择协商结果', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(isShowRepetition){
+                            	callback();
+                            }
+                        }, trigger: 'change'}
+                    ],
+                    
                 },
                 releaseRules:{
                     reason: [
@@ -1178,7 +1296,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  }
                    var repeatPhone= this.repeatApplyForm.repeatPhone;
                    var employee= this.repeatApplyForm.employee;
-   
                    var param={};
                    param.telemarketingId=employee
                    this.repeatApplyForm.repeatClue="";
@@ -1225,7 +1342,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         
                         var textarea= this.repeatApplyForm.textarea;
                         
-                        var  param={};
+                        var operatingArea = this.repeatApplyForm.operatingArea ;
+    	   				var investigateTime  = this.repeatApplyForm.investigateTime   ;
+    	   				var investigateArea = this.repeatApplyForm.investigateArea ;
+    	   			 var  param={};
+    	   				if(this.repeatApplyForm.investigateProjectId !=null && this.repeatApplyForm.investigateProjectId !=''){
+    	   					var investigateProjectId = this.repeatApplyForm.investigateProjectId.join(',')   ;
+    	   					param.investigateProjectId = investigateProjectId;
+    	   				}
+    	   				
+    	   				var consultResults = this.repeatApplyForm.consultResults ;
+    	   				
+                       
                         
                         param.clueId=clue;
                         
@@ -1236,6 +1364,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         param.repeatUserId=employee;
                         
                         param.repeatPhone=repeatPhone;
+                        param.operatingArea = operatingArea ;
+                        param.investigateTime = investigateTime;
+                        param.investigateArea = investigateArea;
+                        param.consultResults = consultResults;
                         param.remark=textarea;
                         this.dialogFormVisible = false;
 

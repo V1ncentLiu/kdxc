@@ -509,11 +509,21 @@ public class TeleSaleTrackingController {
         busGroupReqDTO.setParentId(orgId);
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
-        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        if (!JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             return null;
         }
-        return orgJr.getData();
+        List<OrganizationRespDTO> list = new ArrayList<>();
+        if(listJSONResult != null && listJSONResult.getData().size() > 0){
+            List<OrganizationDTO> data = listJSONResult.getData();
+            for(OrganizationDTO organizationDTO : data){
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(organizationDTO.getId());
+                organizationRespDTO.setName(organizationDTO.getName());
+                list.add(organizationRespDTO);
+            }
+        }
+        return list;
     }
 
     private void addTotalTeportResourceAllocation(TeleSaleTrackingDto resTotal, List<List<Object>> dataList) {

@@ -663,6 +663,11 @@ public class UserController {
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
         userRole.setOrgId(orgId);
+        //账号状态集合
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        userRole.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> userInfoJson = userInfoFeignClient.listByOrgAndRole(userRole);
         if (userInfoJson != null && JSONResult.SUCCESS.equals(userInfoJson.getCode()) && userInfoJson.getData() != null
                 && userInfoJson.getData().size() > 0) {
@@ -683,6 +688,8 @@ public class UserController {
                     UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
                     userRoleInfo.setRoleCode(RoleCodeEnum.DXFZ.name());
                     userRoleInfo.setOrgId(org.getId());
+                    //账号状态集合
+                    userRoleInfo.setStatusList(statusList);
                     JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient.listByOrgAndRole(userRoleInfo);
                     if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
                             && ceoUserInfoJson.getData().size() > 0) {
@@ -695,6 +702,7 @@ public class UserController {
                     UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
                     userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
                     userRoleInfo.setOrgId(org.getId());
+                    userRoleInfo.setStatusList(statusList);
                     JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient.listByOrgAndRole(userRoleInfo);
                     if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
                             && ceoUserInfoJson.getData().size() > 0) {

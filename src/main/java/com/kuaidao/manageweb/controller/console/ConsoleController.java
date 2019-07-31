@@ -7,7 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
+import com.kuaidao.manageweb.feign.dashboard.DashboardTeleGroupFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
@@ -46,14 +51,20 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
+import com.kuaidao.dashboard.dto.bussale.BusSaleDTO;
+import com.kuaidao.dashboard.dto.tele.DashboardTeleSaleDto;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
+import com.kuaidao.manageweb.feign.busgroup.BusGroupDashboardFeignClient;
 import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.PendingVisitFeignClient;
+import com.kuaidao.manageweb.feign.console.sale.DashboardSaleFeignClient;
+import com.kuaidao.manageweb.feign.console.sale.DashboardTeleSaleFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -75,7 +86,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * 控制台
- * 
+ *
  * @author Chen
  * @date 2019年3月16日 下午2:27:31
  * @version V1.0
@@ -125,10 +136,17 @@ public class ConsoleController {
 
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    @Autowired
+    private BusGroupDashboardFeignClient busGroupDashboardFeignClient;
+    @Autowired
+    DashboardSaleFeignClient dashboardSaleFeignClient;
+    @Autowired
+    DashboardTeleSaleFeignClient dashboardTeleSaleFeignClient;
+    @Autowired
+    private DashboardTeleGroupFeignClient dashboardTeleGroupFeignClient;
     /***
      * 跳转控制台页面
-     * 
+     *
      * @return
      */
     @RequestMapping("/index")
@@ -141,6 +159,15 @@ public class ConsoleController {
         String path = "";
 
         if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+        	IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(curLoginUser.getId());
+            JSONResult<DashboardTeleSaleDto> jsonResult = dashboardTeleSaleFeignClient
+                .findDashboardTeleSaleByUserId(idEntityLong);
+            DashboardTeleSaleDto dashboardTeleSaleDto = new DashboardTeleSaleDto();
+            if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
+            	dashboardTeleSaleDto = jsonResult.getData();
+            }
+            request.setAttribute("dashboardTelSale", dashboardTeleSaleDto);
             // 电销顾问
             path = "console/consoleTelemarketing";
         } else if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -151,7 +178,14 @@ public class ConsoleController {
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(curLoginUser.getOrgId());
+            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByOrgId(idEntityLong);
+            DashboardTeleGroupDto data = dashboard.getData();
+            if (data == null) {
+                data = new DashboardTeleGroupDto();
+            }
+            request.setAttribute("dashboardTeleGroup", data);
             // 查询字典类别集合
             request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
             // 查询字典类别集合
@@ -167,6 +201,16 @@ public class ConsoleController {
             if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
+
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(curLoginUser.getId());
+            JSONResult<BusSaleDTO> dashboard = dashboardSaleFeignClient
+                .findDataByUserId(idEntityLong);
+            BusSaleDTO data = dashboard.getData();
+            if(data==null){
+                data = new BusSaleDTO();
+            }
+            request.setAttribute("dashboardSale", data);
             // 查询赠送类型集合
             request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
             path = "console/consoleBusinessManager";
@@ -210,7 +254,7 @@ public class ConsoleController {
          * JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
          * if(JSONResult.SUCCESS.equals(proJson.getCode())){ request.setAttribute("proSelect",
          * proJson.getData()); }
-         * 
+         *
          * path="console/consoleBusinessManager"; }else if(type.equals("4")) { // 查询所有商务经理
          * List<Map<String, Object>> allSaleList = getAllSaleList();
          * request.setAttribute("allSaleList", allSaleList); // 查询组织下商务经理 List<Integer> statusList =
@@ -224,7 +268,7 @@ public class ConsoleController {
          * // 查询字典店铺面积集合 request.setAttribute("storefrontAreaList",
          * getDictionaryByCode(Constants.STOREFRONT_AREA)); // 查询字典投资金额集合
          * request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
-         * 
+         *
          * path="console/consoleBusinessMajordomo"; }
          */
 
@@ -235,7 +279,7 @@ public class ConsoleController {
 
     /**
      * 查询公告 --不 带分页
-     * 
+     *
      * @param queryDTO
      * @return
      */
@@ -254,7 +298,7 @@ public class ConsoleController {
 
     /**
      * 控制台使用 查询业务消息 -- 不带分页
-     * 
+     *
      * @param queryDTO
      * @return
      */
@@ -270,7 +314,7 @@ public class ConsoleController {
 
     /**
      * 统计电销人员今日分配资源数
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -294,7 +338,7 @@ public class ConsoleController {
 
     /**
      * 统计电销人员今日領取数
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -320,7 +364,7 @@ public class ConsoleController {
 
     /***
      * 控制台 今日邀约单 不包括 删除的
-     * 
+     *
      * @param teleConsoleReqDTO
      * @return
      */
@@ -339,7 +383,7 @@ public class ConsoleController {
 
     /**
      * 查询电销人员 待跟进客户资源
-     * 
+     *
      * @param queryDto
      * @return
      */
@@ -362,7 +406,7 @@ public class ConsoleController {
 
     /**
      * 电销总监未分配资源数
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -384,7 +428,7 @@ public class ConsoleController {
 
     /**
      * 电销总监今日接受资源数
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -408,7 +452,7 @@ public class ConsoleController {
 
     /**
      * 电销总监今日领取资源数
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -430,7 +474,7 @@ public class ConsoleController {
 
     /**
      * 电销总监 今日邀约数
-     * 
+     *
      * @return
      */
     @PostMapping("/countTeleDirectorTodayAppiontmentNum")
@@ -460,7 +504,7 @@ public class ConsoleController {
 
     /**
      * 电销总监 预计明日到访数
-     * 
+     *
      * @return
      */
     @PostMapping("/countTeleDirecotorTomorrowArriveTime")
@@ -494,7 +538,7 @@ public class ConsoleController {
 
     /**
      * 电销总监 查询待分配资源
-     * 
+     *
      * @param pageParam
      * @return
      */
@@ -512,7 +556,7 @@ public class ConsoleController {
 
     /**
      * 商务经理 看板统计 当月到访数 当月签约数 当月二次到访数 当月二次来访签约数 未收齐尾款笔数
-     * 
+     *
      * @return
      */
     @RequestMapping("/countCurMonthNum")
@@ -532,7 +576,7 @@ public class ConsoleController {
 
     /**
      * 商务经理控制台 待处理邀约来访记录
-     * 
+     *
      * @param param
      * @return
      */
@@ -550,12 +594,12 @@ public class ConsoleController {
 
     /*   *//**
             * 商务经理当月签约数
-            * 
+            *
             * @param businessConsoleReqDTO
             * @return
             *//*
               * @RequestMapping("/countCurMonthSignedNum")
-              * 
+              *
               * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
               * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
               * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
@@ -568,7 +612,7 @@ public class ConsoleController {
 
     /**
      * 商务总监 1. 待分配任务数 9当月二次到访数 10 当月二次来访签约数： 看板统计
-     * 
+     *
      * @return
      */
     @RequestMapping("/countBusinessDirectorCurMonthNum")
@@ -597,7 +641,7 @@ public class ConsoleController {
 
     /**
      * 商务总监 4预计明日到访数
-     * 
+     *
      * @param businessConsoleReqDTO
      * @return
      */
@@ -637,7 +681,7 @@ public class ConsoleController {
 
     /***
      * 商务总监 待分配来访客户列表
-     * 
+     *
      * @return
      */
     @PostMapping("/pendingVisitListNoPage")
@@ -663,7 +707,7 @@ public class ConsoleController {
 
     /**
      * 商务总监 待审批到访记录 待审批未到访记录
-     * 
+     *
      * @param visitRecordReqDTO isVisit:是否到访
      * @return
      */
@@ -730,7 +774,7 @@ public class ConsoleController {
 
     /**
      * 商务总监 待审批签约记录
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -787,7 +831,7 @@ public class ConsoleController {
 
     /**
      * 根据机构和角色类型获取用户
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -803,7 +847,7 @@ public class ConsoleController {
 
     /**
      * 获取所有商务经理（组织名-大区名）
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -866,7 +910,7 @@ public class ConsoleController {
 
     /**
      * 获取工作天数
-     * 
+     *
      * @param request
      * @return
      */
@@ -887,14 +931,17 @@ public class ConsoleController {
         }
 
         Date createTime = data.getCreateTime();
-        int diffDay = DateUtil.diffDay(createTime, new Date()) + 1;
+        logger.info(DateUtil.getStartOrEndOfDay(createTime,LocalTime.MIN).toString());
+        logger.info(DateUtil.getStartOrEndOfDay(new Date(),LocalTime.MAX).toString());
+//        int diffDay = DateUtil.diffDay(createTime,new Date())+1;
+        int diffDay = DateUtil.differentDays(createTime,new Date())+1;
         return new JSONResult<String>().success(diffDay + "");
 
     }
 
     /**
      * 查询字典表
-     * 
+     *
      * @param code
      * @return
      */
@@ -911,7 +958,7 @@ public class ConsoleController {
 
     /**
      * 获取当前组织机构下 角色信息
-     * 
+     *
      * @param orgId
      * @param roleCode
      * @return
@@ -934,5 +981,44 @@ public class ConsoleController {
             return idList;
         }
         return null;
+    }
+
+    /**
+     * 查询今日看板计数
+     *
+     */
+    @PostMapping("/busGroupDayQuery")
+    @ResponseBody
+    public JSONResult<BusGroupDTO> busGroupDayQuery() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Map map = new HashMap();
+        map.put("busDirectorId",curLoginUser.getId());
+        map.put("flag", 1);
+        JSONResult<BusGroupDTO> jsonResult = busGroupDashboardFeignClient.busGroupDataQuery(map);
+        if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            return new JSONResult<BusGroupDTO>().fail(jsonResult.getCode(), jsonResult.getMsg());
+        }
+        BusGroupDTO data = jsonResult.getData();
+        return new JSONResult<BusGroupDTO>().success(data);
+    }
+
+
+    /**
+     * 查询非今日看板计数
+     *
+     */
+    @PostMapping("/busGroupNotDayQuery")
+    @ResponseBody
+    public JSONResult<BusGroupDTO> busGroupNotDayQuery() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Map map = new HashMap();
+        map.put("busDirectorId",curLoginUser.getId());
+        map.put("flag", 2);
+        JSONResult<BusGroupDTO> jsonResult = busGroupDashboardFeignClient.busGroupDataQuery(map);
+        if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            return new JSONResult<BusGroupDTO>().fail(jsonResult.getCode(), jsonResult.getMsg());
+        }
+        BusGroupDTO data = jsonResult.getData();
+        return new JSONResult<BusGroupDTO>().success(data);
     }
 }

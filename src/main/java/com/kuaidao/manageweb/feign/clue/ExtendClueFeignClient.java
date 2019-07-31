@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -67,13 +68,20 @@ public interface ExtendClueFeignClient {
     public JSONResult<String> distributedUpdateClue(@RequestBody PushClueReq pushClueReq);
 
     /**
-     * 撤回资源
+     * 单条撤回资源
      *
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/recallClue")
     public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong);
 
+    /**
+     * 批量撤回资源
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/recallClues")
+    public JSONResult<String> recallClues(@RequestBody IdListLongReq clueIds);
     /**
      * 导入资源
      *
@@ -142,9 +150,13 @@ public interface ExtendClueFeignClient {
         @Override
         public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong) {
             // TODO Auto-generated method stub
-            return fallBackError("撤回资源");
+            return fallBackError("单条撤回资源");
         }
-
+        @Override
+        public JSONResult<String> recallClues(@RequestBody IdListLongReq list) {
+            // TODO Auto-generated method stub
+            return fallBackError("批量撤回资源");
+        }
         @Override
         public JSONResult<List<PushClueReq>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
@@ -154,13 +166,13 @@ public interface ExtendClueFeignClient {
         @Override
         public JSONResult<List<ClueDistributionedTaskDTO>> findClues(
                 ClueDistributionedTaskQueryDTO queryDto) {
-            return fallBackError("导出线索：资源沟通记录");
+            return fallBackError("导出线索：资源情况");
         }
 
         @Override
         public JSONResult<List<ClueDistributionedTaskDTO>> findCommunicateRecords(
                 ClueDistributionedTaskQueryDTO queryDto) {
-            return fallBackError("导出线索：资源情况");
+            return fallBackError("导出线索：资源沟通记录");
         }
 
     }

@@ -35,9 +35,16 @@
                 <el-form-item label="客户手机号:" prop="phone">
                     <el-input v-model="clueSearchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
                 </el-form-item>
-                <el-form-item label="客户姓名:" prop="cusName">
-                    <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
-                </el-form-item>
+                <el-form-item label="资源类别:" prop="category">
+                    <el-select v-model="clueSearchForm.category" clearable filterable placeholder="资源类别">
+                      <el-option
+                          v-for="item in categoryOptions"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                </el-form-item> 
                 <el-form-item label="电销组:" prop="teleGorupId">
                     <el-select v-model="clueSearchForm.teleGorupId" clearable placeholder="电销组" style="width: 100%;">
                       <el-option
@@ -56,7 +63,7 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="资源类型:" prop="type">
-                        <el-select v-model="clueSearchForm.type" clearable placeholder="资源类型" style="width: 100%;">
+                        <el-select v-model="clueSearchForm.type" clearable filterable placeholder="资源类型" style="width: 100%;">
                           <el-option
                               v-for="item in typeOptions"
                               :key="item.value"
@@ -65,24 +72,17 @@
                           </el-option>
                         </el-select>
                     </el-form-item>
-        		    <el-form-item label="资源类别:" prop="category">
-        			    <el-select v-model="clueSearchForm.category" clearable placeholder="资源类别">
-        			      <el-option
-        				      v-for="item in categoryOptions"
-        				      :key="item.value"
-        				      :label="item.name"
-        				      :value="item.value">
-        				  </el-option>
-        			    </el-select>
-        		    </el-form-item>                
+        		    <el-form-item label="客户姓名:" prop="cusName">
+                        <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+                    </el-form-item>               
                     <el-form-item label="留言重点:" prop="messagePoint">
                         <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
                     </el-form-item>
                     <el-form-item label="搜索词:" prop="searchWord">
                         <el-input v-model="clueSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
                     </el-form-item>
-                    <el-form-item label="地址:" prop="address">
-                        <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
+                    <el-form-item label="地域信息:" prop="address">
+                        <el-input v-model="clueSearchForm.address" placeholder="地域信息" class="input-with-select"></el-input>
                     </el-form-item>
                   <el-form-item label="资源ID:">
                     <el-input v-model="clueSearchForm.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
@@ -134,6 +134,9 @@
                         <span v-if="scope.row.inputType ==1">
                             <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         </span>
+                        <span v-else-if="scope.row.phtraCustomerStatus ==4">
+                            <input type='hidden'><img th:src="@{/images/fromTraffic.png}"  style="margin:0 10px;width:44px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
                     </template>
                 </el-table-column>
 
@@ -142,7 +145,7 @@
     	        </el-table-column>
     	        
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -155,6 +158,15 @@
                 			:key="item.id" 
                 			:label="item.name" 
                 			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="客户级别：" :label-width="formLabelWidth"  prop="cusLevel">
+                    <el-select v-model="allocationForm.cusLevel" placeholder="不变化" style="width: 290px;">
+                        <el-option v-for="item in levelOptions" 
+                			:key="item.value" 
+                			:label="item.name" 
+                			:value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -270,15 +282,15 @@
 	    <el-button @click="dialogFormVisible = false">取 消</el-button>
 	  </div>
 	</el-dialog>
-    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'"    :visible.sync="repeatPhonesDialog" width="1000px">
+    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1160px">
         <div v-show="showPhoneTable">
             <p style="margin:10px 0;">手机号{{phone}}重复手机号资源</p>
             <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
               <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                   <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -298,20 +310,20 @@
                   </div>
                 </template>
               </el-table-column>
-                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
             </el-table>
         </div>
         <div v-show="showPhoneTable2">
             <p style="margin:10px 0;">手机号{{phone2}}重复手机号资源</p>
             <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
               <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                   <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -331,20 +343,20 @@
                   </div>
                 </template>
               </el-table-column>
-                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
             </el-table>
         </div>
         <div v-show="showPhoneTable3">
             <p style="margin:10px 0;">手机号{{phone3}}重复手机号资源</p>
             <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
               <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                   <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -364,20 +376,20 @@
                   </div>
                 </template>
               </el-table-column>
-                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
             </el-table>
         </div>
         <div v-show="showPhoneTable4">
             <p style="margin:10px 0;">手机号{{phone4}}重复手机号资源</p>
             <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
               <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                   <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -397,20 +409,20 @@
                   </div>
                 </template>
               </el-table-column>
-                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
             </el-table>
         </div>
         <div v-show="showPhoneTable5">
             <p style="margin:10px 0;">手机号{{phone5}}重复手机号资源</p>
             <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
-                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
-                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
               <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
                 <template slot-scope="scope">
                   <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
@@ -430,10 +442,10 @@
                   </div>
                 </template>
               </el-table-column>
-                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
-                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
-                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
             </el-table>
         </div>
     </el-dialog>
@@ -456,9 +468,11 @@ var customerStatusList=[[${customerStatusList}]];//电销一级客户状态
 var customerStatusSubList=[[${customerStatusSubList}]];//电销二级客户状态
 var phCustomerStatusList=[[${phCustomerStatusList}]];//话务一级客户状态
 var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户状态
+var levelList=[[${levelList}]];//客户级别
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            paginationShow: false,
             isDisabled:false,//默认不可点击    
             isShow:false,
     		clueSearchForm: {
@@ -478,7 +492,8 @@ var clueVM = new Vue({
             wechat:''
             },
             allocationForm: {
-            	saleId:''
+            	saleId:'',
+            	cusLevel:''
             },
             transferForm: {
             	id:''
@@ -544,6 +559,7 @@ var clueVM = new Vue({
             teleGorupOptions:teleGorupList,
             saleGroupOptions:saleGroupList,
             categoryOptions:clueCategoryList,
+            levelOptions:levelList,
             typeOptions:clueTypeList,
             teleSaleOptions:[],
             releaseTable:[],
@@ -560,12 +576,43 @@ var clueVM = new Vue({
             multipleSelection:[],
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
+            storeForm: {
+                phone: '',
+                cusName: '',
+                category: '',
+                teleGorupId: '',
+                type: '',
+                startTime: '',
+                endTime: '',
+                messagePoint: '',
+                searchWord: '',
+                address: '',
+                clueId:'',
+                qq:'',
+                email:'',
+                wechat:''
+            },
+            storeId: '',
+            scrollTop: 0,
                 
         },
         methods: {
             //展现详情
+            // showClueDetailInfo (row, column) {
+            //     window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.id;
+            // },
             showClueDetailInfo (row, column) {
-                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.id;
+                // 存储选中信息--start
+                var clueId=row.id;  
+                setSessionStore("pendingAllocationManagerStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("pendingAllocationManagerOtherVal", otherVal);
+                // 存储选中信息--end  
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
             },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
@@ -601,24 +648,55 @@ var clueVM = new Vue({
                 console.info(param);
                 axios.post('/clue/pendingAllocation/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      var data= table.data;
-                      for(var i=0;i<data.length;i++){
-                    	  data[i].category=clueVM.transformCategory(data[i].category);
-                    	  data[i].type=clueVM.transformType(data[i].type);
-                    	  data[i].createTime=clueVM.dateFormat(data[i].createTime);
-                    	  data[i].messageTime=clueVM.dateFormat(data[i].messageTime);
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    var data= table.data;
+                    for(var i=0;i<data.length;i++){
+                      data[i].category=clueVM.transformCategory(data[i].category);
+                      data[i].type=clueVM.transformType(data[i].type);
+                      data[i].createTime=clueVM.dateFormat(data[i].createTime);
+                      data[i].messageTime=clueVM.dateFormat(data[i].messageTime);
+                    }
+                    clueVM.dataTable= data;
+                    clueVM.pager.total =  table.total;
+                    clueVM.pager.currentPage = table.currentPage;
+
+                    // 取出存储的id
+                    if(!clueVM.paginationShow){
+                       if(clueVM.storeId){
+                           clueVM.$nextTick(function(){
+                              var storage = [];
+                              clueVM.dataTable.forEach(function(item, index){
+                                  if(item.id === clueVM.storeId ){
+                                      storage.push(clueVM.dataTable[index]);
+                                  }
+                              })
+                              clueVM.toggleSelection(storage);
+                              clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop = clueVM.scrollTop;
+                          })
                       }
-                      clueVM.dataTable= data;
-                      clueVM.pager.total =  table.total;
-                      clueVM.pager.currentPage = table.currentPage;
+                    }else{
+                      removeSessionStore ("pendingAllocationManagerStoreForm");
+                      removeSessionStore ("pendingAllocationManagerOtherVal");
+                    }
+                    clueVM.paginationShow = true;
+                    clueVM.storeForm = clueVM.clueSearchForm;
+
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
+              },
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
               },
               //选择行
               handleSelectionChange(val) {
@@ -753,6 +831,7 @@ var clueVM = new Vue({
                        return;
                    }
                    this.allocationForm.saleId = '';
+                   this.allocationForm.cusLevel = '';
                    this.allocationVisible = true;
                },
                allocationClue(formName){//分配资源
@@ -765,10 +844,12 @@ var clueVM = new Vue({
                       	   var curRow = rows[i];
                              rowIds.push(curRow.id);
                          }
+                          var cusLevel = this.allocationForm.cusLevel;
                       	  //分配
                       	  var param  = {};
                       	  param.idList=rowIds;
                       	  param.teleSaleId=this.allocationForm.saleId;
+                          param.cusLevel = this.allocationForm.cusLevel;
                           axios.post('/clue/pendingAllocation/allocationClue',param)
                           .then(function (response) {
                               var data =  response.data;
@@ -1148,6 +1229,17 @@ var clueVM = new Vue({
         },
         created(){
             console.info("create method");
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("pendingAllocationManagerStoreForm");
+                var otherVal = getSessionStore("pendingAllocationManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.clueSearchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

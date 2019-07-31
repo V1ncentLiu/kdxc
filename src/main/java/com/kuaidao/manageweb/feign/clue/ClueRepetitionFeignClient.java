@@ -1,7 +1,5 @@
 package com.kuaidao.manageweb.feign.clue;
 
-import java.util.List;
-import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -13,16 +11,8 @@ import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.customfield.CustomFieldAddAndUpdateDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldMenuAddAndUpdateDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldMenuQueryDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
 
 /**
  * 重单处理管理
@@ -73,7 +63,7 @@ public interface ClueRepetitionFeignClient {
 	 * @return
 	 */
 	@PostMapping("/dealPetitionById")
-	public JSONResult dealPetitionById(@RequestBody ClueRepetitionDTO menuDTO);
+	public JSONResult<ClueRepetitionDTO> dealPetitionById(@RequestBody ClueRepetitionDTO menuDTO);
 	
 	/**
 	 * 审核重单
