@@ -542,13 +542,7 @@ var mainDivVM = new Vue({
         },
     },
     computed: {
-        updateFormSigningAmountPerformance(){
-            var aone = parseFloat(this.updateFormSigning.amountReceived);
-            var atwo = parseFloat(this.updateFormSigning.firstToll);
-            if(isNaN(aone)) aone = 0
-            if(isNaN(atwo)) atwo = 0
-            return aone + atwo
-        },
+
         formSigningAmountPerformance(){
             var aone = parseFloat(this.formSigning.amountReceived);
             var atwo = parseFloat(this.formSigning.firstToll);
@@ -558,6 +552,14 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+
+      updateFormSigningAmountPerformance(){
+        var aone = parseFloat(this.updateFormSigning.amountReceived);
+        var atwo = parseFloat(this.updateFormSigning.firstToll);
+        if(isNaN(aone)) aone = 0
+        if(isNaN(atwo)) atwo = 0
+        this.updateFormSigning.performanceAmount = (aone + atwo) + ""
+      },
       formatNum(value) {
           if(!value&&value!==0) return 0;
 
@@ -1575,9 +1577,9 @@ var mainDivVM = new Vue({
         },
 
         submitUpdateForm(formName) {
+            this.updateFormSigning.amountPerformance = this.updateFormSigning.performanceAmount;
             var param = this.updateFormSigning;
-            param.amountPerformance = this.updateFormSigningAmountPerformance;
-            this.updateFormSigning.amountPerformance = this.updateFormSigningAmountPerformance;
+            console.log(param)
             if(param.makeUpTime){
                 param.makeUpTime = new Date(param.makeUpTime)
             }
@@ -1588,7 +1590,7 @@ var mainDivVM = new Vue({
         	   param.giveType=-1;
            }
            this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
-            // 设置 clueid
+           // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     this.btnDisabled = true;
