@@ -1,32 +1,5 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
@@ -68,6 +41,33 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/exetend/agendaTaskManager")
@@ -335,7 +335,7 @@ public class ExtendClueAgendaTaskController {
     }
 
     /**
-     * 撤回资源
+     * 单条撤回资源
      * 
      * @param request
      * @param idEntityLong
@@ -352,7 +352,24 @@ public class ExtendClueAgendaTaskController {
 
         return clueInfo;
     }
+    /**
+     * 批量撤回资源
+     *
+     * @param request
+     * @param IdListLongReq
+     * @return
+     */
+    @RequestMapping("/recallClues")
+    @ResponseBody
+    @LogRecord(description = "批量撤回资源", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    public JSONResult<String> recallClues(HttpServletRequest request,
+        @RequestBody IdListLongReq clueIds) {
 
+        JSONResult<String> clueInfo = extendClueFeignClient.recallClues(clueIds);
+
+        return clueInfo;
+    }
 
     /**
      * 查询所有资源专员
