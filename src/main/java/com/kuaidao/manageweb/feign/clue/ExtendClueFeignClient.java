@@ -74,7 +74,13 @@ public interface ExtendClueFeignClient {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/recallClue")
     public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong);
-
+    /**
+     * 批量撤回资源
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/recallClues")
+    public JSONResult<String> recallClues(@RequestBody IdListLongReq idEntityLong);
     /**
      * 导入资源
      *
@@ -145,7 +151,11 @@ public interface ExtendClueFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("撤回资源");
         }
-
+        @Override
+        public JSONResult<String> recallClues(@RequestBody IdListLongReq idEntityLong) {
+            // TODO Auto-generated method stub
+            return fallBackError("批量撤回资源");
+        }
         @Override
         public JSONResult<Map<String, Object>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
