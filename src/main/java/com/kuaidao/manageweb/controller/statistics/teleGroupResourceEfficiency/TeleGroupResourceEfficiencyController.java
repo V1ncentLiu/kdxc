@@ -163,10 +163,10 @@ public class TeleGroupResourceEfficiencyController {
             setNonFirstClueValidField(curList,curDto,curOrgName,curCategoryType,curMedia,curProjectName);
             //设置 首日属性
             setFirstClueValidField(curList,curDto);
-            curOrgName = curDto.getOrgName();
+            /*curOrgName = curDto.getOrgName();
             curCategoryType = curDto.getResourceCategoryName();
             curMedia = curDto.getResourceMediumName();
-            curProjectName = curDto.getProjectTypeName();
+            curProjectName = curDto.getProjectTypeName();*/
             dataList.add(curList);
         }
        
@@ -212,26 +212,26 @@ public class TeleGroupResourceEfficiencyController {
     private void setNonFirstClueValidField(List<Object> curList,TeleGroupResourceEfficiencyAllDto curDto,String curOrgName
             , String curCategoryType,String curMedia, String curProjectName) {
         String orgName = curDto.getOrgName();
-        if(CommonUtil.isNotBlank(curOrgName) && curOrgName.equals(orgName)) {
+     /*   if(CommonUtil.isNotBlank(curOrgName) && curOrgName.equals(orgName)) {
             orgName = "";
-        }
+        }*/
         curList.add(orgName);
         
         String resourceCategoryName = curDto.getResourceCategoryName();
-        if(CommonUtil.isNotBlank(curCategoryType) && curCategoryType.equals(resourceCategoryName)) {
+       /* if(CommonUtil.isNotBlank(curCategoryType) && curCategoryType.equals(resourceCategoryName)) {
             resourceCategoryName="";
-        }
+        }*/
         curList.add(resourceCategoryName);
         
         String resourceMediumName = curDto.getResourceMediumName();
-        if(CommonUtil.isNotBlank(curMedia) && curMedia.equals(resourceMediumName)) {
+        /*if(CommonUtil.isNotBlank(curMedia) && curMedia.equals(resourceMediumName)) {
             resourceMediumName="";
-        }
+        }*/
         curList.add(resourceMediumName);
         String projectTypeName = curDto.getProjectTypeName();
-        if(CommonUtil.isNotBlank(curProjectName) && curProjectName.equals(projectTypeName)) {
+      /*  if(CommonUtil.isNotBlank(curProjectName) && curProjectName.equals(projectTypeName)) {
             projectTypeName ="";
-        }
+        }*/
         curList.add(projectTypeName);
         curList.add(CommUtil.nullIntegerToZero(curDto.getIssuedResources()));
         curList.add(CommUtil.nullIntegerToZero(curDto.getFollowResources()));
