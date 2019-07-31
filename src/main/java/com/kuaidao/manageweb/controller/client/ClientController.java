@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.client;
 
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,16 +100,30 @@ public class ClientController {
     @RequiresPermissions("aggregation:trClient:view")
     @RequestMapping("/trClientIndex")
     public String trClientIndex(HttpServletRequest request) {
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-//      queryDTO.setOrgType(OrgTypeConstant.DXZ);
-        //查询全部
-        JSONResult<List<OrganizationRespDTO>> orgListJr =
-                organizationFeignClient.queryOrgByParam(queryDTO);
-        if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
-            logger.error("跳转天润坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+        List<OrganizationDTO> orgList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
         } else {
-            request.setAttribute("orgList", orgListJr.getData());
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+//      queryDTO.setOrgType(OrgTypeConstant.DXZ);
+            //查询全部
+            JSONResult<List<OrganizationRespDTO>> orgListJr =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+            if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+                logger.error("跳转天润坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+            } else {
+                request.setAttribute("orgList", orgListJr.getData());
+            }
         }
         return "client/trClientPage";
     }
@@ -119,14 +136,28 @@ public class ClientController {
     @RequiresPermissions("aggregation:qimoClient:view")
     @RequestMapping("/qimoClientIndex")
     public String qimoClientIndex(HttpServletRequest request) {
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        JSONResult<List<OrganizationRespDTO>> orgListJr =
-                organizationFeignClient.queryOrgByParam(queryDTO);
-        if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
-            logger.error("跳转七陌坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+        List<OrganizationDTO> orgList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
         } else {
-            request.setAttribute("orgList", orgListJr.getData());
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            JSONResult<List<OrganizationRespDTO>> orgListJr =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+            if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+                logger.error("跳转七陌坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+            } else {
+                request.setAttribute("orgList", orgListJr.getData());
+            }
         }
         return "client/qimoClientPage";
     }
@@ -268,7 +299,15 @@ public class ClientController {
     @ResponseBody
     public JSONResult<PageBean<TrClientDataRespDTO>> listTrClientPage(
             @RequestBody QueryTrClientDTO queryClientDTO) {
-
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        Long orgId = curLoginUser.getOrgId();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            queryClientDTO.setOrgId(orgId);
+        }
         return clientFeignClient.listTrClientPage(queryClientDTO);
     }
 
@@ -511,7 +550,15 @@ public class ClientController {
     @ResponseBody
     public JSONResult<PageBean<QimoDataRespDTO>> listQimoClientPage(
             @RequestBody QueryQimoDTO queryClientDTO) {
-
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        Long orgId = curLoginUser.getOrgId();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            queryClientDTO.setOrgId(orgId);
+        }
         return clientFeignClient.listQimoClientPage(queryClientDTO);
     }
 
@@ -779,7 +826,7 @@ public class ClientController {
     
     /**
      * 根据坐席号查询坐席的信息，判断坐席号是否属于当前用户
-     * @param cno  坐席号
+     * @param trClientQueryDTO  坐席号
      * @return
      */
     @PostMapping("/queryClientInfoByCno")
@@ -827,4 +874,21 @@ public class ClientController {
         return clientFeignClient.trClientLogout(trAxbOutCallReqDTO);
     }
 
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
+    }
 }
