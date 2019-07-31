@@ -76,7 +76,7 @@
                 	<el-col :span="12">
                         <el-form-item label="QQ：" prop="qq" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -45px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model.trim="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 260px;"></el-input>
+                            <el-input v-model.trim="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" @change.native="qqnumber" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
                 	<el-col :span="12">                        
@@ -284,7 +284,7 @@
                     required: true, message: '手机号不能为空', trigger: 'blur',
                 }"
             >
-                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
+                <el-input v-model.trim="domain.value" maxLength="30" @keyup.native="phoneNumber" @change.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
                 <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
@@ -297,7 +297,7 @@
         <template>
             <el-form :model="wechatForm" ref="wechatForm" > 
               <el-form-item label="微信2：" :label-width="formLabelWidth1" >
-                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+                  <el-input v-model.trim="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
               	<el-upload
@@ -713,7 +713,8 @@ if(notOptList){
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
-                        value: ''
+                        value: '',
+                        key:Date.now(),
                     }]
                 },
                 optsex: [{
@@ -1149,8 +1150,12 @@ if(notOptList){
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
             	this.form.wechatUrl=this.wechatForm.wechatUrl;
-            	addClueVM.$message({ message: "提交成功", type: 'success' }); 
-            	this.wechatVisible = false;
+                if(this.wechatForm.wechat2!==""){
+                	addClueVM.$message({ message: "提交成功", type: 'success' }); 
+                    this.wechatVisible = false;
+                }else{
+                    addClueVM.$message({ message: "提交内容不能为空", type: 'error' });
+                }            	
             },
             removeDomain(item) {
                 var index = this.dynamicValidateForm.domains.indexOf(item);
@@ -1200,7 +1205,7 @@ if(notOptList){
     　　　     	this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                 this.form.phone=this.form.phone.replace('.','');
                 // if(this.form.phone.length==11){
-                if(this.form.phone.length!=""){
+                if(this.form.phone!=""&&this.form.phone.length!=0){
                     this.isDisabled=false;
                 }else{
                     this.isDisabled=true;
@@ -1381,7 +1386,8 @@ if(notOptList){
 	        	this.form.cusName=clueInfo.clueCustomer.cusName;
 	        	this.form.phone=clueInfo.clueCustomer.phone;
 	        	
-	        	if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length==11){
+                // if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length==11){
+	        	if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length>0){
 	        		this.isDisabled=false;
 	        	}
 	        	this.form.wechat=clueInfo.clueCustomer.wechat;
@@ -1419,9 +1425,10 @@ if(notOptList){
                 if(phoneArr.length>0){
                     this.buttonType = 'B';//按钮状态
                 }else{
-                	var phone5 = {};
-                    phone5.value = "";
-                	this.dynamicValidateForm.domains.push(phone5);
+                  var phone2 = {};
+                  phone2.value = '';
+                  phone2.key = Date.now();
+                  this.dynamicValidateForm.domains.push(phone2);
                     this.buttonType = 'A';//按钮状态
                 }
                 if(phoneArr.length>1){                    
