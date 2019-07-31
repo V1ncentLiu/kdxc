@@ -1140,7 +1140,8 @@ public class ExtendClueAgendaTaskController {
     }
 
     /**
-     * 数据字典-词条转换Map（name-value）(全大写)
+     * <<<<<<< HEAD 数据字典-词条转换Map（name-value）（全大写） ======= 数据字典-词条转换Map（name-value）(全大写) >>>>>>>
+     * refs/remotes/origin/test
      *
      * @return
      */
