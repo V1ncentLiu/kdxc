@@ -170,6 +170,7 @@ var homePageVM=new Vue({
 	    },
 	    menuClick:function(ifreamUrl){
 	     	this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
+            window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
 	   	},  
 	   	handleCommand(command) {//点击下拉菜单
 	        if(command=='modifyPwd'){//修改密码
