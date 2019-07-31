@@ -558,6 +558,13 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+      formatNum(value) {
+          if(!value&&value!==0) return 0;
+
+          let str = value.toString();
+          let reg = str.indexOf(".") > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g;
+          return str.replace(reg,"$1,");
+        },
       saveNotVisit() {
         var param = this.notVisitFlag;
         // 设置 clueid
