@@ -15,7 +15,7 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "sys-service-ff", path = "/sys/ip/accessManager",
+@FeignClient(name = "sys-service", path = "/sys/ip/accessManager",
         fallback = IpAccessFeignClient.HystrixClientFallback.class)
 
 public interface IpAccessFeignClient {

@@ -15,7 +15,7 @@ import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.ModuleQueryDTO;
 
-@FeignClient(name = "sys-service-ff", path = "/sys/module/moduleManager",
+@FeignClient(name = "sys-service", path = "/sys/module/moduleManager",
         fallback = ModuleManagerFeignClient.HystrixClientFallback.class)
 public interface ModuleManagerFeignClient {
 

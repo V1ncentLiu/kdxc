@@ -17,7 +17,7 @@ import com.kuaidao.common.entity.JSONResult;
  * 
  * @author fanjd
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/changeorg", fallback = ChangeOrgFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/changeorg", fallback = ChangeOrgFeignClient.HystrixClientFallback.class)
 public interface ChangeOrgFeignClient {
 
     @PostMapping("/insert")

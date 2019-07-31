@@ -18,7 +18,7 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/invitearea", fallback = InviteareaFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/invitearea", fallback = InviteareaFeignClient.HystrixClientFallback.class)
 public interface InviteareaFeignClient {
 
 	/**

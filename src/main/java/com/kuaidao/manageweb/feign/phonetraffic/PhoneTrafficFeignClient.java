@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/phonetraffic", fallback = PhoneTrafficFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/phonetraffic", fallback = PhoneTrafficFeignClient.HystrixClientFallback.class)
 public interface PhoneTrafficFeignClient {
 
 	@PostMapping("/queryPage")

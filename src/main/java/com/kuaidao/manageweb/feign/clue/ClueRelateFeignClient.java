@@ -18,7 +18,7 @@ import com.kuaidao.common.entity.JSONResult;
  * @date: 2019年6月17日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/clue/clueRelate", fallback = ClueRelateFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/clue/clueRelate", fallback = ClueRelateFeignClient.HystrixClientFallback.class)
 public interface ClueRelateFeignClient {
 
     /**

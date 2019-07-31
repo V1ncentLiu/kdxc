@@ -40,7 +40,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月3日 下午5:06:37
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-ff", path = "/aggregation/client/client", fallback = ClientFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/client/client", fallback = ClientFeignClient.HystrixClientFallback.class)
 public interface ClientFeignClient {
     
     /**
