@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 import java.util.List;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/paydetail", fallback = PayDetailFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/paydetail", fallback = PayDetailFeignClient.HystrixClientFallback.class)
 public interface PayDetailFeignClient {
 
 

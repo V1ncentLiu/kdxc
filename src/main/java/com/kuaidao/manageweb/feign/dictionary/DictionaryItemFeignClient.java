@@ -25,7 +25,7 @@ import java.util.List;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service",path="/sys/DictionaryItem",fallback = DictionaryItemFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service-ff",path="/sys/DictionaryItem",fallback = DictionaryItemFeignClient.HystrixClientFallback.class)
 public interface DictionaryItemFeignClient {
 
 

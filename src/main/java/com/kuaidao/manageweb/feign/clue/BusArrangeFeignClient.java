@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/arrange", fallback = BusArrangeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/arrange", fallback = BusArrangeFeignClient.HystrixClientFallback.class)
 public interface BusArrangeFeignClient {
 	/**
 	 * 商务排班表列表

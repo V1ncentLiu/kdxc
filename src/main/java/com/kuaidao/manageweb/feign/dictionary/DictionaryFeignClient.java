@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service",path="/sys/dictionary",fallback = DictionaryFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service-ff",path="/sys/dictionary",fallback = DictionaryFeignClient.HystrixClientFallback.class)
 public interface DictionaryFeignClient {
 
 

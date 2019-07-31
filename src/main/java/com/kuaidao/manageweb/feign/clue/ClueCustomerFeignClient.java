@@ -25,7 +25,7 @@ import java.util.List;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/clueCustomer",
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/clueCustomer",
         fallback = ClueCustomerFeignClient.HystrixClientFallback.class)
 public interface ClueCustomerFeignClient {
 

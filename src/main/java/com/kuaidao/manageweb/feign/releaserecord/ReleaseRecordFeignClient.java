@@ -26,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
  * @auther yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/releaserecord",
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/releaserecord",
         fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
 public interface ReleaseRecordFeignClient {
 

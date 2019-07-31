@@ -28,7 +28,7 @@ import java.util.List;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service",path="/sys/announcement",fallback = AnnouncementFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service-ff",path="/sys/announcement",fallback = AnnouncementFeignClient.HystrixClientFallback.class)
 public interface AnnouncementFeignClient {
 
 

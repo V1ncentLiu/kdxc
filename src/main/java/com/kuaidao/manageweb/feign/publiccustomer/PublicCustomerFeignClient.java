@@ -26,7 +26,7 @@ import java.util.List;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/publicCustomerResources",fallback = PublicCustomerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ff",path="/aggregation/publicCustomerResources",fallback = PublicCustomerFeignClient.HystrixClientFallback.class)
 public interface PublicCustomerFeignClient {
 
     @PostMapping("/allocationResource")

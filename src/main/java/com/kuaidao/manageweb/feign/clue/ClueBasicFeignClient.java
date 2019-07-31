@@ -22,7 +22,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/clueBasic",
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/clueBasic",
         fallback = ClueBasicFeignClient.HystrixClientFallback.class)
 public interface ClueBasicFeignClient {
 

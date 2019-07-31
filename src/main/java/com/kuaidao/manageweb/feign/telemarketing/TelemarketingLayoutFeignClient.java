@@ -19,7 +19,7 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/telemarketinglayout", fallback = TelemarketingLayoutFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/telemarketinglayout", fallback = TelemarketingLayoutFeignClient.HystrixClientFallback.class)
 
 public interface TelemarketingLayoutFeignClient {
 
