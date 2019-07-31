@@ -954,6 +954,18 @@ public class ExtendClueAgendaTaskController {
                 // 全部符合则进行匹配站点、去重、分发，不符合进入导入失败列表
                 if (islegal) {
                     PushClueReq pushClueReq = new PushClueReq();
+                    //拼接地址和备注
+                    StringBuilder addressAndRemark = new StringBuilder();
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getAddress())) {
+                        addressAndRemark.append(clueAgendaTaskDTO1.getAddress());
+                        if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getRemark())){
+                            addressAndRemark.append(";"+ clueAgendaTaskDTO1.getRemark());
+                        }
+                    } else {
+                        if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getRemark())) {
+                            addressAndRemark.append(clueAgendaTaskDTO1.getRemark());
+                        }
+                    }
                     pushClueReq.setCategory(String.valueOf(clueAgendaTaskDTO1.getCategory()));
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getCusName())) {
                         pushClueReq.setCusName(clueAgendaTaskDTO1.getCusName());
@@ -993,7 +1005,9 @@ public class ExtendClueAgendaTaskController {
                     if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getEmail()) && StringUtils.isNotBlank(clueAgendaTaskDTO1.getEmail().trim())) {
                         pushClueReq.setEmail(clueAgendaTaskDTO1.getEmail().trim());
                     }
-                    pushClueReq.setRemark(clueAgendaTaskDTO1.getAddress());
+                    if(StringUtils.isNotBlank(addressAndRemark)) {
+                        pushClueReq.setRemark(addressAndRemark.toString());
+                    }
                     pushClueReq.setSearchWord(clueAgendaTaskDTO1.getSearchWord());
                     pushClueReq.setSource(String.valueOf(clueAgendaTaskDTO1.getSource()));
                     pushClueReq.setSourceName(clueAgendaTaskDTO1.getSourceName());
@@ -1024,7 +1038,6 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     pushClueReq.setProjectName(clueAgendaTaskDTO1.getProjectName());
                     pushClueReq.setCreateUser(user.getId());
-                    pushClueReq.setRemark(clueAgendaTaskDTO1.getRemark());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getAge1())) {
                         pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTO1.getAge1()));
                     }
@@ -1038,71 +1051,69 @@ public class ExtendClueAgendaTaskController {
         logger.info("clue import:{{}}", list1);
         logger.info("clue not import:{{}}", illegalDataList);
         if (list1 != null && list1.size() > 0) {
-            JSONResult<Map<String, Object>> jsonResult = extendClueFeignClient.importclue(list1);
+            JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
             // 导入失败数据进入导入失败列表
             if (null != jsonResult && jsonResult.getCode().equals("0")
                     && null != jsonResult.getData()) {
-                Map<String, Object> data = jsonResult.getData();
-                Map<String, Integer> numMap = (Map<String, Integer>) data.get("num");
+                List<PushClueReq> data = jsonResult.getData();
+                //取得第一条数据，该数据专门用来存数据数
+                Map<String, Integer> numMap = data.get(0).getStatisticsMap();
                 Integer trash = numMap.get("trash");// 废弃数
                 Integer assign = numMap.get("assign");// 已分发
-                Integer notAssign = numMap.get("notAssign");// 待分发
                 result.put("trash", trash);
                 result.put("assign", assign);
-                result.put("notAssign", notAssign);
-                result.put("success", list1.size());
                 // 如果有导入失败数据
-                if (null != jsonResult.getData().get("list")) {
-                    List<PushClueReq> list2 = (List<PushClueReq>) data.get("list");
-                    if (list2 != null && list2.size() > 0) {
-                        for (PushClueReq pushClueReq : list2) {
-                            ClueAgendaTaskDTO clueAgendaTaskDTO2 = new ClueAgendaTaskDTO();
-                            clueAgendaTaskDTO2.setDate(pushClueReq.getCreateTime());
-                            clueAgendaTaskDTO2.setTypeName(typeMap2.get(pushClueReq.getType()));
-                            clueAgendaTaskDTO2
-                                    .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
-                            clueAgendaTaskDTO2.setSourceTypeName(
-                                    sourceTypeMap2.get(pushClueReq.getSourceType()));
-                            clueAgendaTaskDTO2
-                                    .setSourceName(sourceMap2.get(pushClueReq.getSource()));
-                            clueAgendaTaskDTO2
-                                    .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
-                            clueAgendaTaskDTO2.setIndustryCategoryName(
-                                    industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
-                            clueAgendaTaskDTO2.setCusName(pushClueReq.getCusName());
-                            clueAgendaTaskDTO2.setPhone(pushClueReq.getPhone());
-                            clueAgendaTaskDTO2.setPhone2(pushClueReq.getPhone2());
-                            clueAgendaTaskDTO2.setWechat(pushClueReq.getWechat());
-                            clueAgendaTaskDTO2.setWechat2(pushClueReq.getWechat2());
-                            clueAgendaTaskDTO2.setQq(pushClueReq.getQq());
-                            clueAgendaTaskDTO2.setEmail(pushClueReq.getEmail());
-                            if (null != pushClueReq.getSex() && pushClueReq.getSex() == 1) {
-                                clueAgendaTaskDTO2.setSex1("男");
-                            } else if (null != pushClueReq.getSex() && pushClueReq.getSex() == 2) {
-                                clueAgendaTaskDTO2.setSex1("女");
-                            }
-                            if (null != pushClueReq.getAge()) {
-                                clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
-                            }
-                            clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
-                            if (pushClueReq.getMessageTime() != null) {
-                                clueAgendaTaskDTO2.setMessageTime1(DateUtil.convert2String(
-                                        pushClueReq.getMessageTime(), DateUtil.ymdhms));
-                            }
-
-                            clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
-                            clueAgendaTaskDTO2.setSearchWord(pushClueReq.getSearchWord());
-                            if (pushClueReq.getReserveTime() != null) {
-                                clueAgendaTaskDTO2.setReserveTime1(DateUtil.convert2String(
-                                        pushClueReq.getReserveTime(), DateUtil.ymdhms));
-                            }
-                            clueAgendaTaskDTO2.setAccountName(
-                                    accountNameMap2.get(pushClueReq.getAccountName()));
-                            clueAgendaTaskDTO2.setUrlAddress(pushClueReq.getUrlAddress());
-                            illegalDataList.add(clueAgendaTaskDTO2);
+                if (null != data && data.size()>1) {
+                    for (int i = 1;i < data.size(); i++) {
+                        PushClueReq pushClueReq = data.get(i);
+                        ClueAgendaTaskDTO clueAgendaTaskDTO2 = new ClueAgendaTaskDTO();
+                        clueAgendaTaskDTO2.setDate(pushClueReq.getCreateTime());
+                        clueAgendaTaskDTO2.setTypeName(typeMap2.get(pushClueReq.getType()));
+                        clueAgendaTaskDTO2
+                                .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
+                        clueAgendaTaskDTO2.setSourceTypeName(
+                                sourceTypeMap2.get(pushClueReq.getSourceType()));
+                        clueAgendaTaskDTO2
+                                .setSourceName(sourceMap2.get(pushClueReq.getSource()));
+                        clueAgendaTaskDTO2
+                                .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
+                        clueAgendaTaskDTO2.setIndustryCategoryName(
+                                industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        clueAgendaTaskDTO2.setCusName(pushClueReq.getCusName());
+                        clueAgendaTaskDTO2.setPhone(pushClueReq.getPhone());
+                        clueAgendaTaskDTO2.setPhone2(pushClueReq.getPhone2());
+                        clueAgendaTaskDTO2.setWechat(pushClueReq.getWechat());
+                        clueAgendaTaskDTO2.setWechat2(pushClueReq.getWechat2());
+                        clueAgendaTaskDTO2.setQq(pushClueReq.getQq());
+                        clueAgendaTaskDTO2.setEmail(pushClueReq.getEmail());
+                        if (null != pushClueReq.getSex() && pushClueReq.getSex() == 1) {
+                            clueAgendaTaskDTO2.setSex1("男");
+                        } else if (null != pushClueReq.getSex() && pushClueReq.getSex() == 2) {
+                            clueAgendaTaskDTO2.setSex1("女");
                         }
+                        if (null != pushClueReq.getAge()) {
+                            clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        }
+                        clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
+                        if (pushClueReq.getMessageTime() != null) {
+                            clueAgendaTaskDTO2.setMessageTime1(DateUtil.convert2String(
+                                    pushClueReq.getMessageTime(), DateUtil.ymdhms));
+                        }
+
+                        clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
+                        clueAgendaTaskDTO2.setSearchWord(pushClueReq.getSearchWord());
+                        if (pushClueReq.getReserveTime() != null) {
+                            clueAgendaTaskDTO2.setReserveTime1(DateUtil.convert2String(
+                                    pushClueReq.getReserveTime(), DateUtil.ymdhms));
+                        }
+                        clueAgendaTaskDTO2.setAccountName(
+                                accountNameMap2.get(pushClueReq.getAccountName()));
+                        clueAgendaTaskDTO2.setUrlAddress(pushClueReq.getUrlAddress());
+                        illegalDataList.add(clueAgendaTaskDTO2);
                     }
                 }
+                result.put("success", (list.size() - illegalDataList.size()));
+                result.put("notAssign", (list.size() - illegalDataList.size() - trash - assign));
             } else {
                 return new JSONResult().fail("-1", "导入失败");
             }
