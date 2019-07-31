@@ -2,9 +2,6 @@ package com.kuaidao.manageweb.feign.phonetraffic;
 
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficParamDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficRespDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.TrafficParam;
@@ -17,10 +14,6 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/phonetraffic", fallback = PhoneTrafficFeignClient.HystrixClientFallback.class)
 public interface PhoneTrafficFeignClient {
