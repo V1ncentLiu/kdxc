@@ -14,7 +14,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 
-@FeignClient(name = "sys-service", path = "/sys/role/roleManager", fallback = RoleManagerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service-ff", path = "/sys/role/roleManager", fallback = RoleManagerFeignClient.HystrixClientFallback.class)
 public interface RoleManagerFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryRoleList")

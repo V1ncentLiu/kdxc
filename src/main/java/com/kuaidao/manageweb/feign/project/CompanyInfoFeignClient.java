@@ -25,7 +25,7 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/companyInfo",
+@FeignClient(name = "aggregation-service-ff", path = "/aggregation/companyInfo",
         fallback = CompanyInfoFeignClient.HystrixClientFallback.class)
 public interface CompanyInfoFeignClient {
     /**
