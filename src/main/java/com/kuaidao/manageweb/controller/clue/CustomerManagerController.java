@@ -11,6 +11,8 @@ import javax.validation.Valid;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -51,7 +53,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 @Controller
 @RequestMapping("/tele/customerManager")
 public class CustomerManagerController {
-
+    private static Logger logger = LoggerFactory.getLogger(PendingAllocationController.class);
     @Autowired
     private CustomerManagerFeignClient customerManagerFeignClient;
 
@@ -73,7 +75,9 @@ public class CustomerManagerController {
 
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
+        String ownOrgId = "";
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
+            List<OrganizationDTO> dataList = new ArrayList<OrganizationDTO>();
             // 如果当前登录的为电销总监,查询所有下属电销员工
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
@@ -81,6 +85,11 @@ public class CustomerManagerController {
             List<UserInfoDTO> userList =
                     getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
+            ownOrgId =  String.valueOf(user.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                dataList.add(curOrgGroupByOrgId);
+            }
             // 查询同事业部下的电销组
             Long orgId = user.getOrgId();
             JSONResult<OrganizationDTO> queryOrgById =
@@ -88,11 +97,7 @@ public class CustomerManagerController {
             List<Map<String, Object>> saleGroupList =
                     getSaleGroupList(queryOrgById.getData().getParentId());
             request.setAttribute("saleGroupList", saleGroupList);
-
-            // 如是电销总监只展现当前组
-            List<OrganizationDTO> dataList = new ArrayList<OrganizationDTO>();
-            dataList.add(queryOrgById.getData());
-            // 查询下级电销组(查询使用)
+            request.setAttribute("ownOrgId", ownOrgId);
             request.setAttribute("queryOrg", dataList);
 
         } else if (roleList != null
@@ -201,8 +206,7 @@ public class CustomerManagerController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -213,8 +217,7 @@ public class CustomerManagerController {
 
     /**
      * 根据机构和角色类型获取用户
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
@@ -230,7 +233,7 @@ public class CustomerManagerController {
     /**
      * 获取电销组
      * 
-     * @param orgDTO
+     * @param orgId
      * @return
      */
     private List<Map<String, Object>> getSaleGroupList(Long orgId) {
@@ -273,7 +276,7 @@ public class CustomerManagerController {
     /**
      * 转移资源
      * 
-     * @param orgDTO
+     * @param allocationClueReq
      * @return
      */
     @PostMapping("/transferClue")
@@ -297,5 +300,23 @@ public class CustomerManagerController {
         }
         allocationClueReq.setOrg(user.getOrgId());
         return clueBasicFeignClient.transferClue(allocationClueReq);
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 }

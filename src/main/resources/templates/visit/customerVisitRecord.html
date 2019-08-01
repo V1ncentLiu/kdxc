@@ -42,7 +42,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务小组:">
-                    <el-select v-model="form.busGroupId" placeholder="商务小组" clearable filterable>
+                    <el-select v-model="form.busGroupId" placeholder="商务小组" clearable filterable :disabled="isSWZDisabled">
                         <el-option
                             v-for="item in businessGroupList"
                             :key="item.id"
@@ -224,9 +224,10 @@
 <script th:inline="javascript">
 /*     var projectList = [[${projectList}]];
     var busManagerList = [[${busManagerList}]];
-    var businessGroupList = [[${businessGroupList}]];
     var proviceList = [[${proviceList}]];
     var companyList = [[${companyList}]]; */
+var businessGroupList = [[${businessGroupList}]];
+var ownOrgId=[[${ownOrgId}]];//商务总监商务组
 </script>
 <script>
   var customerVisitRecordVm =   new Vue({
@@ -241,9 +242,10 @@
                 dialogFormVisible:false,
                 notSignedReasonDialog:false,
                 reasonDialog:false,
+                isSWZDisabled:false,
                 form: {
                 	projectId:'',
-                	busGroupId:'',
+                	busGroupId:ownOrgId,
                 	busManagerId:'',
                 	signProvince:'',
                 	companyId:'',
@@ -288,7 +290,7 @@
                 },
                 projectList:[],
                 busManagerList:[],
-                businessGroupList:[],
+                businessGroupList:businessGroupList,
                 proviceList:[],
                 companyList:[],
                 rebutReason:'',//驳回原因
@@ -667,6 +669,7 @@
         created(){
         	this.initCustomerVisitRecord();
         	this.initSelect();
+          if(ownOrgId){this.isSWZDisabled= true;}//商务总监商务组筛选按钮不可点击
         }
     })
 </script>

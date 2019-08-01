@@ -3,6 +3,8 @@
  */
 package com.kuaidao.manageweb.controller.business;
 
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +74,7 @@ public class BusCustomerManagerController {
     @RequiresPermissions("business:busCustomerManager:view")
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
-
+        String ownOrgId = "";
         // 查询所有电销组
         List<OrganizationRespDTO> teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ,null);
         request.setAttribute("teleSaleGroupList", teleSaleGroupList);
@@ -98,7 +100,6 @@ public class BusCustomerManagerController {
             }
             List<OrganizationRespDTO> busSaleGroupList =
                     getSaleGroupList(user.getOrgId(), OrgTypeConstant.SWZ,businessLine);
-            request.setAttribute("busSaleGroupList", busSaleGroupList);
             // 查询本区商务总监
             List<UserInfoDTO> busDirectorList =
                     getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null,businessLine);
@@ -110,6 +111,19 @@ public class BusCustomerManagerController {
             List<UserInfoDTO> saleList =
                     getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList,businessLine);
             request.setAttribute("busSaleList", saleList);
+            //商务总监固定商务组筛选条件为本组
+            if(RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())){
+                ownOrgId = String.valueOf(user.getOrgId());
+                OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+                if(curOrgGroupByOrgId!=null) {
+                    OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                    organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                    organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                    busSaleGroupList.add(organizationRespDTO);
+                }
+            }
+            request.setAttribute("busSaleGroupList", busSaleGroupList);
+            request.setAttribute("ownOrgId", ownOrgId);
         }
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
@@ -180,8 +194,7 @@ public class BusCustomerManagerController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -192,8 +205,7 @@ public class BusCustomerManagerController {
 
     /**
      * 获取所有组织组
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private List<OrganizationRespDTO> getSaleGroupList(Long parentId, Integer type,Integer businessLine) {
@@ -210,8 +222,7 @@ public class BusCustomerManagerController {
 
     /**
      * 获取所有商务经理（组织名-大区名）
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private List<Map<String, Object>> getAllSaleList() {
@@ -273,7 +284,10 @@ public class BusCustomerManagerController {
     /**
      * 根据机构和角色类型获取用户
      * 
-     * @param orgDTO
+     * @param orgId
+     * @param roleCode
+     * @param statusList
+     * @param businessLine
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList,Integer businessLine) {
@@ -303,4 +317,21 @@ public class BusCustomerManagerController {
         return null;
     }
 
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
+    }
 }

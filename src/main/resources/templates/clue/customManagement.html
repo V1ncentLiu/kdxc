@@ -186,7 +186,7 @@
                     </el-form-item>  
                   
                     <el-form-item label="电销组:">  
-                        <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                        <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDXZDisabled">
                             <el-option
                                 v-for="item in orgTeleArr"
                                 :key="item.id"
@@ -263,6 +263,19 @@
                           :key="item.value"
                           :label="item.name"
                           :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="是否签约:" prop="isSign">
+                    <el-select v-model="form.isSign" clearable placeholder="是否签约">
+                      <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
+                                 :value="item.value"></el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="是否补齐尾款:">
+                    <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable>
+                      <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
+                                 :value="item.value">
                       </el-option>
                     </el-select>
                   </el-form-item>
@@ -702,6 +715,7 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
 var queryOrg=[[${queryOrg}]];//电销组
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
+var ownOrgId=[[${ownOrgId}]];//电销总监电销组
 // var userFieldList=[];
   var  customerManVM=new Vue({
         el: '#myCustom',
@@ -714,6 +728,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 dialogChooseList:false,
                 repeatPhonesDialog:false,
                 allocateFormVisible: false, //分配资源
+                isDXZDisabled:false,
                 dailogTitleType:'',
                 formAllocat:{
                     telSales:'',
@@ -742,6 +757,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     tableData:[]
                 },
                 adviserValue: '', //电销顾问
+                isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+                isSignOptions: [{
+                  value: 0,
+                  name: "未签约"
+                }, {
+                  value: 1,
+                  name: "已签约"
+                }],
                 isTransfer:[
                             {
                                value: '0',
@@ -825,7 +848,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 	searchWord:'',
                 	address:'',
                 	trackingDay:'',
-                	teleorg:'',
+                	teleorg:ownOrgId,
                 	teleSaleId:'',
                   clueId:'',
                   qq:"",
@@ -833,6 +856,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   email:"",
                   status:"",
                   isCall:"",
+                  isTailMoney:"",
+                  isSign:"",
                 },
                 form1: {
                     type: [],
@@ -904,7 +929,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     searchWord:'',
                     address:'',
                     trackingDay:'',
-                    teleorg:'',
+                    teleorg:ownOrgId,
                     teleSaleId:'',
                   clueId:'',
                   qq:"",
@@ -983,6 +1008,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  param.qq = this.form.qq;
                  param.email = this.form.email;
                  param.wechat = this.form.wechat;
+                 param.isSign = this.form.isSign;
+                 param.isTailMoney = this.form.isTailMoney;
                  if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
                   param.teleSaleId= this.form.teleSaleId.join(",");
                 }
@@ -1543,6 +1570,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
                 if(localVal){this.pager.pageSize = localVal;}
             };
+          if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
     		//初始化数据列表
     		 this.initTableData();
     		//客户状态

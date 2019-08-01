@@ -3,6 +3,7 @@ var myCallRecordVm = new Vue({
     data: {
         audioShow:false,
         isShow:false,
+      isDXZDisabled:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -44,7 +45,8 @@ var myCallRecordVm = new Vue({
         	cno:'',
         	bindPhone:'',
         	accountId:'',
-        	teleGroupId:'',
+        	teleGroupId:ownOrgId,
+        		
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
