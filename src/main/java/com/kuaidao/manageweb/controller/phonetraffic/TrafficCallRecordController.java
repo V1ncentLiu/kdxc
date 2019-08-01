@@ -3,7 +3,6 @@ package com.kuaidao.manageweb.controller.phonetraffic;
 import com.alibaba.fastjson.JSONObject;
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
-import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -11,9 +10,7 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.manageweb.config.BusinessCallrecordLimit;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -23,7 +20,6 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +49,6 @@ public class TrafficCallRecordController {
 
     @Autowired
     OrganizationFeignClient organizationFeignClient;
-    
-    @Autowired
-    BusinessCallrecordLimit businessCallrecordLimit;
 
     /**
      * 话务通话记录页面初始化
@@ -114,7 +107,6 @@ public class TrafficCallRecordController {
     @ResponseBody
     public JSONResult<Map<String, Object>> listHwCallRecord(
         @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
-        logger.info("callrecord limit {{}}",businessCallrecordLimit);
         // 根据角色查询下属话务专员
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
@@ -150,7 +142,6 @@ public class TrafficCallRecordController {
     @ResponseBody
     public JSONResult<Map<String, Object>> listAllHwCallRecord(
         @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
-        logger.info("callrecord limit {{}}",businessCallrecordLimit);
         // 根据角色查询下属话务专员
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
@@ -203,45 +194,6 @@ public class TrafficCallRecordController {
         return  null;
     }
     /**
-     * 我的通话记录 统计总时长
-     *
-     * @param myCallRecordReqDTO
-     * @return
-     */
-    @PostMapping("/countMyCallRecordTalkTime")
-    @ResponseBody
-    public JSONResult<Integer> countMyCallRecordTalkTime(
-            @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        Long id = curLoginUser.getId();
-        List<Long> accountIdList = new ArrayList<Long>();
-        accountIdList.add(id);
-        myCallRecordReqDTO.setAccountIdList(accountIdList);
-        return callRecordFeign.countMyCallRecordTalkTime(myCallRecordReqDTO);
-    }
-
-
-
-    /**
-     * 根据businessLine 获取创业顾问
-    * @param businessLine
-    * @return
-     */
-    private List<UserInfoDTO> getTeleSaleByBusinessLine(Integer businessLine) {
-        UserOrgRoleReq req = new UserOrgRoleReq();
-        req.setBusinessLine(businessLine);
-        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
-        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-        if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-            logger.error(
-                    "查询电销通话记录-根据业务线获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
-                    req, userJr);
-            return null;
-        }
-        return userJr.getData();
-    }
-
-    /**
      * 根据orgId 获取话务专员
      *
      * @param orgId
@@ -260,33 +212,6 @@ public class TrafficCallRecordController {
         }
         return userJr.getData();
     }
-
-    /**
-     * 根据clueId 或 customerPhone 查询 通话记录
-     *
-     * @param myCallRecordReqDTO 参数 clueid 或 customerPhone
-     * @return
-     */
-    @PostMapping("/listTmCallReacordByParams")
-    @ResponseBody
-    public JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(
-            @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
-        return callRecordFeign.listTmCallReacordByParams(myCallRecordReqDTO);
-    }
-
-    /**
-     * 根据clueId 或 customerPhone 查询 通话记录
-     *
-     * @param myCallRecordReqDTO 参数 clueid 或 customerPhone
-     * @return
-     */
-    @PostMapping("/listTmCallReacordByParamsNoPage")
-    @ResponseBody
-    JSONResult<List<CallRecordRespDTO>> listTmCallReacordByParamsNoPage(
-            @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
-        return callRecordFeign.listTmCallReacordByParamsNoPage(myCallRecordReqDTO);
-    }
-
     /**
      *  获取天润通话记录地址 根据 记录Id
      * @param idEntity
