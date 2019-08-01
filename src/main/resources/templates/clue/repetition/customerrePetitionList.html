@@ -20,47 +20,65 @@
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm">
-                <el-form-item label="处理状态:" label-width="55px">
+                <el-form-item label="处理状态:"  >
                     <el-select filterable v-model="status" placeholder="处理状态" clearable>
                         <el-option
-                                v-for="item in statusList"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
+                            v-for="item in statusList"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="是否重单:" label-width="75px">
+                <el-form-item label="是否重单:" >
                     <el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
                         <el-option
-                                v-for="item in repetitionList"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
+                            v-for="item in repetitionList"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="客户姓名:" label-width="75px">
+                <el-form-item label="客户姓名:" >
                     <el-input v-model="cusName" placeholder="客户姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="客户手机号:" label-width="85px">
+                <el-form-item label="客户手机号:" >
                     <el-input v-model="cusPhone" placeholder="客户手机号"></el-input>
                 </el-form-item>
                 <!-- <div class="mainSearchBtnBox">  -->
-                <el-form-item label="">
+                <!--<el-form-item label="">-->
+                <!--<el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px">搜索</el-button>-->
+                <!--</el-form-item>-->
+                <el-row v-show="isShowSearch">
+                    <el-form-item label="是否签约:" prop="isSign">
+                        <el-select v-model="isSign" clearable placeholder="是否签约">
+                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
+                                       :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否补齐尾款:">
+                        <el-select v-model="isTailMoney" placeholder="是否补齐尾款" clearable>
+                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px">搜索</el-button>
-                </el-form-item>
-                <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                <!-- </div> -->
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShowSearch">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShowSearch,'greycolor paddingL6 el-icon-arrow-down':!isShowSearch}"></i></span>
+                </div>
             </el-form>
         </div>
         <el-table
-                ref="multipleTable"
-                tooltip-effect="dark"
-                empty-text="无数据"
-                style="width: 100%"
-                border
-                :data="dataTable"  @selection-change="handleSelectionChange">
+            ref="multipleTable"
+            tooltip-effect="dark"
+            empty-text="无数据"
+            style="width: 100%"
+            border
+            :data="dataTable"  @selection-change="handleSelectionChange">
             <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
             <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
@@ -100,9 +118,20 @@
         <el-form   class="width500">
             <el-form-item label="重单手机号：" :label-width="formLabelWidth" >{{cusPhoneId}}
             </el-form-item>
+            <div v-if="isShowRepetition ==true">
+                <el-form-item label="运作区域：" :label-width="formLabelWidth" >{{operatingArea}}
+                </el-form-item>
+                <el-form-item label="考察时间：" :label-width="formLabelWidth" >{{investigateTime}}
+                </el-form-item>
+                <el-form-item label="考察地点：" :label-width="formLabelWidth" >{{investigateArea}}
+                </el-form-item>
+                <el-form-item label="考察项目：" :label-width="formLabelWidth" >{{projectName}}
+                </el-form-item>
+                <el-form-item label="协商结果：" :label-width="formLabelWidth" >{{consultResults}}
+                </el-form-item>
+            </div>
             <el-form-item label="提交备注：" :label-width="formLabelWidth" >{{remarkId}}
             </el-form-item>
-
             <el-form-item label="处理状态：" :label-width="formLabelWidth" >{{statusId}}
 
             </el-form-item>
@@ -112,12 +141,12 @@
             </el-form-item>
             <el-form-item label="分配比例：" v-show="isShow" :label-width="formLabelWidth" >
                 <el-table
-                        ref="multipleTable"
-                        tooltip-effect="dark"
-                        empty-text="无数据"
-                        style="width: 100%"
-                        border
-                        :data="repetitionDetailList"  >
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="repetitionDetailList"  >
                     <el-table-column align="center" prop="repeatName" label="顾问姓名"></el-table-column>
                     <el-table-column align="center" prop="repeatRatio" :formatter="addCent" label="比例" ></el-table-column>
                 </el-table>
@@ -127,12 +156,12 @@
     <!-- dialog -->
     <el-dialog title="判单明细" :visible.sync="repeatDetaildialogFormVisible" width="1100px">
         <el-table
-                ref="multipleTable"
-                tooltip-effect="dark"
-                empty-text="无数据"
-                style="width: 100%"
-                border
-                :data="detailList"  >
+            ref="multipleTable"
+            tooltip-effect="dark"
+            empty-text="无数据"
+            style="width: 100%"
+            border
+            :data="detailList"  >
             <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
             <el-table-column align="center" prop="signNo"  label="签约单编号" ></el-table-column>
             <el-table-column align="center" prop="statementNo"  label="结算单编号" width="130"></el-table-column>
@@ -147,12 +176,12 @@
     <!-- dialog -->
     <el-dialog title="判单明细" :visible.sync="repeatPayDetaildialogFormVisible">
         <el-table
-                ref="multipleTable"
-                tooltip-effect="dark"
-                empty-text="无数据"
-                style="width: 100%"
-                border
-                :data="payDetailList"  >
+            ref="multipleTable"
+            tooltip-effect="dark"
+            empty-text="无数据"
+            style="width: 100%"
+            border
+            :data="payDetailList"  >
             <el-table-column align="center" prop="repeatName" label="顾问姓名"></el-table-column>
             <el-table-column align="center" prop="repeatRatio" :formatter="addCent" label="比例" ></el-table-column>
         </el-table>
@@ -332,407 +361,458 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var payModeItem =[[${payModeItem}]];
-    var userId = [[${userId}]];
-    var roleCode = [[${roleCode}]];
-    var orgId = [[${orgId}]];
-
-    var orgVM =  new Vue({
-        el: '#organizationManage',
-        data: {
-            dailogTitleType:"",
-            cusName:"",
-            cusPhone:"",
-            status:"",
-            dealStatus:"",
-            cusPhoneId:"",
-            remarkId:"",
-            dealRemarkId:"",
-            dealStatusId:"",
-            statusId:"",
-            repeatPayDetaildialogFormVisible:false,
-            repeatDetaildialogFormVisible:false,
-            dialogFormVisible:false,
-            repeatPhonesDialog:false,
-            repetitionList:"",
-            exportFormVisible:false,
-            formLabelWidth: '100px',
-            dialogFormVisible: false,
-            addOrModifyDialogTitle:"",
-            dialogFormVisible:false,
-            dataTable:[],
-            isShow:true,
-            multipleSelection: [],
-            repetitionDetailList:[],
-            payDetailList:[],
-            detailList:[],
-            repeatPhonesTable:[],
-            repeatPhonesTable2:[],
-            repeatPhonesTable3:[],
-            repeatPhonesTable4:[],
-            repeatPhonesTable5:[],
-            showPhoneTable:false,
-            showPhoneTable2:false,
-            showPhoneTable3:false,
-            showPhoneTable4:false,
-            showPhoneTable5:false,
-            phone:'',
-            phone2:'',
-            phone3:'',
-            phone4:'',
-            phone5:'',
-            statusList:[
-                {
-                    value: '0',
-                    label: '待审批处理'
-                },
-                {
-                    value: '1',
-                    label: '已审批处理'
-                }
-            ],
-            repetitionList:[
-                {
-                    value: '0',
-                    label: '不重单'
-                },
-                {
-                    value: '1',
-                    label: '重单'
-                }
-            ],
-            pager:{
-                total: 0,
-                currentPage: 1,
-                pageSize: 20,
-            },
-            loading:false,
-
-
+  var payModeItem =[[${payModeItem}]];
+  var userId = [[${userId}]];
+  var roleCode = [[${roleCode}]];
+  var orgId = [[${orgId}]];
+  var isShowRepetition =[[${isShowRepetition}]];
+  var orgVM =  new Vue({
+    el: '#organizationManage',
+    data: {
+      isTailMoney:"",
+      isSign:"",
+      isShowSearch:false,
+      dailogTitleType:"",
+      operatingArea:"",
+      investigateTime:"",
+      investigateArea:"",
+      projectName:"",
+      consultResults:"",
+      cusName:"",
+      cusPhone:"",
+      status:"",
+      dealStatus:"",
+      cusPhoneId:"",
+      remarkId:"",
+      dealRemarkId:"",
+      dealStatusId:"",
+      statusId:"",
+      isShowRepetition:isShowRepetition,
+      repeatPayDetaildialogFormVisible:false,
+      repeatDetaildialogFormVisible:false,
+      dialogFormVisible:false,
+      repeatPhonesDialog:false,
+      repetitionList:"",
+      exportFormVisible:false,
+      formLabelWidth: '100px',
+      dialogFormVisible: false,
+      addOrModifyDialogTitle:"",
+      dialogFormVisible:false,
+      dataTable:[],
+      isShow:true,
+      multipleSelection: [],
+      repetitionDetailList:[],
+      payDetailList:[],
+      detailList:[],
+      repeatPhonesTable:[],
+      repeatPhonesTable2:[],
+      repeatPhonesTable3:[],
+      repeatPhonesTable4:[],
+      repeatPhonesTable5:[],
+      showPhoneTable:false,
+      showPhoneTable2:false,
+      showPhoneTable3:false,
+      showPhoneTable4:false,
+      showPhoneTable5:false,
+      phone:'',
+      phone2:'',
+      phone3:'',
+      phone4:'',
+      phone5:'',
+      isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+      isSignOptions: [{
+        value: 0,
+        name: "未签约"
+      }, {
+        value: 1,
+        name: "已签约"
+      }],
+      statusList:[
+        {
+          value: '0',
+          label: '待审批处理'
         },
-        methods: {
-            //日期数据格式化方法
-            dateFormat:function(row, column) {
-                var date = row[column.property];
-                if (date == undefined) {
-                    return "";
+        {
+          value: '1',
+          label: '已审批处理'
+        }
+      ],
+      repetitionList:[
+        {
+          value: '0',
+          label: '不重单'
+        },
+        {
+          value: '1',
+          label: '重单'
+        }
+      ],
+      pager:{
+        total: 0,
+        currentPage: 1,
+        pageSize: 20,
+      },
+      loading:false,
+
+
+    },
+    methods: {
+      toogleClick(){
+        if(this.isShowSearch){
+          this.isShowSearch=false
+        }else{
+          this.isShowSearch=true
+        }
+      },
+      //日期数据格式化方法
+      dateFormat:function(row, column) {
+        var date = row[column.property];
+        if (date == undefined) {
+          return "";
+        }
+        return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      },
+      dateTimeFormats(date) {
+        if(date !=null && date !=''){
+          return moment(date).format("YYYY-MM-DD HH:mm:ss");
+        }else{
+          return "";
+        }
+
+      },
+      consultResultsNum(num) {
+        if(num !=null ){
+          if(num ==0){
+            return  "平分";
+          }else if(num ==1){
+            return  "判定";
+          }
+        }
+        return "";
+      },
+      transCusPhone(row) {
+        var text="";
+        if( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
+            ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
+            ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)){
+          text ="***"
+        }else{
+          text = row.cusPhone;
+        }
+        return text;
+      },
+      queryRepeatPage(){//查询按钮
+        var param = {};
+        var pageSize = this.pager.pageSize;
+        var pageNum = this.pager.currentPage;
+        param.pageNum = pageNum;
+        param.pageSize = pageSize;
+        param.dealStatus=this.dealStatus;
+        param.cusName=this.cusName;
+        param.cusPhone=this.cusPhone;
+        param.status=this.status;
+        param.isSign = this.isSign;
+        param.isTailMoney = this.isTailMoney;
+        console.log(param);
+        axios.post('/clue/cluerepetition/queryRepeatList',param).then(function (response) {
+          console.log(response);
+          if(null===response||response.data==null||response.data.code!='0'){
+            orgVM.$message({
+              message: response.data.msg,
+              type: 'warning'
+            });
+            return ;
+          }else{
+            var result =  response.data;
+            console.info(result);
+            var table=result.data;
+            var data= table.data;
+            for(var i=0;i<data.length;i++){
+              console.log(data[i]);
+              data[i].cusPhone=orgVM.transCusPhone(data[i]);
+            }
+            orgVM.dataTable = response.data.data.data;
+            orgVM.pager.currentPage= response.data.data.currentPage;
+            orgVM.pager.total= response.data.data.total;
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        .then(function () {
+        });
+
+      } ,
+      detailButton(){
+        orgVM.isShow =false;
+        var rows = this.multipleSelection;
+        if(rows.length  !=1){
+          this.$message({
+            message: '请选择一条数据',
+            type: 'warning'
+          });
+          return;
+        }
+        this.dialogFormVisible = true;
+        var str = "";
+        var text="";
+        for ( var i = 0; i <rows.length; i++){
+          str = rows[i].id
+          if(rows[i].phase ==7 || rows[i].phase == 8 || (roleCode =='DXCYGW' && rows[i].teleSaleIds.indexOf(userId) == -1 )
+              ||  (roleCode =='DXZJ' && rows[i].teleGorupIds.indexOf(orgId) == -1)
+              ||  (roleCode =='DXFZ' && rows[i].teleDeptIds.indexOf(orgId) == -1)){
+            text ="***"
+          }
+        }
+        var param={};
+        param.id=str;
+        axios.post('/clue/cluerepetition/queryRepeatById',param).then(function (response) {
+          console.log(response);
+
+          if(null !==response && response.data !=null && response.data.code=='0'){
+            var clueRepetitionDTO = response.data.data;
+            if(text == "***") {
+              orgVM.cusPhoneId = text;
+            } else {
+              orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
+            }
+            if(isShowRepetition){
+              orgVM.operatingArea = clueRepetitionDTO.operatingArea ;
+              orgVM.investigateTime = orgVM.dateTimeFormats(clueRepetitionDTO.investigateTime) ;
+              orgVM.investigateArea = clueRepetitionDTO.investigateArea ;
+              orgVM.projectName = clueRepetitionDTO.projectName ;
+              orgVM.consultResults = orgVM.consultResultsNum(clueRepetitionDTO.consultResults) ;
+            }
+            orgVM.remarkId = clueRepetitionDTO.remark;
+            orgVM.dealRemarkId = clueRepetitionDTO.dealRemark;
+            if(clueRepetitionDTO.status ==0){
+              orgVM.statusId = "待处理" ;
+              orgVM.dealStatusId = "";
+            }else{
+              orgVM.statusId = "已处理" ;
+              if(clueRepetitionDTO.dealStatus ==0){
+                orgVM.dealStatusId = "不重单";
+              }else{
+                orgVM.dealStatusId = "重单";
+                orgVM.isShow=true;
+                if(clueRepetitionDTO.clueRepetitionDTOs !=null){
+                  orgVM.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs;
                 }
-                return moment(date).format("YYYY-MM-DD HH:mm:ss");
-            },
-            transCusPhone(row) {
-                var text="";
-                if( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
-                    ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
-                    ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)){
-                    text ="***"
+              }
+
+            }
+          }else{
+            alert(response.data.data.msg);
+            return ;
+          }
+        }).catch(function (error) {
+          console.log(error);
+        })
+        .then(function () {
+          // always executed
+        });
+      },
+      cancelButton(){
+        this.$confirm("确定要撤销选中的重单申请?", '撤销申请', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 查询 table 需要数据
+          var param = {};
+          var deleInfo=this.multipleSelection;
+          var ids="";
+          if(null!=deleInfo){
+            for ( var i = 0; i <deleInfo.length; i++){
+              if("" == ids){
+                ids = deleInfo[i].id
+              }else{
+                ids = ids+","+deleInfo[i].id
+              }
+            }
+            var param={};
+            param.ids=ids;
+            axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+              console.log(response);
+              if(null !==response && response.data !=null && response.data.code=='0'){
+                window.location.href="/invitearea/inviteAreaList";
+              }else{
+                alert(response.data.data.msg);
+                return ;
+              }
+            }).catch(function (error) {
+              console.log(error);
+            })
+            .then(function () {
+              // always executed
+            });
+
+          }
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      search(){
+        this.pager.currentPage = 1;
+        this.queryRepeatPage();
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      transformStatus(row, column, cellValue, index) {
+        var text="";
+        if(cellValue=="0"){
+          text="启用"
+        }else if(cellValue=="1"){
+          text="禁用"
+        }
+        return text;
+      },
+      addCent(value){
+        return value.repeatRatio+"%";
+      },
+      paytype(row, column, cellValue, index) {
+        var text="";
+        if(cellValue=="1"){
+          text="全款"
+        }else if(cellValue=="2"){
+          text="定金"
+        }else if(cellValue=="3"){
+          text="追加定金"
+        }else if(cellValue=="4"){
+          text="尾款"
+        }
+        return text;
+      },
+      payMode(row, column, value, index) {
+        var valText="";
+        if(!value){
+          return valText;
+        }
+        var vals = value.split(",");
+        if(payModeItem){
+          for(var j = 0 ; j < vals.length;j++  ){
+            for(var i = 0; i < payModeItem.length ; i++){
+              if(payModeItem[i].value == vals[j]){
+                if(j==0){
+                  valText += payModeItem[i].name;
                 }else{
-                    text = row.cusPhone;
+                  valText += ","+payModeItem[i].name;
                 }
-                return text;
-            },
-            queryRepeatPage(){//查询按钮
-                var param = {};
-                var pageSize = this.pager.pageSize;
-                var pageNum = this.pager.currentPage;
-                param.pageNum = pageNum;
-                param.pageSize = pageSize;
-                param.dealStatus=this.dealStatus;
-                param.cusName=this.cusName;
-                param.cusPhone=this.cusPhone;
-                param.status=this.status;
-                console.log(param);
-                axios.post('/clue/cluerepetition/queryRepeatList',param).then(function (response) {
-                    console.log(response);
-                    if(null===response||response.data==null||response.data.code!='0'){
-                        orgVM.$message({
-                            message: response.data.msg,
-                            type: 'warning'
-                        });
-                        return ;
-                    }else{
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        var data= table.data;
-                        for(var i=0;i<data.length;i++){
-                            console.log(data[i]);
-                            data[i].cusPhone=orgVM.transCusPhone(data[i]);
-                        }
-                        orgVM.dataTable = response.data.data.data;
-                        orgVM.pager.currentPage= response.data.data.currentPage;
-                        orgVM.pager.total= response.data.data.total;
-                    }
-                })
-                    .catch(function (error) {
-                        console.log(error);
-                    })
-                    .then(function () {
-                    });
 
-            } ,
-            detailButton(){
-                orgVM.isShow =false;
-                var rows = this.multipleSelection;
-                if(rows.length  !=1){
-                    this.$message({
-                        message: '请选择一条数据',
-                        type: 'warning'
-                    });
-                    return;
-                }
-                this.dialogFormVisible = true;
-                var str = "";
-                var text="";
-                for ( var i = 0; i <rows.length; i++){
-                    str = rows[i].id
-                    if(rows[i].phase ==7 || rows[i].phase == 8 || (roleCode =='DXCYGW' && rows[i].teleSaleIds.indexOf(userId) == -1 )
-                        ||  (roleCode =='DXZJ' && rows[i].teleGorupIds.indexOf(orgId) == -1)
-                        ||  (roleCode =='DXFZ' && rows[i].teleDeptIds.indexOf(orgId) == -1)){
-                        text ="***"
-                    }
-                }
-                var param={};
-                param.id=str;
-                axios.post('/clue/cluerepetition/queryRepeatById',param).then(function (response) {
-                    console.log(response);
+              }
+            }
+          }
+        }
+        return valText;
+      },
+      repeatPhonesClick(row) {//重复手机号按钮点击
+        console.log(row);
+        this.dailogTitleType=row.clueId;
+        var param ={};
+        param.id = row.clueId;
+        param.clueId = row.clueId;
+        param.cusPhone = row.cusPhone;
+        //自定义参数，为0时不走移除自身资源方法
+        param.isRemove = 0;
+        if((roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
+            ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
+            ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)
+            || row.phase ==7 || row.phase == 8){
+          this.$message({
+            message: "当前资源已释放到公有池，不允许进行重复手机号资源的查看",
+            type: 'error'
+          });
+          return;
+        }
+        this.repeatPhonesDialog=true;
+        axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
+          var map = response.data.data;
+          debugger
+          if(map.phone){
+            orgVM.phone = map.phones[0]
+            orgVM.repeatPhonesTable=map.phone;
+            orgVM.showPhoneTable = true;
+          }else{
+            orgVM.phone = '';
+            orgVM.repeatPhonesTable=[];
+            orgVM.showPhoneTable = false;
+          }
+          if(map.phone2){
+            orgVM.phone2 = map.phones[1]
+            orgVM.repeatPhonesTable2=map.phone2;
+            orgVM.showPhoneTable2 = true;
+          }else{
+            orgVM.phone2 ='';
+            orgVM.repeatPhonesTable2=[];
+            orgVM.showPhoneTable2 = false;
+          }
+          if(map.phone3){
+            orgVM.phone3 = map.phones[2]
+            orgVM.repeatPhonesTable3=map.phone3;
+            orgVM.showPhoneTable3 = true;
+          }else{
+            orgVM.phone3 = '';
+            orgVM.repeatPhonesTable3=[];
+            orgVM.showPhoneTable3 = false;
+          }
+          if(map.phone4){
+            orgVM.phone4 = map.phones[3]
+            orgVM.repeatPhonesTable4=map.phone4;
+            orgVM.showPhoneTable4 = true;
+          }else{
+            orgVM.phone4 = ''
+            orgVM.repeatPhonesTable4=[];
+            orgVM.showPhoneTable4 = false;
+          }
+          if(map.phone5){
+            orgVM.phone5 = map.phones[4]
+            orgVM.repeatPhonesTable5=map.phone5;
+            orgVM.showPhoneTable5 = true;
+          }else{
+            orgVM.phone5 = map.phones[4]
+            orgVM.repeatPhonesTable5=[];
+            orgVM.showPhoneTable5 = false;
+          }
+          orgVM.repeatPhonesDialog=true;
+        })  .catch(function (error) {
+          console.log(error);
+        });
 
-                    if(null !==response && response.data !=null && response.data.code=='0'){
-                        var clueRepetitionDTO = response.data.data;
-                        if(text == "***") {
-                            orgVM.cusPhoneId = text;
-                        } else {
-                            orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
-                        }
-                        orgVM.remarkId = clueRepetitionDTO.remark;
-                        orgVM.dealRemarkId = clueRepetitionDTO.dealRemark;
-                        if(clueRepetitionDTO.status ==0){
-                            orgVM.statusId = "待处理" ;
-                            orgVM.dealStatusId = "";
-                        }else{
-                            orgVM.statusId = "已处理" ;
-                            if(clueRepetitionDTO.dealStatus ==0){
-                                orgVM.dealStatusId = "不重单";
-                            }else{
-                                orgVM.dealStatusId = "重单";
-                                orgVM.isShow=true;
-                                if(clueRepetitionDTO.clueRepetitionDTOs !=null){
-                                    orgVM.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs;
-                                }
-                            }
+      },
+      repeatDetailButton(row) {//重复手机号按钮点击
+        console.log(row);
+        var param ={};
+        param.repeatId = row.repeatId;
+        console.info(param);
+        axios.post('/clue/cluerepetition/getRepeatDetailsByRepeatId', param)
+        .then(function (response) {
+          var result =  response.data.data;
+          console.info(result);
+          if(result.payDetailDTOs !=null && result.payDetailDTOs.length>0){
+            orgVM.repeatDetaildialogFormVisible = true;
+            orgVM.detailList = result.payDetailDTOs;
+          }else{
+            orgVM.payDetailList = result.clueRepetitionDTOs;
+            orgVM.repeatPayDetaildialogFormVisible= true;
+          }
 
-                        }
-                    }else{
-                        alert(response.data.data.msg);
-                        return ;
-                    }
-                }).catch(function (error) {
-                    console.log(error);
-                })
-                    .then(function () {
-                        // always executed
-                    });
-            },
-            cancelButton(){
-                this.$confirm("确定要撤销选中的重单申请?", '撤销申请', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    // 查询 table 需要数据
-                    var param = {};
-                    var deleInfo=this.multipleSelection;
-                    var ids="";
-                    if(null!=deleInfo){
-                        for ( var i = 0; i <deleInfo.length; i++){
-                            if("" == ids){
-                                ids = deleInfo[i].id
-                            }else{
-                                ids = ids+","+deleInfo[i].id
-                            }
-                        }
-                        var param={};
-                        param.ids=ids;
-                        axios.post('/invitearea/deleInviteArea',param).then(function (response) {
-                            console.log(response);
-                            if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/invitearea/inviteAreaList";
-                            }else{
-                                alert(response.data.data.msg);
-                                return ;
-                            }
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
-                            .then(function () {
-                                // always executed
-                            });
+        })  .catch(function (error) {
+          console.log(error);
+        });
 
-                    }
-                }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '已取消删除'
-                    });
-                });
-            },
-            search(){
-                this.pager.currentPage = 1;
-                this.queryRepeatPage();
-            },
-            handleSelectionChange(val) {
-                this.multipleSelection = val;
-            },
-            transformStatus(row, column, cellValue, index) {
-                var text="";
-                if(cellValue=="0"){
-                    text="启用"
-                }else if(cellValue=="1"){
-                    text="禁用"
-                }
-                return text;
-            },
-            addCent(value){
-                return value.repeatRatio+"%";
-            },
-            paytype(row, column, cellValue, index) {
-                var text="";
-                if(cellValue=="1"){
-                    text="全款"
-                }else if(cellValue=="2"){
-                    text="定金"
-                }else if(cellValue=="3"){
-                    text="追加定金"
-                }else if(cellValue=="4"){
-                    text="尾款"
-                }
-                return text;
-            },
-            payMode(row, column, value, index) {
-                var valText="";
-                if(!value){
-                    return valText;
-                }
-                var vals = value.split(",");
-                if(payModeItem){
-                    for(var j = 0 ; j < vals.length;j++  ){
-                        for(var i = 0; i < payModeItem.length ; i++){
-                            if(payModeItem[i].value == vals[j]){
-                                if(j==0){
-                                    valText += payModeItem[i].name;
-                                }else{
-                                    valText += ","+payModeItem[i].name;
-                                }
-
-                            }
-                        }
-                    }
-                }
-                return valText;
-            },
-            repeatPhonesClick(row) {//重复手机号按钮点击
-                console.log(row);
-                this.dailogTitleType=row.clueId;
-                var param ={};
-                param.id = row.clueId;
-                param.clueId = row.clueId;
-                param.cusPhone = row.cusPhone;
-                //自定义参数，为0时不走移除自身资源方法
-                param.isRemove = 0;
-                if((roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
-                    ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
-                    ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)
-                    || row.phase ==7 || row.phase == 8){
-                    this.$message({
-                        message: "当前资源已释放到公有池，不允许进行重复手机号资源的查看",
-                        type: 'error'
-                    });
-                    return;
-                }
-                this.repeatPhonesDialog=true;
-                axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
-                    var map = response.data.data;
-                    debugger
-                    if(map.phone){
-                        orgVM.phone = map.phones[0]
-                        orgVM.repeatPhonesTable=map.phone;
-                        orgVM.showPhoneTable = true;
-                    }else{
-                        orgVM.phone = '';
-                        orgVM.repeatPhonesTable=[];
-                        orgVM.showPhoneTable = false;
-                    }
-                    if(map.phone2){
-                        orgVM.phone2 = map.phones[1]
-                        orgVM.repeatPhonesTable2=map.phone2;
-                        orgVM.showPhoneTable2 = true;
-                    }else{
-                        orgVM.phone2 ='';
-                        orgVM.repeatPhonesTable2=[];
-                        orgVM.showPhoneTable2 = false;
-                    }
-                    if(map.phone3){
-                        orgVM.phone3 = map.phones[2]
-                        orgVM.repeatPhonesTable3=map.phone3;
-                        orgVM.showPhoneTable3 = true;
-                    }else{
-                        orgVM.phone3 = '';
-                        orgVM.repeatPhonesTable3=[];
-                        orgVM.showPhoneTable3 = false;
-                    }
-                    if(map.phone4){
-                        orgVM.phone4 = map.phones[3]
-                        orgVM.repeatPhonesTable4=map.phone4;
-                        orgVM.showPhoneTable4 = true;
-                    }else{
-                        orgVM.phone4 = ''
-                        orgVM.repeatPhonesTable4=[];
-                        orgVM.showPhoneTable4 = false;
-                    }
-                    if(map.phone5){
-                        orgVM.phone5 = map.phones[4]
-                        orgVM.repeatPhonesTable5=map.phone5;
-                        orgVM.showPhoneTable5 = true;
-                    }else{
-                        orgVM.phone5 = map.phones[4]
-                        orgVM.repeatPhonesTable5=[];
-                        orgVM.showPhoneTable5 = false;
-                    }
-                    orgVM.repeatPhonesDialog=true;
-                })  .catch(function (error) {
-                    console.log(error);
-                });
-
-            },
-            repeatDetailButton(row) {//重复手机号按钮点击
-                console.log(row);
-                var param ={};
-                param.repeatId = row.repeatId;
-                console.info(param);
-                axios.post('/clue/cluerepetition/getRepeatDetailsByRepeatId', param)
-                    .then(function (response) {
-                        var result =  response.data.data;
-                        console.info(result);
-                        if(result.payDetailDTOs !=null && result.payDetailDTOs.length>0){
-                            orgVM.repeatDetaildialogFormVisible = true;
-                            orgVM.detailList = result.payDetailDTOs;
-                        }else{
-                            orgVM.payDetailList = result.clueRepetitionDTOs;
-                            orgVM.repeatPayDetaildialogFormVisible= true;
-                        }
-
-                    })  .catch(function (error) {
-                    console.log(error);
-                });
-
-            },
-        },
-        created(){
-            // 取页数存储
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
-            this.queryRepeatPage();
-            document.getElementById('organizationManage').style.display = 'block';
-        }//created方法 结束
-    })
+      },
+    },
+    created(){
+      // 取页数存储
+      var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+      if(localVal){this.pager.pageSize = localVal;}
+      this.queryRepeatPage();
+      document.getElementById('organizationManage').style.display = 'block';
+    }//created方法 结束
+  })
 </script>
 </html>
