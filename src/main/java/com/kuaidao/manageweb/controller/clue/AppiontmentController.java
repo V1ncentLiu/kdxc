@@ -1,6 +1,8 @@
 
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.common.entity.IdEntity;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -84,16 +86,23 @@ public class AppiontmentController {
     public String initAppiontmentList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
-
+        String ownOrgId = "";
         // 如果当前登录的为电销总监,查询所有下属电销员工
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
+            List<OrganizationDTO> orgList = new ArrayList<OrganizationDTO>();
             UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
             userOrgRoleReq.setOrgId(user.getOrgId());
             userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
             JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                     userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
             request.setAttribute("userList", listByOrgAndRole.getData());
-
+            ownOrgId =  String.valueOf(user.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
+            request.setAttribute("ownOrgId", ownOrgId);
         } else if (roleList != null
                 && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
             // 如果当前登录的为电销副总,查询所有下属电销组
@@ -253,7 +262,7 @@ public class AppiontmentController {
     /**
      * 修改预约来访信息
      * 
-     * @param orgDTO
+     * @param clueAppiontmentReq
      * @return
      */
     @PostMapping("/updateAppiontment")
@@ -279,7 +288,7 @@ public class AppiontmentController {
     /**
      * 删除预约来访信息
      * 
-     * @param orgDTO
+     * @param idList
      * @return
      */
     @PostMapping("/deleteAppiontment")
@@ -310,8 +319,7 @@ public class AppiontmentController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -334,5 +342,23 @@ public class AppiontmentController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 }

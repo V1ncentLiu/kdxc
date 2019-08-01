@@ -159,13 +159,13 @@ public class ConsoleController {
         String path = "";
 
         if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
-        	IdEntityLong idEntityLong = new IdEntityLong();
+            IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getId());
             JSONResult<DashboardTeleSaleDto> jsonResult = dashboardTeleSaleFeignClient
-                .findDashboardTeleSaleByUserId(idEntityLong);
+                    .findDashboardTeleSaleByUserId(idEntityLong);
             DashboardTeleSaleDto dashboardTeleSaleDto = new DashboardTeleSaleDto();
             if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
-            	dashboardTeleSaleDto = jsonResult.getData();
+                dashboardTeleSaleDto = jsonResult.getData();
             }
             request.setAttribute("dashboardTelSale", dashboardTeleSaleDto);
             // 电销顾问
@@ -180,7 +180,7 @@ public class ConsoleController {
             request.setAttribute("saleList", userList);
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getOrgId());
-            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByOrgId(idEntityLong);
+            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByUserId(idEntityLong);
             DashboardTeleGroupDto data = dashboard.getData();
             if (data == null) {
                 data = new DashboardTeleGroupDto();
@@ -205,7 +205,7 @@ public class ConsoleController {
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getId());
             JSONResult<BusSaleDTO> dashboard = dashboardSaleFeignClient
-                .findDataByUserId(idEntityLong);
+                    .findDataByUserId(idEntityLong);
             BusSaleDTO data = dashboard.getData();
             if(data==null){
                 data = new BusSaleDTO();
@@ -593,21 +593,21 @@ public class ConsoleController {
     }
 
     /*   *//**
-            * 商务经理当月签约数
-            *
-            * @param businessConsoleReqDTO
-            * @return
-            *//*
-              * @RequestMapping("/countCurMonthSignedNum")
-              *
-              * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
-              * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-              * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
-              * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
-              * Date(); businessConsoleReqDTO.setEndTime(curDate);
-              * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
-              * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
-              */
+     * 商务经理当月签约数
+     *
+     * @param businessConsoleReqDTO
+     * @return
+     *//*
+     * @RequestMapping("/countCurMonthSignedNum")
+     *
+     * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
+     * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+     * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
+     * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
+     * Date(); businessConsoleReqDTO.setEndTime(curDate);
+     * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
+     * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
+     */
 
 
     /**

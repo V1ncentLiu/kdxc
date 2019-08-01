@@ -1,9 +1,9 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
-      teleGroupList:teleGroupList,
+        audioShow:false,
+        isShow:false,
     	formLabelWidth:'120px',
-      isDXZDisabled:false,
 	    pager:{//组织列表pager
           total: 0,
           currentPage: 1,
@@ -11,14 +11,23 @@ var myCallRecordVm = new Vue({
         },
         totalTalkTime:0,
         callRecordData:[],
-        callStatus:[{
-            value: "1",
-            label: '接通'
-        }, {
+        callStatus:[
+          {
+                value: "-1",
+                label: '全部'
+          },
+        {
             value: "0",
             label: '未接通'
+        }, {
+            value: "1",
+            label: '已接通'
         }],
-        callTypeList:[{
+        callTypeList:[
+        	{
+                value: "-1",
+                label: '全部'
+            },{
             value: "1",
             label: '呼入'
         }, {
@@ -26,70 +35,96 @@ var myCallRecordVm = new Vue({
             label: '外呼'
         }],
         searchForm:{
+        	callStatus:'',
+        	customerName:'',
+        	customerPhone:'',
+        	callType:'',
         	startTime:'',
         	endTime:'',
-        	accoutName:'',
-          teleGroupId:ownOrgId,
+        	cno:'',
+        	bindPhone:'',
+        	accountId:'',
+        	teleGroupId:'',
+        		
         },
-      tmList:[]
+      hwGroupList:hwGroupList,//话务组
+      hwzyList:[],
     },
     methods:{
-      changeTeleGroup(selectedValue){
+      changeHwGroup(selectedValue){
         this.tmList=[];
         if(!selectedValue){
           return;
         }
         var param ={};
         param.orgId = selectedValue;
-        param.roleCode="DXCYGW";
-        param.statusList =[1,3];
+        param.roleCode="HWY";
         axios.post('/user/userManager/listByOrgAndRole', param)
         .then(function (response) {
           var result =  response.data;
           var table=result.data;
-          myCallRecordVm.tmList= table;
+          myCallRecordVm.hwzyList= table;
         })
         .catch(function (error) {
           console.log(error);
         });
       },
-      clearTeleGroupList(selectedValue){
-        this.teleGroupList= [];
-        this.tmList=[];
-        this.searchForm.accountId='';
-        this.searchForm.teleGroupId='';
+      transCusPhone(row) {
+        var text="";
+        if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
+          text ="***"
+        }else{
+          text = row.customerPhone;
+        }
+        return text;
       },
     	initCallRecordData(){
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
     		 var startTimestamp = Date.parse(new Date(startTime));
-    		 var endTimestamp = new Date(endTime);
-    		 if(startTimestamp> endTimestamp){
-    			 this.$message({
-                     message: '开始时间必须小于结束时间',
-                     type: 'warning'
-                   });
-                 return;
-             }
+    		 if(endTime){
+    			 var endTimestamp = new Date(endTime);
+        		 if(startTimestamp> endTimestamp){
+        			 this.$message({
+                         message: '开始时间必须小于结束时间',
+                         type: 'warning'
+                       });
+                     return;
+                 }
+    			 
+    		 }
+    		 var callStatus = this.searchForm.callStatus;
+    		 if(callStatus=='-1'){
+    			 this.searchForm.callStatus='';
+    		 }
+    		 var callType = this.searchForm.callType;
+    		 if(callType=='-1'){
+    			 this.searchForm.callType='';
+    		 }
     		 var param = this.searchForm;
-          var accountId =this.searchForm.accountId;
-          if(accountId){
-            var accountIdArr = new Array();
-            accountIdArr.push(accountId);
-            param.accountIdList=accountIdArr;
-          }else{
-            param.accountIdList=[];
-          }
+    		 var accountId =this.searchForm.accountId;
+    		 if(accountId){
+    			 var accountIdArr = new Array();
+    			 accountIdArr.push(accountId);
+    			 param.accountIdList=accountIdArr;
+    		 }else{
+    			 param.accountIdList=[];
+    		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
-        	 axios.post('/call/callRecord/listAllTmCallTalkTime',param)
+        	 axios.post('/traffic/callRecord/listAllHwCallRecord',param)
              .then(function (response) {
-            	 var data =  response.data
+            	 
+            	 var data =  response.data;
                  if(data.code=='0'){
                  	var resData = data.data;
                  	var callRecordData = resData.data;
+                 	var callRecordDataData = callRecordData.data;
+                   for(var i=0;i<callRecordDataData.length;i++){
+                     callRecordDataData[i].customerPhone=callRecordDataData[i];
+                   }
                  	myCallRecordVm.callRecordData= callRecordData.data;
-                 	myCallRecordVm.totalTalkTime = resData.totalTalktime;
+                 	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
                   //3.分页组件
                  	myCallRecordVm.pager.total= callRecordData.total;
                  	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
@@ -110,7 +145,7 @@ var myCallRecordVm = new Vue({
     		var valText="";
     		if(value=="1"){
     			valText="呼入";
-    		}else if(value=="2"){
+    		}else if(value=="3"){
     			valText="外呼";
     		}
     		
@@ -130,6 +165,7 @@ var myCallRecordVm = new Vue({
     		var valText="";
     		if(value){
     			valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+    			//valText = new Date(value).format("yyyy-MM-dd hh:mm:ss");
     		}
     		return valText;
     	},
@@ -218,7 +254,97 @@ var myCallRecordVm = new Vue({
   	        this.searchForm.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
             this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             this.initCallRecordData();
-    	}
+    	},
+    	downloadAudio(id,url,callSource){
+    		 var param = {};
+    		 param.id=id;
+    	   	 axios.post('/call/callRecord/getRecordFile',param)
+             .then(function (response) {
+            	 var data =  response.data;
+                 if(data.code=='0'){
+                	 var url = data.data;
+                	 if(url){
+                		 var fileName = url.split('?')[0];
+                		 var fileNameArr= fileName.split("/");
+            			 var x=new XMLHttpRequest();
+            			 x.open("GET", url, true);
+            			 x.responseType = 'blob';
+            			 x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+            			 x.send();
+                	 }
+                     
+                 }else{
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                	 console.error(data);
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
+    		
+    	},
+    	switchSoundBtn(id,url,callSource){
+            debugger
+            this.audioShow=true;
+    		if(callSource=='2'){
+                switchSound(id,url);
+    			return;
+    		}
+    		 var param = {};
+    		 param.id=id;
+    	   	 axios.post('/call/callRecord/getRecordFile',param)
+             .then(function (response) {
+            	 var data =  response.data
+                 if(data.code=='0'){
+                	 var url = data.data;
+                	 switchSound(id,url);                     
+                 }else{
+                	 console.error(data);
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
+    	},
+        toogleClick(){
+            if(this.isShow){
+                this.isShow=false
+            }else{
+                this.isShow=true
+            }
+        },
+        changeTeleGroup(selectedValue){
+        	this.tmList=[];
+        	if(!selectedValue){
+                return;
+            }
+            var param ={};
+          param.orgId = selectedValue;
+          param.roleCode="DXCYGW";
+          param.statusList =[1,3];
+            axios.post('/user/userManager/listByOrgAndRole', param)
+            .then(function (response) {
+                  var result =  response.data;
+                  var table=result.data;
+                  myCallRecordVm.tmList= table;
+            })
+            .catch(function (error) {
+                 console.log(error);
+            });
+        },
+        clearTeleGroupList(selectedValue){
+        	this.teleGroupList= [];
+        	this.tmList=[];
+        	this.searchForm.accountId='';
+        	this.searchForm.teleGroupId='';
+        }
+
+
     },
     created(){
 		var a = new Date();
@@ -227,21 +353,14 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-        // 取页数存储
-        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;}
-        if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
-        this.initCallRecordData();
+    	
+      this.initCallRecordData();
    },
    mounted(){
      	document.getElementById('myCallRecordVm').style.display = 'block';
      },
      filters:{
     	 fomatSeconds2(s){
-    		 if(!s){
-    			 return "00小时00分钟00秒";
-    		 }
-    		
      		var t="";
      		var hour = Math.floor(s/3600);
      		 var min = Math.floor(s/60) % 60;

@@ -105,6 +105,7 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
+        String ownOrgId = "";
         //商学院处理
         boolean isBusinessAcademy = false;
         Long curOrgId = curLoginUser.getOrgId();
@@ -149,7 +150,9 @@ public class CallRecordController {
         if(!isBusinessAcademy) {
             //非商学院
             if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                ownOrgId =  String.valueOf(curLoginUser.getOrgId());
                 request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
+                request.setAttribute("ownOrgId", ownOrgId);
             } else {
                 request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
             }
@@ -261,8 +264,11 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
+        String ownOrgId = "";
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             request.setAttribute("teleGroupList",getCurTeleGroupList(orgId));
+            ownOrgId =  String.valueOf(curLoginUser.getOrgId());
+            request.setAttribute("ownOrgId", ownOrgId);
         }else {
             request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
         }

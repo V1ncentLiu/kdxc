@@ -3,6 +3,7 @@ var myCallRecordVm = new Vue({
     data: {
         audioShow:false,
         isShow:false,
+      isDXZDisabled:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -53,7 +54,6 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        // if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
         if((roleCode =='DXCYGW' && (row.accountId !=undefined && row.accountId!=userId)) || ((row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
           text ="***"
         }else{
@@ -258,6 +258,13 @@ var myCallRecordVm = new Vue({
             this.initCallRecordData();
     	},
     	downloadAudio(id,url,callSource){
+      	     if(roleCode =='ZCBWY'){
+                 this.$message({
+                     message: '您没有下载权限',
+                     type: 'warning'
+                 });
+                 return;
+             }
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)

@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.visit;
 
+import com.kuaidao.common.entity.IdEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,6 +81,22 @@ public class VisitRecordController {
     @RequiresPermissions("aggregation:visitRecord:view")
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request) {
+        String ownOrgId = "";
+        List<OrganizationDTO> businessGroupList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            ownOrgId = String.valueOf(curLoginUser.getOrgId());
+            //商务总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                businessGroupList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("businessGroupList", businessGroupList);
+            request.setAttribute("ownOrgId", ownOrgId);
+        }
         /*
          * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
          * curLoginUser.getOrgId(); // 签约项目 List<ProjectInfoDTO> projectList = getProjectList(); //
@@ -105,16 +122,31 @@ public class VisitRecordController {
     @RequiresPermissions("aggregation:visitRecord:view")
     @RequestMapping("/noVisitRecordPage")
     public String noVisitRecordPage(HttpServletRequest request) {
+        String ownOrgId = "";
+        List<OrganizationDTO> businessGroupList = new ArrayList<>();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
         Long orgId = curLoginUser.getOrgId();
         // 签约项目
         List<ProjectInfoDTO> projectList = getProjectList();
         // 商务小组
-        List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId, OrgTypeConstant.SWZ);
+//        List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId, OrgTypeConstant.SWZ);
         // 商务经理
         List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name());
         // 签约省份
         JSONResult<List<SysRegionDTO>> proviceJr = sysRegionFeignClient.getproviceList();
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            ownOrgId = String.valueOf(curLoginUser.getOrgId());
+            //商务总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                businessGroupList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("businessGroupList", businessGroupList);
+            request.setAttribute("ownOrgId", ownOrgId);
+        }
         // 公司
         // List<OrganizationDTO> companyList = getBusinessGroupList(orgId,
         // OrgTypeConstant.ZSZX);
@@ -303,19 +335,23 @@ public class VisitRecordController {
         List<Long> busGroupIdList = new ArrayList<Long>();
 
         if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
-            // 查询下级所有商务组
-            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-            queryDTO.setParentId(orgId);
-            queryDTO.setOrgType(OrgTypeConstant.SWZ);
-            JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+            if(null != visitNoRecordReqDTO.getBusGroupId()){
+                busGroupIdList.add(visitNoRecordReqDTO.getBusGroupId());
+            } else {
+                // 查询下级所有商务组
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setParentId(orgId);
+                queryDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                     organizationFeignClient.queryOrgByParam(queryDTO);
-            List<OrganizationRespDTO> data = queryOrgByParam.getData();
-            if (CollectionUtils.isEmpty(data)) {
-                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                List<OrganizationRespDTO> data = queryOrgByParam.getData();
+                if (CollectionUtils.isEmpty(data)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                         "该用户下没有下属");
-            }
-            for (OrganizationRespDTO organizationRespDTO : data) {
-                busGroupIdList.add(organizationRespDTO.getId());
+                }
+                for (OrganizationRespDTO organizationRespDTO : data) {
+                    busGroupIdList.add(organizationRespDTO.getId());
+                }
             }
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             busGroupIdList.add(orgId);
@@ -431,8 +467,7 @@ public class VisitRecordController {
 
     /***
      * 签约省份
-     * 
-     * @param result
+     *
      * @return
      */
     @ResponseBody
@@ -441,6 +476,24 @@ public class VisitRecordController {
         SysRegionDTO sysRegionDTO = new SysRegionDTO();
         sysRegionDTO.setType(0);
         return sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 
 }
