@@ -7,18 +7,12 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import javax.validation.Valid;
-import java.util.List;
 
 
 /**

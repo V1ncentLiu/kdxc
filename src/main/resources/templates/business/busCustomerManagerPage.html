@@ -105,7 +105,7 @@
                     </el-form-item>
                     <el-form-item label="商务组:" prop="busGroupId">
                         <el-select v-model="searchForm.busGroupId" clearable @change="getBusSaleList(1)"
-                                   placeholder="商务组" filterable>
+                                   placeholder="商务组" filterable :disabled="isSWZDisabled">
                             <el-option v-for="item in busGroupOptions" :key="item.id" :label="item.name"
                                        :value="item.id"></el-option>
                         </el-select>
@@ -868,6 +868,7 @@
     var storefrontAreaList = [[${storefrontAreaList}]];//店铺面积
     var ussmList = [[${ussmList}]];//投资金额
     var purTypeList = [[${purTypeList}]] // 意向品类
+    var ownOrgId=[[${ownOrgId}]];//商务总监商务组
 
     var customerVM = new Vue({
         el: '#clueManage',
@@ -879,6 +880,7 @@
             hisDatas: [],
             notVisitData: [],
             showTabNotVisitData: false,
+            isSWZDisabled:false,
             editableTabs: [],
             searchForm: {
                 visitStatus: '',
@@ -888,7 +890,7 @@
                 tasteProjectId: '',
                 province: '',
                 isView: '',
-                busGroupId: '',
+                busGroupId: ownOrgId,
                 busDirectorId: '',
                 busSaleId: '',
                 cusName: '',
@@ -1019,7 +1021,7 @@
                 tasteProjectId: '',
                 province: '',
                 isView: '',
-                busGroupId: '',
+                busGroupId: ownOrgId,
                 busDirectorId: '',
                 busSaleId: '',
                 cusName: '',
@@ -1780,6 +1782,7 @@
                 // 取页数存储
                 var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
                 if(localVal){this.pager.pageSize = localVal;}
+                if(ownOrgId){this.isSWZDisabled= true;}//商务总监商务组筛选按钮不可点击
             };
             console.info("create method");
             this.searchTable();
