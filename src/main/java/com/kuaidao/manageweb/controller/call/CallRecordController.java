@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -345,11 +346,23 @@ public class CallRecordController {
                        return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                                "该电销总监下无顾问");
                    }
-                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                   List<Long> idList = userList.parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3).map(user -> user.getId())
                            .collect(Collectors.toList());
                    idList.add(curLoginUser.getId());
                    myCallRecordReqDTO.setAccountIdList(idList);
-
+               }else if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
+                   //总裁办文员
+                   UserOrgRoleReq req = new UserOrgRoleReq();
+                   req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                   req.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
+                   JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                   if(userJr.getData()==null || userJr.getData().isEmpty()){
+                       return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                               "没有数据");
+                   }
+                   List<Long> idList = userJr.getData().parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
                } else {
                    // 其他角色
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
