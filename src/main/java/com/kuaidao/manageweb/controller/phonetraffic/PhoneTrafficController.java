@@ -163,7 +163,8 @@ public class PhoneTrafficController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && roleList.get(0) != null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                    || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+                    || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())
+                    ||RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
                 request.setAttribute("phtrafficList", phTrafficList());
                 flag = AggregationConstant.NO;
             } else {
@@ -175,6 +176,7 @@ public class PhoneTrafficController {
                 request.setAttribute("phtrafficList", map);
             }
         }
+        request.setAttribute("roleCode",roleList.get(0).getRoleCode());
         request.setAttribute("editflag", flag);
         return "phonetraffic/customManagement";
     }
@@ -193,7 +195,8 @@ public class PhoneTrafficController {
         // 权限相关代码
         if (roleList != null && roleList.get(0) != null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                    || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+                    || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode()) ||
+                    RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
                 // 这样的逻辑 下管理员能够看见电销的数据。
                 if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
                     param.setPhTraDirectorId(user.getId());
@@ -442,6 +445,10 @@ public class PhoneTrafficController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         request.setAttribute("loginUserId", user.getId());
+        //话务经理 调整到查看页
+        if(RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())){
+             return "phonetraffic/viewCustomerMaintenance";
+        }
         return "phonetraffic/editCustomerMaintenance";
     }
 
