@@ -669,7 +669,12 @@ public class ExtendClueAgendaTaskController {
         // 资源类型<value,name>
         Map<String, String> accountNameMap2 = dicMapTwo(
             itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
-
+        // 系统参数优化资源类别
+        String opt = getSysSetting(SysConstant.OPT_CATEGORY);
+        List<String> optList = stringToList(opt);
+        // 系统参数非优化资源类别
+        String notOpt = getSysSetting(SysConstant.NOPT_CATEGORY);
+        List<String> notOptList = stringToList(notOpt);
         if (list != null && list.size() > 0) {
 
             for (ClueAgendaTaskDTO clueAgendaTaskDTO1 : list) {
@@ -868,22 +873,37 @@ public class ExtendClueAgendaTaskController {
                         reasonIsNull.append("、媒介");
                     }
                 }
-                // 判断是否存在该项目
-                if (clueAgendaTaskDTO1.getProjectName() != null
-                    && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                    // 去掉前后空格
-                    clueAgendaTaskDTO1.setProjectName(clueAgendaTaskDTO1.getProjectName().trim());
-                    // 去掉前后空格后是否为空
+                //判断是否具有合格的资源类别,若没有则不进行项目校验
+                if(null!=clueAgendaTaskDTO1.getCategory()) {
+                    // 判断是否存在该项目
                     if (clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                        clueAgendaTaskDTO1.setProjectId(
-                            projectMap.get(clueAgendaTaskDTO1.getProjectName().toUpperCase()));
-                        if (clueAgendaTaskDTO1.getProjectId() == null) {
+                        // 去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setProjectName(clueAgendaTaskDTO1.getProjectName().trim());
+                        // 去掉前后空格后是否为空
+                        if (clueAgendaTaskDTO1.getProjectName() != null
+                            && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
+                            //判断资源是否优化类，优化类则不进行项目匹配
+                            if(notOptList.contains(String.valueOf(clueAgendaTaskDTO1.getCategory()))) {
+                                clueAgendaTaskDTO1.setProjectId(
+                                    projectMap
+                                        .get(clueAgendaTaskDTO1.getProjectName().toUpperCase()));
+                                if (clueAgendaTaskDTO1.getProjectId() == null) {
+                                    islegal = false;
+                                    if (StringUtils.isBlank(reasonIsNotMatch)) {
+                                        reasonIsNotMatch.append("资源项目(项目名称)");
+                                    } else {
+                                        reasonIsNotMatch.append("、资源项目(项目名称)");
+                                    }
+                                }
+                            }
+                        } else {
                             islegal = false;
-                            if (StringUtils.isBlank(reasonIsNotMatch)) {
-                                reasonIsNotMatch.append("资源项目(项目名称)");
+                            if (StringUtils.isBlank(reasonIsNull)) {
+                                reasonIsNull.append("资源项目(项目名称)");
                             } else {
-                                reasonIsNotMatch.append("、资源项目(项目名称)");
+                                reasonIsNull.append("、资源项目(项目名称)");
                             }
                         }
                     } else {
@@ -893,13 +913,6 @@ public class ExtendClueAgendaTaskController {
                         } else {
                             reasonIsNull.append("、资源项目(项目名称)");
                         }
-                    }
-                } else {
-                    islegal = false;
-                    if (StringUtils.isBlank(reasonIsNull)) {
-                        reasonIsNull.append("资源项目(项目名称)");
-                    } else {
-                        reasonIsNull.append("、资源项目(项目名称)");
                     }
                 }
                 if (clueAgendaTaskDTO1.getIndustryCategoryName() != null
@@ -1354,5 +1367,21 @@ public class ExtendClueAgendaTaskController {
             return byCode.getData().getValue();
         }
         return null;
+    }
+
+    /**
+     * 优化非优化系统参数字符串转list
+     *
+     * @return
+     */
+    private List<String> stringToList(String setting) {
+        List<String> categoryList = new ArrayList<String>();
+        if (StringUtils.isNotBlank(setting)) {
+            String[] split = setting.split(",");
+            for (String string : split) {
+                categoryList.add(string);
+            }
+        }
+        return categoryList;
     }
 }

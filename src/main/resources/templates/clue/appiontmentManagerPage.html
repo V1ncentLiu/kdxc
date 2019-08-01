@@ -43,7 +43,7 @@
                   </el-select>
                 </el-form-item> -->
                 <el-form-item label="电销组:" class="formItem"  prop="teleGorupId">
-                    <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable>
+                    <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable :disabled="isDXZDisabled">
                         <el-option
                                 v-for="item in teleGorupOptions"
                                 :key="item.id"
@@ -448,17 +448,19 @@
     var userId = [[${userId}]]+"";
     var roleCode = [[${roleCode}]];
     var orgId = [[${orgId}]]+"";
+    var ownOrgId=[[${ownOrgId}]];//电销总监电销组
     var appiontmentVM = new Vue({
         el: '#appiontmentManage',
         data: {
             paginationShow: false,
             isShow:false,
             btnDisabled: false,
+            isDXZDisabled:false,
             appiontmentSearchForm: {
                 startTime: '',
                 endTime: '',
                 teleDeptId: '',
-                teleGorupId: '',
+                teleGorupId:ownOrgId,
                 teleSaleId: '',
                 projectId: '',
                 cusName: '',
@@ -541,7 +543,7 @@
                 startTime: '',
                 endTime: '',
                 teleDeptId: '',
-                teleGorupId: '',
+                teleGorupId:ownOrgId,
                 teleSaleId: '',
                 projectId: '',
                 cusName: '',
@@ -1272,6 +1274,7 @@
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+            if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
             this.initColumn();
             this.searchTable();
             this.currentBusArea();

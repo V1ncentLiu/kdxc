@@ -39,7 +39,7 @@
                     <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
                 </el-form-item>
                 <el-form-item label="电销组:" prop="teleGorupId">
-                    <el-select v-model="clueSearchForm.teleGorupId" clearable placeholder="电销组" style="width: 100%;">
+                    <el-select v-model="clueSearchForm.teleGorupId" clearable placeholder="电销组" style="width: 100%;" :disabled="isDXZDisabled">
                         <el-option
                                 v-for="item in teleGorupOptions"
                                 :key="item.id"
@@ -467,17 +467,19 @@
     var phCustomerStatusList=[[${phCustomerStatusList}]];//话务一级客户状态
     var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户状态
     var levelList=[[${levelList}]];//客户级别
+    var ownOrgId=[[${ownOrgId}]];//电销总监电销组
     var clueVM = new Vue({
         el: '#clueManage',
         data: {
             paginationShow: false,
             isDisabled:false,//默认不可点击
             isShow:false,
+            isDXZDisabled:false,
             clueSearchForm: {
                 phone: '',
                 cusName: '',
                 category: '',
-                teleGorupId: '',
+                teleGorupId:ownOrgId,
                 type: '',
                 startTime: '',
                 endTime: '',
@@ -578,7 +580,7 @@
                 phone: '',
                 cusName: '',
                 category: '',
-                teleGorupId: '',
+                teleGorupId: ownOrgId,
                 type: '',
                 startTime: '',
                 endTime: '',
@@ -1238,6 +1240,7 @@
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+            if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
             this.initColumn();
             this.searchTable();
 

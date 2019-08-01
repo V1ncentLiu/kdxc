@@ -186,7 +186,7 @@
                     </el-form-item>
 
                     <el-form-item label="电销组:">
-                        <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                        <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDXZDisabled">
                             <el-option
                                     v-for="item in orgTeleArr"
                                     :key="item.id"
@@ -690,6 +690,7 @@
     var queryOrg=[[${queryOrg}]];//电销组
     var fieldList=[[${fieldList}]];//自定义字段
     var userFieldList=[[${userFieldList}]];//用户自定义字段
+    var ownOrgId=[[${ownOrgId}]];//电销总监电销组
     // var userFieldList=[];
     var  customerManVM=new Vue({
         el: '#myCustom',
@@ -702,6 +703,7 @@
                 dialogChooseList:false,
                 repeatPhonesDialog:false,
                 allocateFormVisible: false, //分配资源
+                isDXZDisabled:false,
                 dailogTitleType:'',
                 formAllocat:{
                     telSales:''
@@ -812,7 +814,7 @@
                     searchWord:'',
                     address:'',
                     trackingDay:'',
-                    teleorg:'',
+                    teleorg:ownOrgId,
                     teleSaleId:'',
                     clueId:'',
                     qq:"",
@@ -891,7 +893,7 @@
                     searchWord:'',
                     address:'',
                     trackingDay:'',
-                    teleorg:'',
+                    teleorg:ownOrgId,
                     teleSaleId:'',
                     clueId:'',
                     qq:"",
@@ -1482,6 +1484,7 @@
                 var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
                 if(localVal){this.pager.pageSize = localVal;}
             };
+            if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
             //初始化数据列表
             this.initTableData();
             //客户状态
