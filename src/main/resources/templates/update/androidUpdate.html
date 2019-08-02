@@ -24,7 +24,7 @@
         </el-col>
     </el-row>
     <div class="mainSearchBg">        
-        <div class="mainSearchFormBox">
+        <div class="mainSearchFormBox" style="display: none">
           	<el-form :inline="true" class="demo-form-inline mainSearchForm">
                 <el-form-item label="电销组:" label-width="55px">			
           				<el-select filterable v-model="telemarketingTeamId" placeholder="电销组" clearable>
@@ -74,8 +74,19 @@
                 <el-table-column align="center"  prop="beginTime" label="录入时间" :formatter="dateFormat"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="强制升级"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="更新内容"></el-table-column>
-                <el-table-column align="center" prop="status" label="是否在线" :formatter="transformStatus"></el-table-column>
-                <el-table-column align="center" prop="status" label="操作"></el-table-column>
+                <el-table-column align="center" prop="status" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
+                <el-table-column align="center" prop="handle" label="操作">
+                    <template slot-scope="scope">
+                        <el-button  @click="updateButton(scope.row.id,0,'编辑')" type="success"  size="small">编辑</el-button>
+                        <el-button  @click="deleButton(scope.row.id,0,'删除')" type="danger"  size="small">删除</el-button>
+                        <!-- <div v-if="scope.row.status === 1"> -->
+                            <el-button  @click="updateStatus(scope.row.id,0,'上架')" type="warning"  size="small">上架</el-button>
+                        <!-- </div> -->                    
+                        <!-- <div v-else-if="scope.row.status === 0"> -->
+                            <!-- <el-button @click="updateStatus(scope.row.id,1,'下架')"  type="success"  size="small">下架</el-button> -->
+                        <!-- </div> -->                        
+                    </template>
+                </el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
         </el-row> 
@@ -306,28 +317,22 @@
                   
               } ,
             
-              updateButton(){
-            	  this.showTitle="修改布局"
+              updateButton(rowsId){
+            	  this.showTitle="编辑安卓发布"
             	  if (this.$refs['form']!=undefined) {
                  		this.$refs['form'].resetFields();
                  	  }
             	  $("#addOrUpdate").val(2);
             	  //修改菜单数据	
-              	var rows = this.multipleSelection;
-                  if(rows.length!=1){
-                      this.$message({
-                         message: '请选择一条数据进行修改',
-                         type: 'warning'
-                       });
-                      return;
-                  }
+              	var rows = rowsId;
+                 
                   this.dialogFormVisible = true;
                   var param ={};
-                  var str = "";
-                  for ( var i = 0; i <rows.length; i++){
-                	  str = rows[i].id
-                  }
-                  param.id = str;
+                  // var str = "";
+                  // for ( var i = 0; i <rows.length; i++){
+                	 //  str = rows[i].id
+                  // }
+                  param.id = rowsId;
                   axios.post('/telemarketing/findTelemarketingById',param).then(function (response) {
                   	  console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
@@ -618,7 +623,7 @@
               	  
                 },
                 addbutton(){
-                	this.showTitle="添加布局"
+                	this.showTitle="安卓发布"
                 	$("#addOrUpdate").val(1);
                 	this.dialogFormVisible=true;
                 	this.form.beginTime = "";
