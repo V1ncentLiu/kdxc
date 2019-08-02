@@ -183,7 +183,6 @@ public class BusCustomerManagerController {
      */
     @PostMapping("/getSaleList")
     @ResponseBody
-    @RequiresPermissions("aggregation:appiontmentManager:view")
     public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
             HttpServletRequest request) {
         userOrgRoleReq.setRoleCode(RoleCodeEnum.SWJL.name());

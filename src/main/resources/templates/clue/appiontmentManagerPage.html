@@ -1308,7 +1308,22 @@
       // 取页数存储
       var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
       if(localVal){this.pager.pageSize = localVal;}
-      if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
+      if(ownOrgId){
+        this.isDXZDisabled= true;
+        var param ={};
+          param.orgId = ownOrgId;
+          console.info(param);
+          axios.post('/clue/appiontment/getSaleList', param)
+          .then(function (response) {
+            var result =  response.data;
+            console.info(result);
+            var table=result.data;
+            appiontmentVM.teleSaleOptions= table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }//电销总监电销组筛选按钮不可点击
       this.initColumn();
       this.searchTable();
       this.currentBusArea();

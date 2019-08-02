@@ -167,6 +167,8 @@ public class TrafficCallRecordController {
                     myCallRecordReqDTO.setAccountIdList(idList);
                 } else {
                     List<UserInfoDTO> userInfoList = getPhoneTrafficByOrgId(curLoginUser.getOrgId());
+                    List<UserInfoDTO> userHwzgList = getPhoneTrafficUserByOrgId(teleGroupId);
+                    userInfoList.addAll(userHwzgList);
                     if (CollectionUtils.isEmpty(userInfoList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
@@ -213,6 +215,25 @@ public class TrafficCallRecordController {
             logger.error(
                     "查询话务通话记录-获取话务专员-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
                     orgId, userJr);
+            return null;
+        }
+        return userJr.getData();
+    }
+    /**
+     * 话务经理根据orgId 获取主管
+     *
+     * @param orgId
+     * @return
+     */
+    private List<UserInfoDTO> getPhoneTrafficUserByOrgId(Long orgId) {
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(orgId);
+        req.setRoleCode(RoleCodeEnum.HWZG.name());
+        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+            logger.error(
+                "查询话务通话记录-获取话务主管-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                orgId, userJr);
             return null;
         }
         return userJr.getData();

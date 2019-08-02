@@ -354,7 +354,7 @@ public class ExtendClueAgendaTaskController {
         return clueInfo;
     }
     /**
-     * 批量撤回资源
+     * 批量删除资源
      *
      * @param request
      * @param IdListLongReq
@@ -372,7 +372,7 @@ public class ExtendClueAgendaTaskController {
         return clueInfo;
     }
     /**
-     * 删除资源
+     * 撤回资源
      *
      * @param request
      * @param IdListLongReq
