@@ -362,7 +362,23 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-      if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
+        if(ownOrgId){
+    	  this.isDXZDisabled= true;
+    	   var param ={};
+           param.orgId = selectedValue;
+           param.roleCode="DXCYGW";
+           param.statusList =[1,3];
+             axios.post('/user/userManager/listByOrgAndRole', param)
+             .then(function (response) {
+                   var result =  response.data;
+                   var table=result.data;
+                   myCallRecordVm.tmList= table;
+             })
+             .catch(function (error) {
+                  console.log(error);
+             });
+      
+         }//电销总监电销组筛选按钮不可点击
       this.initCallRecordData();
    },
    mounted(){
