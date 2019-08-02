@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -599,28 +603,46 @@ public class PhoneTrafficController {
      * @return
      */
     private Map<String, List<UserInfoDTO>> phTrafficList() {
-        RoleQueryDTO query = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.HWZG.name());
-        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
-        UserInfoDTO user = CommUtil.getCurLoginUser();
         List<UserInfoDTO> userList = new ArrayList();
-        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
-            List<RoleInfoDTO> roleList = roleJson.getData();
-            if (null != roleList && roleList.size() > 0) {
-                RoleInfoDTO roleDto = roleList.get(0);
-                UserInfoPageParam param = new UserInfoPageParam();
-                // param.setRoleId(roleDto.getId()); // 查询该组织下，该角色的全部员工。去掉就是查询全部该组织下的员工
-                param.setOrgId(user.getOrgId());
-                param.setPageSize(10000);
-                param.setPageNum(1);
-                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
-                    PageBean<UserInfoDTO> pageList = userListJson.getData();
-                    userList = pageList.getData();
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        //如果是话务经理
+        if(RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())){
+            OrganizationQueryDTO dto=new OrganizationQueryDTO();
+            dto.setParentId(user.getOrgId());
+            //查询话务经理下所有话务组
+            JSONResult<List<OrganizationRespDTO>> orgListDto= organizationFeignClient.queryOrgByParam(dto);
+            if (JSONResult.SUCCESS.equals(orgListDto.getCode())) {
+                List<OrganizationRespDTO> orglist=orgListDto.getData();
+                for(OrganizationRespDTO org:orglist){
+                    //查询话务组下面的话务员
+                    UserOrgRoleReq req=new UserOrgRoleReq();
+                    req.setRoleCode(RoleCodeEnum.HWY.name());
+                    req.setOrgId(org.getId());
+                    JSONResult<List<UserInfoDTO>> jsonIfo= userInfoFeignClient.listByOrgAndRole(req);
+                    userList.addAll(jsonIfo.getData());
+                }
+            }
+        }else{
+            RoleQueryDTO query = new RoleQueryDTO();
+            query.setRoleCode(RoleCodeEnum.HWZG.name());
+            JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+            if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
+                List<RoleInfoDTO> roleList = roleJson.getData();
+                if (null != roleList && roleList.size() > 0) {
+                    RoleInfoDTO roleDto = roleList.get(0);
+                    UserInfoPageParam param = new UserInfoPageParam();
+                    // param.setRoleId(roleDto.getId()); // 查询该组织下，该角色的全部员工。去掉就是查询全部该组织下的员工
+                    param.setOrgId(user.getOrgId());
+                    param.setPageSize(10000);
+                    param.setPageNum(1);
+                    JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
+                    if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+                        PageBean<UserInfoDTO> pageList = userListJson.getData();
+                        userList = pageList.getData();
+                    }
                 }
             }
         }
-
         // 查询话务总监ID
         Long roleId = null;
         RoleQueryDTO query1 = new RoleQueryDTO();
