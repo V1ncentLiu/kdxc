@@ -158,7 +158,11 @@ public class CallRecordController {
                 request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
             }
         }
-       
+        //总裁办文员-查询所有小物种的电销组
+        if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
+            request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(BusinessLineConstant.XIAOWUZHONG));
+        }
+
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
