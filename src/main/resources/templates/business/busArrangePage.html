@@ -352,7 +352,16 @@ var clueVM = new Vue({
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-          if(ownOrgId){this.isSWZDisabled= true;}//商务总监商务组筛选按钮不可点击
+          if(ownOrgId){
+              this.isSWZDisabled= false;
+            var param={};
+            param.orgId=ownOrgId;
+            param.roleCode="SWJL";
+            param.statusList =[1,3];
+            axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
+              clueVM.busSaleOptions=response.data.data;
+            });
+            }//商务总监商务组筛选按钮不可点击
             this.searchTable();
            
         },
