@@ -123,6 +123,8 @@ public class ResourceEfficiencyController {
             curList.add(ra.getNotConnectNotEffectiveResources());
             curList.add(formatPercent(ra.getFollowRate()));
             curList.add(formatPercent(ra.getFirstRate()));
+            curList.add(formatPercent(ra.getIssuedConnectRate()));
+            curList.add(formatPercent(ra.getIssuedEffectiveRate()));
             curList.add(formatPercent(ra.getResourceConnectRate()));
             curList.add(formatPercent(ra.getResourceEffectiveRate()));
             curList.add(formatPercent(ra.getConnectionRate()));
@@ -134,6 +136,8 @@ public class ResourceEfficiencyController {
             curList.add(ra.getFirstDayNotConnectEffectiveResources());
             curList.add(ra.getFirstDayNotConnectNotEffectiveResources());
             curList.add(formatPercent(ra.getFirstDayFollowRate()));
+            curList.add(formatPercent(ra.getFirstDayIssuedConnectRate()));
+            curList.add(formatPercent(ra.getFirstDayIssuedEffectiveRate()));
             curList.add(formatPercent(ra.getFirstDayResourceConnectRate()));
             curList.add(formatPercent(ra.getFirstDayResourceEffectiveRate()));
             curList.add(formatPercent(ra.getFirstDayConnectionRate()));
@@ -170,8 +174,10 @@ public class ResourceEfficiencyController {
         headTitleList.add("未接通无效资源量");
         headTitleList.add("跟访率");
         headTitleList.add("首次接通率");
-        headTitleList.add("资源接通率");
-        headTitleList.add("资源有效率");
+        headTitleList.add("下发接通率");
+        headTitleList.add("下发有效率");
+        headTitleList.add("跟进接通率");
+        headTitleList.add("跟进有效率");
         headTitleList.add("接通有效率");
         headTitleList.add("首日跟访资源量");
         headTitleList.add("首日接通资源量");
@@ -181,8 +187,10 @@ public class ResourceEfficiencyController {
         headTitleList.add("首日未接通有效资源量");
         headTitleList.add("首日未接通无效资源量");
         headTitleList.add("首日跟访率");
-        headTitleList.add("首日资源接通率");
-        headTitleList.add("首日资源有效率");
+        headTitleList.add("首日下发接通率");
+        headTitleList.add("首日下发有效率");
+        headTitleList.add("首日跟进接通率");
+        headTitleList.add("首日跟进有效率");
         headTitleList.add("首日接通有效率");
         return headTitleList;
     }
@@ -204,6 +212,8 @@ public class ResourceEfficiencyController {
         curList.add(ra.getNotConnectNotEffectiveResources());
         curList.add(formatPercent(ra.getFollowRate()));
         curList.add(formatPercent(ra.getFirstRate()));
+        curList.add(formatPercent(ra.getIssuedConnectRate()));
+        curList.add(formatPercent(ra.getIssuedEffectiveRate()));
         curList.add(formatPercent(ra.getResourceConnectRate()));
         curList.add(formatPercent(ra.getResourceEffectiveRate()));
         curList.add(formatPercent(ra.getConnectionRate()));
@@ -215,6 +225,8 @@ public class ResourceEfficiencyController {
         curList.add(ra.getFirstDayNotConnectEffectiveResources());
         curList.add(ra.getFirstDayNotConnectNotEffectiveResources());
         curList.add(formatPercent(ra.getFirstDayFollowRate()));
+        curList.add(formatPercent(ra.getFirstDayIssuedConnectRate()));
+        curList.add(formatPercent(ra.getFirstDayIssuedEffectiveRate()));
         curList.add(formatPercent(ra.getFirstDayResourceConnectRate()));
         curList.add(formatPercent(ra.getFirstDayResourceEffectiveRate()));
         curList.add(formatPercent(ra.getFirstDayConnectionRate()));

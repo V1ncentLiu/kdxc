@@ -210,6 +210,19 @@
                     <el-form-item label="邮箱:">
                         <el-input v-model="form.email" placeholder="邮箱"></el-input>
                     </el-form-item>
+                    <el-form-item label="搜索词:">
+                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>
+                    <el-form-item label="站点ID是否为空:">
+                        <el-select v-model="form.siteIsNull" placeholder="站点ID是否为空" clearable >
+                            <el-option
+                                v-for="item in comArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -425,7 +438,8 @@
                     firstCall:"",
                     qq:"",
                     wechat:"",
-                    email:""
+                    email:"",
+                    siteIsNull:""
                 },
                 pager:{
                     total: 0,
@@ -479,7 +493,8 @@
                     firstCall:"",
                     qq:"",
                     wechat:"",
-                    email:""
+                    email:"",
+                    siteIsNull:""
                 },
                 storeId: '',
                 scrollTop: 0,
@@ -544,9 +559,11 @@
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
+                param.siteIsNull = this.form.siteIsNull;
                 param.qq = this.form.qq;
                 param.email = this.form.email;
                 param.wechat = this.form.wechat;
+                param.searchWord=this.form.searchWord;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(pageNum > 5000){
@@ -880,11 +897,43 @@
                         return;
                     }
                 }
-                var methodStr;
                 if(falg==1){ // 沟通情况
-                    methodStr = 'findCommunicateRecords';
+                    this.isExport1=false;
+                    // 存localstorage
+                    localStorage.setItem('distributeExport1','1');
                 }else{ // 资源记录
-                    methodStr = 'findClues';
+                    this.isExport2=false;
+                    // 存localstorage
+                    localStorage.setItem('distributeExport2','2');
+                }
+                this.timedown();
+                // var methodStr;
+                // if(falg==1){ // 沟通情况
+                //     methodStr = 'findCommunicateRecords';
+                // }else{ // 资源记录
+                //     methodStr = 'findClues';
+                // }
+                // axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
+                // .then(function (response) {
+                //     var data =  response.data;
+                //     var fileName = response.headers.filename;
+                //     saveAs(data,decodeURI(fileName));
+                // }).catch(function (error) {
+                //     console.log(error);
+                // }).then(function(){
+                // });
+                var falgNew=falg;
+                window.parent.distributeExportFun(falgNew,param)
+            },
+            timedown(){
+                console.log(0)
+                clearInterval(this.timer);
+                var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+                var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+                if(storageDistributeExport1){
+                    this.isExport1=false;
+                }else{
+                    this.isExport1=true;
                 }
                 axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
                     .then(function (response) {
@@ -964,10 +1013,24 @@
             },
         },
         mounted(){
-
-            document.getElementById('optimizeClueManagement').style.display = 'block';
+        	document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
+            var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+            var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+            if(storageDistributeExport1){
+                this.isExport1=false;
+            }else{
+                this.isExport1=true;
+            }
+            if(storageDistributeExport2){
+                this.isExport2=false;
+            }else{
+                this.isExport2=true;
+            }
+            if(storageDistributeExport1 || storageDistributeExport2){
+                this.timedown();
+            }
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = this.getSessionStore("distributiveResourceStoreForm");
