@@ -947,51 +947,82 @@
                 });
             },
 
-            toRecall() {
-                var rows = this.multipleSelection;
-                if(rows.length!=1){
-                    this.$message({
-                        message: '请选择一条数据进行撤回',
-                        type: 'warning'
-                    });
-                    return;
-                }else{
-                    if(rows[0].phase>3){
-                        this.$message({
-                            message: '已分配电销经理，不可撤回',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        var param={};
-                        var rows = this.multipleSelection;
-                        param.id=rows[0].clueId;
-                        axios.post('/exetend/agendaTaskManager/recallClue',param).then(function (response) {
-                            if(!response||!response.data||response.data.code!='0'){
-                                ocmVM.$message({
-                                    message: "接口调用失败",
-                                    type: 'error'
-                                });
-                                return ;
-                            }
-                            var resobj= response.data;
-                            ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
-                                    ocmVM.initTableData();
-                                }});
-                        });
-                    }).catch(() => {
-                        this.$message({
-                            type: 'info',
-                            message: '已取消操作'
-                        });
-                    });
+          toRecall() {
+            var rows = this.multipleSelection;
+            if(rows.length < 1){
+              this.$message({
+                message: '请选择至少一条数据进行撤回',
+                type: 'warning'
+              });
+              return;
+            }else{
+              debugger;
+              var clueIds =[];
+              if(rows.length == 1) {
+                if (rows[0].phase > 3) {
+                  this.$message({
+                    message: '该资源已分配电销顾问，不可撤回',
+                    type: 'warning'
+                  });
+                  clueIds = [];
+                  return;
                 }
-            },
+              } else {
+                for (var i = 0; i < rows.length; i++) {
+                  if (rows[i].phase > 3) {
+                    this.$message({
+                      message: '该批资源包含已分配电销顾问，不可批量撤回',
+                      type: 'warning'
+                    });
+                    clueIds = [];
+                    return;
+                  } else {
+                    clueIds.push(rows[i].clueId);
+                  }
+                }
+              }
+              console.log('撤回'+clueIds);
+              this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                debugger;
+                var url ='';
+                var param={};
+                var rows = this.multipleSelection;
+                if(rows.length == 1){
+                  param.id=rows[0].clueId;
+                  url = '/exetend/agendaTaskManager/recallClue';
+                }else {
+                  var rows = this.multipleSelection;
+                  param.idList=clueIds;
+                  url = '/exetend/agendaTaskManager/recallClues';
+                }
+                // var param={};
+                // var rows = this.multipleSelection;
+                // param.clueIds=clueIds;
+                axios.post(url,param).then(function (response) {
+                  if(!response||!response.data||response.data.code!='0'){
+                    ocmVM.$message({
+                      message: "接口调用失败",
+                      type: 'error'
+                    });
+                    return ;
+                  }
+                  var resobj= response.data;
+                  ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
+                      ocmVM.initTableData();
+                    }});
+                });
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '已取消操作'
+                });
+              });
+            }
+          },
             setSessionStore (name, content) {
                 if (!name) return
                 if (typeof content !== 'string') {
