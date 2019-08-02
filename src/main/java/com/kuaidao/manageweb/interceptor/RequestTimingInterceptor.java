@@ -3,12 +3,14 @@ package com.kuaidao.manageweb.interceptor;
 import java.lang.reflect.Method;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import io.prometheus.client.Summary;
 
 public class RequestTimingInterceptor extends HandlerInterceptorAdapter {
-
+    private static Logger logger = LoggerFactory.getLogger(RequestTimingInterceptor.class);
     private static final String REQ_PARAM_TIMING = "timing";
 
     // @formatter:off
@@ -40,6 +42,7 @@ public class RequestTimingInterceptor extends HandlerInterceptorAdapter {
             Method method = ((HandlerMethod) handler).getMethod();
             handlerLabel = method.getDeclaringClass().getSimpleName() + "." + method.getName();
         }
+        logger.info("方法{}，响应时间{}", request.getMethod(), completedTime);
         // Note (3)
         responseTimeInMs
                 .labels(request.getMethod(), handlerLabel, Integer.toString(response.getStatus()))
