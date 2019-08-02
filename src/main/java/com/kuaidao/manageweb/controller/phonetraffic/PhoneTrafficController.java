@@ -201,7 +201,8 @@ public class PhoneTrafficController {
                 if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
                     param.setPhTraDirectorId(user.getId());
                     param.setRoleCode(RoleCodeEnum.HWZG.name());
-                } else {
+                } else if(RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())){
+                    param.setRoleCode(RoleCodeEnum.HWZG.name());
                 }
                 Integer dealStatus = param.getDealStatus();
                 if (dealStatus != null && dealStatus == 0) {

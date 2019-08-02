@@ -20,6 +20,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -67,9 +68,13 @@ public class TrafficCallRecordController {
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
         if (RoleCodeEnum.HWZG.name().equals(roleCode)) {
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(1);
+            statusList.add(3);
             UserOrgRoleReq userRole = new UserOrgRoleReq();
             userRole.setOrgId(orgId);
             userRole.setRoleCode(RoleCodeEnum.HWY.name());
+            userRole.setStatusList(statusList);
             JSONResult<List<UserInfoDTO>> hwUserList =  userInfoFeignClient.listByOrgAndRole(userRole);
             request.setAttribute("hwzyList", hwUserList.getData());
         }

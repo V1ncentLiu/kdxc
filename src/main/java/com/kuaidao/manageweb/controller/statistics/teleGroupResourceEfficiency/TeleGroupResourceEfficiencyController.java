@@ -199,6 +199,8 @@ public class TeleGroupResourceEfficiencyController {
         curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectEffectiveResources()));
         curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectNotEffectiveResources()));
         curList.add(formatPercent(curDto.getFirstFollowRate()));
+        curList.add(formatPercent(curDto.getFirstAssignedConnectedRate()));
+        curList.add(formatPercent(curDto.getFirstAssignedValidRate()));
         curList.add(formatPercent(curDto.getFirstResourceConnectRate()));
         curList.add(formatPercent(curDto.getFirstResourceEffectiveRate()));
         curList.add(formatPercent(curDto.getFirstConnectionRate()));
@@ -244,6 +246,8 @@ public class TeleGroupResourceEfficiencyController {
         curList.add(CommUtil.nullIntegerToZero(curDto.getNotConnectNotEffectiveResources()));
         curList.add(formatPercent(curDto.getFollowRate()));
         curList.add(formatPercent(curDto.getFirstRate()));
+        curList.add(formatPercent(curDto.getAssignedConnectedRate()));
+        curList.add(formatPercent(curDto.getAssignedValidRate()));
         curList.add(formatPercent(curDto.getResourceConnectRate()));
         curList.add(formatPercent(curDto.getResourceEffectiveRate()));
         curList.add(formatPercent(curDto.getConnectionRate()));
@@ -370,8 +374,10 @@ public class TeleGroupResourceEfficiencyController {
         headTitleList.add("未接通无效资源量");
         headTitleList.add("跟访率");
         headTitleList.add("首次接通率");
-        headTitleList.add("资源接通率");
-        headTitleList.add("资源有效率");
+        headTitleList.add("下发接通率");
+        headTitleList.add("下发有效率");
+        headTitleList.add("跟进接通率");
+        headTitleList.add("跟进有效率");
         headTitleList.add("接通有效率");
         headTitleList.add("首日跟访资源量");
         headTitleList.add("首日接通资源量");
@@ -381,8 +387,10 @@ public class TeleGroupResourceEfficiencyController {
         headTitleList.add("首日未接通有效资源量");
         headTitleList.add("首日未接通无效资源量");
         headTitleList.add("首日跟访率");
-        headTitleList.add("首日资源接通率");
-        headTitleList.add("首日资源有效率");
+        headTitleList.add("首日下发接通率");
+        headTitleList.add("首日下发有效率");
+        headTitleList.add("首日跟进接通率");
+        headTitleList.add("首日跟进有效率");
         headTitleList.add("首日接通有效率");
         return headTitleList;
     }
