@@ -94,8 +94,18 @@
                     <el-form-item label="—" class="widthauto">
                       <el-date-picker  v-model="searchForm.payEndTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                     </el-form-item>
+                    <el-form-item label="电销分公司:">
+	                    <el-select v-model="searchForm.teleCompanyId" @change="showTele(7)" placeholder="电销分公司" clearable filterable>
+	                        <el-option
+	                                v-for="item in dxBusinessList"
+	                                :key="item.id"
+	                                :label="item.name"
+	                                :value="item.id">
+	                        </el-option>
+	                    </el-select>
+	                </el-form-item>
                     <el-form-item label="电销事业部:"  prop="teleDeptId">
-                      <el-select v-model="searchForm.teleDeptId" clearable filterable  placeholder="电销事业部" @change="changeTeleDept"  @clear="clearTeleDeptList">
+                      <el-select v-model="searchForm.teleDeptId" clearable filterable  placeholder="电销事业部" @change="showTele(1)"  @clear="clearTeleDeptList">
                         <el-option
                           v-for="item in teleDeptOptions"
                           :key="item.id"
@@ -322,6 +332,7 @@ var clueVM = new Vue({
             lowestCommissionShow: false,
             btnDisabled: false,
         		searchForm: {
+        		teleCompanyId:'',
   	       		busAreaId: '',
   	       		busGroupId: '',
   	       		busSaleId: '',
@@ -356,6 +367,7 @@ var clueVM = new Vue({
             backQuery:"",
             rejectVisible:false,
             count:0,
+            dxBusinessList:[],
             dataTable:[],
             allTableColums:[],
             tableColums:[],
@@ -371,7 +383,7 @@ var clueVM = new Vue({
             busAreaOptions:busAreaList,
             busGroupOptions:busGroupList,
             busSaleOptions:busSaleList,
-            teleDeptOptions:teleDeptList,
+            teleDeptOptions:[],
             teleGorupOptions:teleGroupList,
             teleSaleOptions:teleSaleList,
             provinceOptions:provinceList,
@@ -536,6 +548,7 @@ var clueVM = new Vue({
                 param.status = this.searchForm.status;
                 param.signProjectId = this.searchForm.signProjectId;
                 param.cusName = this.searchForm.cusName;
+                param.teleCompanyId = this.searchForm.teleCompanyId;
                 param.teleDeptId = this.searchForm.teleDeptId;
                 param.teleGorupId = this.searchForm.teleGorupId;
                 param.teleSaleId = this.searchForm.teleSaleId;
@@ -1106,6 +1119,12 @@ var clueVM = new Vue({
                          console.log(error);
                     });
                 },
+                clearTeleCompanyList(){
+                    this.teleDeptOptions=[];
+                    this.searchForm.teleDeptId='';
+                    this.clearTeleDeptList();
+
+                },
                 clearTeleDeptList(){
                     this.teleGorupOptions=[];
                     this.searchForm.teleGorupId='';
@@ -1190,7 +1209,37 @@ var clueVM = new Vue({
                     .catch(function (error) {
                          console.log(error);
                     });
-                }
+                },
+              //级联查询机构
+                showTele(type){
+                    var param={};
+                    if(type==1){
+                        param.orgType="1";
+                        param.parentId = this.searchForm.teleDeptId;
+                        this.clearTeleDeptList();
+                    }else if(type ==7){
+                        param.orgType="7";
+                        param.parentId = this.searchForm.teleCompanyId;
+                        this.clearTeleCompanyList();
+                    }else if(type ==0){
+                        param.orgType="8";
+                    }
+                    axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+                        //    console.log(response);
+                        if(type==1){
+                        	clueVM.teleGorupOptions = response.data.data;
+                        }else if(type ==7){
+                        	clueVM.teleDeptOptions = response.data.data;
+                        }else{
+                        	clueVM.dxBusinessList = response.data.data;
+                        }
+                    }).catch(function (error) {
+                        console.log(error);
+                    })
+                        .then(function () {
+                            // always executed
+                        });
+                },
 
         },
         created(){
@@ -1211,7 +1260,9 @@ var clueVM = new Vue({
             if(localVal){this.pager.pageSize = localVal;}
             this.initColumn();
             this.searchTable();
-            this.getBusAndTel()
+            this.showTele(0);
+            this.teleDeptOptions = teleDeptList;
+            this.getBusAndTel();
         },
         mounted(){
            console.info("mounted method");
