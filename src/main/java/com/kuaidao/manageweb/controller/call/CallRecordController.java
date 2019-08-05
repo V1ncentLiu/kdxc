@@ -364,7 +364,7 @@ public class CallRecordController {
                        return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                                "没有数据");
                    }
-                   List<Long> idList = userJr.getData().parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3).map(user -> user.getId())
+                   List<Long> idList = userJr.getData().parallelStream().map(user -> user.getId())
                            .collect(Collectors.toList());
                    myCallRecordReqDTO.setAccountIdList(idList);
                } else {
