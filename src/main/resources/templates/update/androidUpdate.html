@@ -18,47 +18,11 @@
     <el-row class="marginB20">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>版本发布</el-button>
-            <!-- <el-button type="warning" @click="dialogBatchVisible = true"><i class="el-icon-download"></i>导入</el-button>
-            <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
+            <!-- <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
    			    <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑电销布局</el-button> -->
         </el-col>
     </el-row>
-    <div class="mainSearchBg">        
-        <div class="mainSearchFormBox">
-          	<el-form :inline="true" class="demo-form-inline mainSearchForm">
-                <el-form-item label="电销组:" label-width="55px">			
-          				<el-select filterable v-model="telemarketingTeamId" placeholder="电销组" clearable>
-          			    <el-option
-          			      v-for="item in dzList"
-          			      :key="item.id"
-          			      :label="item.name"
-          			      :value="item.id">
-          			    </el-option>
-          				</el-select>
-                </el-form-item>
-                <el-form-item label="项目:" label-width="55px">
-          				<el-select filterable v-model="projectId" placeholder="项目" clearable>
-          			    <el-option
-          			      v-for="item in projectList"
-          			      :key="item.id"
-          			      :label="item.projectName"
-          			      :value="item.id">
-          			    </el-option>
-          				</el-select>
-                </el-form-item>
-                <el-form-item label="开始时间:" label-width="80px">
-        				  <el-date-picker value-format="yyyy-MM-dd" v-model="beginTime" type="date" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
-          				<el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期">
-          				</el-date-picker>
-                </el-form-item>
-                <el-form-item label="">
-      					    <el-button icon="el-icon-search" type="primary" @click="inviteAreaListPage" style="width: 90px;">搜索</el-button>
-                    <!-- <el-button type="info" style="width: 90px;">取消</el-button> -->
-                </el-form-item>
-            </el-form>
-        </div>
+    <div class="mainSearchBg">
         <el-row>
             <el-table 
                 ref="multipleTable"
@@ -74,8 +38,19 @@
                 <el-table-column align="center"  prop="beginTime" label="录入时间" :formatter="dateFormat"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="强制升级"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="更新内容"></el-table-column>
-                <el-table-column align="center" prop="status" label="是否在线" :formatter="transformStatus"></el-table-column>
-                <el-table-column align="center" prop="status" label="操作"></el-table-column>
+                <el-table-column align="center" prop="status" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
+                <el-table-column align="center" prop="handle" label="操作">
+                    <template slot-scope="scope">
+                        <el-button  @click="updateButton(scope.row.id)" type="success"  size="small">编辑</el-button>
+                        <el-button  @click="deleButton(scope.row.projects)" type="danger"  size="small">删除</el-button>
+                        <!-- <div v-if="scope.row.status === 1"> -->
+                            <el-button  @click="updateStatus(scope.row.id)" type="warning"  size="small">上架</el-button>
+                        <!-- </div> -->                    
+                        <!-- <div v-else-if="scope.row.status === 0"> -->
+                            <!-- <el-button @click="updateStatus(scope.row.id,1,'下架')"  type="success"  size="small">下架</el-button> -->
+                        <!-- </div> -->                        
+                    </template>
+                </el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
         </el-row> 
@@ -83,111 +58,41 @@
 
     <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
-        <!-- <el-form :model="form" ref="form" :rules="rules" class="width500"> -->
         <el-form :model="form" ref="form" :rules="rules" >
-            <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
-                <el-select filterable v-model="form.projectIds" multiple placeholder="选择项目" style="width: 290px;">
-                    <el-option
-                        v-for="item in projectList"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
+            <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="apkUpdate">
+                <el-upload
+                    class="upload-demo"
+                    ref="upload"
+                    :multiple="false"
+                    action="/telemarketing/uploadCustomField"
+                    :file-list="fileList"
+                    :on-change="handleChange"
+                    :before-upload="beforeUpload"
+                    :on-success="uploadSuccess"
+                    :on-error="uploadError"
+                    :auto-upload="false">
+                    <el-button slot="trigger" size="small" type="success" style="margin-right: 10px;">上传文件</el-button>
+                </el-upload>
             </el-form-item>
-            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="telemarketingTeamId">
-                <el-select filterable v-model="form.telemarketingTeamId" placeholder="选择电销组" style="width: 290px;">
-                    <el-option
-                        v-for="item in dzList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
+            <el-form-item label="版本号：" :label-width="formLabelWidth" prop="editionNum">
+                
             </el-form-item>
-					
-            <el-form-item label="开始时间：" :label-width="formLabelWidth" prop="beginTime">
-                <el-date-picker value-format="yyyy-MM-dd" v-model="form.beginTime" type="date" placeholder="选择日期" style="width: 290px;">
-					</el-date-picker>
+					  <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="isUpdate">
+                <el-radio-group v-model="form.resource">
+                    <el-radio label="是"></el-radio>
+                    <el-radio label="否"></el-radio>
+                </el-radio-group>
             </el-form-item>
-            <el-form-item label="结束时间："  :label-width="formLabelWidth" prop="endTime">
-                <el-date-picker value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期" style="width: 290px;">
-					</el-date-picker>
+            <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
+                <el-input type="textarea" v-model="form.updateContent"></el-input>
             </el-form-item>
-            <el-form-item label="启用状态：" :label-width="formLabelWidth" prop="status">
-                <el-select filterable v-model="form.status" placeholder="启用状态" style="width: 290px;">
-                    <el-option
-                        v-for="item in statusList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
+            
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
-
-           <!-- 批量添加 自定义字段弹窗 start -->
-            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
-               <el-row class="marginB20">
-                                 <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
-                                 下载批量上传模版：<a href="/excel-templates/telemarketinglayout.xlsx" download="电销布局模板"><span style="color:#409EFF">电销布局模板下载</span></a>
-               
-               </el-row>
-               <el-row>
-                  <el-upload
-                      class="upload-demo"
-                      ref="upload"
-                      :multiple="false"
-                      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                      action="/telemarketing/uploadCustomField"
-                      :file-list="fileList"
-                      :on-change="handleChange"
-                      :before-upload="beforeUpload"
-                      :on-success="uploadSuccess"
-                     :on-error="uploadError"
-                      
-                      :auto-upload="false">
-                      <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件</el-button>
-                      <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
-                    </el-upload>
-               
-               
-               </el-row>
-              <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="submitUpload">确 定</el-button>
-                <el-button @click="dialogBatchVisible = false">取 消</el-button>
-              </div>
-            </el-dialog>
-            
-            <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%" @close="submitExportclose">
-            <el-form>
-            <div id="totalNumId" class="marginB10">{{dataNum}}</div>
-                 <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="无数据"
-                    style="width: 100%"
-                    border
-                    :data="exportdataTable"  >
-                    <el-table-column align="center" prop="serialNumber" label="序号"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center" prop="projects" label="项目"></el-table-column>
-                    <el-table-column align="center" prop="beginTime" label="起始时间" :formatter="dateFormat"></el-table-column>
-                    <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat"></el-table-column>
-                </el-table>
-            </el-row>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-            <el-button type="primary" :disabled="confirmBtnDisabled" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
-            </div>
-        </el-dialog>
-
 </div>
 <input id="addOrUpdate" type="hidden" >
 </body>
@@ -196,49 +101,37 @@
 <script th:inline="javascript">
 
     var dzList=[[${dzList}]];
-	var projectList = [[${projectList}]];
-   var orgVM =  new Vue({
+	  var projectList = [[${projectList}]];
+    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
             btnDisabled: false,
-        	dataNum:"",
-        	showTitle:"",
-        	exportFormVisible:false,
-        	dialogBatchVisible:false,
-        	confirmBtnDisabled:false,
-        	formLabelWidth: '130px',
-        	dialogFormVisible: false,
-        	telemarketingTeamId:"",
-        	businessGroupId:"",
-        	beginTime:"",
-        	endTime:"",
-        	addOrModifyDialogTitle:"",
-        	fileList:[],//上传文件列表
-        	dialogFormVisible:false,
-        	dataTable:[],
-        	multipleSelection: [],
-        	exportdataTable:[],
-        	dzList:dzList,
-        	projectList:projectList,
-        	projectId:"",
-        	form:{
-        	 projectIds: '',
-        	 telemarketingTeamId: '',
-        	 beginTime:'',
-        	 endTime:'',
-        	 status:'0'
-        	
-        	},
-        	 statusList:[
-        		 {
-               		value: '0',
-                   label: '启用'	
-               	},
-               	{
-                  value: '1',
-                   label: '禁用'	
-                  }
-        	  ],
+        	  dataNum:"",
+          	showTitle:"",
+          	exportFormVisible:false,
+          	dialogBatchVisible:false,
+          	confirmBtnDisabled:false,
+          	formLabelWidth: '130px',
+          	dialogFormVisible: false,
+          	telemarketingTeamId:"",
+          	businessGroupId:"",
+          	beginTime:"",
+          	endTime:"",
+          	addOrModifyDialogTitle:"",
+          	fileList:[],//上传文件列表
+          	dialogFormVisible:false,
+          	dataTable:[],
+          	multipleSelection: [],
+          	exportdataTable:[],
+          	dzList:dzList,
+          	projectList:projectList,
+          	projectId:"",
+          	form:{
+              	apkUpdate:'',
+                editionNum:'',
+                isUpdate:'', 
+                updateContent:''
+          	},
             pager:{
                 total: 0,
                 currentPage: 1,
@@ -246,390 +139,313 @@
             },
             loading:false,
             rules: {
-            	projectIds: [
-                    { required: true, message: '请选择项目', trigger: 'change' }
+            	  apkUpdate: [
+                    { required: true, message: '请选择上传文件', trigger: 'change' }
                 ],
-                telemarketingTeamId: [
-                    { required: true, message: '请选择电销组', trigger: 'change' }
+                editionNum: [
+                    { required: true, message: '请填写版本号', trigger: 'change' }
                 ],
-                beginTime: [
-                    { required: true, message: '请选择开始时间', trigger: 'blur' }
-                ],
-                endTime: [
-                    { required: true, message: '请选择结束时间', trigger: 'blur' }
-                ],
-                status: [
-                    { required: true, message: '请选择启用状态', trigger: 'blur' }
+                isUpdate: [
+                    { required: true, message: '请选择是否强制升级', trigger: 'blur' }
                 ]
             }
              
         },
         methods: {
-        	inviteAreaListPage(){//查询按钮
+        	  inviteAreaListPage(){//查询按钮
             	  var param = {}; 
             	  var pageSize = this.pager.pageSize;
-                  var pageNum = this.pager.currentPage;
-                  param.pageNum = pageNum;
-                  param.pageSize = pageSize;
-                  param.projectIds=this.projectId;
-                  param.telemarketingTeamId=this.telemarketingTeamId;
-                  console.log(param);
-                  if(this.beginTime !=null && this.endTime !=null && this.beginTime !='' && this.endTime != ''){
-                	  if(this.beginTime>this.endTime){
-                    	  this.$message("开始时间不能大于结束时间");
-               	         return;
-                      } 
-                  }
-                  if(this.beginTime !=null && this.beginTime !=''){
-                	  param.beginTime=this.beginTime+" 00:00:00";
-                  }
-                  if(this.endTime !=null && this.endTime !=''){
-                	  param.endTime=this.endTime+" 23:59:59";
-                  }
-                 
-                  axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
-                  	  console.log(response);
-                      if(null===response||response.data==null||response.data.code!='0'){
-	                  	  alert(response.data.msg);
-	                  	  return ;
-                     }else{
-                    	 orgVM.dataTable =response.data.data.data; 
-                    	 orgVM.pager.currentPage= response.data.data.currentPage;
-                    	 orgVM.pager.total= response.data.data.total;
-                     } 
-                  })
-                  .catch(function (error) {
+                var pageNum = this.pager.currentPage;
+                param.pageNum = pageNum;
+                param.pageSize = pageSize;
+                param.projectIds=this.projectId;
+                param.telemarketingTeamId=this.telemarketingTeamId;
+                console.log(param);
+                if(this.beginTime !=null && this.endTime !=null && this.beginTime !='' && this.endTime != ''){
+              	  if(this.beginTime>this.endTime){
+                  	  this.$message("开始时间不能大于结束时间");
+             	         return;
+                    } 
+                }
+                if(this.beginTime !=null && this.beginTime !=''){
+              	  param.beginTime=this.beginTime+" 00:00:00";
+                }
+                if(this.endTime !=null && this.endTime !=''){
+              	  param.endTime=this.endTime+" 23:59:59";
+                }
+               
+                axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
+                	  console.log(response);
+                    if(null===response||response.data==null||response.data.code!='0'){
+                  	  alert(response.data.msg);
+                  	  return ;
+                   }else{
+                  	 orgVM.dataTable =response.data.data.data; 
+                  	 orgVM.pager.currentPage= response.data.data.currentPage;
+                  	 orgVM.pager.total= response.data.data.total;
+                   } 
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+                });  
+                
+            } ,
+          
+            updateButton(rowsId){
+          	  this.showTitle="编辑安卓发布"
+          	  if (this.$refs['form']!=undefined) {
+               		this.$refs['form'].resetFields();
+               	  }
+          	  $("#addOrUpdate").val(2);
+          	  //修改菜单数据	
+            	var rows = rowsId;
+               
+                this.dialogFormVisible = true;
+                var param ={};
+                // var str = "";
+                // for ( var i = 0; i <rows.length; i++){
+              	 //  str = rows[i].id
+                // }
+                param.id = rowsId;
+                axios.post('/telemarketing/findTelemarketingById',param).then(function (response) {
+                	  console.log(response);
+                    if(null !==response && response.data !=null && response.data.code=='0'){
+                  	  var telemarketing = response.data.data;
+                  	  orgVM.form.projectIds = telemarketing.projectIds;
+                  	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
+                  	  orgVM.form.beginTime = telemarketing.beginTime;
+                  	  orgVM.form.endTime = telemarketing.endTime;
+                  	  orgVM.form.status = telemarketing.status+"";
+                  	  var projects = telemarketing.projectIds;
+                  	  var valueMultiple=[];
+                  	  var obj = projects.split(',');
+                  	    if(null!=projects&&obj.length>0) {
+                       	   for(var i=0;i<obj.length;i++){
+                       	       valueMultiple.push(obj[i]+"");
+                       	     }
+                       	   }
+                  	    orgVM.form.projectIds=valueMultiple;
+                   }else{
+                  	 alert(response.data.data.message);
+                  	  	return ;
+                   } 
+                }).catch(function (error) {
                     console.log(error);
-                  })
-                  .then(function () {
-                  });  
-                  
-              } ,
-            
-              updateButton(){
-            	  this.showTitle="修改布局"
-            	  if (this.$refs['form']!=undefined) {
-                 		this.$refs['form'].resetFields();
-                 	  }
-            	  $("#addOrUpdate").val(2);
-            	  //修改菜单数据	
-              	var rows = this.multipleSelection;
-                  if(rows.length!=1){
-                      this.$message({
-                         message: '请选择一条数据进行修改',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-                  this.dialogFormVisible = true;
-                  var param ={};
-                  var str = "";
-                  for ( var i = 0; i <rows.length; i++){
-                	  str = rows[i].id
-                  }
-                  param.id = str;
-                  axios.post('/telemarketing/findTelemarketingById',param).then(function (response) {
-                  	  console.log(response);
-                      if(null !==response && response.data !=null && response.data.code=='0'){
-                    	  var telemarketing = response.data.data;
-                    	  orgVM.form.projectIds = telemarketing.projectIds;
-                    	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
-                    	  orgVM.form.beginTime = telemarketing.beginTime;
-                    	  orgVM.form.endTime = telemarketing.endTime;
-                    	  orgVM.form.status = telemarketing.status+"";
-                    	  var projects = telemarketing.projectIds;
-                    	  var valueMultiple=[];
-                    	  var obj = projects.split(',');
-                    	    if(null!=projects&&obj.length>0) {
-                         	   for(var i=0;i<obj.length;i++){
-                         	       valueMultiple.push(obj[i]+"");
-                         	     }
-                         	   }
-                    	    orgVM.form.projectIds=valueMultiple;
-                     }else{
-                    	 alert(response.data.data.message);
-	                  	  	return ;
-                     } 
-                  }).catch(function (error) {
-                      console.log(error);
-                  })
-                  .then(function () {
-                    // always executed
-                  });  
-              },
-              deleButton(){
-            	  var rows = this.multipleSelection;
-                  if(rows.length <1){
-                      this.$message({
-                         message: '请选择删除数据',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-                  var moduleName="";
-    	           if(null!=rows){
-    	 		       for ( var i = 0; i <rows.length; i++){
-    	 		    	  moduleName+="【"+rows[i].projects+"】";
-    	 		        }
-    	           }
-    	           this.$confirm("确定要删除"+moduleName+"电销布局?", '提示', {
-                       confirmButtonText: '确定',
-                       cancelButtonText: '取消',
-                       type: 'warning'
-                   }).then(() => {
-                      	// 查询 table 需要数据
-                       var param = {};
-                       var deleInfo=this.multipleSelection;
-     	        	    var ids="";
-     		            if(null!=deleInfo){
-     		             for ( var i = 0; i <deleInfo.length; i++){
-     		            	if("" == ids){
-     		            		ids = deleInfo[i].id
-     		            	}else{
-     		            		ids = ids+","+deleInfo[i].id
-     		            	}
-     		             }
-     		             var param={};
-     		             param.ids=ids;
-    	                 axios.post('/telemarketing/deleTelemarketingLayout',param).then(function (response) {
-    	                  	  console.log(response);
-    	                      if(null !==response && response.data !=null && response.data.code=='0'){
-    	                    	  window.location.href="/telemarketing/telemarketingLayoutList"; 
-    	                     }else{
-    	                    	 alert(response.data.data.msg);
-     	                  	  	return ;
-    	                     } 
-    	                  }).catch(function (error) {
-                              console.log(error);
-                          })
-                          .then(function () {
-                            // always executed
-                          });  
-     	              
-                     }
-                   }).catch(() => {
-                       this.$message({
-                           type: 'info',
-                           message: '已取消删除'
-                       });          
-                   });
-    	           
-    	     
-              },
-              exportButton(){
-            	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
-              },
-              showExport(){//点击弹出新增dialog
-              	this.dialogFormVisible = true;
-              	this.addOrModifyDialogTitle="添加菜单页面";
-              },
-              closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
-              	  this.$refs['customMenuForm'].resetFields();
-              },
-              cancelForm(formName) {
-                  this.$refs[formName].resetFields();
-              	this.dialogFormVisible = false;
-              },
-              handleSelectionChange(val) {
-                  this.multipleSelection = val;
-              },
-              
-              transformStatus(row, column, cellValue, index) {
-            	  var text="";
-                  if(cellValue=="0"){
-                	  text="启用"
-                  }else if(cellValue=="1"){
-                	  text="禁用"
-                  }
-                  return text;
-              }, 
-            //时间格式化
-              dateFormat(row, column){
-            	  var date = row[column.property]; 
-            	     if (date == undefined || date ==null || date =="") { 
-            	       return ""; 
-            	     } 
-            	     return moment(new Date(date)).format("YYYY-MM-DD"); 
-            	} ,
-                //时间格式化
-                dateFormatTime(row, column){
-              	  var date = row[column.property]; 
-              	     if (date == undefined) { 
-              	       return ""; 
-              	     } 
-              	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
-              	} ,
-             submitForm(formName) {
-                    this.$refs[formName].validate((valid) => {
-                        if (valid) {
-                          var formData = this.form;
-                          var param={};
-                          param.projectIds = formData.projectIds;
-                          var strs ="";
-                          for ( var i = 0; i <formData.projectIds.length; i++){
-                        	   if(strs !=""){
-                        		   strs = strs+","+formData.projectIds[i];
-                        	   }else{
-                        		   strs = formData.projectIds[i];
-                        	   }
-                        	}
-                          param.projectIds = strs;
-                          param.telemarketingTeamId = formData.telemarketingTeamId;
-                          param.beginTime = formData.beginTime;
-                          param.endTime = formData.endTime;
-                          param.status = formData.status;
-                          var str = "";
-                          var rows = this.multipleSelection;
-                          for ( var i = 0; i <rows.length; i++){
-                        	  str = rows[i].id
-                          }
-                          param.id = str;
-                          if(formData.beginTime>formData.endTime){
-                        	  this.$message("开始时间不能大于结束时间");
-                   	         return;
-                          }
-                          orgVM.btnDisabled = true; 
-                          var url = "/telemarketing/addTelemarketingLayout";
-                          if($("#addOrUpdate").val() ==2){
-                        	  url = "/telemarketing/updateTelemarketingLayout"
-                          }
-                       	  axios.post(url,param).then(function (response) {
-       	                  	//   console.log(response);
-       	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/telemarketing/telemarketingLayoutList"; 
-                                orgVM.btnDisabled = false; 
-       	                     }else{
-       	                    	orgVM.$message({message: response.data.data.msg, type: 'warning'});
-                                orgVM.btnDisabled = false; 
-                                return ;
-                            } 
-       	                    }).catch(function (error) {
-                                orgVM.btnDisabled = false; 
-                                console.log(error);
-                            })
-                            .then(function () {
-                            // always executed
-                            });  
-                        } else {
-                            console.log('error submit!!');
-                            return false;
-                        }
-                    });
-                },
-                closeUploadFileDialog(){//关闭上传文件 dialog
-              	  this.$refs.upload.clearFiles();
-                },
-                handleChange(files,fileList){//只允许选择一个文件
-                    this.fileList = fileList.slice(-1);
-              },
-              beforeUpload(file){//上传之前 文件校验
-                  var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                  if(!isTextComputer){
-                      this.$message.error('文件格式错误');
-                  	  orgVM.loading = false;
-                  	  orgVM.fileList = [];
-                      return false;
-                  }
-              },
-              uploadSuccess(response, file, fileList){//上传成功后
-              	
-            	  if(response.code=='0'){
-            		this.addOrModifyDialogTitle="预览数据";
-            		  //清空文件里列表
-                	  this.$refs.upload.clearFiles();
-                      this.dialogBatchVisible = false;
-
-                   	orgVM.exportdataTable =response.data; 
-                   	orgVM.loading = false;
-                   	orgVM.exportFormVisible = true;
-                   	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
-
-            	  }else{
-            		orgVM.loading = false;
-            		  this.$message('上传失败');
-            	  }
-            	
-              },
-              uploadError(){//上傳失敗
-                this.loading = false;
-            	  this.$message({message:'上传失败',type:'error'});
-              }
-              , submitUpload() {//提交文件
-            	orgVM.confirmBtnDisabled = false;
-              	this.loading = true;
-              	var fileList = this.fileList;
-              	if(!fileList || fileList.length!=1){
-              		this.$message.error({message:'未选中文件',type:'error'});
-              		orgVM.loading = false;
-              		return false;
-              	}
-                  this.$refs.upload.submit();
-                },
-                submitExportclose(){
-                  	  window.location.href="/telemarketing/telemarketingLayoutList"; 
-                },
-                submitExport(){
-                  if($("#showButton").attr("data") ==2){
-                	  window.location.href="/telemarketing/telemarketingLayoutList"; 
-                	  return;
-                  }
-                  this.$alert('<center><strong>确认导入数据</strong></center>', {
-                      dangerouslyUseHTMLString: true,
-                      center:true
-                  }).then(() => {
-                	  $("#showButton").html("导入中");
-                	  var param = {};
-                	  orgVM.loading = true;
-                  	  param.list = orgVM.exportdataTable;
-                  	  if(param.list !=null && param.list.length==0){
-                  		  this.loading = false;
-                  		  this.$message({message:'无要上传的数据',type:'error'});
-                  		  return;
-                  	  }
-                  	
-                  	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
-                        	  console.log(response);
-                            if(null !==response && response.data !=null && response.data.code=='0'){
-                          	  if(response.data.data !=null  && response.data.data.length !=0){
-                          		  $("#showButton").html("知道了");
-                          		  $("#showButton").attr("data",2);
-                          		  orgVM.loading = false;
-                          		  orgVM.addOrModifyDialogTitle="部分导入失败";
-                          		  
-                          		  orgVM.exportdataTable =response.data.data; 
-                          		  orgVM.dataNum="以下内容导入失败，请重新导入"
-                          	  }else{
-                          		orgVM.$message({message:'导入成功',type:'success',duration:2000,onClose:function(){
-                          			orgVM.exportFormVisible = false;
-                                }});
-                          	  }
-                          	
-                           }else{
-                          	 alert(response.data.data.message);
-      	                  	  	return ;
-                           } 
-                        }).catch(function (error) {
+                })
+                .then(function () {
+                  // always executed
+                });  
+            },
+            deleButton(moduleName){
+          	  
+  	           this.$confirm("确定要删除"+moduleName+"电销布局?", '提示', {
+                     confirmButtonText: '确定',
+                     cancelButtonText: '取消',
+                     type: 'warning'
+                 }).then(() => {
+                    	// 查询 table 需要数据
+                     var param = {};
+                     var deleInfo=this.multipleSelection;
+   	        	    var ids="";
+   		            if(null!=deleInfo){
+   		             for ( var i = 0; i <deleInfo.length; i++){
+   		            	if("" == ids){
+   		            		ids = deleInfo[i].id
+   		            	}else{
+   		            		ids = ids+","+deleInfo[i].id
+   		            	}
+   		             }
+   		             var param={};
+   		             param.ids=ids;
+  	                 axios.post('/telemarketing/deleTelemarketingLayout',param).then(function (response) {
+  	                  	  console.log(response);
+  	                      if(null !==response && response.data !=null && response.data.code=='0'){
+  	                    	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+  	                     }else{
+  	                    	 alert(response.data.data.msg);
+   	                  	  	return ;
+  	                     } 
+  	                  }).catch(function (error) {
                             console.log(error);
                         })
                         .then(function () {
                           // always executed
-                        }); 
-                  })
-              	  
-                },
-                addbutton(){
-                	this.showTitle="添加布局"
-                	$("#addOrUpdate").val(1);
-                	this.dialogFormVisible=true;
-                	this.form.beginTime = "";
-                	this.form.endTime = "";
-                	this.form.projectIds = [];
-                	this.form.telemarketingTeamId = "";
-                	this.form.status= '0';
-                	if (this.$refs['form']!=undefined) {
-                   		this.$refs['form'].resetFields();
-                   	  }
+                        });  
+   	              
+                   }
+                 }).catch(() => {
+                     this.$message({
+                         type: 'info',
+                         message: '已取消删除'
+                     });          
+                 });
+  	           
+  	     
+            },
+            exportButton(){
+          	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
+            },
+            showExport(){//点击弹出新增dialog
+            	this.dialogFormVisible = true;
+            	this.addOrModifyDialogTitle="添加菜单页面";
+            },
+            closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+            	  this.$refs['customMenuForm'].resetFields();
+            },
+            cancelForm(formName) {
+                this.$refs[formName].resetFields();
+            	this.dialogFormVisible = false;
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            
+            transformStatus(row, column, cellValue, index) {
+          	    var text="";
+                if(cellValue=="0"){
+              	  text="启用"
+                }else if(cellValue=="1"){
+              	  text="禁用"
                 }
+                return text;
+            }, 
+            //时间格式化
+            dateFormat(row, column){
+          	    var date = row[column.property]; 
+          	    if (date == undefined || date ==null || date =="") { 
+          	        return ""; 
+          	    } 
+          	    return moment(new Date(date)).format("YYYY-MM-DD"); 
+          	} ,
+            //时间格式化
+            dateFormatTime(row, column){
+            	  var date = row[column.property]; 
+            	  if (date == undefined) { 
+            	      return ""; 
+            	  } 
+            	  return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
+            } ,
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                      var formData = this.form;
+                      var param={};
+                      param.projectIds = formData.projectIds;
+                      var strs ="";
+                      for ( var i = 0; i <formData.projectIds.length; i++){
+                    	   if(strs !=""){
+                    		   strs = strs+","+formData.projectIds[i];
+                    	   }else{
+                    		   strs = formData.projectIds[i];
+                    	   }
+                    	}
+                      param.projectIds = strs;
+                      param.telemarketingTeamId = formData.telemarketingTeamId;
+                      param.beginTime = formData.beginTime;
+                      param.endTime = formData.endTime;
+                      param.status = formData.status;
+                      var str = "";
+                      var rows = this.multipleSelection;
+                      for ( var i = 0; i <rows.length; i++){
+                    	  str = rows[i].id
+                      }
+                      param.id = str;
+                      if(formData.beginTime>formData.endTime){
+                    	  this.$message("开始时间不能大于结束时间");
+               	         return;
+                      }
+                      orgVM.btnDisabled = true; 
+                      var url = "/telemarketing/addTelemarketingLayout";
+                      if($("#addOrUpdate").val() ==2){
+                    	  url = "/telemarketing/updateTelemarketingLayout"
+                      }
+                   	  axios.post(url,param).then(function (response) {
+   	                  	//   console.log(response);
+   	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                            window.location.href="/telemarketing/telemarketingLayoutList"; 
+                            orgVM.btnDisabled = false; 
+   	                     }else{
+   	                    	orgVM.$message({message: response.data.data.msg, type: 'warning'});
+                            orgVM.btnDisabled = false; 
+                            return ;
+                        } 
+   	                    }).catch(function (error) {
+                            orgVM.btnDisabled = false; 
+                            console.log(error);
+                        })
+                        .then(function () {
+                        // always executed
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            closeUploadFileDialog(){//关闭上传文件 dialog
+          	  this.$refs.upload.clearFiles();
+            },
+            handleChange(files,fileList){//只允许选择一个文件
+                this.fileList = fileList.slice(-1);
+            },
+            beforeUpload(file){//上传之前 文件校验
+                var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                if(!isTextComputer){
+                    this.$message.error('文件格式错误');
+                	  orgVM.loading = false;
+                	  orgVM.fileList = [];
+                    return false;
+                }
+            },
+            uploadSuccess(response, file, fileList){//上传成功后
+            	
+          	  if(response.code=='0'){
+          		this.addOrModifyDialogTitle="预览数据";
+          		  //清空文件里列表
+              	  this.$refs.upload.clearFiles();
+                    this.dialogBatchVisible = false;
+
+                 	orgVM.exportdataTable =response.data; 
+                 	orgVM.loading = false;
+                 	orgVM.exportFormVisible = true;
+                 	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
+
+          	  }else{
+          		orgVM.loading = false;
+          		  this.$message('上传失败');
+          	  }
+          	
+            },
+            uploadError(){//上傳失敗
+              this.loading = false;
+          	  this.$message({message:'上传失败',type:'error'});
+            }, 
+            submitUpload() {//提交文件
+            	  orgVM.confirmBtnDisabled = false;
+              	this.loading = true;
+              	var fileList = this.fileList;
+              	if(!fileList || fileList.length!=1){
+                		this.$message.error({message:'未选中文件',type:'error'});
+                		orgVM.loading = false;
+                		return false;
+              	}
+                this.$refs.upload.submit();
+            },
+            addbutton(){
+              	this.showTitle="安卓发布"
+              	$("#addOrUpdate").val(1);
+              	this.dialogFormVisible=true;
+              	this.form.beginTime = "";
+              	this.form.endTime = "";
+              	this.form.projectIds = [];
+              	this.form.telemarketingTeamId = "";
+              	this.form.status= '0';
+              	if (this.$refs['form']!=undefined) {
+                 		this.$refs['form'].resetFields();
+                }
+            }
         },
         created(){
             // 取页数存储
