@@ -94,47 +94,33 @@
 
     <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
-        <!-- <el-form :model="form" ref="form" :rules="rules" class="width500"> -->
         <el-form :model="form" ref="form" :rules="rules" >
-            <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
-                <el-select filterable v-model="form.projectIds" multiple placeholder="选择项目" style="width: 290px;">
-                    <el-option
-                        v-for="item in projectList"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
+            <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="projectIds">
+                <el-upload
+                    class="upload-demo"
+                    ref="upload"
+                    :multiple="false"
+                    action="/telemarketing/uploadCustomField"
+                    :file-list="fileList"
+                    :on-change="handleChange"
+                    :before-upload="beforeUpload"
+                    :on-success="uploadSuccess"
+                    :on-error="uploadError"
+                    :auto-upload="false">
+                    <el-button slot="trigger" size="small" type="success" style="margin-right: 10px;">上传文件</el-button>
+                </el-upload>
             </el-form-item>
-            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="telemarketingTeamId">
-                <el-select filterable v-model="form.telemarketingTeamId" placeholder="选择电销组" style="width: 290px;">
-                    <el-option
-                        v-for="item in dzList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
+            <el-form-item label="版本号：" :label-width="formLabelWidth" prop="telemarketingTeamId">
+                
             </el-form-item>
-					
-            <el-form-item label="开始时间：" :label-width="formLabelWidth" prop="beginTime">
-                <el-date-picker value-format="yyyy-MM-dd" v-model="form.beginTime" type="date" placeholder="选择日期" style="width: 290px;">
-					</el-date-picker>
+					  <el-form-item label="特殊资源" prop="resource">
+                <el-radio-group v-model="ruleForm.resource">
+                    <el-radio label="线上品牌商赞助"></el-radio>
+                    <el-radio label="线下场地免费"></el-radio>
+                </el-radio-group>
             </el-form-item>
-            <el-form-item label="结束时间："  :label-width="formLabelWidth" prop="endTime">
-                <el-date-picker value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期" style="width: 290px;">
-					</el-date-picker>
-            </el-form-item>
-            <el-form-item label="启用状态：" :label-width="formLabelWidth" prop="status">
-                <el-select filterable v-model="form.status" placeholder="启用状态" style="width: 290px;">
-                    <el-option
-                        v-for="item in statusList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
+            
+            
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
