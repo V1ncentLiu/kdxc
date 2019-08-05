@@ -3,6 +3,7 @@ var myCallRecordVm = new Vue({
     data: {
         audioShow:false,
         isShow:false,
+      isDXZDisabled:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -44,7 +45,7 @@ var myCallRecordVm = new Vue({
         	cno:'',
         	bindPhone:'',
         	accountId:'',
-        	teleGroupId:'',
+        	teleGroupId:ownOrgId,
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
@@ -53,7 +54,6 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        // if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
         if((roleCode =='DXCYGW' && (row.accountId !=undefined && row.accountId!=userId)) || ((row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
           text ="***"
         }else{
@@ -258,6 +258,13 @@ var myCallRecordVm = new Vue({
             this.initCallRecordData();
     	},
     	downloadAudio(id,url,callSource){
+      	     if(roleCode =='ZCBWY'){
+                 this.$message({
+                     message: '您没有下载权限',
+                     type: 'warning'
+                 });
+                 return;
+             }
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
@@ -355,7 +362,22 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-    	
+      if(ownOrgId){
+        this.isDXZDisabled= true;
+        var param ={};
+        param.orgId = ownOrgId;
+        param.roleCode="DXCYGW";
+        param.statusList =[1,3];
+        axios.post('/user/userManager/listByOrgAndRole', param)
+        .then(function (response) {
+          var result =  response.data;
+          var table=result.data;
+          myCallRecordVm.tmList= table;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      }//电销总监电销组筛选按钮不可点击
       this.initCallRecordData();
    },
    mounted(){

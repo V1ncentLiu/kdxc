@@ -40,7 +40,7 @@
                 </el-form-item>
                 <el-form-item label="商务组:">
                     <el-select v-model="form.businessGroupId" placeholder="商务组" style="width: 100%;" clearable
-                               filterable>
+                               filterable :disabled="isSWZDisabled">
                         <el-option
                                 v-for="item in businessGroupList"
                                 :key="item.id"
@@ -421,7 +421,6 @@
 <script th:inline="javascript">
     /*  var projectList = [[${projectList}]];
      var busManagerList = [[${busManagerList}]];
-     var businessGroupList = [[${businessGroupList}]];
      var teleGroupList = [[${teleGroupList}]]; */
     //var teleSaleList = [[${teleSaleList}]];
 
@@ -429,6 +428,8 @@
     var refundData = [[${refundData}]];
     var payModeItem =[[${payModeItem}]];
     var giveTypeList =[[${giveTypeList}]];
+    var businessGroupList = [[${businessGroupList}]];
+    var ownOrgId=[[${ownOrgId}]];//商务总监商务组
 </script>
 
 </body>
@@ -451,10 +452,11 @@
                 paymentDetailsShow3: false,//判断二次定金付款明细表格是否显示
                 paymentDetailsShow4: false,//判断尾款付款明细表格是否显示
                 visitRecordShow: false,
+                isSWZDisabled:false,
                 curRow: "", // 列表数据：当前行，使用地点：付款明细
                 form: {
                     signProjectId: '',
-                    businessGroupId: '',
+                    businessGroupId: ownOrgId,
                     businessManagerId: '',
                     teleGroupid: '',
                     teleSaleId: '',
@@ -470,7 +472,7 @@
                 dataTable: [],
                 projectList: [],
                 busManagerList: [],
-                businessGroupList: [],
+                businessGroupList: businessGroupList,
                 teleGroupList: [],
                 teleSaleList: [],
                 refundTable: [],
@@ -1068,7 +1070,7 @@
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            
+            if(ownOrgId){this.isSWZDisabled= true;}//商务总监商务组筛选按钮不可点击
             this.initSignRecordData();
             this.initSelect();
         }

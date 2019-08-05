@@ -1,436 +1,449 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
-  <title>后台管理系统</title>
+    <title>后台管理系统</title>
 </head>
 <body>
 <div id="appiontmentManage" class="appiontmentManage mainPadding" style="display: none;">
-  <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-    <el-breadcrumb-item>Home</el-breadcrumb-item>
-    <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-    <el-breadcrumb-item>邀约来访记录</el-breadcrumb-item>
-  </el-breadcrumb>
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>邀约来访记录</el-breadcrumb-item>
+    </el-breadcrumb>
 
-  <el-row class="marginB20">
-    <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
-    <shiro:hasPermission name="aggregation:appiontmentManager:edit">
-      <el-button type="success" @click="toUpdateAppiontment">编辑</el-button>
-    </shiro:hasPermission>
-    <shiro:hasPermission name="aggregation:appiontmentManager:view">
-      <el-button type="warning" @click="viewCustomerInfo">预览客户信息</el-button>
-    </shiro:hasPermission>
-    <shiro:hasPermission name="aggregation:appiontmentManager:delete">
-      <el-button type="danger" @click="deleteAppiontment">删除</el-button>
-    </shiro:hasPermission>
-    <shiro:hasPermission name="aggregation:appiontmentManager:cancel">
-      <el-button type="info" @click="openCancelForm">标记取消</el-button>
-    </shiro:hasPermission>
-  </el-row>
-  <div class="mainSearchBg">
-    <div class="mainSearchFormBox">
-      <el-form :inline="true" :model="appiontmentSearchForm" class="demo-form-inline mainSearchForm" ref="appiontmentSearchForm">
-        <el-form-item label="客户姓名:" class="formItem" prop="cusName">
-          <el-input v-model="appiontmentSearchForm.cusName" placeholder="请输入客户姓名" class="input-with-select"></el-input>
-        </el-form-item>
-        <!-- <el-form-item label="电销事业部:" class="formItem"  prop="teleDeptId">
-          <el-select v-model="appiontmentSearchForm.teleDeptId" clearable @change="getSaleList" placeholder="电销事业部" filterable>
-            <el-option
-                v-for="item in teleDeptOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item> -->
-        <el-form-item label="电销组:" class="formItem"  prop="teleGorupId">
-          <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable>
-            <el-option
-                v-for="item in teleGorupOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="电销顾问:" class="formItem"  prop="teleSaleId">
-          <el-select v-model="appiontmentSearchForm.teleSaleId" clearable placeholder="电销顾问" filterable>
-            <el-option
-                v-for="item in teleSaleOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="提交时间:">
-          <el-date-picker v-model="appiontmentSearchForm.startTime" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="—" class="widthauto">
-          <el-date-picker v-model="appiontmentSearchForm.endTime" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
-          </el-date-picker>
-        </el-form-item>
-        <el-row v-show="isShow">
-          <el-form-item label="品尝项目:" class="formItem"  prop="projectId">
-            <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="品尝项目" filterable>
-              <el-option
-                  v-for="item in projectOptions"
-                  :key="item.id"
-                  :label="item.projectName"
-                  :value="item.id">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="客户手机号:" class="formItem" prop="cusPhone">
-            <el-input v-model="appiontmentSearchForm.cusPhone" placeholder="请输入客户手机号" class="input-with-select"></el-input>
-          </el-form-item>
-          <el-form-item label="资源ID:">
-            <el-input v-model="appiontmentSearchForm.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
-          </el-form-item>
-          <el-form-item label="QQ:">
-            <el-input v-model="appiontmentSearchForm.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
-          </el-form-item>
-          <el-form-item label="微信:">
-            <el-input v-model="appiontmentSearchForm.wechat" placeholder="微信"></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱:">
-            <el-input v-model="appiontmentSearchForm.email" placeholder="邮箱"></el-input>
-          </el-form-item>
-        </el-row>
-        <div class="mainSearchBtnBox">
-          <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-          <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-          <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
+        <shiro:hasPermission name="aggregation:appiontmentManager:edit">
+            <el-button type="success" @click="toUpdateAppiontment">编辑</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="aggregation:appiontmentManager:view">
+            <el-button type="warning" @click="viewCustomerInfo">预览客户信息</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="aggregation:appiontmentManager:delete">
+            <el-button type="danger" @click="deleteAppiontment">删除</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="aggregation:appiontmentManager:cancel">
+            <el-button type="info" @click="openCancelForm">标记取消</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="appiontmentSearchForm" class="demo-form-inline mainSearchForm" ref="appiontmentSearchForm">
+                <el-form-item label="客户姓名:" class="formItem" prop="cusName">
+                    <el-input v-model="appiontmentSearchForm.cusName" placeholder="请输入客户姓名" class="input-with-select"></el-input>
+                </el-form-item>
+                <!-- <el-form-item label="电销事业部:" class="formItem"  prop="teleDeptId">
+                  <el-select v-model="appiontmentSearchForm.teleDeptId" clearable @change="getSaleList" placeholder="电销事业部" filterable>
+                    <el-option
+                        v-for="item in teleDeptOptions"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                  </el-select>
+                </el-form-item> -->
+                <el-form-item label="电销组:" class="formItem"  prop="teleGorupId">
+                    <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable :disabled="isDXZDisabled">
+                        <el-option
+                            v-for="item in teleGorupOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:" class="formItem"  prop="teleSaleId">
+                    <el-select v-model="appiontmentSearchForm.teleSaleId" clearable placeholder="电销顾问" filterable>
+                        <el-option
+                            v-for="item in teleSaleOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="提交时间:">
+                    <el-date-picker v-model="appiontmentSearchForm.startTime" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="appiontmentSearchForm.endTime" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="品尝项目:" class="formItem"  prop="projectId">
+                        <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="品尝项目" filterable>
+                            <el-option
+                                v-for="item in projectOptions"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="客户手机号:" class="formItem" prop="cusPhone">
+                        <el-input v-model="appiontmentSearchForm.cusPhone" placeholder="请输入客户手机号" class="input-with-select"></el-input>
+                    </el-form-item>
+                    <el-form-item label="资源ID:">
+                        <el-input v-model="appiontmentSearchForm.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="QQ:">
+                        <el-input v-model="appiontmentSearchForm.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="微信:">
+                        <el-input v-model="appiontmentSearchForm.wechat" placeholder="微信"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱:">
+                        <el-input v-model="appiontmentSearchForm.email" placeholder="邮箱"></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否签约:" prop="isSign">
+                        <el-select v-model="appiontmentSearchForm.isSign" clearable placeholder="是否签约">
+                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
+                                       :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否补齐尾款:">
+                        <el-select v-model="appiontmentSearchForm.isTailMoney" placeholder="是否补齐尾款" clearable>
+                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
+            </el-form>
         </div>
-      </el-form>
-    </div>
-    <el-row>
-      <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-                 style="width: 100%"  :data="dataTable" >
-        <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
-          <template slot-scope="scope">
-            <div v-if="scope.row.isRepeatPhone === 1">
-              <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
-            </div>
-    	                    <div v-else></div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
-          <template slot-scope="scope">
-            <div v-if="scope.row.isTrack === 1">
-              <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
-            </div>
-            <div v-else>无</div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
-          <template slot-scope="scope">
-            {{scope.row.cusName}}
-            <span v-if="scope.row.inputType ==1">
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+                       style="width: 100%"  :data="dataTable" >
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isRepeatPhone === 1">
+                            <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                        </div>
+                        <div v-else></div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isTrack === 1">
+                            <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
+                        </div>
+                        <div v-else>无</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.cusName}}
+                        <span v-if="scope.row.inputType ==1">
                 <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
             </span>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-                         v-else-if="item.fieldCode == 'cusPhone'" >
-        </el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-                         v-else>
-        </el-table-column>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'cusPhone'" >
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else>
+                </el-table-column>
 
-      </el-table>
-      <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
-    </el-row>
-  </div>
-  <!-- dialog -->
-  <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible" width="540px">
-    <el-form :model="appiontmentForm" ref="appiontmentForm" :rules="appiontmentFormRule">
-      <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
-        <el-select v-model="appiontmentForm.area" disabled placeholder="请选择" style="width: 290px;" @change="currentBusGroup" >
-          <el-option
-              v-for="item in areaOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="分公司：" :label-width="formLabelWidth" prop="busCompay">
-        <el-select v-model="appiontmentForm.busCompay" disabled placeholder="请选择" style="width: 290px;" @change="currentBusSale">
-          <el-option
-              v-for="item in busCompayOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="商务总监：" :label-width="formLabelWidth" prop="busDirectorId">
-        <el-select v-model="appiontmentForm.busDirectorId" disabled placehold er="请选择" style="width: 290px;">
-          <el-option
-              v-for="item in busDirectorOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="品尝项目：" :label-width="formLabelWidth" >
-        <el-form-item label="" prop="tasteProjectId">
-          <el-select
-              v-model="appiontmentForm.tasteProjectId"
-              placeholder="品尝项目"
-              style="width: 290px;"
-              multiple
-              filterable
-          >
-            <el-option
-                v-for="item in  projectOptions"
-                :key="item.id"
-                :label="item.projectName"
-                :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form-item>
-      <el-form-item label="预约时间：" :label-width="formLabelWidth" prop="reserveTime">
-        <el-date-picker
-            style="width: 290px;"
-            v-model="appiontmentForm.reserveTime"
-            type="datetime"
-            placeholder="选择日期时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark">
-        <el-input type="textarea" :rows="2" v-model="appiontmentForm.remark" maxlength="500" style="width: 290px;"></el-input>
-      </el-form-item>
-    </el-form>
-    <div slot="footer" class="dialog-footer">
-      <el-button type="primary" :disabled="btnDisabled" @click="saveAppiontment('appiontmentForm')">确 定</el-button>
-      <el-button @click="appiontmentFormVisible = false">取 消</el-button>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
     </div>
-  </el-dialog>
-  <!-- dialog -->
-  <!-- 跟进记录 -->
-  <el-dialog title="跟进记录" :visible.sync="recordDialog" width="1000px">
-    <el-table
-        ref="singleTable"
-        tooltip-effect="dark"
-        style="width: 100%"
-        border
-        :data="recordTable"
-    >
-      <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-      <el-table-column align="center" prop="callTime" label="拨打时间" width="150"></el-table-column>
-      <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
-      <el-table-column align="center" prop="isCall" label="是否接通" :formatter="transformIsCall" width="90"></el-table-column>
-      <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
-      <!--<el-table-column align="center" prop="visitStatus" label="是否继续回访" :formatter="transform"></el-table-column>  -->
-      <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="150"></el-table-column>
-      <el-table-column align="center" prop="createUserName" label="创建人" width="150"></el-table-column>
-    </el-table>
-  </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible" width="540px">
+        <el-form :model="appiontmentForm" ref="appiontmentForm" :rules="appiontmentFormRule">
+            <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
+                <el-select v-model="appiontmentForm.area" disabled placeholder="请选择" style="width: 290px;" @change="currentBusGroup" >
+                    <el-option
+                        v-for="item in areaOptions"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="分公司：" :label-width="formLabelWidth" prop="busCompay">
+                <el-select v-model="appiontmentForm.busCompay" disabled placeholder="请选择" style="width: 290px;" @change="currentBusSale">
+                    <el-option
+                        v-for="item in busCompayOptions"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="商务总监：" :label-width="formLabelWidth" prop="busDirectorId">
+                <el-select v-model="appiontmentForm.busDirectorId" disabled placehold er="请选择" style="width: 290px;">
+                    <el-option
+                        v-for="item in busDirectorOptions"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="品尝项目：" :label-width="formLabelWidth" >
+                <el-form-item label="" prop="tasteProjectId">
+                    <el-select
+                        v-model="appiontmentForm.tasteProjectId"
+                        placeholder="品尝项目"
+                        style="width: 290px;"
+                        multiple
+                        filterable
+                    >
+                        <el-option
+                            v-for="item in  projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form-item>
+            <el-form-item label="预约时间：" :label-width="formLabelWidth" prop="reserveTime">
+                <el-date-picker
+                    style="width: 290px;"
+                    v-model="appiontmentForm.reserveTime"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark">
+                <el-input type="textarea" :rows="2" v-model="appiontmentForm.remark" maxlength="500" style="width: 290px;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="saveAppiontment('appiontmentForm')">确 定</el-button>
+            <el-button @click="appiontmentFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    <!-- dialog -->
+    <!-- 跟进记录 -->
+    <el-dialog title="跟进记录" :visible.sync="recordDialog" width="1000px">
+        <el-table
+            ref="singleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="recordTable"
+        >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="callTime" label="拨打时间" width="150"></el-table-column>
+            <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
+            <el-table-column align="center" prop="isCall" label="是否接通" :formatter="transformIsCall" width="90"></el-table-column>
+            <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
+            <!--<el-table-column align="center" prop="visitStatus" label="是否继续回访" :formatter="transform"></el-table-column>  -->
+            <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="150"></el-table-column>
+            <el-table-column align="center" prop="createUserName" label="创建人" width="150"></el-table-column>
+        </el-table>
+    </el-dialog>
 
-  <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1160px">
-    <div v-show="showPhoneTable">
-      <p style="margin:10px 0;">手机号{{phone}}重复手机号资源</p>
-      <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
-          <template slot-scope="scope">
-            <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
-              {{scope.row.teleReceiveTime}}(分配)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===3">
-              {{scope.row.teleReceiveTime}}(领取)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===4">
-              {{scope.row.teleReceiveTime}}(自建)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===5">
-              {{scope.row.teleReceiveTime}}(分发)
-            </div>
-            <div v-else>
-              {{scope.row.teleReceiveTime}}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
-        <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
-        <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
-      </el-table>
-    </div>
-    <div v-show="showPhoneTable2">
-      <p style="margin:10px 0;">手机号{{phone2}}重复手机号资源</p>
-      <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
-          <template slot-scope="scope">
-            <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
-              {{scope.row.teleReceiveTime}}(分配)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===3">
-              {{scope.row.teleReceiveTime}}(领取)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===4">
-              {{scope.row.teleReceiveTime}}(自建)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===5">
-              {{scope.row.teleReceiveTime}}(分发)
-            </div>
-            <div v-else>
-              {{scope.row.teleReceiveTime}}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
-        <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
-        <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
-      </el-table>
-    </div>
-    <div v-show="showPhoneTable3">
-      <p style="margin:10px 0;">手机号{{phone3}}重复手机号资源</p>
-      <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
-          <template slot-scope="scope">
-            <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
-              {{scope.row.teleReceiveTime}}(分配)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===3">
-              {{scope.row.teleReceiveTime}}(领取)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===4">
-              {{scope.row.teleReceiveTime}}(自建)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===5">
-              {{scope.row.teleReceiveTime}}(分发)
-            </div>
-            <div v-else>
-              {{scope.row.teleReceiveTime}}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
-        <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
-        <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
-      </el-table>
-    </div>
-    <div v-show="showPhoneTable4">
-      <p style="margin:10px 0;">手机号{{phone4}}重复手机号资源</p>
-      <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
-          <template slot-scope="scope">
-            <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
-              {{scope.row.teleReceiveTime}}(分配)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===3">
-              {{scope.row.teleReceiveTime}}(领取)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===4">
-              {{scope.row.teleReceiveTime}}(自建)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===5">
-              {{scope.row.teleReceiveTime}}(分发)
-            </div>
-            <div v-else>
-              {{scope.row.teleReceiveTime}}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
-        <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
-        <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
-      </el-table>
-    </div>
-    <div v-show="showPhoneTable5">
-      <p style="margin:10px 0;">手机号{{phone5}}重复手机号资源</p>
-      <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="130"></el-table-column>
-        <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
-          <template slot-scope="scope">
-            <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
-              {{scope.row.teleReceiveTime}}(分配)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===3">
-              {{scope.row.teleReceiveTime}}(领取)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===4">
-              {{scope.row.teleReceiveTime}}(自建)
-            </div>
-            <div v-else-if="scope.row.teleReceiveSource ===5">
-              {{scope.row.teleReceiveTime}}(分发)
-            </div>
-            <div v-else>
-              {{scope.row.teleReceiveTime}}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" prop="teleGorupName" label="电销组" width="100"></el-table-column>
-        <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="130"></el-table-column>
-        <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="110"></el-table-column>
-        <el-table-column align="center" prop="createUserName" label="资源创建人" width="80"></el-table-column>
-      </el-table>
-    </div>
-  </el-dialog>
+    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'"    :visible.sync="repeatPhonesDialog" width="1000px">
+        <div v-show="showPhoneTable">
+            <p style="margin:10px 0;">手机号{{phone}}重复手机号资源</p>
+            <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable2">
+            <p style="margin:10px 0;">手机号{{phone2}}重复手机号资源</p>
+            <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable3">
+            <p style="margin:10px 0;">手机号{{phone3}}重复手机号资源</p>
+            <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable4">
+            <p style="margin:10px 0;">手机号{{phone4}}重复手机号资源</p>
+            <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable5">
+            <p style="margin:10px 0;">手机号{{phone5}}重复手机号资源</p>
+            <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>
+            </el-table>
+        </div>
+    </el-dialog>
 
-  <el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
-    <el-form :model="form">
-      <el-form-item label="" prop="type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
-            {{item.displayName}}
-          </el-checkbox>
-        </el-checkbox-group>
-      </el-form-item>
-    </el-form>
-    <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="confirmColumn">确 定</el-button>
-      <el-button @click="dialogFormVisible = false">取 消</el-button>
-    </div>
-  </el-dialog>
-  <!-- 释放资源 -->
-  <el-dialog title="取消原因"    :visible.sync="cancelFormVisible" width="540px">
-    <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
-      <el-row>
-        <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
-        <el-form-item label="取消原因：" :label-width="formLabelWidth1" prop="cancelReason">
-          <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
-        </el-form-item>
-      </el-row>
-    </el-form>
-    <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="submitCancelForm('cancelDigForm')">提 交</el-button>
-      <el-button @click="cancelFormVisible= false" >取 消</el-button>
-    </div>
-  </el-dialog>
+    <el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
+        <el-form :model="form">
+            <el-form-item label="" prop="type">
+                <el-checkbox-group v-model="form.type">
+                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        {{item.displayName}}
+                    </el-checkbox>
+                </el-checkbox-group>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="confirmColumn">确 定</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    <!-- 释放资源 -->
+    <el-dialog title="取消原因"    :visible.sync="cancelFormVisible" width="540px">
+        <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
+            <el-row>
+                <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
+                <el-form-item label="取消原因：" :label-width="formLabelWidth1" prop="cancelReason">
+                    <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
+                </el-form-item>
+            </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="submitCancelForm('cancelDigForm')">提 交</el-button>
+            <el-button @click="cancelFormVisible= false" >取 消</el-button>
+        </div>
+    </el-dialog>
 
 
 </div>
@@ -448,17 +461,19 @@
   var userId = [[${userId}]]+"";
   var roleCode = [[${roleCode}]];
   var orgId = [[${orgId}]]+"";
+  var ownOrgId=[[${ownOrgId}]];//电销总监电销组
   var appiontmentVM = new Vue({
     el: '#appiontmentManage',
     data: {
       paginationShow: false,
       isShow:false,
-      btnDisabled: false,  
+      btnDisabled: false,
+      isDXZDisabled:false,
       appiontmentSearchForm: {
         startTime: '',
         endTime: '',
         teleDeptId: '',
-        teleGorupId: '',
+        teleGorupId:ownOrgId,
         teleSaleId: '',
         projectId: '',
         cusName: '',
@@ -467,6 +482,8 @@
         qq:"",
         wechat:"",
         email:"",
+        isTailMoney:"",
+        isSign:"",
       },
       appiontmentForm: {
         id:'',
@@ -537,11 +554,19 @@
           { required: true, message: '预约时间不能为空', trigger: 'change' }
         ]
       },
+      isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+      isSignOptions: [{
+        value: 0,
+        name: "未签约"
+      }, {
+        value: 1,
+        name: "已签约"
+      }],
       storeForm: {
         startTime: '',
         endTime: '',
         teleDeptId: '',
-        teleGorupId: '',
+        teleGorupId:ownOrgId,
         teleSaleId: '',
         projectId: '',
         cusName: '',
@@ -555,15 +580,15 @@
       scrollTop: 0,
     },
     methods: {
-    	transCusPhone(row) {
-    		var text="";
-    		if((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7){
-    			text ="***"
-    		}else{
-    			text = row.cusPhone;
-    		}
-             return text;
-         },
+      transCusPhone(row) {
+        var text="";
+        if((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7){
+          text ="***"
+        }else{
+          text = row.cusPhone;
+        }
+        return text;
+      },
       searchTable() {
         var param ={};
 
@@ -590,6 +615,8 @@
         param.qq = this.appiontmentSearchForm.qq;
         param.email = this.appiontmentSearchForm.email;
         param.wechat = this.appiontmentSearchForm.wechat;
+        param.isSign = this.appiontmentSearchForm.isSign;
+        param.isTailMoney = this.appiontmentSearchForm.isTailMoney;
         console.info(param);
         axios.post('/clue/appiontment/list', param)
         .then(function (response) {
@@ -615,25 +642,25 @@
           appiontmentVM.pager.currentPage = table.currentPage;
 
           // 取出存储的id
-           if(!appiontmentVM.paginationShow){
-               if(appiontmentVM.storeId){
-                   appiontmentVM.$nextTick(function(){
-                      var storage = [];
-                      appiontmentVM.dataTable.forEach(function(item, index){
-                          if(item.clueId === appiontmentVM.storeId ){
-                              storage.push(appiontmentVM.dataTable[index]);
-                          }
-                      })
-                      appiontmentVM.toggleSelection(storage);
+          if(!appiontmentVM.paginationShow){
+            if(appiontmentVM.storeId){
+              appiontmentVM.$nextTick(function(){
+                var storage = [];
+                appiontmentVM.dataTable.forEach(function(item, index){
+                  if(item.clueId === appiontmentVM.storeId ){
+                    storage.push(appiontmentVM.dataTable[index]);
+                  }
+                })
+                appiontmentVM.toggleSelection(storage);
 
-                      appiontmentVM.$el.querySelector('.el-table__body-wrapper').scrollTop = appiontmentVM.scrollTop;
-                         
-                  })
-              }
-           }else{
-              removeSessionStore ("appiontmentManagerStoreForm");
-              removeSessionStore ("appiontmentManagerOtherVal");
-           }
+                appiontmentVM.$el.querySelector('.el-table__body-wrapper').scrollTop = appiontmentVM.scrollTop;
+
+              })
+            }
+          }else{
+            removeSessionStore ("appiontmentManagerStoreForm");
+            removeSessionStore ("appiontmentManagerOtherVal");
+          }
           appiontmentVM.paginationShow = true;
           appiontmentVM.storeForm = appiontmentVM.appiontmentSearchForm;
         })
@@ -643,13 +670,13 @@
 
       },
       toggleSelection(rows) { // table select 默认选中fn
-          if (rows) {
-              rows.forEach(row => {
-                  this.$refs.multipleTable.toggleRowSelection(row,true);
-              });
-          } else {
-              this.$refs.multipleTable.clearSelection();
-          }
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row,true);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
       },
       //选择行
       handleSelectionChange(val) {
@@ -862,12 +889,12 @@
               if(resData.code=='0'){
                 appiontmentVM.cancelForm(formName);
                 appiontmentVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
-                    appiontmentVM.btnDisabled = false; 
+                    appiontmentVM.btnDisabled = false;
                     appiontmentVM.searchTable();
                   }});
               }else{
                 appiontmentVM.$message('操作失败');
-                appiontmentVM.btnDisabled = false; 
+                appiontmentVM.btnDisabled = false;
               }
             })
             .catch(function (error) {
@@ -908,28 +935,28 @@
         }
         this.cancelForm.cancelReason="";
         this.cancelFormVisible=true;
-       /*  var param  = {cancelIdList:rowIds};
-        axios.post('/clue/appiontment/findCancelList',param)
-        .then(function (response) {
-          var data =  response.data;
-          if(data.code=='0'){
-            if(null!=data.data&&data.data.length>0){
-              appiontmentVM.$message({
-                message: "当前选中的邀约来访记录已经填写有效的到访记录或已经提交签约单,不可取消邀约",
-                type: 'error'
-              });
-              return  ;
-            }
+        /*  var param  = {cancelIdList:rowIds};
+         axios.post('/clue/appiontment/findCancelList',param)
+         .then(function (response) {
+           var data =  response.data;
+           if(data.code=='0'){
+             if(null!=data.data&&data.data.length>0){
+               appiontmentVM.$message({
+                 message: "当前选中的邀约来访记录已经填写有效的到访记录或已经提交签约单,不可取消邀约",
+                 type: 'error'
+               });
+               return  ;
+             }
 
-          }else{
+           }else{
 
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        }).then(function () {
+           }
+         })
+         .catch(function (error) {
+           console.log(error);
+         }).then(function () {
 
-        }); */
+         }); */
 
       },
       //取消邀约数据
@@ -1093,31 +1120,23 @@
           });
           return;
         }
-
-        if((roleCode =='DXCYGW' && (rows[0].teleSaleId+"") != userId)  || rows[0].phase ==7){
+        if((roleCode =='DXCYGW' && (rows[0].teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(rows[0].teleGorupId+"")) || rows[0].phase ==7){
           this.$message({
             message: "当前资源已释放到公有池，不允许进行详细信息的查看",
             type: 'error'
           });
           return;
         }
-        if(roleCode =='DXZJ' && orgId !=(rows[0].teleGorupId+"")){
-              this.$message({
-                  message: "此资源已经被转给其他顾问，您不可再进行详细信息查看",
-                  type: 'error'
-              });
-              return;
-          }
         // 存储选中信息--start
-        var clueId=rows[0].clueId; 
+        var clueId=rows[0].clueId;
         setSessionStore("appiontmentManagerStoreForm", this.storeForm);
         var otherVal = {
-            "currentPage": this.pager.currentPage,
-            "clueId": clueId,
-            "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
         }
         setSessionStore("appiontmentManagerOtherVal", otherVal);
-        // 存储选中信息--end  
+        // 存储选中信息--end
         window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+clueId;
       },
       //查看重复手机号资源
@@ -1137,11 +1156,11 @@
         }
         //电销顾问角色
         if((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId)){
-            this.$message({
-                message:'此资源已经被转给其他顾问，您不可再进行详细信息查看',
-                type:'error'
-            });
-            return;
+          this.$message({
+            message:'此资源已经被转给其他顾问，您不可再进行详细信息查看',
+            type:'error'
+          });
+          return;
         }
 
         this.repeatPhonesDialog=true;
@@ -1277,18 +1296,34 @@
       console.info("create method");
       // 进入页面判断有是否有存储值
       if(!this.paginationShow){
-          var storeVal = getSessionStore("appiontmentManagerStoreForm");
-          var otherVal = getSessionStore("appiontmentManagerOtherVal");
-          if(storeVal && otherVal){
-              this.appiontmentSearchForm = storeVal;
-              this.$set(this.pager,"currentPage",otherVal.currentPage);
-              this.storeId = otherVal.clueId;
-              this.scrollTop = otherVal.scrollTop;
-          }
+        var storeVal = getSessionStore("appiontmentManagerStoreForm");
+        var otherVal = getSessionStore("appiontmentManagerOtherVal");
+        if(storeVal && otherVal){
+          this.appiontmentSearchForm = storeVal;
+          this.$set(this.pager,"currentPage",otherVal.currentPage);
+          this.storeId = otherVal.clueId;
+          this.scrollTop = otherVal.scrollTop;
+        }
       };
       // 取页数存储
       var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
       if(localVal){this.pager.pageSize = localVal;}
+      if(ownOrgId){
+        this.isDXZDisabled= true;
+        var param ={};
+          param.orgId = ownOrgId;
+          console.info(param);
+          axios.post('/clue/appiontment/getSaleList', param)
+          .then(function (response) {
+            var result =  response.data;
+            console.info(result);
+            var table=result.data;
+            appiontmentVM.teleSaleOptions= table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }//电销总监电销组筛选按钮不可点击
       this.initColumn();
       this.searchTable();
       this.currentBusArea();

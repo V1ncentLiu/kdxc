@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +87,9 @@ public class PendingAllocationController {
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
+        String ownOrgId = "";
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
+            List<OrganizationRespDTO>  teleGorupList = new ArrayList<>();
             // 如果当前登录的为电销总监,查询所有下属电销员工
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
@@ -94,12 +97,22 @@ public class PendingAllocationController {
             List<UserInfoDTO> userList =
                     getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
+            ownOrgId =  String.valueOf(user.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGorupList.add(organizationRespDTO);
+            }
             // 查询同事业部下的电销组
             Long orgId = user.getOrgId();
             JSONResult<OrganizationDTO> queryOrgById =
                     organizationFeignClient.queryOrgById(new IdEntity(orgId.toString()));
             List<Map<String, Object>> saleGroupList =
                     getSaleGroupList(queryOrgById.getData().getParentId(), user);
+            request.setAttribute("teleGorupList", teleGorupList);
+            request.setAttribute("ownOrgId", ownOrgId);
             request.setAttribute("saleGroupList", saleGroupList);
 
 
@@ -434,6 +447,24 @@ public class PendingAllocationController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 
 }

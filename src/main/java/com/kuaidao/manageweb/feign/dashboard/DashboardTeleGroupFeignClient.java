@@ -14,7 +14,7 @@ import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
 
 /**
  * 看板计数
- * 
+ *
  * @author: fanjd
  * @date: 2019年7月10日
  * @version V1.0
@@ -26,8 +26,8 @@ public interface DashboardTeleGroupFeignClient {
     /**
      * 看板数据查询-电销总监
      */
-    @PostMapping("/findTeleGroupDataByOrgId")
-    public JSONResult<DashboardTeleGroupDto> findTeleGroupDataByOrgId(@RequestBody IdEntityLong idEntityLong);
+    @PostMapping("/findTeleGroupDataByUserId")
+    public JSONResult<DashboardTeleGroupDto> findTeleGroupDataByUserId(@RequestBody IdEntityLong idEntityLong);
 
     @Component
     class HystrixClientFallback implements DashboardTeleGroupFeignClient {
@@ -41,7 +41,7 @@ public interface DashboardTeleGroupFeignClient {
         }
 
         @Override
-        public JSONResult findTeleGroupDataByOrgId(IdEntityLong idEntityLong) {
+        public JSONResult findTeleGroupDataByUserId(IdEntityLong idEntityLong) {
             return fallBackError("电销总监：" + idEntityLong.getId()+"获取看板");
         }
     }
