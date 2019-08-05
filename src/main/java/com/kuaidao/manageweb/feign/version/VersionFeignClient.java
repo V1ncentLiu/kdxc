@@ -1,0 +1,147 @@
+package com.kuaidao.manageweb.feign.version;
+
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.version.dto.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+/**
+ * 版本管理服务调用Feign类
+ *
+ * @author
+ */
+@FeignClient(name = "version-service-sjy", fallback = VersionFeignClient.HystrixClientFallback.class)
+public interface VersionFeignClient {
+	/**
+	 * 版本信息列表
+	 *
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/list")
+	public JSONResult<PageBean<VersionManageDTO>> list(
+      @RequestBody VersionManageListDTO versionManageListDTO);
+
+	/**
+	 * 创建版本信息
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/create")
+	JSONResult<String> create(@RequestBody VersionCreateReq versionCreateReq);
+
+	/**
+	 * 版本信息维护
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/update")
+	JSONResult update(@RequestBody VersionUpdateReq versionUpdateReq);
+
+	/**
+	 * 删除版本信息
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/delete")
+	public JSONResult<Void> delete(@RequestBody IdEntity idEntity);
+
+	/**
+	 * 查询版本信息
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/version/v1.0/version/getVersion/{id}")
+	JSONResult<VersionManageDTO> getVersion(@PathVariable("id") String id);
+
+	/**
+	 * 设置最新版本
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/setNewVersion")
+	public JSONResult<Void> setNewVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO);
+
+	/**
+	 * 校验版本号是否重复
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/checkNum")
+	JSONResult<Boolean> checkNum(@RequestBody VersionNumCheckReq versionNumCheckReq);
+
+	/**
+	 * 这边采取了和Spring
+	 * Cloud官方文档相同的做法，将fallback类作为内部类放入Feign的接口中，当然也可以单独写一个fallback类。
+	 *
+	 * @author guoruiling
+	 */
+	@Component
+	static class HystrixClientFallback implements VersionFeignClient {
+		private static final Logger logger = LoggerFactory.getLogger(VersionFeignClient.class);
+
+		/**
+		 * 熔断器返回信息
+		 *
+		 * @param name
+		 *            接口名称
+		 * @return
+		 */
+		private JSONResult fallBackError(String name) {
+			logger.error(name + "接口调用失败：无法获取目标服务");
+			return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+					SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+		}
+
+		@Override
+		public JSONResult<PageBean<VersionManageDTO>> list(@RequestBody VersionManageListDTO versionManageListDTO) {
+			return fallBackError("版本信息列表");
+		}
+
+		@Override
+		public JSONResult<String> create(VersionCreateReq versionCreateReq) {
+			return fallBackError("新增版本信息");
+		}
+
+		@Override
+		public JSONResult update(VersionUpdateReq versionUpdateReq) {
+			return fallBackError("修改版本信息");
+		}
+
+		@Override
+		public JSONResult<Void> delete(@RequestBody IdEntity idEntity) {
+			return fallBackError("删除版本信息");
+		}
+
+		@Override
+		public JSONResult<VersionManageDTO> getVersion(String id) {
+			return fallBackError("查询版本信息");
+		}
+
+		@Override
+		public JSONResult<Void> setNewVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO) {
+			return fallBackError("设置最新版本");
+		}
+
+		@Override
+		public JSONResult<Boolean> checkNum(VersionNumCheckReq versionNumCheckReq) {
+			return fallBackError("校验版本号是否重复");
+		}
+
+	}
+
+}

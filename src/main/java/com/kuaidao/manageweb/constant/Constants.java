@@ -91,4 +91,9 @@ public class Constants {
     public static final String TODAY_TELE_SALE = "huiju:dashboard:todaytelesale:";
     /** redis前缀 看板计数-电销顾问计数-今日 **/
     public static final String NOTTODAY_TELE_SALE = "huiju:dashboard:nottodaytelesale:";
+
+    /**
+     * 返回码成功
+     */
+    public static final String SUCCESS = "0";
 }
