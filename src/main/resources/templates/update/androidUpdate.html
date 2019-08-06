@@ -18,8 +18,6 @@
     <el-row class="marginB20">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>版本发布</el-button>
-            <!-- <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
-   			    <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑电销布局</el-button> -->
         </el-col>
     </el-row>
     <div class="mainSearchBg">
@@ -37,7 +35,7 @@
                 <el-table-column align="center" prop="type" label="系统" :formatter="transformType"></el-table-column>
                 <el-table-column align="center" prop="insertTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
                 <el-table-column align="center" prop="upgradeType" label="强制升级" :formatter="transformUpgradeType"></el-table-column>
-                <el-table-column align="center" prop="promptContent" label="更新内容"></el-table-column>
+                <el-table-column align="center" prop="updateContent" label="更新内容"></el-table-column>
                 <el-table-column align="center" prop="isNewest" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
                 <el-table-column align="center" prop="handle" label="操作">
                     <template slot-scope="scope">
@@ -82,7 +80,7 @@
                 </el-upload>
             </el-form-item>
             <el-form-item label="版本号：" :label-width="formLabelWidth" prop="versionNum">
-                <el-input v-model="form.versionNum"></el-input>
+                <el-input type="number" v-model="form.versionNum"></el-input>
             </el-form-item>
 					  <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="upgradeType">
                 <el-radio-group v-model="form.upgradeType">
@@ -91,7 +89,7 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
-                <el-input type="textarea" v-model="form.updateContent"></el-input>
+                <el-input type="textarea" v-model="form.updateContent" maxlength="200"></el-input>
             </el-form-item>
             
         </el-form>
@@ -124,13 +122,11 @@
           	endTime:"",
           	addOrModifyDialogTitle:"",
           	fileList:[],//上传文件列表
-          	dialogFormVisible:false,
           	dataTable:[],
           	multipleSelection: [],
           	exportdataTable:[],
           	projectId:"",
           	form:{
-              	url:'',
                 versionNum:'',
                 upgradeType:"1", 
                 updateContent:''
@@ -212,7 +208,7 @@
                       orgVM.form.updateContent = data.updateContent;
                   	 
                    }else{
-                  	 alert(response.data.data.message);
+                  	    alert(response.data.data.message);
                   	  	return ;
                    } 
                 }).catch(function (error) {
@@ -236,10 +232,10 @@
                     .then(function (response) {
                           var result =  response.data;
                           if(result.code=="0"){
-                            orgVM.$message.success("删除成功");
-                            orgVM.searchTable();
+                              orgVM.$message.success("删除成功");
+                              orgVM.inviteAreaListPage();
                           }else{
-                            orgVM.$message.error("删除失败");
+                              orgVM.$message.error("删除失败");
                           }
                     })
                     .catch(function (error) {
@@ -365,36 +361,39 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                      var formData = this.form;
-                      var param={};
-                      param.type = 1;//版本类型:1-android2-ios
-                      param.versionNum = formData.versionNum;//版本号
-                      param.upgradeType = formData.versionNum;//升级模式:1-强制升级、2-可选升级
-                      param.url = formData.url;//url地址
-                      param.updateContent = formData.updateContent;//更新内容
-                      param.md5 = '';//apkMD5值
-                      var str = "";
-                      var rows = this.multipleSelection;
-                      for ( var i = 0; i <rows.length; i++){
-                    	  str = rows[i].id
-                      }
-                      param.id = str;
-                      
-                      orgVM.btnDisabled = true; 
-                      var url = "/version/addAndroid";//新建
-                      if($("#addOrUpdate").val() ==2){
-                    	  url = "/version/editAndroid"//编辑
-                      }
-                   	  axios.post(url,param).then(function (response) {
-   	                  	  console.log(response);
-   	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                              window.location.href="/version/androidVersionListInit"; 
-                              orgVM.btnDisabled = false; 
-   	                      }else{
-   	                    	    orgVM.$message({message: response.data.data.msg, type: 'warning'});
-                              orgVM.btnDisabled = false; 
-                              return ;
-                        } 
+                        var formData = this.form;
+                        var param={};
+                        param.type = 1;//版本类型:1-android2-ios
+                        param.versionNum = formData.versionNum;//版本号
+                        param.upgradeType = formData.upgradeType;//升级模式:1-强制升级、2-可选升级
+                        param.url = formData.url;//url地址
+                        param.updateContent = formData.updateContent;//更新内容
+                        param.md5 = '';//apkMD5值
+                        var str = "";
+                        var rows = this.multipleSelection;
+                        for ( var i = 0; i <rows.length; i++){
+                      	    str = rows[i].id
+                        }
+                        param.id = str;
+                        
+                        orgVM.btnDisabled = true; 
+                        var url = "/version/addAndroid";//新建
+                        if($("#addOrUpdate").val() ==2){
+                      	    url = "/version/editAndroid"//编辑
+                        }
+                   	    axios.post(url,param).then(function (response) {
+     	                  	  console.log(response);
+     	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                                // window.location.href="/version/androidVersionListInit"; 
+                                orgVM.inviteAreaListPage();
+                                // 关闭窗口
+                                orgVM.dialogFormVisible=false;
+                                orgVM.btnDisabled = false; 
+     	                      }else{
+     	                    	    orgVM.$message({message: response.data.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
+                            } 
    	                    }).catch(function (error) {
                             orgVM.btnDisabled = false; 
                             console.log(error);
@@ -450,11 +449,9 @@
               	this.showTitle="安卓发布"
               	$("#addOrUpdate").val(1);
               	this.dialogFormVisible=true;
-              	this.form.beginTime = "";
-              	this.form.endTime = "";
-              	this.form.projectIds = [];
-              	this.form.telemarketingTeamId = "";
-              	this.form.status= '0';
+              	this.form.versionNum = "";
+              	this.form.upgradeType = "1";
+              	this.form.updateContent = "";
               	if (this.$refs['form']!=undefined) {
                  		this.$refs['form'].resetFields();
                 }

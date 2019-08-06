@@ -35,12 +35,12 @@
                 <el-table-column align="center" prop="type" label="系统" :formatter="transformType"></el-table-column>
                 <el-table-column align="center" prop="insertTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
                 <el-table-column align="center" prop="upgradeType" label="强制升级" :formatter="transformUpgradeType"></el-table-column>
-                <el-table-column align="center" prop="promptContent" label="更新内容"></el-table-column>
+                <el-table-column align="center" prop="updateContent" label="更新内容"></el-table-column>
                 <el-table-column align="center" prop="isNewest" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
                 <el-table-column align="center" prop="handle" label="操作">
                     <template slot-scope="scope">
                         <el-button  @click="updateButton(scope.row.id)" type="success"  size="small">编辑</el-button>
-                        <el-button  @click="deleButton(scope.row.projects)" type="danger"  size="small">删除</el-button>
+                        <el-button  @click="deleButton(scope.row.id)" type="danger"  size="small">删除</el-button>
                         <!-- <div v-if="scope.row.status === 1"> -->
                             <el-button  @click="updateStatus(scope.row.id)" type="warning"  size="small">上架</el-button>
                         <!-- </div> -->                    
@@ -58,7 +58,7 @@
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
         <el-form :model="form" ref="form" :rules="rules" >
             <el-form-item label="版本号：" :label-width="formLabelWidth" prop="versionNum">
-                <el-input v-model="form.versionNum"></el-input>
+                <el-input type="number" v-model="form.versionNum"></el-input>
             </el-form-item>
             <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="upgradeType">
                 <el-radio-group v-model="form.upgradeType">
@@ -67,7 +67,7 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
-                <el-input type="textarea" v-model="form.updateContent"></el-input>
+                <el-input type="textarea" v-model="form.updateContent" maxlength="200"></el-input>
             </el-form-item>
             
         </el-form>
@@ -181,51 +181,37 @@
                   // always executed
                 });  
             },
-            deleButton(moduleName){
-              
-               this.$confirm("确定要删除"+moduleName+"电销布局?", '提示', {
-                     confirmButtonText: '确定',
-                     cancelButtonText: '取消',
-                     type: 'warning'
-                 }).then(() => {
-                      // 查询 table 需要数据
-                     var param = {};
-                     var deleInfo=this.multipleSelection;
-                  var ids="";
-                  if(null!=deleInfo){
-                   for ( var i = 0; i <deleInfo.length; i++){
-                    if("" == ids){
-                      ids = deleInfo[i].id
-                    }else{
-                      ids = ids+","+deleInfo[i].id
-                    }
-                   }
-                   var param={};
-                   param.ids=ids;
-                     axios.post('/telemarketing/deleTelemarketingLayout',param).then(function (response) {
-                          console.log(response);
-                          if(null !==response && response.data !=null && response.data.code=='0'){
-                            window.location.href="/telemarketing/telemarketingLayoutList"; 
-                         }else{
-                           alert(response.data.data.msg);
-                            return ;
-                         } 
-                      }).catch(function (error) {
-                            console.log(error);
-                        })
-                        .then(function () {
-                          // always executed
-                        });  
-                  
-                   }
-                 }).catch(() => {
-                     this.$message({
-                         type: 'info',
-                         message: '已取消删除'
-                     });          
-                 });
-               
-         
+            deleButton(id) {
+                console.log(id)
+                this.$confirm("删除后此条记录无法恢复确定删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var param = {};
+                    param.id=id;
+
+                    axios.post('/version/delete', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          if(result.code=="0"){
+                              orgVM.$message.success("删除成功");
+                              orgVM.inviteAreaListPage();
+                          }else{
+                              orgVM.$message.error("删除失败");
+                          }
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+             
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -300,7 +286,10 @@
                       axios.post(url,param).then(function (response) {
                           console.log(response);
                           if(null !==response && response.data !=null && response.data.code=='0'){
-                              window.location.href="/version/iosVersionListInit"; 
+                              // window.location.href="/version/iosVersionListInit"; 
+                              orgVM.inviteAreaListPage();
+                              // 关闭窗口
+                              orgVM.dialogFormVisible=false;
                               orgVM.btnDisabled = false; 
                           }else{
                               orgVM.$message({message: response.data.data.msg, type: 'warning'});
