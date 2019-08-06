@@ -33,7 +33,7 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
  * Created on: 2019-08-01-14:58
  */
 @Controller
-@RequestMapping(value = "/version")
+@RequestMapping("/version")
 public class VersionController {
 
   @Autowired
@@ -69,16 +69,13 @@ public class VersionController {
   /**
    * 获取版本列表
    *
-   * @param map
+   * @param versionManageListDTO
    * @return
    */
-  @PostMapping(value = "/list")
+  @PostMapping("/list")
   @ResponseBody
-  public PageBean<VersionManageDTO> list(@RequestBody VersionManageListDTO versionManageListDTO, ModelMap map,
-      int pageNum, int pageSize) {
+  public PageBean<VersionManageDTO> list(@RequestBody VersionManageListDTO versionManageListDTO) {
     // 查询账号列表信息
-    versionManageListDTO.setPageNum(pageNum);
-    versionManageListDTO.setPageSize(pageSize);
     JSONResult<PageBean<VersionManageDTO>> listResult = versionFeignClient.list(versionManageListDTO);
     if (null != listResult && listResult.getCode().equals(Constants.SUCCESS)) {
       return listResult.getData();
@@ -128,33 +125,29 @@ public class VersionController {
   /**
    * 创建android版本信息
    *
-   * @param request
-   * @param model
+   * @param versionCreateReq
    * @return
    * @throws Exception
    */
   @RequestMapping(value = { "/addAndroid" }, method = RequestMethod.POST)
   @ResponseBody
   @LogRecord(description="创建android版本信息",operationType=OperationType.INSERT,menuName=MenuEnum.ANDROID_VERSION_LIST)
-  public JSONResult addAndroid(HttpServletRequest request, @RequestBody VersionCreateReq versionCreateReq,
-      Model model) throws Exception {
+  public JSONResult addAndroid(@RequestBody VersionCreateReq versionCreateReq) throws Exception {
     return versionFeignClient.create(versionCreateReq);
   }
 
   /**
    * 修改android版本信息
    *
-   * @param request
    * @param versionUpdateReq
-   * @param model
+   * @param versionUpdateReq
    * @return
    * @throws Exception
    */
   @RequestMapping(value = { "/editAndroid" }, method = RequestMethod.POST)
   @ResponseBody
   @LogRecord(description="修改android版本信息",operationType=OperationType.UPDATE,menuName=MenuEnum.ANDROID_VERSION_LIST)
-  public JSONResult editAndroid(HttpServletRequest request, @RequestBody VersionUpdateReq versionUpdateReq,
-      Model model) throws Exception {
+  public JSONResult editAndroid(@RequestBody VersionUpdateReq versionUpdateReq) throws Exception {
     return versionFeignClient.update(versionUpdateReq);
   }
 
@@ -162,15 +155,14 @@ public class VersionController {
   /**
    * 创建iOS版本信息
    *
-   * @param request
-   * @param model
+   * @param versionCreateReq
    * @return
    * @throws Exception
    */
   @RequestMapping(value = { "/addIOS" }, method = RequestMethod.POST)
   @ResponseBody
   @LogRecord(description="创建iOS版本信息",operationType=OperationType.INSERT,menuName=MenuEnum.IOS_VERSION_LIST)
-  public JSONResult addIOS(HttpServletRequest request, @RequestBody VersionCreateReq versionCreateReq, Model model)
+  public JSONResult addIOS(@RequestBody VersionCreateReq versionCreateReq)
       throws Exception {
     return versionFeignClient.create(versionCreateReq);
   }
@@ -178,16 +170,14 @@ public class VersionController {
   /**
    * 修改iOS版本信息
    *
-   * @param request
    * @param versionUpdateReq
-   * @param model
    * @return
    * @throws Exception
    */
   @RequestMapping(value = { "/editIOS" }, method = RequestMethod.POST)
   @ResponseBody
   @LogRecord(description="修改iOS版本信息",operationType=OperationType.UPDATE,menuName=MenuEnum.IOS_VERSION_LIST)
-  public JSONResult editIOS(HttpServletRequest request, @RequestBody VersionUpdateReq versionUpdateReq, Model model)
+  public JSONResult editIOS(@RequestBody VersionUpdateReq versionUpdateReq)
       throws Exception {
     return versionFeignClient.update(versionUpdateReq);
   }
@@ -207,15 +197,13 @@ public class VersionController {
   /**
    * 校验版本号是否重复
    *
-   * @param request
    * @param
-   * @param model
    * @return
    * @throws Exception
    */
   @RequestMapping(value = { "/checkNum" }, method = RequestMethod.POST)
   @ResponseBody
-  public void checkNum(HttpServletRequest request, HttpServletResponse response,@RequestParam(required = false) String curVersionNum, @RequestParam String versionNum,@RequestParam Integer type, Model model)
+  public void checkNum(HttpServletResponse response,@RequestParam(required = false) String curVersionNum, @RequestParam String versionNum,@RequestParam Integer type)
       throws Exception {
     //判断如果是编辑页面判断重复，并且版本号没有改变，则直接返回成功
     if(StringUtils.isNotEmpty(curVersionNum) && versionNum.equals(curVersionNum)){
