@@ -59,19 +59,26 @@
     <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
         <el-form :model="form" ref="form" :rules="rules" >
-            <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="url">
+            <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="fileList">
                 <el-upload
                     class="upload-demo"
-                    ref="upload"
-                    :multiple="false"
-                    action="/telemarketing/uploadCustomField"
-                    :file-list="fileList"
-                    :on-change="handleChange"
-                    :before-upload="beforeUpload"
-                    :on-success="uploadSuccess"
-                    :on-error="uploadError"
-                    :auto-upload="false">
-                    <el-button slot="trigger" size="small" type="success" style="margin-right: 10px;">上传文件</el-button>
+                    :action="uploadOssHost"
+                    ref="refundApplyImgUpload"
+                    :on-preview="handlePreview"
+                    :on-remove="handleRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
+                    accept=".jpg,.png"
+                    multiple
+                    :data="uploadParamData"
+                    :limit='1'
+                    :on-change="selectFile"
+                    :on-exceed="handleExceed"
+                    :auto-upload="false"
+                    :file-list="fileList">
+                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
                 </el-upload>
             </el-form-item>
             <el-form-item label="版本号：" :label-width="formLabelWidth" prop="versionNum">
@@ -80,7 +87,7 @@
 					  <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="upgradeType">
                 <el-radio-group v-model="form.upgradeType">
                     <el-radio label="1">是</el-radio>
-                    <el-radio label="0">否</el-radio>
+                    <el-radio label="2">否</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
@@ -99,7 +106,7 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-
+    var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
@@ -144,7 +151,20 @@
                 upgradeType: [
                     { required: true, message: '请选择是否强制升级', trigger: 'blur' }
                 ]
-            }
+            },
+            uploadOssHost:'',
+            uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'', 
+                'x:params':'',
+                'realName':''
+             },
+             fileList:[],
+             limit:1,
+             ossUrl:ossSignatureUrl,
              
         },
         methods: {
@@ -216,10 +236,10 @@
                     .then(function (response) {
                           var result =  response.data;
                           if(result.code=="0"){
-                            userVM.$message.success("删除成功");
-                            userVM.searchTable();
+                            orgVM.$message.success("删除成功");
+                            orgVM.searchTable();
                           }else{
-                            userVM.$message.error("删除失败");
+                            orgVM.$message.error("删除失败");
                           }
                     })
                     .catch(function (error) {
@@ -237,7 +257,68 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            
+
+            selectFile(file, fileList){
+                orgVM.uploadParamData.key= orgVM.uploadParamData.dir+orgVM.random_string(10)+orgVM.get_suffix(file.name),
+                orgVM.uploadParamData.realName= file.name
+            },
+            submitUpload(){
+                this.$refs.refundApplyImgUpload.submit();
+            },
+            handlePreview(file){
+             
+            },
+            handleRemove(file,fileList){
+              this.fileList=[];
+            },
+            handleExceed(files, fileList) {
+             //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            handleSuccess(response, file, fileList){
+                console.info(fileList);
+                console.info(orgVM.fileList);
+                var realName = file.name;
+                var randomName = orgVM.uploadParamData.key;
+                var imgUrl =  orgVM.uploadOssHost+"/"+randomName;
+                this.wechatForm.wechatUrl=imgUrl;
+                this.wechatForm.fileList.push(realName);
+                this.fileList=[];
+                this.wechatForm.fileList=[];
+            },
+            handleError(err, file, fileList){
+               console.info(err);
+            },
+            handleBefore(file){
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                if(!isTextComputer){
+                    this.fileList=[];
+                    this.$message.error('文件格式错误');
+                    return false;
+                }
+                if(file.size>2*1024*1024){
+                    this.fileList=[];
+                    this.$message.error('最大为2MB');
+                    return false;
+                }
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                    suffix = filename.substring(pos);
+                }
+                return suffix;
+            },
             transformType(row, column, cellValue, index) {
           	    var text="";
                 if(cellValue=="1"){
@@ -365,17 +446,6 @@
               this.loading = false;
           	  this.$message({message:'上传失败',type:'error'});
             }, 
-            submitUpload() {//提交文件
-            	  orgVM.confirmBtnDisabled = false;
-              	this.loading = true;
-              	var fileList = this.fileList;
-              	if(!fileList || fileList.length!=1){
-                		this.$message.error({message:'未选中文件',type:'error'});
-                		orgVM.loading = false;
-                		return false;
-              	}
-                this.$refs.upload.submit();
-            },
             addbutton(){
               	this.showTitle="安卓发布"
               	$("#addOrUpdate").val(1);
