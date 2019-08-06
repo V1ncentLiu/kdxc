@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  * @author
  */
-@FeignClient(name = "version-service-sjy", fallback = VersionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "version-service", fallback = VersionFeignClient.HystrixClientFallback.class)
 public interface VersionFeignClient {
 	/**
 	 * 版本信息列表
@@ -63,8 +63,8 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/version/v1.0/version/getVersion/{id}")
-	JSONResult<VersionManageDTO> getVersion(@PathVariable("id") String id);
+	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/getVersion")
+	JSONResult<VersionManageDTO> getVersion(@RequestBody IdEntity idEntity);
 
 	/**
 	 * 设置最新版本
@@ -128,7 +128,7 @@ public interface VersionFeignClient {
 		}
 
 		@Override
-		public JSONResult<VersionManageDTO> getVersion(String id) {
+		public JSONResult<VersionManageDTO> getVersion(@RequestBody IdEntity idEntity){
 			return fallBackError("查询版本信息");
 		}
 

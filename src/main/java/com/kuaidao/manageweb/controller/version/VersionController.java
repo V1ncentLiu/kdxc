@@ -193,6 +193,18 @@ public class VersionController {
   }
 
   /**
+   * 查询版本信息
+   *
+   * @return
+   * @throws Exception
+   */
+  @RequestMapping(value = { "/queryVersion" })
+  public JSONResult<VersionManageDTO> queryVersion(@RequestBody IdEntity idEntity){
+    JSONResult<VersionManageDTO> result = versionFeignClient.getVersion(idEntity);
+    return result;
+  }
+
+  /**
    * 校验版本号是否重复
    *
    * @param request
