@@ -34,9 +34,9 @@
                  <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" prop="versionNum" label="版本号"></el-table-column>
-                <el-table-column align="center" prop="type" label="系统"></el-table-column>
+                <el-table-column align="center" prop="type" label="系统" :formatter="transformType"></el-table-column>
                 <el-table-column align="center" prop="insertTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
-                <el-table-column align="center" prop="upgradeType" label="强制升级"></el-table-column>
+                <el-table-column align="center" prop="upgradeType" label="强制升级" :formatter="transformUpgradeType"></el-table-column>
                 <el-table-column align="center" prop="promptContent" label="更新内容"></el-table-column>
                 <el-table-column align="center" prop="isNewest" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
                 <el-table-column align="center" prop="handle" label="操作">
@@ -157,14 +157,13 @@
                 param.type=1;//版本类型:1-android2-ios                
                 axios.post('/version/list',param).then(function (response) {
                 	  console.log(response);
-                    if(null===response||response.data==null||response.data.code!='0'){
-                  	  alert(response.data.msg);
-                  	  return ;
-                   }else{
-                  	 orgVM.dataTable =response.data.data.data; 
-                  	 orgVM.pager.currentPage= response.data.data.currentPage;
-                  	 orgVM.pager.total= response.data.data.total;
-                   } 
+                    var data=response.data;
+                    if(data){
+                        orgVM.dataTable =response.data.data; 
+                        orgVM.pager.currentPage= response.data.currentPage;
+                        orgVM.pager.total= response.data.total;
+                    }
+                    
                 })
                 .catch(function (error) {
                   console.log(error);
@@ -175,39 +174,29 @@
             } ,
           
             updateButton(rowsId){
-          	  this.showTitle="编辑安卓发布"
-          	  if (this.$refs['form']!=undefined) {
-               		this.$refs['form'].resetFields();
-              }
-          	  $("#addOrUpdate").val(2);
-          	  //修改菜单数据	
-            	var rows = rowsId;
-               
+            	  this.showTitle="编辑安卓发布"
+            	  if (this.$refs['form']!=undefined) {
+                 		this.$refs['form'].resetFields();
+                }
+            	  $("#addOrUpdate").val(2);
+            	  //修改菜单数据	
                 this.dialogFormVisible = true;
                 var param ={};
-                // var str = "";
-                // for ( var i = 0; i <rows.length; i++){
-              	 //  str = rows[i].id
-                // }
                 param.id = rowsId;
-                axios.post('/telemarketing/findTelemarketingById',param).then(function (response) {
+                param.versionNum = this.form.versionNum;
+                param.upgradeType = this.form.upgradeType;
+                param.promptContent = this.form.promptContent;
+                param.url = this.form.url;
+                param.updateContent = this.form.updateContent;
+
+                axios.post('/version/editAndroid',param).then(function (response) {
                 	  console.log(response);
-                    if(null !==response && response.data !=null && response.data.code=='0'){
-                  	  var telemarketing = response.data.data;
-                  	  orgVM.form.projectIds = telemarketing.projectIds;
-                  	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
-                  	  orgVM.form.beginTime = telemarketing.beginTime;
-                  	  orgVM.form.endTime = telemarketing.endTime;
-                  	  orgVM.form.status = telemarketing.status+"";
-                  	  var projects = telemarketing.projectIds;
-                  	  var valueMultiple=[];
-                  	  var obj = projects.split(',');
-                  	    if(null!=projects&&obj.length>0) {
-                       	   for(var i=0;i<obj.length;i++){
-                       	       valueMultiple.push(obj[i]+"");
-                       	     }
-                       	   }
-                  	    orgVM.form.projectIds=valueMultiple;
+                    var data=response.data;
+                    if(data){
+                      orgVM.form.versionNum = data.versionNum;
+                      orgVM.form.upgradeType = data.upgradeType;
+                      orgVM.form.updateContent = data.updateContent;
+                  	 
                    }else{
                   	 alert(response.data.data.message);
                   	  	return ;
@@ -269,12 +258,30 @@
                 this.multipleSelection = val;
             },
             
-            transformStatus(row, column, cellValue, index) {
+            transformType(row, column, cellValue, index) {
           	    var text="";
+                if(cellValue=="1"){
+              	  text="Android"
+                }else if(cellValue=="2"){
+              	  text="IOS"
+                }
+                return text;
+            }, 
+            transformUpgradeType(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="1"){
+                  text="是"
+                }else if(cellValue=="2"){
+                  text="否"
+                }
+                return text;
+            }, 
+            transformStatus(row, column, cellValue, index) {
+                var text="";
                 if(cellValue=="0"){
-              	  text="否"
+                  text="否"
                 }else if(cellValue=="1"){
-              	  text="是"
+                  text="是"
                 }
                 return text;
             }, 
