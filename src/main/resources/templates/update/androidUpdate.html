@@ -219,7 +219,7 @@
             },
             deleButton(id) {
                 console.log(id)
-                this.$confirm("删除后此条记录无法恢复确定删除？", '提示', {
+                this.$confirm("删除后此条记录无法恢复，确定删除？", '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
@@ -483,26 +483,43 @@
           },
             //修改状态
             updateStatus(id,status,msg,versionNum) {
-              var param = {};
-              param.id=id;
-              param.versionNum=versionNum;
-              param.type=1;
-              var url='/version/setNewVersion';
-              axios.post(url, param)
-              .then(function (response) {
-                var result =  response.data;
-                if(result.code=="0"){
-                  orgVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
-                  orgVM.inviteAreaListPage();
-                  }});
-                  
+                var mesTip="";
+                if(status=="1"){
+                    mesTip="上架后原在线版本变为离线状态，确定上架？"
                 }else{
-                  orgVM.$message.error(msg+"失败");
+                    mesTip="下架后此版本用户无法正常下载，确定上下架？"
                 }
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+                this.$confirm(mesTip, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var param = {};
+                    param.id=id;
+                    param.versionNum=versionNum;
+                    param.type=1;
+                    var url='/version/setNewVersion';
+                    axios.post(url, param)
+                    .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=="0"){
+                        orgVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                        orgVM.inviteAreaListPage();
+                        }});
+                        
+                      }else{
+                        orgVM.$message.error(msg+"失败");
+                      }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    });                 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消'+msg
+                    });          
+                });
             }
         },
         created(){
