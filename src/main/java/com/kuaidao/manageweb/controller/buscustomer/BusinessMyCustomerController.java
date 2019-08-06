@@ -88,7 +88,6 @@ public class BusinessMyCustomerController {
                     OrganizationDTO organizationDTO = new OrganizationDTO();
                     organizationDTO.setId(myCustomerRespDTO.getTeleGorupId());
                     organizationDTO.setName(myCustomerRespDTO.getTeleGorupName());
-                    // teleGroupList.add(organizationDTO);
                     groupMap.put(organizationDTO.getId(), organizationDTO);
                 }
 
@@ -100,14 +99,8 @@ public class BusinessMyCustomerController {
                     // teleSaleList.add(organizationDTO);
                     saleMap.put(myCustomerRespDTO.getTeleSaleId(), organizationDTO);
                 }
-                // 品尝项目
-                // if(myCustomerRespDTO.getTasteProjectId()!=null){
-                // OrganizationDTO organizationDTO = new OrganizationDTO();
-                // organizationDTO.setId(myCustomerRespDTO.getTasteProjectId());
-                // organizationDTO.setName(myCustomerRespDTO.getTasteProjectName());
-                // tasteProList.add(organizationDTO);
-                // }
             }
+
             for (Map.Entry<Long, OrganizationDTO> entry : groupMap.entrySet()) {
                 teleGroupList.add(entry.getValue());
             }
@@ -115,25 +108,33 @@ public class BusinessMyCustomerController {
                 teleSaleList.add(entry.getValue());
             }
         }
-
+        long endTime0=System.currentTimeMillis();
+        logger.info("电销组以及电销顾问："+(endTime0-startTime0));
         // 项目
+        long startTime=System.currentTimeMillis();
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(-1);
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
         }
-
+        long endTime=System.currentTimeMillis();
+        logger.info("获取项目时间："+(endTime-startTime));
         // 项目
+        long startTime1=System.currentTimeMillis();
         JSONResult<List<ProjectInfoDTO>> proallJson = projectInfoFeignClient.allProject();
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proAllSelect", proallJson.getData());
         }
-
+        long endTime1=System.currentTimeMillis();
+        logger.info("获取全部项目时间："+(endTime1-startTime1));
+        long startTime2=System.currentTimeMillis();
         JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             request.setAttribute("companySelect", proJson.getData());
         }
+        long endTime2=System.currentTimeMillis();
+        logger.info("获取公司时间："+(endTime2-startTime2));
      // 查询赠送类型集合
         request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         request.setAttribute("teleGroupList", teleGroupList);
