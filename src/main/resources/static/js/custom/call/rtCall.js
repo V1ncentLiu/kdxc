@@ -36,9 +36,9 @@ $(function(){
 function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 
 	var callSource1 = callSource;
-	if(callSource==3){//话务和电销用一样的逻辑
-		callSource=2;
-	}
+	// if(callSource==3){//话务和电销用一样的逻辑
+	// 	callSource=2;
+	// }
 	stopSound();//停止播放录音
 	clearTimer();//清除定时器
 	if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){

@@ -125,7 +125,7 @@ public class TrafficCallRecordController {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                         "该话务主管下没有话务专员");
                 }
-                List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                List<Long> idList = userList.parallelStream().map(user -> user.getId())
                     .collect(Collectors.toList());
                 idList.add(curLoginUser.getId());
                 myCallRecordReqDTO.setAccountIdList(idList);
@@ -159,10 +159,12 @@ public class TrafficCallRecordController {
                 Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
                 if (teleGroupId != null) {
                     List<UserInfoDTO> userList = getPhoneTrafficByOrgId(teleGroupId);
+                    List<UserInfoDTO> userHwzgList = getPhoneTrafficUserByOrgId(teleGroupId);
+                    userList.addAll(userHwzgList);
                     if (CollectionUtils.isEmpty(userList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
-                    List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                    List<Long> idList = userList.parallelStream().map(user -> user.getId())
                         .collect(Collectors.toList());
                     myCallRecordReqDTO.setAccountIdList(idList);
                 } else {
@@ -172,7 +174,7 @@ public class TrafficCallRecordController {
                     if (CollectionUtils.isEmpty(userInfoList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
-                    List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                    List<Long> idList = userInfoList.parallelStream().map(user -> user.getId())
                         .collect(Collectors.toList());
                     myCallRecordReqDTO.setAccountIdList(idList);
                 }
