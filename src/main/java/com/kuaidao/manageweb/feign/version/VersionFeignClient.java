@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  * @author
  */
-@FeignClient(name = "version-service", fallback = VersionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "version-service", path = "/version/v1.0/version",fallback = VersionFeignClient.HystrixClientFallback.class)
 public interface VersionFeignClient {
 	/**
 	 * 版本信息列表
 	 *
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/list")
+	@RequestMapping(method = RequestMethod.POST, value = "/list")
 	public JSONResult<PageBean<VersionManageDTO>> list(
       @RequestBody VersionManageListDTO versionManageListDTO);
 
@@ -36,7 +36,7 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/create")
+	@RequestMapping(method = RequestMethod.POST, value = "/create")
 	JSONResult<String> create(@RequestBody VersionCreateReq versionCreateReq);
 
 	/**
@@ -45,7 +45,7 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/update")
+	@RequestMapping(method = RequestMethod.POST, value = "/update")
 	JSONResult update(@RequestBody VersionUpdateReq versionUpdateReq);
 
 	/**
@@ -54,7 +54,7 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/delete")
+	@RequestMapping(method = RequestMethod.POST, value = "/delete")
 	public JSONResult<Void> delete(@RequestBody IdEntity idEntity);
 
 	/**
@@ -63,7 +63,7 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/getVersion")
+	@RequestMapping(method = RequestMethod.POST, value = "/getVersion")
 	JSONResult<VersionManageDTO> getVersion(@RequestBody IdEntity idEntity);
 
 	/**
@@ -72,7 +72,7 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/setNewVersion")
+	@RequestMapping(method = RequestMethod.POST, value = "/setNewVersion")
 	public JSONResult<Void> setNewVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO);
 
 	/**
@@ -81,7 +81,7 @@ public interface VersionFeignClient {
 	 * @param
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/version/v1.0/version/checkNum")
+	@RequestMapping(method = RequestMethod.POST, value = "/checkNum")
 	JSONResult<Boolean> checkNum(@RequestBody VersionNumCheckReq versionNumCheckReq);
 
 	/**
