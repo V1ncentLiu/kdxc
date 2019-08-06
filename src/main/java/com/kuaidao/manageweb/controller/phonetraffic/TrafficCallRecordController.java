@@ -134,7 +134,7 @@ public class TrafficCallRecordController {
 
         }
 
-        return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
+        return callRecordFeign.listHwAllTmCallRecord(myCallRecordReqDTO);
 
     }
     /**
