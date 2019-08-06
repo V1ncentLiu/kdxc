@@ -35,18 +35,15 @@
                 <el-table-column align="center" prop="type" label="系统" :formatter="transformType"></el-table-column>
                 <el-table-column align="center" prop="insertTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
                 <el-table-column align="center" prop="upgradeType" label="强制升级" :formatter="transformUpgradeType"></el-table-column>
-                <el-table-column align="center" prop="promptContent" label="更新内容"></el-table-column>
+                <el-table-column align="center" prop="updateContent" label="更新内容"></el-table-column>
                 <el-table-column align="center" prop="isNewest" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
                 <el-table-column align="center" prop="handle" label="操作">
                     <template slot-scope="scope">
                         <el-button  @click="updateButton(scope.row.id)" type="success"  size="small">编辑</el-button>
-                        <el-button  @click="deleButton(scope.row.projects)" type="danger"  size="small">删除</el-button>
-                        <!-- <div v-if="scope.row.status === 1"> -->
-                            <el-button  @click="updateStatus(scope.row.id)" type="warning"  size="small">上架</el-button>
-                        <!-- </div> -->                    
-                        <!-- <div v-else-if="scope.row.status === 0"> -->
-                            <!-- <el-button @click="updateStatus(scope.row.id,1,'下架')"  type="success"  size="small">下架</el-button> -->
-                        <!-- </div> -->                        
+                        <el-button  @click="deleButton(scope.row.id)" type="danger"  size="small">删除</el-button>
+                        <!-- 是否为最新版本：0-否、1-是 -->
+                        <el-button  v-if="scope.row.isNewest === 0" @click="updateStatus(scope.row.id,1,'上架',scope.row.versionNum)" type="warning"  size="small">上架</el-button>
+                        <el-button v-else-if="scope.row.isNewest === 1" @click="updateStatus(scope.row.id,0,'下架',scope.row.versionNum)"  type="success"  size="small">下架</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -58,7 +55,7 @@
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
         <el-form :model="form" ref="form" :rules="rules" >
             <el-form-item label="版本号：" :label-width="formLabelWidth" prop="versionNum">
-                <el-input v-model="form.versionNum"></el-input>
+                <el-input type="number" v-model="form.versionNum"></el-input>
             </el-form-item>
             <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="upgradeType">
                 <el-radio-group v-model="form.upgradeType">
@@ -67,7 +64,7 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
-                <el-input type="textarea" v-model="form.updateContent"></el-input>
+                <el-input type="textarea" v-model="form.updateContent" maxlength="200"></el-input>
             </el-form-item>
             
         </el-form>
@@ -181,51 +178,37 @@
                   // always executed
                 });  
             },
-            deleButton(moduleName){
-              
-               this.$confirm("确定要删除"+moduleName+"电销布局?", '提示', {
-                     confirmButtonText: '确定',
-                     cancelButtonText: '取消',
-                     type: 'warning'
-                 }).then(() => {
-                      // 查询 table 需要数据
-                     var param = {};
-                     var deleInfo=this.multipleSelection;
-                  var ids="";
-                  if(null!=deleInfo){
-                   for ( var i = 0; i <deleInfo.length; i++){
-                    if("" == ids){
-                      ids = deleInfo[i].id
-                    }else{
-                      ids = ids+","+deleInfo[i].id
-                    }
-                   }
-                   var param={};
-                   param.ids=ids;
-                     axios.post('/telemarketing/deleTelemarketingLayout',param).then(function (response) {
-                          console.log(response);
-                          if(null !==response && response.data !=null && response.data.code=='0'){
-                            window.location.href="/telemarketing/telemarketingLayoutList"; 
-                         }else{
-                           alert(response.data.data.msg);
-                            return ;
-                         } 
-                      }).catch(function (error) {
-                            console.log(error);
-                        })
-                        .then(function () {
-                          // always executed
-                        });  
-                  
-                   }
-                 }).catch(() => {
-                     this.$message({
-                         type: 'info',
-                         message: '已取消删除'
-                     });          
-                 });
-               
-         
+            deleButton(id) {
+                console.log(id)
+                this.$confirm("删除后此条记录无法恢复确定删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var param = {};
+                    param.id=id;
+
+                    axios.post('/version/delete', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          if(result.code=="0"){
+                              orgVM.$message.success("删除成功");
+                              orgVM.inviteAreaListPage();
+                          }else{
+                              orgVM.$message.error("删除失败");
+                          }
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+             
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -281,7 +264,7 @@
                       var param={};
                       param.type = 2;//版本类型:1-android2-ios
                       param.versionNum = formData.versionNum;//版本号
-                      param.upgradeType = formData.versionNum;//升级模式:1-强制升级、2-可选升级
+                      param.upgradeType = formData.upgradeType;//升级模式:1-强制升级、2-可选升级
                       param.url = formData.url;//url地址
                       param.updateContent = formData.updateContent;//更新内容
                       param.md5 = '';//apkMD5值
@@ -300,7 +283,10 @@
                       axios.post(url,param).then(function (response) {
                           console.log(response);
                           if(null !==response && response.data !=null && response.data.code=='0'){
-                              window.location.href="/version/iosVersionListInit"; 
+                              // window.location.href="/version/iosVersionListInit"; 
+                              orgVM.inviteAreaListPage();
+                              // 关闭窗口
+                              orgVM.dialogFormVisible=false;
                               orgVM.btnDisabled = false; 
                           }else{
                               orgVM.$message({message: response.data.data.msg, type: 'warning'});
@@ -381,6 +367,29 @@
                 if (this.$refs['form']!=undefined) {
                     this.$refs['form'].resetFields();
                 }
+            },
+            //修改状态
+            updateStatus(id,status,msg,versionNum) {
+              var param = {};
+              param.id=id;
+              param.versionNum=versionNum;
+              param.type=2;
+              var url='/version/setNewVersion';
+              axios.post(url, param)
+              .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                  orgVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                  orgVM.inviteAreaListPage();
+                  }});
+                  
+                }else{
+                  orgVM.$message.error(msg+"失败");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
             }
         },
         created(){
