@@ -31,8 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -71,6 +69,7 @@ public class CallRecordController {
     @PostMapping("/recodeCallTime")
     @ResponseBody
     public void recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
+        logger.info("firstCall {{}}",myCallRecordReqDTO);
         callRecordFeign.recodeCallTime(myCallRecordReqDTO);
     }
 
