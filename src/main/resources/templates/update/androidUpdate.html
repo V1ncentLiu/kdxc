@@ -35,7 +35,7 @@
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" prop="projects" label="版本号"></el-table-column>
                 <el-table-column align="center" prop="telemarketingTeam" label="系统"></el-table-column>
-                <el-table-column align="center"  prop="beginTime" label="录入时间" :formatter="dateFormat"></el-table-column>
+                <el-table-column align="center"  prop="beginTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="强制升级"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="更新内容"></el-table-column>
                 <el-table-column align="center" prop="status" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
@@ -59,7 +59,7 @@
     <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
         <el-form :model="form" ref="form" :rules="rules" >
-            <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="apkUpdate">
+            <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="url">
                 <el-upload
                     class="upload-demo"
                     ref="upload"
@@ -74,13 +74,13 @@
                     <el-button slot="trigger" size="small" type="success" style="margin-right: 10px;">上传文件</el-button>
                 </el-upload>
             </el-form-item>
-            <el-form-item label="版本号：" :label-width="formLabelWidth" prop="editionNum">
-                
+            <el-form-item label="版本号：" :label-width="formLabelWidth" prop="versionNum">
+                <el-input v-model="form.versionNum"></el-input>
             </el-form-item>
-					  <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="isUpdate">
-                <el-radio-group v-model="form.resource">
-                    <el-radio label="是"></el-radio>
-                    <el-radio label="否"></el-radio>
+					  <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="upgradeType">
+                <el-radio-group v-model="form.upgradeType">
+                    <el-radio label="1">是</el-radio>
+                    <el-radio label="0">否</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
@@ -123,9 +123,9 @@
           	exportdataTable:[],
           	projectId:"",
           	form:{
-              	apkUpdate:'',
-                editionNum:'',
-                isUpdate:'', 
+              	url:'',
+                versionNum:'',
+                upgradeType:"1", 
                 updateContent:''
           	},
             pager:{
@@ -135,13 +135,13 @@
             },
             loading:false,
             rules: {
-            	  apkUpdate: [
+            	  url: [
                     { required: true, message: '请选择上传文件', trigger: 'change' }
                 ],
-                editionNum: [
+                versionNum: [
                     { required: true, message: '请填写版本号', trigger: 'change' }
                 ],
-                isUpdate: [
+                upgradeType: [
                     { required: true, message: '请选择是否强制升级', trigger: 'blur' }
                 ]
             }
@@ -149,8 +149,13 @@
         },
         methods: {
         	  inviteAreaListPage(){//查询按钮            	  
-               
-                axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
+                var param = {}; 
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum = pageNum;
+                param.pageSize = pageSize;
+                param.type=1;//版本类型:1-android2-ios                
+                axios.post('/manageweb/version/list',param).then(function (response) {
                 	  console.log(response);
                     if(null===response||response.data==null||response.data.code!='0'){
                   	  alert(response.data.msg);
@@ -260,20 +265,6 @@
   	           
   	     
             },
-            exportButton(){
-          	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
-            },
-            showExport(){//点击弹出新增dialog
-            	this.dialogFormVisible = true;
-            	this.addOrModifyDialogTitle="添加菜单页面";
-            },
-            closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
-            	  this.$refs['customMenuForm'].resetFields();
-            },
-            cancelForm(formName) {
-                this.$refs[formName].resetFields();
-            	this.dialogFormVisible = false;
-            },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
@@ -308,44 +299,33 @@
                     if (valid) {
                       var formData = this.form;
                       var param={};
-                      param.projectIds = formData.projectIds;
-                      var strs ="";
-                      for ( var i = 0; i <formData.projectIds.length; i++){
-                    	   if(strs !=""){
-                    		   strs = strs+","+formData.projectIds[i];
-                    	   }else{
-                    		   strs = formData.projectIds[i];
-                    	   }
-                    	}
-                      param.projectIds = strs;
-                      param.telemarketingTeamId = formData.telemarketingTeamId;
-                      param.beginTime = formData.beginTime;
-                      param.endTime = formData.endTime;
-                      param.status = formData.status;
+                      param.type = 1;//版本类型:1-android2-ios
+                      param.versionNum = formData.versionNum;//版本号
+                      param.upgradeType = formData.versionNum;//升级模式:1-强制升级、2-可选升级
+                      param.url = formData.url;//url地址
+                      param.updateContent = formData.updateContent;//更新内容
+                      param.md5 = '';//apkMD5值
                       var str = "";
                       var rows = this.multipleSelection;
                       for ( var i = 0; i <rows.length; i++){
                     	  str = rows[i].id
                       }
                       param.id = str;
-                      if(formData.beginTime>formData.endTime){
-                    	  this.$message("开始时间不能大于结束时间");
-               	         return;
-                      }
+                      
                       orgVM.btnDisabled = true; 
-                      var url = "/telemarketing/addTelemarketingLayout";
+                      var url = "/manageweb/version/addAndroid";//新建
                       if($("#addOrUpdate").val() ==2){
-                    	  url = "/telemarketing/updateTelemarketingLayout"
+                    	  url = "/manageweb/version/editAndroid"//编辑
                       }
                    	  axios.post(url,param).then(function (response) {
-   	                  	//   console.log(response);
+   	                  	  console.log(response);
    	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                            window.location.href="/telemarketing/telemarketingLayoutList"; 
-                            orgVM.btnDisabled = false; 
-   	                     }else{
-   	                    	orgVM.$message({message: response.data.data.msg, type: 'warning'});
-                            orgVM.btnDisabled = false; 
-                            return ;
+                              window.location.href="/version/androidVersionListInit"; 
+                              orgVM.btnDisabled = false; 
+   	                      }else{
+   	                    	    orgVM.$message({message: response.data.data.msg, type: 'warning'});
+                              orgVM.btnDisabled = false; 
+                              return ;
                         } 
    	                    }).catch(function (error) {
                             orgVM.btnDisabled = false; 
