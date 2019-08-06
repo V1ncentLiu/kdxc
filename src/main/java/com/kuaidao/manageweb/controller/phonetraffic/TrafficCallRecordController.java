@@ -182,7 +182,7 @@ public class TrafficCallRecordController {
 
         }
 
-        return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
+        return callRecordFeign.listHwAllTmCallRecord(myCallRecordReqDTO);
 
     }
     private List<OrganizationDTO> getHwGroupByRoleCode(UserInfoDTO user) {
