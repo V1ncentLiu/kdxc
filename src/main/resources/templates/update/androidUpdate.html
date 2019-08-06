@@ -100,8 +100,6 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 
-    var dzList=[[${dzList}]];
-	  var projectList = [[${projectList}]];
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
@@ -123,8 +121,6 @@
           	dataTable:[],
           	multipleSelection: [],
           	exportdataTable:[],
-          	dzList:dzList,
-          	projectList:projectList,
           	projectId:"",
           	form:{
               	apkUpdate:'',
@@ -152,27 +148,7 @@
              
         },
         methods: {
-        	  inviteAreaListPage(){//查询按钮
-            	  var param = {}; 
-            	  var pageSize = this.pager.pageSize;
-                var pageNum = this.pager.currentPage;
-                param.pageNum = pageNum;
-                param.pageSize = pageSize;
-                param.projectIds=this.projectId;
-                param.telemarketingTeamId=this.telemarketingTeamId;
-                console.log(param);
-                if(this.beginTime !=null && this.endTime !=null && this.beginTime !='' && this.endTime != ''){
-              	  if(this.beginTime>this.endTime){
-                  	  this.$message("开始时间不能大于结束时间");
-             	         return;
-                    } 
-                }
-                if(this.beginTime !=null && this.beginTime !=''){
-              	  param.beginTime=this.beginTime+" 00:00:00";
-                }
-                if(this.endTime !=null && this.endTime !=''){
-              	  param.endTime=this.endTime+" 23:59:59";
-                }
+        	  inviteAreaListPage(){//查询按钮            	  
                
                 axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
                 	  console.log(response);
@@ -197,7 +173,7 @@
           	  this.showTitle="编辑安卓发布"
           	  if (this.$refs['form']!=undefined) {
                		this.$refs['form'].resetFields();
-               	  }
+              }
           	  $("#addOrUpdate").val(2);
           	  //修改菜单数据	
             	var rows = rowsId;
