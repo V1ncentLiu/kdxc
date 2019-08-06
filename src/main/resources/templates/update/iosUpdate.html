@@ -28,9 +28,10 @@
                 empty-text="无数据"
                 style="width: 100%"
                 border
-                :data="dataTable"  @selection-change="handleSelectionChange">
-                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
-                 <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                :data="dataTable"  
+                @selection-change="handleSelectionChange">
+                <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+                <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" prop="versionNum" label="版本号"></el-table-column>
                 <el-table-column align="center" prop="type" label="系统" :formatter="transformType"></el-table-column>
                 <el-table-column align="center" prop="insertTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
@@ -75,6 +76,7 @@
     </el-dialog>
 </div>
 <input id="addOrUpdate" type="hidden" >
+<input id="updateId" type="hidden" >
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -124,6 +126,9 @@
              
         },
         methods: {
+            // clickRow(row){
+            //     this.$refs.multipleTable.toggleRowSelection(row)
+            // },
             inviteAreaListPage(){//查询按钮               
                 var param = {}; 
                 var pageSize = this.pager.pageSize;
@@ -155,6 +160,7 @@
                     this.$refs['form'].resetFields();
                 }
                 $("#addOrUpdate").val(2);
+                $("#updateId").val(rowsId);
                 //修改菜单数据  
                 this.dialogFormVisible = true;
                 var param ={};
@@ -270,10 +276,16 @@
                         var str = "";
                         var rows = this.multipleSelection;
                         for ( var i = 0; i <rows.length; i++){
-                          str = rows[i].id
+                           str = rows[i].id
                         }
-                        param.id = str;
-                        
+                        // param.id = str;
+                        var idval=$("#updateId").val();
+                        if(idval){
+                            param.id = idval; 
+                        }else{
+                            param.id=""
+                        }
+
                         orgVM.btnDisabled = true; 
                         var url = "/version/addIOS";//新建
                         if($("#addOrUpdate").val() ==2){
@@ -287,6 +299,7 @@
                                 // 关闭窗口
                                 orgVM.dialogFormVisible=false;
                                 orgVM.btnDisabled = false; 
+                                $("#updateId").val("");
                             }else{
                                 orgVM.$message({message: response.data.data.msg, type: 'warning'});
                                 orgVM.btnDisabled = false; 
