@@ -203,15 +203,8 @@ public class VersionController {
    */
   @RequestMapping(value = { "/checkNum" }, method = RequestMethod.POST)
   @ResponseBody
-  public void checkNum(HttpServletResponse response,@RequestParam(required = false) String curVersionNum, @RequestParam String versionNum,@RequestParam Integer type)
+  public void checkNum(HttpServletResponse response,@RequestBody VersionNumCheckReq versionNumCheckReq)
       throws Exception {
-    //判断如果是编辑页面判断重复，并且版本号没有改变，则直接返回成功
-    if(StringUtils.isNotEmpty(curVersionNum) && versionNum.equals(curVersionNum)){
-      return;
-    }
-    VersionNumCheckReq versionNumCheckReq = new VersionNumCheckReq();
-    versionNumCheckReq.setType(type);
-    versionNumCheckReq.setVersionNum(versionNum);
     JSONResult<Boolean> result =  versionFeignClient.checkNum(versionNumCheckReq);
     //如果重复返回响应状态为409
     if (null != result && result.getCode().equals(Constants.SUCCESS) && !result.getData()) {
