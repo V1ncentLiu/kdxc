@@ -188,6 +188,7 @@ public class VersionController {
    * @return
    * @throws Exception
    */
+  @ResponseBody
   @RequestMapping(value = { "/queryVersion" })
   public JSONResult<VersionManageDTO> queryVersion(@RequestBody IdEntity idEntity){
     JSONResult<VersionManageDTO> result = versionFeignClient.getVersion(idEntity);
