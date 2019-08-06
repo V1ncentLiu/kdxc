@@ -76,6 +76,15 @@ public interface VersionFeignClient {
 	public JSONResult<Void> setNewVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO);
 
 	/**
+	 * 设置下架
+	 *
+	 * @param
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/setOneOldVersion")
+	public JSONResult<Void> setOneOldVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO);
+
+	/**
 	 * 校验版本号是否重复
 	 *
 	 * @param
@@ -135,6 +144,11 @@ public interface VersionFeignClient {
 		@Override
 		public JSONResult<Void> setNewVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO) {
 			return fallBackError("设置最新版本");
+		}
+
+		@Override
+		public JSONResult<Void> setOneOldVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO) {
+			return fallBackError("设置下架");
 		}
 
 		@Override

@@ -111,10 +111,29 @@ public class VersionController {
    */
   @PostMapping(value = "/setNewVersion")
   @ResponseBody
-  @LogRecord(description="设置最新版本",operationType=OperationType.DELETE,menuName=MenuEnum.VERSION_LIST)
+  @LogRecord(description="设置最新版本",operationType=OperationType.UPDATE,menuName=MenuEnum.VERSION_LIST)
   public JSONResult<Void> setNewVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO) {
     // 查询账号列表信息
     JSONResult<Void> listResult = versionFeignClient.setNewVersion(versionManageSetNewDTO);
+    if (null != listResult && listResult.getCode().equals(Constants.SUCCESS)) {
+      return listResult;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * 设置下架
+   *
+   * @param versionManageSetNewDTO
+   * @return
+   */
+  @PostMapping(value = "/setOneOldVersion")
+  @ResponseBody
+  @LogRecord(description="设置下架",operationType=OperationType.UPDATE,menuName=MenuEnum.VERSION_LIST)
+  public JSONResult<Void> setOneOldVersion(@RequestBody VersionManageSetNewDTO versionManageSetNewDTO) {
+    // 查询账号列表信息
+    JSONResult<Void> listResult = versionFeignClient.setOneOldVersion(versionManageSetNewDTO);
     if (null != listResult && listResult.getCode().equals(Constants.SUCCESS)) {
       return listResult;
     } else {
