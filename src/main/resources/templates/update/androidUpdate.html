@@ -124,9 +124,11 @@
           	exportdataTable:[],
           	projectId:"",
           	form:{
+                url:'',
                 versionNum:'',
                 upgradeType:"1", 
-                updateContent:''
+                updateContent:'',
+              fileList:[]
           	},
             pager:{
                 total: 0,
@@ -273,10 +275,10 @@
                 var realName = file.name;
                 var randomName = orgVM.uploadParamData.key;
                 var imgUrl =  orgVM.uploadOssHost+"/"+randomName;
-                this.wechatForm.wechatUrl=imgUrl;
-                this.wechatForm.fileList.push(realName);
+                this.form.url=imgUrl;
+                this.form.fileList.push(realName);
                 this.fileList=[];
-                this.wechatForm.fileList=[];
+                this.form.fileList=[];
             },
             handleError(err, file, fileList){
                console.info(err);
@@ -453,6 +455,32 @@
                  		this.$refs['form'].resetFields();
                 }
             },
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              orgVM.uploadParamData= new_multipart_params;
+              orgVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
             //修改状态
             updateStatus(id,status,msg,versionNum) {
               var param = {};
@@ -478,6 +506,7 @@
             }
         },
         created(){
+          this.getUploadParam();
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
