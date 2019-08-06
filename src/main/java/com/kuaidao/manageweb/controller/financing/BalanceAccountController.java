@@ -186,6 +186,7 @@ public class BalanceAccountController {
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         logger.info("财务对账申请总共时间"+(queryFieldByUserAndMenuReqdate-busAreaStartdate));
+        request.setAttribute("businessLine", user.getBusinessLine());
         return "financing/balanceAccountPage";
     }
 

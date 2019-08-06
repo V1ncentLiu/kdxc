@@ -128,7 +128,6 @@ public class ReconciliationConfirmController {
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
-        request.setAttribute("businessLine", user.getBusinessLine());
         return "financing/reconciliationConfirmPage";
     }
 
