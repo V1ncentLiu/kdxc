@@ -78,7 +78,7 @@ public class BusinessMyCustomerController {
         }else{
             dto.setBusSaleId(user.getId());
         }
-
+        long startTime0=System.currentTimeMillis();
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
         if (JSONResult.SUCCESS.equals(resList.getCode())) {
             List<BusMyCustomerRespDTO> datas = resList.getData();
