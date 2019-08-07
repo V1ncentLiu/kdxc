@@ -2737,22 +2737,32 @@
                 } else {
                     this.form.radioProject = intention.purProjectType + "";
                 }
+                debugger;
                 //是否考虑同行业
-                this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
-                //同行业项目
-                if (intention.tradeProject != null) {
-                    this.domainShow = true;
-                    var tradeProjectArr = intention.tradeProject.split(",");
-                    for(var i=0;i<tradeProjectArr.length;i++){
+                if (intention.istrade == null && intention.purType == 2) {
+                    this.form.radioSelect = 1+"";
+                    if(intention.purOutProject != null){
+                        this.domainShow = true;
+                        this.form.domains.push({value:intention.purOutProject});
+                    }
+
+                }else{
+                    this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
+                    //同行业项目
+                    if (intention.tradeProject != null) {
+                        this.domainShow = true;
+                        var tradeProjectArr = intention.tradeProject.split(",");
+                        for(var i=0;i<tradeProjectArr.length;i++){
+                            this.form.domains.push({
+                                value: tradeProjectArr[i],
+                            });
+                        }
+                    }else{
+                        //同行业品牌占位
                         this.form.domains.push({
-                            value: tradeProjectArr[i],
+                            value: ''
                         });
                     }
-                }else{
-                    //同行业品牌占位
-                    this.form.domains.push({
-                        value: ''
-                    });
                 }
                 //意向内部项目
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
@@ -2889,6 +2899,9 @@
             axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                 addCustomerVM.provinceArr = response.data.data.data;
             });
+
+            //是否在考虑同行业
+
 
 
         }
