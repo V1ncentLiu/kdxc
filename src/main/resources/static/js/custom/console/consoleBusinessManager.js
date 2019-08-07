@@ -1462,7 +1462,7 @@ var mainDivVM = new Vue({
                             }else{
                                 mainDivVM.isAllMoney = false;
                             }
-                            mainDivVM.notEditRebutSign = true;
+                           // mainDivVM.notEditRebutSign = true;
                             mainDivVM.payTypeSelect = false;
                             mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
                         }else{
