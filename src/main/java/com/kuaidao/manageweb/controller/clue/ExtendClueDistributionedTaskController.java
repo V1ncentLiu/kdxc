@@ -83,7 +83,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 初始化已审核列表数据
-     * 
+     *
      * @param request
      * @param model
      * @return
@@ -187,7 +187,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 跳转编辑资源
-     * 
+     *
      * @param request
      * @param model
      * @return
@@ -232,7 +232,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 编辑资源
-     * 
+     *
      * @param request
      * @return
      */
@@ -253,6 +253,8 @@ public class ExtendClueDistributionedTaskController {
      * 导出资源情况
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
+    @LogRecord(description = "导出资源情况", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findClues")
     public void findClues(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -384,6 +386,8 @@ public class ExtendClueDistributionedTaskController {
      * 导出资源沟通情况
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
+    @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findCommunicateRecords")
     public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -512,7 +516,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
-     * 
+     *
      * @return
      */
     private List<Object> getHeadTitleList1() {
@@ -543,7 +547,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源情况
-     * 
+     *
      * @return
      */
     private List<Object> getHeadTitleList() {
@@ -580,7 +584,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 查询所有资源专员
-     * 
+     *
      * @return
      */
 
@@ -635,7 +639,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 获取所有组织组
-     * 
+     *
      * @return
      */
     private List<OrganizationRespDTO> getGroupList(Long parentId, Integer type) {
@@ -667,7 +671,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 查询系统参数
-     * 
+     *
      * @param code
      * @return
      */

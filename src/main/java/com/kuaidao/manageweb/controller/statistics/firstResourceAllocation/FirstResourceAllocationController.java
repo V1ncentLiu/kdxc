@@ -64,8 +64,7 @@ public class FirstResourceAllocationController {
     @RequestMapping("/getFirstResourceAllocationPage")
     @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPage(
-            @RequestBody(
-                    required = false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto) {
+            @RequestBody( required = false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto) {
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
         if (null == orgId) {
             buildOrgIdList(firstResourceAllocationQueryDto, orgId);
@@ -78,8 +77,7 @@ public class FirstResourceAllocationController {
                         .success(emptyDataPageBean);
             }
         }
-        return firstResourceAllocationFeignClient
-                .getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
+        return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
     }
 
     /**
@@ -88,14 +86,12 @@ public class FirstResourceAllocationController {
     @RequiresPermissions("statistics:firstResourceAllocation:export")
     @PostMapping("/exportFirstResourceAllocationPage")
     public void exportFirstResourceAllocationPage(
-            @RequestBody(
-                    required = false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
+            @RequestBody(required = false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
             HttpServletResponse response) throws IOException {
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
         buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
-                firstResourceAllocationFeignClient
-                        .getFirstResourceAllocationList(firstResourceAllocationQueryDto);
+                firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationList.getData();
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         // 获取合计
@@ -117,6 +113,7 @@ public class FirstResourceAllocationController {
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
+            curList.add(ra.getSjhz());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -190,6 +187,7 @@ public class FirstResourceAllocationController {
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
+            curList.add(ra.getSjhz());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -270,6 +268,7 @@ public class FirstResourceAllocationController {
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
+            curList.add(ra.getSjhz());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -337,10 +336,8 @@ public class FirstResourceAllocationController {
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
         buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
-                firstResourceAllocationFeignClient
-                        .getFirstResourceAllocationList(firstResourceAllocationQueryDto);
-        FirstResourceAllocationDto countTotal =
-                getCountTotal(firstResourceAllocationList.getData());
+                firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
+        FirstResourceAllocationDto countTotal = getCountTotal(firstResourceAllocationList.getData());
         List<FirstResourceAllocationDto> list = new ArrayList<>();
         list.add(countTotal);
         return new JSONResult<List<FirstResourceAllocationDto>>().success(list);
@@ -480,6 +477,7 @@ public class FirstResourceAllocationController {
         headTitleList.add("官网");
         headTitleList.add("行业");
         headTitleList.add("品牌");
+        headTitleList.add("商机盒子");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         return headTitleList;
@@ -498,6 +496,7 @@ public class FirstResourceAllocationController {
         headTitleList.add("官网");
         headTitleList.add("行业");
         headTitleList.add("品牌");
+        headTitleList.add("商机盒子");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         return headTitleList;
@@ -517,6 +516,7 @@ public class FirstResourceAllocationController {
         headTitleList.add("官网");
         headTitleList.add("行业");
         headTitleList.add("品牌");
+        headTitleList.add("商机盒子");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         return headTitleList;
@@ -528,33 +528,27 @@ public class FirstResourceAllocationController {
     private FirstResourceAllocationDto getCountTotal(List<FirstResourceAllocationDto> list) {
         FirstResourceAllocationDto firstResourceAllocationDto = new FirstResourceAllocationDto();
         // 首次分配资源数
-        Long assignClueCount =
-                list.stream().mapToLong(FirstResourceAllocationDto::getAssignClueCount).sum();
+        Long assignClueCount = list.stream().mapToLong(FirstResourceAllocationDto::getAssignClueCount).sum();
         // 联展
-        Long jointExhibition =
-                list.stream().mapToLong(FirstResourceAllocationDto::getJointExhibition).sum();
+        Long jointExhibition = list.stream().mapToLong(FirstResourceAllocationDto::getJointExhibition).sum();
         // 竞价
-        Long priceCompetition =
-                list.stream().mapToLong(FirstResourceAllocationDto::getPriceCompetition).sum();
+        Long priceCompetition = list.stream().mapToLong(FirstResourceAllocationDto::getPriceCompetition).sum();
         // 优化
-        Long optimization =
-                list.stream().mapToLong(FirstResourceAllocationDto::getOptimization).sum();
+        Long optimization = list.stream().mapToLong(FirstResourceAllocationDto::getOptimization).sum();
         // 信息流
-        Long informationFlow =
-                list.stream().mapToLong(FirstResourceAllocationDto::getInformationFlow).sum();
+        Long informationFlow = list.stream().mapToLong(FirstResourceAllocationDto::getInformationFlow).sum();
         // 官网
-        Long officialWebsite =
-                list.stream().mapToLong(FirstResourceAllocationDto::getOfficialWebsite).sum();
+        Long officialWebsite = list.stream().mapToLong(FirstResourceAllocationDto::getOfficialWebsite).sum();
         // 行业
         Long industry = list.stream().mapToLong(FirstResourceAllocationDto::getIndustry).sum();
         // 其他
         Long other = list.stream().mapToLong(FirstResourceAllocationDto::getOther).sum();
         // 网民未接
-        Long netizensMissed =
-                list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
+        Long netizensMissed = list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
         // 品牌
-        Long brand =
-                list.stream().mapToLong(FirstResourceAllocationDto::getBrand).sum();
+        Long brand = list.stream().mapToLong(FirstResourceAllocationDto::getBrand).sum();
+        // 商机盒子
+        Long sjhz = list.stream().mapToLong(FirstResourceAllocationDto::getSjhz).sum();
         firstResourceAllocationDto.setOrgId(0L);
         firstResourceAllocationDto.setOrgName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
@@ -565,6 +559,7 @@ public class FirstResourceAllocationController {
         firstResourceAllocationDto.setOfficialWebsite(officialWebsite);
         firstResourceAllocationDto.setIndustry(industry);
         firstResourceAllocationDto.setBrand(brand);
+        firstResourceAllocationDto.setSjhz(sjhz);
         firstResourceAllocationDto.setOther(other);
         firstResourceAllocationDto.setNetizensMissed(netizensMissed);
         return firstResourceAllocationDto;
@@ -683,6 +678,7 @@ public class FirstResourceAllocationController {
         totalList.add(resTotal.getOfficialWebsite());
         totalList.add(resTotal.getIndustry());
         totalList.add(resTotal.getBrand());
+        totalList.add(resTotal.getSjhz());
         totalList.add(resTotal.getOther());
         totalList.add(resTotal.getNetizensMissed());
         dataList.add(totalList);

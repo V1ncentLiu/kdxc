@@ -3,6 +3,7 @@ var myCallRecordVm = new Vue({
     data: {
       teleGroupList:teleGroupList,
     	formLabelWidth:'120px',
+      isDXZDisabled:false,
 	    pager:{//组织列表pager
           total: 0,
           currentPage: 1,
@@ -28,7 +29,7 @@ var myCallRecordVm = new Vue({
         	startTime:'',
         	endTime:'',
         	accoutName:'',
-      
+          teleGroupId:ownOrgId,
         },
       tmList:[]
     },
@@ -228,7 +229,23 @@ var myCallRecordVm = new Vue({
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
         // 取页数存储
         var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;} 	
+        if(localVal){this.pager.pageSize = localVal;}
+        if(ownOrgId){
+          this.isDXZDisabled= true;
+          var param ={};
+          param.orgId = ownOrgId;
+          param.roleCode="DXCYGW";
+          param.statusList =[1,3];
+          axios.post('/user/userManager/listByOrgAndRole', param)
+          .then(function (response) {
+            var result =  response.data;
+            var table=result.data;
+            myCallRecordVm.tmList= table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }//电销总监电销组筛选按钮不可点击
         this.initCallRecordData();
    },
    mounted(){

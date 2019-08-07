@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
 import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -95,7 +96,22 @@ public class SignRecordController {
     @RequiresPermissions("aggregation:signRecord:view")
     @RequestMapping("/signRecordPage")
     public String signRecordPage(HttpServletRequest request) {
-
+        String ownOrgId = "";
+        List<OrganizationDTO> businessGroupList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            ownOrgId = String.valueOf(curLoginUser.getOrgId());
+            //商务总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                businessGroupList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("businessGroupList", businessGroupList);
+            request.setAttribute("ownOrgId", ownOrgId);
+        }
         /*
          * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
          * curLoginUser.getOrgId(); // 签约项目 List<ProjectInfoDTO> projectList = getProjectList(); //
@@ -480,6 +496,24 @@ public class SignRecordController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 
 }

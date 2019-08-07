@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -30,8 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -70,6 +69,7 @@ public class CallRecordController {
     @PostMapping("/recodeCallTime")
     @ResponseBody
     public void recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
+        logger.info("firstCall {{}}",myCallRecordReqDTO);
         callRecordFeign.recodeCallTime(myCallRecordReqDTO);
     }
 
@@ -105,6 +105,7 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
+        String ownOrgId = "";
         //商学院处理
         boolean isBusinessAcademy = false;
         Long curOrgId = curLoginUser.getOrgId();
@@ -149,12 +150,18 @@ public class CallRecordController {
         if(!isBusinessAcademy) {
             //非商学院
             if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                ownOrgId =  String.valueOf(curLoginUser.getOrgId());
                 request.setAttribute("teleGroupList", getCurTeleGroupList(orgId));
+                request.setAttribute("ownOrgId", ownOrgId);
             } else {
                 request.setAttribute("teleGroupList", getTeleGroupByRoleCode(curLoginUser));
             }
         }
-       
+        //总裁办文员-查询所有小物种的电销组
+        if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
+            request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(BusinessLineConstant.XIAOWUZHONG));
+        }
+
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
@@ -261,8 +268,11 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
+        String ownOrgId = "";
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             request.setAttribute("teleGroupList",getCurTeleGroupList(orgId));
+            ownOrgId =  String.valueOf(curLoginUser.getOrgId());
+            request.setAttribute("ownOrgId", ownOrgId);
         }else {
             request.setAttribute("teleGroupList",getTeleGroupByRoleCode(curLoginUser));
         }
@@ -339,11 +349,24 @@ public class CallRecordController {
                        return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                                "该电销总监下无顾问");
                    }
-                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                   List<Long> idList = userList.parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3).map(user -> user.getId())
                            .collect(Collectors.toList());
                    idList.add(curLoginUser.getId());
                    myCallRecordReqDTO.setAccountIdList(idList);
-
+               }else if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
+                   //总裁办文员
+                   UserOrgRoleReq req = new UserOrgRoleReq();
+                   req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                   req.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
+                   req.setOrgId(myCallRecordReqDTO.getTeleGroupId());
+                   JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                   if(userJr.getData()==null || userJr.getData().isEmpty()){
+                       return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                               "没有数据");
+                   }
+                   List<Long> idList = userJr.getData().parallelStream().map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
                } else {
                    // 其他角色
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
