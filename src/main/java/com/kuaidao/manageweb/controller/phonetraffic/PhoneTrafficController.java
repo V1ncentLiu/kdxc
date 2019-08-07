@@ -453,7 +453,7 @@ public class PhoneTrafficController {
         //话务经理 调整到查看页
         if(RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())){
 //             return "phonetraffic/viewCustomerMaintenance";
-             return "phonetraffic/readOnlyCustomerMaintenance";
+             return "phonetraffic/viewCustomerMaintenance";
         }
         return "phonetraffic/editCustomerMaintenance";
     }
