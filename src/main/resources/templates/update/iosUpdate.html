@@ -300,6 +300,10 @@
                                 orgVM.dialogFormVisible=false;
                                 orgVM.btnDisabled = false; 
                                 $("#updateId").val("");
+                            }else if(response.data.code=='21902'){
+                                orgVM.$message({message: response.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
                             }else{
                                 orgVM.$message({message: response.data.data.msg, type: 'warning'});
                                 orgVM.btnDisabled = false; 
@@ -397,7 +401,12 @@
                     param.id=id;
                     param.versionNum=versionNum;
                     param.type=2;
-                    var url='/version/setNewVersion';
+                    var url="";
+                    if(status=="1"){
+                        url='/version/setNewVersion';
+                    }else{
+                        url="/version/setOneOldVersion"
+                    }
                     axios.post(url, param)
                     .then(function (response) {
                       var result =  response.data;

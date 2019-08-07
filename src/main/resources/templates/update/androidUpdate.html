@@ -389,16 +389,21 @@
                       	    url = "/version/editAndroid"//编辑
                         }
                    	    axios.post(url,param).then(function (response) {
-     	                  	  console.log(response);
-     	                      if(null !==response && response.data !=null && response.data.code=='0'){
+     	                  	console.log(response);
+                            debugger
+     	                    if(null !==response && response.data !=null && response.data.code=='0'){
                                 // window.location.href="/version/androidVersionListInit"; 
                                 orgVM.inviteAreaListPage();
                                 // 关闭窗口
                                 orgVM.dialogFormVisible=false;
                                 orgVM.btnDisabled = false; 
                                 $("#updateId").val("");
-     	                      }else{
-     	                    	    orgVM.$message({message: response.data.data.msg, type: 'warning'});
+     	                    }else if(response.data.code=='21902'){
+                                orgVM.$message({message: response.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
+                            }else{
+     	                    	orgVM.$message({message: response.data.msg, type: 'warning'});
                                 orgVM.btnDisabled = false; 
                                 return ;
                             } 
@@ -508,7 +513,12 @@
                     param.id=id;
                     param.versionNum=versionNum;
                     param.type=1;
-                    var url='/version/setNewVersion';
+                    var url="";
+                    if(status=="1"){
+                        url='/version/setNewVersion';
+                    }else{
+                        url="/version/setOneOldVersion"
+                    }
                     axios.post(url, param)
                     .then(function (response) {
                       var result =  response.data;
