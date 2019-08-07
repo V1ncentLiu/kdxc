@@ -253,6 +253,8 @@ public class ExtendClueDistributionedTaskController {
      * 导出资源情况
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
+    @LogRecord(description = "导出资源情况", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findClues")
     public void findClues(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -384,6 +386,8 @@ public class ExtendClueDistributionedTaskController {
      * 导出资源沟通情况
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
+    @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findCommunicateRecords")
     public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {

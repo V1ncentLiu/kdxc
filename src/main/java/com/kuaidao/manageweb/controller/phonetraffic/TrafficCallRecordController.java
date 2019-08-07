@@ -134,7 +134,7 @@ public class TrafficCallRecordController {
 
         }
 
-        return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
+        return callRecordFeign.listHwAllTmCallRecord(myCallRecordReqDTO);
 
     }
     /**
@@ -159,6 +159,8 @@ public class TrafficCallRecordController {
                 Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
                 if (teleGroupId != null) {
                     List<UserInfoDTO> userList = getPhoneTrafficByOrgId(teleGroupId);
+                    List<UserInfoDTO> userHwzgList = getPhoneTrafficUserByOrgId(teleGroupId);
+                    userList.addAll(userHwzgList);
                     if (CollectionUtils.isEmpty(userList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
@@ -180,7 +182,7 @@ public class TrafficCallRecordController {
 
         }
 
-        return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
+        return callRecordFeign.listHwAllTmCallRecord(myCallRecordReqDTO);
 
     }
     private List<OrganizationDTO> getHwGroupByRoleCode(UserInfoDTO user) {

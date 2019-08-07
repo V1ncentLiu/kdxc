@@ -324,6 +324,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var payModeItem =[[${payModeItem}]];
 var giveTypeList =[[${giveTypeList}]];
+var businessLine = [[${businessLine}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -352,6 +353,7 @@ var clueVM = new Vue({
   	       		statementNo: '',
   	       		signNo: ''
             },
+            businessLine:businessLine,
             confirmCommission:"",
             doubtRemarkShow:false,
             backRemarks:"",
@@ -1205,6 +1207,7 @@ var clueVM = new Vue({
                           clueVM.busGroupOptions = result.busGroupList;
                           clueVM.teleSaleOptions = result.teleSaleList;
                           clueVM.teleGorupOptions = result.teleGroupList;
+                          clueVM.dxBusinessList = result.teleCompanyList;
                     })
                     .catch(function (error) {
                          console.log(error);
@@ -1224,6 +1227,7 @@ var clueVM = new Vue({
                     }else if(type ==0){
                         param.orgType="8";
                     }
+                    param.businessLine = businessLine;
                     axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
                         //    console.log(response);
                         if(type==1){
@@ -1260,7 +1264,7 @@ var clueVM = new Vue({
             if(localVal){this.pager.pageSize = localVal;}
             this.initColumn();
             this.searchTable();
-            this.showTele(0);
+         //   this.showTele(0);
             this.teleDeptOptions = teleDeptList;
             this.getBusAndTel();
         },

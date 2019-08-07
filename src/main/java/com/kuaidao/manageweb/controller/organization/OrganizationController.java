@@ -1,6 +1,27 @@
 package com.kuaidao.manageweb.controller.organization;
 
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -31,26 +52,6 @@ import com.kuaidao.sys.dto.user.OrgUserReqDTO;
 import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 组织机构类
@@ -130,6 +131,9 @@ public class OrganizationController {
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(dto.getOrgType());
         orgDto.setParentId(dto.getParentId());
+        if(dto !=null && dto.getBusinessLine() !=null) {
+        	orgDto.setBusinessLine(dto.getBusinessLine());
+        }
         JSONResult<List<OrganizationRespDTO>> orgJson =
                 organizationFeignClient.queryOrgByParam(orgDto);
         return orgJson;
