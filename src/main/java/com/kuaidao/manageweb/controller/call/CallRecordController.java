@@ -358,7 +358,7 @@ public class CallRecordController {
                    UserOrgRoleReq req = new UserOrgRoleReq();
                    req.setRoleCode(RoleCodeEnum.DXCYGW.name());
                    req.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
-                   req.setOrgId(orgId);
+                   req.setOrgId(myCallRecordReqDTO.getTeleGroupId());
                    JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
                    if(userJr.getData()==null || userJr.getData().isEmpty()){
                        return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
