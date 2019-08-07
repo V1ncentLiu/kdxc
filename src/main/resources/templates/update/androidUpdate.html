@@ -64,7 +64,7 @@
                     :on-success="handleSuccess"
                     :on-error="handleError"
                     :before-upload="handleBefore"
-                    accept=".jpg,.png"
+                    accept=".apk"
                     multiple
                     :data="uploadParamData"
                     :limit='1'
@@ -119,7 +119,6 @@
           	beginTime:"",
           	endTime:"",
           	addOrModifyDialogTitle:"",
-          	fileList:[],//上传文件列表
           	dataTable:[],
           	multipleSelection: [],
           	exportdataTable:[],
@@ -128,7 +127,7 @@
                 versionNum:'',
                 upgradeType:"1", 
                 updateContent:'',
-              fileList:[]
+                fileList:[]
           	},
             pager:{
                 total: 0,
@@ -137,8 +136,8 @@
             },
             loading:false,
             rules: {
-            	  url: [
-                    { required: true, message: '请选择上传文件', trigger: 'change' }
+            	fileList: [
+                    // { required: true, message: '请选择上传文件', trigger: 'change' }
                 ],
                 versionNum: [
                     { required: true, message: '请填写版本号', trigger: 'change' }
@@ -271,6 +270,8 @@
              //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
             },
             handleSuccess(response, file, fileList){
+                console.log(response)
+                console.log(file)
                 console.info(fileList);
                 console.info(orgVM.fileList);
                 var realName = file.name;
@@ -285,17 +286,17 @@
                console.info(err);
             },
             handleBefore(file){
-                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
-                if(!isTextComputer){
-                    this.fileList=[];
-                    this.$message.error('文件格式错误');
-                    return false;
-                }
-                if(file.size>2*1024*1024){
-                    this.fileList=[];
-                    this.$message.error('最大为2MB');
-                    return false;
-                }
+                // var isTextComputer = file.type === 'apk' || file.type==='apk';
+                // if(!isTextComputer){
+                //     this.fileList=[];
+                //     this.$message.error('文件格式错误');
+                //     return false;
+                // }
+                // if(file.size>2*1024*1024){
+                //     this.fileList=[];
+                //     this.$message.error('最大为2MB');
+                //     return false;
+                // }
             },
             random_string(len) {
                 len = len || 32;
@@ -421,7 +422,8 @@
                 this.fileList = fileList.slice(-1);
             },
             beforeUpload(file){//上传之前 文件校验
-                var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                // var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                var isTextComputer = file.type === 'application/vnd.android.package-archive';
                 if(!isTextComputer){
                     this.$message.error('文件格式错误');
                 	  orgVM.loading = false;
