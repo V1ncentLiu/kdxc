@@ -139,7 +139,7 @@
             loading:false,
             rules: {
                 fileList: [
-                    // { required: true, message: '请上传apk包', trigger: 'change' }
+                    { required: true, message: '请上传apk包', trigger: 'change' }
                 ],
                 versionNum: [
                     { required: true, message: '请填写版本号', trigger: 'change' }
@@ -204,10 +204,12 @@
                         orgVM.form.versionNum = data.versionNum;
                         orgVM.form.upgradeType = data.upgradeType+"";
                         orgVM.form.updateContent = data.updateContent;   
-                        var urldata=data.url;                      
+                        var urldata=data.url; 
+                        var index = urldata.lastIndexOf("\/");
+                        urldataName = urldata.substring(index + 1,urldata.length);
                         var fileListObj={};
                         fileListObj.url=urldata;
-                        fileListObj.name=urldata;
+                        fileListObj.name=urldataName;
                         orgVM.form.fileList.push(fileListObj);  
                    }else{
                   	    alert(response.data.data.message);
@@ -276,6 +278,9 @@
                 var realName = file.name;
                 var randomName = orgVM.uploadParamData.key;
                 var imgUrl =  orgVM.uploadOssHost+"/"+randomName;
+                var fileListObj={};
+                fileListObj.name=realName;
+                this.form.fileList.push(fileListObj);
                 this.form.url=imgUrl;
                 console.log(randomName)
                 console.log(realName)
@@ -285,13 +290,15 @@
                console.info(err);
             },
             handleBefore(file){
+                debugger
                 // var isTextComputer = file.type === 'application/vnd.android.package-archive';
-                // if(!isTextComputer){
-                //     this.$message.error('文件格式错误');
-                //       orgVM.loading = false;
-                //       orgVM.fileList = [];
-                //     return false;
-                // }
+                var isTextComputer = file.name.split('.')[1] === 'apk';
+                if(!isTextComputer){
+                    this.$message.error('文件格式错误');
+                      orgVM.loading = false;
+                      orgVM.fileList = [];
+                    return false;
+                }
             },
             random_string(len) {
                 len = len || 32;
