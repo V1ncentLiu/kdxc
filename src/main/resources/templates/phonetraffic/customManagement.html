@@ -74,10 +74,20 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
-                    <el-form-item label="媒介:">
+                    <!--<el-form-item label="媒介:">
                         <el-select v-model="form.source" placeholder="媒介" clearable filterable>
                             <el-option
                                     v-for="item in mediumArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>-->
+                    <el-form-item label="资源类别：">
+                        <el-select v-model="form.resourceType" placeholder="请选择" clearable filterable>
+                            <el-option
+                                    v-for="item in categoryArr"
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.value">
@@ -93,6 +103,9 @@
                                     :value="item.value">
                             </el-option>
                         </el-select>
+                    </el-form-item>
+                    <el-form-item label="搜索词：">
+                        <el-input v-model="form.searchWord" autocomplete="off" maxlength="50" ></el-input>
                     </el-form-item>
                     <el-form-item label="请选择:" style="margin-right: 10px;">
                         <el-select v-model="form.defineColumn">
@@ -464,7 +477,8 @@ var phoneButton = false;
                     type: [],
                 },
                 cusStatusArr:[],
-                mediumArr:[],
+                //mediumArr:[],
+                categoryArr:[],
                 userArr:phtrafficList.phAllUsers,
                 userArr1:phtrafficList.phUsers,
                 orgTeleArr:queryOrg,
@@ -517,6 +531,7 @@ var phoneButton = false;
         	initTableData(){
                 var param = {};
                 param=this.form
+                param.category = this.form.resourceType;
                 param.pageNum=this.pager.currentPage ;
                 param.pageSize=this.pager.pageSize;
      		    axios.post('/phonetraffic/queryPage',param).then(function (response) {
@@ -1003,10 +1018,15 @@ var phoneButton = false;
              });
 
             //客户媒介
-            param={};
+           /* param={};
             param.groupCode="medium";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 customerManVM.mediumArr=response.data.data;
+            });*/
+            //资源类别
+            param.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                customerManVM.categoryArr=response.data.data;
             });
             this.initColumn();
     	}
