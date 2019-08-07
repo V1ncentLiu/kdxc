@@ -186,6 +186,7 @@ public class BalanceAccountController {
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         logger.info("财务对账申请总共时间"+(queryFieldByUserAndMenuReqdate-busAreaStartdate));
+        request.setAttribute("businessLine", user.getBusinessLine());
         return "financing/balanceAccountPage";
     }
 
@@ -644,6 +645,9 @@ public class BalanceAccountController {
     @ResponseBody
     public Map getBusAndTel(@RequestBody ReconciliationConfirmReq req,HttpServletRequest request) {
     	UserInfoDTO user = CommUtil.getCurLoginUser();
+    	// 查询所有电销事业部
+        List<OrganizationRespDTO> teleCompanyList =
+                getOrgList(null, OrgTypeConstant.DXFGS, user.getBusinessLine());
     	 // 查询所有商务组
         List<OrganizationRespDTO> busGroupList =
                 getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
@@ -670,6 +674,7 @@ public class BalanceAccountController {
         map.put("teleGroupList", teleGroupList);
         map.put("busSaleList", busSaleList);
         map.put("teleSaleList", teleSaleList);
+        map.put("teleCompanyList", teleCompanyList);
         return map;
     }
 }

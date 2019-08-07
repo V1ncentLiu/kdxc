@@ -201,6 +201,7 @@ public class TeleStatementController {
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
+            curList.add(ra.getSjhz());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             curList.add(ra.getOther2());
@@ -241,6 +242,7 @@ public class TeleStatementController {
         totalList.add(resTotal.getOfficialWebsite());
         totalList.add(resTotal.getIndustry());
         totalList.add(resTotal.getBrand());
+        totalList.add(resTotal.getSjhz());
         totalList.add(resTotal.getOther());
         totalList.add(resTotal.getNetizensMissed());
         totalList.add(resTotal.getOther2());
@@ -328,6 +330,7 @@ public class TeleStatementController {
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
+            curList.add(ra.getSjhz());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             curList.add(ra.getOther2());
@@ -382,6 +385,7 @@ public class TeleStatementController {
             curList.add(ra.getOfficialWebsite());
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
+            curList.add(ra.getSjhz());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             curList.add(ra.getOther2());
@@ -787,6 +791,7 @@ public class TeleStatementController {
         headTitleList.add("官网");
         headTitleList.add("行业");
         headTitleList.add("品牌");
+        headTitleList.add("商机盒子");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         headTitleList.add("其他2");
@@ -806,6 +811,7 @@ public class TeleStatementController {
         headTitleList.add("官网");
         headTitleList.add("行业");
         headTitleList.add("品牌");
+        headTitleList.add("商机盒子");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         headTitleList.add("其他2");
@@ -826,6 +832,7 @@ public class TeleStatementController {
         headTitleList.add("官网");
         headTitleList.add("行业");
         headTitleList.add("品牌");
+        headTitleList.add("商机盒子");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
         headTitleList.add("其他2");

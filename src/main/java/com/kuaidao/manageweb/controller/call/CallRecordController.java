@@ -31,8 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -71,6 +69,7 @@ public class CallRecordController {
     @PostMapping("/recodeCallTime")
     @ResponseBody
     public void recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
+        logger.info("firstCall {{}}",myCallRecordReqDTO);
         callRecordFeign.recodeCallTime(myCallRecordReqDTO);
     }
 
@@ -359,6 +358,7 @@ public class CallRecordController {
                    UserOrgRoleReq req = new UserOrgRoleReq();
                    req.setRoleCode(RoleCodeEnum.DXCYGW.name());
                    req.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
+                   req.setOrgId(orgId);
                    JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
                    if(userJr.getData()==null || userJr.getData().isEmpty()){
                        return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
