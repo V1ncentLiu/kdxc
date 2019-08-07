@@ -96,6 +96,12 @@
                     <el-form-item label="邮箱:">
                         <el-input v-model="clueSearchForm.email" placeholder="邮箱"></el-input>
                     </el-form-item>
+                    <el-form-item label="资源来源:">
+	                    <el-select v-model="clueSearchForm.teleReceiveSource" clearable placeholder="资源来源">
+	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name"
+	                                   :value="item.value"></el-option>
+	                    </el-select>
+	                </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -492,7 +498,8 @@
                 clueId:'',
                 qq:'',
                 email:'',
-                wechat:''
+                wechat:'',
+                teleReceiveSource:''
             },
             allocationForm: {
                 saleId:'',
@@ -540,6 +547,10 @@
             repeatPhonesTable3:[],
             repeatPhonesTable4:[],
             repeatPhonesTable5:[],
+            teleReceiveSourceArr:[
+              	 {value:"1",name:"分配"},
+                 {value:"3",name:"领取"},
+              ],
             showPhoneTable:false,
             showPhoneTable2:false,
             showPhoneTable3:false,
@@ -648,6 +659,7 @@
                 param.qq = this.clueSearchForm.qq;
                 param.email = this.clueSearchForm.email;
                 param.wechat = this.clueSearchForm.wechat;
+                param.teleReceiveSource = this.clueSearchForm.teleReceiveSource;
                 console.info(param);
                 axios.post('/clue/pendingAllocation/list', param)
                     .then(function (response) {
