@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -150,7 +151,9 @@ public class ReconciliationConfirmController {
         }
         pageParam.setBusinessLine(user.getBusinessLine());
         String notInCompanyIds = getSysSetting(SysConstant.NOT_IN_CONFIRM_COMPANY_IDS);
-        pageParam.setNotInCompanyIds(notInCompanyIds);
+        if(notInCompanyIds != null && StringUtils.isNotBlank(notInCompanyIds)) {
+        	pageParam.setNotInCompanyIds(notInCompanyIds);
+        }
         JSONResult<PageBean<ReconciliationConfirmDTO>> list =
                 reconciliationConfirmFeignClient.list(pageParam);
         return list;

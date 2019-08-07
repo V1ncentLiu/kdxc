@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>苹果版本记录</title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>版本管理</el-breadcrumb-item>
+        <el-breadcrumb-item>苹果版本记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+            <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>版本发布</el-button>
+        </el-col>
+    </el-row>
+    <div class="mainSearchBg">
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  
+                @selection-change="handleSelectionChange">
+                <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+                <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                <el-table-column align="center" prop="versionNum" label="版本号"></el-table-column>
+                <el-table-column align="center" prop="type" label="系统" :formatter="transformType"></el-table-column>
+                <el-table-column align="center" prop="insertTime" label="录入时间" :formatter="dateFormatTime"></el-table-column>
+                <el-table-column align="center" prop="upgradeType" label="强制升级" :formatter="transformUpgradeType"></el-table-column>
+                <el-table-column align="center" prop="updateContent" label="更新内容"></el-table-column>
+                <el-table-column align="center" prop="isNewest" label="是否在线" :formatter="transformStatus" width="100"></el-table-column>
+                <el-table-column align="center" prop="handle" label="操作">
+                    <template slot-scope="scope">
+                        <el-button  @click="updateButton(scope.row.id)" type="success"  size="small">编辑</el-button>
+                        <el-button  @click="deleButton(scope.row.id)" type="danger"  size="small">删除</el-button>
+                        <!-- 是否为最新版本：0-否、1-是 -->
+                        <el-button  v-if="scope.row.isNewest === 0" @click="updateStatus(scope.row.id,1,'上架',scope.row.versionNum)" type="warning"  size="small">上架</el-button>
+                        <el-button v-else-if="scope.row.isNewest === 1" @click="updateStatus(scope.row.id,0,'下架',scope.row.versionNum)"  type="success"  size="small">下架</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+             <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+        </el-row> 
+    </div>
+
+    <!-- dialog -->
+    <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
+        <el-form :model="form" ref="form" :rules="rules" >
+            <el-form-item label="版本号：" :label-width="formLabelWidth" prop="versionNum">
+                <el-input type="number" v-model="form.versionNum"></el-input>
+            </el-form-item>
+            <el-form-item label="强制升级：" :label-width="formLabelWidth" prop="upgradeType">
+                <el-radio-group v-model="form.upgradeType">
+                    <el-radio label="1">是</el-radio>
+                    <el-radio label="0">否</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="更新内容：" :label-width="formLabelWidth" prop="updateContent">
+                <el-input type="textarea" v-model="form.updateContent" maxlength="200"></el-input>
+            </el-form-item>
+            
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
+            <el-button @click="dialogFormVisible= false">取消</el-button>
+        </div>
+    </el-dialog>
+</div>
+<input id="addOrUpdate" type="hidden" >
+<input id="updateId" type="hidden" >
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+            btnDisabled: false,
+            dataNum:"",
+            showTitle:"",
+            exportFormVisible:false,
+            dialogBatchVisible:false,
+            confirmBtnDisabled:false,
+            formLabelWidth: '130px',
+            dialogFormVisible: false,
+            telemarketingTeamId:"",
+            businessGroupId:"",
+            beginTime:"",
+            endTime:"",
+            addOrModifyDialogTitle:"",
+            fileList:[],//上传文件列表
+            dialogFormVisible:false,
+            dataTable:[],
+            multipleSelection: [],
+            exportdataTable:[],
+            projectId:"",
+            form:{
+                versionNum:'',
+                upgradeType:"1", 
+                updateContent:''
+            },
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            loading:false,
+            rules: {
+                versionNum: [
+                    { required: true, message: '请填写版本号', trigger: 'change' }
+                ],
+                upgradeType: [
+                    { required: true, message: '请选择是否强制升级', trigger: 'blur' }
+                ]
+            }
+             
+        },
+        methods: {
+            // clickRow(row){
+            //     this.$refs.multipleTable.toggleRowSelection(row)
+            // },
+            inviteAreaListPage(){//查询按钮               
+                var param = {}; 
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum = pageNum;
+                param.pageSize = pageSize;
+                param.type=2;//版本类型:1-android2-ios                
+                axios.post('/version/list',param).then(function (response) {
+                    console.log(response);
+                    var data=response.data;
+                    if(data){
+                        orgVM.dataTable =response.data.data; 
+                        orgVM.pager.currentPage= response.data.currentPage;
+                        orgVM.pager.total= response.data.total;
+                    }
+                    
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+                });  
+                
+            } ,
+          
+            updateButton(rowsId){
+                this.showTitle="编辑苹果发布"
+                if (this.$refs['form']!=undefined) {
+                    this.$refs['form'].resetFields();
+                }
+                $("#addOrUpdate").val(2);
+                $("#updateId").val(rowsId);
+                //修改菜单数据  
+                this.dialogFormVisible = true;
+                var param ={};
+                param.id = rowsId;  
+                axios.post('/version/queryVersion',param).then(function (response) {
+                    console.log(response);
+                    var data=response.data.data;
+                    if(data){
+                        orgVM.form.versionNum = data.versionNum;
+                        orgVM.form.upgradeType = data.upgradeType+"";
+                        orgVM.form.updateContent = data.updateContent;                     
+                    }else{
+                        alert(response.data.data.message);
+                        return ;
+                    } 
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                });  
+            },
+            deleButton(id) {
+                console.log(id)
+                this.$confirm("删除后此条记录无法恢复，确定删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var param = {};
+                    param.id=id;
+
+                    axios.post('/version/delete', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          if(result.code=="0"){
+                              orgVM.$message.success("删除成功");
+                              orgVM.inviteAreaListPage();
+                          }else{
+                              orgVM.$message.error("删除失败");
+                          }
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+             
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            
+            transformType(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="1"){
+                  text="Android"
+                }else if(cellValue=="2"){
+                  text="IOS"
+                }
+                return text;
+            }, 
+            transformUpgradeType(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="1"){
+                  text="是"
+                }else if(cellValue=="2"){
+                  text="否"
+                }
+                return text;
+            }, 
+            transformStatus(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="0"){
+                  text="否"
+                }else if(cellValue=="1"){
+                  text="是"
+                }
+                return text;
+            }, 
+            //时间格式化
+            dateFormat(row, column){
+                var date = row[column.property]; 
+                if (date == undefined || date ==null || date =="") { 
+                    return ""; 
+                } 
+                return moment(new Date(date)).format("YYYY-MM-DD"); 
+            } ,
+            //时间格式化
+            dateFormatTime(row, column){
+                var date = row[column.property]; 
+                if (date == undefined) { 
+                    return ""; 
+                } 
+                return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
+            } ,
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var formData = this.form;
+                        var param={};
+                        param.type = 2;//版本类型:1-android2-ios
+                        param.versionNum = formData.versionNum;//版本号
+                        param.upgradeType = formData.upgradeType;//升级模式:1-强制升级、2-可选升级
+                        param.url = formData.url;//url地址
+                        param.updateContent = formData.updateContent;//更新内容
+                        param.md5 = '';//apkMD5值
+                        var str = "";
+                        var rows = this.multipleSelection;
+                        for ( var i = 0; i <rows.length; i++){
+                           str = rows[i].id
+                        }
+                        // param.id = str;
+                        var idval=$("#updateId").val();
+                        if(idval){
+                            param.id = idval; 
+                        }else{
+                            param.id=""
+                        }
+
+                        orgVM.btnDisabled = true; 
+                        var url = "/version/addIOS";//新建
+                        if($("#addOrUpdate").val() ==2){
+                            url = "/version/editIOS"//编辑
+                        }
+                        axios.post(url,param).then(function (response) {
+                            console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                                // window.location.href="/version/iosVersionListInit"; 
+                                orgVM.inviteAreaListPage();
+                                // 关闭窗口
+                                orgVM.dialogFormVisible=false;
+                                orgVM.btnDisabled = false; 
+                                $("#updateId").val("");
+                            }else if(response.data.code=='21902'){
+                                orgVM.$message({message: response.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
+                            }else{
+                                orgVM.$message({message: response.data.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
+                        } 
+                        }).catch(function (error) {
+                            orgVM.btnDisabled = false; 
+                            console.log(error);
+                        })
+                        .then(function () {
+                        // always executed
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            closeUploadFileDialog(){//关闭上传文件 dialog
+              this.$refs.upload.clearFiles();
+            },
+            handleChange(files,fileList){//只允许选择一个文件
+                this.fileList = fileList.slice(-1);
+            },
+            beforeUpload(file){//上传之前 文件校验
+                var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                if(!isTextComputer){
+                    this.$message.error('文件格式错误');
+                    orgVM.loading = false;
+                    orgVM.fileList = [];
+                    return false;
+                }
+            },
+            uploadSuccess(response, file, fileList){//上传成功后
+              
+              if(response.code=='0'){
+              this.addOrModifyDialogTitle="预览数据";
+                //清空文件里列表
+                  this.$refs.upload.clearFiles();
+                    this.dialogBatchVisible = false;
+
+                  orgVM.exportdataTable =response.data; 
+                  orgVM.loading = false;
+                  orgVM.exportFormVisible = true;
+                  orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
+
+              }else{
+              orgVM.loading = false;
+                this.$message('上传失败');
+              }
+            
+            },
+            uploadError(){//上傳失敗
+              this.loading = false;
+              this.$message({message:'上传失败',type:'error'});
+            }, 
+            submitUpload() {//提交文件
+                orgVM.confirmBtnDisabled = false;
+                this.loading = true;
+                var fileList = this.fileList;
+                if(!fileList || fileList.length!=1){
+                    this.$message.error({message:'未选中文件',type:'error'});
+                    orgVM.loading = false;
+                    return false;
+                }
+                this.$refs.upload.submit();
+            },
+            addbutton(){
+                this.showTitle="苹果发布"
+                $("#addOrUpdate").val(1);
+                this.dialogFormVisible=true;
+                this.form.beginTime = "";
+                this.form.endTime = "";
+                this.form.projectIds = [];
+                this.form.telemarketingTeamId = "";
+                this.form.status= '0';
+                if (this.$refs['form']!=undefined) {
+                    this.$refs['form'].resetFields();
+                }
+            },
+            //修改状态
+            updateStatus(id,status,msg,versionNum) {
+                var mesTip="";
+                if(status=="1"){
+                    mesTip="上架后原在线版本变为离线状态，确定上架？"
+                }else{
+                    mesTip="下架后此版本用户无法正常下载，确定上下架？"
+                }
+                this.$confirm(mesTip, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var param = {};
+                    param.id=id;
+                    param.versionNum=versionNum;
+                    param.type=2;
+                    var url="";
+                    if(status=="1"){
+                        url='/version/setNewVersion';
+                    }else{
+                        url="/version/setOneOldVersion"
+                    }
+                    axios.post(url, param)
+                    .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=="0"){
+                        orgVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                        orgVM.inviteAreaListPage();
+                        }});
+                        
+                      }else{
+                        orgVM.$message.error(msg+"失败");
+                      }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    });                 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消'+msg
+                    });          
+                });
+            }
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
+            this.inviteAreaListPage();
+            document.getElementById('organizationManage').style.display = 'block';
+          
+          
+        },//created方法 结束
+        mounted(){
+            document.getElementById('organizationManage').style.display = 'block';
+        }
+    })
+</script>
+</html>
