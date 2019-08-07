@@ -500,6 +500,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSecondCommunicateContent()); // 第二次沟通内容
                 curList.add(taskDTO.getThreeCommunicateTime()); // 第三次沟通时间
                 curList.add(taskDTO.getThreeCommunicateContent()); // 第三次沟通内容
+                curList.add(taskDTO.getMessageTime());//留言时间
                 dataList.add(curList);
             }
         }
@@ -542,6 +543,7 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("第二次沟通内容");
         headTitleList.add("第三次沟通时间");
         headTitleList.add("第三次沟通内容");
+        headTitleList.add("留言时间");
         return headTitleList;
     }
 
