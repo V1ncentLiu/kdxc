@@ -159,7 +159,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="预签约省份:">
-                        <el-select v-model="form.province" placeholder="预签约省份" clearable >
+                        <el-select v-model="form.province" placeholder="预签约省份" clearable   filterable  multiple>
                             <el-option
                                 v-for="item in provinceArr"
                                 :key="item.name"
@@ -1011,7 +1011,9 @@
         param.dayTel=this.form.dayTel;
         param.hasInvite=this.form.hasInvite;
         param.repeatStatus=this.form.repeatStatus;
-        param.province= this.form.province;
+        if(null!=this.form.province&&this.form.province.length>0) {
+            param.provinces= this.form.province.join(",");
+        }
         param.category= this.form.category;
         param.address= this.form.address;
         param.searchWord= this.form.searchWord;
@@ -1055,7 +1057,6 @@
           });
           return;
         }
-
         axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
           var resobj= response.data;
           var pageData=resobj.data;
