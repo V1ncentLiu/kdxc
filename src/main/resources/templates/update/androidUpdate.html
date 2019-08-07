@@ -53,18 +53,18 @@
 
     <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
-        <el-form :model="form" ref="form" :rules="rules" >
+        <el-form :model="form" ref="form" :rules="rules" style="position: relative;">
+            <span style="position: absolute;left: 48px;top: 10px;color: #f56c6c;">*</span>
             <el-form-item label="apk包上传：" :label-width="formLabelWidth" prop="fileList">
                 <el-upload
                     class="upload-demo"
                     :action="uploadOssHost"
                     ref="refundApplyImgUpload"
-                    :on-preview="handlePreview"
                     :on-remove="handleRemove"
                     :on-success="handleSuccess"
                     :on-error="handleError"
                     :before-upload="handleBefore"
-                    accept=".apk"
+                    accept="application/vnd.android.package-archive"
                     multiple
                     :data="uploadParamData"
                     :limit='1'
@@ -98,6 +98,7 @@
 </div>
 <input id="addOrUpdate" type="hidden" >
 <input id="updateId" type="hidden" >
+<input id="submitval" type="hidden" >
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -126,8 +127,7 @@
           	form:{
                 versionNum:'',
                 upgradeType:"1", 
-                updateContent:'',
-                fileList:[]
+                updateContent:''
           	},
             pager:{
                 total: 0,
@@ -136,9 +136,6 @@
             },
             loading:false,
             rules: {
-            	fileList: [
-                    // { required: true, message: '请选择上传文件', trigger: 'change' }
-                ],
                 versionNum: [
                     { required: true, message: '请填写版本号', trigger: 'change' }
                 ],
@@ -162,7 +159,7 @@
              
         },
         methods: {
-        	  inviteAreaListPage(){//查询按钮            	  
+        	inviteAreaListPage(){//查询按钮            	  
                 var param = {}; 
                 var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
@@ -177,20 +174,17 @@
                         orgVM.pager.currentPage= response.data.currentPage;
                         orgVM.pager.total= response.data.total;
                     }
-                    
                 })
                 .catch(function (error) {
                   console.log(error);
                 })
                 .then(function () {
-                });  
-                
-            } ,
-          
+                }); 
+            },          
             updateButton(rowsId){
-            	  this.showTitle="编辑安卓发布"
-            	  if (this.$refs['form']!=undefined) {
-                 		this.$refs['form'].resetFields();
+            	this.showTitle="编辑安卓发布"
+        	    if (this.$refs['form']!=undefined) {
+             		this.$refs['form'].resetFields();
                 }
             	$("#addOrUpdate").val(2);
                 $("#updateId").val(rowsId);
@@ -199,13 +193,13 @@
                 var param ={};
                 param.id = rowsId;  
                 axios.post('/version/queryVersion',param).then(function (response) {
-                	  console.log(response);
+                	console.log(response);
                     debugger
                     var data=response.data.data;
                     if(data){
-                      orgVM.form.versionNum = data.versionNum;
-                      orgVM.form.upgradeType = data.upgradeType+"";
-                      orgVM.form.updateContent = data.updateContent;                  	 
+                        orgVM.form.versionNum = data.versionNum;
+                        orgVM.form.upgradeType = data.upgradeType+"";
+                        orgVM.form.updateContent = data.updateContent;  
                    }else{
                   	    alert(response.data.data.message);
                   	  	return ;
@@ -246,22 +240,18 @@
                         type: 'info',
                         message: '已取消删除'
                     });          
-                });
-             
+                });             
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-
             selectFile(file, fileList){
                 orgVM.uploadParamData.key= orgVM.uploadParamData.dir+orgVM.random_string(10)+orgVM.get_suffix(file.name),
                 orgVM.uploadParamData.realName= file.name
             },
-            submitUpload(){
+            submitUpload(){                
                 this.$refs.refundApplyImgUpload.submit();
-            },
-            handlePreview(file){
-             
+                $("#submitval").val(1);
             },
             handleRemove(file,fileList){
               this.fileList=[];
@@ -274,27 +264,16 @@
                 console.log(file)
                 console.info(fileList);
                 console.info(orgVM.fileList);
-                var realName = file.name;
-                var randomName = orgVM.uploadParamData.key;
-                var imgUrl =  orgVM.uploadOssHost+"/"+randomName;
-                this.form.url=imgUrl;
-                this.form.fileList.push(realName);
-                this.fileList=[];
-                this.form.fileList=[];
             },
             handleError(err, file, fileList){
                console.info(err);
             },
             handleBefore(file){
-                // var isTextComputer = file.type === 'apk' || file.type==='apk';
+                // var isTextComputer = file.type === 'application/vnd.android.package-archive';
                 // if(!isTextComputer){
-                //     this.fileList=[];
                 //     this.$message.error('文件格式错误');
-                //     return false;
-                // }
-                // if(file.size>2*1024*1024){
-                //     this.fileList=[];
-                //     this.$message.error('最大为2MB');
+                //       orgVM.loading = false;
+                //       orgVM.fileList = [];
                 //     return false;
                 // }
             },
@@ -350,7 +329,7 @@
           	        return ""; 
           	    } 
           	    return moment(new Date(date)).format("YYYY-MM-DD"); 
-          	} ,
+          	},
             //时间格式化
             dateFormatTime(row, column){
             	  var date = row[column.property]; 
@@ -358,8 +337,13 @@
             	      return ""; 
             	  } 
             	  return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
-            } ,
+            },
             submitForm(formName) {
+                debugger
+                if(!$("#submitval").val()){
+                    orgVM.$message({message: "请上传apk包", type: 'warning'});
+                    return
+                }
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var formData = this.form;
@@ -420,45 +404,6 @@
                     }
                 });
             },
-            closeUploadFileDialog(){//关闭上传文件 dialog
-          	  this.$refs.upload.clearFiles();
-            },
-            handleChange(files,fileList){//只允许选择一个文件
-                this.fileList = fileList.slice(-1);
-            },
-            beforeUpload(file){//上传之前 文件校验
-                // var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                var isTextComputer = file.type === 'application/vnd.android.package-archive';
-                if(!isTextComputer){
-                    this.$message.error('文件格式错误');
-                	  orgVM.loading = false;
-                	  orgVM.fileList = [];
-                    return false;
-                }
-            },
-            uploadSuccess(response, file, fileList){//上传成功后
-            	
-          	  if(response.code=='0'){
-          		this.addOrModifyDialogTitle="预览数据";
-          		  //清空文件里列表
-              	  this.$refs.upload.clearFiles();
-                    this.dialogBatchVisible = false;
-
-                 	orgVM.exportdataTable =response.data; 
-                 	orgVM.loading = false;
-                 	orgVM.exportFormVisible = true;
-                 	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
-
-          	  }else{
-          		orgVM.loading = false;
-          		  this.$message('上传失败');
-          	  }
-          	
-            },
-            uploadError(){//上傳失敗
-              this.loading = false;
-          	  this.$message({message:'上传失败',type:'error'});
-            },
             addbutton(){
               	this.showTitle="安卓发布"
               	$("#addOrUpdate").val(1);
@@ -467,35 +412,37 @@
               	this.form.upgradeType = "1";
               	this.form.updateContent = "";
               	if (this.$refs['form']!=undefined) {
-                 		this.$refs['form'].resetFields();
+                 	this.$refs['form'].resetFields();
                 }
+                $("#submitval").val("");
+                this.fileList = [];
             },
-          getUploadParam(){
-            var signUrl = this.ossUrl+"?serviceType=aggregation";
-            var param={};
+            getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
 
-            axios.get(signUrl, param)
-            .then(function (response) {
-              // console.info(response);
-              var respData= response.data;
-              var host = respData.host;
-              var params={};
-              var new_multipart_params = {
-                dir:respData.dir,
-                'policy': respData.policy,
-                'OSSAccessKeyId': respData.accessid,
-                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
-                'signature': respData.signature,
-                'x:params':params,//自定义编码，basse64编码后的字符串,
-                'realName':''
-              };
-              orgVM.uploadParamData= new_multipart_params;
-              orgVM.uploadOssHost = host;
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-          },
+                axios.get(signUrl, param)
+                .then(function (response) {
+                    // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                        dir:respData.dir,
+                        'policy': respData.policy,
+                        'OSSAccessKeyId': respData.accessid,
+                        'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                        'signature': respData.signature,
+                        'x:params':params,//自定义编码，basse64编码后的字符串,
+                        'realName':''
+                    };
+                    orgVM.uploadParamData= new_multipart_params;
+                    orgVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+            },
             //修改状态
             updateStatus(id,status,msg,versionNum) {
                 var mesTip="";
@@ -543,14 +490,12 @@
             }
         },
         created(){
-          this.getUploadParam();
+            this.getUploadParam();
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-        	  this.inviteAreaListPage();
-        	  document.getElementById('organizationManage').style.display = 'block';
-        	
+        	this.inviteAreaListPage();       	
         	
         },//created方法 结束
         mounted(){
