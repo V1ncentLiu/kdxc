@@ -360,12 +360,11 @@ public class CallRecordController {
                    req.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
                    req.setOrgId(myCallRecordReqDTO.getTeleGroupId());
                    JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-                   if(userJr.getData()==null || userJr.getData().isEmpty()){
-                       return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                               "没有数据");
+                   List<Long> idList=new ArrayList<>();
+                   if(userJr.getData()!=null && !userJr.getData().isEmpty()){
+                        idList = userJr.getData().parallelStream().map(user -> user.getId())
+                               .collect(Collectors.toList());
                    }
-                   List<Long> idList = userJr.getData().parallelStream().map(user -> user.getId())
-                           .collect(Collectors.toList());
                    myCallRecordReqDTO.setAccountIdList(idList);
                } else {
                    // 其他角色
