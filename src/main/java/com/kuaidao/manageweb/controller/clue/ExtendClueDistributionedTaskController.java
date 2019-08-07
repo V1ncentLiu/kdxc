@@ -609,6 +609,15 @@ public class ExtendClueDistributionedTaskController {
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()) {
             userList = userZxzjList.getData();
         }
+        //查询管理员放入user集合
+      List<UserInfoDTO> userAdminList = new ArrayList<UserInfoDTO>();
+      UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
+      userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
+      JSONResult<List<UserInfoDTO>> userAdminJson = userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
+      if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
+        userAdminList = userAdminJson.getData();
+      }
+      userList.addAll(userAdminList);
         return userList;
 
     }
