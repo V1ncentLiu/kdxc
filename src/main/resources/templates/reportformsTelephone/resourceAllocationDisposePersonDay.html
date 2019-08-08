@@ -38,19 +38,9 @@
                     <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="话务组:"> 
-                    <el-select v-model="form.orgId" placeholder="话务组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
-                        <el-option
-                            v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -70,31 +60,38 @@
             </el-form>
         </div>
         <el-row>
-            <el-table
-                :data="tableData"
-                border
+                <el-table
                 style="width: 100%"
+                border
+                :data="tableData"
                 v-loading="loading"
                 :span-method="arraySpanMethod">
-                <el-table-column prop="id" type="index" label="序号" align="center" width="55" :index="indexFun">
-                </el-table-column>
+                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
                 <el-table-column
-                    prop="dateId"
+                    prop="newResource"
                     align="center"
-                    label="统计日期">
+                    label="是否新资源">
                     <template slot-scope="scope">
-                        <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
-                        <span type="text" size="small" v-else>{{scope.row.dateId | dateFormatFilter}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.newResource == '合计'" @click="gotoPerson()">{{scope.row.newResource}}</el-button>
+                        <span type="text" size="small" v-else>{{scope.row.newResource?'是':'否'}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="callCount" align="center" label="拨打次数"></el-table-column>
-                <el-table-column prop="calledCount" align="center" label="接通次数" :formatter="nullToZero"></el-table-column>
-                <el-table-column prop="callPercent" align="center" label="接通率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="callClueCount" align="center" label="拨打量"></el-table-column>
-                <el-table-column prop="calledClueCount" align="center" label="接通量" :formatter="nullToZero"></el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长"></el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长"></el-table-column>
+                <el-table-column prop="receiveCount" align="center" label="接收资源">
+                </el-table-column>
+                <el-table-column prop="assignCount" align="center" label="分配资源量">
+                </el-table-column>
+                <el-table-column prop="trackingCount" align="center" label="跟访量">
+                </el-table-column>
+                <el-table-column prop="transCount" align="center" label="转电销量">
+                </el-table-column>
+                <el-table-column prop="effectiveCount" align="center" label="有效资源">
+                </el-table-column>
+                <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat">
+                </el-table-column>
+                <el-table-column prop="transRate" align="center" label="转电销率" :formatter="percentFormat">
+                </el-table-column>
+                <el-table-column prop="effectiveRate" align="center" label="资源有效率" :formatter="percentFormat">
+                </el-table-column>
             </el-table>
             <table-pagination :pager="pager" :papernum="[3,5,10]" @change="searchTable()"></table-pagination>
         </el-row>
@@ -110,13 +107,9 @@
 </style>
 <script th:inline="javascript">
     var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
-    console.log(clueCategoryList);
-
-    var queryOrg=[[${teleGroupList}]]; // 话务组
     var parentParam = [[${trafficCallTimeQueryDto}]];
-    var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
-    console.log(parentParam,curOrgId,curUserId);
+    console.log(parentParam,curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         filters: {
@@ -132,9 +125,7 @@
         data: function() {
             return {
                 loading: false,
-                isDisabled: true, // 话务组筛选框
                 isDisabledUserId: false,
-                // btnDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -143,59 +134,59 @@
                 form: {
                     startTime: '',
                     endTime: '',
-                    orgId: '',
-                    userId: '',
-                    newResource: ''
+                    category: '',
+                    newResource: '',
+                    userId: ''
                 },
                 export: {
                     startTime: '',
                     endTime: '',
-                    orgId: '',
-                    userId: '',
-                    newResource: ''
+                    category: '',
+                    newResource: '',
+                    userId: ''
                 },
                 clueCategoryList: clueCategoryList,
                 tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '合计',
-                    //     dateId: 1564385355,
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0.1,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     dateId: 1564385355,
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 0
-                    // },
-                    // {
-                    //     orgId: "3",
-                    //     dateId: 1564385355,
-                    //     orgName: '电销组3',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     // callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     // userAvgDayValidCallTime: 155799
-                    // }
+                    {
+                        newResource: '合计',
+                        receiveCount: 0,
+                        assignCount: 0,
+                        trackingCount: 0,
+                        transCount: 0,
+                        effectiveCount: 0,
+                        followRate : 0,
+                        transRate: 0,
+                        effectiveRate: 0,
+                        days: '2019-01-01',
+                        userName: '张三',
+                    },
+                    {
+                        newResource: 1,
+                        receiveCount: 0,
+                        assignCount: 0,
+                        trackingCount: 0,
+                        transCount: 0,
+                        effectiveCount: 0,
+                        followRate : 0,
+                        transRate: 0,
+                        effectiveRate: 0,
+                        days: '2019-01-01',
+                        userName: '张三',
+                    },
+                    {
+                        newResource: 0,
+                        receiveCount: 0,
+                        assignCount: 0,
+                        trackingCount: 0,
+                        transCount: 0,
+                        effectiveCount: 0,
+                        followRate : 0,
+                        transRate: 0,
+                        effectiveRate: 0,
+                        days: '2019-01-01',
+                        userName: '李四',
+                    },
                 ],
-                orgTeleArr: queryOrg, // 话务组
                 teleMarketArr: []      
             }            
         },
@@ -204,9 +195,9 @@
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
-                    endTime = new Date(this.form.endTime);
-                    if(startTime>endTime){
+                    var startT = new Date(this.form.startTime);
+                    var endT = new Date(this.form.endTime);
+                    if(startT>endT){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -219,7 +210,7 @@
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(startT < beforeSixMonthRes || endT > currentDateRes){
                         this.$message({
                             message: '请选择近6个月内的时间',
                             type: 'warning'
@@ -237,16 +228,16 @@
                 }   
                 
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                param.startTime = startTime;
+                param.endTime = endTime;
                 param.pageSize = this.pager.pageSize;
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
                 param.userId = this.form.userId;
+                param.category = this.form.category;
                 param.newResource = this.form.newResource;
                 this.loading = true; 
                 axios.post('/statistics/trafficCallResource/getPersonDayPageList',param).then(function (response) {
@@ -276,10 +267,10 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.startTime = startTime;
+                        mainDivVM.export.endTime = endTime;
                         mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.category = mainDivVM.form.category;
                         mainDivVM.export.newResource = mainDivVM.form.newResource;
                     }else{
                         mainDivVM.loading = false;
@@ -342,25 +333,25 @@
             goBack () {
                 window.history.go(-1);
             },
-            timeFormat (row, column) { // 时间格式化：时分秒
-                var time = row[column.property];
-                if(!time){return "00时00分00秒";}
-                var timeResult = this.timeFun (time); 
-                return timeResult;
-            },
-            timeFun(s){
-                var t="";
-                var hour = Math.floor(s/3600);
-                var min = Math.floor(s/60) % 60;
-                var sec = s % 60;
-                if(hour<10){t+="0";}
-                t+=hour+"时"
-                if(min < 10){t += "0";}
-                t += min + "分";
-                if(sec < 10){t += "0";}
-                t += sec + "秒";
-                return t;
-            },
+    //         timeFormat (row, column) { // 时间格式化：时分秒
+    //             var time = row[column.property];
+    //             if(!time){return "00时00分00秒";}
+    //             var timeResult = this.timeFun (time); 
+    //             return timeResult;
+    //         },
+    //         timeFun(s){
+    //             var t="";
+    //             var hour = Math.floor(s/3600);
+    //             var min = Math.floor(s/60) % 60;
+    //             var sec = s % 60;
+    //             if(hour<10){t+="0";}
+    //             t+=hour+"时"
+    //             if(min < 10){t += "0";}
+    //             t += min + "分";
+    //             if(sec < 10){t += "0";}
+    //             t += sec + "秒";
+    //             return t;
+    //         },
             percentFormat (row, column) {
                 var percent = row[column.property];
                 if(!percent){ // 如果没有值或值为0
@@ -455,39 +446,35 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            if(curOrgId){ // 有角色
-                // this.isDisabled = true;
-                this.form.orgId = curOrgId;
-                if(curUserId){
-                    this.isDisabledUserId = true;
-                    this.form.userId = curUserId;
-                }else{
-                    this.form.userId = parentParam.userId ?parentParam.userId:'';
-                }
+            if(curUserId){
+                this.isDisabledUserId = true;
+                this.form.userId = curUserId;
             }else{
-                this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
-                this.form.userId = parentParam.userId ? parentParam.userId:'';
+                this.form.userId = parentParam.userId ?parentParam.userId:'';
             }
+
             if(parentParam && parentParam.startTime){
-                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
-                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
-                this.form.newResource = parentParam.newResource != null?parentParam.newResource.toString():'';
+                this.form.startTime = parentParam.startTime;
+                this.form.endTime = parentParam.endTime;
+                this.form.category = parentParam.category != null ?parentParam.category.toString():'';
+                this.form.newResource = parentParam.newResource != null ?parentParam.newResource.toString():'';
 
                 this.export.startTime = parentParam.startTime;
                 this.export.endTime = parentParam.endTime;
             }else{
                 this.form.startTime = startTime;
                 this.form.endTime = endTime;
-                this.export.startTime = this.minuteFormat(this.form.startTime);
-                this.export.endTime = this.minuteFormat(this.form.endTime);
+                this.export.startTime = this.form.startTime;
+                this.export.endTime = this.form.endTime;
             }
-            this.export.orgId = this.form.orgId; 
+
             this.export.userId = this.form.userId;
+            this.export.category = this.form.category; 
             this.export.newResource = this.form.newResource;
+
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.currentTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){
