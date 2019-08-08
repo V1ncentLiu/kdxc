@@ -96,6 +96,17 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+        gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
+            //外呼手机
+            var param = {};
+            param.clueId = clueId;
+            window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                });
+            });
+            //跳转页面
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+        },
         gotoMyCustomer(){//跳转我的客户
             window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
         },
