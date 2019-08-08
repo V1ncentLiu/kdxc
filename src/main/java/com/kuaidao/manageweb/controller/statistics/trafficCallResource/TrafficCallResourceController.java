@@ -3,13 +3,16 @@ package com.kuaidao.manageweb.controller.statistics.trafficCallResource;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.statistics.trafficCallResource.TrafficCallResourceFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceDto;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceQueryDto;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,6 +44,8 @@ public class TrafficCallResourceController {
     private static final Integer GROUP_PERSON_DAY = 3;
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 组一级页面跳转
@@ -48,6 +53,8 @@ public class TrafficCallResourceController {
     @RequestMapping("/resourceAllocationDispose")
     public String resourceAllocationDispose(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
         pageParams(category,startTime,endTime,newResource,request);
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDispose";
     }
     /**
@@ -56,6 +63,8 @@ public class TrafficCallResourceController {
     @RequestMapping("/resourceAllocationDisposePerson")
     public String resourceAllocationPersonDispose(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
         pageParams(category,startTime,endTime,newResource,request);
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDisposePerson";
     }
     /**
@@ -64,6 +73,8 @@ public class TrafficCallResourceController {
     @RequestMapping("/resourceAllocationDisposePersonDay")
     public String resourceAllocationDisposeTeam(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
         pageParams(category,startTime,endTime,newResource,request);
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDisposePersonDay";
     }
     /**
@@ -285,6 +296,21 @@ public class TrafficCallResourceController {
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole;
+    }
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
     }
 
 }
