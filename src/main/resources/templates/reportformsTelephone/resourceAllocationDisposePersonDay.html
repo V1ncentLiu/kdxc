@@ -73,7 +73,7 @@
                     align="center"
                     label="是否新资源">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.newResource == '合计'" @click="gotoPerson()">{{scope.row.newResource}}</el-button>
+                        <span type="text" size="small" v-if="scope.row.newResource == '合计'">{{scope.row.newResource}}</span>
                         <span type="text" size="small" v-else>{{scope.row.newResource?'是':'否'}}</span>
                     </template>
                 </el-table-column>
@@ -149,6 +149,7 @@
                 clueCategoryList: clueCategoryList,
                 tableData: [
                     {
+                        id: '',
                         newResource: '合计',
                         receiveCount: 0,
                         assignCount: 0,
@@ -192,6 +193,26 @@
             }            
         },
         methods: {
+            formatData (list) {
+                var newArray = [];
+                var tmp = list;
+                var index = 1;
+                tmp[0].index = 1; 
+                for (var i = 0; i < tmp.length; i++) {
+                    for(var j = i + 1; j < tmp.length; j++){
+                        if(tmp[i].typeid == tmp[j].typeid){
+                            tmp[j].title1 = "";
+                            tmp[j].index = index;
+                        }else{
+                            index ++;
+                            tmp[j].index = index;
+                        }
+                        break;
+                    }
+                    newArray.push(tmp[i]);
+                }
+                return newArray
+            },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -318,7 +339,9 @@
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
-                        return [1, 2];
+                        return [0, 0];
+                    } else if (columnIndex === 2) {
+                        return [1, 3];
                     }
                 }
             },
