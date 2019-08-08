@@ -3,13 +3,26 @@
  */
 package com.kuaidao.manageweb.controller.business;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -333,4 +346,78 @@ public class BusCustomerManagerController {
         }
         return orgJr.getData();
     }
+
+    /**
+     * 导出到访业绩
+     */
+    @LogRecord(description = "导出到访业绩", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.BUSS_MANAGER)
+    @PostMapping("/importVisitPer")
+    public void importVisitPer(HttpServletRequest request, HttpServletResponse response,
+        @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
+        UserInfoDTO user = getUser();
+        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+
+        // 权限限制
+        JSONResult<List> listJSONResult  = new JSONResult();
+        // 数据获取
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitleList());
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
+            && listJSONResult.getData().size() != 0) {
+            List<ClueDistributionedTaskDTO> orderList = listJSONResult.getData();
+            int size = orderList.size();
+            for (int i = 0; i < size; i++) {
+                // 数据插入
+                List<Object> curList = new ArrayList<>();
+                dataList.add(curList);
+            }
+        }
+
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+        String name = "到访业绩" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        response.addHeader("Content-Disposition",
+            "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
+    }
+    /**
+     * 导出到访业绩
+     * @return
+     */
+    private List<Object> getHeadTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("来访日期");
+        headTitleList.add("客户姓名");
+        headTitleList.add("来访区域");
+        headTitleList.add("到访类别");
+        headTitleList.add("来访次数");
+        headTitleList.add("是否成功");
+        headTitleList.add("合作项目");
+        headTitleList.add("签约类型");
+        headTitleList.add("签约店型");
+        headTitleList.add("二次来访客户首次来访洽谈日期");
+        headTitleList.add("已收金额");
+        headTitleList.add("未收金额");
+        headTitleList.add("预计补款日期");
+        headTitleList.add("是否远程");
+        headTitleList.add("所属公司");
+        headTitleList.add("洽谈人员");
+        headTitleList.add("备注（未签约原因内容）");
+        headTitleList.add("电销部门");
+        headTitleList.add("创业顾问");
+        headTitleList.add("负责人");
+        headTitleList.add("洽谈数量");
+        headTitleList.add("签约数量");
+        headTitleList.add("是否有特殊优惠以及赠送");
+        headTitleList.add("具体内容");
+        headTitleList.add("来访省份");
+        headTitleList.add("项目类别（饮品／非饮品）");
+        headTitleList.add("值");
+        return headTitleList;
+    }
+
 }
