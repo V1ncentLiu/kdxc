@@ -3,17 +3,22 @@ package com.kuaidao.manageweb.controller.statistics.trafficCallResource;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.statistics.trafficCallResource.TrafficCallResourceFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceDto;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceQueryDto;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +39,8 @@ public class TrafficCallResourceController {
     private static final Integer GROUP = 1;
     private static final Integer GROUP_PERSON = 2;
     private static final Integer GROUP_PERSON_DAY = 3;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
     /**
      * 组一级页面跳转
@@ -63,6 +70,7 @@ public class TrafficCallResourceController {
      * 一级页面查询组（分页）
      */
     @PostMapping("/getGroupPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getGroupPageList(@RequestBody TrafficCallResourceQueryDto trafficCallResourceQueryDto){
         return trafficCallResourceFeignClient.getGroupPageList(trafficCallResourceQueryDto);
     }
@@ -70,6 +78,7 @@ public class TrafficCallResourceController {
      * 二级页面查询(分页)
      */
     @PostMapping("/getPersonPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getPersonPageList(@RequestBody TrafficCallResourceQueryDto trafficCallResourceQueryDto){
         return trafficCallResourceFeignClient.getPersonPageList(trafficCallResourceQueryDto);
     }
@@ -77,6 +86,7 @@ public class TrafficCallResourceController {
      * 三级页面查询(分页)
      */
     @PostMapping("/getPersonDayPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getPersonDayPageList(@RequestBody TrafficCallResourceQueryDto trafficCallResourceQueryDto){
         return trafficCallResourceFeignClient.getPersonDayPageList(trafficCallResourceQueryDto);
     }
@@ -208,17 +218,18 @@ public class TrafficCallResourceController {
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
             if(type.equals(GROUP)){
-                curList.add(ra.getNewResource());
+                curList.add(ra.getNewResource()==0?"否":"是");
                 curList.add(ra.getReceiveCount());
             }
             if(type.equals(GROUP_PERSON)){
                 curList.add(ra.getUserName());
-                curList.add(ra.getNewResource());
+                curList.add(ra.getNewResource()==0?"否":"是");
             }
             if(type.equals(GROUP_PERSON_DAY)){
                 curList.add(ra.getDays());
-                curList.add(ra.getNewResource());
+                curList.add(ra.getNewResource()==0?"否":"是");
             }
+            curList.add(ra.getAssignCount());
             curList.add(ra.getTrackingCount());
             curList.add(ra.getTransCount());
             curList.add(ra.getEffectiveCount());
@@ -232,24 +243,24 @@ public class TrafficCallResourceController {
         List<Object> curList = new ArrayList<>();
         curList.add("");
         if(type.equals(GROUP)){
-            curList.add(ra.getNewResource());
+            curList.add("合计");
             curList.add(ra.getReceiveCount());
         }
         if(type.equals(GROUP_PERSON)){
             curList.add(ra.getUserName());
-            curList.add(ra.getNewResource());
+            curList.add("合计");
         }
         if(type.equals(GROUP_PERSON_DAY)){
             curList.add(ra.getDays());
-            curList.add(ra.getNewResource());
+            curList.add("合计");
         }
+        curList.add(ra.getAssignCount());
         curList.add(ra.getTrackingCount());
         curList.add(ra.getTransCount());
         curList.add(ra.getEffectiveCount());
         curList.add(formatPercent(ra.getFollowRate()));
         curList.add(formatPercent(ra.getTransRate()));
         curList.add(formatPercent(ra.getEffectiveRate()));
-        dataList.add(curList);
         dataList.add(curList);
     }
     /**
@@ -262,6 +273,18 @@ public class TrafficCallResourceController {
             callPercent = BigDecimal.ZERO;
         }
         return callPercent+"%";
+    }
+    /**
+     * 查询话务专员
+     */
+    @PostMapping("/getSaleList")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
+                                                     HttpServletRequest request) {
+        userOrgRoleReq.setRoleCode(RoleCodeEnum.HWY.name());
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole;
     }
 
 }
