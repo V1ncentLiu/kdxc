@@ -194,7 +194,6 @@ public class TrafficCallTimeController {
         ServletOutputStream outputStream = response.getOutputStream();
         wbWorkbook.write(outputStream);
         outputStream.close();
-        trafficCallTimeFeignClient.getGroupPersonList(trafficCallTimeQueryDto);
     }
 
     /**
