@@ -61,10 +61,10 @@ public class TrafficCallResourceController {
     /**
      * 人+天三级页面跳转
      */
-    @RequestMapping("/resourceAllocationDisposeTeam")
+    @RequestMapping("/resourceAllocationDisposePersonDay")
     public String resourceAllocationDisposeTeam(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
         pageParams(category,startTime,endTime,newResource,request);
-        return "reportformsTelephone/resourceAllocationDisposeTeam";
+        return "reportformsTelephone/resourceAllocationDisposePersonDay";
     }
     /**
      * 一级页面查询组（分页）
