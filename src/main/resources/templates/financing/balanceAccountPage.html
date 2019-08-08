@@ -875,21 +875,6 @@ var clueVM = new Vue({
             	   var statementNo = rows[0].statementNo;
             	   var payTime = rows[0].payTime;
             	   var msg = "";
-            	   var lowestCommissionStr = rows[0].lowestCommissionStr;
-                   if ((rows[0].payType == "全款" || rows[0].payType == "尾款") && lowestCommissionStr != "") {
-                       var signId = rows[0].signId;
-                       var parmMap = {};
-                       parmMap.signId = signId;
-                       this.lowestCommissionShow = true;
-                       this.lowestCommission = lowestCommissionStr;
-                       //根据签约id获取已对账确认的佣金
-                       axios.post('/financing/balanceaccount/getConfirmCommission', parmMap).then(function (response) {
-                           if (null != response || response.data != null || response.data.code == '0') {
-                               clueVM.confirmCommission = response.data.data;
-                           }
-                       });
-                   }
-
             	   if(status =="驳回商务"){
             		   msg = "该申请处于驳回商务状态，不允许提交对账"
             	   }else if(status =="已结算"){
@@ -902,6 +887,8 @@ var clueVM = new Vue({
                          });
                         return;
             	   }
+                   this.ratio = rows[0].ratio.substring(0,2) ;
+
             	   if(status=="提交对账" || status=="已对账"){
             		   this.apply.commissionMoney = null;
                 	   this.apply.money = rows[0].money ;
@@ -915,13 +902,28 @@ var clueVM = new Vue({
                 		   this.apply.doubtRemark = null;
                 	   }
             	   }else{
-            		   this.apply.commissionMoney = null;
-                	   this.apply.money = null ;
+                       //结算金额
+                       this.apply.money = rows[0].amountReceived;
+            		   this.apply.commissionMoney = this.apply.money * (this.ratio / 100);
                 	   this.apply.isDoubt = 0 ;
                 	   this.apply.doubtRemark = null ;
                 	   this.doubtRemarkShow = false;
             	   }
-            	   this.ratio = rows[0].ratio.substring(0,2) ;
+                   var lowestCommissionStr = rows[0].lowestCommissionStr;
+                   if ((rows[0].payType == "全款" || rows[0].payType == "尾款") && lowestCommissionStr != "") {
+                       var signId = rows[0].signId;
+                       var parmMap = {};
+                       parmMap.signId = signId;
+                       this.lowestCommissionShow = true;
+                       this.lowestCommission = lowestCommissionStr;
+                       //根据签约id获取已对账确认的佣金
+                       axios.post('/financing/balanceaccount/getConfirmCommission', parmMap).then(function (response) {
+                           if (null != response || response.data != null || response.data.code == '0') {
+                               clueVM.confirmCommission = response.data.data;
+                           }
+                       });
+                       repeatApplyNumber();
+                   }
             	   this.submitApplyVisible = true;
                },
                //结算确认
@@ -1055,7 +1057,6 @@ var clueVM = new Vue({
 
                   },
             repeatApplyNumber() {
-          	    debugger;
                 var commissionMoney = this.apply.money * this.ratio / 100;
                 if (!this.lowestCommissionShow) {
                     clueVM.apply.commissionMoney = commissionMoney;
