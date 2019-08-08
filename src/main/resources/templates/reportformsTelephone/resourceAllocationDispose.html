@@ -33,7 +33,7 @@
                     <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
-                            :key="item.value"
+                            :key="item.id"
                             :label="item.name"
                             :value="item.value">
                         </el-option>
@@ -58,16 +58,15 @@
                 v-loading="loading"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="newResource" align="center" label="是否新资源">
-                <!-- <el-table-column
-                    prop="orgName"
+                <el-table-column
+                    prop="newResource"
                     align="center"
-                    label="话务组">
+                    label="是否新资源">
                     <template slot-scope="scope">
-                        <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)" v-else>{{scope.row.orgName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.newResource == '合计'" @click="gotoPerson()">{{scope.row.newResource}}</el-button>
+                        <span type="text" size="small" v-else>{{scope.row.newResource?'是':'否'}}</span>
                     </template>
-                </el-table-column> -->
+                </el-table-column>
                 <el-table-column prop="receiveCount" align="center" label="接收资源">
                 </el-table-column>
                 <el-table-column prop="assignCount" align="center" label="分配资源量">
@@ -80,7 +79,7 @@
                 </el-table-column>
                 <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat">
                 </el-table-column>
-                <el-table-column prop="transRate" align="center" :formatter="timeFormat" label="转电销率" :formatter="percentFormat">
+                <el-table-column prop="transRate" align="center" label="转电销率" :formatter="percentFormat">
                 </el-table-column>
                 <el-table-column prop="effectiveRate" align="center" label="资源有效率" :formatter="percentFormat">
                 </el-table-column>
@@ -103,10 +102,6 @@
 </style>
 <script th:inline="javascript">
     var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
-    console.log(clueCategoryList);
-
-    // var curOrgId = [[${curOrgId}]];
-    // console.log(queryOrg,curOrgId, 'curOrgId')
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -132,7 +127,7 @@
                 clueCategoryList: clueCategoryList,
                 tableData: [
                     {
-                        newResource: 1,
+                        newResource: '合计',
                         receiveCount: 0,
                         assignCount: 0,
                         trackingCount: 0,
@@ -155,6 +150,19 @@
                         transRate: 0,
                         effectiveRate: 0,
                         days: '2019-01-01',
+                        userName: '张三',
+                    },
+                    {
+                        newResource: 0,
+                        receiveCount: 0,
+                        assignCount: 0,
+                        trackingCount: 0,
+                        transCount: 0,
+                        effectiveCount: 0,
+                        followRate : 0,
+                        transRate: 0,
+                        effectiveRate: 0,
+                        days: '2019-01-01',
                         userName: '李四',
                     },
                 ]
@@ -165,9 +173,9 @@
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
-                    endTime = new Date(this.form.endTime);
-                    if(startTime>endTime){
+                    var startT = new Date(this.form.startTime);
+                    var endT = new Date(this.form.endTime);
+                    if(startT>endT){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -180,7 +188,7 @@
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(startT < beforeSixMonthRes || endT > currentDateRes){
                         this.$message({
                             message: '请选择近6个月内的时间',
                             type: 'warning'
@@ -195,8 +203,7 @@
                         type: 'warning'
                     });
                     return;
-                }   
-                
+                }
                 var param = {};
                 param.startTime = startTime;
                 param.endTime = endTime;
@@ -291,15 +298,12 @@
             	if(value){return value;}
             	return 0;
             },
-            gotoTeam (row) { // 页面跳转
-                var orgId = row.orgId; // 话务组id
-                var userId = this.export.userId; // 话务专员id
+            gotoPerson (row) { // 页面跳转
+                var category = this.export.category;
                 var newResource = this.export.newResource;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                if(orgId){
-                    window.location.href="/statistics/trafficCallTime/telephoneCallTablePerson?orgId=" + orgId + "&userId="+ userId +"&newResource="+ newResource +"&startTime=" + startTime + "&endTime=" + endTime; 
-                }
+                window.location.href="/statistics/trafficCallResource/resourceAllocationDisposePerson?category=" + category + "&newResource="+ newResource +"&startTime=" + startTime + "&endTime=" + endTime;
             },
             percentFormat (row, column) { // 百分比格式化fn
                 var percent = row[column.property];
@@ -328,21 +332,21 @@
     //             t += sec + "秒";
     //             return t;
     //         },
-    //         minuteFormat (m) { // 时间格式化201905050505fn
-    //             if (!m) {return "";}
-    //             var timeStr = new Date(m);
-    //             var yearRes = timeStr.getFullYear();
-    //             var monthRea = timeStr.getMonth()+1;
-    //             monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
-    //             var dateRes = timeStr.getDate();
-    //             dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
-    //             var hoursRes = timeStr.getHours();
-    //             hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
-    //             var minRes = timeStr.getMinutes();
-    //             minRes = minRes < 10 ?  "0" + minRes : minRes;                
-    //             var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
-    //             return timeRes;
-    //         },
+            minuteFormat (m) { // 时间格式化201905050505fn
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear();
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                return timeRes;
+            },
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -412,7 +416,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
