@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.business;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.clue.BusVisitPerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
 import com.kuaidao.common.entity.IdEntity;
@@ -354,22 +355,49 @@ public class BusCustomerManagerController {
         menuName = MenuEnum.BUSS_MANAGER)
     @PostMapping("/importVisitPer")
     public void importVisitPer(HttpServletRequest request, HttpServletResponse response,
-        @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
+        @RequestBody BusCustomerPageParam pageParam) throws Exception {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
-
+        JSONResult<List<BusVisitPerDTO>> listJSONResult = busCustomerFeignClient
+            .importVisitPer(pageParam);
         // 权限限制
-        JSONResult<List> listJSONResult  = new JSONResult();
         // 数据获取
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
             && listJSONResult.getData().size() != 0) {
-            List<ClueDistributionedTaskDTO> orderList = listJSONResult.getData();
+            List<BusVisitPerDTO> orderList = listJSONResult.getData();
             int size = orderList.size();
-            for (int i = 0; i < size; i++) {
-                // 数据插入
+            for (BusVisitPerDTO visitPerDTO : orderList) {
                 List<Object> curList = new ArrayList<>();
+                curList.add(visitPerDTO.getVisitTime());
+                curList.add(visitPerDTO.getCusName());
+                curList.add(visitPerDTO.getArea());
+                curList.add(visitPerDTO.getVisitType());
+                curList.add(visitPerDTO.getVisitNum());
+                curList.add(visitPerDTO.getIsSign());
+                curList.add(visitPerDTO.getSignProject());
+                curList.add(visitPerDTO.getSignType());
+                curList.add(visitPerDTO.getSignShopType());
+                curList.add(visitPerDTO.getFirstVisitTime());
+                curList.add(visitPerDTO.getAmountReceivable());
+                curList.add(visitPerDTO.getAmountReceivedSum());
+                curList.add(visitPerDTO.getAmountBalance());
+                curList.add(visitPerDTO.getMakeUpTime());
+                curList.add(visitPerDTO.getIsRemote());
+                curList.add(visitPerDTO.getCompany());
+                curList.add(visitPerDTO.getBusManagerName());
+                curList.add(visitPerDTO.getRemark());
+                curList.add(visitPerDTO.getTeleGroupName());
+                curList.add(visitPerDTO.getTeleSaleName());
+                curList.add(visitPerDTO.getTeleDirectorName()); // 负责人
+                curList.add(visitPerDTO.getTakeOverNum());
+                curList.add(visitPerDTO.getSignNum());
+                curList.add(visitPerDTO.getIsPreferential());
+                curList.add(visitPerDTO.getConcrete());
+                curList.add(visitPerDTO.getVisitProvince());
+                curList.add(visitPerDTO.getProjectCategory());
+                curList.add(visitPerDTO.getValue());
                 dataList.add(curList);
             }
         }
