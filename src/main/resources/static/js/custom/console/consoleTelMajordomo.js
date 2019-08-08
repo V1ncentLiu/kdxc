@@ -70,6 +70,19 @@ var mainDivVM = new Vue({
         
     },
     methods: {
+        showClueDetailInfo (row, column) {//跳转待分配资源列表编辑详情
+            // 存储选中信息--start
+            var clueId=row.id;
+            // setSessionStore("pendingAllocationManagerStoreForm", this.storeForm);
+            // var otherVal = {
+            //     "currentPage": this.pager.currentPage,
+            //     "clueId": clueId,
+            //     "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+            // }
+            // setSessionStore("pendingAllocationManagerOtherVal", otherVal);
+            // 存储选中信息--end
+            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+        },
         gotoPendingAllocation(){//跳转待分配资源列表
             window.location.href="/clue/pendingAllocation/initAppiontmentList"; 
         },
