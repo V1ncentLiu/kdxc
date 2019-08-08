@@ -152,8 +152,8 @@ public class RuleReportController {
     @PostMapping("/export")
     @LogRecord(description = "规则报表导出", operationType = OperationType.EXPORT,
             menuName = MenuEnum.CLUE_RULE_REPORT)
-    public void exportTrackingOrder(@RequestBody RuleReportPageParam pageParam,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void export(@RequestBody RuleReportPageParam pageParam, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
