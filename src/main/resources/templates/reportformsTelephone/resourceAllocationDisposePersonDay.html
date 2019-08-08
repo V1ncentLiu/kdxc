@@ -34,6 +34,16 @@
                         <el-option label="否" value="0"></el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
+                        <el-option
+                            v-for="item in clueCategoryList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="话务组:"> 
                     <el-select v-model="form.orgId" placeholder="话务组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
@@ -99,6 +109,9 @@
     }
 </style>
 <script th:inline="javascript">
+    var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
+    console.log(clueCategoryList);
+
     var queryOrg=[[${teleGroupList}]]; // 话务组
     var parentParam = [[${trafficCallTimeQueryDto}]];
     var curOrgId = [[${curOrgId}]];
@@ -141,6 +154,7 @@
                     userId: '',
                     newResource: ''
                 },
+                clueCategoryList: clueCategoryList,
                 tableData: [
                     // {
                     //     orgId: "1",
@@ -235,7 +249,7 @@
                 param.userId = this.form.userId;
                 param.newResource = this.form.newResource;
                 this.loading = true; 
-                axios.post('/statistics/trafficCallTime/getGroupPersonDayPageList',param).then(function (response) {
+                axios.post('/statistics/trafficCallResource/getPersonDayPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -306,26 +320,6 @@
                     return value;
                 }
                 return 0;
-            },
-            currentTelSale(seleVal){ // 根据话务组选择话务专员
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                var param ={};
-                param.id = seleVal;
-                axios.post('/statistics/trafficCallTime/getSaleList', param)
-                .then(function (response) {
-                    var result =  response.data;
-                    if(result.data){
-                    mainDivVM.teleMarketArr = result.data;
-                    }
-                })
-                .catch(function (error) {
-                     mainDivVM.$message({
-                        message: "话务专员请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -440,10 +434,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                param.userId =  this.export.userId; 
-                param.newResource =  this.export.newResource; 
-                axios.post('/statistics/trafficCallTime/exportGroupPersonDayList',param,{responseType:'blob'})
+                param.category =  this.export.category; 
+                param.newResource =  this.export.newResource;
+                param.userId =  this.export.userId;
+                axios.post('/statistics/trafficCallResource/exportPersonDayAllList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;

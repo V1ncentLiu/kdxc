@@ -29,30 +29,20 @@
                 <el-form-item label="—" class="widthauto">
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
+                        <el-option
+                            v-for="item in clueCategoryList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="是否新资源:">  
                     <el-select v-model="form.newResource" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="0"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="话务组:">  
-                    <el-select v-model="form.orgId" placeholder="话务组" style="width: 100%;" clearable filterable :disabled="isDisabled" @change="currentTelSale">
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="话务专员:">  
-                    <el-select v-model="form.userId" placeholder="话务专员" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in teleMarketArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
@@ -68,7 +58,8 @@
                 v-loading="loading"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column
+                <el-table-column prop="newResource" align="center" label="是否新资源">
+                <!-- <el-table-column
                     prop="orgName"
                     align="center"
                     label="话务组">
@@ -76,22 +67,22 @@
                         <span type="text" size="small" v-if="scope.row.orgName == '合计'">{{scope.row.orgName}}</span>
                         <el-button type="text" size="small" @click="gotoTeam(scope.row)" v-else>{{scope.row.orgName}}</el-button>
                     </template>
+                </el-table-column> -->
+                <el-table-column prop="receiveCount" align="center" label="接收资源">
                 </el-table-column>
-                <el-table-column prop="callCount" align="center" label="拨打次数">
+                <el-table-column prop="assignCount" align="center" label="分配资源量">
                 </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="接通次数" :formatter="nullToZero">
+                <el-table-column prop="trackingCount" align="center" label="跟访量">
                 </el-table-column>
-                <el-table-column prop="callPercent" align="center" label="接通率" :formatter="percentFormat">
+                <el-table-column prop="transCount" align="center" label="转电销量">
                 </el-table-column>
-                <el-table-column prop="callClueCount" align="center" label="拨打量">
+                <el-table-column prop="effectiveCount" align="center" label="有效资源">
                 </el-table-column>
-                <el-table-column prop="calledClueCount" align="center" label="接通量" :formatter="nullToZero">
+                <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat">
                 </el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat">
+                <el-table-column prop="transRate" align="center" :formatter="timeFormat" label="转电销率" :formatter="percentFormat">
                 </el-table-column>
-                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="天均总有效通话时长">
+                <el-table-column prop="effectiveRate" align="center" label="资源有效率" :formatter="percentFormat">
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
@@ -111,16 +102,16 @@
 }
 </style>
 <script th:inline="javascript">
-    var queryOrg=[[${teleGroupList}]]; // 话务组
-    var curOrgId = [[${curOrgId}]];
-    console.log(queryOrg,curOrgId, 'curOrgId')
+    var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
+    console.log(clueCategoryList);
+
+    // var curOrgId = [[${curOrgId}]];
+    // console.log(queryOrg,curOrgId, 'curOrgId')
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
-                isDisabled: false, // 话务组筛选框
-                // btnDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -129,76 +120,47 @@
                 form: {
                     startTime: '',
                     endTime: '',
-                    orgId: curOrgId,
-                    userId: '',
+                    category: '',
                     newResource: ''
                 },
                 export: {
                     startTime: '',
                     endTime: '',
-                    orgId: curOrgId,
-                    userId: '',
+                    category: '',
                     newResource: ''
                 },
+                clueCategoryList: clueCategoryList,
                 tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '合计',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0.1,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 0
-                    // },
-                    // {
-                    //     orgId: "3",
-                    //     orgName: '电销组3',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     // callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     // userAvgDayValidCallTime: 155799
-                    // }
-                ],
-                orgTeleArr: queryOrg, // 话务组
-                teleMarketArr: []
+                    {
+                        newResource: 1,
+                        receiveCount: 0,
+                        assignCount: 0,
+                        trackingCount: 0,
+                        transCount: 0,
+                        effectiveCount: 0,
+                        followRate : 0,
+                        transRate: 0,
+                        effectiveRate: 0,
+                        days: '2019-01-01',
+                        userName: '张三',
+                    },
+                    {
+                        newResource: 1,
+                        receiveCount: 0,
+                        assignCount: 0,
+                        trackingCount: 0,
+                        transCount: 0,
+                        effectiveCount: 0,
+                        followRate : 0,
+                        transRate: 0,
+                        effectiveRate: 0,
+                        days: '2019-01-01',
+                        userName: '李四',
+                    },
+                ]
             }             
         },
         methods: {
-            currentTelSale(seleVal){ // 根据话务组选择话务专员
-                if(null==seleVal||seleVal==""){return;}
-                var param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/statistics/trafficCallTime/getSaleList',param).then(function (response) {  
-                    var result =  response.data;
-                    if(result.data){
-                        mainDivVM.teleMarketArr = result.data;
-                    }
-                }).catch(function (error) {
-                     mainDivVM.$message({
-                        message: "话务专员请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -236,19 +198,18 @@
                 }   
                 
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                param.startTime = startTime;
+                param.endTime = endTime;
                 param.pageSize = this.pager.pageSize;
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
-                param.userId = this.form.userId;
+                param.category = this.form.category;
                 param.newResource = this.form.newResource;
                 this.loading = true; 
-                axios.post('/statistics/trafficCallTime/getGroupPageList',param).then(function (response) {
+                axios.post('/statistics/trafficCallResource/getGroupPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -275,10 +236,9 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
-                        mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.startTime = startTime;
+                        mainDivVM.export.endTime = endTime;
+                        mainDivVM.export.category = mainDivVM.form.category;
                         mainDivVM.export.newResource = mainDivVM.form.newResource;
  
                     }else{
@@ -349,40 +309,40 @@
                 percent = (percent * 1000)/10 + "%";
                 return percent;
             },
-            timeFormat (row, column) { // 时间格式化：时分秒fn
-                var time = row[column.property];
-                if(!time){return "00时00分00秒";}
-                var timeResult = this.timeFun (time); 
-                return timeResult;
-            },
-            timeFun(s){
-                var t="";
-                var hour = Math.floor(s/3600);
-                var min = Math.floor(s/60) % 60;
-                var sec = s % 60;
-                if(hour<10){t+="0";}
-                t+=hour+"时"
-                if(min < 10){t += "0";}
-                t += min + "分";
-                if(sec < 10){t += "0";}
-                t += sec + "秒";
-                return t;
-            },
-            minuteFormat (m) { // 时间格式化201905050505fn
-                if (!m) {return "";}
-                var timeStr = new Date(m);
-                var yearRes = timeStr.getFullYear();
-                var monthRea = timeStr.getMonth()+1;
-                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
-                var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
-                var hoursRes = timeStr.getHours();
-                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
-                var minRes = timeStr.getMinutes();
-                minRes = minRes < 10 ?  "0" + minRes : minRes;                
-                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
-                return timeRes;
-            },
+    //         timeFormat (row, column) { // 时间格式化：时分秒fn
+    //             var time = row[column.property];
+    //             if(!time){return "00时00分00秒";}
+    //             var timeResult = this.timeFun (time); 
+    //             return timeResult;
+    //         },
+    //         timeFun(s){
+    //             var t="";
+    //             var hour = Math.floor(s/3600);
+    //             var min = Math.floor(s/60) % 60;
+    //             var sec = s % 60;
+    //             if(hour<10){t+="0";}
+    //             t+=hour+"时"
+    //             if(min < 10){t += "0";}
+    //             t += min + "分";
+    //             if(sec < 10){t += "0";}
+    //             t += sec + "秒";
+    //             return t;
+    //         },
+    //         minuteFormat (m) { // 时间格式化201905050505fn
+    //             if (!m) {return "";}
+    //             var timeStr = new Date(m);
+    //             var yearRes = timeStr.getFullYear();
+    //             var monthRea = timeStr.getMonth()+1;
+    //             monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+    //             var dateRes = timeStr.getDate();
+    //             dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+    //             var hoursRes = timeStr.getHours();
+    //             hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+    //             var minRes = timeStr.getMinutes();
+    //             minRes = minRes < 10 ?  "0" + minRes : minRes;                
+    //             var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+    //             return timeRes;
+    //         },
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -423,10 +383,9 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                param.userId =  this.export.userId; 
+                param.category =  this.export.category; 
                 param.newResource =  this.export.newResource; 
-                axios.post('/statistics/trafficCallTime/exportGroupList',param,{responseType:'blob'})
+                axios.post('/statistics/trafficCallResource/exportGroupAllList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -445,19 +404,15 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-            if(curOrgId){
-                this.isDisabled= true;
-                this.currentTelSale(curOrgId);
-            }
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.form.startTime = startTime;
+            this.form.endTime = endTime;
+            this.export.startTime = startTime;
+            this.export.endTime = endTime;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.searchTable();
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

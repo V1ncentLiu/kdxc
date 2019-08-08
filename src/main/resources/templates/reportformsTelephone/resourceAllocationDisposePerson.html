@@ -28,6 +28,16 @@
                 <el-form-item label="—" class="widthauto">
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
+                        <el-option
+                            v-for="item in clueCategoryList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="是否新资源:">  
                     <el-select v-model="form.newResource" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
@@ -109,9 +119,11 @@
     }
 </style>
 <script th:inline="javascript">
-    var queryOrg=[[${teleGroupList}]]; // 话务组
+    var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
+    console.log(clueCategoryList);
+    // var queryOrg=[[${teleGroupList}]]; // 话务组
     var parentParam = [[${trafficCallTimeQueryDto}]];
-    var curOrgId = [[${curOrgId}]];
+    // var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
     console.log(parentParam,curOrgId,curUserId);
     var mainDivVM = new Vue({
@@ -131,17 +143,18 @@
                 form: {
                     startTime: '',
                     endTime: '',
-                    orgId: '',
+                    // orgId: '',
                     userId: '',
                     newResource: ''
                 },
                 export: {
                     startTime: '',
                     endTime: '',
-                    orgId: '',
+                    // orgId: '',
                     userId: '',
                     newResource: ''
                 },
+                clueCategoryList: clueCategoryList,
                 tableData: [
                     // {
                     //     userId: "1",
@@ -185,7 +198,7 @@
                     //     // userAvgDayValidCallTime: 155799
                     // }
                 ],
-                orgTeleArr: queryOrg, // 话务组
+                // orgTeleArr: queryOrg, // 话务组
                 teleMarketArr: []      
             }     
         },
@@ -236,11 +249,11 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
+                // param.orgId = this.form.orgId;
                 param.userId = this.form.userId;
                 param.newResource = this.form.newResource;
                 this.loading = true; 
-                axios.post('/statistics/trafficCallTime/getGroupPersonPageList',param).then(function (response) {
+                axios.post('/statistics/trafficCallResource/getPersonPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -269,7 +282,7 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        // mainDivVM.export.orgId = mainDivVM.form.orgId;
                         mainDivVM.export.userId = mainDivVM.form.userId;
                         mainDivVM.export.newResource = mainDivVM.form.newResource;
        
@@ -327,37 +340,17 @@
                 }
                 return 0;
             },
-            currentTelSale(seleVal){ // 根据话务组选择话务专员
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                var param ={};
-                param.id = seleVal;
-                axios.post('/statistics/trafficCallTime/getSaleList', param)
-                .then(function (response) {
-                    var result =  response.data;
-                    if(result.data){
-                    mainDivVM.teleMarketArr = result.data;
-                    }
-                })
-                .catch(function (error) {
-                     mainDivVM.$message({
-                        message: "话务专员请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
             goBack () {
                 window.history.go(-1);
             },
             gotoPerson (rowIndex) {
                 var userId = row.userId;// 话务专员id
-                var orgId = this.export.orgId;// 话务组id
+                // var orgId = this.export.orgId;// 话务组id
                 var newResource = this.export.newResource;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(userId){
-                    window.location.href="/statistics/trafficCallTime/telephoneCallTablePersonDay?orgId=" + orgId + "&userId="+ userId +"&newResource="+ newResource +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/statistics/trafficCallTime/telephoneCallTablePersonDay?userId="+ userId +"&newResource="+ newResource +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             }, 
             dateTimeFormat (dt) { 
@@ -452,10 +445,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                param.userId =  this.export.userId; 
-                param.newResource =  this.export.newResource; 
-                axios.post('/statistics/trafficCallTime/exportGroupPersonList',param,{responseType:'blob'})
+                param.category =  this.export.category; 
+                param.newResource =  this.export.newResource;
+                param.userId =  this.export.userId;
+                axios.post('/statistics/trafficCallResource/exportPersonAllList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -483,7 +476,7 @@
                     this.form.userId = parentParam.userId ?parentParam.userId:'';
                 }
             }else{
-                this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
+                // this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
                 this.form.userId = parentParam.userId ?parentParam.userId:'';
             }
             if(parentParam && parentParam.startTime){
