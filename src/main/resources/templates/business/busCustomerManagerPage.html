@@ -1122,7 +1122,36 @@
                 }
             },
             importVisitPer(){
-                var param = {};
+              var startTime = this.searchForm.startTime;
+              var endTime = this.searchForm.endTime;
+              var startReserveTime = this.searchForm.startReserveTime;
+              var endReserveTime = this.searchForm.endReserveTime;
+              var startAllocationTime = this.searchForm.startAllocationTime;
+              var endAllocationTime = this.searchForm.endAllocationTime;
+              var vilad = false;
+              if (startTime && endTime && startTime > endTime) {
+                vilad = true;
+              }
+              if (startReserveTime && endReserveTime && startReserveTime > endReserveTime) {
+                vilad = true;
+              }
+              if (startAllocationTime && endAllocationTime && startAllocationTime > endAllocationTime) {
+                vilad = true;
+              }
+              if (vilad) {
+                this.$message({
+                  message: '开始时间不能大于结束时间',
+                  type: 'warning'
+                });
+                return;
+              }
+              var param = this.searchForm;
+              param.pageSize = this.pager.pageSize;
+              param.pageNum = this.pager.currentPage;
+              param.sortField = this.searchForm.sortField;
+              param.sortType = this.searchForm.sortType;
+              param.isTailMoney = this.searchForm.isTailMoney;
+
                 localStorage.setItem('importVisitPer','1');
                 this.timedown();
                 axios.post('/business/busCustomerManager/importVisitPer',param,{responseType:'blob'})
