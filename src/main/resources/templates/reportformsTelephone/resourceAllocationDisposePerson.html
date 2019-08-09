@@ -119,7 +119,7 @@
 </style>
 <script th:inline="javascript">
     var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
-    var parentParam = [[${trafficCallTimeQueryDto}]];
+    var parentParam = [[${trafficCallResourceQueryDto}]];
     var curUserId = [[${curUserId}]];
     console.log(parentParam,curUserId);
     var mainDivVM = new Vue({
@@ -212,10 +212,8 @@
             }     
         },
         methods: {
-            currentTelSale(seleVal){ // 根据话务组选择话务专员
-                if(null==seleVal||seleVal==""){return;}
+            currentTelSale(){ // 根据话务组选择话务专员
                 var param={};
-                param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/statistics/trafficCallTime/getSaleList',param).then(function (response) {  
                     var result =  response.data;
@@ -545,6 +543,7 @@
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+            
             this.currentTelSale();
             this.searchTable();
         },
