@@ -51,6 +51,7 @@ var homePageVM=new Vue({
 		   	isLogin:false,//坐席是否登录
 		   	isTrClient:false,//天润坐席是否登录
 		   	isQimoClient:false,//七陌坐席是否登录
+		   	isHeliClient:false,//合力坐席是否登录
 	    	callTitle:'呼叫中心',
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
@@ -68,6 +69,9 @@ var homePageVM=new Vue({
             }, {
                 value: 2,
                 label: '登录七陌呼叫中心'
+            }, {
+                value: 3,
+                label: '登录合力呼叫中心'
             }],
             bindPhoneTypeOptions: [{
                 value: 1,
@@ -263,6 +267,9 @@ var homePageVM=new Vue({
         		}else if(this.isTrClient){
         			this.loginClientForm.clientType=1;
         			this.dialogLogoutClientVisible  = true;
+        		}else if(this.isHeliClient){
+        			this.loginClientForm.clientType=3;
+        			this.dialogLogoutClientVisible  = true;
         		}else{
         			 if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
@@ -307,13 +314,62 @@ var homePageVM=new Vue({
              		this.loginTrClient();
              	}else if(clientType==2){
              		this.loginQimoClient();
-             		
+             	}else if(clientType==3){
+             		this.loginHeliClient();
              	}
              	
              } else {
                return false;
              }
            });
+        	
+        	
+        },
+        loginHeliClient(){//合力 登录
+        	var bindType = this.loginClientForm.bindPhoneType;
+        	if(bindType==1){
+    		     this.$message({message:"合力不支持普通电话模式登录！",type:'warning'});
+    		     return;
+        	}
+        	var cno = this.loginClientForm.cno;
+        	
+        	var param = {};
+        	param.bindType = bindType+"";
+        	param.clientNo = cno;
+        	param.accountType = homePageVM.accountType;
+        	param.clientType = homePageVM.loginClientForm.clientType;
+	       	 axios.post('/client/heliClient/login',param)
+	         .then(function (response) {
+	             var data =  response.data;
+	             
+	             if(data.code=='0'){
+	                 var resData = data.data;
+	                 homePageVM.$message({message:"登录成功",type:'success'});
+	                 homePageVM.callTitle="呼叫中心（合力ON）";
+	                 homePageVM.dialogLoginClientVisible =false;
+	                 homePageVM.isHeliClient=true;
+	                 homePageVM.isTrClient=false;
+	                 homePageVM.isQimoClient = false;
+	                 //sessionStorage.setItem("loginClient","qimo");
+	                 //sessionStorage.setItem("accountId",homePageVM.accountId);
+	                 var clientInfo={};
+	                 clientInfo.loginClientType="heli";
+	                 clientInfo.clientNo = homePageVM.loginClientForm.cno;
+	                 clientInfo.clientType = homePageVM.loginClientForm.clientType;
+	                 clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+	                 localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+	                 
+	             }else{
+	            	 console.error(data);
+	                 homePageVM.$message({message:data.msg,type:'error'});
+	             }
+	         })
+	         .catch(function (error) {
+	            console.log(error);
+	         })
+	         .then(function () {
+	           // always executed
+	         });
         	
         	
         },
@@ -336,6 +392,7 @@ var homePageVM=new Vue({
                      homePageVM.dialogLoginClientVisible =false;
                      homePageVM.isQimoClient=true;
                      homePageVM.isTrClient=false;
+                     homePageVM.isHeliClient=false;
                      //sessionStorage.setItem("loginClient","qimo");
                      //sessionStorage.setItem("accountId",homePageVM.accountId);
                      var clientInfo={};
@@ -478,6 +535,7 @@ var homePageVM=new Vue({
 			                     homePageVM.dialogLoginClientVisible =false;
 			                     homePageVM.isQimoClient=false;
 			                     homePageVM.isTrClient=true;
+			                     homePageVM.isHeliClient=false;
 			                     //sessionStorage.setItem("loginClient","tr");
 			                    // sessionStorage.setItem("accountId",homePageVM.accountId);
 			                     
@@ -548,6 +606,7 @@ var homePageVM=new Vue({
                          homePageVM.callTitle="呼叫中心";
                          homePageVM.isQimoClient=false;
                          homePageVM.isTrClient=false;
+                         homePageVM.isHeliClient=false;
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -593,7 +652,36 @@ var homePageVM=new Vue({
          	    });*/
         		
          	   this.trClientLogout();
+        	}else if(this.isHeliClient){
+        		this.heliClientLogout();
         	}
+        },
+        heliClientLogout(){
+         var param = {};
+         param.clientNo = this.loginClientForm.cno;
+   		 axios.post('/client/heliClient/logout',param)
+         .then(function (response) {
+             var data =  response.data;
+             if(data.code=='0'){
+            	 homePageVM.dialogLogoutClientVisible =false;
+                 homePageVM.$message({message:"退出成功",type:'success'});
+                 homePageVM.callTitle="呼叫中心";
+                 homePageVM.isQimoClient=false;
+                 homePageVM.isTrClient=false;
+                 homePageVM.isHeliClient=false;
+             	// sessionStorage.removeItem("loginClient");
+             	// sessionStorage.removeItem("accountId");
+                 localStorage.removeItem("clientInfo");
+             }else{
+            		homePageVM.$message({message:data.msg,type:'error'});
+             }
+         })
+         .catch(function (error) {
+            console.log(error);
+         })
+         .then(function () {
+           // always executed
+         });
         },
         trClientLogout(){
         	 var cno = homePageVM.loginClientForm.cno;
@@ -605,8 +693,9 @@ var homePageVM=new Vue({
                  console.info(resData);
                  if(resData.code=='0'){
                 	 homePageVM.dialogLogoutClientVisible =false;
-                     homePageVM.isQimoClient=false;
+                	 homePageVM.isQimoClient=false;
                      homePageVM.isTrClient=false;
+                     homePageVM.isHeliClient=false;
                      homePageVM.callTitle="呼叫中心";
                     // sessionStorage.removeItem("loginClient");
                    //  sessionStorage.removeItem("accountId");
