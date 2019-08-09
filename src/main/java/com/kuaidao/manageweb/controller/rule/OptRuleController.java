@@ -427,7 +427,7 @@ public class OptRuleController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
 
 
-        String name = "非优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
+        String name = "优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
