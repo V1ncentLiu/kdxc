@@ -1,9 +1,12 @@
 package com.kuaidao.manageweb.feign.clue;
 
+import com.kuaidao.aggregation.dto.clue.BusVisitPerDTO;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.clue.BusCustomerDTO;
@@ -34,6 +37,9 @@ public interface BusCustomerFeignClient {
     public JSONResult<PageBean<BusCustomerDTO>> busCustomerList(
             @RequestBody BusCustomerPageParam pageParam);
 
+    @PostMapping("/importVisitPer")
+    public  JSONResult<List<BusVisitPerDTO>> importVisitPer(
+        @RequestBody BusCustomerPageParam pageParam);
 
 
     @Component
@@ -55,6 +61,10 @@ public interface BusCustomerFeignClient {
             return fallBackError("查询商务客户管理列表");
         }
 
+        @Override
+        public JSONResult<List<BusVisitPerDTO>> importVisitPer(BusCustomerPageParam pageParam) {
+            return fallBackError("导出到访业绩");
+        }
 
 
     }
