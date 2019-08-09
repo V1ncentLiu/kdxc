@@ -367,7 +367,13 @@ public class BusCustomerManagerController {
     public void importVisitPer(HttpServletRequest request, HttpServletResponse response,
         @RequestBody BusCustomerPageParam pageParam) throws Exception {
         UserInfoDTO user = getUser();
-        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        pageParam.setUserId(user.getId());
+        pageParam.setBusinessLine(user.getBusinessLine());
+        pageParam.setOrgId(user.getOrgId());
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null) {
+            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+        }
         JSONResult<List<BusVisitPerDTO>> listJSONResult = busCustomerFeignClient
             .importVisitPer(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
@@ -436,6 +442,7 @@ public class BusCustomerManagerController {
         headTitleList.add("签约类型");
         headTitleList.add("签约店型");
         headTitleList.add("二次来访客户首次来访洽谈日期");
+        headTitleList.add("合同金额");
         headTitleList.add("已收金额");
         headTitleList.add("未收金额");
         headTitleList.add("预计补款日期");
