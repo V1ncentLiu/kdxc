@@ -51,8 +51,8 @@ public class TrafficCallResourceController {
      * 组一级页面跳转
      */
     @RequestMapping("/resourceAllocationDispose")
-    public String resourceAllocationDispose(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
-        pageParams(category,startTime,endTime,newResource,request);
+    public String resourceAllocationDispose(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
+        pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDispose";
@@ -61,8 +61,8 @@ public class TrafficCallResourceController {
      * 人二级页面跳转
      */
     @RequestMapping("/resourceAllocationDisposePerson")
-    public String resourceAllocationPersonDispose(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
-        pageParams(category,startTime,endTime,newResource,request);
+    public String resourceAllocationPersonDispose(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
+        pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDisposePerson";
@@ -71,8 +71,8 @@ public class TrafficCallResourceController {
      * 人+天三级页面跳转
      */
     @RequestMapping("/resourceAllocationDisposePersonDay")
-    public String resourceAllocationDisposeTeam(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
-        pageParams(category,startTime,endTime,newResource,request);
+    public String resourceAllocationDisposeTeam(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
+        pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDisposePersonDay";
@@ -190,12 +190,13 @@ public class TrafficCallResourceController {
         outputStream.close();
     }
 
-    private void pageParams(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request){
+    private void pageParams(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request){
         TrafficCallResourceQueryDto trafficCallResourceQueryDto = new TrafficCallResourceQueryDto();
         trafficCallResourceQueryDto.setCategory(category);
         trafficCallResourceQueryDto.setStartTime(startTime);
         trafficCallResourceQueryDto.setEndTime(endTime);
         trafficCallResourceQueryDto.setNewResource(newResource);
+        trafficCallResourceQueryDto.setUserId(userId);
         request.setAttribute("trafficCallResourceQueryDto",trafficCallResourceQueryDto);
     }
 
