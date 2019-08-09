@@ -6,6 +6,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -39,6 +40,14 @@ public interface HeliClientFeignClient {
     @SuppressWarnings("rawtypes")
     @PostMapping("/logout")
     public JSONResult logout (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO);
+    
+    /**
+     * 外呼
+    * @param heLiClientOutboundReqDTO
+    * @return
+     */
+    @PostMapping("/outbound")
+    public JSONResult outbound(@RequestBody HeLiClientOutboundReqDTO heLiClientOutboundReqDTO);
 
     
     @Component
@@ -61,6 +70,13 @@ public interface HeliClientFeignClient {
         public JSONResult logout(HeLiClientOutboundReqDTO heLiClientOutboundReqDTO) {
             return fallBackError("合力坐席退出");
         }
+
+        @Override
+        public JSONResult outbound(HeLiClientOutboundReqDTO heLiClientOutboundReqDTO) {
+            return fallBackError("合力坐席外呼");
+        }
         
     }
+
+
 }

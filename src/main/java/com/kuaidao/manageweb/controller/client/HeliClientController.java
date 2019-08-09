@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.client;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
 import com.kuaidao.common.entity.JSONResult;
@@ -87,6 +89,25 @@ public class HeliClientController {
           return heliClientFeignClient.logout(heLiClientOutboundReqDTO);
     }
     
+    
+    /**
+     * 坐席外呼
+    * @param heLiClientOutboundReqDTO
+    * @return
+     */
+    @PostMapping("/outbound")
+    @ResponseBody
+    public JSONResult outbound (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
+          String customerPhone = heLiClientOutboundReqDTO.getCustomerPhone();
+          if (StringUtils.isBlank(customerPhone)) {
+              return CommonUtil.getParamIllegalJSONResult();
+          }
+
+          UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+          Long orgId = curLoginUser.getOrgId();
+          heLiClientOutboundReqDTO.setOrgId(orgId);
+          return heliClientFeignClient.outbound(heLiClientOutboundReqDTO);
+    }
     
 
 }
