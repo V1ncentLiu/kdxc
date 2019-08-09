@@ -102,8 +102,11 @@ public class BusCustomerManagerController {
             // 查询所有商务总监
             List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null,null);
             request.setAttribute("busDirectorList", busDirectorList);
-        } else if (roleList != null
+        }
+        else if (roleList != null
                 && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.BUSBIGAREAW.name().equals(roleList.get(0).getRoleCode())
                         || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
             // 商务大区总监 可以选择本区下的商务组 商务总监
             // 商务总监 可以选择本商务组下的商务经理
@@ -139,6 +142,7 @@ public class BusCustomerManagerController {
             request.setAttribute("busSaleGroupList", busSaleGroupList);
             request.setAttribute("ownOrgId", ownOrgId);
         }
+
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
@@ -180,6 +184,8 @@ public class BusCustomerManagerController {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
+        pageParam.setBusinessLine(user.getBusinessLine());
+        pageParam.setOrgId(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
@@ -189,6 +195,10 @@ public class BusCustomerManagerController {
 
         return busCustomerList;
     }
+
+
+
+
 
     /***
      * 下属商务经理列表
@@ -360,8 +370,6 @@ public class BusCustomerManagerController {
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         JSONResult<List<BusVisitPerDTO>> listJSONResult = busCustomerFeignClient
             .importVisitPer(pageParam);
-        // 权限限制
-        // 数据获取
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
