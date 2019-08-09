@@ -55,7 +55,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn"  :disabled="loading">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -66,7 +66,11 @@
                 :data="tableData"
                 v-loading="loading"
                 :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
+                <el-table-column type="text" prop="index" label="序号" align="center" width="55">
+                    <template slot-scope="scope">
+                        <span type="text" size="small">{{scope.row.userName ?scope.row.index : ''}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column
                     prop="userName"
                     align="center"
@@ -80,7 +84,7 @@
                     align="center"
                     label="是否新资源">
                     <template slot-scope="scope">
-                        <span type="text" size="small" v-if="scope.row.newResource == '合计'">{{scope.row.newResource}}</span>
+                        <span type="text" size="small" v-if="scope.row.newResource == 99999">合计</span>
                         <span type="text" size="small" v-else>{{scope.row.newResource?'是':'否'}}</span>
                     </template>
                 </el-table-column>
@@ -148,52 +152,103 @@
                 },
                 clueCategoryList: clueCategoryList,
                 tableData: [
-                    {
-                        newResource: '合计',
-                        receiveCount: 0,
-                        assignCount: 0,
-                        trackingCount: 0,
-                        transCount: 0,
-                        effectiveCount: 0,
-                        followRate : 0,
-                        transRate: 0,
-                        effectiveRate: 0,
-                        days: '2019-01-01',
-                        userName: '张三',
-                    },
-                    {
-                        newResource: 1,
-                        receiveCount: 0,
-                        assignCount: 0,
-                        trackingCount: 0,
-                        transCount: 0,
-                        effectiveCount: 0,
-                        followRate : 0,
-                        transRate: 0,
-                        effectiveRate: 0,
-                        days: '2019-01-01',
-                        userName: '张三',
-                        userId: 1,
-                    },
-                    {
-                        newResource: 0,
-                        receiveCount: 0,
-                        assignCount: 0,
-                        trackingCount: 0,
-                        transCount: 0,
-                        effectiveCount: 0,
-                        followRate : 0,
-                        transRate: 0,
-                        effectiveRate: 0,
-                        days: '2019-01-01',
-                        userName: '李四',
-                        userId: 2,
-                    },
+                    // {
+                    //     newResource: 99999,
+                    //     receiveCount: 0,
+                    //     assignCount: 0,
+                    //     trackingCount: 0,
+                    //     transCount: 0,
+                    //     effectiveCount: 0,
+                    //     followRate : 0,
+                    //     transRate: 0,
+                    //     effectiveRate: 0,
+                    //     days: '2019-01-01',
+                    //     userName: '张三',
+                    // },
+                    // {
+                    //     newResource: 1,
+                    //     receiveCount: 0,
+                    //     assignCount: 0,
+                    //     trackingCount: 0,
+                    //     transCount: 0,
+                    //     effectiveCount: 0,
+                    //     followRate : 0,
+                    //     transRate: 0,
+                    //     effectiveRate: 0,
+                    //     days: '2019-01-01',
+                    //     userName: '张三',
+                    //     userId: 1,
+                    // },
+                    // {
+                    //     newResource: 1,
+                    //     receiveCount: 0,
+                    //     assignCount: 0,
+                    //     trackingCount: 0,
+                    //     transCount: 0,
+                    //     effectiveCount: 0,
+                    //     followRate : 0,
+                    //     transRate: 0,
+                    //     effectiveRate: 0,
+                    //     days: '2019-01-01',
+                    //     userName: '张三',
+                    //     userId: 1,
+                    // },
+                    // {
+                    //     newResource: 0,
+                    //     receiveCount: 0,
+                    //     assignCount: 0,
+                    //     trackingCount: 0,
+                    //     transCount: 0,
+                    //     effectiveCount: 0,
+                    //     followRate : 0,
+                    //     transRate: 0,
+                    //     effectiveRate: 0,
+                    //     days: '2019-01-01',
+                    //     userName: '李四',
+                    //     userId: 2,
+                    // },
                 ],
                 teleMarketArr: []    
             }     
         },
-        methods: { 
+        methods: {
+            currentTelSale(seleVal){ // 根据话务组选择话务专员
+                if(null==seleVal||seleVal==""){return;}
+                var param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/statistics/trafficCallTime/getSaleList',param).then(function (response) {  
+                    var result =  response.data;
+                    if(result.data){
+                        mainDivVM.teleMarketArr = result.data;
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "话务专员请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            formatData (list, param1,param2) {
+                var newArray = [];
+                var tmp = list;
+                var index = 1;
+                tmp[0].index = 1; 
+                for (var i = 0; i < tmp.length; i++) {
+                    for(var j = i + 1; j < tmp.length; j++){
+                        if(tmp[i][param1] == tmp[j][param1]){
+                            tmp[j][param2] = "";
+                            tmp[j].index = index;
+                        }else{
+                            index ++;
+                            tmp[j].index = index;
+                        }
+                        break;
+                    }
+                    newArray.push(tmp[i]);
+                }
+                return newArray
+            },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -231,8 +286,8 @@
                 }   
     
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                param.startTime = startTime;
+                param.endTime = endTime;
                 param.pageSize = this.pager.pageSize;
   
                 if(firstPage){
@@ -245,6 +300,7 @@
                 param.newResource = this.form.newResource;
                 this.loading = true; 
                 axios.post('/statistics/trafficCallResource/getPersonPageList',param).then(function (response) {
+                    mainDivVM.tableData = mainDivVM.formatData(mainDivVM.tableData, "userId","userName");
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -263,16 +319,20 @@
                     }else if(resobj.data && resobj.data.tableData){
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
-                        mainDivVM.tableData = tableData.data;
+                        // mainDivVM.tableData = tableData.data;
                         if( tableData.data.length && resobj.data.totalData ){
+                            var dataResault = mainDivVM.formatData(tableData, "userId","userName");
                             var totalData = resobjData.totalData[0];
-                            mainDivVM.tableData.unshift(totalData);
+                            dataResault.unshift(totalData);
+                            mainDivVM.tableData = dataResault;
+                        }else{
+                            mainDivVM.tableData = tableData.data;
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.startTime = startTime;
+                        mainDivVM.export.endTime = endTime;
                         mainDivVM.export.userId = mainDivVM.form.userId;
                         mainDivVM.export.category = mainDivVM.form.category;
                         mainDivVM.export.newResource = mainDivVM.form.newResource;
@@ -485,7 +545,7 @@
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-
+            this.currentTelSale();
             this.searchTable();
         },
         mounted(){
