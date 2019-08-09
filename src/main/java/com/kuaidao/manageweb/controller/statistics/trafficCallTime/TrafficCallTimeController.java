@@ -364,11 +364,7 @@ public class TrafficCallTimeController {
         headTitleList.add("接通量");
         headTitleList.add("资源接通率");
         headTitleList.add("总有效通话时长");
-        if(type.equals(GROUP_PERSON_DAY)){
-            headTitleList.add("人均总有效通话时长");
-        }else{
-            headTitleList.add("天均总有效通话时长");
-        }
+        headTitleList.add("人均天有效通话时长");
         return headTitleList;
     }
     private void addTotalExportData(TrafficCallTimeDto ra, List<List<Object>> dataList,Integer type) {
