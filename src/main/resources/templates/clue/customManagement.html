@@ -159,7 +159,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="预签约省份:">
-                        <el-select v-model="form.province" placeholder="预签约省份" clearable >
+                        <el-select v-model="form.province" placeholder="预签约省份" clearable   filterable  multiple>
                             <el-option
                                 v-for="item in provinceArr"
                                 :key="item.name"
@@ -279,6 +279,12 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="资源来源:">
+	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源">
+	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name"
+	                                   :value="item.value"></el-option>
+	                    </el-select>
+	                </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -394,7 +400,7 @@
     <!-- 跟进记录 -->
     <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1000px">
         <div v-show="showPhoneTable">
-            <p style="padding:10px 0;">手机号{{phone}}重复手机号资源</p>
+            <p style="padding:10px 0;">手机号<span style="color: red">(1)</span>{{phone}}重复手机号资源</p>
             <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
@@ -427,7 +433,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable2">
-            <p style="padding:10px 0;">手机号{{phone2}}重复手机号资源</p>
+            <p style="padding:10px 0;">手机号<span style="color: red">(2)</span>{{phone2}}重复手机号资源</p>
             <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
@@ -460,7 +466,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable3">
-            <p style="padding:10px 0;">手机号{{phone3}}重复手机号资源</p>
+            <p style="padding:10px 0;">手机号<span style="color: red">(3)</span>{{phone3}}重复手机号资源</p>
             <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
@@ -493,7 +499,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable4">
-            <p style="padding:10px 0;">手机号{{phone4}}重复手机号资源</p>
+            <p style="padding:10px 0;">手机号<span style="color: red">(4)</span>{{phone4}}重复手机号资源</p>
             <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
@@ -526,7 +532,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable5">
-            <p style="padding:10px 0;">手机号{{phone5}}重复手机号资源</p>
+            <p style="padding:10px 0;">手机号<span style="color: red">(5)</span>{{phone5}}重复手机号资源</p>
             <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
@@ -824,7 +830,14 @@
             label: '跟访'
           }
         ],
+        teleReceiveSourceArr:[
+       	 {value:"1",name:"分配"},
+            {value:"3",name:"领取"},
+       	 {value:"4",name:"自建"},
+            {value:"5",name:"分发"}
+       ],
         form: {
+          teleReceiveSource:"",
           isTransfer:'',
           cluesta:'',
           customerPhone:'',
@@ -998,7 +1011,9 @@
         param.dayTel=this.form.dayTel;
         param.hasInvite=this.form.hasInvite;
         param.repeatStatus=this.form.repeatStatus;
-        param.province= this.form.province;
+        if(null!=this.form.province&&this.form.province.length>0) {
+            param.provinces= this.form.province.join(",");
+        }
         param.category= this.form.category;
         param.address= this.form.address;
         param.searchWord= this.form.searchWord;
@@ -1010,6 +1025,7 @@
         param.wechat = this.form.wechat;
         param.isSign = this.form.isSign;
         param.isTailMoney = this.form.isTailMoney;
+        param.teleReceiveSource = this.form.teleReceiveSource;
         if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
           param.teleSaleId= this.form.teleSaleId.join(",");
         }
@@ -1041,7 +1057,6 @@
           });
           return;
         }
-
         axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
           var resobj= response.data;
           var pageData=resobj.data;

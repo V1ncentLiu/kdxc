@@ -421,11 +421,15 @@
                         <el-form-item label="性别：" :label-width="formLabelWidth"> {{viewForm.sexName}}</el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="手机号：" :label-width="formLabelWidth"> {{viewForm.phone}}
+                        <el-form-item label="手机号：" :label-width="formLabelWidth">
+                            <span v-show="viewForm.phoneEdit == 1" style="color: red">{{viewForm.phone}}</span>
+                            <span v-show="viewForm.phoneEdit == 0">{{viewForm.phone}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12" v-for="(domain, index) in dynamicValidateForm.domains">
-                        <el-form-item v-if="domain.value" :label="'手机号' + (parseInt(index)+2) + ':'" :label-width="formLabelWidth"> {{domain.value}}
+                        <el-form-item v-if="domain.value" :label="'手机号' + (parseInt(index)+2) + ':'" :label-width="formLabelWidth">
+                            <span v-show="domain.edit == 1" style="color: red">{{domain.value}}</span>
+                            <span v-show="domain.edit == 0">{{domain.value}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -551,6 +555,7 @@
                     cusName:'',
                     sex:'',
                     phone:'',
+                    phoneEdit:0,
                     wechat:'',
                     wechat2:'',
                     wechatUrl:'',
@@ -712,6 +717,7 @@
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
                         value: '',
+                        edit:1,
                         key:Date.now(),
                     }]
                 },
@@ -1206,6 +1212,7 @@
             number(){
     　　　     	this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                 this.form.phone=this.form.phone.replace('.','');
+                this.form.phoneEdit =1;
                 // if(this.form.phone.length==11){
                 if(this.form.phone!=""&&this.form.phone.length!=0){
                     this.isDisabled=false;
@@ -1218,6 +1225,7 @@
                 for(var i=0;i<domains.length;i++){
                     domains[i].value=domains[i].value.replace(/[^\.\d]/g,'');
                     domains[i].value=domains[i].value.replace('.','');
+                    domains[i].edit =1;
                 }
             },
             qqnumber(){
@@ -1401,12 +1409,14 @@
                 if (customer.phone2) {
                     var phone2 = {};
                     phone2.value = customer.phone2;
+                  phone2.edit =0;
                     phoneArr.push(phone2);
 
                 }
                 if (customer.phone3) {
                     var phone3 = {};
                     phone3.value = customer.phone3;
+                  phone3.edit =0;
                     phoneArr.push(phone3);
 
                 }
@@ -1414,12 +1424,14 @@
                 if (customer.phone4) {
                     var phone4 = {};
                     phone4.value = customer.phone4;
+                  phone4.edit =0;
                     phoneArr.push(phone4);
 
                 }
                 if (customer.phone5) {
                     var phone5 = {};
                     phone5.value = customer.phone5;
+                  phone5.edit =0;
                     phoneArr.push(phone5);
                 }
                 this.dynamicValidateForm.domains = phoneArr;
