@@ -120,8 +120,10 @@ public class TrafficCallResourceController {
         addTotalExportData(sumReadd,dataList,GROUP);
         buildList(dataList, orderList,GROUP);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String startTime = trafficCallResourceQueryDto.getStartTime();
-        String endTime = trafficCallResourceQueryDto.getEndTime();
+        String startTime = trafficCallResourceQueryDto.getStartTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
+        String endTime = trafficCallResourceQueryDto.getEndTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
         String name = "话务资源分配处理明细表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -149,8 +151,10 @@ public class TrafficCallResourceController {
         addTotalExportData(sumReadd,dataList,GROUP_PERSON);
         buildList(dataList, orderList,GROUP_PERSON);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String startTime = trafficCallResourceQueryDto.getStartTime();
-        String endTime = trafficCallResourceQueryDto.getEndTime();
+        String startTime = trafficCallResourceQueryDto.getStartTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
+        String endTime = trafficCallResourceQueryDto.getEndTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
         String name = "话务资源分配处理明细表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -178,8 +182,10 @@ public class TrafficCallResourceController {
         addTotalExportData(sumReadd,dataList,GROUP_PERSON_DAY);
         buildList(dataList, orderList,GROUP_PERSON_DAY);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String startTime = trafficCallResourceQueryDto.getStartTime();
-        String endTime = trafficCallResourceQueryDto.getEndTime();
+        String startTime = trafficCallResourceQueryDto.getStartTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
+        String endTime = trafficCallResourceQueryDto.getEndTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
         String name = "话务资源分配处理明细表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -238,7 +244,10 @@ public class TrafficCallResourceController {
                 curList.add(ra.getNewResource()==0?"否":"是");
             }
             if(type.equals(GROUP_PERSON_DAY)){
-                curList.add(ra.getDays());
+                StringBuilder sb = new StringBuilder(ra.getDays());
+                sb.insert(6,"-");
+                sb.insert(4,"-");
+                curList.add(sb);
                 curList.add(ra.getNewResource()==0?"否":"是");
             }
             curList.add(ra.getAssignCount());
