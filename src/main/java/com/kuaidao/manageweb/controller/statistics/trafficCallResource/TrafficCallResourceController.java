@@ -10,9 +10,11 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.statistics.trafficCallResource.TrafficCallResourceFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceDto;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -55,6 +57,15 @@ public class TrafficCallResourceController {
         pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.HWY.name().equals(roleCode)){
+            String curUserId = String.valueOf(curLoginUser.getId());
+            request.setAttribute("curUserId",curUserId);
+            return "reportformsTelephone/resourceAllocationDisposePerson";
+        }
         return "reportformsTelephone/resourceAllocationDispose";
     }
     /**
