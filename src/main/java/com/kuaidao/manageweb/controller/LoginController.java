@@ -189,15 +189,19 @@ public class LoginController {
         }
         UserInfoDTO user = getbyUserName.getData();
         List<RoleInfoDTO> roleList = user.getRoleList();
+        // TODO使用工具类判断
         if (roleList == null || roleList.size() == 0) {
-            return new JSONResult<>().fail("1", "当前账号没有角色");
+            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                    "当前账号没有角色");
         }
+        // TODO修改错误码
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         // 判断登陆IP限制
         if (SysConstant.YES.equals(roleInfoDTO.getIsIpLimit())) {
             List<String> ipList = roleInfoDTO.getIpList();
             if (!ipList.contains(ipAddr)) {
-                return new JSONResult<>().fail("1", "当前登录系统IP异常，请联系管理员");
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                        "当前登录系统IP异常，请联系管理员");
             }
         }
         // 查询登录用户所属业务线放入登录对象中
@@ -239,12 +243,14 @@ public class LoginController {
                     // 判断账号是否禁用
                     if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
                         errorMessage = "帐号已禁用，请联系管理员修改！";
-                        return new JSONResult<>().fail("1", errorMessage);
+                        return new JSONResult<>().fail(
+                                ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                     }
                     // 判断账号是否锁定
                     if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
                         errorMessage = "账号锁定，请联系管理员修改！";
-                        return new JSONResult<>().fail("1", errorMessage);
+                        return new JSONResult<>().fail(
+                                ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                     }
                     // 判断密码是否过期。
                     String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
@@ -260,7 +266,9 @@ public class LoginController {
                         if (date.getTime() - resetpwdTime.getTime() > pwdTime * 24 * 60 * 60
                                 * 1000) {
                             errorMessage = "账号过期，请忘记密码方式找回！";
-                            return new JSONResult<>().fail("1", errorMessage);
+                            return new JSONResult<>().fail(
+                                    ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                                    errorMessage);
                         }
                     }
                 }
@@ -328,7 +336,8 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    return new JSONResult<>().fail("1", errorMessage);
+                    return new JSONResult<>()
+                            .fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                 }
                 List<LoginRecordDTO> findList2 =
                         findLoginRecordList(username, null, new Date(date.getTime() - 600000), date,
@@ -341,7 +350,8 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    return new JSONResult<>().fail("1", errorMessage);
+                    return new JSONResult<>()
+                            .fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttp", wsUrlHttp);
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
@@ -406,7 +416,8 @@ public class LoginController {
                         SysConstant.YES.toString(), 1, TimeUnit.DAYS);
             }
         }
-        return new JSONResult<>().fail("1", errorMessage);
+        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                errorMessage);
     }
 
     /**
