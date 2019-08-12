@@ -94,7 +94,7 @@
                 <el-table-column prop="dayOfPer" label="二次来访签约率" :formatter="numFormat"></el-table-column>
                 <el-table-column prop="dayOfPer" label="2+次来访签约率" :formatter="numFormat"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -131,7 +131,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
                 pickerOptions0: {
                   disabledDate(time) {
@@ -325,8 +325,8 @@
                     return end;
                 }
             },
-            searchYesterday(){//昨天
-                var today = new Date();
+            searchYesterday(){ // 昨天
+               var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
                var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
@@ -334,14 +334,13 @@
                this.form.endTime=endTime;
                this.searchTable(1);
             },
-            searchWeek(){//近七天
+            searchWeek(){ // 近七天
                  var a = new Date();
                  var year = a.getFullYear();
                  var month = a.getMonth();
                  var date = a.getDate();
                  var b = new Date(year,month,date);
                  var c = b.valueOf()-6*24*60*60*1000;
-                // var d = b.valueOf()+1*24*60*60*1000;
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
@@ -349,7 +348,7 @@
                  this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
                  this.searchTable(1);
             },
-            searchMonth(){//本月
+            searchMonth(){ // 本月 
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -357,10 +356,8 @@
                 var b = new Date(year,month,date);
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
-              //  var d = b.valueOf()+1*24*60*60*1000;
                 var startTime= new Date(c);
-               // var endTime = new Date(d);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
             },
