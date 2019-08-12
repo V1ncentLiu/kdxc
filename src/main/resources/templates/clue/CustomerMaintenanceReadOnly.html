@@ -88,6 +88,20 @@
                         <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth120" >
                             <el-button type="text" disabled>{{form.customerName}}</el-button>
                         </el-form-item>
+                        <el-form-item  :label-width="formLabelWidth120">
+                            <div v-show="showPhone">
+                                <font >{{form.cusNameCreateUserRoleName}}</font>
+                                <font v-show="form.cusNameCreateUserName !=null && form.cusNameCreateUserName !=''">[{{form.cusNameCreateUserName}}]</font>
+                                <font >{{formatTimeFn(form.cusNameCreateTime)}}</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item  :label-width="formLabelWidth120" v-show="form.cusNameUpdateUserName !=null && form.cusNameUpdateUserName !=''">
+                            <div >
+                                <font >{{form.cusNameUpdateUserRoleName}}</font>
+                                <font >[{{form.cusNameUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.cusNameUpdateTime)}}</font>
+                            </div>
+                        </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="客户级别：" :label-width="formLabelWidth120">
@@ -939,7 +953,13 @@ var vxShow = false;
 var showwchatcode = "/images/errorIcon.jpg";
 if(customer==null){
     vform= {
-        customerName:"",
+            customerName:"",
+            cusNameCreateUserRoleName:"",
+            cusNameUpdateUserRoleName:"",
+            cusNameCreateUserName:"",
+            cusNameUpdateUserName:"",
+            cusNameCreateTime:"",
+            cusNameUpdateTime:"",
             customerPhone:"",
             phoneCreateTime:"",
             customerPhoneCreateUser:"",
@@ -1003,6 +1023,12 @@ if(customer==null){
     }
     vform={
         customerName:customer.cusName,
+        cusNameCreateUserRoleName:customer.cusNameCreateUserRoleName,
+        cusNameUpdateUserRoleName:customer.cusNameUpdateUserRoleName,
+        cusNameCreateUserName:customer.cusNameCreateUserName,
+        cusNameUpdateUserName:customer.cusNameUpdateUserName,
+        cusNameCreateTime:customer.cusNameCreateTime,
+        cusNameUpdateTime:customer.cusNameUpdateTime,
         customerPhone:customer.phone,
         phoneCreateTime:customer.phoneCreateTime,
         customerPhoneCreateUser:customer.phoneCreateUserName,
@@ -1365,11 +1391,13 @@ if(base==null){
             },
             switchSoundBtn(id,url,callSource){
                 // 播放器显示
-                this.audioShow=true;
+                // this.audioShow=true;
                 if(callSource=='2'){
-                    switchSound(id,url);
+                    // switchSound(id,url);
+                    window.parent.open(url)
                     return;
                 }
+                var newWindow = window.open();
                 var param = {};
                 param.id=id;
                 axios.post('/call/callRecord/getRecordFile',param)
@@ -1377,7 +1405,8 @@ if(base==null){
                         var data =  response.data
                         if(data.code=='0'){
                             var url = data.data;
-                            switchSound(id,url);
+                            // switchSound(id,url);
+                            newWindow.location.href = url;
                         }else{
                             console.error(data);
                             addCustomerVM.$message({message:data.msg,type:'error'});

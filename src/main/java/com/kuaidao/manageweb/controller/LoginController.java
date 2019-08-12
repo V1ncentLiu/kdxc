@@ -3,39 +3,6 @@
  */
 package com.kuaidao.manageweb.controller;
 
-import com.google.code.kaptcha.impl.DefaultKaptcha;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.MD5Util;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.LoginReq;
-import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
-import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.IdUtil;
-import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
-import com.kuaidao.msgpush.dto.SmsCodeSendReq;
-import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.user.LoginRecordDTO;
-import com.kuaidao.sys.dto.user.LoginRecordReq;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -44,7 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -75,12 +41,17 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
@@ -92,6 +63,7 @@ import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.LoginReq;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
@@ -102,7 +74,15 @@ import com.kuaidao.msgpush.dto.SmsCodeSendReq;
 import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.user.*;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.LoginRecordDTO;
+import com.kuaidao.sys.dto.user.LoginRecordReq;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoReq;
 
 
 /**
@@ -152,6 +132,7 @@ public class LoginController {
     private boolean verificationCodeShow;
     @Autowired
     OrganizationFeignClient organizationFeignClient;
+
     /***
      * 登录页
      *
@@ -191,7 +172,7 @@ public class LoginController {
     @ResponseBody
     @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
     public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
-                            RedirectAttributes redirectAttributes) throws Exception {
+            RedirectAttributes redirectAttributes) throws Exception {
         String username = loginReq.getUsername();
         String password = loginReq.getPassword();
         redirectAttributes.addFlashAttribute("username", username);
@@ -207,11 +188,24 @@ public class LoginController {
             return getbyUserName;
         }
         UserInfoDTO user = getbyUserName.getData();
-        //查询登录用户所属业务线放入登录对象中
-        JSONResult<OrganizationDTO> organizationDTOJSONResult = organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList == null || roleList.size() == 0) {
+            return new JSONResult<>().fail("1", "当前账号没有角色");
+        }
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        // 判断登陆IP限制
+        if (SysConstant.YES.equals(roleInfoDTO.getIsIpLimit())) {
+            List<String> ipList = roleInfoDTO.getIpList();
+            if (!ipList.contains(ipAddr)) {
+                return new JSONResult<>().fail("1", "当前登录系统IP异常，请联系管理员");
+            }
+        }
+        // 查询登录用户所属业务线放入登录对象中
+        JSONResult<OrganizationDTO> organizationDTOJSONResult =
+                organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
         if (JSONResult.SUCCESS.equals(organizationDTOJSONResult.getCode())) {
             OrganizationDTO organizationDTO = organizationDTOJSONResult.getData();
-            if(organizationDTO != null && organizationDTO.getBusinessLine() != null){
+            if (organizationDTO != null && organizationDTO.getBusinessLine() != null) {
                 user.setBusinessLine(organizationDTO.getBusinessLine());
             }
         }
@@ -222,8 +216,8 @@ public class LoginController {
         loginRecord.setIp(ipAddr);
         loginRecord.setLoginTime(date);
         // * 校验验证码
-        //只有正式环境校验验证码 其他环境不校验 by fanjd  2019/5/8
-        //是否继续判断标识
+        // 只有正式环境校验验证码 其他环境不校验 by fanjd 2019/5/8
+        // 是否继续判断标识
         boolean flag = true;
         if (verificationCodeShow) {
             SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
@@ -270,7 +264,7 @@ public class LoginController {
                         }
                     }
                 }
-                /**强制清空session，防止非正常退出导致权限不刷新**/
+                /** 强制清空session，防止非正常退出导致权限不刷新 **/
                 kickOutUser(username);
                 // 用户登陆
                 UsernamePasswordToken token = new UsernamePasswordToken(username,
@@ -539,7 +533,7 @@ public class LoginController {
     @LogRecord(description = "修改密码", operationType = OperationType.UPDATE,
             menuName = MenuEnum.UPDATE_PASSWORD)
     public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
-                                 BindingResult result) {
+            BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -613,7 +607,7 @@ public class LoginController {
     @LogRecord(description = "退出登录", operationType = OperationType.LOGINOUT,
             menuName = MenuEnum.LOGINOUT)
     public String logout(String type, Model model, HttpServletRequest request,
-                         RedirectAttributes redirectAttributes) throws Exception {
+            RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
         Object attribute = subject.getSession().getAttribute("user");
         UserInfoDTO user = null;
@@ -651,7 +645,7 @@ public class LoginController {
      * @return
      */
     private List<LoginRecordDTO> findLoginRecordList(String username, String ipAddr, Date startTime,
-                                                     Date endTime, Integer loginStatus, Integer isChangeMachine) {
+            Date endTime, Integer loginStatus, Integer isChangeMachine) {
         LoginRecordReq loginRecordVo = new LoginRecordReq();
         loginRecordVo.setUsername(username);
         loginRecordVo.setIp(ipAddr);
@@ -742,30 +736,33 @@ public class LoginController {
 
     /**
      * 删除用户缓存信息(防止非正常登录事session存在导致权限不刷新)
-     * @author fanjd  2019/05/9  20:05:08
+     * 
+     * @author fanjd 2019/05/9 20:05:08
      * @param username 当前登陆用户名
      */
-    private  void kickOutUser(String username) {
-        //处理session
-        DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
-        DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
-        //获取当前已登录的用户session列表
+    private void kickOutUser(String username) {
+        // 处理session
+        DefaultWebSecurityManager securityManager =
+                (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+        DefaultWebSessionManager sessionManager =
+                (DefaultWebSessionManager) securityManager.getSessionManager();
+        // 获取当前已登录的用户session列表
         Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();
         String sessionUserName = "";
         for (Session session : sessions) {
             if (null == session) {
                 continue;
             }
-            //清除该用户以前登录时保存的session，强制退出
+            // 清除该用户以前登录时保存的session，强制退出
             Object attribute = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
             if (attribute == null) {
                 continue;
             }
             sessionUserName = (String) session.getAttribute("userName");
-            //判断是否当前用户
+            // 判断是否当前用户
             if (username.equals(sessionUserName)) {
                 Authenticator authc = securityManager.getAuthenticator();
-                //删除cache，登录成功后重新授权
+                // 删除cache，登录成功后重新授权
                 ((LogoutAware) authc).onLogout((PrincipalCollection) attribute);
             }
 
