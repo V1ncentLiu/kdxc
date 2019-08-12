@@ -363,10 +363,11 @@ public class BusCustomerManagerController {
      */
     @LogRecord(description = "导出到访业绩", operationType = OperationType.EXPORT,
         menuName = MenuEnum.BUSS_MANAGER)
-    @PostMapping("/importVisitPer")
-    public void importVisitPer(HttpServletRequest request, HttpServletResponse response,
+    @PostMapping("/exportVisitPer")
+    public void exportVisitPer(HttpServletRequest request, HttpServletResponse response,
         @RequestBody BusCustomerPageParam pageParam) throws Exception {
         UserInfoDTO user = getUser();
+
         pageParam.setUserId(user.getId());
         pageParam.setBusinessLine(user.getBusinessLine());
         pageParam.setOrgId(user.getOrgId());
@@ -375,7 +376,7 @@ public class BusCustomerManagerController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         JSONResult<List<BusVisitPerDTO>> listJSONResult = busCustomerFeignClient
-            .importVisitPer(pageParam);
+            .exportVisitPer(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null

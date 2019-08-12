@@ -30,15 +30,14 @@ public interface BusCustomerFeignClient {
     /**
      * 查询商务客户管理列表
      *
-     * @param commentInsertReq
      * @return
      */
     @PostMapping("/busCustomerList")
     public JSONResult<PageBean<BusCustomerDTO>> busCustomerList(
             @RequestBody BusCustomerPageParam pageParam);
 
-    @PostMapping("/importVisitPer")
-    public  JSONResult<List<BusVisitPerDTO>> importVisitPer(
+    @PostMapping("/exportVisitPer")
+    public  JSONResult<List<BusVisitPerDTO>> exportVisitPer(
         @RequestBody BusCustomerPageParam pageParam);
 
 
@@ -62,7 +61,7 @@ public interface BusCustomerFeignClient {
         }
 
         @Override
-        public JSONResult<List<BusVisitPerDTO>> importVisitPer(BusCustomerPageParam pageParam) {
+        public JSONResult<List<BusVisitPerDTO>> exportVisitPer(BusCustomerPageParam pageParam) {
             return fallBackError("导出到访业绩");
         }
 
