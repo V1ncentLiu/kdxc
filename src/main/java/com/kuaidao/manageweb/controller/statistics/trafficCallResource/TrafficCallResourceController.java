@@ -10,9 +10,11 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.statistics.trafficCallResource.TrafficCallResourceFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceDto;
 import com.kuaidao.stastics.dto.trafficCallResource.TrafficCallResourceQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -51,18 +53,27 @@ public class TrafficCallResourceController {
      * 组一级页面跳转
      */
     @RequestMapping("/resourceAllocationDispose")
-    public String resourceAllocationDispose(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
-        pageParams(category,startTime,endTime,newResource,request);
+    public String resourceAllocationDispose(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
+        pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.HWY.name().equals(roleCode)){
+            String curUserId = String.valueOf(curLoginUser.getId());
+            request.setAttribute("curUserId",curUserId);
+            return "reportformsTelephone/resourceAllocationDisposePerson";
+        }
         return "reportformsTelephone/resourceAllocationDispose";
     }
     /**
      * 人二级页面跳转
      */
     @RequestMapping("/resourceAllocationDisposePerson")
-    public String resourceAllocationPersonDispose(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
-        pageParams(category,startTime,endTime,newResource,request);
+    public String resourceAllocationPersonDispose(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
+        pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDisposePerson";
@@ -71,8 +82,8 @@ public class TrafficCallResourceController {
      * 人+天三级页面跳转
      */
     @RequestMapping("/resourceAllocationDisposePersonDay")
-    public String resourceAllocationDisposeTeam(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
-        pageParams(category,startTime,endTime,newResource,request);
+    public String resourceAllocationDisposeTeam(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request) {
+        pageParams(userId,category,startTime,endTime,newResource,request);
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         return "reportformsTelephone/resourceAllocationDisposePersonDay";
@@ -120,8 +131,10 @@ public class TrafficCallResourceController {
         addTotalExportData(sumReadd,dataList,GROUP);
         buildList(dataList, orderList,GROUP);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String startTime = trafficCallResourceQueryDto.getStartTime();
-        String endTime = trafficCallResourceQueryDto.getEndTime();
+        String startTime = trafficCallResourceQueryDto.getStartTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
+        String endTime = trafficCallResourceQueryDto.getEndTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
         String name = "话务资源分配处理明细表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -149,8 +162,10 @@ public class TrafficCallResourceController {
         addTotalExportData(sumReadd,dataList,GROUP_PERSON);
         buildList(dataList, orderList,GROUP_PERSON);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String startTime = trafficCallResourceQueryDto.getStartTime();
-        String endTime = trafficCallResourceQueryDto.getEndTime();
+        String startTime = trafficCallResourceQueryDto.getStartTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
+        String endTime = trafficCallResourceQueryDto.getEndTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
         String name = "话务资源分配处理明细表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -178,8 +193,10 @@ public class TrafficCallResourceController {
         addTotalExportData(sumReadd,dataList,GROUP_PERSON_DAY);
         buildList(dataList, orderList,GROUP_PERSON_DAY);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String startTime = trafficCallResourceQueryDto.getStartTime();
-        String endTime = trafficCallResourceQueryDto.getEndTime();
+        String startTime = trafficCallResourceQueryDto.getStartTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
+        String endTime = trafficCallResourceQueryDto.getEndTime().
+                replace(" ","").replaceAll("-","").replaceAll(":","");
         String name = "话务资源分配处理明细表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -190,12 +207,13 @@ public class TrafficCallResourceController {
         outputStream.close();
     }
 
-    private void pageParams(Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request){
+    private void pageParams(Long userId,Integer category,String startTime,String endTime,Integer newResource,HttpServletRequest request){
         TrafficCallResourceQueryDto trafficCallResourceQueryDto = new TrafficCallResourceQueryDto();
         trafficCallResourceQueryDto.setCategory(category);
         trafficCallResourceQueryDto.setStartTime(startTime);
         trafficCallResourceQueryDto.setEndTime(endTime);
         trafficCallResourceQueryDto.setNewResource(newResource);
+        trafficCallResourceQueryDto.setUserId(userId);
         request.setAttribute("trafficCallResourceQueryDto",trafficCallResourceQueryDto);
     }
 
@@ -237,7 +255,10 @@ public class TrafficCallResourceController {
                 curList.add(ra.getNewResource()==0?"否":"是");
             }
             if(type.equals(GROUP_PERSON_DAY)){
-                curList.add(ra.getDays());
+                StringBuilder sb = new StringBuilder(ra.getDays());
+                sb.insert(6,"-");
+                sb.insert(4,"-");
+                curList.add(sb);
                 curList.add(ra.getNewResource()==0?"否":"是");
             }
             curList.add(ra.getAssignCount());

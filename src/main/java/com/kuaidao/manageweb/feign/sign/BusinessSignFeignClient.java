@@ -2,31 +2,26 @@ package com.kuaidao.manageweb.feign.sign;
 
 import java.util.List;
 
-import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
-import com.kuaidao.common.entity.IdEntityLong;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
+import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
-import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
-import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
-
-import javax.validation.Valid;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
 
@@ -80,6 +75,11 @@ public interface BusinessSignFeignClient {
 
 	@RequestMapping("/querySignList")
 	public JSONResult<List<BusSignRespDTO>> querySignList(@RequestBody SignRecordReqDTO dto);
+	@RequestMapping("/querySignById")
+	public JSONResult<BusSignRespDTO> querySignById(@RequestBody IdEntityLong idEntityLong);
+	@RequestMapping("/updateSignDetail")
+	public JSONResult<Boolean> updateSignDetail(@Valid @RequestBody BusSignInsertOrUpdateDTO dto);
+	
 
 	@Component
 	static class HystrixClientFallback implements BusinessSignFeignClient {
@@ -143,6 +143,16 @@ public interface BusinessSignFeignClient {
 		@Override
 		public JSONResult<PayDetailDTO> getPaymentDetailsById(PayDetailDTO detailDTO) {
 			return fallBackError("根据id查询付款明细详情失败");
+		}
+
+		@Override
+		public JSONResult<BusSignRespDTO> querySignById(IdEntityLong idEntityLong) {
+			return fallBackError("查询签约单明细");
+		}
+
+		@Override
+		public JSONResult<Boolean> updateSignDetail(BusSignInsertOrUpdateDTO dto) {
+			return fallBackError("更新签约单");
 		}
 
 	}
