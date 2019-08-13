@@ -6,10 +6,12 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
+import com.kuaidao.callcenter.dto.HeliClientReqDTO;
+import com.kuaidao.callcenter.dto.HeliClientRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 
 
 /**
@@ -18,7 +20,7 @@ import com.kuaidao.common.entity.JSONResult;
  * @date 2019-08-08 10:39:01
  * @version V1.0
  */
-@FeignClient(name = "callcenter-service-chen", path = "/callcenter/heliClient/", fallback = HeliClientFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "callcenter-service", path = "/callcenter/heliClient/", fallback = HeliClientFeignClient.HystrixClientFallback.class)
 public interface HeliClientFeignClient {
     
     
@@ -50,6 +52,15 @@ public interface HeliClientFeignClient {
     public JSONResult outbound(@RequestBody HeLiClientOutboundReqDTO heLiClientOutboundReqDTO);
 
     
+    /**
+     * 查询坐席列表
+    * @param heliClientReqDTO
+    * @return
+     */
+    @PostMapping("/listClientsPage")
+    public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(HeliClientReqDTO heliClientReqDTO);
+
+    
     @Component
     static class HystrixClientFallback implements HeliClientFeignClient {
 
@@ -74,6 +85,11 @@ public interface HeliClientFeignClient {
         @Override
         public JSONResult outbound(HeLiClientOutboundReqDTO heLiClientOutboundReqDTO) {
             return fallBackError("合力坐席外呼");
+        }
+
+        @Override
+        public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(HeliClientReqDTO heliClientReqDTO) {
+            return fallBackError("分页查询坐席列表");
         }
         
     }

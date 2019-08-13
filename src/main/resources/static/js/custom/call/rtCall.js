@@ -287,10 +287,25 @@ function heliClientOutbound(outboundInputPhone,callSource,clueId,callback){
 	     		  //10分钟后红色字体显示
 	     		 // intervalTimer("outboundCallTime",1,2);
 	     		  
-	     		   if (typeof callback === 'function') {
-	 	            callback();
-	     		   }
-	     		   
+	        	  if(callSource==1){
+          			 homePageVM.dialogOutboundVisible =true;
+          			 $("#outboundCallTime").html("");
+ 					 $('#outboundPhoneLocaleArea').html("");
+ 				 	 intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
+ 					// getPhoneLocale(outboundInputPhone,callSource);
+          		  }else if(callSource==2) {
+          			 homePageVM.tmOutboundCallDialogVisible =true;
+ 					 $("#tmOutboundCallTime").html("");
+ 					 $('#tmOutboundPhoneLocaleArea').html("");
+ 					 intervalTimer("tmOutboundCallTime",10,2);
+ 					 //查询手机号归属地
+ 					// getPhoneLocale(outboundInputPhone,callSource);
+          		  }
+          	
+      		   
+      		    if (typeof callback === 'function') {
+		             callback();
+		        }	     		   
 	          }else{
 	        	  clearTimer();//清除定时器
 	         		homePageVM.$message({message:data.msg,type:'error'});

@@ -1,10 +1,15 @@
 package com.kuaidao.manageweb.controller.client;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +17,22 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
+import com.kuaidao.callcenter.dto.HeliClientReqDTO;
+import com.kuaidao.callcenter.dto.HeliClientRespDTO;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.client.HeliClientFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
@@ -36,6 +52,45 @@ public class HeliClientController {
     
     @Autowired
     ClientFeignClient clientFeignClient;
+    
+    @Autowired
+    OrganizationFeignClient organizationFeignClient;
+    
+    
+    /**
+     * 跳转 合力坐席管理页面
+    * @return
+     */
+    @RequiresPermissions("callCenter:heliClient:view")
+    @GetMapping("/heliClientPage")
+    public String heliClientPage(HttpServletRequest request) {
+        List<OrganizationDTO> orgList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
+        } else {
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+//      queryDTO.setOrgType(OrgTypeConstant.DXZ);
+            //查询全部
+            JSONResult<List<OrganizationRespDTO>> orgListJr =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+            if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+                logger.error("跳转合力坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+            } else {
+                request.setAttribute("orgList", orgListJr.getData());
+            }
+        }
+        return "client/heliClientPage";
+    }
     
     
     @PostMapping("/login")
@@ -107,6 +162,35 @@ public class HeliClientController {
           Long orgId = curLoginUser.getOrgId();
           heLiClientOutboundReqDTO.setOrgId(orgId);
           return heliClientFeignClient.outbound(heLiClientOutboundReqDTO);
+    }
+    
+    /**
+     * 查询坐席列表
+    * @param heliClientReqDTO
+    * @return
+     */
+    @PostMapping("/listClientsPage")
+    @ResponseBody
+    public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(@RequestBody HeliClientReqDTO heliClientReqDTO){
+        return heliClientFeignClient.listClientsPage(heliClientReqDTO);
+    }
+    
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
     
 
