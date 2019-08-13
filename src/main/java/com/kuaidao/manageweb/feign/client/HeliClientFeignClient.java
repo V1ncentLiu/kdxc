@@ -59,7 +59,7 @@ public interface HeliClientFeignClient {
     * @return
      */
     @PostMapping("/listClientsPage")
-    public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(HeliClientReqDTO heliClientReqDTO);
+    public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(@RequestBody HeliClientReqDTO heliClientReqDTO);
 
     /**
      * 查询坐席相关信息
