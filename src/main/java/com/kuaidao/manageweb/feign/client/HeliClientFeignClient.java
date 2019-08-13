@@ -21,7 +21,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date 2019-08-08 10:39:01
  * @version V1.0
  */
-@FeignClient(name = "callcenter-service", path = "/callcenter/heliClient/", fallback = HeliClientFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "callcenter-service", path = "/callcenter/heliClient", fallback = HeliClientFeignClient.HystrixClientFallback.class)
 public interface HeliClientFeignClient {
     
     
