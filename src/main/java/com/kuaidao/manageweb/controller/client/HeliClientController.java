@@ -225,9 +225,8 @@ public class HeliClientController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        TrClientQueryDTO queryDTO = new TrClientQueryDTO();
-        queryDTO.setClientNo(cno);
-        queryDTO.setOrgId(curLoginUser.getOrgId());
+        heliClientReqDTO.setClientNo(cno);
+        heliClientReqDTO.setOrgId(curLoginUser.getOrgId());
         JSONResult<List<HeliClientRespDTO>>  trClientJr = heliClientFeignClient.listClientByParams(heliClientReqDTO);
         if(trClientJr==null || !JSONResult.SUCCESS.equals(trClientJr.getCode())) {
             logger.error("queryClientInfoByCno  heliClientFeignClient.listClientByParams(),param{{}},rs{{}}",trClientJr);
