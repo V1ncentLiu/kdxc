@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.client;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
+import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
+import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
 import com.kuaidao.callcenter.dto.HeliClientReqDTO;
 import com.kuaidao.callcenter.dto.HeliClientRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
@@ -205,6 +209,38 @@ public class HeliClientController {
             return null;
         }
         return orgJr.getData();
+    }
+    
+    
+    /**
+     * 根据坐席号查询坐席信息
+    * @param heliClientReqDTO
+    * @return
+     */
+    @PostMapping("/queryClientInfoByCno")
+    @ResponseBody
+    public JSONResult<Boolean> queryClientInfoByCno(@RequestBody HeliClientReqDTO heliClientReqDTO){
+        String cno =  heliClientReqDTO.getClientNo();
+        if(StringUtils.isBlank(cno)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        TrClientQueryDTO queryDTO = new TrClientQueryDTO();
+        queryDTO.setClientNo(cno);
+        queryDTO.setOrgId(curLoginUser.getOrgId());
+        JSONResult<List<HeliClientRespDTO>>  trClientJr = heliClientFeignClient.listClientByParams(heliClientReqDTO);
+        if(trClientJr==null || !JSONResult.SUCCESS.equals(trClientJr.getCode())) {
+            logger.error("queryClientInfoByCno  heliClientFeignClient.listClientByParams(),param{{}},rs{{}}",trClientJr);
+            return new JSONResult<Boolean>().fail(trClientJr.getCode(),trClientJr.getMsg());
+        }
+        //默认坐席属于自己
+        boolean isBelongToSelf = true;
+        List<HeliClientRespDTO> data = trClientJr.getData();
+        if (CollectionUtils.isEmpty(data)) {
+            isBelongToSelf = false;
+        }
+        
+        return new JSONResult<Boolean>().success(isBelongToSelf);
     }
     
 
