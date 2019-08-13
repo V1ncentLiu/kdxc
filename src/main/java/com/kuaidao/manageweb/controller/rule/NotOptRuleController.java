@@ -387,7 +387,7 @@ public class NotOptRuleController {
         // 非优化规则
         pageParam.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
 
-
+        // 查询规则数据不分页
         JSONResult<List<ClueAssignRuleDTO>> listNoPage =
                 clueAssignRuleFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
@@ -434,9 +434,11 @@ public class NotOptRuleController {
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
-        ServletOutputStream outputStream = response.getOutputStream();
-        wbWorkbook.write(outputStream);
-        outputStream.close();
+        try (ServletOutputStream outputStream = response.getOutputStream();) {
+            wbWorkbook.write(outputStream);
+        } catch (Exception e) {
+            logger.error("导出异常{}", e);
+        }
 
     }
 

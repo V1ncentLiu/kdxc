@@ -14,9 +14,9 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button> 
-        <!-- <shiro:hasPermission name="statistics:trafficCall:export"> -->
+         <shiro:hasPermission name="statistics:trafficCallResource:export">
             <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
-        <!-- </shiro:hasPermission> -->
+         </shiro:hasPermission>
         <el-button type="primary" v-if="!isShowBackBtn" @click="goBack" style="float: right;">返回</el-button>
     </el-row>
     <div class="mainSearchBg">        
@@ -68,7 +68,8 @@
                 :span-method="arraySpanMethod">
                 <el-table-column type="text" prop="index" label="序号" align="center" width="55">
                     <template slot-scope="scope">
-                        <span type="text" size="small">{{scope.row.userName ?scope.row.index : ''}}</span>
+                        <span type="text" size="small">{{scope.row.index}}</span>
+                        <!-- <span type="text" size="small">{{scope.row.userName ?scope.row.index : ''}}</span> -->
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -88,8 +89,8 @@
                         <span type="text" size="small" v-else>{{scope.row.newResource?'是':'否'}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="receiveCount" align="center" label="接收资源">
-                </el-table-column>
+                <!-- <el-table-column prop="receiveCount" align="center" label="接收资源">
+                </el-table-column> -->
                 <el-table-column prop="assignCount" align="center" label="分配资源量">
                 </el-table-column>
                 <el-table-column prop="trackingCount" align="center" label="跟访量">
@@ -105,7 +106,7 @@
                 <el-table-column prop="effectiveRate" align="center" label="资源有效率" :formatter="percentFormat">
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" :papernum="[3,5,10]" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" :papernum="[5,10]" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -119,7 +120,7 @@
 </style>
 <script th:inline="javascript">
     var clueCategoryList=[[${clueCategoryList}]]; // 资源类别
-    var parentParam = [[${trafficCallTimeQueryDto}]];
+    var parentParam = [[${trafficCallResourceQueryDto}]];
     var curUserId = [[${curUserId}]];
     console.log(parentParam,curUserId);
     var mainDivVM = new Vue({
@@ -127,14 +128,12 @@
         data: function() {
             return {
                 loading: false,
-                isDisabled: true, // 话务组筛选框
                 isDisabledUserId: false,
                 isShowBackBtn: curUserId,
-                // btnDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3
+                    pageSize: 5
                 },
                 form: {
                     startTime: '',
@@ -212,10 +211,8 @@
             }     
         },
         methods: {
-            currentTelSale(seleVal){ // 根据话务组选择话务专员
-                if(null==seleVal||seleVal==""){return;}
+            currentTelSale(){ // 根据话务组选择话务专员
                 var param={};
-                param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/statistics/trafficCallTime/getSaleList',param).then(function (response) {  
                     var result =  response.data;
@@ -237,8 +234,8 @@
                 for (var i = 0; i < tmp.length; i++) {
                     for(var j = i + 1; j < tmp.length; j++){
                         if(tmp[i][param1] == tmp[j][param1]){
-                            tmp[j][param2] = "";
-                            tmp[j].index = index;
+                            if(param2){tmp[j][param2] = "";}
+                            tmp[j].index = '';
                         }else{
                             index ++;
                             tmp[j].index = index;
@@ -300,7 +297,6 @@
                 param.newResource = this.form.newResource;
                 this.loading = true; 
                 axios.post('/statistics/trafficCallResource/getPersonPageList',param).then(function (response) {
-                    mainDivVM.tableData = mainDivVM.formatData(mainDivVM.tableData, "userId","userName");
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -321,7 +317,7 @@
                         var tableData = resobjData.tableData;
                         // mainDivVM.tableData = tableData.data;
                         if( tableData.data.length && resobj.data.totalData ){
-                            var dataResault = mainDivVM.formatData(tableData, "userId","userName");
+                            var dataResault = mainDivVM.formatData(tableData.data, "userId","userName");
                             var totalData = resobjData.totalData[0];
                             dataResault.unshift(totalData);
                             mainDivVM.tableData = dataResault;
@@ -437,25 +433,6 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-    //         timeFormat (row, column) { // 时间格式化：时分秒
-    //             var time = row[column.property];
-    //             if(!time){return "00时00分00秒";}
-    //             var timeResult = this.timeFun (time); 
-    //             return timeResult;
-    //         },
-    //         timeFun(s){
-    //             var t="";
-    //             var hour = Math.floor(s/3600);
-    //             var min = Math.floor(s/60) % 60;
-    //             var sec = s % 60;
-    //             if(hour<10){t+="0";}
-    //             t+=hour+"时"
-    //             if(min < 10){t += "0";}
-    //             t += min + "分";
-    //             if(sec < 10){t += "0";}
-    //             t += sec + "秒";
-    //             return t;
-    //         },
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -530,21 +507,22 @@
                 this.form.category = parentParam.category != null ?parentParam.category.toString():'';
                 this.form.newResource = parentParam.newResource != null ?parentParam.newResource.toString():'';
 
-                this.export.startTime = parentParam.startTime;
-                this.export.endTime = parentParam.endTime;
+                // this.export.startTime = parentParam.startTime;
+                // this.export.endTime = parentParam.endTime;
             }else{
                 this.form.startTime = startTime;
                 this.form.endTime = endTime;
-                this.export.startTime = this.form.startTime;
-                this.export.endTime = this.form.endTime;
             }
 
+            this.export.startTime = this.form.startTime;
+            this.export.endTime = this.form.endTime;
             this.export.userId = this.form.userId;
             this.export.category = this.form.category; 
             this.export.newResource = this.form.newResource;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+
             this.currentTelSale();
             this.searchTable();
         },

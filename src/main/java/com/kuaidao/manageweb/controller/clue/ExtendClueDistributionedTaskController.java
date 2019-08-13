@@ -384,8 +384,8 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
+     * @TODOif判断修改
      */
-    // @RequiresPermissions("aggregation:truckingOrder:export")
     @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT,
         menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findCommunicateRecords")
@@ -446,10 +446,12 @@ public class ExtendClueDistributionedTaskController {
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
+        //查询资源沟通情况集合
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
                 extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        dataList.add(getHeadTitleList1());
+        //获取资源导出情况Excel表头
+        dataList.add(getCommunicateRecordsHeadTitleList());
 
 
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
@@ -460,20 +462,30 @@ public class ExtendClueDistributionedTaskController {
             for (int i = 0; i < size; i++) {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
-                curList.add(taskDTO.getClueId()); // 资源ID
-                curList.add(taskDTO.getCreateTime()); // 创建时间
-                curList.add(taskDTO.getCategoryName()); // 资源类别
-                curList.add(taskDTO.getSourceName()); // 媒介
-                curList.add(taskDTO.getProjectName()); // 资源项目
-                curList.add(taskDTO.getPhone()); // 手机号
-
+                // 资源ID
+                curList.add(taskDTO.getClueId());
+                // 创建时间
+                curList.add(taskDTO.getCreateTime());
+                // 资源类别
+                curList.add(taskDTO.getCategoryName());
+                // 媒介
+                curList.add(taskDTO.getSourceName());
+                // 资源项目
+                curList.add(taskDTO.getProjectName());
+                // 手机号
+                curList.add(taskDTO.getPhone());
+                // 手机号2
                 curList.add(taskDTO.getPhone2());
+                //QQ
                 curList.add(taskDTO.getQq());
+                //微信
                 curList.add(taskDTO.getWechat());
-
-                curList.add(taskDTO.getSearchWord()); // 搜索词
-                curList.add(taskDTO.getTeleGorupName()); // 电销组
-                curList.add(taskDTO.getTeleSaleName()); // 电销顾问
+                // 搜索词
+                curList.add(taskDTO.getSearchWord());
+                // 电销组
+                curList.add(taskDTO.getTeleGorupName());
+                // 电销顾问
+                curList.add(taskDTO.getTeleSaleName());
                 // 这两个要进行转换
                 String isCall = null;
                 if (taskDTO.getIsCall() != null) {
@@ -483,7 +495,8 @@ public class ExtendClueDistributionedTaskController {
                         isCall = "否";
                     }
                 }
-                curList.add(isCall); // 是否接通
+                // 是否接通
+                curList.add(isCall);
                 String status = null;
                 if (taskDTO.getStatus() != null) {
                     if (taskDTO.getStatus() == 1) {
@@ -492,15 +505,24 @@ public class ExtendClueDistributionedTaskController {
                         status = "否";
                     }
                 }
-                curList.add(status); // 是否有效
-                curList.add(taskDTO.getFirstCallTime()); // 第一次拨打时间
-                curList.add(taskDTO.getFirstCommunicateTime()); // 第一次沟通时间
-                curList.add(taskDTO.getFirstCommunicateContent()); // 第一次沟通内容
-                curList.add(taskDTO.getSecondCommunicateTime()); // 第二次沟通时间
-                curList.add(taskDTO.getSecondCommunicateContent()); // 第二次沟通内容
-                curList.add(taskDTO.getThreeCommunicateTime()); // 第三次沟通时间
-                curList.add(taskDTO.getThreeCommunicateContent()); // 第三次沟通内容
-                curList.add(taskDTO.getMessageTime());//留言时间
+                // 是否有效
+                curList.add(status);
+                // 第一次拨打时间
+                curList.add(taskDTO.getFirstCallTime());
+                // 第一次沟通时间
+                curList.add(taskDTO.getFirstCommunicateTime());
+                // 第一次沟通内容
+                curList.add(taskDTO.getFirstCommunicateContent());
+                // 第二次沟通时间
+                curList.add(taskDTO.getSecondCommunicateTime());
+                // 第二次沟通内容
+                curList.add(taskDTO.getSecondCommunicateContent());
+                // 第三次沟通时间
+                curList.add(taskDTO.getThreeCommunicateTime());
+                // 第三次沟通内容
+                curList.add(taskDTO.getThreeCommunicateContent());
+                //留言时间
+                curList.add(taskDTO.getMessageTime());
                 dataList.add(curList);
             }
         }
@@ -517,10 +539,9 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
-     *
      * @return
      */
-    private List<Object> getHeadTitleList1() {
+    private List<Object> getCommunicateRecordsHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("资源ID");
         headTitleList.add("创建时间");
@@ -618,7 +639,7 @@ public class ExtendClueDistributionedTaskController {
         userAdminList = userAdminJson.getData();
       }
       userList.addAll(userAdminList);
-        return userList;
+      return userList;
 
     }
 
