@@ -25,6 +25,9 @@ import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.client.HeliClientFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -93,8 +96,15 @@ public class HeliClientController {
     }
     
     
+    /**
+     * 坐席登录
+    * @param heLiClientOutboundReqDTO
+    * @return
+     */
     @PostMapping("/login")
     @ResponseBody
+    @LogRecord(description = "合力坐席登录", operationType = OperationType.LOGIN,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
     public JSONResult login (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String clientNo = heLiClientOutboundReqDTO.getClientNo();
           if(!CommonUtil.isNotBlank(clientNo)) {
@@ -131,6 +141,8 @@ public class HeliClientController {
      */
     @ResponseBody
     @PostMapping("/logout")
+    @LogRecord(description = "合力坐席退出", operationType = OperationType.LOGINOUT,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
     public JSONResult logout (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String clientNo = heLiClientOutboundReqDTO.getClientNo();
           if(!CommonUtil.isNotBlank(clientNo)) {
@@ -152,6 +164,8 @@ public class HeliClientController {
      */
     @PostMapping("/outbound")
     @ResponseBody
+    @LogRecord(description = "合力坐席外呼", operationType = OperationType.OUTBOUNDCALL,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
     public JSONResult outbound (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String customerPhone = heLiClientOutboundReqDTO.getCustomerPhone();
           if (StringUtils.isBlank(customerPhone)) {
