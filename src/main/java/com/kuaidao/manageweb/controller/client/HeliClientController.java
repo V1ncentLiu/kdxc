@@ -103,8 +103,8 @@ public class HeliClientController {
      */
     @PostMapping("/login")
     @ResponseBody
-    @LogRecord(description = "合力坐席登录", operationType = OperationType.LOGIN,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
+   /* @LogRecord(description = "合力坐席登录", operationType = OperationType.LOGIN,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)*/
     public JSONResult login (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String clientNo = heLiClientOutboundReqDTO.getClientNo();
           if(!CommonUtil.isNotBlank(clientNo)) {
@@ -141,8 +141,8 @@ public class HeliClientController {
      */
     @ResponseBody
     @PostMapping("/logout")
-    @LogRecord(description = "合力坐席退出", operationType = OperationType.LOGINOUT,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
+/*    @LogRecord(description = "合力坐席退出", operationType = OperationType.LOGINOUT,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)*/
     public JSONResult logout (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String clientNo = heLiClientOutboundReqDTO.getClientNo();
           if(!CommonUtil.isNotBlank(clientNo)) {
@@ -164,8 +164,8 @@ public class HeliClientController {
      */
     @PostMapping("/outbound")
     @ResponseBody
-    @LogRecord(description = "合力坐席外呼", operationType = OperationType.OUTBOUNDCALL,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
+   /* @LogRecord(description = "合力坐席外呼", operationType = OperationType.OUTBOUNDCALL,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)*/
     public JSONResult outbound (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String customerPhone = heLiClientOutboundReqDTO.getCustomerPhone();
           if (StringUtils.isBlank(customerPhone)) {
