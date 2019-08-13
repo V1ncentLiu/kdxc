@@ -1639,17 +1639,22 @@
                         var ary = [];
                         for (var i = 0; i < domains.length; i++) {
                             // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-                            ary.push(domains[i].value);//把输入的品牌名称放入一个数组
-                            var s = ary.join(",") + ",";
-                            for (var j = 0; j < ary.length; j++) {
-                                console.log(ary[j])
-                                if (ary[j] != "") {
-                                    if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
-                                        this.$message({
-                                            message: '请不要输入相同品牌',
-                                            type: 'warning'
-                                        });
-                                        return;
+                            if(domains[i].value != ""){
+                                //把输入的品牌名称放入一个数组
+                                ary.push(domains[i].value);
+                                var s = ary.join(",") + ",";
+                                for (var j = 0; j < ary.length; j++) {
+                                    console.log(ary[j])
+                                    if (ary[j] != "") {
+                                        if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                            this.$message({
+                                                message: '请不要输入相同品牌',
+                                                type: 'warning'
+                                            });
+                                            //保存按钮可点击
+                                            this.saveDisabled = false;
+                                            return;
+                                        }
                                     }
                                 }
                             }
@@ -1659,7 +1664,7 @@
                     }
                     if (radioSelect == 1 && tradeProject == "") {
                         this.$message({
-                            message: '请输入品牌名称',
+                            message: '请输入考虑同行业的品牌名称',
                             type: 'warning'
                         });
                         //保存按钮可点击
