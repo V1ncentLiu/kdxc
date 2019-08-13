@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.client;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -60,9 +61,16 @@ public interface HeliClientFeignClient {
     @PostMapping("/listClientsPage")
     public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(HeliClientReqDTO heliClientReqDTO);
 
+    /**
+     * 查询坐席相关信息
+    * @param heliClientReqDTO
+    * @return
+     */
+    @PostMapping("/listClientByParams")
+    public JSONResult<List<HeliClientRespDTO>> listClientByParams(@RequestBody HeliClientReqDTO heliClientReqDTO);
     
     @Component
-    static class HystrixClientFallback implements HeliClientFeignClient {
+    static   class HystrixClientFallback implements HeliClientFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(ClientFeignClient.class);
 
@@ -90,6 +98,12 @@ public interface HeliClientFeignClient {
         @Override
         public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(HeliClientReqDTO heliClientReqDTO) {
             return fallBackError("分页查询坐席列表");
+        }
+
+        @Override
+        public JSONResult<List<HeliClientRespDTO>> listClientByParams(
+                HeliClientReqDTO heliClientReqDTO) {
+            return fallBackError("查询坐席相关信息");
         }
         
     }
