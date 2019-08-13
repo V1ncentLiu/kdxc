@@ -421,14 +421,18 @@
                         <el-form-item label="性别：" :label-width="formLabelWidth"> {{viewForm.sexName}}</el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="手机号：" :label-width="formLabelWidth">
+                        <el-form-item class="redLabel" v-if="viewForm.phoneEdit == 1" label="手机号：" :label-width="formLabelWidth">
                             <span v-show="viewForm.phoneEdit == 1" style="color: red">{{viewForm.phone}}</span>
-                            <span v-show="viewForm.phoneEdit == 0">{{viewForm.phone}}</span>
+                        </el-form-item>
+                        <el-form-item v-else label="手机号：" :label-width="formLabelWidth">
+                            {{viewForm.phone}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12" v-for="(domain, index) in dynamicValidateForm.domains">
-                        <el-form-item v-if="domain.value" :label="'手机号' + (parseInt(index)+2) + ':'" :label-width="formLabelWidth">
+                        <el-form-item class="redLabel" v-if="domain.value && domain.edit == 1" :label="'手机号' + (parseInt(index)+2) + '：'" :label-width="formLabelWidth">
                             <span v-show="domain.edit == 1" style="color: red">{{domain.value}}</span>
+                        </el-form-item>
+                        <el-form-item  v-else-if="domain.value && domain.edit == 0" :label="'手机号' + (parseInt(index)+2) + '：'" :label-width="formLabelWidth">
                             <span v-show="domain.edit == 0">{{domain.value}}</span>
                         </el-form-item>
                     </el-col>
