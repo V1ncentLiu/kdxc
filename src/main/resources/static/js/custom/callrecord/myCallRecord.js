@@ -268,7 +268,7 @@ var myCallRecordVm = new Vue({
     	},
     	switchSoundBtn(id,url,callSource){
             // this.audioShow=true;
-    		if(callSource=='2'){
+    		if(callSource=='2' || callSource=='3'){
     			// switchSound(id,url);
                 window.parent.open(url)
     			return;
