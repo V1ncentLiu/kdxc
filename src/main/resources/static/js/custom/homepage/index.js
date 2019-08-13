@@ -332,7 +332,10 @@ var homePageVM=new Vue({
     		     return;
         	}
         	var cno = this.loginClientForm.cno;
-        	
+        	//验证坐席是否属于自己
+        	if(!this.validHeliClientNo(cno)){
+        		return;
+        	}
         	var param = {};
         	param.bindType = bindType+"";
         	param.clientNo = cno;
@@ -674,6 +677,12 @@ var homePageVM=new Vue({
              	// sessionStorage.removeItem("loginClient");
              	// sessionStorage.removeItem("accountId");
                  localStorage.removeItem("clientInfo");
+                 
+                 homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
+                 homePageVM.loginClientForm.bindPhoneType=1;
+                 homePageVM.loginClientForm.cno='';
+                 homePageVM.loginClientForm.bindPhone='';
+                 homePageVM.loginClientForm.loginClient='';
              }else{
             		homePageVM.$message({message:data.msg,type:'error'});
              }
@@ -890,7 +899,35 @@ var homePageVM=new Vue({
     			
     			return isPass;
     		
-    	}
+    	},
+    	validHeliClientNo(cno){//验证合力坐席是否属于自己
+			var isPass =false;
+			$.ajax({  
+				type: "POST",  
+				url: "/client/heliClient/queryClientInfoByCno",          
+				data: JSON.stringify({clientNo:cno}),   
+				dataType: 'json',     
+				async: false, //设置为同步请求
+				contentType:"application/json",
+				success: function(data){  
+					console.info(data);
+					if(data.code==0){
+						isPass= data.data;
+						if(!isPass){
+							homePageVM.$message({message:"登陆失败，该坐席号不属于您的归属部门",type:'error'});
+						}
+					}else{
+						homePageVM.$message({message:data.msg+"(验证坐席号归属部门)",type:'error'});
+					}
+				},  
+				error: function() {     
+				     
+				}
+			})
+			
+			return isPass;
+		
+	}
     
          
   	},
