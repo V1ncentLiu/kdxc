@@ -1205,34 +1205,47 @@ var loginUserId=[[${loginUserId}]];
                             clueIntention.city = ""
                             clueIntention.district=""
                         }
-                	    
-
                         //是否考虑同行
                         var radioSelect= this.form.radioSelect;
                         clueIntention.istrade=radioSelect;
-                        //同行业项目
-                        var domains=this.form.domains;
-                        var ary=[];   
-                        for(var i=0;i<domains.length;i++){
-                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-                            ary.push(domains[i].value);//把输入的手机号放入一个数组
-                            var s = ary.join(",")+",";                            
-                            // console.log(ary)
-                            for(var j=0;j<ary.length;j++) {
-                                console.log(ary[j])
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要输入相同品牌',
-                                            type: 'warning'
-                                        });
-                                        return;
+                        var  tradeProject;
+                        if (radioSelect == 1) {
+                            //同行业项目
+                            var domains = this.form.domains;
+                            var ary = [];
+                            for (var i = 0; i < domains.length; i++) {
+                                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                                if (domains[i].value != "") {
+                                    ary.push(domains[i].value);//把输入的手机号放入一个数组
+                                    var s = ary.join(",") + ",";
+                                    // console.log(ary)
+                                    for (var j = 0; j < ary.length; j++) {
+                                        console.log(ary[j])
+                                        if (ary[j] != "") {
+                                            if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                                this.$message({
+                                                    message: '请不要输入相同品牌',
+                                                    type: 'warning'
+                                                });
+                                                addCustomerVM.btnDisabled = false;
+                                                return;
+                                            }
+                                        }
                                     }
-                                }                                
+                                }
                             }
+                            tradeProject = ary.join(',');
+                            clueIntention.tradeProject = tradeProject;
                         }
-                        var  tradeProject = ary.join(',');
-                        clueIntention.tradeProject=tradeProject;
+                        if (radioSelect == 1 && tradeProject == "") {
+                            this.$message({
+                                message: '请输入考虑同行业的品牌名称',
+                                type: 'warning'
+                            });
+                            //保存按钮可点击
+                            addCustomerVM.btnDisabled = false;
+                            return;
+                        }
                         var clue={};
               	        clue.clueId=clueId;
                         clue.clueCustomer=clueCustomer;
