@@ -304,6 +304,7 @@ var homePageVM=new Vue({
         },
         changeClientType(selectedValue){
         	this.$refs.loginClientForm.resetFields();
+        	this.$refs.loginClientForm.clearValidate();
         	this.loginClientForm.clientType=selectedValue;
         },
         loginClient(formName){
