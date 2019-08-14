@@ -424,7 +424,7 @@ public class OptRuleController {
             logger.error("export rule_report res{{}}", listNoPage);
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelOptRule(dataList);
 
 
         String name = "优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
@@ -458,7 +458,7 @@ public class OptRuleController {
         headTitleList.add("规则有效结束时间");
         headTitleList.add("创建人");
         headTitleList.add("最后编辑人");
-        headTitleList.add("分配小组");
+        headTitleList.add("分配电销组");
         headTitleList.add("状态");
         return headTitleList;
     }
