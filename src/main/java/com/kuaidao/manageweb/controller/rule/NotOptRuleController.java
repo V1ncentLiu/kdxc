@@ -426,7 +426,7 @@ public class NotOptRuleController {
             logger.error("export rule_report res{{}}", listNoPage);
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelNotOptRule(dataList);
 
 
         String name = "非优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";

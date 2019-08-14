@@ -178,7 +178,7 @@ public class ConsoleController {
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getOrgId());
             JSONResult<DashboardTeleGroupDto> dashboard =
-                    dashboardTeleGroupFeignClient.findTeleGroupDataByUserId(idEntityLong);
+                    dashboardTeleGroupFeignClient.findTeleGroupDataByOrgId(idEntityLong);
             DashboardTeleGroupDto data = dashboard.getData();
             if (data == null) {
                 data = new DashboardTeleGroupDto();

@@ -340,6 +340,20 @@ public class CallRecordController {
            if (isBusLimit &&  busMap.get("result")!=null) {
               return (JSONResult)busMap.get("result");
             }
+           if (isBusLimit) {
+               //商学院组织机构
+               Long selectTeleGroupId = myCallRecordReqDTO.getTeleGroupId();
+               if (selectTeleGroupId!=null) {
+                   List<UserInfoDTO> userList = getTeleSaleByOrgId(selectTeleGroupId);
+                   if (CollectionUtils.isEmpty(userList)) {
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
+               }
+           }
+         
            
            if (!isBusLimit) {
                if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {

@@ -275,11 +275,15 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
+                		 if(callSource=='3'){
+                			 url = "/client/heliClient/downloadHeliClientAudio?url="+url;
+                		 }
             			 var x=new XMLHttpRequest();
-            			 x.open("GET", url, true);
-            			 x.responseType = 'blob';
-            			 x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
-            			 x.send();
+             			x.open("GET", url, true);
+             			x.responseType = 'blob';
+             			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+             			x.send(); 
+                		 
                 	 }
                      
                  }else{
