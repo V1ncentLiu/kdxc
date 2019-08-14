@@ -785,9 +785,7 @@ var loginUserId=[[${loginUserId}]];
 //                showwchatcode:'',
 //                showWxCodeFalg:false,
                 form: {
-                    domains: [{ //同行业品牌数据
-                        value: ''
-                    }],
+                    domains: [],
                     radioSelect:'0',//是否考虑同行业
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
@@ -1783,33 +1781,32 @@ var loginUserId=[[${loginUserId}]];
         	   if(this.form.city){
                    this.currentCity(this.form.city)
                }
-        	   // if(intention.purProjectType==2){
-         		//   this.outsideProjectShow=true; //外部项目默认显示
-         		//   this.insideProjectShow=false; //内部项目不默认显示
-         	  //  }
-             //是否考虑同行业
-             this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
-        	   console.log( intention.istrade)
-             //同行业项目
-             if (intention.tradeProject) {
-               this.domainShow = true;
-               console.log("--------------")
-               console.log(intention.tradeProject)
-               console.log("--------------")
-               this.form.domains = [];
-               var tradeProjectArr = intention.tradeProject.split(",");
-               for(var i=0;i<tradeProjectArr.length;i++){
-                 this.form.domains.push({
-                   value: tradeProjectArr[i],
-                 });
-               }
-             }else{
-               // //同行业品牌占位
-               // this.form.domains.push({
-               //   value: ''
-               // });
-             }
+               //是否考虑同行业
+               if (intention.istrade == null && intention.purProjectType == 2) {
+                   this.form.radioSelect = 1+"";
+                   if(intention.purOutProject != null){
+                       this.domainShow = true;
+                       this.form.domains.push({value:intention.purOutProject});
+                   }
 
+               }else{
+                   this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
+                   //同行业项目
+                   if (intention.tradeProject != null) {
+                       this.domainShow = true;
+                       var tradeProjectArr = intention.tradeProject.split(",");
+                       for(var i=0;i<tradeProjectArr.length;i++){
+                           this.form.domains.push({
+                               value: tradeProjectArr[i],
+                           });
+                       }
+                   }else{
+                       //同行业品牌占位
+                       this.form.domains.push({
+                           value: ''
+                       });
+                   }
+               }
         	   if(this.form.intentionCategory){
                    this.projectChangeSelect(this.form.intentionCategory)
                }else{
