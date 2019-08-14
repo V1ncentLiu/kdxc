@@ -249,6 +249,11 @@ public class HeliClientController {
         return new JSONResult<Boolean>().success(isBelongToSelf);
     }
     
+    /**
+     * 下载合力坐席通话录音
+    * @param url  录音文件地址
+    * @return
+     */
     @RequestMapping("/downloadHeliClientAudio")
     @ResponseBody
     public ResponseEntity downloadHeliClientAudio(String url) {
