@@ -708,7 +708,7 @@ public class ClientController {
      */
     @PostMapping("/qimoLogin")
     @ResponseBody
-    @LogRecord(description = "七陌坐席", operationType = OperationType.LOGIN,
+    @LogRecord(description = "七陌坐席", operationType = OperationType.CLIENT_LOGIN,
             menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
         String loginName = reqDTO.getLoginName();
@@ -768,7 +768,7 @@ public class ClientController {
      */
     @PostMapping("/qimoLogout")
     @ResponseBody
-    @LogRecord(description = "七陌坐席退出登录", operationType = OperationType.LOGINOUT,
+    @LogRecord(description = "七陌坐席退出登录", operationType = OperationType.CLIENT_LOGOUT,
         menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult loginout(HttpServletRequest request) {
         Session session = SecurityUtils.getSubject().getSession();
@@ -861,7 +861,7 @@ public class ClientController {
      */
     @PostMapping("/trClientLogout")
     @ResponseBody
-    @LogRecord(description = "天润坐席退出", operationType = OperationType.LOGINOUT,
+    @LogRecord(description = "天润坐席退出", operationType = OperationType.CLIENT_LOGOUT,
     menuName = MenuEnum.TR_CLIENT_MANAGEMENT)
     public JSONResult trClientLogout(@RequestBody TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
         String cno = trAxbOutCallReqDTO.getCno();

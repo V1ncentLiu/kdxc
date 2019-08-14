@@ -275,11 +275,26 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-            			 var x=new XMLHttpRequest();
-            			 x.open("GET", url, true);
-            			 x.responseType = 'blob';
-            			 x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
-            			 x.send();
+                		 if(callSource=='3'){
+                			 axios.get('/client/heliClient/downloadHeliClientAudio', {
+            				    params: {
+            				      url: url
+            				    }
+            				  })
+            				  .then(function (response) {
+            					  download(response, fileNameArr[fileNameArr.length-1], 'audio/*' ); 
+            				  })
+            				  .catch(function (error) {
+            				    console.log(error);
+            				  });
+                			return; 
+                		 }else{
+                			 var x=new XMLHttpRequest();
+                			 x.open("GET", url, true);
+                			 x.responseType = 'blob';
+                			 x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+                			 x.send();
+                		 }
                 	 }
                      
                  }else{
