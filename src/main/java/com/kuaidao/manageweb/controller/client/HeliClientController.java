@@ -9,13 +9,17 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import org.springframework.web.client.RestTemplate;
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
@@ -63,6 +67,9 @@ public class HeliClientController {
     @Autowired
     OrganizationFeignClient organizationFeignClient;
     
+    @Autowired
+    RestTemplate restTemplate;
+    
     
     /**
      * 跳转 合力坐席管理页面
@@ -107,8 +114,8 @@ public class HeliClientController {
      */
     @PostMapping("/login")
     @ResponseBody
-   /* @LogRecord(description = "合力坐席登录", operationType = OperationType.LOGIN,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)*/
+    @LogRecord(description = "合力坐席登录", operationType = OperationType.CLIENT_LOGIN,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
     public JSONResult login (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String clientNo = heLiClientOutboundReqDTO.getClientNo();
           if(!CommonUtil.isNotBlank(clientNo)) {
@@ -145,8 +152,8 @@ public class HeliClientController {
      */
     @ResponseBody
     @PostMapping("/logout")
-/*    @LogRecord(description = "合力坐席退出", operationType = OperationType.LOGINOUT,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)*/
+   @LogRecord(description = "合力坐席退出", operationType = OperationType.CLIENT_LOGOUT,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
     public JSONResult logout (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String clientNo = heLiClientOutboundReqDTO.getClientNo();
           if(!CommonUtil.isNotBlank(clientNo)) {
@@ -168,8 +175,8 @@ public class HeliClientController {
      */
     @PostMapping("/outbound")
     @ResponseBody
-   /* @LogRecord(description = "合力坐席外呼", operationType = OperationType.OUTBOUNDCALL,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)*/
+    @LogRecord(description = "合力坐席外呼", operationType = OperationType.OUTBOUNDCALL,
+    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
     public JSONResult outbound (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
           String customerPhone = heLiClientOutboundReqDTO.getCustomerPhone();
           if (StringUtils.isBlank(customerPhone)) {
@@ -240,6 +247,14 @@ public class HeliClientController {
         }
         
         return new JSONResult<Boolean>().success(isBelongToSelf);
+    }
+    
+    @RequestMapping("/downloadHeliClientAudio")
+    @ResponseBody
+    public ResponseEntity downloadHeliClientAudio(String url) {
+        HttpHeaders header  = new HttpHeaders();
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(url,HttpMethod.GET,new HttpEntity<>(header),byte[].class);
+        return responseEntity;
     }
     
 
