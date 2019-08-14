@@ -785,9 +785,7 @@ var loginUserId=[[${loginUserId}]];
 //                showwchatcode:'',
 //                showWxCodeFalg:false,
                 form: {
-                    domains: [{ //同行业品牌数据
-                        value: ''
-                    }],
+                    domains: [],
                     radioSelect:'0',//是否考虑同行业
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
@@ -1205,34 +1203,47 @@ var loginUserId=[[${loginUserId}]];
                             clueIntention.city = ""
                             clueIntention.district=""
                         }
-                	    
-
                         //是否考虑同行
                         var radioSelect= this.form.radioSelect;
                         clueIntention.istrade=radioSelect;
-                        //同行业项目
-                        var domains=this.form.domains;
-                        var ary=[];   
-                        for(var i=0;i<domains.length;i++){
-                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-                            ary.push(domains[i].value);//把输入的手机号放入一个数组
-                            var s = ary.join(",")+",";                            
-                            // console.log(ary)
-                            for(var j=0;j<ary.length;j++) {
-                                console.log(ary[j])
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要输入相同品牌',
-                                            type: 'warning'
-                                        });
-                                        return;
+                        var  tradeProject;
+                        if (radioSelect == 1) {
+                            //同行业项目
+                            var domains = this.form.domains;
+                            var ary = [];
+                            for (var i = 0; i < domains.length; i++) {
+                                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                                if (domains[i].value != "") {
+                                    ary.push(domains[i].value);//把输入的手机号放入一个数组
+                                    var s = ary.join(",") + ",";
+                                    // console.log(ary)
+                                    for (var j = 0; j < ary.length; j++) {
+                                        console.log(ary[j])
+                                        if (ary[j] != "") {
+                                            if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                                this.$message({
+                                                    message: '请不要输入相同品牌',
+                                                    type: 'warning'
+                                                });
+                                                addCustomerVM.btnDisabled = false;
+                                                return;
+                                            }
+                                        }
                                     }
-                                }                                
+                                }
                             }
+                            tradeProject = ary.join(',');
+                            clueIntention.tradeProject = tradeProject;
                         }
-                        var  tradeProject = ary.join(',');
-                        clueIntention.tradeProject=tradeProject;
+                        if (radioSelect == 1 && tradeProject == "") {
+                            this.$message({
+                                message: '请输入考虑同行业的品牌名称',
+                                type: 'warning'
+                            });
+                            //保存按钮可点击
+                            addCustomerVM.btnDisabled = false;
+                            return;
+                        }
                         var clue={};
               	        clue.clueId=clueId;
                         clue.clueCustomer=clueCustomer;
@@ -1770,33 +1781,32 @@ var loginUserId=[[${loginUserId}]];
         	   if(this.form.city){
                    this.currentCity(this.form.city)
                }
-        	   // if(intention.purProjectType==2){
-         		//   this.outsideProjectShow=true; //外部项目默认显示
-         		//   this.insideProjectShow=false; //内部项目不默认显示
-         	  //  }
-             //是否考虑同行业
-             this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
-        	   console.log( intention.istrade)
-             //同行业项目
-             if (intention.tradeProject) {
-               this.domainShow = true;
-               console.log("--------------")
-               console.log(intention.tradeProject)
-               console.log("--------------")
-               this.form.domains = [];
-               var tradeProjectArr = intention.tradeProject.split(",");
-               for(var i=0;i<tradeProjectArr.length;i++){
-                 this.form.domains.push({
-                   value: tradeProjectArr[i],
-                 });
-               }
-             }else{
-               // //同行业品牌占位
-               // this.form.domains.push({
-               //   value: ''
-               // });
-             }
+               //是否考虑同行业
+               if (intention.istrade == null && intention.purProjectType == 2) {
+                   this.form.radioSelect = 1+"";
+                   if(intention.purOutProject != null){
+                       this.domainShow = true;
+                       this.form.domains.push({value:intention.purOutProject});
+                   }
 
+               }else{
+                   this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
+                   //同行业项目
+                   if (intention.tradeProject != null  && intention.tradeProject != "") {
+                       this.domainShow = true;
+                       var tradeProjectArr = intention.tradeProject.split(",");
+                       for(var i=0;i<tradeProjectArr.length;i++){
+                           this.form.domains.push({
+                               value: tradeProjectArr[i],
+                           });
+                       }
+                   }else{
+                       //同行业品牌占位
+                       this.form.domains.push({
+                           value: ''
+                       });
+                   }
+               }
         	   if(this.form.intentionCategory){
                    this.projectChangeSelect(this.form.intentionCategory)
                }else{

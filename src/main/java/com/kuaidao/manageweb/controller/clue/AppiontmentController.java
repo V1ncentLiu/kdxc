@@ -26,6 +26,7 @@ import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -216,6 +217,24 @@ public class AppiontmentController {
     	 UserInfoDTO user = getUser();
     	 if(user.getBusinessLine() !=null ) {
     		 param.setBusinessLine(user.getBusinessLine());
+    		 List<Integer> phaseList = new ArrayList<>();
+    		 if(user.getRoleList() !=null && user.getRoleList().size()>0) {
+    			 RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+    			 if(RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())) {
+    				 phaseList.add(CluePhase.PHASE_1ST.getCode());
+    				 phaseList.add(CluePhase.PHAE_2ND.getCode());
+    				 phaseList.add(CluePhase.PHAE_3RD.getCode());
+    				 phaseList.add(CluePhase.PHAE_4TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_6TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_10TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_11TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_12TH.getCode());
+    			 }else {
+    				 phaseList.add(CluePhase.PHASE_1ST.getCode());
+    				 phaseList.add(CluePhase.PHAE_2ND.getCode());
+    			 }
+    		 }
+    		 param.setPhaseList(phaseList);
     	 }
     	
         JSONResult<Map> map = appiontmentFeignClient.repeatPhoneMap(param);
