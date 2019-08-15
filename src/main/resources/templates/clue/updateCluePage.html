@@ -549,6 +549,11 @@
                 deleteShow:false,//删除新增手机号输入框
                 loading:false,
                 confirmBtnDisabled:false,//提交按钮 是否禁用
+                phone:'',
+                phone2:'',
+                phone3:'',
+                phone4:'',
+                phone5:'',
                 form: {
                     clueId:'',
                     cusId:'',
@@ -643,7 +648,7 @@
                 rules:{
                     phone:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.email==""&&addClueVM.form.phone=="" && addClueVM.form.wechatUrl==null){
+                            if(!addClueVM.form.qq&&!addClueVM.form.wechat&&!addClueVM.form.wechat2&&!addClueVM.form.email&&!addClueVM.form.phone && !addClueVM.form.wechatUrl){
                                 callback(new Error("至少填一项"));
                             }
                             // else{
@@ -665,7 +670,7 @@
                     ],
                     wechat:[
                         { validator:function(rule,value,callback){
-                                if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.email==""&&addClueVM.form.phone=="" && addClueVM.form.wechatUrl==null){
+                                if(!addClueVM.form.qq&&!addClueVM.form.wechat&&!addClueVM.form.wechat2&&!addClueVM.form.email&&!addClueVM.form.phone && !addClueVM.form.wechatUrl){
                                     callback(new Error("至少填一项"));
                                 }else{
                                     callback();
@@ -674,7 +679,7 @@
                     ],
                     qq:[
                         { validator:function(rule,value,callback){
-                                if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.email==""&&addClueVM.form.phone=="" && addClueVM.form.wechatUrl==null){
+                                if(!addClueVM.form.qq&&!addClueVM.form.wechat&&!addClueVM.form.wechat2&&!addClueVM.form.email&&!addClueVM.form.phone && !addClueVM.form.wechatUrl){
                                     callback(new Error("至少填一项"));
                                 }else{
                                     callback();
@@ -683,7 +688,7 @@
                     ],
                     email:[
                         { validator:function(rule,value,callback){
-                                if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.email==""&&addClueVM.form.phone=="" && addClueVM.form.wechatUrl==null){
+                                if(!addClueVM.form.qq&&!addClueVM.form.wechat&&!addClueVM.form.wechat2&&!addClueVM.form.email&&!addClueVM.form.phone && !addClueVM.form.wechatUrl){
                                     callback(new Error("至少填一项"));
                                 }else{
                                     callback();
@@ -863,6 +868,48 @@
             openViewForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
+                        // 判断手机号是否重复开始
+                        var domains=this.dynamicValidateForm.domains;
+                        var phone=this.form.phone;
+                        var ary=[];
+                        console.log(domains)
+                        for(var i=0;i<domains.length;i++){
+                            // 判断弹框里的值是否与页面的手机号1重复
+                            if(domains[i].value==phone&&phone!=""){
+                                this.$message({
+                                    message: '请不要提交重复手机号',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            ary.push(domains[i].value);//把输入的手机号放入一个数组
+                            var s = ary.join(",")+",";
+                            console.log(ary)
+                            for(var j=0;j<ary.length;j++) {
+                                console.log(ary[j])
+                                if(ary[j]!=""){
+                                    if((","+s.replace(ary[j]+",","")).indexOf(","+ary[j]+",")>-1) {
+                                        this.$message({
+                                            message: '请不要提交重复手机号',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }
+
+                            }
+                            // 如果输入的是非数字
+                            if(/^[0-9]*$/.test(domains[i].value) == false){
+                                this.$message({
+                                    message: '请输入数字',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+
+                        }
+                        // 判断手机号是否重复结束
                         //----资源基本信息---//
                         this.viewFormVisible=true;
                         this.viewForm=true;
@@ -1216,7 +1263,11 @@
             number(){
     　　　     	this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                 this.form.phone=this.form.phone.replace('.','');
-                this.form.phoneEdit =1;
+                if(this.form.phone != this.phone){
+                    this.form.phoneEdit =1;
+                }else {
+                    this.form.phoneEdit =0;
+                }
                 // if(this.form.phone.length==11){
                 if(this.form.phone!=""&&this.form.phone.length!=0){
                     this.isDisabled=false;
@@ -1229,7 +1280,31 @@
                 for(var i=0;i<domains.length;i++){
                     domains[i].value=domains[i].value.replace(/[^\.\d]/g,'');
                     domains[i].value=domains[i].value.replace('.','');
-                    domains[i].edit =1;
+                    if(i==0)  {
+                        if(this.phone2 != domains[i].value){
+                            domains[i].edit =1;
+                        }else {
+                            domains[i].edit =0;
+                        }
+                    } else if(i==1)  {
+                        if(this.phone3 != domains[i].value){
+                            domains[i].edit =1;
+                        }else {
+                            domains[i].edit =0;
+                        }
+                    }else if(i==2)  {
+                        if(this.phone4 != domains[i].value){
+                            domains[i].edit =1;
+                        }else {
+                            domains[i].edit =0;
+                        }
+                    }else if(i==3)  {
+                        if(this.phone5 != domains[i].value){
+                            domains[i].edit =1;
+                        }else {
+                            domains[i].edit =0;
+                        }
+                    }
                 }
             },
             qqnumber(){
@@ -1399,6 +1474,8 @@
                 }
                 this.form.cusName=clueInfo.clueCustomer.cusName;
                 this.form.phone=clueInfo.clueCustomer.phone;
+                this.phone = clueInfo.clueCustomer.phone;
+
                 // if(clueInfo.clueCustomer.phone && clueInfo.clueCustomer.phone.length==11){
                 if(clueInfo.clueCustomer.phone){
                     this.isDisabled=false;
@@ -1415,6 +1492,7 @@
                     phone2.value = customer.phone2;
                   phone2.edit =0;
                     phoneArr.push(phone2);
+                    this.phone2 = customer.phone2;
 
                 }
                 if (customer.phone3) {
@@ -1422,6 +1500,7 @@
                     phone3.value = customer.phone3;
                   phone3.edit =0;
                     phoneArr.push(phone3);
+                    this.phone3 = customer.phone3;
 
                 }
 
@@ -1430,6 +1509,7 @@
                     phone4.value = customer.phone4;
                   phone4.edit =0;
                     phoneArr.push(phone4);
+                    this.phone4 = customer.phone4;
 
                 }
                 if (customer.phone5) {
@@ -1437,6 +1517,7 @@
                     phone5.value = customer.phone5;
                   phone5.edit =0;
                     phoneArr.push(phone5);
+                    this.phone5 = customer.phone5;
                 }
                 this.dynamicValidateForm.domains = phoneArr;
                 if(phoneArr.length>0){
