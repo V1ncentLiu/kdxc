@@ -19,9 +19,9 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>
-        <!-- <shiro:hasPermission name="statistics:telemarketingFollow:export"> -->
+        <shiro:hasPermission name="statistics:telemarketingFollow:export">
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        <!-- </shiro:hasPermission> -->
+        </shiro:hasPermission>
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
@@ -50,7 +50,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled" @change="currentTelSale">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -101,6 +101,14 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
+<style>
+    .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {
+        font-weight: bold;
+    }
+    .mainSearchBg .el-form-item__label{
+        width: 100px;
+    }
+</style>
 <script th:inline="javascript">
     var parentParam=[[${appointmentVisitQueryDto}]];
     var orgIdList=[[${teleGroupList}]];// 电销组
@@ -131,16 +139,16 @@
                     projectId: ''
                 },
                 tableData: [
-                    {
-                        projectName: '项目名称',
-                        invitationNum: '1',
-                        cancelInvitationNum:'12',
-                        deleteInvitationNum: '123',
-                        invitationFrequency: '1234',
-                        cancelInvitationFrequency: '12345',
-                        deleteInvitationFrequency: '1233444',
-                        reserveTime: '20190101',
-                    }
+                    // {
+                    //     projectName: '项目名称',
+                    //     invitationNum: '1',
+                    //     cancelInvitationNum:'12',
+                    //     deleteInvitationNum: '123',
+                    //     invitationFrequency: '1234',
+                    //     cancelInvitationFrequency: '12345',
+                    //     deleteInvitationFrequency: '1233444',
+                    //     reserveTime: '20190101',
+                    // }
                 ],
                 orgTeleArr: orgIdList, // 电销组
                 busSaleArr: '', // 电销顾问
@@ -329,8 +337,7 @@
                 var oHour = d.slice(8,10);
                 var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            },  
-            
+            },
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -404,8 +411,9 @@
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            this.currentTelSale(this.export.orgId);
-            
+            if(this.export.orgId){
+                this.currentTelSale(this.export.orgId);
+            }
             this.searchTable();
         },
         mounted(){

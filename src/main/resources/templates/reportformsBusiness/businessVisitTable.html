@@ -19,9 +19,9 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>
-        <!-- <shiro:hasPermission name="statistics:telemarketingFollow:export"> -->
+        <shiro:hasPermission name="statistics:telemarketingFollow:export">
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        <!-- </shiro:hasPermission> -->
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -49,7 +49,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable @change="currentTelSale">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -87,7 +87,8 @@
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="projectName" label="来访项目">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.projectName!='合计'" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
+                        <span v-else>{{scope.row.projectName}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="invitationNum" label="正常邀约数"></el-table-column>
@@ -104,6 +105,14 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
+<style>
+    .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {
+        font-weight: bold;
+    }
+    .mainSearchBg .el-form-item__label{
+        width: 100px;
+    }
+</style>
 <script th:inline="javascript">
     var orgIdList=[[${teleGroupList}]];// 电销组
     var projectList=[[${projectList}]];// 来访项目
@@ -133,16 +142,16 @@
                     projectId: ''
                 },
                 tableData: [
-                    {
-                        projectName: '项目名称',
-                        invitationNum: '1',
-                        cancelInvitationNum:'12',
-                        deleteInvitationNum: '123',
-                        invitationFrequency: '1234',
-                        cancelInvitationFrequency: '12345',
-                        deleteInvitationFrequency: '1233444',
-                        reserveTime: '20190101',
-                    }
+                    // {
+                    //     projectName: '项目名称',
+                    //     invitationNum: '1',
+                    //     cancelInvitationNum:'12',
+                    //     deleteInvitationNum: '123',
+                    //     invitationFrequency: '1234',
+                    //     cancelInvitationFrequency: '12345',
+                    //     deleteInvitationFrequency: '1233444',
+                    //     reserveTime: '20190101',
+                    // }
                 ],
                 orgTeleArr: orgIdList, // 电销组
                 busSaleArr: '', // 电销顾问
@@ -287,9 +296,10 @@
                 }
             },
             gotoTeam(row){
-                var userId = row.userId;// 话务专员id
+                var projectId = row.projectId;
+                var userId = this.export.userId;// 话务专员id
                 var orgId = this.export.orgId;// 话务组id
-                var projectId = this.export.projectId;
+                // var projectId = this.export.projectId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(userId){
