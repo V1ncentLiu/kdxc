@@ -83,9 +83,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="btnDisabled">搜索</el-button>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                    <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -105,7 +103,7 @@
                 <el-table-column prop="countResource" label="未收齐尾款笔数" width="200"></el-table-column>
                 <el-table-column prop="countClueId" label="未收齐尾款金额"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -122,7 +120,6 @@
             return {
                 loading:false,
                 isDisabled:false,
-                btnDisabled:false,
                 form: {
                     startTime:'',
                     endTime:'',
@@ -141,7 +138,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
                 pickerOptions0: {
                   disabledDate(time) {
@@ -212,7 +209,6 @@
                             type: 'error'
                         });
                         mainDivVM.loading=false;
-                        mainDivVM.btnDisabled=false; 
                         return ;
                     }
                     var resobj= response.data;
@@ -222,7 +218,6 @@
                             type: 'error'
                         });
                         mainDivVM.loading=false;
-                        mainDivVM.btnDisabled=false; 
                         return ;
                     }
                     if(resobj.code!='0'){
@@ -231,7 +226,6 @@
                             type: 'error'
                         });
                         mainDivVM.loading=false;
-                        mainDivVM.btnDisabled=false; 
                         return ;
                     }  
                     var resobjData=resobj.data.data;                    
@@ -246,8 +240,7 @@
                     }else{
                         // loading
                         mainDivVM.loading=false;
-                    }   
-                    mainDivVM.btnDisabled=false;//按钮可点
+                    }
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
@@ -403,8 +396,8 @@
                     return end;
                 }
             },
-            searchYesterday(){//昨天
-                var today = new Date();
+            searchYesterday(){ // 昨天
+               var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
                var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
@@ -412,14 +405,13 @@
                this.form.endTime=endTime;
                this.searchTable(1);
             },
-            searchWeek(){//近七天
+            searchWeek(){ // 近七天
                  var a = new Date();
                  var year = a.getFullYear();
                  var month = a.getMonth();
                  var date = a.getDate();
                  var b = new Date(year,month,date);
                  var c = b.valueOf()-6*24*60*60*1000;
-                // var d = b.valueOf()+1*24*60*60*1000;
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
@@ -427,7 +419,7 @@
                  this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
                  this.searchTable(1);
             },
-            searchMonth(){//本月
+            searchMonth(){ // 本月 
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -435,10 +427,8 @@
                 var b = new Date(year,month,date);
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
-              //  var d = b.valueOf()+1*24*60*60*1000;
                 var startTime= new Date(c);
-               // var endTime = new Date(d);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
             },

@@ -267,11 +267,13 @@ var myCallRecordVm = new Vue({
 
         },
         switchSoundBtn(id,url,callSource){
-            this.audioShow=true;
-            if(callSource=='2'){
-                switchSound(id,url);
+            // this.audioShow=true;
+            if(callSource=='2' || callSource=='3'){
+                // switchSound(id,url);
+                window.parent.open(url)
                 return;
             }
+            var newWindow = window.open();
             var param = {};
             param.id=id;
             axios.post('/trafficCall/callRecord/getRecordFile',param)
@@ -279,7 +281,8 @@ var myCallRecordVm = new Vue({
                     var data =  response.data
                     if(data.code=='0'){
                         var url = data.data;
-                        switchSound(id,url);
+                        // switchSound(id,url);
+                        newWindow.location.href = url;
                     }else{
                         console.error(data);
                         myCallRecordVm.$message({message:data.msg,type:'error'});

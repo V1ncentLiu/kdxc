@@ -64,14 +64,14 @@
                     <el-date-picker
                             v-model="form.starTime"
                             type="datetime"
-                            placeholder="选择日期时间">
+                            placeholder="选择日期时间" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
                             v-model="form.endTime"
                             type="datetime"
-                            placeholder="选择日期时间">
+                            placeholder="选择日期时间" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
                     </el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
@@ -218,6 +218,16 @@
                         <el-select v-model="form.siteIsNull" placeholder="站点是否为空" clearable >
                             <el-option
                                 v-for="item in comArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否自建:">
+                        <el-select v-model="form.buildSelf" placeholder="是否自建" clearable >
+                            <el-option
+                                v-for="item in buildSelfArr"
                                 :key="item.value"
                                 :label="item.name"
                                 :value="item.value">
@@ -451,7 +461,8 @@
                     qq:"",
                     wechat:"",
                     email:"",
-                    siteIsNull:""
+                    siteIsNull:"",
+                    buildSelf:"",
                 },
                 pager:{
                     total: 0,
@@ -480,6 +491,11 @@
                     {value:"1",name:"是"},
                     {value:"0",name:"否"}
                 ],
+                  buildSelfArr:[
+                    {value:"",name:"全部"},
+                    {value:"1",name:"是"},
+                    {value:"0",name:"否"}
+                  ],
                 tableData:[],
                 customer:'',
                 basic:'',
@@ -551,8 +567,8 @@
                 var pageNum = this.pager.currentPage;
                 param.pageNum=pageNum;
                 param.pageSize=pageSize;
-                param.createTimeStart=this.form.starTime;
-                param.createTimeEnd=this.form.endTime;
+                param.createTimeStart=new Date(this.form.starTime);
+                param.createTimeEnd=new Date(this.form.endTime);
                 param.spreadAssignTimeStart=this.form.assignTimeStart;
                 param.spreadAssignTimeEnd=this.form.assignTimeEnd;
                 param.teleCompanyId=this.form.telemarketingBranch;
@@ -576,6 +592,7 @@
                 param.email = this.form.email;
                 param.wechat = this.form.wechat;
                 param.searchWord=this.form.searchWord;
+                param.buildSelf = this.form.buildSelf;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(pageNum > 5000){
@@ -1059,6 +1076,12 @@
         	document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
+          var a = new Date();
+          var year = a.getFullYear();
+          var month = a.getMonth();
+          var date = a.getDate();
+          this.form.starTime=new Date(year+"-" + month + "-" + date+" 00:00:00");
+          this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
             var storageDistributeExport1 = localStorage.getItem("distributeExport1");
             var storageDistributeExport2 = localStorage.getItem("distributeExport2");
             if(storageDistributeExport1){

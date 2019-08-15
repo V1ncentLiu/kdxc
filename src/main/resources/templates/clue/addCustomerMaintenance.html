@@ -554,7 +554,7 @@
                 <el-button type="primary" :disabled="saveDisabled" @click="submitForm('form')">保存客户信息</el-button>
                 <el-button type="success" v-show="showConfirmButtonFlag"  :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
                 </el-button>
-                <el-button @click="rebackClue">取 消</el-button>
+                <el-button @click="rebackClue">返回</el-button>
             </div>
         </el-form>
     </el-row>
@@ -1439,6 +1439,7 @@
             professionChange() {
                 if (this.form.radioSelect == "0") {//否
                     this.domainShow = false
+
                 } else if (this.form.radioSelect == "1") {//是
                     this.domainShow = true
                 }
@@ -1470,15 +1471,6 @@
                         valid = error;
                     });
                 }
-                // if (valid) {
-                //     if (valid) {
-                //         this.$refs[form].validateField(["phone"], (error) => {
-                //             if (error) {
-                //                 valid = false;
-                //             }
-                //         });
-                //     }
-                // }
 
                 if (valid) {
                     this.saveDisabled = true;
@@ -1584,16 +1576,6 @@
                             }
 
                         }
-                        // 如果输入的是非数字
-                        // if (/^[0-9]*$/.test(phoneArr[i].value) == false) {
-                        //     this.$message({
-                        //         message: '手机号请输入数字',
-                        //         type: 'warning'
-                        //     });
-                        //     this.saveDisabled = false;//保存按钮可点击
-                        //     return;
-                        // }
-
                     }
                     // 判断手机号重复结束
                     if (phoneArr.length > 0) {
@@ -1641,28 +1623,45 @@
                     //是否考虑同行
                     var radioSelect = this.form.radioSelect;
                     clueIntention.istrade = radioSelect;
-                    //同行业项目
-                    var domains = this.form.domains;
-                    var ary = [];
-                    for (var i = 0; i < domains.length; i++) {
-                        // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-                        ary.push(domains[i].value);//把输入的品牌名称放入一个数组
-                        var s = ary.join(",") + ",";
-                        for (var j = 0; j < ary.length; j++) {
-                            console.log(ary[j])
-                            if (ary[j] != "") {
-                                if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
-                                    this.$message({
-                                        message: '请不要输入相同品牌',
-                                        type: 'warning'
-                                    });
-                                    return;
+                    var  tradeProject;
+                    if (radioSelect == 1) {
+                        //同行业项目
+                        var domains = this.form.domains;
+                        var ary = [];
+                        for (var i = 0; i < domains.length; i++) {
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            if(domains[i].value != ""){
+                                //把输入的品牌名称放入一个数组
+                                ary.push(domains[i].value);
+                                var s = ary.join(",") + ",";
+                                for (var j = 0; j < ary.length; j++) {
+                                    console.log(ary[j])
+                                    if (ary[j] != "") {
+                                        if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                            this.$message({
+                                                message: '请不要输入相同品牌',
+                                                type: 'warning'
+                                            });
+                                            //保存按钮可点击
+                                            this.saveDisabled = false;
+                                            return;
+                                        }
+                                    }
                                 }
                             }
                         }
+                        tradeProject = ary.join(',');
+                        clueIntention.tradeProject=tradeProject;
                     }
-                    var  tradeProject = ary.join(',');
-                    clueIntention.tradeProject=tradeProject;
+                    if (radioSelect == 1 && tradeProject == "") {
+                        this.$message({
+                            message: '请输入考虑同行业的品牌名称',
+                            type: 'warning'
+                        });
+                        //保存按钮可点击
+                        this.saveDisabled = false;
+                        return;
+                    }
                     //省
                     var province = this.form.province;
                     clueIntention.province = province;
@@ -2137,11 +2136,6 @@
             //邀约来访
             inviteCustomer(form) {
                 var valid = true;
-                // this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
-                //     if (error) {
-                //         valid = false;
-                //     }
-                // });
                 //跟进记录校验
                 if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
                     this.$refs['LineRuleForm'].validate((error) => {
@@ -2281,16 +2275,6 @@
                             }
 
                         }
-                        // 如果输入的是非数字
-                        // if (/^[0-9]*$/.test(phoneArr[i].value) == false) {
-                        //     this.$message({
-                        //         message: '手机号请输入数字',
-                        //         type: 'warning'
-                        //     });
-                        //     this.saveDisabled = false;//保存按钮可点击
-                        //     return;
-                        // }
-
                     }
                     // 判断手机号重复结束
                     if (phoneArr.length > 0) {
@@ -2335,6 +2319,46 @@
                     //意向外部项目
                     var outsideProject = this.form.outsideProject;
                     clueIntention.purOutProject = outsideProject;
+                    //是否考虑同行
+                    var radioSelect = this.form.radioSelect;
+                    clueIntention.istrade = radioSelect;
+                    var  tradeProject;
+                    if (radioSelect == 1) {
+                        //同行业项目
+                        var domains = this.form.domains;
+                        var ary = [];
+                        for (var i = 0; i < domains.length; i++) {
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            if(domains[i].value != ""){
+                                //把输入的品牌名称放入一个数组
+                                ary.push(domains[i].value);
+                                var s = ary.join(",") + ",";
+                                for (var j = 0; j < ary.length; j++) {
+                                    console.log(ary[j])
+                                    if (ary[j] != "") {
+                                        if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                            this.$message({
+                                                message: '请不要输入相同品牌',
+                                                type: 'warning'
+                                            });
+                                            addCustomerVM.inviteBtnDisabled = false;
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        tradeProject = ary.join(',');
+                        clueIntention.tradeProject=tradeProject;
+                    }
+                    if (radioSelect == 1 && tradeProject == "") {
+                        this.$message({
+                            message: '请输入考虑同行业的品牌名称',
+                            type: 'warning'
+                        });
+                        addCustomerVM.inviteBtnDisabled = false;
+                        return;
+                    }
                     //省
                     var province = this.form.province;
                     clueIntention.province = province;
@@ -2380,7 +2404,6 @@
                                 addCustomerVM.$message({
                                     message: '操作成功', type: 'success', duration: 2000, onClose: function () {
                                         window.location.href = "/tele/clueMyCustomerInfo/inviteCustomer?clueId=" + clueId + "&cusName=" + addCustomerVM.form.customerName + "&cusPhone=" + customerPhone;
-                                        // addCustomerVM.inviteBtnDisabled=false;
                                     }
                                 });
                             }
@@ -2442,13 +2465,15 @@
                 $(".downloadMp3:eq(" + index + ") a").prop("download", "true");
                 $(".downloadMp3:eq(" + index + ") a>p").trigger("click");
             },
-            switchSoundBtn(id, url, callSource) {
+            switchSoundBtn(id, url, callSource) {                
                 // 播放器显示
-                this.audioShow=true;
+                // this.audioShow=true;
                 if (callSource == '2') {
-                    switchSound(id, url);
+                    // switchSound(id, url);
+                    window.parent.open(url)
                     return;
                 }
+                var newWindow = window.open();
                 var param = {};
                 param.id = id;
                 axios.post('/call/callRecord/getRecordFile', param)
@@ -2456,8 +2481,8 @@
                         var data = response.data
                         if (data.code == '0') {
                             var url = data.data;
-                            switchSound(id, url);
-
+                            // switchSound(id, url);
+                            newWindow.location.href = url;
                         } else {
                             console.error(data);
                             addCustomerVM.$message({message: data.msg, type: 'error'});
@@ -2481,6 +2506,9 @@
                                 var fileName = url.split('?')[0];
                                 var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
+                                 if(callSource=='3'){
+                                     url = "/client/heliClient/downloadHeliClientAudio?url="+url;
+                                 }
                                 var x = new XMLHttpRequest();
                                 x.open("GET", url, true);
                                 x.responseType = 'blob';
@@ -2738,21 +2766,30 @@
                     this.form.radioProject = intention.purProjectType + "";
                 }
                 //是否考虑同行业
-                this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
-                //同行业项目
-                if (intention.tradeProject != null) {
-                    this.domainShow = true;
-                    var tradeProjectArr = intention.tradeProject.split(",");
-                    for(var i=0;i<tradeProjectArr.length;i++){
+                if (intention.istrade == null && intention.purProjectType == 2) {
+                    this.form.radioSelect = 1+"";
+                    if(intention.purOutProject != null){
+                        this.domainShow = true;
+                        this.form.domains.push({value:intention.purOutProject});
+                    }
+
+                }else{
+                    this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
+                    //同行业项目
+                    if (intention.tradeProject != null) {
+                        this.domainShow = true;
+                        var tradeProjectArr = intention.tradeProject.split(",");
+                        for(var i=0;i<tradeProjectArr.length;i++){
+                            this.form.domains.push({
+                                value: tradeProjectArr[i],
+                            });
+                        }
+                    }else{
+                        //同行业品牌占位
                         this.form.domains.push({
-                            value: tradeProjectArr[i],
+                            value: ''
                         });
                     }
-                }else{
-                    //同行业品牌占位
-                    this.form.domains.push({
-                        value: ''
-                    });
                 }
                 //意向内部项目
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
@@ -2889,8 +2926,6 @@
             axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                 addCustomerVM.provinceArr = response.data.data.data;
             });
-
-
         }
     })
 </script>

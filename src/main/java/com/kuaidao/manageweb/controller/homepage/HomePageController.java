@@ -1,10 +1,16 @@
 package com.kuaidao.manageweb.controller.homepage;
 
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.StageContant;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
+import com.kuaidao.sys.dto.module.IndexModuleDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.common.constant.StageContant;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -15,14 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
-import com.kuaidao.sys.dto.module.IndexModuleDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 @Controller
 @RequestMapping("/homePage")
@@ -70,7 +68,8 @@ public class HomePageController {
         request.setAttribute("userId", user.getId());
         RoleInfoDTO roleInfoDTO1 = user.getRoleList().get(0);
         if(roleInfoDTO1!=null){
-            if(roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.XXLY.name())){
+            if(roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.XXLY.name())
+                ||RoleCodeEnum.HWZG.name().equals(roleInfoDTO1.getRoleCode())||RoleCodeEnum.HWJL.name().equals(roleInfoDTO1.getRoleCode())){
                 request.setAttribute("accountType", StageContant.STAGE_PHONE_TRAFFIC);
             }else{
                 request.setAttribute("accountType", StageContant.STAGE_TELE);

@@ -37,6 +37,10 @@
         <shiro:hasPermission name="business:busCustomerManager:cancelVisit">
             <el-button type="warning" @click="notVisit">标记未到访</el-button>
         </shiro:hasPermission>
+        <shiro:hasPermission name="business:busCustomerManager:importVisitPer">
+            <el-button v-if="importVisitPerFlag" icon="el-icon-download" type="warning" @click="importVisitPer">导出到访业绩</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>到访业绩导出中</el-button>
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
@@ -879,6 +883,7 @@
             activeName: '',
             hisDatas: [],
             notVisitData: [],
+            importVisitPerFlag:true,
             showTabNotVisitData: false,
             isSWZDisabled:false,
             editableTabs: [],
@@ -1116,6 +1121,67 @@
                     this.$refs.multipleTable.clearSelection();
                 }
             },
+            importVisitPer(){
+              var startTime = this.searchForm.startTime;
+              var endTime = this.searchForm.endTime;
+              var startReserveTime = this.searchForm.startReserveTime;
+              var endReserveTime = this.searchForm.endReserveTime;
+              var startAllocationTime = this.searchForm.startAllocationTime;
+              var endAllocationTime = this.searchForm.endAllocationTime;
+              var vilad = false;
+              if (startTime && endTime && startTime > endTime) {
+                vilad = true;
+              }
+              if (startReserveTime && endReserveTime && startReserveTime > endReserveTime) {
+                vilad = true;
+              }
+              if (startAllocationTime && endAllocationTime && startAllocationTime > endAllocationTime) {
+                vilad = true;
+              }
+              if (vilad) {
+                this.$message({
+                  message: '开始时间不能大于结束时间',
+                  type: 'warning'
+                });
+                return;
+              }
+              var param = this.searchForm;
+              param.pageSize = this.pager.pageSize;
+              param.pageNum = this.pager.currentPage;
+              param.sortField = this.searchForm.sortField;
+              param.sortType = this.searchForm.sortType;
+              param.isTailMoney = this.searchForm.isTailMoney;
+
+                localStorage.setItem('importVisitPer','1');
+                this.timedown();
+                axios.post('/business/busCustomerManager/exportVisitPer',param,{responseType:'blob'})
+                .then(function (response) {
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                    customerVM.$notify({type: 'success', title: '提示', message: '到访业绩导出成功', position: 'bottom-right', duration: 0});
+                    localStorage.removeItem("importVisitPer");
+                }).catch(function (error) {
+                    customerVM.$notify.error({title: '提示', message: error + ',到访业绩导出失败', position: 'bottom-right'});
+                    localStorage.removeItem("importVisitPer");
+                })
+            },
+            timedown(){
+                console.log(0)
+                clearInterval(this.timer);
+                var importVisitPer = localStorage.getItem("importVisitPer");
+                if(importVisitPer){
+                    this.importVisitPerFlag=false;
+                }else{
+                    this.importVisitPerFlag=true;
+                }
+                if(importVisitPer){
+                    this.timer=setInterval(this.timedown,1000)
+                }else{
+                    clearInterval(this.timer)
+                }
+            },
+
             notVisit() {
                 var rows = customerVM.multipleSelection;
                 if (rows.length == 0) {

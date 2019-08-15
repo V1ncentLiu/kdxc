@@ -18,7 +18,7 @@ public enum MenuEnum {
     /**
      * 电销管理 -业务设置
      */
-    TR_CLIENT_MANAGEMENT("天润坐席管理"), QIMO_CLIENT_MANAGEMENT("七陌坐席管理"), COMPANY_MANAGEMENT("公司管理"), PROJECT_MANAGEMENT("项目管理"), ABNORMALUSER_MANAGENT("标记异常客户"), DEPTCALLSET_MANAGENT("部门呼叫设置"), ASSIGNRULE_INFO("信息流分配规则"), ASSIGNRULE_TELE("电销分配规则"), APPIONTMENT_MANAGEMENT("预约来访记录"), PENDING_ALLOCATION_CLUE("待分配资源"), BUS_ALLOCATION_CLUE("待分配来访记录"), BUS_CUSTOMER_MANAGER("商务客户管理"), FINANCELAYOUT("财务电销布局"), TM_MY_CUSTOMER("我的客户(电销)"), BUS_MY_CUSTOMER("我的客户(商务)"), TRUCKING_ORDER_PAGE("邀约来访派车单"), TELE_CUSTOMER_MANAGER("电销客户管理"), CUSTOMER_INFO("客户详情"),
+    TR_CLIENT_MANAGEMENT("天润坐席管理"),HELI_CLIENT_MANAGEMENT("合力坐席管理"), QIMO_CLIENT_MANAGEMENT("七陌坐席管理"), COMPANY_MANAGEMENT("公司管理"), PROJECT_MANAGEMENT("项目管理"), ABNORMALUSER_MANAGENT("标记异常客户"), DEPTCALLSET_MANAGENT("部门呼叫设置"), ASSIGNRULE_INFO("信息流分配规则"), ASSIGNRULE_TELE("电销分配规则"), APPIONTMENT_MANAGEMENT("预约来访记录"), PENDING_ALLOCATION_CLUE("待分配资源"), BUS_ALLOCATION_CLUE("待分配来访记录"), BUS_CUSTOMER_MANAGER("商务客户管理"), FINANCELAYOUT("财务电销布局"), TM_MY_CUSTOMER("我的客户(电销)"), BUS_MY_CUSTOMER("我的客户(商务)"), TRUCKING_ORDER_PAGE("邀约来访派车单"), TELE_CUSTOMER_MANAGER("电销客户管理"), CUSTOMER_INFO("客户详情"),
     /**
      * 电销管理 - 电销中心
      */
@@ -31,7 +31,7 @@ public enum MenuEnum {
     /**
      * 电销中心
      */
-    SIGN_ORDER("签约记录"), CUSTOMER_VISIT_RECORD("来访记录"), CLUE_RELEASE_RECEIVE_RULE("资源释放领取规则"),
+    BUSS_MANAGER("商务管理"),SIGN_ORDER("签约记录"), CUSTOMER_VISIT_RECORD("来访记录"), CLUE_RELEASE_RECEIVE_RULE("资源释放领取规则"),
     /**
      * 话务
      */

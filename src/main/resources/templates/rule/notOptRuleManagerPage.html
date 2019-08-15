@@ -28,6 +28,9 @@
         	<el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
         </shiro:hasPermission>
         	<el-button type="primary" @click="copyFun"><i class="el-icon-edit"></i>复制规则</el-button>
+        <shiro:hasPermission name="clueAssignRule:notOptRuleManager:export">
+            <el-button type="warning" @click="exportFun"><i ></i>导出规则</el-button>
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -236,6 +239,7 @@ var adsenseList=[[${adsenseList}]];//广告位集合
 var clueTypeList=[[${clueTypeList}]];//资源类型集合
 var mediumList=[[${mediumList}]];//媒介集合
 var userId=[[${userId}]];//登录人账号id
+var roleCode=[[${roleCode}]];//登录人角色code
 var queryOrg=[[${queryOrg}]];//电销组
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
@@ -326,15 +330,17 @@ var queryOrg=[[${queryOrg}]];//电销组
                 var rowIds = [];
                 for(var i=0;i<rows.length;i++){
              	   var curRow = rows[i];
-             	   if(curRow.createUser+""!=userId){
+             	   if(roleCode=="NQWY"||roleCode=="NQZG"||roleCode=="NQJL"){
+            		   
+            	   }else if(curRow.createUser+""!=userId){
              		  this.$message({
                           message: '不允许删除非本人创建的规则',
                           type: 'warning'
                         });
                        return;
              	   }
-                    rowIds.push(curRow.id);
-                    rowNames.push("【"+curRow.ruleName+"】");
+                   rowIds.push(curRow.id);
+                   rowNames.push("【"+curRow.ruleName+"】");
                 }
              this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
                  confirmButtonText: '确定',
@@ -539,6 +545,24 @@ var queryOrg=[[${queryOrg}]];//电销组
                     // 存储选中信息--end
                 	document.location.href='/clueAssignRule/notOptRule/initUpdate?id='+clueId;
                 }                
+            },
+            exportFun(){
+                var param = this.form;
+                param.pageNum='';
+                param.pageSize='';
+                axios.post('/clueAssignRule/notOptRule/export',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                	ocmVM.loading=false;
+                });                     	
+            	
             },
           //状态转换方法
             transformStatus(row, column, cellValue, index) {

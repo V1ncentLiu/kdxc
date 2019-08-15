@@ -245,13 +245,15 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-                		 //download(url,fileNameArr[fileNameArr.length-1],'audio/*');
+                		 if(callSource=='3'){
+                			 url = "/client/heliClient/downloadHeliClientAudio?url="+url;
+                		 }
+            			 var x=new XMLHttpRequest();
+             			x.open("GET", url, true);
+             			x.responseType = 'blob';
+             			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+             			x.send(); 
                 		 
-                		var x=new XMLHttpRequest();
-            			x.open("GET", url, true);
-            			x.responseType = 'blob';
-            			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
-            			x.send();
                 	 }
                      
                  }else{
@@ -267,29 +269,32 @@ var myCallRecordVm = new Vue({
     		
     	},
     	switchSoundBtn(id,url,callSource){
-            this.audioShow=true;
+            // this.audioShow=true;
     		if(callSource=='2'){
-    			switchSound(id,url);
+    			// switchSound(id,url);
+                window.parent.open(url)
     			return;
     		}
-    		 var param = {};
-    		 param.id=id;
-    	   	 axios.post('/call/callRecord/getRecordFile',param)
-             .then(function (response) {
-            	 var data =  response.data
-                 if(data.code=='0'){
-                	 var url = data.data;
-                     switchSound(id,url);
-                 }else{
-                	 console.error(data);
-                	 myCallRecordVm.$message({message:data.msg,type:'error'});
-                 }
-             
-             })
-             .catch(function (error) {
-                  console.log(error);
-             }).then(function(){
-             });
+            var newWindow = window.open();
+    		var param = {};
+    		param.id=id;
+    	   	axios.post('/call/callRecord/getRecordFile',param)
+            .then(function (response) {
+                var data =  response.data
+                if(data.code=='0'){
+                    var url = data.data;
+                    // switchSound(id,url);
+                    newWindow.location.href = url;
+                }else{
+                    console.error(data);
+                    myCallRecordVm.$message({message:data.msg,type:'error'});
+                }
+
+                })
+            .catch(function (error) {
+                console.log(error);
+            }).then(function(){
+            });
     	},
         toogleClick(){
             if(this.isShow){

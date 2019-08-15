@@ -2,7 +2,6 @@ package com.kuaidao.manageweb.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
@@ -37,6 +36,7 @@ public class ShiroConfig {
      */
     @Value("${spring.profiles.active}")
     private String environment;
+
     @Bean
     public ShiroFilterFactoryBean shirFilter(org.apache.shiro.mgt.SecurityManager securityManager) {
         System.out.println("ShiroConfiguration.shirFilter()");
@@ -48,6 +48,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/css/**", "anon");
         filterChainDefinitionMap.put("/images/**", "anon");
         filterChainDefinitionMap.put("/js/**", "anon");
+        filterChainDefinitionMap.put("/prometheus", "anon");
         filterChainDefinitionMap.put("/login/resetPwd", "anon");
         filterChainDefinitionMap.put("/login/index", "anon");
         filterChainDefinitionMap.put("/login/sendmsg", "anon");
@@ -118,7 +119,7 @@ public class ShiroConfig {
         redisManager.setPort(port);
         // redisManager.setExpire(1800);// 配置缓存过期时间
         redisManager.setTimeout(timeout);
-        if(StringUtils.isNotBlank(environment)&&StringUtils.equals(environment,"prod")){
+        if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
             redisManager.setPassword(password);
         }
         // redisManager.setPassword(password);
