@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
     <!-- <style>
         .el-date-picker__editor-wrap{display: none;}
@@ -19,9 +19,9 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>
-        <shiro:hasPermission name="statistics:telemarketingFollow:export">
+        <!-- <shiro:hasPermission name="statistics:telemarketingFollow:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        </shiro:hasPermission>
+        <!-- </shiro:hasPermission> -->
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -69,7 +69,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="loading">搜索</el-button>
+                    <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -85,19 +85,19 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="countResource" label="来访项目">
+                <el-table-column prop="projectName" label="来访项目">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="gotoTeam()">{{scope.row.countResource}}</el-button>
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column prop="countResource" label="正常邀约数"></el-table-column>
-                <el-table-column prop="countClueId" label="取消邀约数"></el-table-column>
-                <el-table-column prop="countDistinctClue" label="删除邀约数"></el-table-column>
-                <el-table-column prop="countDistinctClue" label="邀约次数"></el-table-column>
-                <el-table-column prop="dayOfPer" label="取消邀约次数" :formatter="numFormat"></el-table-column>
-                <el-table-column prop="dayOfPer" label="删除邀约次数" :formatter="numFormat"></el-table-column>
+                <el-table-column prop="invitationNum" label="正常邀约数"></el-table-column>
+                <el-table-column prop="cancelInvitationNum" label="取消邀约数"></el-table-column>
+                <el-table-column prop="deleteInvitationNum" label="删除邀约数"></el-table-column>
+                <el-table-column prop="invitationFrequency" label="邀约次数"></el-table-column>
+                <el-table-column prop="cancelInvitationFrequency" label="取消邀约次数"></el-table-column>
+                <el-table-column prop="deleteInvitationFrequency" label="删除邀约次数"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -116,7 +116,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3,
+                    pageSize: 20,
                 },
                 form: {
                     startTime:'',
