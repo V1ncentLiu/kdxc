@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
@@ -30,10 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.crypto.hash.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,19 +69,59 @@ public class BusinessMyCustomerController {
         logger.info("------------ 商务：我的客户列表 ---------------");
         UserInfoDTO user = CommUtil.getCurLoginUser();
         // 电销组
-        List teleGroupList = new ArrayList();
-        Map<Long, OrganizationDTO> groupMap = new HashMap();
-        List teleSaleList = new ArrayList();
-        Map<Long, OrganizationDTO> saleMap = new HashMap();
-        List tasteProList = new ArrayList();
-        Map tasteMap = new HashMap();
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
         }else{
             dto.setBusSaleId(user.getId());
         }
-        long startTime0=System.currentTimeMillis();
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proAllSelect", proJson.getData());
+            if(!CollectionUtils.isEmpty(proJson.getData())){
+                List<ProjectInfoDTO> data = proJson.getData();
+                List<ProjectInfoDTO> alist = new ArrayList<>();
+                for(ProjectInfoDTO infoDTO :data){
+                    if(AggregationConstant.NO.equals(infoDTO.getIsNotSign())){
+                        alist.add(infoDTO);
+                    }
+                }
+                request.setAttribute("proSelect",alist);
+            }
+        }
+        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
+            request.setAttribute("companySelect", proJson.getData());
+        }
+     // 查询赠送类型集合
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
+//        request.setAttribute("teleGroupList", teleGroupList);
+//        request.setAttribute("teleSaleList", teleSaleList);
+        request.setAttribute("loginUserId", user.getId());
+        return "bus_mycustomer/mycustomerList";
+    }
+
+
+    @PostMapping("/teleSaleAndGroupName")
+    @ResponseBody
+    public JSONResult<Map> teleSaleAndGroupName(
+        @RequestBody MyCustomerParamDTO param) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        Map<String,List<OrganizationDTO>> map = new HashMap<>();
+        Map<Long, OrganizationDTO> groupMap = new HashMap();
+        List teleGroupList = new ArrayList();
+        List teleSaleList = new ArrayList();
+        Map<Long, OrganizationDTO> saleMap = new HashMap();
+
+        MyCustomerParamDTO dto = new MyCustomerParamDTO();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+        }else{
+            dto.setBusSaleId(user.getId());
+        }
+
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
         if (JSONResult.SUCCESS.equals(resList.getCode())) {
             List<BusMyCustomerRespDTO> datas = resList.getData();
@@ -90,13 +133,11 @@ public class BusinessMyCustomerController {
                     organizationDTO.setName(myCustomerRespDTO.getTeleGorupName());
                     groupMap.put(organizationDTO.getId(), organizationDTO);
                 }
-
                 // 创业顾问
                 if (myCustomerRespDTO.getTeleSaleId() != null) {
                     OrganizationDTO organizationDTO = new OrganizationDTO();
                     organizationDTO.setId(myCustomerRespDTO.getTeleSaleId());
                     organizationDTO.setName(myCustomerRespDTO.getTeleSaleName());
-                    // teleSaleList.add(organizationDTO);
                     saleMap.put(myCustomerRespDTO.getTeleSaleId(), organizationDTO);
                 }
             }
@@ -108,41 +149,13 @@ public class BusinessMyCustomerController {
                 teleSaleList.add(entry.getValue());
             }
         }
-        long endTime0=System.currentTimeMillis();
-        logger.info("电销组以及电销顾问："+(endTime0-startTime0));
-        // 项目
-        long startTime=System.currentTimeMillis();
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(-1);
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-            request.setAttribute("proSelect", proJson.getData());
-        }
-        long endTime=System.currentTimeMillis();
-        logger.info("获取项目时间："+(endTime-startTime));
-        // 项目
-        long startTime1=System.currentTimeMillis();
-        JSONResult<List<ProjectInfoDTO>> proallJson = projectInfoFeignClient.allProject();
-        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-            request.setAttribute("proAllSelect", proallJson.getData());
-        }
-        long endTime1=System.currentTimeMillis();
-        logger.info("获取全部项目时间："+(endTime1-startTime1));
-        long startTime2=System.currentTimeMillis();
-        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
-        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
-            request.setAttribute("companySelect", proJson.getData());
-        }
-        long endTime2=System.currentTimeMillis();
-        logger.info("获取公司时间："+(endTime2-startTime2));
-     // 查询赠送类型集合
-        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
-        request.setAttribute("teleGroupList", teleGroupList);
-        request.setAttribute("teleSaleList", teleSaleList);
-        request.setAttribute("tasteProList", tasteProList);
-        request.setAttribute("loginUserId", user.getId());
-        return "bus_mycustomer/mycustomerList";
+        map.put("teleGroupList",teleGroupList);
+        map.put("teleSaleList",teleSaleList);
+        return new JSONResult<Map>().success(map);
     }
+
+
+
 
     @PostMapping("/queryPage")
     @ResponseBody
