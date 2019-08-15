@@ -85,7 +85,7 @@ public class AppointmentVisitController {
      */
     @PostMapping("/getGroupPageList")
     @ResponseBody
-    public JSONResult<Map<String,Object>> getGroupPageList(AppointmentVisitQueryDto appointmentVisitQueryDto){
+    public JSONResult<Map<String,Object>> getGroupPageList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto){
         return appointmentVisitFeignClient.getGroupPageList(appointmentVisitQueryDto);
     }
 
@@ -93,7 +93,7 @@ public class AppointmentVisitController {
      * 组不分页 导出
      */
     @PostMapping("/exportGroupList")
-    public void exportGroupList(AppointmentVisitQueryDto appointmentVisitQueryDto,HttpServletResponse response) throws IOException {
+    public void exportGroupList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto,HttpServletResponse response) throws IOException {
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getAppointmentVisitTitleList(GROUP));
         JSONResult<Map<String, Object>> result =   appointmentVisitFeignClient.getGroupList(appointmentVisitQueryDto);
@@ -122,7 +122,7 @@ public class AppointmentVisitController {
      */
     @PostMapping("/getGroupDayPageList")
     @ResponseBody
-    public JSONResult<Map<String,Object>> getGroupDayPageList(AppointmentVisitQueryDto appointmentVisitQueryDto){
+    public JSONResult<Map<String,Object>> getGroupDayPageList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto){
         return appointmentVisitFeignClient.getGroupDayPageList(appointmentVisitQueryDto);
     }
 
@@ -130,7 +130,7 @@ public class AppointmentVisitController {
      * 组+天不分页 导出
      */
     @PostMapping("/exportGroupDayList")
-    public void exportGroupDayList(AppointmentVisitQueryDto appointmentVisitQueryDto,HttpServletResponse response) throws IOException {
+    public void exportGroupDayList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto,HttpServletResponse response) throws IOException {
 
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getAppointmentVisitTitleList(GROUP_DAY));

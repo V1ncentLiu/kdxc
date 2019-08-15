@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Map;
@@ -19,25 +20,25 @@ public interface AppointmentVisitFeignClient {
      * 组分页
      */
     @RequestMapping("/getGroupPageList")
-    JSONResult<Map<String,Object>> getGroupPageList(AppointmentVisitQueryDto appointmentVisitQueryDto);
+    JSONResult<Map<String,Object>> getGroupPageList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto);
 
     /**
      * 组不分页
      */
     @RequestMapping("/getGroupList")
-    JSONResult<Map<String,Object>> getGroupList(AppointmentVisitQueryDto appointmentVisitQueryDto);
+    JSONResult<Map<String,Object>> getGroupList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto);
 
     /**
      * 组+天分页
      */
     @RequestMapping("/getGroupDayPageList")
-    JSONResult<Map<String,Object>> getGroupDayPageList(AppointmentVisitQueryDto appointmentVisitQueryDto);
+    JSONResult<Map<String,Object>> getGroupDayPageList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto);
 
     /**
      * 组+天不分页
      */
     @RequestMapping("/getGroupDayList")
-    JSONResult<Map<String,Object>> getGroupDayList(AppointmentVisitQueryDto appointmentVisitQueryDto);
+    JSONResult<Map<String,Object>> getGroupDayList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto);
 
 
     @Component
