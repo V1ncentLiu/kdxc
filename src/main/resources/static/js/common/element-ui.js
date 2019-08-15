@@ -4088,7 +4088,7 @@ function(e) {
                                 return "INPUT" === e.tagName
                             })[0],
                             n = e.$refs.tags,
-                            s = e.initialInputHeight || 40;
+                            s = e.initialInputHeight || 30;
                             i.style.height = 0 === e.selected.length ? s + "px": Math.max(n ? n.clientHeight + (n.clientHeight > s ? 6 : 0) : 0, s) + "px",
                             e.visible && !1 !== e.emptyText && e.broadcast("ElSelectDropdown", "updatePopper")
                         }
