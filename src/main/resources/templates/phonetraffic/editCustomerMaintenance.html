@@ -1266,6 +1266,55 @@
             },
 
             saveClue(form,flag){
+                // 手机号重复验证开始
+                var domains = this.dynamicValidateForm.domains;
+                var customerPhone = this.form.customerPhone;
+                var phone="";
+                if(this.form.phone){
+                    phone=this.form.phone
+                }
+                if(this.form.customerPhone){
+                    phone=customerPhone;
+                }                        
+                var ary = [];
+                console.log(domains)
+                for (var i = 0; i < domains.length; i++) {
+                    // 判断弹框里的值是否与页面的手机号1重复
+                    if (domains[i].value == phone&&phone!="") {
+                        this.$message({
+                            message: '请不要提交重复手机号',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                    ary.push(domains[i].value);//把输入的手机号放入一个数组
+                    var s = ary.join(",") + ",";
+                    console.log(ary)
+                    for (var j = 0; j < ary.length; j++) {
+                        console.log(ary[j])
+                        if (ary[j] != "") {
+                            if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                this.$message({
+                                    message: '请不要提交重复手机号',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+                        }
+
+                    }
+                    // 如果输入的是非数字
+                    if (/^[0-9]*$/.test(domains[i].value) == false) {
+                        this.$message({
+                            message: '请输入数字',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+
+                }
+                // 手机号重复验证结束
                 if(flag=="toTele"){ // 仅保存时候不需要对 意向项目进行必填验证
                     if( this.form.radioProject == 1){ // 内部项目
                         if(!this.form.insideProject){
@@ -1491,13 +1540,21 @@
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        debugger
                         var domains = this.dynamicValidateForm.domains;
                         var customerPhone = this.form.customerPhone;
+                        var phone="";
+                        if(this.form.phone){
+                            phone=this.form.phone
+                        }
+                        if(this.form.customerPhone){
+                            phone=customerPhone;
+                        }                        
                         var ary = [];
                         console.log(domains)
                         for (var i = 0; i < domains.length; i++) {
                             // 判断弹框里的值是否与页面的手机号1重复
-                            if (domains[i].value == customerPhone) {
+                            if (domains[i].value == phone&&phone!="") {
                                 this.$message({
                                     message: '请不要提交重复手机号',
                                     type: 'warning'
