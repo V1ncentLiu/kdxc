@@ -382,7 +382,7 @@ var homePageVM=new Vue({
 	                 
 	             }else{
 	            	 console.error(data);
-	                 homePageVM.$message({message:data.msg,type:'error'});
+	                 homePageVM.$message({message:"合力坐席登录："+data.msg,type:'error'});
 	             }
 	         })
 	         .catch(function (error) {
