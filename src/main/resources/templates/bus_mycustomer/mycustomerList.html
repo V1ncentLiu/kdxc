@@ -1649,8 +1649,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
-    var dzList = [[${teleGroupList}]];
-    var dxgwList = [[${teleSaleList}]];
+   // var dzList = [[${teleGroupList}]];
+   // var dxgwList = [[${teleSaleList}]];
     var proSelect = [[${proSelect}]];
     var proAllSelect = [[${proAllSelect}]];
     var loginUserId = [[${loginUserId}]];
@@ -1719,8 +1719,8 @@
                 twoNotSignShow: false,
                 threeNotSignShow: false
             },
-            teleketGroupArr: dzList,
-            teleketSaleArr: dxgwList,
+            teleketGroupArr: "",
+            teleketSaleArr: "",
             tasteProArr: proAllSelect,
             signArr: [{value: 0, name: '未签约'}, {value: 1, name: '已签约'}],
             isSignArr: [{value: 0, name: '否'}, {value: 1, name: '是'}],
@@ -3401,10 +3401,16 @@
                 var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
                 if(localVal){this.pager.pageSize = localVal;}
             };
+
+            var param = {};
+            // 电销组以及电销员工名称
+            axios.post('/aggregation/businessMyCustomer/teleSaleAndGroupName', param).then(function (response) {
+                mainDivVM.teleketGroupArr = response.data.data.teleGroupList;
+                mainDivVM.teleketSaleArr = response.data.data.teleSaleList;
+            });
             //初始化数据列表
             this.initList();
             //  到访店铺类型 vistitStoreTypeArr
-            var param = {};
             param.groupCode = "vistitStoreType";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 mainDivVM.vistitStoreTypeArr = response.data.data;
