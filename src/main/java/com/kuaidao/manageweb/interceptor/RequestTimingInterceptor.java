@@ -42,7 +42,6 @@ public class RequestTimingInterceptor extends HandlerInterceptorAdapter {
             Method method = ((HandlerMethod) handler).getMethod();
             handlerLabel = method.getDeclaringClass().getSimpleName() + "." + method.getName();
         }
-        logger.info("方法{}，响应时间{}", request.getMethod(), completedTime);
         // Note (3)
         responseTimeInMs
                 .labels(request.getMethod(), handlerLabel, Integer.toString(response.getStatus()))
