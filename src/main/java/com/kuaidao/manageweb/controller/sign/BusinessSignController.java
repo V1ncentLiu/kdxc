@@ -869,7 +869,7 @@ public class BusinessSignController {
         return CommonUtil.validateParam(result);
       }
       UserInfoDTO user = CommUtil.getCurLoginUser();
-      dto.setUpdateUser(user.getId());
+      dto.setCreateUser(user.getId());
       if(dto.getSignType()==1){ // 全款
         dto.setMakeUpTime(null);
         dto.setAmountBalance(null);

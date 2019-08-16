@@ -290,13 +290,13 @@ function heliClientOutbound(outboundInputPhone,callSource,clueId,callback){
 	        	  if(callSource==1){
           			 homePageVM.dialogOutboundVisible =true;
           			 $("#outboundCallTime").html("");
- 					 $('#outboundPhoneLocaleArea').html("");
+ 					 //$('#outboundPhoneLocaleArea').html("");
  				 	 intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
  					// getPhoneLocale(outboundInputPhone,callSource);
           		  }else if(callSource==2) {
           			 homePageVM.tmOutboundCallDialogVisible =true;
  					 $("#tmOutboundCallTime").html("");
- 					 $('#tmOutboundPhoneLocaleArea').html("");
+ 					 //$('#tmOutboundPhoneLocaleArea').html("");
  					 intervalTimer("tmOutboundCallTime",10,2);
  					 //查询手机号归属地
  					// getPhoneLocale(outboundInputPhone,callSource);

@@ -19,9 +19,11 @@ public @interface LogRecord {
     /**
      * 更新；LOGIN:登录； LOGINOUT:退出登录； INSERT:添加 UPDATE:编辑 DELETE:删除； EXPORT:导出；PUSH：推送；DISTRIBUTION：分配；
      * RELEASE:释放； TRANSFER:转移 DISABLE:禁用 ENABLE:启用 IMPORTS：导入 SCHEDULE：定时任务 RECEIVE：领取 OUTBOUNDCALL:外呼
+     * CLIENT_LOGIN:坐席登录；CLIENT_LOGOUT：坐席退出
      */
     public enum OperationType {
         LOGIN, LOGINOUT, UPDATE, INSERT, DELETE, EXPORT, PUSH, IMPORTS, DISTRIBUTION, TRANSFER, RELEASE, DISABLE, ENABLE, SCHEDULE, RECEIVE, OUTBOUNDCALL
+        ,CLIENT_LOGIN,CLIENT_LOGOUT
     }
 
     /**
@@ -33,6 +35,7 @@ public @interface LogRecord {
      * 该请求的操作类型，delete update insert
      */
     OperationType operationType();
+    
 
     /**
      * 菜单名称

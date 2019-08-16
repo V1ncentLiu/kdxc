@@ -245,13 +245,16 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-                		 //download(url,fileNameArr[fileNameArr.length-1],'audio/*');
+                		 if(callSource=='3'){
+                			 var decodeUrl = encodeURI(url);
+                			 url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                		 }
+            			 var x=new XMLHttpRequest();
+             			x.open("GET", url, true);
+             			x.responseType = 'blob';
+             			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+             			x.send(); 
                 		 
-                		var x=new XMLHttpRequest();
-            			x.open("GET", url, true);
-            			x.responseType = 'blob';
-            			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
-            			x.send();
                 	 }
                      
                  }else{
@@ -268,7 +271,7 @@ var myCallRecordVm = new Vue({
     	},
     	switchSoundBtn(id,url,callSource){
             // this.audioShow=true;
-    		if(callSource=='2' || callSource=='3'){
+    		if(callSource=='2'){
     			// switchSound(id,url);
                 window.parent.open(url)
     			return;

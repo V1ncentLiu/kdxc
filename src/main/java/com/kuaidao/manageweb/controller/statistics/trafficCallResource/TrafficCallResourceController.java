@@ -251,7 +251,11 @@ public class TrafficCallResourceController {
                 curList.add(ra.getReceiveCount());
             }
             if(type.equals(GROUP_PERSON)){
-                curList.add(ra.getUserName());
+                if(ra.getUserId() == -2){
+                    curList.add("话务主管");
+                }else{
+                    curList.add(ra.getUserName());
+                }
                 curList.add(ra.getNewResource()==0?"否":"是");
             }
             if(type.equals(GROUP_PERSON_DAY)){
