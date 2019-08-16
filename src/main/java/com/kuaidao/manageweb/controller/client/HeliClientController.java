@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.client;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -256,9 +257,10 @@ public class HeliClientController {
      */
     @RequestMapping("/downloadHeliClientAudio")
     @ResponseBody
-    public ResponseEntity downloadHeliClientAudio(String url) {
+    public ResponseEntity downloadHeliClientAudio(String url) throws Exception{
         HttpHeaders header  = new HttpHeaders();
-        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(url,HttpMethod.GET,new HttpEntity<>(header),byte[].class);
+        String decodeUrl = URLDecoder.decode(url,"utf-8");
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(decodeUrl,HttpMethod.GET,new HttpEntity<>(header),byte[].class);
         return responseEntity;
     }
     

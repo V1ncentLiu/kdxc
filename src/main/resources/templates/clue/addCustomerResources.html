@@ -743,7 +743,7 @@
                 	    //意向外部项目
                 	    var  outsideProject= this.form.outsideProject;
                 	    clueIntention.purOutProject=outsideProject;
-                        //是否考虑同行
+                       /* //是否考虑同行
                         var radioSelect = this.form.radioSelect;
                         clueIntention.istrade = radioSelect;
                         //同行业项目
@@ -767,8 +767,55 @@
                             }
                         }
                         var  tradeProject = tradeProjectAry.join(',');
-                        clueIntention.tradeProject=tradeProject;
-                	    //省
+                        clueIntention.tradeProject=tradeProject;*/
+                       //是否考虑同行
+                        var radioSelect = this.form.radioSelect;
+                        clueIntention.istrade = radioSelect;
+                        var  tradeProject;
+                        if (radioSelect == 1) {
+                            //同行业项目
+                            var domains = this.form.domains;
+                            var ary = [];
+                            for (var i = 0; i < domains.length; i++) {
+                                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                                if(domains[i].value != ""){
+                                    //把输入的品牌名称放入一个数组
+                                    ary.push(domains[i].value);
+                                    var s = ary.join(",") + ",";
+                                    for (var j = 0; j < ary.length; j++) {
+                                        console.log(ary[j])
+                                        if (ary[j] != "") {
+                                            if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                                this.$message({
+                                                    message: '请不要输入相同品牌',
+                                                    type: 'warning'
+                                                });
+                                                //保存按钮可点击
+                                                addCustomerVM.confirmBtnDisabled = false;
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            tradeProject = ary.join(',');
+                            clueIntention.tradeProject=tradeProject;
+                        }
+                        if (radioSelect == 1 && tradeProject == "") {
+                            this.$message({
+                                message: '请输入考虑同行业的品牌名称',
+                                type: 'warning'
+                            });
+                            //保存按钮可点击
+                            addCustomerVM.confirmBtnDisabled = false;
+                            return;
+                        }
+
+
+
+
+
+                        //省
                 	    var province= this.form.province;
                 	    clueIntention.province=province;
                 	    //市

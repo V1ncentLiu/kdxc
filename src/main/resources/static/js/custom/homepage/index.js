@@ -130,6 +130,23 @@ var homePageVM=new Vue({
                     { required: true, message: '绑定类型不能为空'}
                 ]
             },
+            trClientFormRules:{//登录坐席校验规则
+            	clientType:[
+                    { required: true, message: '选择呼叫中心不能为空'}
+                ],
+            	cno:[
+            		 { required: true, message: '坐席号不能为空'},
+            		 {validator:function(rule,value,callback){
+            			 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入数字,不超过10位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+            			 
+            		 },trigger:'blur'},
+            	]
+            },
+          /*  clientRules:'trClientFormRules',*/
             enterpriseId:enterpriseId,
             token:token,
             dialogOutboundVisible:false,//外呼dialog
@@ -938,7 +955,20 @@ var homePageVM=new Vue({
 		if(isUpdatePassword=="1"){
 			this.dialogModifyPwdVisible=true;
 		}
-	}
+	},
+	computed: {
+	    clientRules:function() {
+	    	var clientType = this.loginClientForm.clientType;
+	    	var ruleName="";
+	        if(clientType==1){
+	    	  return this.trClientFormRules;
+	    	}else if(clientType==2){
+	    		 return this.qimoClientFormRules;
+	    	}else if(clientType==3){
+	    		 return this.heliClientFormRules;
+	    	}
+	    }
+	 }
 })
 // 点击导航赋值ifream的src值
 $(function () { 
