@@ -1,12 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
-    <style>
-        .el-date-picker__editor-wrap{display: none;}
-        .el-date-picker__time-header{display: none;}
-        .el-picker-panel__link-btn.el-button--text{display: none;}
-    </style>
 </head>
 <body>
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
@@ -115,6 +110,9 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
+<style>
+    .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+</style>
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
     var clientRankIdList=[[${cusLevelListArray}]];//客户级别
@@ -169,9 +167,20 @@
                     mainDivVM.busSaleArr=response.data.data;
                 });
             },
-            searchTable(pageNumOne) {                 
-                var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
+            currentTelSale(seleVal){ // 根据电销组选择电销顾问
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                });
+            },
+            searchTable(firstPage) { 
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
                 if(endTime && startTime){
                     startTime = new Date(this.form.startTime);
                     endTime = new Date(this.form.endTime);
@@ -188,7 +197,7 @@
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(new Date(startTime) < beforeSixMonthRes || new Date(endTime) > currentDateRes){
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
                         this.$message({
                             message: '请选择近6个月内的时间',
                             type: 'warning'
@@ -203,122 +212,69 @@
                         type: 'warning'
                     });
                     return;
-                }
+                }   
+    
                 var param = {};
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-                // param.pageNum =  this.pager.currentPage;
-                if(pageNumOne){
-                    param.pageNum = pageNumOne;
+  
+                if(firstPage){
+                    param.pageNum = firstPage;
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                // 搜索条件
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
-                param.orgId = this.form.orgId;//电销组
-                param.userId = this.form.userId;//电销顾问
-                param.cusLevelList = this.form.cusLevelList;//客户级别
-                this.loading=true;
-                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserId',param).then(function (response) {
-                    if(!response){
+                param.orgId = this.form.orgId;
+                param.userId = this.form.userId;
+                param.projectId = this.form.projectId;
+                this.loading = true; 
+                axios.post('/statistics/appointmentVisit/getGroupPageList',param).then(function (response) {
+                    if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
                         });
-                        mainDivVM.loading=false;
                         return ;
                     }
                     var resobj= response.data;
-                    if(!resobj){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        mainDivVM.loading=false;
-                        return ;
-                    }
-                    if(resobj.code!='0'){
+                    if(resobj.code != '0'){
+                        mainDivVM.loading = false;
                         mainDivVM.$message({
                             message: resobj.msg,
                             type: 'error'
                         });
-                        mainDivVM.loading=false;
                         return ;
-                    }  
-                    var resobjData=resobj.data.data;                    
-                    // 表格数据渲染
-                    mainDivVM.tableData=resobjData;
-                    // 分页
-                    mainDivVM.pager.currentPage= resobj.data.currentPage;
-                    mainDivVM.pager.total= resobj.data.total;
-                    // loading
-                    mainDivVM.loading=false;
-                    // 给导出参数赋值
-                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    mainDivVM.export.userId = mainDivVM.form.userId;
-                    mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
-                })
+                    }else if(resobj.data && resobj.data.tableData){
+                        var resobjData = resobj.data;    
+                        var tableData = resobjData.tableData;
+                        mainDivVM.tableData = tableData.data;
+                        if( tableData.data.length && resobj.data.totalData ){
+                            var totalData = resobjData.totalData[0];
+                            mainDivVM.tableData.unshift(totalData);
+                        }
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.projectId = mainDivVM.form.projectId;
+       
+                    }else{
+                        mainDivVM.loading = false;
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
-            gotoPerson(item){
-                var userId = item.userId;
-                var orgId=this.export.orgId;;
-                // 搜索条件
-                var startTime=this.export.startTime;
-                var endTime=this.export.endTime;
-                var cusLevelList=this.export.cusLevelList;
-                var strCusLevelList="";
-                if(cusLevelList!=0){
-                    strCusLevelList=cusLevelList.join(",");
-                }else{
-                    strCusLevelList=""
-                }  
-                if(userId){
-                    // 点击个人跳转到此人的资源分配信息
-                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId="+userId+"&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&strCusLevelList="+ strCusLevelList;
-                }
-            },
-            goback () {
-                window.history.go(-1);
-            },
-            dateFormat (row, column) { 
-                var date = row[column.property];
-                 if (!date) {return "";}
-                var d = date.toString();
-                var oYear = d.slice(0,4);
-                var oMonth = d.slice(5,6);
-                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
-                var oDay = d.slice(7);
-                oDay = oDay < 10 ? "0" + oDay : oDay;
-                return oYear+"-"+oMonth+"-"+oDay;
-            }, 
-            numFormat(row, column){
-                var percent = row[column.property];
-                if(percent){
-                    percent = Math.floor(percent * 100) / 100;
-                }
-                return percent;
-            },
-            minuteFormat (m) {
-                if (!m) {
-                   return "";
-                 }
-                return moment(m).format("YYYYMMDDHHmm");
-            },
-             dateTimeFormat (dt) { 
-                if (!dt) {return "";}
-                var d = dt.toString();
-                var oYear = d.slice(0,4);
-                var oMonth = d.slice(4,6);
-                var oDay = d.slice(6,8);
-                var oHour = d.slice(8,10);
-                var oMinute = d.slice(10);
-                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            },  
             limitTime (start, end) {
-                var startTime = this.minuteFormat (start);
                 var endTime = this.minuteFormat (end);
+                var startTime = this.minuteFormat (start);
                 var date = new Date();
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
@@ -338,6 +294,41 @@
                     }
                     return end;
                 }
+            },
+            goback () {
+                window.history.go(-1);
+            },
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay; 
+            },
+            numFormat(row, column){
+                var percent = row[column.property];
+                if(percent){
+                    percent = Math.floor(percent * 100) / 100;
+                }
+                return percent;
+            },
+            minuteFormat (m) {
+                if (!m) {
+                   return "";
+                 }
+                return moment(m).format("YYYYMMDDHHmm");
+            },
+            dateTimeFormat (dt) { 
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
             },
             searchYesterday(){ // 昨天
                var today = new Date();
