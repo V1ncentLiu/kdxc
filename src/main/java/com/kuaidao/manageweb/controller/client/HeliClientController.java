@@ -150,27 +150,29 @@ public class HeliClientController {
 
         return loginRecordJr;
     }
-    
+
     /**
      * 坐席退出
-    * @param heLiClientOutboundReqDTO
-    * @return
+     * 
+     * @param heLiClientOutboundReqDTO
+     * @return
      */
     @ResponseBody
     @PostMapping("/logout")
-   @LogRecord(description = "合力坐席退出", operationType = OperationType.CLIENT_LOGOUT,
-    menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
-    public JSONResult logout (@RequestBody HeLiClientOutboundReqDTO  heLiClientOutboundReqDTO) {
-          String clientNo = heLiClientOutboundReqDTO.getClientNo();
-          if(!CommonUtil.isNotBlank(clientNo)) {
-              logger.error("heliClient logout param{{}}",heLiClientOutboundReqDTO);
-              return CommonUtil.getParamIllegalJSONResult();
-          }
-          
-          UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-          Long orgId = curLoginUser.getOrgId();
-          heLiClientOutboundReqDTO.setOrgId(orgId);
-          return heliClientFeignClient.logout(heLiClientOutboundReqDTO);
+    @LogRecord(description = "合力坐席退出", operationType = OperationType.CLIENT_LOGOUT, menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
+    public JSONResult logout(@RequestBody HeLiClientOutboundReqDTO heLiClientOutboundReqDTO) {
+        String clientNo = heLiClientOutboundReqDTO.getClientNo();
+        if (!CommonUtil.isNotBlank(clientNo)) {
+            logger.error("heliClient logout param{{}}", heLiClientOutboundReqDTO);
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        // 退出删除坐席号
+        Session session = SecurityUtils.getSubject().getSession();
+        session.removeAttribute("clientNo:axb");
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long orgId = curLoginUser.getOrgId();
+        heLiClientOutboundReqDTO.setOrgId(orgId);
+        return heliClientFeignClient.logout(heLiClientOutboundReqDTO);
     }
     
     
