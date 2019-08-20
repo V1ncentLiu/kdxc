@@ -87,6 +87,7 @@ public class AppointmentVisitController {
     @PostMapping("/getGroupPageList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getGroupPageList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto){
+        initAuth(appointmentVisitQueryDto);
         return appointmentVisitFeignClient.getGroupPageList(appointmentVisitQueryDto);
     }
 
@@ -95,6 +96,7 @@ public class AppointmentVisitController {
      */
     @PostMapping("/exportGroupList")
     public void exportGroupList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto,HttpServletResponse response) throws IOException {
+        initAuth(appointmentVisitQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getAppointmentVisitTitleList(GROUP));
         JSONResult<Map<String, Object>> result =   appointmentVisitFeignClient.getGroupList(appointmentVisitQueryDto);
@@ -124,6 +126,7 @@ public class AppointmentVisitController {
     @PostMapping("/getGroupDayPageList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getGroupDayPageList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto){
+        initAuth(appointmentVisitQueryDto);
         return appointmentVisitFeignClient.getGroupDayPageList(appointmentVisitQueryDto);
     }
 
@@ -132,7 +135,7 @@ public class AppointmentVisitController {
      */
     @PostMapping("/exportGroupDayList")
     public void exportGroupDayList(@RequestBody AppointmentVisitQueryDto appointmentVisitQueryDto,HttpServletResponse response) throws IOException {
-
+        initAuth(appointmentVisitQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getAppointmentVisitTitleList(GROUP_DAY));
         JSONResult<Map<String, Object>> result = appointmentVisitFeignClient.getGroupDayList(appointmentVisitQueryDto);
@@ -157,13 +160,14 @@ public class AppointmentVisitController {
     }
 
 
-    private List<OrganizationDTO> getOrgGroupByOrgId(Long orgId, Integer orgType) {
-        // 电销组
+    private List<OrganizationRespDTO> getOrgGroupByOrgId() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        // 商务组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-        busGroupReqDTO.setParentId(orgId);
+        busGroupReqDTO.setParentId(curLoginUser.getOrgId());
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+        JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         return listJSONResult.getData();
     }
 
@@ -257,6 +261,13 @@ public class AppointmentVisitController {
         curList.add(ra.getCancelInvitationFrequency());
         curList.add(ra.getDeleteInvitationFrequency());
         dataList.add(curList);
+    }
+
+    private void initAuth(AppointmentVisitQueryDto appointmentVisitQueryDto){
+        List<Long> orgIdList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        orgIdList.add(curLoginUser.getOrgId());
+        appointmentVisitQueryDto.setBusCompayList(orgIdList);
     }
 
 }
