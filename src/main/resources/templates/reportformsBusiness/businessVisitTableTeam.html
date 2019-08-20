@@ -154,14 +154,20 @@
                 return "text-align:center"
             },  
             currentTelSale(seleVal){ // 根据电销组选择电销顾问
-                if(null==seleVal||seleVal==""){
+                if(seleVal==null||seleVal==""){
                     return ;
                 }
+                this.form.userId = '';
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
                 });
             },
             searchTable(firstPage) { 
