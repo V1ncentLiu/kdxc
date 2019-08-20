@@ -18,6 +18,7 @@ import com.kuaidao.stastics.dto.appointmentVisit.AppointmentVisitDto;
 import com.kuaidao.stastics.dto.appointmentVisit.AppointmentVisitQueryDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -179,15 +180,12 @@ public class AppointmentVisitController {
         request.setAttribute("appointmentVisitQueryDto",appointmentVisitQueryDto);
     }
     private void initOrgList(HttpServletRequest request){
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        // 电销组
-        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-        busGroupReqDTO.setParentId(curLoginUser.getOrgId());
-        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
-        List<OrganizationDTO> data = listJSONResult.getData();
-        request.setAttribute("teleGroupList",data);
+        //查询全部电销组
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.DXZ);
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        request.setAttribute("teleGroupList",queryOrgByParam.getData());
 
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
