@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -62,9 +62,15 @@
                 :data="tableData"
                 v-loading="loading"
                 :cell-style="centerStyle"
-                :header-cell-style="centerStyle">
-                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
+                :header-cell-style="centerStyle"
+                :span-method="arraySpanMethod">
+                <el-table-column type="index" label="序号" width="55":index="indexFun"></el-table-column>
+                <el-table-column prop="dateId" label="日期">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.dateId == 99999">合计</span>
+                        <span v-else>{{scope.row.dateId | dateFormatFilter}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="visitNum" label="来访次数"></el-table-column>
                 <el-table-column prop="visitClueNum" label="来访资源数"></el-table-column>
                 <el-table-column prop="firstVisitRate" label="首访数占比" :formatter="percentFormat"></el-table-column>
@@ -129,6 +135,16 @@
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
             }             
+        },
+        filters: {
+            dateFormatFilter (date) { 
+                if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay; 
+          },
         },
         methods: {    
             centerStyle(){
@@ -277,6 +293,18 @@
             },
             goback () {
                 window.history.go(-1);
+            },
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [1, 2];
+                    }
+                }
+            },
+            indexFun (index) { // 表格序号
+                return index;
             },
             //百分比格式话
             percentFormat(row, column) {
