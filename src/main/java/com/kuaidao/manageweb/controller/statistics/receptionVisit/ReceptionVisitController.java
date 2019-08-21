@@ -213,7 +213,7 @@ public class ReceptionVisitController {
             curList.add(ra.getRefundNum());
             curList.add(formatPercent(ra.getRefundRate()));
             curList.add(ra.getAvgCustomRate());
-            curList.add(formatPercent(ra.getAvgReceptionRate()));
+            curList.add(ra.getAvgReceptionRate());
             dataList.add(curList);
         }
     }
