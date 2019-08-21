@@ -313,7 +313,7 @@
                     <template slot-scope="scope" >
                         <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
                         <input type='hidden'>
-                        <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        <img th:src="@{/images/tel.png}" :readonly="phoneDisabled" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
@@ -729,6 +729,7 @@
       return {
         paginationShow: false,//分页是否显示
         isShow:false,
+        phoneDisabled:false,
         btnDisabled: false,
         recordDialog:false,
         dialogChooseList:false,
@@ -957,24 +958,29 @@
     },
     methods: {
       gettelNumberIcon(tel,clueId) {
+          this.phoneDisabled = true;
+          var sessionStorage =window.sessionStorage;
+          if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000){
+              sessionStorage.setItem("phoneKey"+clueId,new Date().getTime());
+            //外呼手机
+              var param = {};
+              param.clueId = clueId;
+              // 存储选中信息--start
+              this.setSessionStore("telemarketingStoreForm", this.storeForm);
+              var otherVal = {
+                  "currentPage": this.pager.currentPage,
+                  "clueId": clueId
+              }
 
-        //外呼手机
-        var param = {};
-        param.clueId = clueId;
-        // 存储选中信息--start
-        this.setSessionStore("telemarketingStoreForm", this.storeForm);
-        var otherVal = {
-          "currentPage": this.pager.currentPage,
-          "clueId": clueId
-        }
-        this.setSessionStore("telemarketingOtherVal", otherVal);
-        // 存储选中信息--end
-        window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
-          axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
-          });
-        });
-        //跳转页面
-        this.showClueDetailInfo(clueId);
+              this.setSessionStore("telemarketingOtherVal", otherVal);
+              // 存储选中信息--end
+              /*window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                  axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                  });
+              });*/
+              //跳转页面
+              this.showClueDetailInfo(clueId);
+          }
       },
       //日期数据格式化方法
       dateFormat(row, column, cellValue, index) {
