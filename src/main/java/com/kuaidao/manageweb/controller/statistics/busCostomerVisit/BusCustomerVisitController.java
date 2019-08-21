@@ -13,6 +13,7 @@ import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.busCoustomerVisit.BusCousomerVisitFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.appointmentVisit.AppointmentVisitQueryDto;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitDto;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitQueryDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -35,6 +36,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -61,9 +63,10 @@ public class BusCustomerVisitController {
      * @return
      */
     @RequestMapping("/list")
-    public String cusomerVisit(HttpServletRequest request){
+    public String cusomerVisit(HttpServletRequest request,Long userId,Long orgId,Long startTime,Long endTime,Long projectId){
+        pageParams(userId,orgId,startTime,endTime,projectId,request);
         initOrgList(request);
-        return "reportformsBusiness/businessSignTableTeam";
+        return "reportformsBusiness/businessSignTable";
     }
 
 
@@ -74,7 +77,7 @@ public class BusCustomerVisitController {
      */
     @RequestMapping("/queryByPage")
     @ResponseBody
-    public JSONResult<PageBean<CustomerVisitDto>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+    public JSONResult<Map<String,Object>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //商务大区总监 查询所有商务组
@@ -135,15 +138,15 @@ public class BusCustomerVisitController {
     /**
      * 来访签约表-- 商务经理 签约列表
      * @param request
-     * @param managerId
+     * @param
      * @return
      */
     @RequestMapping("/signDetailList")
-    public String managerVisit(HttpServletRequest request,Long managerId){
+    public String managerVisit(HttpServletRequest request,Long userId,Long orgId,Long startTime,Long endTime,Long projectId){
         // 查询所有项目
+        pageParams(userId,orgId,startTime,endTime,projectId,request);
         initOrgList(request);
-        request.setAttribute("managerId",managerId);
-        return "reportformsBusiness/businessSignTable";
+        return "reportformsBusiness/businessSignTableTeam";
     }
 
 
@@ -154,11 +157,11 @@ public class BusCustomerVisitController {
      */
     @RequestMapping("/queryPageByManagerId")
     @ResponseBody
-    public JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+    public JSONResult<Map<String,Object>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         if(null==customerVisitQueryDto.getBusinessManagerId()){
-            return new JSONResult<PageBean<CustomerVisitDto>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
+            return new JSONResult<Map<String,Object>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
         }
-        JSONResult<PageBean<CustomerVisitDto>> jsonResult=busCousomerVisitFeignClient.queryPageByManagerId(customerVisitQueryDto);
+        JSONResult<Map<String,Object>> jsonResult=busCousomerVisitFeignClient.queryPageByManagerId(customerVisitQueryDto);
         return jsonResult;
     }
 
@@ -231,6 +234,19 @@ public class BusCustomerVisitController {
         }
         JSONResult<List<UserInfoDTO>> jsonResult=userInfoFeignClient.getUserInfoListByParam(infoDTO);
         request.setAttribute("userList", jsonResult.getData());
+    }
+
+    /**
+     *  返回页面携带参数
+     */
+    private void pageParams(Long userId,Long orgId,Long startTime,Long endTime,Long projectId,HttpServletRequest request){
+        CustomerVisitQueryDto customerVisitDto = new CustomerVisitQueryDto();
+        customerVisitDto.setBusinessGroupId(orgId);
+        customerVisitDto.setStartTime(startTime);
+        customerVisitDto.setEndTime(endTime);
+        customerVisitDto.setBusinessManagerId(userId);
+        customerVisitDto.setProjectId(projectId);
+        request.setAttribute("appointmentVisitQueryDto",customerVisitDto);
     }
 
 }

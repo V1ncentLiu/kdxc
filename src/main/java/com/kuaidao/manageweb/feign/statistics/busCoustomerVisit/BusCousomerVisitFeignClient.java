@@ -25,7 +25,7 @@ import java.util.Map;
 public interface BusCousomerVisitFeignClient {
 
     @RequestMapping("/queryPage")
-    public JSONResult<PageBean<CustomerVisitDto>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto);
+    public JSONResult<Map<String,Object>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto);
 
 
     @RequestMapping("/queryList")
@@ -34,7 +34,7 @@ public interface BusCousomerVisitFeignClient {
 
 
     @RequestMapping("/queryPageByManage")
-    public JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(CustomerVisitQueryDto customerVisitQueryDto);
+    public JSONResult<Map<String,Object>> queryPageByManagerId(CustomerVisitQueryDto customerVisitQueryDto);
 
 
     @RequestMapping("/queryListByManagerId")
@@ -51,7 +51,7 @@ public interface BusCousomerVisitFeignClient {
          }
 
          @Override
-         public JSONResult<PageBean<CustomerVisitDto>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto) {
+         public JSONResult<Map<String,Object>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto) {
              return fallBackError("来访签约统计");
          }
 
@@ -61,7 +61,7 @@ public interface BusCousomerVisitFeignClient {
          }
 
          @Override
-         public JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(CustomerVisitQueryDto customerVisitQueryDto) {
+         public JSONResult<Map<String,Object>> queryPageByManagerId(CustomerVisitQueryDto customerVisitQueryDto) {
              return fallBackError("商务经理来访签约统计");
          }
 
