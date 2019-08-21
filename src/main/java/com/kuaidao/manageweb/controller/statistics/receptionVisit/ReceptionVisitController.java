@@ -109,6 +109,7 @@ public class ReceptionVisitController {
      * 一级页面查询人（分页）
      */
     @PostMapping("/getPersonPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getPersonPageList(@RequestBody ReceptionVisitQueryDto receptionVisitQueryDto){
         initAuth(receptionVisitQueryDto,null);
         return receptionVisitFeignClient.getPersonPageList(receptionVisitQueryDto);
@@ -148,7 +149,9 @@ public class ReceptionVisitController {
      * 二级页面查询人+天（分页）
      */
     @PostMapping("/getPersonDayPageList")
+    @ResponseBody
     JSONResult<Map<String,Object>> getPersonDayPageList(@RequestBody ReceptionVisitQueryDto receptionVisitQueryDto){
+        initAuth(receptionVisitQueryDto,null);
         return receptionVisitFeignClient.getPersonDayPageList(receptionVisitQueryDto);
     }
 
