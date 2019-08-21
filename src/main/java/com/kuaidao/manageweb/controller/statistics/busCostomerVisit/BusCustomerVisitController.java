@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.statistics.busCostomerVisit;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -19,6 +20,7 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import com.netflix.ribbon.proxy.annotation.Http;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +42,16 @@ import java.util.stream.Collectors;
 /**
  * @author: guhuitao
  * @create: 2019-08-20 14:22
+ * 商务-来访签约统计
  **/
-@RequestMapping("/customerVisit")
+@RequestMapping("/customerVisitSign")
 @Controller
 public class BusCustomerVisitController {
     private static Logger logger = LoggerFactory.getLogger(BusCustomerVisitController.class);
     @Autowired
     private BusCousomerVisitFeignClient busCousomerVisitFeignClient;
-    @Autowired
-    private BusManagerVisitFeignClient busManagerVisitFeignClient;
+//    @Autowired
+//    private BusManagerVisitFeignClient busManagerVisitFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -61,6 +64,8 @@ public class BusCustomerVisitController {
         initOrgList(request);
         return "reportformsBusiness/businessSignTableTeam";
     }
+
+
 
     /**
      * 分页查询拜访
@@ -125,6 +130,31 @@ public class BusCustomerVisitController {
          logger.error("exportExcel error:",e);
        }
     }
+
+
+//    /**
+//     * 来访签约表-- 商务经理 签约列表
+//     * @param request
+//     * @param managerId
+//     * @return
+//     */
+//    @RequestMapping("/signDetailList")
+//    public String managerVisit(HttpServletRequest request,Long managerId){
+//        // 查询所有项目
+//        initOrgList(request);
+//        request.setAttribute("managerId",managerId);
+//        return "reportformsBusiness/businessSignTable";
+//    }
+
+
+
+    /*public  JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+        if(null==customerVisitQueryDto.getBusinessManagerId()){
+            return new JSONResult<PageBean<CustomerVisitDto>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
+        }
+        JSONResult<PageBean<CustomerVisitDto>> jsonResult=busManagerVisitFeignClient.queryByPage(customerVisitQueryDto);
+        return jsonResult;
+    }*/
 
 
     private void initOrgList(HttpServletRequest request){
