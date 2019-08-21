@@ -170,6 +170,22 @@
                     });
                 });
             },
+            curTelSale(seleVal){ // 根据电销组选择电销顾问
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -419,7 +435,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             if(this.export.orgId){
-                this.currentTelSale(this.export.orgId);
+                this.curTelSale(this.export.orgId);
             }
             this.searchTable();
         },
