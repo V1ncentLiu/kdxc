@@ -44,7 +44,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled" @change="currentTelSale">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -159,18 +159,51 @@
         methods: {    
             centerStyle(){
                 return "text-align:center"
-            },  
-            currentTelSale(seleVal){ // 根据电销组选择电销顾问
-                if(null==seleVal||seleVal==""){
+            },
+            firstCurTelSale(seleVal, first){
+                if(seleVal==null||seleVal==""){
                     return ;
                 }
+                if(first){this.form.userId = '';}
+                this.getTelSale(seleVal);
+            },
+            currentTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getTelSale(seleVal);
+            },
+            getTelSale(seleVal){
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
                 });
             },
+            // currentTelSale(seleVal, first){ // 根据电销组选择电销顾问
+            //     console.log(seleVal,first)
+            //     if(seleVal==null||seleVal==""){
+            //         return ;
+            //     }
+            //     if(first){this.form.userId = '';}
+            //     param={};
+            //     param.orgId=seleVal;
+            //     param.roleCode="DXCYGW";
+            //     axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+            //         mainDivVM.busSaleArr=response.data.data;
+            //     }).catch(function (error) {
+            //          mainDivVM.$message({
+            //             message: "电销顾问请求失败，请稍后重试",
+            //             type: "error"
+            //         });
+            //     });
+            // },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
