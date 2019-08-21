@@ -178,7 +178,7 @@ public class ReceptionVisitController {
     private void addTotalExportData(ReceptionVisitDto ra, List<List<Object>> dataList) {
         List<Object> curList = new ArrayList<>();
         curList.add("");
-        curList.add("");
+        curList.add("合计");
         curList.add(ra.getVisitNum());
         curList.add(ra.getVisitClueNum());
         curList.add(formatPercent(ra.getFirstVisitRate()));
@@ -187,7 +187,7 @@ public class ReceptionVisitController {
         curList.add(ra.getRefundNum());
         curList.add(formatPercent(ra.getRefundRate()));
         curList.add(ra.getAvgCustomRate());
-        curList.add(formatPercent(ra.getAvgReceptionRate()));
+        curList.add(ra.getAvgReceptionRate());
         dataList.add(curList);
     }
 
