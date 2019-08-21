@@ -44,7 +44,7 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        if( (roleCode =='DXCYGW' && (row.accountId !=undefined && row.accountId!=userId)) || (row.clueId != null &&( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))))){
+        if(row.clueId &&( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")))){
           text ="***"
         }else{
           text = row.customerPhone;
@@ -245,13 +245,16 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-                		 //download(url,fileNameArr[fileNameArr.length-1],'audio/*');
+                		 if(callSource=='3'){
+                			 var decodeUrl = encodeURI(url);
+                			 url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                		 }
+            			 var x=new XMLHttpRequest();
+             			x.open("GET", url, true);
+             			x.responseType = 'blob';
+             			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+             			x.send(); 
                 		 
-                		var x=new XMLHttpRequest();
-            			x.open("GET", url, true);
-            			x.responseType = 'blob';
-            			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
-            			x.send();
                 	 }
                      
                  }else{

@@ -93,6 +93,14 @@ public class BusCustomerManagerController {
         List<OrganizationRespDTO> teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ,null);
         request.setAttribute("teleSaleGroupList", teleSaleGroupList);
         List<RoleInfoDTO> roleList = user.getRoleList();
+        // 获取业务线
+        Integer businessLine = null;
+        if(user.getBusinessLine() != null ){
+            businessLine = user.getBusinessLine();
+        }
+        // 获取人员所在组织
+        Long orgId =user.getOrgId();
+
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             // 管理员 可以选择所有商务组 商务总监
             // 查询所有商务组
@@ -108,26 +116,29 @@ public class BusCustomerManagerController {
                         || RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())
                         || RoleCodeEnum.BUSBIGAREAW.name().equals(roleList.get(0).getRoleCode())
                         || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
+
+            // 商务中心查询业务线下数据。
+            if( RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())){
+                orgId =null;
+            }
+
             // 商务大区总监 可以选择本区下的商务组 商务总监
             // 商务总监 可以选择本商务组下的商务经理
             // 查询下属商务组
-            Integer businessLine = null;
-            if(user.getBusinessLine() != null ){
-                businessLine = user.getBusinessLine();
-            }
             List<OrganizationRespDTO> busSaleGroupList =
-                    getSaleGroupList(user.getOrgId(), OrgTypeConstant.SWZ,businessLine);
+                    getSaleGroupList(orgId, OrgTypeConstant.SWZ,businessLine);
             // 查询本区商务总监
             List<UserInfoDTO> busDirectorList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null,businessLine);
+                    getUserList(orgId, RoleCodeEnum.SWZJ.name(), null,businessLine);
             request.setAttribute("busDirectorList", busDirectorList);
             // 查询组织下商务经理
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> saleList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList,businessLine);
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList,businessLine);
             request.setAttribute("busSaleList", saleList);
+
             //商务总监固定商务组筛选条件为本组
             if(RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())){
                 ownOrgId = String.valueOf(user.getOrgId());
