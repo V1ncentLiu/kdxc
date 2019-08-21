@@ -28,7 +28,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.bussinessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -38,7 +38,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务经理:">  
-                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
+                    <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
@@ -76,22 +76,22 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="businessManagerName" label="商务经理">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.businessManagerId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.businessManagerName}}</el-button>
-                        <span v-else>{{scope.row.businessManagerName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.businessManagerId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.userName}}</el-button>
+                        <span v-else>{{scope.row.userName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="visitNum" label="首访数"></el-table-column>
-                <el-table-column prop="visitClueNum" label="二次来访数"></el-table-column>
-                <el-table-column prop="firstVisitRate" label="2+次来访数"></el-table-column>
-                <el-table-column prop="businessSignNum" label="签约数"></el-table-column>
-                <el-table-column prop="earnestRate" label="首访签约数"></el-table-column>
-                <el-table-column prop="refundNum" label="二次来访签约数"></el-table-column>
-                <el-table-column prop="refundRate" label="2+次来访签约数"></el-table-column>
-                <el-table-column prop="avgCustomRate" label="其他签约"></el-table-column>
-                <el-table-column prop="avgReceptionRate" label="签约率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="refundRate" label="首访签约率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="avgCustomRate" label="二次来访签约率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="avgReceptionRate" label="2+次来访签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="firstVisit" label="首访数"></el-table-column>
+                <el-table-column prop="secondVisit" label="二次来访数"></el-table-column>
+                <el-table-column prop="manyVisit" label="2+次来访数"></el-table-column>
+                <el-table-column prop="sumSign" label="签约数"></el-table-column>
+                <el-table-column prop="firstSign" label="首访签约数"></el-table-column>
+                <el-table-column prop="secondSign" label="二次来访签约数"></el-table-column>
+                <el-table-column prop="manySign" label="2+次来访签约数"></el-table-column>
+                <el-table-column prop="otherSign" label="其他签约"></el-table-column>
+                <el-table-column prop="signRate" label="签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="isitRate" label="首访签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="secondSignRate" label="二次来访签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="manySignRate" label="2+次来访签约率" :formatter="percentFormat"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -124,14 +124,16 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: ''
+                    bussinessGroupId: '',
+                    businessManagerId: '',
+                    projectId: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: ''
+                    bussinessGroupId: '',
+                    businessManagerId: '',
+                    projectId: ''
                 },
                 tableData: [],
                 orgTeleArr: orgIdList, // 商务组
@@ -153,7 +155,7 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.form.userId = '';
+                this.form.businessManagerId = '';
                 this.getTelSale(seleVal);
             },
             getTelSale(seleVal){
@@ -215,10 +217,10 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
-                param.userId = this.form.userId;
+                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessManagerId = this.form.businessManagerId;
                 this.loading = true; 
-                axios.post('/statistics/receptionVisit/getPersonPageList',param).then(function (response) {
+                axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -247,8 +249,8 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
-                        mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -285,12 +287,13 @@
                 }
             },
             gotoTeam(row){
-                var userId = row.businessManagerId;
-                var orgId = this.export.orgId;
+                var businessManagerId = row.businessManagerId;
+                var bussinessGroupId = this.export.bussinessGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                if(userId){
-                    window.location.href="/statistics/receptionVisit/businessVisitReceptionTablePerson?orgId=" + orgId + "&userId="+ userId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                var projectId = this.export.projectId;
+                if(businessManagerId){
+                    window.location.href="/statistics/receptionVisit/businessVisitReceptionTablePerson?bussinessGroupId=" + bussinessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -339,18 +342,18 @@
                 this.searchTable(1);
             },
             searchWeek(){ // 近七天
-                    var a = new Date();
-                    var year = a.getFullYear();
-                    var month = a.getMonth();
-                    var date = a.getDate();
-                    var b = new Date(year,month,date);
-                    var c = b.valueOf()-6*24*60*60*1000;
-                    var d = b.valueOf();
-                    var startTime= new Date(c);
-                    var endTime = new Date(d);
-                    this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                    this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                    this.searchTable(1);
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var c = b.valueOf()-6*24*60*60*1000;
+                var d = b.valueOf();
+                var startTime= new Date(c);
+                var endTime = new Date(d);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                this.searchTable(1);
             },
             searchMonth(){ // 本月 
                 var a = new Date();
@@ -369,9 +372,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.orgId = this.export.orgId;
-                param.userId = this.export.userId;
-                axios.post('/statistics/receptionVisit/exportPersonAllList',param,{responseType:'blob'})
+                param.projectId = this.export.projectId;
+                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                axios.post('/customerVisit/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -393,14 +397,14 @@
             this.form.endTime=endTime; 
             if(curOrgId){
                 this.isDisabled = true;
-                this.form.orgId = curOrgId; 
+                this.form.bussinessGroupId = curOrgId; 
                 this.firstCurTelSale(curOrgId);
                 if(curUserId){
-                    this.form.curUserId = curUserId; 
+                    this.form.businessManagerId = curUserId;
                     this.isDisabledUserId = true;
                 }
-                this.export.orgId = this.form.orgId; 
-                this.export.userId = this.form.userId; 
+                this.export.bussinessGroupId = this.form.bussinessGroupId; 
+                this.export.businessManagerId = this.form.businessManagerId; 
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);

@@ -39,7 +39,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务经理:">  
-                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
+                    <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.value"
@@ -81,15 +81,18 @@
                         <span v-else>{{scope.row.dateId | dateFormatFilter}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="visitNum" label="来访次数"></el-table-column>
-                <el-table-column prop="visitClueNum" label="来访资源数"></el-table-column>
-                <el-table-column prop="firstVisitRate" label="首访数占比" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="businessSignNum" label="签约单数"></el-table-column>
-                <el-table-column prop="earnestRate" label="订金率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="refundNum" label="退款单数" :formatter="numFormat"></el-table-column>
-                <el-table-column prop="refundRate" label="退款率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="avgCustomRate" label="平均每客户来访次数"></el-table-column>
-                <el-table-column prop="avgReceptionRate" label="人均天接待来访次数"></el-table-column>
+                <el-table-column prop="firstVisit" label="首访数"></el-table-column>
+                <el-table-column prop="secondVisit" label="二次来访数"></el-table-column>
+                <el-table-column prop="manyVisit" label="2+次来访数"></el-table-column>
+                <el-table-column prop="sumSign" label="签约数"></el-table-column>
+                <el-table-column prop="firstSign" label="首访签约数"></el-table-column>
+                <el-table-column prop="secondSign" label="二次来访签约数"></el-table-column>
+                <el-table-column prop="manySign" label="2+次来访签约数"></el-table-column>
+                <el-table-column prop="otherSign" label="其他签约"></el-table-column>
+                <el-table-column prop="signRate" label="签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="isitRate" label="首访签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="secondSignRate" label="二次来访签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="manySignRate" label="2+次来访签约率" :formatter="percentFormat"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -122,27 +125,18 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: ''
+                    bussinessGroupId: '',
+                    businessManagerId: '',
+                    projectId: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: ''
+                    bussinessGroupId: '',
+                    businessManagerId: '',
+                    projectId: ''
                 },
-                tableData: [
-                    // {
-                    //     projectName: '项目名称',
-                    //     invitationNum: '1',
-                    //     cancelInvitationNum:'12',
-                    //     deleteInvitationNum: '123',
-                    //     invitationFrequency: '1234',
-                    //     cancelInvitationFrequency: '12345',
-                    //     deleteInvitationFrequency: '1233444',
-                    //     reserveTime: '20190101',
-                    // }
-                ],
+                tableData: [],
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
                 projectArr: projectList, // 来访项目
@@ -172,7 +166,7 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.form.userId = '';
+                this.form.businessManagerId = '';
                 this.getTelSale(seleVal);
             },
             getTelSale(seleVal){
@@ -234,10 +228,10 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
-                param.userId = this.form.userId;
+                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessManagerId = this.form.businessManagerId;
                 this.loading = true; 
-                axios.post('/statistics/receptionVisit/getPersonDayPageList',param).then(function (response) {
+                axios.post('/customerVisitSign/queryPageByManagerId',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -266,8 +260,8 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
-                        mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -378,18 +372,18 @@
                 this.searchTable(1);
             },
             searchWeek(){ // 近七天
-                    var a = new Date();
-                    var year = a.getFullYear();
-                    var month = a.getMonth();
-                    var date = a.getDate();
-                    var b = new Date(year,month,date);
-                    var c = b.valueOf()-6*24*60*60*1000;
-                    var d = b.valueOf();
-                    var startTime= new Date(c);
-                    var endTime = new Date(d);
-                    this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                    this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                    this.searchTable(1);
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var c = b.valueOf()-6*24*60*60*1000;
+                var d = b.valueOf();
+                var startTime= new Date(c);
+                var endTime = new Date(d);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                this.searchTable(1);
             },
             searchMonth(){ // 本月 
                 var a = new Date();
@@ -408,9 +402,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.orgId = this.export.orgId;
-                param.userId = this.export.userId;
-                axios.post('/statistics/receptionVisit/exportPersonDayAllList',param,{responseType:'blob'})
+                param.projectId = this.export.projectId;
+                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -430,16 +425,16 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curOrgId){ // 有角色
                 this.isDisabled = true;
-                this.form.orgId = curOrgId;
+                this.form.bussinessGroupId = curOrgId;
                 if(curUserId){
                     this.isDisabledUserId = true;
-                    this.form.userId = curUserId;
+                    this.form.businessManagerId = curUserId;
                 }else{
-                    this.form.userId = parentParam.userId ?parentParam.userId:'';
+                    this.form.businessManagerId = parentParam.businessManagerId ?parentParam.businessManagerId:'';
                 }
             }else{
-                this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
-                this.form.userId = parentParam.userId ? parentParam.userId:'';
+                this.form.bussinessGroupId = parentParam.bussinessGroupId ? parentParam.bussinessGroupId:'';
+                this.form.businessManagerId = parentParam.businessManagerId ? parentParam.businessManagerId:'';
             }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
@@ -453,13 +448,13 @@
                 this.export.startTime = this.minuteFormat(this.form.startTime);
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
-            this.export.orgId = this.form.orgId; 
-            this.export.userId = this.form.userId;
+            this.export.bussinessGroupId = this.form.bussinessGroupId;
+            this.export.businessManagerId = this.form.businessManagerId; 
             
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.firstCurTelSale(this.export.orgId); 
+            this.firstCurTelSale(this.export.bussinessGroupId); 
             this.searchTable();
         },
         mounted(){
