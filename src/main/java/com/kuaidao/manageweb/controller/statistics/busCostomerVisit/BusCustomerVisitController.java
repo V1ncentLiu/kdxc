@@ -47,8 +47,6 @@ public class BusCustomerVisitController {
     private static Logger logger = LoggerFactory.getLogger(BusCustomerVisitController.class);
     @Autowired
     private BusCousomerVisitFeignClient busCousomerVisitFeignClient;
-//    @Autowired
-//    private BusManagerVisitFeignClient busManagerVisitFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -56,12 +54,16 @@ public class BusCustomerVisitController {
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
 
+    /**
+     * 签约列表页
+     * @param request
+     * @return
+     */
     @RequestMapping("/list")
     public String cusomerVisit(HttpServletRequest request){
         initOrgList(request);
         return "reportformsBusiness/businessSignTableTeam";
     }
-
 
 
     /**
@@ -129,30 +131,64 @@ public class BusCustomerVisitController {
     }
 
 
-//    /**
-//     * 来访签约表-- 商务经理 签约列表
-//     * @param request
-//     * @param managerId
-//     * @return
-//     */
-//    @RequestMapping("/signDetailList")
-//    public String managerVisit(HttpServletRequest request,Long managerId){
-//        // 查询所有项目
-//        initOrgList(request);
-//        request.setAttribute("managerId",managerId);
-//        return "reportformsBusiness/businessSignTable";
-//    }
+    /**
+     * 来访签约表-- 商务经理 签约列表
+     * @param request
+     * @param managerId
+     * @return
+     */
+    @RequestMapping("/signDetailList")
+    public String managerVisit(HttpServletRequest request,Long managerId){
+        // 查询所有项目
+        initOrgList(request);
+        request.setAttribute("managerId",managerId);
+        return "reportformsBusiness/businessSignTable";
+    }
 
 
-
-    /*public  JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+    /**
+     * 商务经理-来访签约表
+     * @param customerVisitQueryDto
+     * @return
+     */
+    @RequestMapping("/queryPageByManagerId")
+    @ResponseBody
+    public JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         if(null==customerVisitQueryDto.getBusinessManagerId()){
             return new JSONResult<PageBean<CustomerVisitDto>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
         }
-        JSONResult<PageBean<CustomerVisitDto>> jsonResult=busManagerVisitFeignClient.queryByPage(customerVisitQueryDto);
+        JSONResult<PageBean<CustomerVisitDto>> jsonResult=busCousomerVisitFeignClient.queryPageByManagerId(customerVisitQueryDto);
         return jsonResult;
-    }*/
+    }
 
+    /**
+     * 导出excel
+     * @param request
+     * @param customerVisitQueryDto
+     */
+    @RequestMapping("/exportExcelByManagerId")
+    @ResponseBody
+    public void exportMExcel(HttpServletRequest request,
+                            HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+        try{
+            JSONResult<List<CustomerVisitDto>> result=busCousomerVisitFeignClient.queryManagerListByParams(customerVisitQueryDto);
+            CustomerVisitDto [] dtos=result.getData().toArray(new CustomerVisitDto[0]);
+            String [] keys={"visitDate","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
+            String [] hader={"日期","首访数","二次来访数","2+次来访数","签约数","首访签约数","二次来访签约数","2+次来访签约数","其他签约","签约率","首访签约率","二次来访签约率","2+次来访签约率"};
+            Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
+            String name = "商务经理签约来访表.xlsx";
+
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ServletOutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("exportExcel error:",e);
+        }
+    }
 
     private void initOrgList(HttpServletRequest request){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
