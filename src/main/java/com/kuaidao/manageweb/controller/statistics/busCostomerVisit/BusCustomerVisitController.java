@@ -20,6 +20,7 @@ import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitDto;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitQueryDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -233,30 +234,13 @@ public class BusCustomerVisitController {
 
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
-        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
-        List<OrganizationDTO> data = listJSONResult.getData();
+        JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        List<OrganizationRespDTO> data = listJSONResult.getData();
         request.setAttribute("busGroupList",data);
 
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
-
-        //商务经理列表
-        UserOrgRoleReq infoDTO=new UserOrgRoleReq();
-        infoDTO.setRoleCode(RoleCodeEnum.SWJL.name());
-        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
-            List<Long> orgidList= data.stream().map(c->c.getId()).collect(Collectors.toList());
-            infoDTO.setOrgIdList(orgidList);
-        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
-            List<Long> list= Arrays.asList(curLoginUser.getOrgId());
-            infoDTO.setOrgIdList(list);
-        }else{
-            List<UserInfoDTO> list= Arrays.asList(curLoginUser);
-            request.setAttribute("userList", list);
-            return;
-        }
-        JSONResult<List<UserInfoDTO>> jsonResult=userInfoFeignClient.getUserInfoListByParam(infoDTO);
-        request.setAttribute("userList", jsonResult.getData());
     }
 
     /**
