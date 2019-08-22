@@ -22,13 +22,10 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
-                <el-form-item label="预约来访日期:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
+                <el-form-item label="统计截止日期:">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endtTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="来访项目:">  
+                <el-form-item label="餐饮项目:">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -38,8 +35,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销分公司:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                <el-form-item label="商务组:">  
+                    <el-select v-model="form.bussinessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -48,33 +45,13 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销事业部:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                <el-form-item label="商务经理:">  
+                    <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in busSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.cusLevelList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
-                        <el-option
-                            v-for="item in clientRank"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -94,14 +71,11 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
-                <el-table-column prop="countResource" label="来访项目" width="200"></el-table-column>
-                <el-table-column prop="countResource" label="正常邀约数" width="200"></el-table-column>
-                <el-table-column prop="countClueId" label="取消邀约数"></el-table-column>
-                <el-table-column prop="countDistinctClue" label="删除邀约数"></el-table-column>
-                <el-table-column prop="countDistinctClue" label="邀约次数"></el-table-column>
-                <el-table-column prop="dayOfPer" label="取消邀约次数" :formatter="numFormat"></el-table-column>
-                <el-table-column prop="dayOfPer" label="删除邀约次数" :formatter="numFormat"></el-table-column>
+                <el-table-column prop="firstVisit" label="项目"></el-table-column>
+                <el-table-column prop="firstVisit" label="欠款天数"></el-table-column>
+                <el-table-column prop="firstVisit" label="商务经理"></el-table-column>
+                <el-table-column prop="firstVisit" label="未收齐尾款笔数"></el-table-column>
+                <el-table-column prop="firstVisit" label="未收齐尾款金额"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
@@ -121,30 +95,32 @@
         el: '#maindiv',
         data: function() {
             return {
-                loading:false,
-                form: {
-                    startTime:'',
-                    endTime:'',
-                    orgId:'',
-                    userId:'',
-                    cusLevelList:[],
-                },
-                export: {
-                    startTime:'',
-                    endTime:'',
-                    orgId:'',
-                    userId:'',
-                    cusLevelList:[],
-                },
-                tableData: [],
-                orgTeleArr:orgIdList,//电销组
-                busSaleArr:'',//创业顾问
-                clientRank:clientRankIdList,//客户级别
+                loading: false,
+                isDisabled: false,
+                isDisabledUserId: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
                     pageSize: 3,
                 },
+                form: {
+                    startTime:'',
+                    endTime:'',
+                    bussinessGroupId: '',
+                    businessManagerId: '',
+                    projectId: ''
+                },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    bussinessGroupId: '',
+                    businessManagerId: '',
+                    projectId: ''
+                },
+                tableData: [],
+                orgTeleArr: orgIdList, // 商务组
+                busSaleArr: '', // 商务经理
+                projectArr: projectList, // 来访项目
                 pickerOptions0: {
                   disabledDate(time) {
                     return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
@@ -156,27 +132,18 @@
             centerStyle(){
                 return "text-align:center"
             },  
-            currentTelSale(seleVal){//根据电销组选择创业顾问
-                if(null==seleVal||seleVal==""){
+            firstCurTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
                     return ;
                 }
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                });
+                this.getTelSale(seleVal);
             },
-            currentTelSale(seleVal){ // 根据电销组选择电销顾问
-                if(null==seleVal||seleVal==""){
+            currentTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
                     return ;
                 }
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                });
+                this.form.businessManagerId = '';
+                this.getTelSale(seleVal);
             },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
@@ -218,17 +185,16 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-  
+    
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
-                param.userId = this.form.userId;
-                param.projectId = this.form.projectId;
+                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessManagerId = this.form.businessManagerId;
                 this.loading = true; 
-                axios.post('/statistics/appointmentVisit/getGroupPageList',param).then(function (response) {
+                axios.post('/customerVisitSign/queryPageByManagerId',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -257,10 +223,9 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
-                        mainDivVM.export.userId = mainDivVM.form.userId;
-                        mainDivVM.export.projectId = mainDivVM.form.projectId;
-       
+                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
+        
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -298,6 +263,27 @@
             goback () {
                 window.history.go(-1);
             },
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [1, 2];
+                    }
+                }
+            },
+            indexFun (index) { // 表格序号
+                return index;
+            },
+            //百分比格式话
+            percentFormat(row, column) {
+                var percent = row[column.property];
+                if (!percent) { // 如果没有值或值为0
+                    return 0 + "%";
+                }
+                percent = (percent * 1000) / 10 + "%";
+                return percent;
+            },
             dateFormat (row, column) { 
                 var date = row[column.property];
                 if (!date) {return "";}
@@ -307,18 +293,20 @@
                 var oDay = d.slice(6);
                 return oYear+"-"+oMonth+"-"+oDay; 
             },
-            numFormat(row, column){
-                var percent = row[column.property];
-                if(percent){
-                    percent = Math.floor(percent * 100) / 100;
-                }
-                return percent;
-            },
             minuteFormat (m) {
-                if (!m) {
-                   return "";
-                 }
-                return moment(m).format("YYYYMMDDHHmm");
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear()
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                return timeRes;
             },
             dateTimeFormat (dt) { 
                 if (!dt) {return "";}
@@ -329,7 +317,7 @@
                 var oHour = d.slice(8,10);
                 var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            },
+            }, 
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -368,21 +356,22 @@
             },
             exportRs(){
                 var param = {};
-                // 搜索条件
                 param.startTime = this.export.startTime;
-                param.endTime =  this.export.endTime;
-                param.orgId =  this.export.orgId;//电销组
-                param.userId =  this.export.userId;//电销顾问
-                param.cusLevelList =  this.export.cusLevelList;//客户级别
-                axios.post('/statistics/teleStatement/exportRecordByGroupLevelUserId',param,{responseType:'blob'})
+                param.endTime = this.export.endTime;
+                param.projectId = this.export.projectId;
+                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
                     saveAs(data,decodeURI(fileName));
                 })
                 .catch(function (error) {
-                    console.log(error);
-                }).then(function(){
+                    mainDivVM.$message({
+                        message: "导出失败，请稍后重试",
+                        type: "error"
+                    });
                 });
             }
         },

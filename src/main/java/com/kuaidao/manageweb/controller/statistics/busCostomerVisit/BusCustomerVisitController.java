@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.statistics.busCostomerVisit;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -12,6 +13,7 @@ import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.busCoustomerVisit.BusCousomerVisitFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.appointmentVisit.AppointmentVisitQueryDto;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitDto;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitQueryDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -34,6 +36,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -47,8 +50,6 @@ public class BusCustomerVisitController {
     private static Logger logger = LoggerFactory.getLogger(BusCustomerVisitController.class);
     @Autowired
     private BusCousomerVisitFeignClient busCousomerVisitFeignClient;
-//    @Autowired
-//    private BusManagerVisitFeignClient busManagerVisitFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -56,12 +57,28 @@ public class BusCustomerVisitController {
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
 
+    /**
+     * 签约列表页
+     * @param request
+     * @return
+     */
     @RequestMapping("/list")
-    public String cusomerVisit(HttpServletRequest request){
+    public String cusomerVisit(HttpServletRequest request,Long businessManagerId,Long businessGroupId,Long startTime,Long endTime,Long projectId){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        //商务经理直接访问页面设置默认值
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            businessManagerId=curLoginUser.getId();
+            businessGroupId=curLoginUser.getOrgId();
+        }
+        pageParams(businessManagerId,businessGroupId,startTime,endTime,projectId,request);
         initOrgList(request);
-        return "reportformsBusiness/businessSignTableTeam";
+        userParms(request);
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            return "reportformsBusiness/businessSignTableTeam";
+        }
+        return "reportformsBusiness/businessSignTable";
     }
-
 
 
     /**
@@ -71,7 +88,7 @@ public class BusCustomerVisitController {
      */
     @RequestMapping("/queryByPage")
     @ResponseBody
-    public JSONResult<PageBean<CustomerVisitDto>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+    public JSONResult<Map<String,Object>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //商务大区总监 查询所有商务组
@@ -129,30 +146,65 @@ public class BusCustomerVisitController {
     }
 
 
-//    /**
-//     * 来访签约表-- 商务经理 签约列表
-//     * @param request
-//     * @param managerId
-//     * @return
-//     */
-//    @RequestMapping("/signDetailList")
-//    public String managerVisit(HttpServletRequest request,Long managerId){
-//        // 查询所有项目
-//        initOrgList(request);
-//        request.setAttribute("managerId",managerId);
-//        return "reportformsBusiness/businessSignTable";
-//    }
+    /**
+     * 来访签约表-- 商务经理 签约列表
+     * @param request
+     * @param
+     * @return
+     */
+    @RequestMapping("/signDetailList")
+    public String managerVisit(HttpServletRequest request,Long businessManagerId,Long businessGroupId,Long startTime,Long endTime,Long projectId){
+        // 查询所有项目
+        pageParams(businessManagerId,businessGroupId,startTime,endTime,projectId,request);
+        initOrgList(request);
+        userParms(request);
+        return "reportformsBusiness/businessSignTableTeam";
+    }
 
 
-
-    /*public  JSONResult<PageBean<CustomerVisitDto>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+    /**
+     * 商务经理-来访签约表
+     * @param customerVisitQueryDto
+     * @return
+     */
+    @RequestMapping("/queryPageByManagerId")
+    @ResponseBody
+    public JSONResult<Map<String,Object>> queryPageByManagerId(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         if(null==customerVisitQueryDto.getBusinessManagerId()){
-            return new JSONResult<PageBean<CustomerVisitDto>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
+            return new JSONResult<Map<String,Object>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
         }
-        JSONResult<PageBean<CustomerVisitDto>> jsonResult=busManagerVisitFeignClient.queryByPage(customerVisitQueryDto);
+        JSONResult<Map<String,Object>> jsonResult=busCousomerVisitFeignClient.queryPageByManagerId(customerVisitQueryDto);
         return jsonResult;
-    }*/
+    }
 
+    /**
+     * 导出excel
+     * @param request
+     * @param customerVisitQueryDto
+     */
+    @RequestMapping("/exportExcelByManagerId")
+    @ResponseBody
+    public void exportMExcel(HttpServletRequest request,
+                            HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
+        try{
+            JSONResult<List<CustomerVisitDto>> result=busCousomerVisitFeignClient.queryManagerListByParams(customerVisitQueryDto);
+            CustomerVisitDto [] dtos=result.getData().toArray(new CustomerVisitDto[0]);
+            String [] keys={"visitDate","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
+            String [] hader={"日期","首访数","二次来访数","2+次来访数","签约数","首访签约数","二次来访签约数","2+次来访签约数","其他签约","签约率","首访签约率","二次来访签约率","2+次来访签约率"};
+            Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
+            String name = "商务经理签约来访表.xlsx";
+
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ServletOutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            outputStream.close();
+        }catch (Exception e){
+            logger.error("exportExcel error:",e);
+        }
+    }
 
     private void initOrgList(HttpServletRequest request){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -194,6 +246,30 @@ public class BusCustomerVisitController {
         }
         JSONResult<List<UserInfoDTO>> jsonResult=userInfoFeignClient.getUserInfoListByParam(infoDTO);
         request.setAttribute("userList", jsonResult.getData());
+    }
+
+    /**
+     *  返回页面携带参数
+     */
+    private void pageParams(Long userId,Long orgId,Long startTime,Long endTime,Long projectId,HttpServletRequest request){
+        CustomerVisitQueryDto customerVisitDto = new CustomerVisitQueryDto();
+        customerVisitDto.setBusinessGroupId(orgId);
+        customerVisitDto.setStartTime(startTime);
+        customerVisitDto.setEndTime(endTime);
+        customerVisitDto.setBusinessManagerId(userId);
+        customerVisitDto.setProjectId(projectId);
+        request.setAttribute("appointmentVisitQueryDto",customerVisitDto);
+    }
+
+    public void userParms(HttpServletRequest request){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+             request.setAttribute("curOrgId",curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            request.setAttribute("curOrgId",curLoginUser.getOrgId());
+            request.setAttribute("curUserId",curLoginUser.getId());
+        }
     }
 
 }
