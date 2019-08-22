@@ -66,6 +66,7 @@ public class BusCustomerVisitController {
     public String cusomerVisit(HttpServletRequest request,Long userId,Long orgId,Long startTime,Long endTime,Long projectId){
         pageParams(userId,orgId,startTime,endTime,projectId,request);
         initOrgList(request);
+        userParms(request);
         return "reportformsBusiness/businessSignTable";
     }
 
@@ -146,6 +147,7 @@ public class BusCustomerVisitController {
         // 查询所有项目
         pageParams(userId,orgId,startTime,endTime,projectId,request);
         initOrgList(request);
+        userParms(request);
         return "reportformsBusiness/businessSignTableTeam";
     }
 
@@ -247,6 +249,17 @@ public class BusCustomerVisitController {
         customerVisitDto.setBusinessManagerId(userId);
         customerVisitDto.setProjectId(projectId);
         request.setAttribute("appointmentVisitQueryDto",customerVisitDto);
+    }
+
+    public void userParms(HttpServletRequest request){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+             request.setAttribute("curOrgId",curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            request.setAttribute("curOrgId",curLoginUser.getOrgId());
+            request.setAttribute("curUserId",curLoginUser.getId());
+        }
     }
 
 }
