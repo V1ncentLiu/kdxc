@@ -5,6 +5,8 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
@@ -155,6 +157,14 @@ public class BusCustomerVisitController {
     @RequestMapping("/signDetailList")
     public String managerVisit(HttpServletRequest request,Long businessManagerId,Long businessGroupId,Long startTime,Long endTime,Long projectId){
         // 查询所有项目
+        if(null==businessGroupId){
+            IdEntityLong idEntity=new IdEntityLong();
+            idEntity.setId(businessManagerId);
+            JSONResult<UserInfoDTO> result=userInfoFeignClient.get(idEntity);
+            if("0".equals(result.getCode()) && null!=result.getData()){
+                businessGroupId=result.getData().getOrgId();
+            }
+        }
         pageParams(businessManagerId,businessGroupId,startTime,endTime,projectId,request);
         initOrgList(request);
         userParms(request);
