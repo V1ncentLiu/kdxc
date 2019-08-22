@@ -21,7 +21,7 @@ import java.util.Map;
  * @author: guhuitao
  * @create: 2019-08-20 14:13
  **/
-@FeignClient(name = "statstics-service3", path = "/statstics/busCustomerVisit", fallback = BusCousomerVisitFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/busCustomerVisit", fallback = BusCousomerVisitFeignClient.HystrixClientFallback.class)
 public interface BusCousomerVisitFeignClient {
 
     @RequestMapping("/queryPage")

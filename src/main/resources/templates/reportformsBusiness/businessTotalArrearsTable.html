@@ -25,9 +25,9 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endtTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="餐饮项目:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in projectArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -35,7 +35,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.bussinessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -89,6 +89,9 @@
 </body>
 <style>
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .mainSearchFormBox form .el-form-item:first-child .el-form-item__label{
+        width: 100px;
+    }
 </style>
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
@@ -109,14 +112,14 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
@@ -152,7 +155,7 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="SWJL";
-                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+                axios.post('/base/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
@@ -162,43 +165,29 @@
                 });
             },
             searchTable(firstPage) { 
-                var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
+                if(endTime){
                     endTime = new Date(this.form.endTime);
-                    if(startTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                    var currentDateRes = new Date(currentDate);
-                    var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
-                        this.$message({
-                            message: '请选择近6个月内的时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    startTime = this.limitTime(startTime, null);
+                    // var date = new Date();
+                    // var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    // var currentDateRes = new Date(currentDate);
+                    // if(endTime > currentDateRes){
+                    //     this.$message({
+                    //         message: '不能超过当天时间',
+                    //         type: 'warning'
+                    //     });
+                    //     return;
+                    // }
                     endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
-                        message: '请选择起止时间',
+                        message: '请选择截止时间',
                         type: 'warning'
                     });
                     return;
                 }   
     
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
     
@@ -207,7 +196,7 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
                 this.loading = true; 
                 axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
@@ -237,9 +226,8 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
         
                     }else{
@@ -278,12 +266,12 @@
             },
             gotoTeam(row){
                 var businessManagerId = row.businessManagerId;
-                var bussinessGroupId = this.export.bussinessGroupId;
+                var businessGroupId = this.export.businessGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
                 if(businessManagerId){
-                    window.location.href="/customerVisit/signDetailList?bussinessGroupId=" + bussinessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/customerVisit/signDetailList?businessGroupId=" + businessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -297,15 +285,6 @@
             },
             indexFun (index) { // 表格序号
                 return index;
-            },
-            //百分比格式话
-            percentFormat(row, column) {
-                var percent = row[column.property];
-                if (!percent) { // 如果没有值或值为0
-                    return 0 + "%";
-                }
-                percent = (percent * 1000) / 10 + "%";
-                return percent;
             },
             minuteFormat (m) {
                 if (!m) {return "";}
@@ -363,7 +342,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 param.projectId = this.export.projectId;
-                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessGroupId =  this.export.businessGroupId;
                 param.businessManagerId = this.export.businessManagerId;
                 axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
                 .then(function (response) {
@@ -380,17 +359,28 @@
             }
         },
         created(){     
-            // 默认进入显示当天时间
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
-            this.form.endTime=endTime;  
+            this.form.endTime=endTime; 
+            if(curOrgId){
+                this.isDisabled = true;
+                this.form.businessGroupId = curOrgId; 
+                this.firstCurTelSale(curOrgId);
+                if(curUserId){
+                    this.form.businessManagerId = curUserId;
+                    this.isDisabledUserId = true;
+                }
+                this.export.businessGroupId = this.form.businessGroupId; 
+                this.export.businessManagerId = this.form.businessManagerId; 
+            }
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
 
-            if(curOrgId){this.isDisabled= true;}
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+
             this.searchTable();
         },
         mounted(){

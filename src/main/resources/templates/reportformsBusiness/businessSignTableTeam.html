@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -89,12 +89,12 @@
                 <el-table-column prop="secondSign" label="二次来访签约数"></el-table-column>
                 <el-table-column prop="manySign" label="2+次来访签约数"></el-table-column>
                 <el-table-column prop="otherSign" label="其他签约"></el-table-column>
-                <el-table-column prop="signRate" label="签约率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="isitRate" label="首访签约率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="secondSignRate" label="二次来访签约率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="manySignRate" label="2+次来访签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="signRate" label="签约率"></el-table-column>
+                <el-table-column prop="visitRate" label="首访签约率"></el-table-column>
+                <el-table-column prop="secondSignRate" label="二次来访签约率"></el-table-column>
+                <el-table-column prop="manySignRate" label="2+次来访签约率"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" :papernum="[3,5,10]" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -107,10 +107,10 @@
 <script th:inline="javascript">
     var parentParam=[[${appointmentVisitQueryDto}]];
     var projectList=[[${projectList}]];// 来访项目
-    var orgIdList=[[${teleGroupList}]];// 商务组
+    var orgIdList=[[${busGroupList}]];// 商务组
     var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
-    console.log(parentParam,projectList,curOrgId);
+    console.log(parentParam,curOrgId,curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -121,19 +121,19 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
                 form: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
@@ -174,7 +174,7 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="SWJL";
-                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+                axios.post('/base/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
@@ -229,7 +229,7 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
                 param.projectId = this.form.projectId;
                 this.loading = true; 
@@ -262,7 +262,7 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.projectId = mainDivVM.form.projectId;
                     }else{
@@ -398,7 +398,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 param.projectId = this.export.projectId;
-                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessGroupId =  this.export.businessGroupId;
                 param.businessManagerId = this.export.businessManagerId;
                 axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
                 .then(function (response) {
@@ -420,15 +420,15 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curOrgId){ // 有角色
                 this.isDisabled = true;
-                this.form.bussinessGroupId = curOrgId;
+                this.form.businessGroupId = curOrgId;
                 if(curUserId){
                     this.isDisabledUserId = true;
                     this.form.businessManagerId = curUserId;
                 }else{
-                    this.form.businessManagerId = parentParam&&parentParam.businessManagerId ?parentParam.businessManagerId:'';
+                    this.form.businessManagerId = parentParam&&parentParam.businessManagerId?parentParam.businessManagerId:'';
                 }
             }else{
-                this.form.bussinessGroupId = parentParam&&parentParam.bussinessGroupId ? parentParam.bussinessGroupId:'';
+                this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
                 this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
             }
             if(parentParam && parentParam.startTime){
@@ -444,14 +444,14 @@
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
             this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
-            this.export.bussinessGroupId = this.form.bussinessGroupId;
+            this.export.businessGroupId = this.form.businessGroupId;
             this.export.businessManagerId = this.form.businessManagerId; 
             this.export.projectId = this.form.projectId; 
             
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.firstCurTelSale(this.export.bussinessGroupId); 
+            this.firstCurTelSale(this.export.businessGroupId); 
             this.searchTable();
         },
         mounted(){
