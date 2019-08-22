@@ -26,9 +26,9 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endtTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="餐饮项目:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in projectArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -86,6 +86,9 @@
 </body>
 <style>
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .mainSearchFormBox form .el-form-item:first-child .el-form-item__label{
+        width: 100px;
+    }
 </style>
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
@@ -274,15 +277,6 @@
             },
             indexFun (index) { // 表格序号
                 return index;
-            },
-            //百分比格式话
-            percentFormat(row, column) {
-                var percent = row[column.property];
-                if (!percent) { // 如果没有值或值为0
-                    return 0 + "%";
-                }
-                percent = (percent * 1000) / 10 + "%";
-                return percent;
             },
             dateFormat (row, column) { 
                 var date = row[column.property];

@@ -25,9 +25,9 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endtTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="餐饮项目:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in projectArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -89,6 +89,9 @@
 </body>
 <style>
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .mainSearchFormBox form .el-form-item:first-child .el-form-item__label{
+        width: 100px;
+    }
 </style>
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
@@ -162,43 +165,29 @@
                 });
             },
             searchTable(firstPage) { 
-                var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
+                if(endTime){
                     endTime = new Date(this.form.endTime);
-                    if(startTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                    var currentDateRes = new Date(currentDate);
-                    var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
-                        this.$message({
-                            message: '请选择近6个月内的时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    startTime = this.limitTime(startTime, null);
+                    // var date = new Date();
+                    // var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    // var currentDateRes = new Date(currentDate);
+                    // if(endTime > currentDateRes){
+                    //     this.$message({
+                    //         message: '不能超过当天时间',
+                    //         type: 'warning'
+                    //     });
+                    //     return;
+                    // }
                     endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
-                        message: '请选择起止时间',
+                        message: '请选择截止时间',
                         type: 'warning'
                     });
                     return;
                 }   
     
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
     
@@ -237,7 +226,6 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
@@ -297,15 +285,6 @@
             },
             indexFun (index) { // 表格序号
                 return index;
-            },
-            //百分比格式话
-            percentFormat(row, column) {
-                var percent = row[column.property];
-                if (!percent) { // 如果没有值或值为0
-                    return 0 + "%";
-                }
-                percent = (percent * 1000) / 10 + "%";
-                return percent;
             },
             minuteFormat (m) {
                 if (!m) {return "";}
