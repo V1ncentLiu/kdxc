@@ -95,7 +95,7 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {
         font-weight: bold;
     }
-    .mainSearchBg .el-form-item__label{
+    .mainSearchFormBox form .el-form-item:first-child .el-form-item__label{
         width: 100px;
     }
 </style>
@@ -127,18 +127,7 @@
                     userId: '',
                     projectId: ''
                 },
-                tableData: [
-                    // {
-                    //     projectName: '项目名称',
-                    //     invitationNum: '1',
-                    //     cancelInvitationNum:'12',
-                    //     deleteInvitationNum: '123',
-                    //     invitationFrequency: '1234',
-                    //     cancelInvitationFrequency: '12345',
-                    //     deleteInvitationFrequency: '1233444',
-                    //     reserveTime: '20190101',
-                    // }
-                ],
+                tableData: [],
                 orgTeleArr: orgIdList, // 电销组
                 busSaleArr: '', // 电销顾问
                 projectArr: projectList, // 来访项目
@@ -203,11 +192,12 @@
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
                     date.setMonth(date.getMonth()-6);
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                    var currentDateRes = new Date(currentDate);
+                    // var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    // if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(startTime < beforeSixMonthRes){
                         this.$message({
-                            message: '请选择近6个月内的时间',
+                            message: '开始时间请选择近6个月内的时间',
                             type: 'warning'
                         });
                         return;
@@ -296,7 +286,7 @@
                 }
                 if(endTime){
                     var e = endTime.slice(0,8);
-                    if(e < data){
+                    if(e < data || e > data){
                         this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
                         return this.form.endTime;                        
                     }
