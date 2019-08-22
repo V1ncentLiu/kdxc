@@ -224,11 +224,12 @@ public class BusCustomerVisitController {
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
             busGroupReqDTO.setParentId(curLoginUser.getOrgId());
-        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode) ||
-                RoleCodeEnum.SWJL.name().equals(roleCode)){
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
             busGroupReqDTO.setId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            //管理员可以查看全部
         }else{
+            //other 没权限
             busGroupReqDTO.setId(-1l);
         }
 
@@ -257,13 +258,18 @@ public class BusCustomerVisitController {
     }
 
     public void userParms(HttpServletRequest request){
+
+        //根据前段要求给默认"" 值
+        request.setAttribute("curOrgId","");
+        request.setAttribute("curUserId","");
+
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
-             request.setAttribute("curOrgId",curLoginUser.getOrgId());
+             request.setAttribute("curOrgId",curLoginUser.getOrgId()+"");
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
-            request.setAttribute("curOrgId",curLoginUser.getOrgId());
-            request.setAttribute("curUserId",curLoginUser.getId());
+            request.setAttribute("curOrgId",curLoginUser.getOrgId()+"");
+            request.setAttribute("curUserId",curLoginUser.getId()+"");
         }
     }
 
