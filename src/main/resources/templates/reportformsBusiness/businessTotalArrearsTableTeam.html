@@ -22,13 +22,10 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
-                <el-form-item label="预约来访日期:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
+                <el-form-item label="统计截止日期:">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endtTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="来访项目:">  
+                <el-form-item label="餐饮项目:">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -38,8 +35,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销分公司:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                <el-form-item label="商务组:">  
+                    <el-select v-model="form.bussinessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -48,33 +45,13 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销事业部:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                <el-form-item label="商务经理:">  
+                    <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in busSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.cusLevelList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
-                        <el-option
-                            v-for="item in clientRank"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -94,7 +71,11 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                
+                <el-table-column prop="firstVisit" label="项目"></el-table-column>
+                <el-table-column prop="firstVisit" label="欠款天数"></el-table-column>
+                <el-table-column prop="firstVisit" label="商务经理"></el-table-column>
+                <el-table-column prop="firstVisit" label="未收齐尾款笔数"></el-table-column>
+                <el-table-column prop="firstVisit" label="未收齐尾款金额"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
@@ -120,7 +101,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
                 form: {
                     startTime:'',
