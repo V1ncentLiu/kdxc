@@ -5,10 +5,8 @@ package com.kuaidao.manageweb.controller.project;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -16,9 +14,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import com.kuaidao.aggregation.dto.project.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.project.BrandListDTO;
+import com.kuaidao.aggregation.dto.project.BrandListPageParam;
+import com.kuaidao.aggregation.dto.project.CategoryDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -67,6 +74,9 @@ public class ProjectController {
                 getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        // 查询所属集团列表
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
+        request.setAttribute("companyList", listNoPage.getData());
         return "project/projectManagerPage";
     }
 
@@ -89,16 +99,16 @@ public class ProjectController {
         request.setAttribute("projectAttributiveList",
                 getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
         // 查询字典集团分配比例归属集合
-        List<DictionaryItemRespDTO>  ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
-        if(ratioList !=null && ratioList.size()>0) {
-        	for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
-        		dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue()+"%");
-			}
+        List<DictionaryItemRespDTO> ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
+        if (ratioList != null && ratioList.size() > 0) {
+            for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
+                dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue() + "%");
+            }
         }
-        request.setAttribute("ratioList",ratioList);
+        request.setAttribute("ratioList", ratioList);
         // 查询公司列表
-       // JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
-        //request.setAttribute("companyList", listNoPage.getData());
+        // JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
+        // request.setAttribute("companyList", listNoPage.getData());
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
         // 查询品牌品类集合
@@ -118,21 +128,21 @@ public class ProjectController {
         // 查询项目信息
         JSONResult<ProjectInfoDTO> jsonResult = projectInfoFeignClient.get(new IdEntityLong(id));
         request.setAttribute("project", jsonResult.getData());
-//        // 查询公司列表
-//        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
-//
-//        request.setAttribute("companyList", listNoPage.getData());
-        List<DictionaryItemRespDTO>  ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
-        if(ratioList !=null && ratioList.size()>0) {
-        	for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
-        		dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue()+"%");
-			}
+        // // 查询公司列表
+        // JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
+        //
+        // request.setAttribute("companyList", listNoPage.getData());
+        List<DictionaryItemRespDTO> ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
+        if (ratioList != null && ratioList.size() > 0) {
+            for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
+                dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue() + "%");
+            }
         }
-        
-        request.setAttribute("ratioList",ratioList);
+
+        request.setAttribute("ratioList", ratioList);
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
-        
+
         // 查询字典品类集合
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
@@ -189,12 +199,14 @@ public class ProjectController {
      */
     @PostMapping("/listNoPage")
     @ResponseBody
-    public JSONResult<List<ProjectInfoDTO>> listNoPage(@RequestBody ProjectInfoPageParam projectInfoPageParam, HttpServletRequest request) {
+    public JSONResult<List<ProjectInfoDTO>> listNoPage(
+            @RequestBody ProjectInfoPageParam projectInfoPageParam, HttpServletRequest request) {
 
-        JSONResult<List<ProjectInfoDTO>> list = projectInfoFeignClient.listNoPage(projectInfoPageParam);
+        JSONResult<List<ProjectInfoDTO>> list =
+                projectInfoFeignClient.listNoPage(projectInfoPageParam);
         if (list.getCode().equals(JSONResult.SUCCESS)) {
             List<ProjectInfoDTO> result = SortUtils.sortList(list.getData(), "projectName");
-        return  new JSONResult<List<ProjectInfoDTO>>().success(result);
+            return new JSONResult<List<ProjectInfoDTO>>().success(result);
         }
         return list;
     }
