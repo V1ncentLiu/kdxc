@@ -158,7 +158,7 @@ var mainDivVM = new Vue({
             signProvince:"",
             signCity:"",
             signDistrict:"",
-            visitCity:"",
+            arrVisitCity:"",
             isSign:1,
             visitPeopleNum:"",
             notSignReason:""
@@ -175,7 +175,7 @@ var mainDivVM = new Vue({
             signProvince:"",
             signCity:"",
             signDistrict:"",
-            visitCity:"",
+            arrVisitCity:"",
             isSign:1,
             // visitPeopleNum:"",
             notSignReason:"",
@@ -203,7 +203,7 @@ var mainDivVM = new Vue({
             isRemoteSign:'',
 
             visitTime:"",
-            visitCity:"",
+            arrVisitCity:"",
             visitType:"",
             visitShopType:"",
             visitNum:"",
@@ -287,8 +287,8 @@ var mainDivVM = new Vue({
             // signCity: [
             //     { required: true, message: '请选择签约城市', trigger: 'change' }
             // ],
-            visitCity: [ //请填写来访城市
-                { required: true, message: '请填写来访城市', trigger: 'change' }
+            arrVisitCity: [ //请填写来访城市
+                { required: true, message: '请填写到访城市', trigger: 'change' }
             ],
             signShopType: [
                 { required: true, message: '请选择签约店型', trigger: 'change' }
@@ -497,8 +497,8 @@ var mainDivVM = new Vue({
             visitTime: [ //请选择到访时间
                 { required: true, message: '请选择到访时间', trigger: 'change' }
             ],
-            visitCity: [ //请填写来访城市
-                { required: true, message: '请填写来访城市', trigger: 'change' }
+            arrVisitCity: [ //请填写来访城市
+                { required: true, message: '请填写到访城市', trigger: 'change' }
             ],
             visitType: [ //请选择到访类型
                 { required: true, message: '请选择到访类型', trigger: 'change' }
@@ -789,7 +789,7 @@ var mainDivVM = new Vue({
             param.id = mainDivVM.formSigning.clueId;
             axios.post('/businesssign/visitEcho',param).then(function (response) {
                 var echoData = response.data.data;
-                mainDivVM.formSigning.visitCity = echoData.visitCity;
+                mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
                 if(echoData.visitNum>0){
                     mainDivVM.formSigning.visitNum=echoData.visitNum;
                 }
@@ -801,7 +801,7 @@ var mainDivVM = new Vue({
             this.suppWrap = false;
             this.shouAddVisitButton = true;
             //清空补充到访记录数据
-            this.formSigning.visitCity = '';
+            this.formSigning.arrVisitCity = '';
             this.formSigning.visitNum='';
             this.formSigning.visitShopType='';
             this.formSigning.visitTime='';
@@ -950,7 +950,7 @@ var mainDivVM = new Vue({
                     param.signProvince=this.updateVisitRecord.signProvince;
                     param.signCity=this.updateVisitRecord.signCity;
                     param.signDistrict=this.updateVisitRecord.signDistrict;
-                    param.visitCity=this.updateVisitRecord.visitCity;
+                    param.arrVisitCity=this.updateVisitRecord.arrVisitCity;
                     param.isSign=this.updateVisitRecord.isSign;
                     param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
                     if( param.isSign==1){ // 已签约
@@ -1352,7 +1352,7 @@ var mainDivVM = new Vue({
                     param.signProvince=this.updateVisitRecord.signProvince;
                     param.signCity=this.updateVisitRecord.signCity;
                     param.signDistrict=this.updateVisitRecord.signDistrict;
-                    param.visitCity=this.updateVisitRecord.visitCity;
+                    param.arrVisitCity=this.updateVisitRecord.arrVisitCity;
                     param.isSign=this.updateVisitRecord.isSign;
                     param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
                     param.notSignReason=this.updateVisitRecord.notSignReason;
