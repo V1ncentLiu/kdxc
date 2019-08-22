@@ -63,15 +63,15 @@ public class BusCustomerVisitController {
      * @return
      */
     @RequestMapping("/list")
-    public String cusomerVisit(HttpServletRequest request,Long userId,Long orgId,Long startTime,Long endTime,Long projectId){
+    public String cusomerVisit(HttpServletRequest request,Long businessManagerId,Long businessGroupId,Long startTime,Long endTime,Long projectId){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //商务经理直接访问页面设置默认值
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
-            userId=curLoginUser.getId();
-            orgId=curLoginUser.getOrgId();
+            businessManagerId=curLoginUser.getId();
+            businessGroupId=curLoginUser.getOrgId();
         }
-        pageParams(userId,orgId,startTime,endTime,projectId,request);
+        pageParams(businessManagerId,businessGroupId,startTime,endTime,projectId,request);
         initOrgList(request);
         userParms(request);
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
@@ -153,10 +153,9 @@ public class BusCustomerVisitController {
      * @return
      */
     @RequestMapping("/signDetailList")
-    public String managerVisit(HttpServletRequest request,Long userId,Long orgId,Long startTime,Long endTime,Long projectId){
+    public String managerVisit(HttpServletRequest request,Long businessManagerId,Long businessGroupId,Long startTime,Long endTime,Long projectId){
         // 查询所有项目
-
-        pageParams(userId,orgId,startTime,endTime,projectId,request);
+        pageParams(businessManagerId,businessGroupId,startTime,endTime,projectId,request);
         initOrgList(request);
         userParms(request);
         return "reportformsBusiness/businessSignTableTeam";
