@@ -14,9 +14,9 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>
-        <!-- <shiro:hasPermission name="statistics:telemarketingFollow:export"> -->
+        <shiro:hasPermission name="statistics:businessVisitReceptionTable:export">
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        <!-- </shiro:hasPermission> -->
+        </shiro:hasPermission>
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
@@ -120,18 +120,7 @@
                     orgId: '',
                     userId: ''
                 },
-                tableData: [
-                    // {
-                    //     projectName: '项目名称',
-                    //     invitationNum: '1',
-                    //     cancelInvitationNum:'12',
-                    //     deleteInvitationNum: '123',
-                    //     invitationFrequency: '1234',
-                    //     cancelInvitationFrequency: '12345',
-                    //     deleteInvitationFrequency: '1233444',
-                    //     reserveTime: '20190101',
-                    // }
-                ],
+                tableData: [],
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
             }             
@@ -166,12 +155,12 @@
             getTelSale(seleVal){
                 param={};
                 param.orgId=seleVal;
-                param.roleCode="DXCYGW";
+                param.roleCode="SWJL";
                 axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
                      mainDivVM.$message({
-                        message: "电销顾问请求失败，请稍后重试",
+                        message: "商务经理请求失败，请稍后重试",
                         type: "error"
                     });
                 });
