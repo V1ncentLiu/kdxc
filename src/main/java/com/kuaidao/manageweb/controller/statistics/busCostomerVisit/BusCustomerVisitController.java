@@ -24,6 +24,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,30 +93,7 @@ public class BusCustomerVisitController {
     @RequestMapping("/queryByPage")
     @ResponseBody
     public JSONResult<Map<String,Object>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-        //商务大区总监 查询所有商务组
-        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
-            OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-            busGroupReqDTO.setParentId(curLoginUser.getOrgId());
-            busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-            busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
-            JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
-            List<OrganizationDTO> data = listJSONResult.getData();
-            List<Long> ids=data.stream().map(c->c.getId()).collect(Collectors.toList());
-            customerVisitQueryDto.setBusinessGroupIds(ids);
-        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
-            //商务总监只能查当前组
-            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
-        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
-            //商务经理只能查看自己
-            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
-            customerVisitQueryDto.setBusinessManagerId(curLoginUser.getId());
-        }
-        //如果有商务组筛选
-        if(null!=customerVisitQueryDto.getBusinessGroupId()){
-            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(customerVisitQueryDto.getBusinessGroupId())));
-        }
+        initCustomerDto(customerVisitQueryDto);
         return busCousomerVisitFeignClient.queryByPage(customerVisitQueryDto);
     }
 
@@ -124,11 +102,13 @@ public class BusCustomerVisitController {
      * @param request
      * @param customerVisitQueryDto
      */
+    @RequiresPermissions("statistics:customerVisitSign:export")
     @RequestMapping("/exportExcel")
     @ResponseBody
     public void exportExcel(HttpServletRequest request,
             HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         try{
+            initCustomerDto(customerVisitQueryDto);
             JSONResult<List<CustomerVisitDto>> result=busCousomerVisitFeignClient.queryListByParams(customerVisitQueryDto);
             CustomerVisitDto [] dtos=result.getData().toArray(new CustomerVisitDto[0]);
             String [] keys={"userName","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
@@ -193,6 +173,7 @@ public class BusCustomerVisitController {
      * @param request
      * @param customerVisitQueryDto
      */
+    @RequiresPermissions("statistics:customerVisitSign:export")
     @RequestMapping("/exportExcelByManagerId")
     @ResponseBody
     public void exportMExcel(HttpServletRequest request,
@@ -270,6 +251,42 @@ public class BusCustomerVisitController {
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
             request.setAttribute("curOrgId",curLoginUser.getOrgId()+"");
             request.setAttribute("curUserId",curLoginUser.getId()+"");
+        }
+    }
+
+    /**
+     * 根据登录角色对查询参数处理
+     * @param customerVisitQueryDto
+     */
+    public void initCustomerDto(CustomerVisitQueryDto customerVisitQueryDto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        //商务大区总监 查询所有商务组
+        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
+            OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+            busGroupReqDTO.setParentId(curLoginUser.getOrgId());
+            busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+            JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+            List<OrganizationDTO> data = listJSONResult.getData();
+            List<Long> ids=data.stream().map(c->c.getId()).collect(Collectors.toList());
+            customerVisitQueryDto.setBusinessGroupIds(ids);
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            //商务总监只能查当前组
+            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            //商务经理只能查看自己
+            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
+            customerVisitQueryDto.setBusinessManagerId(curLoginUser.getId());
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            //管理员查询全部
+        }else{
+            //其他角色查询自己的数据
+            customerVisitQueryDto.setBusinessManagerId(curLoginUser.getId());
+        }
+        //如果有商务组筛选
+        if(null!=customerVisitQueryDto.getBusinessGroupId()){
+            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(customerVisitQueryDto.getBusinessGroupId())));
         }
     }
 
