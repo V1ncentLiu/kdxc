@@ -241,6 +241,13 @@ var mainDivVM = new Vue({
             rebutReason:"",
             isRemoteSign:0,
 
+            visitDetailRecordId:"",
+            visitTime: "",
+            arrVisitCity: "",
+            visitType: "",
+            visitShopType: "",
+            visitNum: "",
+
             payDetailId:"",
             payType:'1',
             payName:'',
@@ -807,6 +814,43 @@ var mainDivVM = new Vue({
             this.formSigning.visitTime='';
             this.formSigning.visitType='';
         },
+
+        suppUpdateShow() { //补充到访记录展开
+            this.suppWrap = true;
+            this.shouAddVisitButton = false;
+            var param = {};
+            console.log(mainDivVM.updateFormSigning.visitDetailRecordId)
+            if(!mainDivVM.updateFormSigning.visitDetailRecordId){
+                return false;
+            }
+            param.id = mainDivVM.updateFormSigning.visitDetailRecordId;
+            //TODO
+            axios.post('/busVisitRecord/one', param).then(function (response) {
+                var echoData = response.data.data;
+                console.log("============================")
+                console.log(echoData)
+                if(echoData.arrVisitCity){
+                    mainDivVM.updateFormSigning.arrVisitCity = echoData.arrVisitCity;
+                }
+                if (echoData.visitPeopleNum > 0) {
+                    mainDivVM.updateFormSigning.visitNum = echoData.visitPeopleNum;
+                }
+                mainDivVM.updateFormSigning.visitShopType = echoData.vistitStoreType;
+                mainDivVM.updateFormSigning.visitType = echoData.visitType;
+                mainDivVM.updateFormSigning.visitTime = echoData.vistitTime;
+            });
+        },
+        suppUpdateHide() {
+            this.suppWrap = false;
+            this.shouAddVisitButton = true;
+            //清空补充到访记录数据
+            this.updateFormSigning.arrVisitCity = '';
+            this.updateFormSigning.visitNum = '';
+            this.updateFormSigning.visitShopType = '';
+            this.updateFormSigning.visitTime = '';
+            this.updateFormSigning.visitType = '';
+        },
+
         changePayType(val){
             if(val==3){
                 this.isAllMoney = true;
@@ -1485,6 +1529,8 @@ var mainDivVM = new Vue({
                         var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
                         mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                     }
+
+                    mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
                     mainDivVM.dialogUpdateFormSigningVisible = true;
                 }
             })
@@ -1582,6 +1628,9 @@ var mainDivVM = new Vue({
             console.log(param)
             if(param.makeUpTime){
                 param.makeUpTime = new Date(param.makeUpTime)
+            }
+            if(param.visitTime){
+                param.visitTime = new Date(param.visitTime);
             }
            if(param.payTime){
                param.payTime = new Date( param.payTime)
