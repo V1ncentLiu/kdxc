@@ -14,9 +14,9 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>
-        <shiro:hasPermission name="statistics:telemarketingFollow:export">
+        <!-- <shiro:hasPermission name="statistics:telemarketingFollow:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        </shiro:hasPermission>
+        <!-- </shiro:hasPermission> -->
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -28,7 +28,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.bussinessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -124,14 +124,14 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
@@ -162,7 +162,7 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="SWJL";
-                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+                axios.post('/statistics/receptionVisit/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
@@ -217,7 +217,7 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
                 param.projectId = this.form.projectId;
                 this.loading = true; 
@@ -250,7 +250,7 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.projectId = mainDivVM.form.projectId;
         
@@ -290,12 +290,12 @@
             },
             gotoTeam(row){
                 var businessManagerId = row.businessManagerId;
-                var bussinessGroupId = this.export.bussinessGroupId;
+                var businessGroupId = row.businessGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
                 if(businessManagerId){
-                    window.location.href="/customerVisitSign/signDetailList?bussinessGroupId=" + bussinessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/customerVisitSign/signDetailList?businessGroupId=" + businessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -375,7 +375,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 param.projectId = this.export.projectId;
-                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessGroupId =  this.export.businessGroupId;
                 param.businessManagerId = this.export.businessManagerId;
                 axios.post('/customerVisit/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
@@ -399,13 +399,13 @@
             this.form.endTime=endTime; 
             if(curOrgId){
                 this.isDisabled = true;
-                this.form.bussinessGroupId = curOrgId; 
+                this.form.businessGroupId = curOrgId; 
                 this.firstCurTelSale(curOrgId);
                 if(curUserId){
                     this.form.businessManagerId = curUserId;
                     this.isDisabledUserId = true;
                 }
-                this.export.bussinessGroupId = this.form.bussinessGroupId; 
+                this.export.businessGroupId = this.form.businessGroupId; 
                 this.export.businessManagerId = this.form.businessManagerId; 
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
