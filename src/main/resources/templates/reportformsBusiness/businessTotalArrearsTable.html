@@ -35,7 +35,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.bussinessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -112,14 +112,14 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    bussinessGroupId: '',
+                    businessGroupId: '',
                     businessManagerId: '',
                     projectId: ''
                 },
@@ -196,7 +196,7 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.bussinessGroupId = this.form.bussinessGroupId;
+                param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
                 this.loading = true; 
                 axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
@@ -227,7 +227,7 @@
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.bussinessGroupId = mainDivVM.form.bussinessGroupId;
+                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
         
                     }else{
@@ -266,12 +266,12 @@
             },
             gotoTeam(row){
                 var businessManagerId = row.businessManagerId;
-                var bussinessGroupId = this.export.bussinessGroupId;
+                var businessGroupId = this.export.businessGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
                 if(businessManagerId){
-                    window.location.href="/customerVisit/signDetailList?bussinessGroupId=" + bussinessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/customerVisit/signDetailList?businessGroupId=" + businessGroupId + "&businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -342,7 +342,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 param.projectId = this.export.projectId;
-                param.bussinessGroupId =  this.export.bussinessGroupId;
+                param.businessGroupId =  this.export.businessGroupId;
                 param.businessManagerId = this.export.businessManagerId;
                 axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
                 .then(function (response) {
@@ -359,17 +359,28 @@
             }
         },
         created(){     
-            // 默认进入显示当天时间
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
-            this.form.endTime=endTime;  
+            this.form.endTime=endTime; 
+            if(curOrgId){
+                this.isDisabled = true;
+                this.form.businessGroupId = curOrgId; 
+                this.firstCurTelSale(curOrgId);
+                if(curUserId){
+                    this.form.businessManagerId = curUserId;
+                    this.isDisabledUserId = true;
+                }
+                this.export.businessGroupId = this.form.businessGroupId; 
+                this.export.businessManagerId = this.form.businessManagerId; 
+            }
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
 
-            if(curOrgId){this.isDisabled= true;}
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+
             this.searchTable();
         },
         mounted(){
