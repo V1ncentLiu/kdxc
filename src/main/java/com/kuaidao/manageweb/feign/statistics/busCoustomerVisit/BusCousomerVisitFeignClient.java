@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -23,13 +24,21 @@ import java.util.Map;
 @FeignClient(name = "statstics-service3", path = "/statstics/busCustomerVisit", fallback = BusCousomerVisitFeignClient.HystrixClientFallback.class)
 public interface BusCousomerVisitFeignClient {
 
-    @RequestMapping("/pageList")
-    public JSONResult<PageBean<CustomerVisitDto>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto);
+    @RequestMapping("/queryPage")
+    public JSONResult<Map<String,Object>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto);
 
 
     @RequestMapping("/queryList")
     public JSONResult<List<CustomerVisitDto>> queryListByParams(CustomerVisitQueryDto customerVisitQueryDto);
 
+
+
+    @RequestMapping("/queryPageByManage")
+    public JSONResult<Map<String,Object>> queryPageByManagerId(CustomerVisitQueryDto customerVisitQueryDto);
+
+
+    @RequestMapping("/queryListByManagerId")
+    public JSONResult<List<CustomerVisitDto>> queryManagerListByParams(CustomerVisitQueryDto customerVisitQueryDto);
 
      @Component
      class HystrixClientFallback implements  BusCousomerVisitFeignClient{
@@ -42,13 +51,23 @@ public interface BusCousomerVisitFeignClient {
          }
 
          @Override
-         public JSONResult<PageBean<CustomerVisitDto>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto) {
+         public JSONResult<Map<String,Object>> queryByPage(CustomerVisitQueryDto customerVisitQueryDto) {
              return fallBackError("来访签约统计");
          }
 
          @Override
          public JSONResult<List<CustomerVisitDto>> queryListByParams(CustomerVisitQueryDto customerVisitQueryDto) {
-             return fallBackError("来访签约统计导出");
+             return fallBackError("来访签约统计导出excel");
+         }
+
+         @Override
+         public JSONResult<Map<String,Object>> queryPageByManagerId(CustomerVisitQueryDto customerVisitQueryDto) {
+             return fallBackError("商务经理来访签约统计");
+         }
+
+         @Override
+         public JSONResult<List<CustomerVisitDto>> queryManagerListByParams(CustomerVisitQueryDto customerVisitQueryDto) {
+             return fallBackError("商务经理来访签约统计导出excel");
          }
      }
 
