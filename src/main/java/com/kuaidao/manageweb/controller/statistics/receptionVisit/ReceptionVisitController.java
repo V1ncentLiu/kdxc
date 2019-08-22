@@ -109,6 +109,7 @@ public class ReceptionVisitController {
      * 一级页面查询人（分页）
      */
     @PostMapping("/getPersonPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getPersonPageList(@RequestBody ReceptionVisitQueryDto receptionVisitQueryDto){
         initAuth(receptionVisitQueryDto,null);
         return receptionVisitFeignClient.getPersonPageList(receptionVisitQueryDto);
@@ -148,7 +149,9 @@ public class ReceptionVisitController {
      * 二级页面查询人+天（分页）
      */
     @PostMapping("/getPersonDayPageList")
+    @ResponseBody
     JSONResult<Map<String,Object>> getPersonDayPageList(@RequestBody ReceptionVisitQueryDto receptionVisitQueryDto){
+        initAuth(receptionVisitQueryDto,null);
         return receptionVisitFeignClient.getPersonDayPageList(receptionVisitQueryDto);
     }
 
@@ -175,7 +178,7 @@ public class ReceptionVisitController {
     private void addTotalExportData(ReceptionVisitDto ra, List<List<Object>> dataList) {
         List<Object> curList = new ArrayList<>();
         curList.add("");
-        curList.add("");
+        curList.add("合计");
         curList.add(ra.getVisitNum());
         curList.add(ra.getVisitClueNum());
         curList.add(formatPercent(ra.getFirstVisitRate()));
@@ -184,7 +187,7 @@ public class ReceptionVisitController {
         curList.add(ra.getRefundNum());
         curList.add(formatPercent(ra.getRefundRate()));
         curList.add(ra.getAvgCustomRate());
-        curList.add(formatPercent(ra.getAvgReceptionRate()));
+        curList.add(ra.getAvgReceptionRate());
         dataList.add(curList);
     }
 
@@ -210,7 +213,7 @@ public class ReceptionVisitController {
             curList.add(ra.getRefundNum());
             curList.add(formatPercent(ra.getRefundRate()));
             curList.add(ra.getAvgCustomRate());
-            curList.add(formatPercent(ra.getAvgReceptionRate()));
+            curList.add(ra.getAvgReceptionRate());
             dataList.add(curList);
         }
     }
