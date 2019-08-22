@@ -216,7 +216,8 @@ public class BusCustomerVisitController {
         }else if(RoleCodeEnum.SWZJ.name().equals(roleCode) ||
                 RoleCodeEnum.SWJL.name().equals(roleCode)){
             busGroupReqDTO.setId(curLoginUser.getOrgId());
-        }else {
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+        }else{
             busGroupReqDTO.setId(-1l);
         }
 
