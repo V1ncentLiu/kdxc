@@ -178,6 +178,9 @@ public class ExtendClueDistributionedTaskController {
             return new JSONResult<PageBean<ClueDistributionedTaskDTO>>()
                     .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
@@ -254,7 +257,7 @@ public class ExtendClueDistributionedTaskController {
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
     @LogRecord(description = "导出资源情况", operationType = OperationType.EXPORT,
-        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findClues")
     public void findClues(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -310,6 +313,9 @@ public class ExtendClueDistributionedTaskController {
             }
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
+        }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
@@ -384,10 +390,11 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
+     * 
      * @TODOif判断修改
      */
     @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT,
-        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findCommunicateRecords")
     public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -444,13 +451,16 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
-        //查询资源沟通情况集合
+        // 查询资源沟通情况集合
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
                 extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        //获取资源导出情况Excel表头
+        // 获取资源导出情况Excel表头
         dataList.add(getCommunicateRecordsHeadTitleList());
 
 
@@ -476,9 +486,9 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getPhone());
                 // 手机号2
                 curList.add(taskDTO.getPhone2());
-                //QQ
+                // QQ
                 curList.add(taskDTO.getQq());
-                //微信
+                // 微信
                 curList.add(taskDTO.getWechat());
                 // 搜索词
                 curList.add(taskDTO.getSearchWord());
@@ -521,7 +531,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getThreeCommunicateTime());
                 // 第三次沟通内容
                 curList.add(taskDTO.getThreeCommunicateContent());
-                //留言时间
+                // 留言时间
                 curList.add(taskDTO.getMessageTime());
                 dataList.add(curList);
             }
@@ -539,6 +549,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
+     * 
      * @return
      */
     private List<Object> getCommunicateRecordsHeadTitleList() {
@@ -630,16 +641,17 @@ public class ExtendClueDistributionedTaskController {
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()) {
             userList = userZxzjList.getData();
         }
-        //查询管理员放入user集合
-      List<UserInfoDTO> userAdminList = new ArrayList<UserInfoDTO>();
-      UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
-      userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
-      JSONResult<List<UserInfoDTO>> userAdminJson = userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
-      if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
-        userAdminList = userAdminJson.getData();
-      }
-      userList.addAll(userAdminList);
-      return userList;
+        // 查询管理员放入user集合
+        List<UserInfoDTO> userAdminList = new ArrayList<UserInfoDTO>();
+        UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
+        userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
+        JSONResult<List<UserInfoDTO>> userAdminJson =
+                userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
+        if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
+            userAdminList = userAdminJson.getData();
+        }
+        userList.addAll(userAdminList);
+        return userList;
 
     }
 
