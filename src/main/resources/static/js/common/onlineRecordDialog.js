@@ -4,7 +4,10 @@ var onlineRecordDialogTempate=
     +'<p>聊天内容：</p>'
     +'<div class="borderbox">'
     +'<ul>'
-    +'<li></li>'
+    +'<li>'
+    +'<p>'
+    +'</p>'
+    +'</li>'
     +'</ul>'
     +'<div><p class="f-tac">加载更多内容</p></div>'
     +'</div>'
@@ -28,6 +31,16 @@ Vue.component('dialog-onlinerecord',{
             var serviceName=this.serviceName;
             console.log(customerName)
             console.log(serviceName)
+
+            var param = {};
+            param.clueId = this.param.clueId;
+            console.log("param================")
+            console.log(param)
+            axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                console.log("response==============")
+                console.log(response)
+            });
+
         }
     },
     created() {
