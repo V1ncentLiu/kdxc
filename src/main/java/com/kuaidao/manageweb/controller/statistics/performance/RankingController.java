@@ -24,7 +24,7 @@ public class RankingController {
      */
     @RequestMapping("/deptList")
     public String deptList(HttpServletRequest request){
-        return "reportPerformance/deptRankingPerformance";
+        return "reportPerformance/rankingPerformanceDept";
     }
 
     /**
@@ -34,7 +34,7 @@ public class RankingController {
      */
     @RequestMapping("/groupList")
     public String teamList(HttpServletRequest request){
-        return "reportPerformance/groupRankingPerformance";
+        return "reportPerformance/rankingPerformanceGroup";
     }
 
     /**
@@ -44,7 +44,7 @@ public class RankingController {
      */
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request){
-        return "reportPerformance/managerRankingPerformance";
+        return "reportPerformance/rankingPerformanceManager";
     }
 
 }
