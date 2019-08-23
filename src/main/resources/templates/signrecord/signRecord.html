@@ -22,10 +22,10 @@
             <el-tab-pane label="已审核签约记录" name="second"></el-tab-pane>
         </el-tabs>
         <shiro:hasPermission name=" aggregation:signRecord:reject">
-            <el-button type="danger" @click="OpenRejectSignRecordDialog">驳回</el-button>
+            <el-button type="danger" @click="OpenRejectSignRecordDialog" v-if="btnIsShow">驳回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name=" aggregation:signRecord:pass">
-            <el-button type="success" @click="pass">审核通过</el-button>
+            <el-button type="success" @click="pass" v-if="btnIsShow">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
@@ -443,6 +443,7 @@
         el: '#businessContractRecord',
         data: function () {
             return {
+                btnIsShow:true,
                 statusIsShow:false,
                 activeName: 'first',//tabs:签约记录
                 btnDisabled: false,    
@@ -525,9 +526,11 @@
                 if(tab.name=='first'){
                     console.log(0)
                     this.statusIsShow=false;
+                    this.btnIsShow=true;
                 }else{
                     console.log(1)
                     this.statusIsShow=true;
+                    this.btnIsShow=false;
                 }
             },
             transGiveType(row, column, value, index) {
