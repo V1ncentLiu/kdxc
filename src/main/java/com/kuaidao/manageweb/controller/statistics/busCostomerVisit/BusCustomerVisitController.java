@@ -24,6 +24,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,9 +80,9 @@ public class BusCustomerVisitController {
         pageParams(businessManagerId,businessGroupId,startTime,endTime,projectId,request);
         initOrgList(request);
         userParms(request);
-        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
-            return "reportformsBusiness/businessSignTableTeam";
-        }
+//        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+//            return "reportformsBusiness/businessSignTableTeam";
+//        }
         return "reportformsBusiness/businessSignTable";
     }
 
@@ -94,7 +96,8 @@ public class BusCustomerVisitController {
     @ResponseBody
     public JSONResult<Map<String,Object>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         initCustomerDto(customerVisitQueryDto);
-        return busCousomerVisitFeignClient.queryByPage(customerVisitQueryDto);
+        JSONResult<Map<String,Object>> jsonResult=busCousomerVisitFeignClient.queryByPage(customerVisitQueryDto);
+        return jsonResult;
     }
 
     /**
@@ -104,7 +107,6 @@ public class BusCustomerVisitController {
      */
     @RequiresPermissions("statistics:customerVisitSign:export")
     @RequestMapping("/exportExcel")
-    @ResponseBody
     public void exportExcel(HttpServletRequest request,
             HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         try{
@@ -114,16 +116,28 @@ public class BusCustomerVisitController {
             String [] keys={"userName","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
             String [] hader={"商务经理","首访数","二次来访数","2+次来访数","签约数","首访签约数","二次来访签约数","2+次来访签约数","其他签约","签约率","首访签约率","二次来访签约率","2+次来访签约率"};
             Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
-            String name = "签约来访表.xlsx";
+            String groupName="";
+            if(null!=customerVisitQueryDto.getBusinessGroupId()){
+                IdEntity idEntity=new IdEntity();
+                idEntity.setId(customerVisitQueryDto.getBusinessGroupId().toString());
+                JSONResult<OrganizationDTO> org= organizationFeignClient.queryOrgById(idEntity);
+                groupName="_"+org.getData().getName();
+            }
+            String userName="";
+            if(null!=customerVisitQueryDto.getBusinessManagerId()){
+                userName=(dtos.length>0)?("_"+dtos[0].getUserName()):"";
+            }
+            String name = MessageFormat.format("签约来访表{0}{1}{2}-{3}.xlsx",groupName,userName,"_"+customerVisitQueryDto.getStartTime(),customerVisitQueryDto.getEndTime()+"");
 
             response.addHeader("Content-Disposition",
-                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+                    "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ServletOutputStream outputStream = response.getOutputStream();
             wb.write(outputStream);
             outputStream.close();
         }catch (Exception e){
+            e.printStackTrace();
          logger.error("exportExcel error:",e);
        }
     }
@@ -184,10 +198,9 @@ public class BusCustomerVisitController {
             String [] keys={"visitDate","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
             String [] hader={"日期","首访数","二次来访数","2+次来访数","签约数","首访签约数","二次来访签约数","2+次来访签约数","其他签约","签约率","首访签约率","二次来访签约率","2+次来访签约率"};
             Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
-            String name = "商务经理签约来访表.xlsx";
-
+            String name = MessageFormat.format("商务经理签约来访表_{0}_{1}.xlsx",""+customerVisitQueryDto.getStartTime(),customerVisitQueryDto.getEndTime()+"");
             response.addHeader("Content-Disposition",
-                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+                    "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ServletOutputStream outputStream = response.getOutputStream();
@@ -290,4 +303,9 @@ public class BusCustomerVisitController {
         }
     }
 
+
+    public static void main(String[] args) {
+        String name = "签约来访表{0}{1}{2}-{3}.xlsx";
+        System.out.println(MessageFormat.format(name,"","","20121717","20180808"));
+    }
 }
