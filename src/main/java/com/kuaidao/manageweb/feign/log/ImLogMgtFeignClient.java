@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 聊天记录
  */
 
-@FeignClient(name = "log-service", fallback = ImLogMgtFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", fallback = ImLogMgtFeignClient.HystrixClientFallback.class)
 public interface ImLogMgtFeignClient {
-	@RequestMapping(method = RequestMethod.POST, value = "/log/imLog/queryIMLogRecord")
+	@RequestMapping(method = RequestMethod.POST, value = "/aggregation/imLog/queryIMLogRecord")
 	public JSONResult<PageBean<ImLogsDTO>> queryIMLogRecord(@RequestBody ImLogsDTO logReqDTO);
 	
 	@Component
