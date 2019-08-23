@@ -462,6 +462,7 @@
                 isSWZDisabled:false,
                 curRow: "", // 列表数据：当前行，使用地点：付款明细
                 form: {
+                    queryType:'',
                     signProjectId: '',
                     businessGroupId: ownOrgId,
                     businessManagerId: '',
@@ -524,13 +525,19 @@
             handleClick(tab, event) {  //到访或者未到访tab切换
                 console.log(tab)
                 if(tab.name=='first'){
-                    console.log(0)
+                    this.form.queryType = '';
+                    this.pager.currentPage = 1;
+                    // this.dataTable=[];
                     this.statusIsShow=false;
                     this.btnIsShow=true;
+                    this.initSignRecordData();
                 }else{
-                    console.log(1)
                     this.statusIsShow=true;
                     this.btnIsShow=false;
+                    this.form.queryType = "1";
+                    this.pager.currentPage = 1;
+                    // this.dataTable=[];
+                    this.initSignRecordData();
                 }
             },
             transGiveType(row, column, value, index) {
@@ -833,6 +840,7 @@
                         return;
                     }
                 }
+
                 var param = this.form;
                 param.pageNum = this.pager.currentPage;
                 param.pageSize = this.pager.pageSize;
