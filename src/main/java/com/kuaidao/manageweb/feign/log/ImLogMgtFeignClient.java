@@ -22,6 +22,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ImLogMgtFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/aggregation/imLog/queryIMLogRecord")
 	public JSONResult<PageBean<ImLogsDTO>> queryIMLogRecord(@RequestBody ImLogsDTO logReqDTO);
+
+	/**
+	 * 根据资源id查询聊天记录
+	 * @param logReqDTO
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/aggregation/imLog/getImLogByClueId")
+	public JSONResult<ImLogsDTO> getImLogByClueId(@RequestBody ImLogsDTO logReqDTO);
+
 	
 	@Component
 	static class HystrixClientFallback implements ImLogMgtFeignClient {
@@ -37,6 +46,11 @@ public interface ImLogMgtFeignClient {
 		public JSONResult<PageBean<ImLogsDTO>> queryIMLogRecord(ImLogsDTO logReqDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("查询聊天记录失败");
+		}
+
+		@Override
+		public JSONResult<ImLogsDTO> getImLogByClueId(ImLogsDTO logReqDTO) {
+			return fallBackError("根据clueId查询聊天记录失败");
 		}
 	}
 

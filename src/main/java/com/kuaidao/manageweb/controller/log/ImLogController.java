@@ -48,5 +48,27 @@ public class ImLogController {
         JSONResult<PageBean<ImLogsDTO>> imLogs = imLogMgtFeignClient.queryIMLogRecord(imLogDto);
         return imLogs;
     }
-
+    /**
+     *根据clueId查询是否有聊天记录
+     * @param
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping("/getImLogByClueId")
+    @ResponseBody
+    public JSONResult getImLogByClueId(
+            @RequestBody ImLogsDTO imLogDto, HttpServletRequest request,
+            HttpServletResponse response) {
+        JSONResult<ImLogsDTO> imLogs = imLogMgtFeignClient.getImLogByClueId(imLogDto);
+        boolean isShowImButton = false;
+        if(imLogs != null && JSONResult.SUCCESS.equals(imLogs.getCode())) {
+            ImLogsDTO ImLogsDTO = imLogs.getData();
+            if(ImLogsDTO !=null && ImLogsDTO.getId() !=null){
+                isShowImButton = true;
+            }
+        }
+        request.setAttribute("isShowImButton", isShowImButton);
+        return imLogs;
+    }
 }
