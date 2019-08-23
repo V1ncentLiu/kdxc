@@ -181,11 +181,11 @@ public class ReceptionVisitController {
         curList.add("合计");
         curList.add(ra.getVisitNum());
         curList.add(ra.getVisitClueNum());
-        curList.add(formatPercent(ra.getFirstVisitRate()));
+        curList.add(ra.getFirstVisitRate());
         curList.add(ra.getBusinessSignNum());
-        curList.add(formatPercent(ra.getEarnestRate()));
+        curList.add(ra.getEarnestRate());
         curList.add(ra.getRefundNum());
-        curList.add(formatPercent(ra.getRefundRate()));
+        curList.add(ra.getRefundRate());
         curList.add(ra.getAvgCustomRate());
         curList.add(ra.getAvgReceptionRate());
         dataList.add(curList);
@@ -207,27 +207,17 @@ public class ReceptionVisitController {
             }
             curList.add(ra.getVisitNum());
             curList.add(ra.getVisitClueNum());
-            curList.add(formatPercent(ra.getFirstVisitRate()));
+            curList.add(ra.getFirstVisitRate());
             curList.add(ra.getBusinessSignNum());
-            curList.add(formatPercent(ra.getEarnestRate()));
+            curList.add(ra.getEarnestRate());
             curList.add(ra.getRefundNum());
-            curList.add(formatPercent(ra.getRefundRate()));
+            curList.add(ra.getRefundRate());
             curList.add(ra.getAvgCustomRate());
             curList.add(ra.getAvgReceptionRate());
             dataList.add(curList);
         }
     }
-    /**
-     * 格式化
-     */
-    private String formatPercent(BigDecimal callPercent) {
-        if(callPercent!=null) {
-            callPercent = callPercent.multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_UP);
-        }else {
-            callPercent = BigDecimal.ZERO;
-        }
-        return callPercent+"%";
-    }
+
     /**
      *  返回页面携带参数
      */
