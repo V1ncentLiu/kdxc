@@ -222,7 +222,7 @@ public class ReceptionVisitController {
      */
     private String formatPercent(BigDecimal callPercent) {
         if(callPercent!=null) {
-            callPercent = callPercent.multiply(new BigDecimal(100));
+            callPercent = callPercent.multiply(new BigDecimal(100)).setScale(2,BigDecimal.ROUND_HALF_UP);
         }else {
             callPercent = BigDecimal.ZERO;
         }
