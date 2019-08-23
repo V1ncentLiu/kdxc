@@ -59,19 +59,8 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="搜索词：" prop="searchText">
-                    <!--  v-model="form.searchText" -->
-                    <el-input placeholder="输入查询内容" class="input-with-select"></el-input>
+                    <el-input v-model="form.searchText" placeholder="输入查询内容" class="input-with-select"></el-input>
                 </el-form-item>
-                <!-- <el-form-item label="搜索词:">
-                    <el-select v-model="form.keyWord" placeholder="全部" clearable filterable>
-                        <el-option
-                            v-for="item in searchTerms"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item> -->
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
@@ -117,8 +106,7 @@
     var orgIdList=[[${busGroupList}]];// 商务组
     var projectList=[[${projectList}]];// 来访项目
     var curOrgId = [[${curOrgId}]];
-    var curUserId = [[${curUserId}]];
-    console.log(curOrgId, curUserId);
+    console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -129,13 +117,12 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
                 form: {
                     startTime:'',
                     endTime:'',
                     businessGroupId: '',
-                    businessManagerId: '',
                     projectId: '',
                     category:'',
                     searchText: ''
@@ -144,7 +131,6 @@
                     startTime:'',
                     endTime:'',
                     businessGroupId: '',
-                    businessManagerId: '',
                     projectId: '',
                     category:'',
                     searchText: ''
@@ -207,7 +193,7 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 param.businessGroupId = this.form.businessGroupId;
-                param.businessManagerId = this.form.businessManagerId;
+                param.category = this.form.category;
                 param.projectId = this.form.projectId;
                 // this.loading = true; 
                 // axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
@@ -240,7 +226,7 @@
                 //         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                 //         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                 //         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
-                //         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
+                //         mainDivVM.export.category = mainDivVM.form.category;
                 //         mainDivVM.export.projectId = mainDivVM.form.projectId;
         
                 //     }else{
@@ -278,13 +264,13 @@
                 }
             },
             gotoTeam(row){
-                var businessManagerId = row.businessManagerId;
-                // var businessGroupId = row.businessGroupId;
+                var businessGroupId = row.businessGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
-                if(businessManagerId){
-                    window.location.href="/customerVisitSign/signDetailList?businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                var category = this.export.category;
+                if(businessGroupId){
+                    window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&category="+ category+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -303,7 +289,7 @@
             percentFormat(row, column) {
                 var percent = row[column.property];
                 if (!percent) { // 如果没有值或值为0
-                    return 0 + "%";
+                    return percent + "%";
                 }
                 percent = (percent * 1000) / 10 + "%";
                 return percent;
@@ -373,7 +359,7 @@
                 param.endTime = this.export.endTime;
                 param.projectId = this.export.projectId;
                 param.businessGroupId =  this.export.businessGroupId;
-                param.businessManagerId = this.export.businessManagerId;
+                param.category = this.export.category;
                 axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
@@ -396,14 +382,8 @@
             this.form.endTime=endTime; 
             if(curOrgId){
                 this.isDisabled = true;
-                this.form.businessGroupId = curOrgId; 
-                this.firstCurTelSale(curOrgId);
-                if(curUserId){
-                    this.form.businessManagerId = curUserId;
-                    this.isDisabledUserId = true;
-                }
+                this.form.businessGroupId = curOrgId;
                 this.export.businessGroupId = this.form.businessGroupId; 
-                this.export.businessManagerId = this.form.businessManagerId; 
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
