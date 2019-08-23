@@ -116,19 +116,7 @@ public class BusCustomerVisitController {
             String [] keys={"userName","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
             String [] hader={"商务经理","首访数","二次来访数","2+次来访数","签约数","首访签约数","二次来访签约数","2+次来访签约数","其他签约","签约率","首访签约率","二次来访签约率","2+次来访签约率"};
             Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
-            String groupName="";
-            if(null!=customerVisitQueryDto.getBusinessGroupId()){
-                IdEntity idEntity=new IdEntity();
-                idEntity.setId(customerVisitQueryDto.getBusinessGroupId().toString());
-                JSONResult<OrganizationDTO> org= organizationFeignClient.queryOrgById(idEntity);
-                groupName="_"+org.getData().getName();
-            }
-            String userName="";
-            if(null!=customerVisitQueryDto.getBusinessManagerId()){
-                userName=(dtos.length>0)?("_"+dtos[0].getUserName()):"";
-            }
-            String name = MessageFormat.format("签约来访表{0}{1}{2}-{3}.xlsx",groupName,userName,"_"+customerVisitQueryDto.getStartTime(),customerVisitQueryDto.getEndTime()+"");
-
+            String name = MessageFormat.format("签约来访表{0}-{1}.xlsx","_"+customerVisitQueryDto.getStartTime(),customerVisitQueryDto.getEndTime()+"");
             response.addHeader("Content-Disposition",
                     "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
