@@ -1,12 +1,12 @@
 var onlineRecordDialogTempate=
     '<el-dialog title="在线聊天记录"  :visible.sync="param.onlineRecordDialogVisible" width="1000px">'
-    +'<p><span>客户姓名：</span><span style="margin-right:100px;">{{customerName}}</span><span>在线客服：</span><span>{{serviceName}}</span></p>'   
-    +'<p>聊天内容：</p>'
-    +'<div class="borderbox">'
+    +'<p class="marginB10"><span>客户姓名：</span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>'   
+    +'<p class="marginB10">聊天内容：</p>'
+    +'<div class="borderbox padding10">'
     +'<ul>'
-    +'<li>'
-    +'<p>'
-    +'</p>'
+    +'<li v-for="item in param.newsData" :key="item.id">'
+    +'<p class="padding10"><span>在线客服</span><span>{{ item.messageTime }}</span></p>'
+    +'<p class="padding10"><span>{{ item.message }}</span></p>'
     +'</li>'
     +'</ul>'
     +'<div><p class="f-tac">加载更多内容</p></div>'
@@ -16,35 +16,39 @@ var onlineRecordDialogTempate=
 Vue.component('dialog-onlinerecord',{
     template:onlineRecordDialogTempate,
     props:['param'],
-    data:()=>{
-        return {
-            customerName:'123',
-            serviceName:'456',
+    computed: {
+        data(){
+            debugger
+            console.log("newsData:"+this.param)
+            return this.param.newsData
         }
     },
-    computed: {},
     watch: {
     },
     methods:{
-        initData(){
-            var customerName=this.customerName;
-            var serviceName=this.serviceName;
-            console.log(customerName)
-            console.log(serviceName)
+        // initData(){
+        //     var param = {};
+        //     param.clueId = this.param.clueId;
+        //     param.pageNum = 1;
+        //     param.pageSize = 10;
+        //     console.log("param================")
+        //     console.log(param)
+        //     axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+        //         console.log("response==============")
+        //         console.log(response)
+        //         var recordData=response.data;
+        //         if(recordData){
+        //             var data=recordData.data.data;                    
+        //             this.onlinerecordData=data;
+        //             for(var i=0;i<data.length;i++){
+        //                this.messageTime=data[0].messageTime; 
+        //             }
+                    
+        //         }
 
-            var param = {};
-            param.clueId = this.param.clueId;
-            console.log("param================")
-            console.log(param)
-            axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
-                console.log("response==============")
-                console.log(response)
-            });
+        //     });
 
-        }
-    },
-    created() {
-        this.initData()
+        // }
     }
 });
 

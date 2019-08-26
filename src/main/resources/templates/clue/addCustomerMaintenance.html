@@ -368,11 +368,11 @@
                           label="资源有效性"
                           align="center">
                           <template slot-scope="scope">
-	                      <div v-if="scope.row.resourceStatus === 0">无效资源
-	                      </div>
-	                       <div v-else-if="scope.row.resourceStatus ===1">有效资源
-	                       </div>
-	                     </template>
+                          <div v-if="scope.row.resourceStatus === 0">无效资源
+                          </div>
+                           <div v-else-if="scope.row.resourceStatus ===1">有效资源
+                           </div>
+                         </template>
                         </el-table-column> -->
                     <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
                     <!--<el-table-column-->
@@ -471,9 +471,9 @@
                             <a :id="scope.row.id"
                                class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP"
                                @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-                				<span class="sound-trigger__inner">
-                		           <i class="fa fa-play-1 fa-lg"></i>
-                			 	</span>
+                                <span class="sound-trigger__inner">
+                                   <i class="fa fa-play-1 fa-lg"></i>
+                                </span>
                             </a>
                             <a class="download_img cursorP" v-if="scope.row.accountId==loginUserId"
                                @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
@@ -733,8 +733,21 @@
             </el-form-item>
         </el-form>
     </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px">
+        <p class="marginB10"><span>客户姓名：</span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+        <ul>
+            <li  v-for="item in onlineRecordData" :key="item.id">
+                <p class="padding10"><span>在线客服</span><span>{{ item.messageTime }}</span></p>
+                <p class="padding10"><span>{{ item.message }}</span></p>
+            </li>
+        </ul>
+        <div><p class="f-tac">加载更多内容</p></div>
+        </div>
+    </el-dialog>
 
-    <dialog-onlinerecord :param="onlineRecordParam"></dialog-onlinerecord>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -858,10 +871,8 @@
         el: '#addCustomer',
         data: function () {
             return {
-                onlineRecordParam:{
-                    onlineRecordDialogVisible:false,
-                    clueId:clueId                    
-                },
+                onlineRecordData:[],
+                onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
                 phoneShow:false,//手机号2默认不显示
                 audioShow:false,//播放器默认不显示
@@ -1150,8 +1161,27 @@
         },
         methods: {
             showOnlineRecord(){
-                this.onlineRecordParam.onlineRecordDialogVisible = true;
-                this.onlineRecordParam.clueId =clueId ;
+                this.onlineRecordDialogVisible=true;                
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                console.log("param================")
+                console.log(param)
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    console.log("response==============")
+                    console.log(response)
+                    var recordData=response.data;
+                    debugger
+                    if(recordData){
+                        var data=recordData.data.data;                    
+                        addCustomerVM.onlinerecordData=data;                        
+                    }
+
+                });
+
             },
             chooseToday(val){
                 var dateNow=new Date();
@@ -2395,7 +2425,7 @@
                                 var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
                                  if(callSource=='3'){
-                                	 var decodeUrl = encodeURI(url);
+                                     var decodeUrl = encodeURI(url);
                                      url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
                                  }
                                 var x = new XMLHttpRequest();
@@ -2701,8 +2731,11 @@
                 }
             }
 
+
+
         },
         created() {
+            this.initData();
             //初始资源类别数据
             this.getUploadParam();
             var param = {};
