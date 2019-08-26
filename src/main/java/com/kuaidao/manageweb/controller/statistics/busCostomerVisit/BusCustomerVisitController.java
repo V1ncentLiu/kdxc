@@ -125,7 +125,6 @@ public class BusCustomerVisitController {
             wb.write(outputStream);
             outputStream.close();
         }catch (Exception e){
-            e.printStackTrace();
          logger.error("exportExcel error:",e);
        }
     }

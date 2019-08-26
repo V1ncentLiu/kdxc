@@ -12,9 +12,9 @@
         <el-breadcrumb-item>业绩表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-        <el-button type="primary" @click="searchMonth">月统计</el-button>
-        <el-button type="success" @click="searchSeason">季统计</el-button>
-        <el-button type="warning" @click="searchYear">年统计</el-button> 
+            <el-button type="primary" @click="searchMonth">月累计排名</el-button>
+            <el-button type="success" @click="searchSeason">年累计排名</el-button>
+            <el-button type="warning" @click="searchYear">年累计均排名</el-button> 
          <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
          <!-- </shiro:hasPermission> -->
@@ -22,11 +22,15 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                <el-form-item label="统计日期：">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                <el-form-item label="地区；">  
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in projectArr"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="事业部：">  
                     <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
@@ -42,16 +46,6 @@
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销顾问：">  
-                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in userTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -77,6 +71,11 @@
             </el-form>
         </div>
         <el-row>
+            <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+                <el-tab-pane label="事业部排名" name="first" ></el-tab-pane>
+                <el-tab-pane label="电销组排名" name="second"></el-tab-pane>
+                <el-tab-pane label="电销顾问排名" name="thired"></el-tab-pane>
+            </el-tabs>
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
@@ -115,13 +114,11 @@
 <script th:inline="javascript">
     var orgIdList=[[${busGroupList}]];// 商务组
     var projectList=[[${projectList}]];// 来访项目
-    var curOrgId = [[${curOrgId}]];
-    var curUserId = [[${curUserId}]];
-    console.log(curOrgId, curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
+                activeName: 'first',
                 loading: false,
                 isDisabled: false,
                 isDisabledUserId: false,
@@ -155,7 +152,16 @@
                 clueCategoryList: []
             }             
         },
-        methods: {    
+        methods: {
+            handleClick(tab, event) {
+                if(tab.name=='first'){
+                	window.location.href="/ranking/deptList";
+                }else if (tab.name == 'second'){
+                	window.location.href="/ranking/groupList";
+                }else if (tab.name == 'thired'){
+                    window.location.href="/ranking/managerList";
+                }
+            },  
             centerStyle(){
                 return "text-align:center"
             },

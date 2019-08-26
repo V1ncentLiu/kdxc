@@ -22,11 +22,15 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                <el-form-item label="统计日期：">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                <el-form-item label="地区；">  
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in projectArr"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="事业部：">  
                     <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
@@ -48,35 +52,17 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
-                        <el-option
-                            v-for="item in busSaleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="资源类别：">
-                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
-                        <el-option
-                            v-for="item in clueCategoryList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="搜索词：" prop="searchText">
-                    <el-input v-model="form.searchText" placeholder="输入查询内容" class="input-with-select"></el-input>
-                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
         <el-row>
+            <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+                <el-tab-pane label="事业部排名" name="first" v-if="!isShowDept"></el-tab-pane>
+                <el-tab-pane label="电销组排名" name="second"></el-tab-pane>
+                <el-tab-pane label="电销顾问排名" name="thired"></el-tab-pane>
+            </el-tabs>
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
@@ -115,12 +101,18 @@
 <script th:inline="javascript">
     var orgIdList=[[${busGroupList}]];// 商务组
     var projectList=[[${projectList}]];// 来访项目
+    var dept = 1;
     var curOrgId = [[${curOrgId}]];
-    console.log(curOrgId);
+    curOrgId = 1;
+    var curUserId = [[${curUserId}]];
+    curUserId = 2;
+    console.log(curOrgId, curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
+                isShowDept: dept,
+                activeName: 'second',
                 loading: false,
                 isDisabled: false,
                 isDisabledUserId: false,
@@ -132,8 +124,8 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: '',
+                    businessGroupId: '',
+                    businessManagerId: '',
                     projectId: '',
                     category:'',
                     searchText: ''
@@ -141,8 +133,8 @@
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: '',
+                    businessGroupId: '',
+                    businessManagerId: '',
                     projectId: '',
                     category:'',
                     searchText: ''
@@ -155,6 +147,15 @@
             }             
         },
         methods: {    
+            handleClick(tab, event) {
+                if(tab.name=='first'){
+                	window.location.href="/ranking/deptList";
+                }else if (tab.name == 'second'){
+                	window.location.href="/ranking/groupList";
+                }else if (tab.name == 'thired'){
+                    window.location.href="/ranking/managerList";
+                }
+            },  
             centerStyle(){
                 return "text-align:center"
             },
@@ -205,7 +206,7 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 param.businessGroupId = this.form.businessGroupId;
-                param.category = this.form.category;
+                param.businessManagerId = this.form.businessManagerId;
                 param.projectId = this.form.projectId;
                 // this.loading = true; 
                 // axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
@@ -238,7 +239,7 @@
                 //         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                 //         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                 //         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
-                //         mainDivVM.export.category = mainDivVM.form.category;
+                //         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                 //         mainDivVM.export.projectId = mainDivVM.form.projectId;
         
                 //     }else{
@@ -276,13 +277,13 @@
                 }
             },
             gotoTeam(row){
-                var businessGroupId = row.businessGroupId;
+                var businessManagerId = row.businessManagerId;
+                // var businessGroupId = row.businessGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
-                var category = this.export.category;
-                if(businessGroupId){
-                    window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&category="+ category+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                if(businessManagerId){
+                    window.location.href="/customerVisitSign/signDetailList?businessManagerId="+ businessManagerId+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -371,7 +372,7 @@
                 param.endTime = this.export.endTime;
                 param.projectId = this.export.projectId;
                 param.businessGroupId =  this.export.businessGroupId;
-                param.category = this.export.category;
+                param.businessManagerId = this.export.businessManagerId;
                 axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
@@ -394,8 +395,13 @@
             this.form.endTime=endTime; 
             if(curOrgId){
                 this.isDisabled = true;
-                this.form.businessGroupId = curOrgId;
+                this.form.businessGroupId = curOrgId; 
+                if(curUserId){
+                    this.form.businessManagerId = curUserId;
+                    this.isDisabledUserId = true;
+                }
                 this.export.businessGroupId = this.form.businessGroupId; 
+                this.export.businessManagerId = this.form.businessManagerId; 
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
@@ -403,7 +409,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
