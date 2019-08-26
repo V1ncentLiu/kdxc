@@ -3,172 +3,124 @@
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
 </head>
-</head>
 <body>
-    <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
-        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-            <el-breadcrumb-item>Home</el-breadcrumb-item>
-            <el-breadcrumb-item>电销报表</el-breadcrumb-item>
-            <el-breadcrumb-item>业绩报表</el-breadcrumb-item>
-            <el-breadcrumb-item>业绩排名</el-breadcrumb-item>
-        </el-breadcrumb>
-        <el-row class="marginB20">
-            <el-button type="primary" @click="searchMonth">月累计排名</el-button>
-            <el-button type="success" @click="searchSeason">年累计排名</el-button>
-            <el-button type="warning" @click="searchYear">年累计均排名</el-button> 
-            <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
-            <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
-            <!-- </shiro:hasPermission> -->
-        </el-row>
-        <div class="mainSearchBg">        
-            <div class="mainSearchFormBox">
-                <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                    <el-form-item label="地区；">  
-                        <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
-                            <el-option
-                                v-for="item in projectArr"
-                                :key="item.id"
-                                :label="item.projectName"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="事业部：">  
-                        <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
-                            <el-option
-                                v-for="item in projectArr"
-                                :key="item.id"
-                                :label="item.projectName"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="电销组：">  
-                        <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable>
-                            <el-option
-                                v-for="item in orgTeleArr"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <div class="mainSearchBtnBox">
-                        <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
-                    </div>  
-                </el-form>
-            </div>
-            <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
-                <el-tab-pane label="访问日志" name="first"></el-tab-pane>
-                <el-tab-pane label="操作日志" name="second"></el-tab-pane>
-            </el-tabs>
-            <el-row>
-                <el-table 
-                    ref="tableData"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    border
-                    :data="tableData"
-                    v-loading="loading"
-                    :cell-style="centerStyle"
-                    :header-cell-style="centerStyle">
-                    <el-table-column type="index" label="序号" width="55"></el-table-column>
-                    <el-table-column prop="projectName" label="全国排名">
-                    </el-table-column>
-                    <el-table-column prop="invitationNum" label="区内排名"></el-table-column>
-                    <el-table-column prop="cancelInvitationNum" label="组内排名"></el-table-column>
-                    <el-table-column prop="deleteInvitationNum" label="电销顾问："></el-table-column>
-                    <el-table-column prop="cancelInvitationFrequency" label="电销组"></el-table-column>
-                    <el-table-column prop="deleteInvitationFrequency" label="事业部"></el-table-column>
-                    <el-table-column prop="cancelInvitationFrequency" label="分公司"></el-table-column>
-                    <el-table-column prop="deleteInvitationFrequency" label="地区"></el-table-column>
-                </el-table>
-                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
-            </el-row>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销报表</el-breadcrumb-item>
+        <el-breadcrumb-item>业绩报表</el-breadcrumb-item>
+        <el-breadcrumb-item>业绩表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="searchMonth">月统计</el-button>
+        <el-button type="success" @click="searchSeason">季统计</el-button>
+        <el-button type="warning" @click="searchYear">年统计</el-button> 
+         <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
+         <!-- </shiro:hasPermission> -->
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                <el-form-item label="统计日期：">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="事业部：">  
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in projectArr"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组：">  
+                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:">  
+                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
+                        <el-option
+                            v-for="item in busSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源类别：">
+                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
+                        <el-option
+                            v-for="item in clueCategoryList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="搜索词：" prop="searchText">
+                    <el-input v-model="form.searchText" placeholder="输入查询内容" class="input-with-select"></el-input>
+                </el-form-item>
+                <div class="mainSearchBtnBox">
+                    <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
+                </div>  
+            </el-form>
         </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading"
+                :cell-style="centerStyle"
+                :header-cell-style="centerStyle"
+                :span-method="arraySpanMethod">
+                <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
+                <el-table-column prop="projectName" label="电销组">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" v-if="scope.row.projectId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
+                        <span v-else>{{scope.row.projectName}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="invitationNum" label="首次分配资源数"></el-table-column>
+                <el-table-column prop="cancelInvitationNum" label="首访数"></el-table-column>
+                <el-table-column prop="deleteInvitationNum" label="签约数"></el-table-column>
+                <el-table-column prop="cancelInvitationFrequency" label="资源来访率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="deleteInvitationFrequency" label="签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="cancelInvitationFrequency" label="业绩金额"></el-table-column>
+                <el-table-column prop="deleteInvitationFrequency" label="签约单笔"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+        </el-row>
     </div>
-    <!-- import common js-->
-    <div th:include="_footer_include :: #jsLib"></div>
-    </body>
-<body>
-	<div id="maindiv" v-loading="loading" class="mainPadding" style="display: none;">
-		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-		<el-breadcrumb-item>访问IP管理</el-breadcrumb-item> </el-breadcrumb>
-		<template> 
-		<el-tabs type="card" v-model="ipManager" @tab-click="handleClick"> <el-tab-pane label="访问IP库" name="first"> 
-		<el-row>
-			<el-form :inline="true" :model="iprepositoryForm" class="demo-form-inline" ref="iprepositoryForm"> 			
-				<el-col :span="18"> 
-					<el-button type="primary" @click="openIpAddData"><i class="el-icon-plus"></i>添加IP</el-button>
-					<el-button type="danger" @click="delIpGroup"><i class="el-icon-delete"></i>删除</el-button> 
-					<el-button type="success" @click="ipTabCreatePackage"><i class="el-icon-plus"></i>创建IP包</el-button> 
-				</el-col> 
-				<el-col :span="6">
-					<el-form-item prop="ipAddress" class="searchBox"> 
-						<el-input placeholder="输入包含IP查询" class="input-with-select" v-model="iprepositoryForm.ipAddress" style="width: 100%;"> 
-							<el-button slot="append" icon="el-icon-search" @click="queryIpDataList">搜索</el-button> 
-						</el-input> 
-					</el-form-item> 
-				</el-col> 
-			
-			</el-form>
-		</el-row>
-		<div class="mainSearchBg">
-		<el-table border id="ipManagerTable" ref="customFieldTable" :data="ipTableData" tooltip-effect="dark" tyle="width: 100%,height:750px" @selection-change="changeIpTableFun"> 
-			<el-table-column type="selection" width="55" prop="id" @selection-change="changeIpTableFun" align="center"></el-table-column> 
-			<el-table-column prop="ipAddress" label="IP地址" align="center"></el-table-column> 
-			<el-table-column prop="createTime" :formatter="dateFormat" label="创建时间" align="center"> 
-			</el-table-column> 
-		</el-table> 
-		<table-pagination :pager="ippager" @change="queryIpDataList"></table-pagination>
-		</div>
-        </el-tab-pane> 
-        <el-tab-pane label="访问IP包" name="second"> 
-            <el-row>
-                <el-form :inline="true" :model="ippackageForm" class="demo-form-inline" ref="customFieldQueryForm">
-                    <el-col :span="12"> 
-                        <el-button type="primary" @click="openAddIpPackage"><i class="el-icon-plus"></i>创建IP包</el-button> 
-                        <el-button type="success" @click="openUpdateIpPackage"><i class="el-icon-edit"></i>修改IP包</el-button> 
-                        <el-button type="danger" @click="delpackageGroup"><i class="el-icon-delete"></i>删除</el-button> 
-                    </el-col> 
-                    <el-col :span="12" style="text-align: right;"> 
-                        <el-form-item label="IP包名:" prop="ipAddress" label-width="55px"> 
-                            <el-input v-model="ippackageForm.ipPackageName" placeholder="输入IP包名查询"></el-input>
-                        </el-form-item> 
-                        <el-form-item label="包含IP:" prop="ipAddress" label-width="55px"> 
-                            <el-input v-model="ippackageForm.ipAddress" placeholder="输入包含IP查询"></el-input> 
-                        </el-form-item> 
-                        <el-form-item label=""> 
-                            <el-button icon="el-icon-search" type="primary" @click="queryPackageDataList" style="margin-left: 10px;">搜索</el-button> 
-                        </el-form-item> 
-                    </el-col> 			 
-                </el-form> 
-            </el-row>
-            <div class="mainSearchBg">
-                <el-table id="ipPackageTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark" @selection-change="changePackageTableFun">
-                    <el-table-column align="center" type="selection" prop="id" width="55" @selection-change="changePackageTableFun"> 
-                    </el-table-column> 
-                    <el-table-column align="center" prop="name" label="包名" width="180"></el-table-column> 
-                    <el-table-column align="center" prop="ipAddress" label="IP地址" width="500"></el-table-column> 
-                    <el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column> 
-                </el-table> 
-                <table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
-        </el-tab-pane> 
-            </div>
-        </el-tabs>
-        </el-dialog> 
-    </template>
-	</div>
-	<div th:include="_footer_include :: #jsLib"></div>
-	<script>
-        var orgIdList='';// 商务组
-        var projectList='';// 来访项目
-var maindiv = new Vue({
-    el:'#maindiv',
-    data: function() {
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<style>
+    .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+</style>
+<script th:inline="javascript">
+    var orgIdList=[[${busGroupList}]];// 商务组
+    var projectList=[[${projectList}]];// 来访项目
+    var curOrgId = [[${curOrgId}]];
+    console.log(curOrgId);
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
             return {
-                activeName: 'first',
                 loading: false,
                 isDisabled: false,
                 isDisabledUserId: false,
@@ -180,7 +132,8 @@ var maindiv = new Vue({
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessGroupId: '',
+                    orgId: '',
+                    userId: '',
                     projectId: '',
                     category:'',
                     searchText: ''
@@ -188,7 +141,8 @@ var maindiv = new Vue({
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessGroupId: '',
+                    orgId: '',
+                    userId: '',
                     projectId: '',
                     category:'',
                     searchText: ''
@@ -331,6 +285,27 @@ var maindiv = new Vue({
                     window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&category="+ category+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [1, 2];
+                    }
+                }
+            },
+            indexFun (index) { // 表格序号
+                return index;
+            },
+            //百分比格式话
+            percentFormat(row, column) {
+                var percent = row[column.property];
+                if (!percent) { // 如果没有值或值为0
+                    return percent + "%";
+                }
+                percent = (percent * 1000) / 10 + "%";
+                return percent;
+            },
             minuteFormat (m) {
                 if (!m) {return "";}
                 var timeStr = new Date(m);
@@ -411,715 +386,29 @@ var maindiv = new Vue({
                 });
             }
         },
-// 	data:{
-// 		formLabelWidth:'120px',
-// 		ipTableData:[] ,
-// 		packageTableData:[],
-// 		ipManager:"first",
-// 		dialogIpVisible:false,
-// 		dialogPackgeVisible:false,
-// 		addIpPackageVisible:false,
-// 		addPackageIPSelectVisible:false,
-// 		updateIpPackageVisible:false,
-// 		IpconfirmBtnDisabled:false,
-// 		packgeconfirmBtnDisabled:false,
-// 		oldPackageName:'',
-//         oldPackageId:'',
-// 		selectIpType:'1',
-// 		ippager:{
-// 			total: 0,
-// 			currentPage: 1,
-// 			pageSize: 20,
-// 		},
-// 	    rules:{
-// 	    	name:[{ required: true, message: 'IP包名称不能为空'},
-//                   {validator:function(rule,value,callback){
-//      			    var param = {'ipPackageName':value};
-//      			    if(ipManagerVM.oldPackageId&&ipManagerVM.oldPackageName==value){
-//      			      callback();
-//      			    }
-//      		      axios.post('/ip/ipAccess/queryIpPackageByParam',param)
-//                      .then(function (response) {
-//                          var data =  response.data;
-//                          if(data.code=='0'){
-//                              var resData = data.data;
-//                              if(resData.length>0){
-//                                  callback(new Error("此IP包名称已存在，请修改后提交"));
-//                              }else{
-//                                  callback();
-//                              }
-                             
-//                          }else{
-//                               callback(new Error("查询IP包名称是否唯一报错"));
-//                          }
-//                      })
-//                      .catch(function (error) {
-//                        console.log(error);
-//                      })
-//                      .then(function () {
-//                        // always executed
-//                      });
-     			  
-//      		  },trigger:'blur'}]
-//         },
-//         rulesAdd:{
-// 	    	ipAddress:[
-// 	    		{ required: true, message: '不能为空'},
-// 	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-//                 {  min: 1, message: '最少1个字符', trigger: 'blur' },
-//                 { validator:function(rule,value,callback){                 
-//                     if(/^[0-9]*$/.test(value) == false){
-//                        callback(new Error("请输入数字"));
-//                     }else{
-//                        callback();
-//                     } 
-//                     callback();
-//                 }, trigger: 'blur'}
-// 	    	],
-// 	    	ipAddress2:[
-// 	    		{ required: true, message: '不能为空'},
-// 	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-//                 {  min: 1, message: '最少1个字符', trigger: 'blur' },
-//                 { validator:function(rule,value,callback){                 
-//                     if(/^[0-9]*$/.test(value) == false){
-//                        callback(new Error("请输入数字"));
-//                     }else{
-//                        callback();
-//                     } 
-//                     callback();
-//                 }, trigger: 'blur'}
-// 	    	],
-// 	    	ipAddress3:[
-// 	    		{ required: true, message: '不能为空'},
-// 	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-//                 {  min: 1, message: '最少1个字符', trigger: 'blur' },
-//                 { validator:function(rule,value,callback){                 
-//                     if(/^[0-9]*$/.test(value) == false){
-//                        callback(new Error("请输入数字"));
-//                     }else{
-//                        callback();
-//                     } 
-//                     callback();
-//                 }, trigger: 'blur'}
-// 	    	],
-// 	    	ipAddress4:[
-// 	    		{ required: true, message: '不能为空'},
-// 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-//                 {  min: 1, message: '最少1个字符', trigger: 'blur' },
-//                 { validator:function(rule,value,callback){
-                 
-//                     if(/^[0-9]*$/.test(value) == false){
-//                        callback(new Error("请输入数字"));
-//                     }else{
-//                        callback();
-//                     } 
-//                     callback();
-//                 }, trigger: 'blur'}
-// 	    	]
-//         },
-//     	ipAddForm:{
-// 			ipAddress:'',
-// 			ipAddress2:'',
-// 			ipAddress3:'',
-// 			ipAddress4:''
-// 		},
-// 		packpager:{
-// 			total: 0,
-// 			currentPage: 1,
-// 			pageSize: 20,
-// 		},
-// 		iprepositoryForm: {
-// 			ipAddress: ''
-// 		},
-// 		ippackageForm:{
-// 			ipPackageName:'',
-// 			ipAddress:''
-// 		},
-// 		ipPackageAddForm:{
-// 		  name:''
-// 		},
-// 		ipPackageUpdateForm:{
-// 		name:''
-// 		},
-// 		packageAddSelectForm:{
-// 			ipAddress: ''	
-// 		},
-// 		packAddIpTable:[],
-// 		packUpdateIpTable:[],
-// 		multipleIpSelection:[],
-// 		packSelectIpTable:[],
-// 		multipleAddPackageIpSelection:[],
-// 		multiplePackageTable:[],
-// 		packUpdateIpTable:[],
-// 		outerVisible:false,
-// 		loading:false,
-// 		btnDisabled: false,
-// 	},
-// 	methods:{ 
-// 		//切换页签方法
-// 		handleClick(tab, event){
-// 			var _val = tab.index; 
-// 			if(_val==0){
-// 				this.queryIpDataList();  
-// 			}else{
-// 				this.queryPackageDataList(); 
-// 			}
-// 		},
-// 		handleClose(){
+        created(){     
+            var today = new Date();
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
+            this.form.startTime=startTime;
+            this.form.endTime=endTime; 
+            if(curOrgId){
+                this.isDisabled = true;
+                this.form.businessGroupId = curOrgId;
+                this.export.businessGroupId = this.form.businessGroupId; 
+            }
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
 
-// 		},
-// 		 openIpAddData(){
-// 		 if(this.$refs['ipAddForm']) {
-//         	 this.$refs['ipAddForm'].resetFields();
-//            }
-// 		   ipManagerVM.dialogIpVisible =true;	
-// 		},
-// 		 deleteRow(index, rows) {
-// 			this.$confirm('确认删除【'+rows[index].ipAddress+"】IP地址吗?", '消息提醒', {
-//                 confirmButtonText: '确定',
-//                 cancelButtonText: '取消',
-//                 type: 'warning'
-//             }).then(() => {
-//             	 rows.splice(index, 1);	
-//             });
-//         },
-//         openAddIpPackage(){
-//           //打开添加IP包窗口
-//            ipManagerVM.addIpPackageVisible=true;
-//            if (this.$refs['ipPackageAddForm']) {
-//         	   this.$refs['ipPackageAddForm'].resetFields();
-//           }
-//            ipManagerVM.selectIpType='1';
-//            ipManagerVM.packAddIpTable=[];
-//         },
-//         //打开IP选择
-//         openIpSelectDiglog(){
-//             ipManagerVM.addPackageIPSelectVisible=true;
-//             if (this.$refs['packageAddSelectForm']) {
-//          	   this.$refs['packageAddSelectForm'].resetFields();
-//            }
-//         },
-// 		//查询ip库列表方法
-// 		queryIpDataList(){ 
-// 			var param = {}; 
-// 			var pageSize = this.ippager.pageSize;
-// 			var pageNum = this.ippager.currentPage;
-// 			var ipAddress = this.iprepositoryForm.ipAddress;
-// 			param.pageSize=pageSize;
-// 			param.pageNum=pageNum;
-// 			param.ipAddress=ipAddress;
-// 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
-// 				if(null==response){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var resobj= response.data;
-// 				if(null==resobj){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				} 
-// 				if(resobj.code!='0'){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var pageData=resobj.data;
-// 				ipManagerVM.ippager.total= pageData.total;
-// 				ipManagerVM.ippager.currentPage = pageData.currentPage;
-// 				ipManagerVM.ippager.pageSize = pageData.pageSize;
-// 				ipManagerVM.ipTableData =pageData.data; 	
-// 			})
-// 			.catch(function (error) {
-// 				console.log(error);
-// 			})
-// 			.then(function () {
-// 			});  
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
 
-// 		} ,
-// 		 ipTabCreatePackage(){
-// 		  //通过IP库页签打开添加IP包窗口
-// 	       ipManagerVM.addIpPackageVisible=true;
-// 	       ipManagerVM.packAddIpTable=ipManagerVM.multipleIpSelection;
-// 	       ipManagerVM.selectIpType="1";
-// 	       if (this.$refs['ipPackageAddForm']) {
-//        	    this.$refs['ipPackageAddForm'].resetFields();
-//            }
-// 		 },
-// 		 openUpdateIpPackage(){
-// 		    var updateInfo=ipManagerVM.multiplePackageTable;
-//  	        if(updateInfo.length!=1){
-//                this.$message({
-//                       message: '请选择一条数据进行修改',
-//                       type: 'warning'
-//                  });
-//                  return;
-//              }
-//  	       if (this.$refs['ipPackageUpdateForm']) {
-//         	    this.$refs['ipPackageUpdateForm'].resetFields();
-//             }
-//  	       ipManagerVM.updateIpPackageVisible=true;
-// 		  //打开修改Ip包
-// 		    var param={};
-// 		    param.id=updateInfo[0].id;
-// 			axios.post('/ip/ipAccess/findPackageById',param).then(function (response){
-// 				if(null==response){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var resobj= response.data;
-// 				if(null==resobj){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				} 
-// 				if(resobj.code!='0'){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var packInfoData=resobj.data;
-// 				ipManagerVM.ipPackageUpdateForm.name=packInfoData.name;
-// 				ipManagerVM.oldPackageName=packInfoData.name;
-// 				ipManagerVM.oldPackageId=packInfoData.id;
-// 				ipManagerVM.packUpdateIpTable=packInfoData.ipRepositorys;
-// 				ipManagerVM.selectIpType='2';
-// 			});
-// 		},
-// 		//查询Ip包列表方法
-// 		queryPackageDataList(){ 
-// 			var param = {}; 
-// 			var pageSize = this.packpager.pageSize;
-// 			var pageNum = this.packpager.currentPage;
-// 			var ipAddress = this.ippackageForm.ipAddress;
-// 			var ipPackageName = this.ippackageForm.ipPackageName;
-// 			param.pageSize=pageSize;
-// 			param.pageNum=pageNum;
-// 			param.ipPackageName=ipPackageName;
-// 			param.ipAddress=ipAddress;
-// 			axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
-// 				if(null==response){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var resobj= response.data;
-// 				if(null==resobj){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				} 
-// 				if(resobj.code!='0'){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var pageData=resobj.data;
-// 				ipManagerVM.packpager.total= pageData.total;
-// 				ipManagerVM.packpager.currentPage = pageData.currentPage;
-// 				ipManagerVM.packpager.pageSize = pageData.pageSize;
-// 				ipManagerVM.packageTableData =pageData.data; 
-// 			})
-// 			.catch(function (error) {
-// 				console.log(error);
-// 			})
-// 			.then(function () {
-// 			});	
-// 		},
-// 		//IP多选获取值
-// 		changeIpTableFun(val) {
-// 			this.multipleIpSelection = val;
-// 		},
-// 		changeSelectIpFun(val){
-// 			this.multipleAddPackageIpSelection = val; 
-// 		},
-// 		changePackageTableFun(val){
-// 			this.multiplePackageTable=val;
-// 		},
-// 		//日期数据格式化方法
-// 		dateFormat:function(row, column) {
-// 			var date = row[column.property];
-//            	if (date == undefined) {
-// 	               return "";
-//           	}
-//            	return moment(date).format("YYYY-MM-DD HH:mm:ss");
-// 		},
-// 		//批量删除Ip数据
-// 		delIpGroup() {
-// 			var deleIpInfo=ipManagerVM.multipleIpSelection;
-// 	       if(deleIpInfo.length <1){
-//                    this.$message({
-//                       message: '请选择删除数据',
-//                       type: 'warning'
-//                     });
-//                  return;
-//              }
-// 	         var packageName="";
-// 	     	var ids=[];	
-// 	        if(null!=deleIpInfo){
-// 	 		    for ( var i = 0; i <deleIpInfo.length; i++){
-// 	 		    	packageName+="【"+deleIpInfo[i].ipAddress+"】";
-// 	 		        ids.push(deleIpInfo[i].id);
-// 	 		     }
-// 	           }
-// 			this.$confirm('确认删除吗'+packageName+"IP地址吗?", '消息提醒', {
-//                 confirmButtonText: '确定',
-//                 cancelButtonText: '取消',
-//                 type: 'warning'
-//             }).then(() => {
-//         		var  param={};
-//         		param.deleId=ids;
-//         		//判断是否有对应IP包
-//         		axios.post('/ip/ipAccess/findListByRepository',param).then(function (response) {
-//         		 if(response.data.data.length>0) {
-//             			 ipManagerVM.$message({
-//                               type: 'warn',
-//                              message: '删除IP有对应IP包,请重新选择'
-//                         }); 
-//             	         return ;
-//             	   }
-//                    var deleIpInfo= ipManagerVM.multipleIpSelection;
-//         		   var ids=[];
-//         			if(null!=deleIpInfo&&deleIpInfo.length>0){
-//         				for ( var i = 0; i <deleIpInfo.length; i++){
-//         					ids.push(deleIpInfo[i].id);
-//         				}
-//         				var param={};
-//         				param.deleteIds=ids;
-//         				axios.post('/ip/ipAccess/deleteIpRepository',param).then(function (response) {
-//         				 ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-//         						ipManagerVM.refreshIpTableData(response);
-//         	        	  }});	
-//         				});
-//         			}else{
-//       				  this.$message({
-//     	                    type: 'info',
-//     	                    message: '请选择删除数据'
-//     	                });  
-//     			 }
-//         		});
-            	
-
-//             }).catch(() => {
-//                 this.$message({
-//                     type: 'info',
-//                     message: '已取消删除'
-//                 });          
-//             });
-// 		},
-// 		delpackageGroup() {
-// 	   //删除IP包数据
-// 		var deleInfo=ipManagerVM.multiplePackageTable;
-// 	     if(deleInfo.length <1){
-//               this.$message({
-//                     message: '请选择删除数据',
-//                     type: 'warning'
-//                  });
-//                return;
-//              }
-// 	        var packageName="";
-// 	    	var ids=[];	
-// 	        if(null!=deleInfo){
-// 	 		   for ( var i = 0; i <deleInfo.length; i++){
-// 	 		      packageName+="【"+deleInfo[i].name+"】";
-// 	 		      ids.push(deleInfo[i].id);
-// 	 		    }
-// 	           }
-// 			this.$confirm('确认要删除'+packageName+"IP包吗?", '消息提醒', {
-//                 confirmButtonText: '确定',
-//                 cancelButtonText: '取消',
-//                 type: 'warning'
-//             }).then(() => {
-//     		var  param={};
-//     		param.deleId=ids;
-//     		//判断是否有IP包与角色对应
-//     		axios.post('/ip/ipAccess/findListByPackage',param).then(function (response) {
-//     		 if(response.data.data.length>0) {
-//     			 ipManagerVM.$message({
-//                       type: 'warn',
-//                      message: '删除IP包有对应角色,请重新选择'
-//                 }); 
-//     	         return ;
-//     	        }
-//     			//批量删除ip库数据
-//     			var deleIpInfo=ipManagerVM.multiplePackageTable;
-//     			var ids=[];
-//     			if(null!=deleIpInfo&&deleIpInfo.length>0){
-//     			  for ( var i = 0; i <deleIpInfo.length; i++){
-//     					ids.push(deleIpInfo[i].id);
-//     			   }
-//     				var param={};
-//     				param.deleteIds=ids;
-//     				//执行删除
-//     				axios.post('/ip/ipAccess/deleteIppackage',param).then(function (response) {
-//     			    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-//     					ipManagerVM.queryPackageDataList(); 
-//     			      }});	
-//     				});
-//     			}else{
-//     				  this.$message({
-//     	                    type: 'info',
-//     	                    message: '请选择删除数据'
-//     	                });  
-//     			}
-//     		});
-//              }).catch(() => {
-//                 this.$message({
-//                     type: 'info',
-//                     message: '已取消删除'
-//                 });          
-//             });
-// 		},
-// 		packgeSelectIpOpen(){
-// 			//ip包添加选择Ip数据 
-// 			var ipAddress = this.packageAddSelectForm.ipAddress;
-// 			var param = {}; 
-// 			param.ipAddress=ipAddress;
-// 			var type=ipManagerVM.selectIpType;
-// 			var notInAddress=[];
-// 			//新增
-// 			if(type=="1"){
-// 			 var updateTable=ipManagerVM.packAddIpTable;
-// 				 if(null!=updateTable&&updateTable.length>0){
-// 					 for ( var i = 0; i <updateTable.length; i++){
-// 						 notInAddress.push(updateTable[i].id);
-// 					 }  
-// 				  }
-// 			}else{
-// 			  var updateTable=ipManagerVM.packUpdateIpTable;
-// 			  if(null!=updateTable&&updateTable.length>0){
-// 				 for ( var i = 0; i <updateTable.length; i++){
-// 					 notInAddress.push(updateTable[i].id);
-// 				 }  
-// 			  }
-// 			}
-// 			param.deleId=notInAddress;
-// 			param.pageNum=1;
-// 			param.pageSize=1000;
-			
-// 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
-// 				if(null==response){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 				 return ;
-// 				}
-// 				var resobj= response.data;
-// 				if(null==resobj){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				} 
-// 				if(resobj.code!='0'){
-// 					ipManagerVM.$message({
-//                         message: "接口调用失败",
-//                         type: 'error'
-//                       }); 
-// 					return ;
-// 				}
-// 				var pageData=resobj.data;
-// 				ipManagerVM.packSelectIpTable =pageData.data; 	
-// 			})
-// 			.catch(function (error) {
-// 				console.log(error);
-// 			})
-// 			.then(function () {
-// 			});  
-
-// 		},
-// 		packageSelectIpSubmit(){
-// 			//添加包选择Ip返回
-// 			if(ipManagerVM.selectIpType=='1'){
-// 				ipManagerVM.packAddIpTable=ipManagerVM.packAddIpTable.concat(ipManagerVM.multipleAddPackageIpSelection);	
-// 			}else{
-// 				 ipManagerVM.packUpdateIpTable=ipManagerVM.packUpdateIpTable.concat(ipManagerVM.multipleAddPackageIpSelection);
-// 			}
-// 			ipManagerVM.addPackageIPSelectVisible=false;
-// 		},
-// 		saveIpPackageData(formName){
-// 			//新增IP包
-// 		    this.$refs[formName].validate((valid) => {
-//                 if (valid) {
-//                     //保存IP包数据	 
-// 					var savepackageIp= ipManagerVM.packAddIpTable; 
-// 					var packageName= ipManagerVM.ipPackageAddForm.name; 
-// 					var param={};
-// 					param.name=packageName;
-// 					param.ipRepositorys=savepackageIp;
-// 					ipManagerVM.packgeconfirmBtnDisabled=true;
-// 					axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
-// 						if(null==response){
-// 							ipManagerVM.$message({
-// 		                        message: "接口调用失败",
-// 		                        type: 'error'
-// 													}); 
-// 							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-// 							return ;
-// 						}
-// 						var resobj= response.data;
-// 						if(null==resobj){
-// 							ipManagerVM.$message({
-// 		                        message: "接口调用失败",
-// 		                        type: 'error'
-// 													}); 
-// 							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-// 							return ;
-// 						} 
-// 						if(resobj.code!='0'){
-// 							ipManagerVM.$message({
-// 		                        message: "接口调用失败",
-// 		                        type: 'error'
-// 													}); 
-// 							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-// 							return ;
-// 						}
-// 						ipManagerVM.addIpPackageVisible=false;
-// 						ipManagerVM.addPackageIPSelectVisible=false;
-// 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-// 						  ipManagerVM.ipManager="second";
-// 							ipManagerVM.queryPackageDataList(); 
-// 							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-// 						 }});	
-// 					  }).catch(function () {
-// 						  ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-//               });
-// 						} else {
-// 								console.log('error submit!!');
-// 								return false;
-// 						}
-// 				});				
-// 		},
-// 		updateIpPackageData(formName){
-// 		    this.$refs[formName].validate((valid) => {
-//                 if (valid) {
-//                     //修改IP包数据	 
-// 					var savepackageIp= ipManagerVM.packUpdateIpTable; 
-// 					var packageName= ipManagerVM.ipPackageUpdateForm.name; 
-// 					var param={};
-// 					param.name=packageName;
-// 					param.ipRepositorys=savepackageIp;
-// 					param.id=ipManagerVM.oldPackageId;
-// 					ipManagerVM.btnDisabled = true; 
-// 					axios.post('/ip/ipAccess/updateIpPackage',param).then(function (response) {
-// 						if(null==response){
-// 							ipManagerVM.$message({
-// 		                        message: "接口调用失败",
-// 		                        type: 'error'
-// 													}); 
-// 							ipManagerVM.btnDisabled = false; 
-// 							return ;
-// 						}
-// 						var resobj= response.data;
-// 						if(null==resobj){
-// 							ipManagerVM.$message({
-// 		                        message: "接口调用失败",
-// 		                        type: 'error'
-// 													}); 
-// 							ipManagerVM.btnDisabled = false; 						
-// 							return ;
-// 						} 
-// 						if(resobj.code!='0'){
-// 							ipManagerVM.$message({
-// 		                        message: "接口调用失败",
-// 		                        type: 'error'
-// 													});
-// 							ipManagerVM.btnDisabled = false;  
-// 							return ;
-// 						}
-// 						ipManagerVM.updateIpPackageVisible=false;
-// 						ipManagerVM.addPackageIPSelectVisible=false;
-// 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-// 							ipManagerVM.btnDisabled = false; 
-// 						  ipManagerVM.queryPackageDataList(); 
-// 						 }});	
-// 						})
-// 						.catch(function(error){
-// 							ipManagerVM.btnDisabled = false; 
-// 						});
-// 					} else {
-// 							console.log('error submit!!');
-// 							return false;
-// 					}
-// 			});				
-// 		},
-// 		refreshIpTableData(response){
-// 			//修改新增Ip后刷新IP列表
-// 			if(null==response){
-// 				ipManagerVM.$message({
-//                     message: "接口调用失败",
-//                     type: 'error'
-//                   }); 
-// 				return ;
-// 			}
-// 			var resobj= response.data;
-// 			if(null==resobj){
-// 				ipManagerVM.$message({
-//                     message: "接口调用失败",
-//                     type: 'error'
-//                   }); 
-// 				return ;
-// 			}        		
-// 			if(resobj.code=='0'){
-// 				ipManagerVM.queryIpDataList();	
-// 			}else{
-// 				ipManagerVM.$message({
-//                     message: "接口调用失败",
-//                     type: 'error'
-//                   }); 
-// 				return;
-// 			}	  
-// 		},
-// 		closeIpAddDialog(){
-
-// 		},
-// 		number(){
-// 	　　　 	this.ipAddForm.ipAddress=this.ipAddForm.ipAddress.replace(/[^\.\d]/g,'');
-// 		    this.ipAddForm.ipAddress=this.ipAddForm.ipAddress.replace('.','');
-// 	　　},
-// 		number2(){
-// 	　　　 	this.ipAddForm.ipAddress2=this.ipAddForm.ipAddress2.replace(/[^\.\d]/g,'');
-// 		    this.ipAddForm.ipAddress2=this.ipAddForm.ipAddress2.replace('.','');
-// 	　　},
-// 		number3(){
-// 	　　　 	this.ipAddForm.ipAddress3=this.ipAddForm.ipAddress3.replace(/[^\.\d]/g,'');
-// 		    this.ipAddForm.ipAddress3=this.ipAddForm.ipAddress3.replace('.','');
-// 	　　},
-// 		number4(){
-// 	　　　 	this.ipAddForm.ipAddress4=this.ipAddForm.ipAddress4.replace(/[^\.\d]/g,'');
-// 		    this.ipAddForm.ipAddress4=this.ipAddForm.ipAddress4.replace('.','');
-// 	　　}
-// 	},
-	created(){
-		
-		// this.queryIpDataList();
-	},
-	mounted(){
-        document.getElementById('maindiv').style.display = 'block';
-    }
-});
+            // this.searchTable();
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
 </script>
-</body>
 </html>

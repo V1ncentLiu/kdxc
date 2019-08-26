@@ -85,6 +85,11 @@ input[type="number"] {
                 </el-form>
             </div>
             <el-row>
+                <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+                    <el-tab-pane label="事业部排名" name="first" v-if="!isShowDept"></el-tab-pane>
+                    <el-tab-pane label="电销组排名" name="second" v-if="!isShowOrgId"></el-tab-pane>
+                    <el-tab-pane label="电销顾问排名" name="thired"></el-tab-pane>
+                </el-tabs>
                 <el-table 
                     ref="tableData"
                     tooltip-effect="dark"
@@ -183,13 +188,22 @@ input[type="number"] {
     </template>
 	</div>
 	<div th:include="_footer_include :: #jsLib"></div>
-	<script>
-        var orgIdList='';// 商务组
-        var projectList='';// 来访项目
-var maindiv = new Vue({
-    el:'#maindiv',
-    data: function() {
+<script>
+    var orgIdList='';// 商务组
+    var projectList='';// 来访项目
+    var dept = 1;
+    // var curOrgId = [[${curOrgId}]];
+    var curOrgId = 1;
+    // var curUserId = [[${curUserId}]];
+    var curUserId = 2;
+    console.log(curOrgId, curUserId);
+    var maindiv = new Vue({
+        el:'#maindiv',
+        data: function() {
             return {
+                isShowDept: dept,
+                isShowOrgId: curOrgId,
+                activeName: 'thired',
                 loading: false,
                 isDisabled: false,
                 isDisabledUserId: false,
@@ -222,6 +236,15 @@ var maindiv = new Vue({
             }             
         },
         methods: {    
+            handleClick(tab, event) {
+                if(tab.name=='first'){
+                	window.location.href="/ranking/deptList";
+                }else if (tab.name == 'second'){
+                	window.location.href="/ranking/groupList";
+                }else if (tab.name == 'thired'){
+                    window.location.href="/ranking/managerList";
+                }
+            },  
             centerStyle(){
                 return "text-align:center"
             },
