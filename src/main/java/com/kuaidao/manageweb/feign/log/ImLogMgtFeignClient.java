@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.List;
+
 
 /**
  * 聊天记录
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name = "aggregation-service", fallback = ImLogMgtFeignClient.HystrixClientFallback.class)
 public interface ImLogMgtFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/aggregation/imLog/queryIMLogRecord")
-	public JSONResult<PageBean<ImLogsDTO>> queryIMLogRecord(@RequestBody ImLogsDTO logReqDTO);
+	public JSONResult<List<ImLogsDTO>> queryIMLogRecord(@RequestBody ImLogsDTO logReqDTO);
 
 	/**
 	 * 根据资源id查询聊天记录
@@ -43,7 +45,7 @@ public interface ImLogMgtFeignClient {
 		}
 
 		@Override
-		public JSONResult<PageBean<ImLogsDTO>> queryIMLogRecord(ImLogsDTO logReqDTO) {
+		public JSONResult<List<ImLogsDTO>> queryIMLogRecord(ImLogsDTO logReqDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("查询聊天记录失败");
 		}

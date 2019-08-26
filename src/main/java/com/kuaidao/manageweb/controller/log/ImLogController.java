@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 组织机构类
@@ -42,10 +43,10 @@ public class ImLogController {
      */
     @RequestMapping("/queryIMLogRecord")
     @ResponseBody
-    public JSONResult<PageBean<ImLogsDTO>> queryIMLogRecord(
+    public JSONResult<List<ImLogsDTO>> queryIMLogRecord(
             @RequestBody ImLogsDTO imLogDto, HttpServletRequest request,
             HttpServletResponse response) {
-        JSONResult<PageBean<ImLogsDTO>> imLogs = imLogMgtFeignClient.queryIMLogRecord(imLogDto);
+        JSONResult<List<ImLogsDTO>> imLogs = imLogMgtFeignClient.queryIMLogRecord(imLogDto);
         return imLogs;
     }
     /**
