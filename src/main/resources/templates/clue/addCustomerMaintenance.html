@@ -11,6 +11,7 @@
         @media screen and (max-width: 1367px) {
             .openWechatbtn{position: relative;top: auto;left: auto;}
         }
+        .maxWidth500{max-width: 500px;}
     </style>
 </head>
 <body>
@@ -750,12 +751,12 @@
                     <span>{{item.messageTime}}</span>
                 </p>
                 <p style="padding:0 10px;">
-                    <span v-if="item.messageType==3"><img :src="item.message" alt=""></span>
+                    <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
                     <span v-else>{{item.message}}</span>
                 </p>
             </li>
         </ul>
-        <div><p class="f-tac">加载更多内容</p></div>
+        <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="initData">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
 
@@ -882,6 +883,8 @@
         el: '#addCustomer',
         data: function () {
             return {
+                recordPageNum:1,
+                isShowMoreBtn:false,
                 customerInfo:customer,
                 isShowOnlineRecordBtn:false,
                 onlineRecordData:[],
@@ -1179,8 +1182,8 @@
             initData(){
                 var param = {};
                 param.clueId = clueId;
-                param.pageNum = 1;
-                param.pageSize = 10;
+                param.pageNum = this.recordPageNum++;
+                param.pageSize = 3;
                 axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
                     var recordData=response.data;
                     if(recordData){
@@ -1194,6 +1197,11 @@
                                 }
                             }
                             addCustomerVM.isShowOnlineRecordBtn=true;
+                            if(data.total>3){
+                                addCustomerVM.isShowMoreBtn=true;
+                            }else{
+                                addCustomerVM.isShowMoreBtn=false;
+                            }
                         }else{
                             addCustomerVM.$message({
                                 message: recordData.msg,
@@ -1207,17 +1215,17 @@
 
             },
             isShowOnlineRecordFun(){
-                var param = {};
-                param.clueId = clueId;
-                axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
-                    var data= response.data;                 
-                    if(data){
-                        addCustomerVM.isShowOnlineRecordBtn=true;
-                    }else{
-                        addCustomerVM.isShowOnlineRecordBtn=false;
-                    }
+                // var param = {};
+                // param.clueId = clueId;
+                // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+                //     var data= response.data;                 
+                //     if(data){
+                //         addCustomerVM.isShowOnlineRecordBtn=true;
+                //     }else{
+                //         addCustomerVM.isShowOnlineRecordBtn=false;
+                //     }
 
-                });
+                // });
             },
             chooseToday(val){
                 var dateNow=new Date();
@@ -2770,9 +2778,7 @@
 
 
         },
-        created() {
-            this.initData();
-            this.isShowOnlineRecordFun();
+        created() {            
             //初始资源类别数据
             this.getUploadParam();
             var param = {};
@@ -2885,6 +2891,9 @@
             axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                 addCustomerVM.provinceArr = response.data.data.data;
             });
+            // 在线聊天记录data
+            this.initData();
+            this.isShowOnlineRecordFun();
         }
     })
 </script>
