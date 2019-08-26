@@ -756,7 +756,7 @@
                 </p>
             </li>
         </ul>
-        <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="initData">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+        <div v-if="isShowMoreBtn"><p class="f-tac"><span>加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
 
@@ -883,7 +883,6 @@
         el: '#addCustomer',
         data: function () {
             return {
-                recordPageNum:1,
                 isShowMoreBtn:false,
                 customerInfo:customer,
                 isShowOnlineRecordBtn:false,
@@ -1182,8 +1181,8 @@
             initData(){
                 var param = {};
                 param.clueId = clueId;
-                param.pageNum = this.recordPageNum++;
-                param.pageSize = 3;
+                param.pageNum = 1;
+                param.pageSize = 10;
                 axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
                     var recordData=response.data;
                     if(recordData){
@@ -1197,7 +1196,7 @@
                                 }
                             }
                             addCustomerVM.isShowOnlineRecordBtn=true;
-                            if(data.total>3){
+                            if(data.total>10){
                                 addCustomerVM.isShowMoreBtn=true;
                             }else{
                                 addCustomerVM.isShowMoreBtn=false;
