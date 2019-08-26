@@ -28,7 +28,7 @@
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户</el-button>
                 <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button>
-                <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
             </div>
 
             <div class="borderbox padding20 resourceInfo">
@@ -735,13 +735,24 @@
     </el-dialog>
     <!-- 在线聊天记录弹窗 -->
     <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px">
-        <p class="marginB10"><span>客户姓名：</span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>  
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>  
         <p class="marginB10">聊天内容：</p>
         <div class="borderbox padding10">
         <ul>
             <li  v-for="(item,i) in onlineRecordData" :key="item.id">
-                <p class="padding10"><span>在线客服</span><span>{{ item.messageTime }}</span></p>
-                <p class="padding10"><span>{{ item.message }}</span></p>
+                <!-- 发送类型 0-自己发送，1-对方发送 -->
+                <p class="padding10 bluecolor" v-if="item.fromType==0">
+                    <span class="marginR10">在线客服</span>
+                    <span>{{item.messageTime}}</span>                    
+                </p>
+                <p class="padding10 yellowcolor" v-else>
+                    <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                    <span>{{item.messageTime}}</span>
+                </p>
+                <p style="padding:0 10px;">
+                    <span v-if="item.messageType==3"><img :src="item.message" alt=""></span>
+                    <span v-else>{{item.message}}</span>
+                </p>
             </li>
         </ul>
         <div><p class="f-tac">加载更多内容</p></div>
@@ -871,6 +882,8 @@
         el: '#addCustomer',
         data: function () {
             return {
+                customerInfo:customer,
+                isShowOnlineRecordBtn:false,
                 onlineRecordData:[],
                 onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
@@ -1168,30 +1181,40 @@
                 param.clueId = clueId;
                 param.pageNum = 1;
                 param.pageSize = 10;
-                console.log("param================")
-                console.log(param)
                 axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
-                    console.log("response==============")
-                    console.log(response)
                     var recordData=response.data;
                     if(recordData){
-                        var data=recordData.data.data;                    
-                        addCustomerVM.onlineRecordData=data;                        
+                        var data=recordData.data;   
+                        if(data){
+                            var dataList=data.data
+                            addCustomerVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            addCustomerVM.isShowOnlineRecordBtn=true;
+                        }else{
+                            addCustomerVM.$message({
+                                message: recordData.msg,
+                                type: 'warning'
+                            });
+                            addCustomerVM.isShowOnlineRecordBtn=false;
+                        }                       
                     }
 
                 });
 
             },
-            isShowOnlineRecordBtn(){
+            isShowOnlineRecordFun(){
                 var param = {};
                 param.clueId = clueId;
                 axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
-                    console.log("response==============")
-                    console.log(response)
-                    var recordData=response.data;
-                    if(recordData){
-                         
-
+                    var data= response.data;                 
+                    if(data){
+                        addCustomerVM.isShowOnlineRecordBtn=true;
+                    }else{
+                        addCustomerVM.isShowOnlineRecordBtn=false;
                     }
 
                 });
@@ -2749,7 +2772,7 @@
         },
         created() {
             this.initData();
-            this.isShowOnlineRecordBtn();
+            this.isShowOnlineRecordFun();
             //初始资源类别数据
             this.getUploadParam();
             var param = {};
