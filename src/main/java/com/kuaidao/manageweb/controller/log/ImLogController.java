@@ -57,7 +57,7 @@ public class ImLogController {
      */
     @RequestMapping("/getImLogByClueId")
     @ResponseBody
-    public JSONResult getImLogByClueId(
+    public boolean getImLogByClueId(
             @RequestBody ImLogsDTO imLogDto, HttpServletRequest request,
             HttpServletResponse response) {
         JSONResult<ImLogsDTO> imLogs = imLogMgtFeignClient.getImLogByClueId(imLogDto);
@@ -68,7 +68,6 @@ public class ImLogController {
                 isShowImButton = true;
             }
         }
-        request.setAttribute("isShowImButton", isShowImButton);
-        return imLogs;
+        return isShowImButton;
     }
 }
