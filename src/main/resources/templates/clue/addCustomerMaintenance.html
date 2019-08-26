@@ -12,6 +12,8 @@
             .openWechatbtn{position: relative;top: auto;left: auto;}
         }
         .maxWidth500{max-width: 500px;}
+        .listBox{max-height: 500px;overflow: hidden;}
+        .listBox.listScroll{overflow-y: scroll;}
     </style>
 </head>
 <body>
@@ -739,24 +741,27 @@
         <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>  
         <p class="marginB10">聊天内容：</p>
         <div class="borderbox padding10">
-        <ul>
-            <li  v-for="(item,i) in onlineRecordData" :key="item.id">
-                <!-- 发送类型 0-自己发送，1-对方发送 -->
-                <p class="padding10 bluecolor" v-if="item.fromType==0">
-                    <span class="marginR10">在线客服</span>
-                    <span>{{item.messageTime}}</span>                    
-                </p>
-                <p class="padding10 yellowcolor" v-else>
-                    <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
-                    <span>{{item.messageTime}}</span>
-                </p>
-                <p style="padding:0 10px;">
-                    <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
-                    <span v-else>{{item.message}}</span>
-                </p>
-            </li>
-        </ul>
-        <div v-if="isShowMoreBtn"><p class="f-tac"><span>加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
 
@@ -883,6 +888,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
                 isShowOnlineRecordBtn:false,
@@ -1175,6 +1181,10 @@
             }
         },
         methods: {
+            isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
             showOnlineRecord(){
                 this.onlineRecordDialogVisible=true;                
             },
@@ -1186,29 +1196,30 @@
                 axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
                     var recordData=response.data;
                     if(recordData){
-                        var data=recordData.data;   
-                        if(data){
-                            var dataList=data.data
+                        var dataList=recordData.data
+                        if(dataList){
                             addCustomerVM.onlineRecordData=dataList;
                             for(var i=0;i<dataList.length;i++){
                                 if(dataList[i].messageTime){
                                     dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
                                 }
                             }
-                            addCustomerVM.isShowOnlineRecordBtn=true;
-                            if(data.total>10){
-                                addCustomerVM.isShowMoreBtn=true;
-                            }else{
-                                addCustomerVM.isShowMoreBtn=false;
+                            if(dataList.length>0){
+                                addCustomerVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    addCustomerVM.isShowMoreBtn=true;
+                                }else{
+                                    addCustomerVM.isShowMoreBtn=false;
+                                }
                             }
-                        }else{
-                            addCustomerVM.$message({
-                                message: recordData.msg,
-                                type: 'warning'
-                            });
-                            addCustomerVM.isShowOnlineRecordBtn=false;
-                        }                       
-                    }
+                        }                        
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        addCustomerVM.isShowOnlineRecordBtn=false;
+                    }                       
 
                 });
 
