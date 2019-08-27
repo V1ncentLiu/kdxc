@@ -77,6 +77,8 @@ public class FirstResourceAllocationController {
                         .success(emptyDataPageBean);
             }
         }
+        logger.info(
+            "首次分配组查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
     }
 
@@ -152,6 +154,8 @@ public class FirstResourceAllocationController {
                         .success(emptyDataPageBean);
             }
         }
+        logger.info(
+            "首次分配个人查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
         return firstResourceAllocationFeignClient
                 .getFirstResourceAllocationPagePersion(firstResourceAllocationQueryDto);
     }
