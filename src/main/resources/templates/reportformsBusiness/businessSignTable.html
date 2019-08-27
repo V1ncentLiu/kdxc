@@ -93,7 +93,7 @@
                 <el-table-column prop="secondSignRate" label="二次来访签约率"></el-table-column>
                 <el-table-column prop="manySignRate" label="2+次来访签约率"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" :papernum="[3,20]" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" :papernum="[2,3,20]" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -108,6 +108,7 @@
     var projectList=[[${projectList}]];// 来访项目
     var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
+    curUserId = 1;
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -118,7 +119,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3,
+                    pageSize: 2,
                 },
                 form: {
                     startTime:'',
@@ -240,7 +241,7 @@
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
-                        if( tableData.data.length && resobj.data.totalData ){
+                        if( !curUserId && tableData.data.length && resobj.data.totalData ){
                             var totalData = resobjData.totalData[0];
                             mainDivVM.tableData.unshift(totalData);
                         }
@@ -298,7 +299,7 @@
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
+                if ( !curUserId && rowIndex === 0) {
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
@@ -307,6 +308,9 @@
                 }
             },
             indexFun (index) { // 表格序号
+                if(curUserId){
+                    return index + 1;
+                }
                 return index;
             },
             //百分比格式话
