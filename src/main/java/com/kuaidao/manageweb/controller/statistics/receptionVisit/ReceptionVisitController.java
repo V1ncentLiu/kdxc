@@ -290,6 +290,11 @@ public class ReceptionVisitController {
             List<Long> orgIdList = teleGroupList.parallelStream().map(OrganizationDTO::getId).collect(Collectors.toList());
             receptionVisitQueryDto.setOrgIdList(orgIdList);
         }
+        //商务经理查询 考虑借调 删除组限制
+        if(null != receptionVisitQueryDto && RoleCodeEnum.SWJL.name().equals(roleCode)){
+            receptionVisitQueryDto.setOrgIdList(null);
+            receptionVisitQueryDto.setOrgId(null);
+        }
         if(null != request){
             request.setAttribute("teleGroupList",teleGroupList);
             request.setAttribute("curOrgId",curOrgId);
