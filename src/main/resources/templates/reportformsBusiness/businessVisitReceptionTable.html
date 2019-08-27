@@ -222,9 +222,11 @@
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
-                        if( tableData.data.length && resobj.data.totalData ){
-                            var totalData = resobjData.totalData[0];
-                            mainDivVM.tableData.unshift(totalData);
+                        if(!curUserId){
+                            if( tableData.data.length && resobj.data.totalData ){
+                                var totalData = resobjData.totalData[0];
+                                mainDivVM.tableData.unshift(totalData);
+                            }
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -278,7 +280,7 @@
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
+                if (rowIndex === 0 && !curUserId) {
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
@@ -287,6 +289,9 @@
                 }
             },
             indexFun (index) { // 表格序号
+                if(curUserId){
+                    return index + 1;
+                }
                 return index;
             },
             minuteFormat (m) {
