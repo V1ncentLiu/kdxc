@@ -91,7 +91,11 @@ public class ReceptionVisitController {
         //合计
         ReceptionVisitDto sumReadd = JSON.parseObject(totalDataStr, ReceptionVisitDto.class);
         //添加合计头
-        addTotalExportData(sumReadd,dataList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+        if(!RoleCodeEnum.SWJL.name().equals(roleCode)){
+            addTotalExportData(sumReadd,dataList);
+        }
         buildList(dataList, orderList,PERSON);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "来访接待工作表" +receptionVisitQueryDto.getStartTime()+"-"+receptionVisitQueryDto.getEndTime() + ".xlsx";
