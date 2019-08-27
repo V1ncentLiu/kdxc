@@ -713,18 +713,25 @@ public class ClientController {
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
         String loginName = reqDTO.getLoginName();
         String bindType = reqDTO.getBindType();
-        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long accountId = curLoginUser.getId();
+       //JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        TrAxbOutCallReqDTO trAxbOutCallReqDTO = new TrAxbOutCallReqDTO();
+        trAxbOutCallReqDTO.setLoginClient(loginName);
+        trAxbOutCallReqDTO.setAccountId(accountId);
+        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClient(trAxbOutCallReqDTO);
+       
         if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
             QimoClientRespDTO qimoClient = qimoClientJr.getData();
             if(qimoClient==null) {
-                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"登录坐席不存在或坐席未启用");
+                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"登录坐席不归属您或坐席未启用");
             }else {
                 Session session = SecurityUtils.getSubject().getSession();
                 session.setAttribute("loginName", loginName);
                 if("2".equals(bindType)) {
                     session.setAttribute("bindType", bindType);
                 }
-                UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+             
                 ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
                 clientLoginRecord.setAccountId(curLoginUser.getId());
                 clientLoginRecord.setAccountType(reqDTO.getAccountType());
@@ -734,11 +741,12 @@ public class ClientController {
                 JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
                 if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
                     logger.error("qimo_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
+                    return  new JSONResult<>().fail(loginRecordJr.getCode(),loginRecordJr.getMsg());
                 }
                 return new JSONResult<>().success(true);
             }
         }else {
-            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",loginName,qimoClientJr);
+            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",trAxbOutCallReqDTO,qimoClientJr);
         }
         return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
     }

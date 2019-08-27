@@ -225,6 +225,15 @@ public interface ClientFeignClient {
     @PostMapping("/trClientLogout")
     JSONResult trClientLogout(TrAxbOutCallReqDTO trAxbOutCallReqDTO);
     
+    
+    /**
+     *  根据坐席账号查询可用的 七陌坐席
+     * @param loginClint 登录坐席
+     * @return
+     */
+    @PostMapping("/queryQimoClient")
+    JSONResult<QimoClientRespDTO> queryQimoClient(@RequestBody TrAxbOutCallReqDTO trAxbOutCallReqDTO);
+    
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
 
@@ -354,6 +363,11 @@ public interface ClientFeignClient {
         @Override
         public JSONResult trClientLogout(TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
             return fallBackError("天润坐席退出");
+        }
+
+        @Override
+        public JSONResult<QimoClientRespDTO> queryQimoClient(TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
+            return fallBackError("查询可用的七陌坐席");
         }
 
 	}
