@@ -95,7 +95,7 @@ public class BusCustomerVisitController {
     @RequestMapping("/queryByPage")
     @ResponseBody
     public JSONResult<Map<String,Object>> queryByPage(@RequestBody CustomerVisitQueryDto customerVisitQueryDto){
-        initCustomerDto(customerVisitQueryDto);
+        initQueryCustomerDto(customerVisitQueryDto);
         JSONResult<Map<String,Object>> jsonResult=busCousomerVisitFeignClient.queryByPage(customerVisitQueryDto);
         return jsonResult;
     }
@@ -110,7 +110,7 @@ public class BusCustomerVisitController {
     public void exportExcel(HttpServletRequest request,
             HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         try{
-            initCustomerDto(customerVisitQueryDto);
+            initQueryCustomerDto(customerVisitQueryDto);
             JSONResult<List<CustomerVisitDto>> result=busCousomerVisitFeignClient.queryListByParams(customerVisitQueryDto);
             CustomerVisitDto [] dtos=result.getData().toArray(new CustomerVisitDto[0]);
             String [] keys={"userName","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
@@ -165,6 +165,7 @@ public class BusCustomerVisitController {
         if(null==customerVisitQueryDto.getBusinessManagerId()){
             return new JSONResult<Map<String,Object>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"必填参数为空");
         }
+        initQueryParams(customerVisitQueryDto);
         JSONResult<Map<String,Object>> jsonResult=busCousomerVisitFeignClient.queryPageByManagerId(customerVisitQueryDto);
         return jsonResult;
     }
@@ -180,6 +181,7 @@ public class BusCustomerVisitController {
     public void exportMExcel(HttpServletRequest request,
                             HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         try{
+            initQueryParams(customerVisitQueryDto);
             JSONResult<List<CustomerVisitDto>> result=busCousomerVisitFeignClient.queryManagerListByParams(customerVisitQueryDto);
             CustomerVisitDto [] dtos=result.getData().toArray(new CustomerVisitDto[0]);
             String [] keys={"visitDate","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
@@ -255,10 +257,23 @@ public class BusCustomerVisitController {
     }
 
     /**
+     * 查询参数处理
+     * @param customerVisitQueryDto
+     */
+    public void initQueryParams(CustomerVisitQueryDto customerVisitQueryDto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        //商务经理访问，则组查询条件设置为null，可以查询外访数据（外访数据在其他组）
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            customerVisitQueryDto.setBusinessManagerId(null);
+        }
+    }
+
+    /**
      * 根据登录角色对查询参数处理
      * @param customerVisitQueryDto
      */
-    public void initCustomerDto(CustomerVisitQueryDto customerVisitQueryDto){
+    public void initQueryCustomerDto(CustomerVisitQueryDto customerVisitQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //商务大区总监 查询所有商务组
@@ -276,7 +291,6 @@ public class BusCustomerVisitController {
             customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
             //商务经理只能查看自己
-            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
             customerVisitQueryDto.setBusinessManagerId(curLoginUser.getId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员查询全部
@@ -293,6 +307,10 @@ public class BusCustomerVisitController {
 
     public static void main(String[] args) {
         String name = "签约来访表{0}{1}{2}-{3}.xlsx";
-        System.out.println(MessageFormat.format(name,"","","20121717","20180808"));
+
+        Long time=System.currentTimeMillis()/1000/3600;
+        System.out.println(time);
+        System.out.println(time*3600l);
+//        System.out.println(MessageFormat.format(name,"","","20121717","20180808"));
     }
 }
