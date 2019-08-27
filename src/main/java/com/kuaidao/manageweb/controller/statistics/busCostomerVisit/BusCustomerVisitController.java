@@ -112,6 +112,14 @@ public class BusCustomerVisitController {
         try{
             initQueryCustomerDto(customerVisitQueryDto);
             JSONResult<List<CustomerVisitDto>> result=busCousomerVisitFeignClient.queryListByParams(customerVisitQueryDto);
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+            //商务经理角色去掉第一行合计数据
+            if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+                if(result.getData().size()>0){
+                    result.getData().remove(0);
+                }
+            }
             CustomerVisitDto [] dtos=result.getData().toArray(new CustomerVisitDto[0]);
             String [] keys={"userName","firstVisit","secondVisit","manyVisit","sumSign","firstSign","secondSign","manySign","otherSign","signRate","visitRate","secondSignRate","manySignRate"};
             String [] hader={"商务经理","首访数","二次来访数","2+次来访数","签约数","首访签约数","二次来访签约数","2+次来访签约数","其他签约","签约率","首访签约率","二次来访签约率","2+次来访签约率"};
@@ -278,14 +286,19 @@ public class BusCustomerVisitController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //商务大区总监 查询所有商务组
         if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
-            OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-            busGroupReqDTO.setParentId(curLoginUser.getOrgId());
-            busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-            busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
-            JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
-            List<OrganizationDTO> data = listJSONResult.getData();
-            List<Long> ids=data.stream().map(c->c.getId()).collect(Collectors.toList());
-            customerVisitQueryDto.setBusinessGroupIds(ids);
+            //如果有商务组筛选
+            if(null!=customerVisitQueryDto.getBusinessGroupId()){
+                customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(customerVisitQueryDto.getBusinessGroupId())));
+            }else{
+                OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+                busGroupReqDTO.setParentId(curLoginUser.getOrgId());
+                busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+                busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+                List<OrganizationDTO> data = listJSONResult.getData();
+                List<Long> ids=data.stream().map(c->c.getId()).collect(Collectors.toList());
+                customerVisitQueryDto.setBusinessGroupIds(ids);
+            }
         }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
             //商务总监只能查当前组
             customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
@@ -298,10 +311,7 @@ public class BusCustomerVisitController {
             //其他角色查询自己的数据
             customerVisitQueryDto.setBusinessManagerId(curLoginUser.getId());
         }
-        //如果有商务组筛选
-        if(null!=customerVisitQueryDto.getBusinessGroupId()){
-            customerVisitQueryDto.setBusinessGroupIds(new ArrayList<>(Arrays.asList(customerVisitQueryDto.getBusinessGroupId())));
-        }
+
     }
 
 
