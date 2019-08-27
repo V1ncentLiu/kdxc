@@ -46,6 +46,7 @@ var myCallRecordVm = new Vue({
         	bindPhone:'',
         	accountId:'',
         	teleGroupId:ownOrgId,
+            categoryArr:[]
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
@@ -95,6 +96,7 @@ var myCallRecordVm = new Vue({
     		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
+        	 debugger;
         	 axios.post('/call/callRecord/listAllTmCallRecord',param)
              .then(function (response) {
             	 
@@ -385,7 +387,14 @@ var myCallRecordVm = new Vue({
         .catch(function (error) {
           console.log(error);
         });
-      }//电销总监电销组筛选按钮不可点击
+      }
+        //初始资源类别数据
+        param={};
+        param.groupCode="clueCategory";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            myCallRecordVm.categoryArr=response.data.data;
+        });
+      //电销总监电销组筛选按钮不可点击
       this.initCallRecordData();
    },
    mounted(){
