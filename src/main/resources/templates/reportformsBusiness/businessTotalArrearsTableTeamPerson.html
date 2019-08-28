@@ -11,12 +11,10 @@
         <el-breadcrumb-item>累计未收齐款统计</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <!-- <el-button type="primary" @click="searchYesterday">昨天</el-button>
-        <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button> -->
         <!-- <shiro:hasPermission name="statistics:businessTotalArrearsTable:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
         <!-- </shiro:hasPermission> -->
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -60,23 +58,19 @@
             </el-form>
         </div>
         <el-row>
-            <el-table
+            <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
-                style="width: 800px"
+                style="width: 100%"
                 border
                 :data="tableData"
                 v-loading="loading"
                 :cell-style="centerStyle"
-                :header-cell-style="centerStyle"
-                :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="owedDays" label="欠款天数">
-                    <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.userId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.userName}}</el-button>
-                        <span v-else>{{scope.row.userName}}</span>
-                    </template>
-                </el-table-column>
+                :header-cell-style="centerStyle">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="projectName" label="项目"></el-table-column>
+                <el-table-column prop="owedDays" label="欠款天数"></el-table-column>
+                <el-table-column prop="userName" label="商务经理"></el-table-column>
                 <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
                 <el-table-column prop="noCreditAmount" label="未收齐尾款金额"></el-table-column>
             </el-table>
@@ -94,10 +88,11 @@
     }
 </style>
 <script th:inline="javascript">
+    var parentParam=[[${unpaidFundsQueryDto}]];
     var projectList = [[${projectList}]];
     var orgIdList=[[${saleGroupList}]];
     var curOrgId = [[${curOrgId}]];
-    var curUserId = [[${curUserId}]];
+    var curUserId = [[${curUserId}]];     
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -126,11 +121,11 @@
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
                 projectArr: projectList, // 来访项目
-                // pickerOptions0: {
-                //   disabledDate(time) {
-                //     return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
-                //   }
-                // },
+                pickerOptions0: {
+                  disabledDate(time) {
+                    return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
+                  }
+                },
             }             
         },
         methods: {    
@@ -154,7 +149,7 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="SWJL";
-                axios.post('/base/getSaleList' ,param).then(function (response) {
+                axios.post('/base/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
@@ -198,7 +193,7 @@
                 param.orgId = this.form.orgId;
                 param.userId = this.form.userId;
                 this.loading = true; 
-                axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
+                axios.post('/statistics/unpaidFunds/getDirectorOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -256,21 +251,15 @@
                 }
                 if(endTime){
                     var e = endTime.slice(0,8);
-                    if(e < date || e > date){
+                    if(e < date){
                         this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
                         return this.form.endTime;                        
                     }
                     return end;
                 }
             },
-            gotoTeam(row){
-                var userId = row.userId;
-                var orgId = this.export.orgId;
-                var endTime = this.export.endTime;
-                var projectId = this.export.projectId;
-                if(userId){
-                    window.location.href="/customerVisit/signDetailList?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime; 
-                }
+            goback () {
+                window.history.go(-1);
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -283,6 +272,15 @@
             },
             indexFun (index) { // 表格序号
                 return index;
+            },
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay; 
             },
             minuteFormat (m) {
                 if (!m) {return "";}
@@ -299,13 +297,23 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
+            dateTimeFormat (dt) { 
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            },
             exportRs(){
                 var param = {};
                 param.endTime = this.export.endTime;
-                param.projectId = this.export.projectId;
-                param.orgId =  this.export.orgId;
+                param.orgId = this.export.orgId;
                 param.userId = this.export.userId;
-                axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
+                param.projectId = this.export.projectId;
+                axios.post('/statistics/unpaidFunds/exportDirectorOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -319,26 +327,38 @@
                 });
             }
         },
-        created(){     
+        created(){ 
             var today = new Date();
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.endTime=endTime; 
-            this.export.endTime = this.minuteFormat(this.form.endTime);
-            if(curOrgId){
+            if(curOrgId){ // 有角色
                 this.isDisabled = true;
-                this.form.orgId = curOrgId; 
-                this.firstCurTelSale(curOrgId);
+                this.form.orgId = curOrgId;
                 if(curUserId){
                     this.isDisabledUserId = true;
                     this.form.userId = curUserId;
+                }else{
+                    this.form.userId = parentParam&&parentParam.userId?parentParam.userId:'';
                 }
-                this.export.orgId = this.form.orgId; 
-                this.export.userId = this.form.userId; 
+            }else{
+                this.form.orgId = parentParam&&parentParam.orgId ? parentParam.orgId:'';
+                this.form.userId = parentParam&&parentParam.userId ? parentParam.userId:'';
             }
-
+            if(parentParam && parentParam.endTime){
+                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
+                this.export.endTime = parentParam.endTime;
+            }else{
+                this.form.endTime = endTime;
+                this.export.endTime = this.minuteFormat(this.form.endTime);
+            }
+            this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
+            this.export.orgId = this.form.orgId;
+            this.export.userId = this.form.userId; 
+            this.export.projectId = this.form.projectId; 
+            
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
+            this.firstCurTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){
