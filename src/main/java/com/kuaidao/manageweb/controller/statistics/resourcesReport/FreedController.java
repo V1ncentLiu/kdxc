@@ -89,7 +89,7 @@ public class FreedController {
             initParams(dto);
             JSONResult<List<ResourceFreeDto>> result = statisticsFreeFeignClient.queryList(dto);
             if ("0".equals(result.getCode())) {
-                CustomerVisitDto[] dtos = result.getData().toArray(new CustomerVisitDto[0]);
+                ResourceFreeDto[] dtos = result.getData().isEmpty()?new ResourceFreeDto[]{}:result.getData().toArray(new ResourceFreeDto[0]);
                 String[] keys = {"name", "value"};
                 String[] hader = {"原因", "数量"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
