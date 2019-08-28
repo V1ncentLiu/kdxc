@@ -1,17 +1,20 @@
 package com.kuaidao.manageweb.controller.statistics.resourcesReport;
 
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.busCostomerVisit.BusCustomerVisitController;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceAllocation.StatisticsFreeFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitDto;
 import com.kuaidao.stastics.dto.resourceFree.ResourceFreeDto;
 import com.kuaidao.stastics.dto.resourceFree.ResourceFreeQueryDto;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
@@ -50,6 +53,9 @@ public class FreedController {
     private StatisticsFreeFeignClient statisticsFreeFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+
     /**
      * 资源释放页面
      * @param request
@@ -58,6 +64,9 @@ public class FreedController {
     @RequestMapping("/releasePie")
     public String freedView(HttpServletRequest request){
         initOrg(request);
+        // 查询字典资源类别集合
+        request.setAttribute("clueCategoryList",
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
        return "reportResources/releasePie";
     }
 
@@ -69,6 +78,7 @@ public class FreedController {
     @RequestMapping("/queryList")
     public @ResponseBody JSONResult<List<ResourceFreeDto>> queryList(@RequestBody ResourceFreeQueryDto dto){
         initParams(dto);
+
         return statisticsFreeFeignClient.queryList(dto);
     }
 
@@ -173,5 +183,21 @@ public class FreedController {
         }
 
     }
+
+
+
+    /**
+     * 查询字典表
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
+
 
 }
