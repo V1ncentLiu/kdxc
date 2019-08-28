@@ -20,6 +20,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ public class FreedController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:resourceFreed:view")
     @RequestMapping("/releasePie")
     public String freedView(HttpServletRequest request){
         initOrg(request);
@@ -75,14 +77,14 @@ public class FreedController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("statistics:resourceFreed:view")
     @RequestMapping("/queryList")
     public @ResponseBody JSONResult<List<ResourceFreeDto>> queryList(@RequestBody ResourceFreeQueryDto dto){
         initParams(dto);
-
         return statisticsFreeFeignClient.queryList(dto);
     }
 
-
+    @RequiresPermissions("statistics:resourceFreed:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody ResourceFreeQueryDto dto, HttpServletResponse response){
         try {
