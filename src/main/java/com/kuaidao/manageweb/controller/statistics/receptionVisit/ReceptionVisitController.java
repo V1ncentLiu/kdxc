@@ -6,6 +6,7 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -69,6 +70,14 @@ public class ReceptionVisitController {
      */
     @RequestMapping("/businessVisitReceptionTablePerson")
     public String businessVisitReceptionTablePerson(Long userId,Long orgId,Long startTime,Long endTime,HttpServletRequest request) {
+        if(null==orgId){
+            IdEntityLong idEntity=new IdEntityLong();
+            idEntity.setId(userId);
+            JSONResult<UserInfoDTO> result=userInfoFeignClient.get(idEntity);
+            if("0".equals(result.getCode()) && null!=result.getData()){
+                orgId=result.getData().getOrgId();
+            }
+        }
         pageParams(userId,orgId,startTime,endTime,request);
         initAuth(null,request);
         return "reportformsBusiness/businessVisitReceptionTablePerson";
