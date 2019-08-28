@@ -28,18 +28,28 @@
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="电销组:">  
-                  <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
-                      <el-option
-                          v-for="item in orgTeleArr"
-                          :key="item.id"
-                          :label="item.name"
-                          :value="item.id">
-                      </el-option>
-                  </el-select>
-              </el-form-item>
-              <el-form-item label="电销顾问:">  
-                  <el-select v-model="form.user_Id" placeholder="电销顾问" style="width: 100%;" filterable clearable :disabled="isDisabledUserId">
+                <el-form-item label="电销事业部：">  
+                    <el-select v-model="form.teleDeptId" placeholder="电销事业部" style="width: 100%;" clearable @change="curTelGroupSale" filterable :disabled="isDisabled">
+                        <el-option
+                            v-for="item in deptList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组：">  
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable @change="curTelSale" filterable :disabled="isDisabled">
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问：">  
+                  <el-select v-model="form.teleSaleId" placeholder="电销顾问" style="width: 100%;" filterable clearable :disabled="isDisabledUserId">
                       <el-option
                           v-for="item in busSaleArr"
                           :key="item.id"
@@ -47,14 +57,14 @@
                           :value="item.id">
                       </el-option>
                   </el-select>
-              </el-form-item>
-                <el-form-item label="资源类别:">  
-                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                </el-form-item>
+                <el-form-item label="资源类别：">
+                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
                         <el-option
-                            v-for="item in projectArr"
+                            v-for="item in clueCategoryList"
                             :key="item.id"
-                            :label="item.projectName"
-                            :value="item.id">
+                            :label="item.name"
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -79,11 +89,13 @@
 </body>
 <script th:src="@{/js/common/echarts.min.js?v=1.0.0}"></script>
 <script th:inline="javascript">
-    var orgIdList=[[${busGroupList}]];// 商务组
-    var projectList=[[${projectList}]];// 来访项目
-    var curOrgId = [[${curOrgId}]];
-    var curUserId = [[${curUserId}]];
-    console.log(curOrgId, curUserId);
+    var deptList=[[${deptList}]];// 事业部
+    var clueCategoryList=[[${clueCategoryList}]];// 资源类别
+    var curDeptId = [[${deptId}]]; // 当前用户事业部Id
+    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curUserId = [[${teleSaleId}]]; // 当前用户顾问Id
+
+    console.log(deptList,clueCategoryList,curOrgId, curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -99,21 +111,24 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessGroupId: '',
-                    businessManagerId: '',
-                    projectId: ''
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: '',
+                    category: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessGroupId: '',
-                    businessManagerId: '',
-                    projectId: ''
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: '',
+                    category: ''
                 },
                 tableData: [],
-                orgTeleArr: orgIdList, // 商务组
+                deptList: deptList, // 电销事业部
+                orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
-                projectArr: projectList, // 来访项目
+                clueCategoryList: clueCategoryList, // 资源类别
 
                 myChart: "",
                 legendData: ["及格人数", "未及格人数"],
@@ -182,17 +197,44 @@
                 }
                 this.getTelSale(seleVal);
             },
-            currentTelSale(seleVal){
+            curTelSale(seleVal){
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.form.businessManagerId = '';
+                this.form.teleSaleId = '';
                 this.getTelSale(seleVal);
+            },
+            firstCurTeGrouplSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getTelGroupSale(seleVal);
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.form.teleSaleId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=1;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             getTelSale(seleVal){
                 param={};
                 param.orgId=seleVal;
-                param.roleCode="SWJL";
+                param.roleCode="DXCYGW";
                 axios.post('/base/getSaleList' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
@@ -203,117 +245,125 @@
                 });
             },
             searchTable(firstPage) { 
-                var data01 = [
-                  { value: 22, name: "及格人数A", itemStyle: "#1ab394",percent: 22},
-                  { value: 28, name: "未及格人数B", itemStyle: "#79d2c0",percent: 28}
-                ];
-                this.seriesData = data01;
-                this.drawPie(this.seriesData);
-                this.myChart.showLoading(
-                  {color: '#C0DEFC'}
-                );
-                setTimeout(function(){
-                  var data02 = [
-                    { value: 11, name: "及格人数C", itemStyle: "#1ab394",percent: 111},
-                    { value: 22, name: "未及格人数D", itemStyle: "#79d2c0",percent: 222}
-                  ];
-                  mainDivVM.myChart.hideLoading();
-                  mainDivVM.seriesData = data02;
-                  mainDivVM.drawPie(mainDivVM.seriesData);
-                }, 4000)
-                // var startTime = this.form.startTime;
-                // var endTime = this.form.endTime;
-                // if(endTime && startTime){
-                //     startTime = new Date(this.form.startTime);
-                //     endTime = new Date(this.form.endTime);
-                //     if(startTime>endTime){
-                //         this.$message({
-                //             message: '开始时间不能大于结束时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     var date = new Date();
-                //     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                //     date.setMonth(date.getMonth()-6);
-                //     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                //     var currentDateRes = new Date(currentDate);
-                //     var beforeSixMonthRes = new Date(beforeSixMonth);
-                //     if(startTime < beforeSixMonthRes || endTime > currentDateRes){
-                //         this.$message({
-                //             message: '请选择近6个月内的时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     startTime = this.limitTime(startTime, null);
-                //     endTime = this.limitTime(null, endTime);
-                // }else{
-                //     this.$message({
-                //         message: '请选择起止时间',
-                //         type: 'warning'
-                //     });
-                //     return;
-                // }   
+                // var data01 = [
+                //   { value: 22, name: "及格人数A", itemStyle: "#1ab394",percent: 22},
+                //   { value: 28, name: "未及格人数B", itemStyle: "#79d2c0",percent: 28}
+                // ];
+                // this.seriesData = data01;
+                // this.drawPie(this.seriesData);
+                // this.myChart.showLoading(
+                //   {color: '#C0DEFC'}
+                // );
+                // setTimeout(function(){
+                //   var data02 = [
+                //     { value: 11, name: "及格人数C", itemStyle: "#1ab394",percent: 111},
+                //     { value: 22, name: "未及格人数D", itemStyle: "#79d2c0",percent: 222}
+                //   ];
+                //   mainDivVM.myChart.hideLoading();
+                //   mainDivVM.seriesData = data02;
+                //   mainDivVM.drawPie(mainDivVM.seriesData);
+                // }, 1000)
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
+                if(endTime && startTime){
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
+                    if(startTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-6);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
+                }else{
+                    this.$message({
+                        message: '请选择起止时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
     
-                // var param = {};
-                // param.startTime = this.minuteFormat(startTime);
-                // param.endTime = this.minuteFormat(endTime);
-                // param.pageSize = this.pager.pageSize;
+                var param = {};
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
+                param.pageSize = this.pager.pageSize;
     
-                // if(firstPage){
-                //     param.pageNum = firstPage;
-                // }else{
-                //     param.pageNum = this.pager.currentPage;
-                // }
-                // param.businessGroupId = this.form.businessGroupId;
-                // param.businessManagerId = this.form.businessManagerId;
-                // param.projectId = this.form.projectId;
+                if(firstPage){
+                    param.pageNum = firstPage;
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
+                param.category = this.form.category;
+                param.teleDeptId = this.form.teleDeptId;
+                param.teleGroupId = this.form.teleGroupId;
+                param.teleSaleId = this.form.teleSaleId;
 
                 // this.loading = true; 
-                // axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
-                //     if(!response || !response.data){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }
-                //     var resobj= response.data;
-                //     if(resobj.code != '0'){
-                //         mainDivVM.loading = false;
-                //         mainDivVM.$message({
-                //             message: resobj.msg,
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }else if(resobj.data && resobj.data.tableData){
-                //         var resobjData = resobj.data;    
-                //         var tableData = resobjData.tableData;
-                //         mainDivVM.tableData = tableData.data;
-                //         if( tableData.data.length && resobj.data.totalData ){
-                //             var totalData = resobjData.totalData[0];
-                //             mainDivVM.tableData.unshift(totalData);
-                //         }
-                //         mainDivVM.pager.currentPage = tableData.currentPage;
-                //         mainDivVM.pager.total = tableData.total;
-                //         mainDivVM.loading = false;
-                //         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                //         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                //         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
-                //         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
-                //         mainDivVM.export.projectId = mainDivVM.form.projectId;
+                this.myChart.showLoading({color: '#C0DEFC'});
+                axios.post('/resourceFreed/queryList',param).then(function (response) {
+                    if(!response || !response.data){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.myChart.hideLoading();
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        mainDivVM.myChart.hideLoading();
+                        return ;
+                    }else if(resobj.data && resobj.data.tableData){
+                        var resobjData = resobj.data;    
+                        var tableData = resobjData.tableData;
+                        mainDivVM.tableData = tableData.data;
+                        // mainDivVM.seriesData = tableData.data;
+                        mainDivVM.drawPie(mainDivVM.tableData);
+                        // if( tableData.data.length && resobj.data.totalData ){
+                        //     var totalData = resobjData.totalData[0];
+                        //     mainDivVM.tableData.unshift(totalData);
+                        // }
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.category = mainDivVM.form.category;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
+                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
+                        mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
         
-                //     }else{
-                //         mainDivVM.loading = false;
-                //     }
-                // }).catch(function (error) {
-                //     mainDivVM.loading = false;
-                //     mainDivVM.$message({
-                //         message: "请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                // });
+                    }else{
+                        // mainDivVM.loading = false;
+                        mainDivVM.myChart.hideLoading();
+                    }
+                }).catch(function (error) {
+                    // mainDivVM.loading = false;
+                    mainDivVM.myChart.hideLoading();
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
                 
             },
             limitTime (start, end) {
@@ -425,10 +475,11 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.projectId = this.export.projectId;
-                param.businessGroupId =  this.export.businessGroupId;
-                param.businessManagerId = this.export.businessManagerId;
-                axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
+                param.projectId = this.export.category;
+                param.businessGroupId =  this.export.teleDeptId;
+                param.businessManagerId = this.export.teleGroupId;
+                param.businessManagerId = this.export.teleSaleId;
+                axios.post('/resourceFreed/export',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
