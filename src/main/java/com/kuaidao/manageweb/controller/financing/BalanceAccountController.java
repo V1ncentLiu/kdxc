@@ -20,6 +20,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -288,7 +289,16 @@ public class BalanceAccountController {
             logger.error("export rule_report res{{}}", listNoPage);
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
+        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
+        // 设置宽度
+        sheet.setColumnWidth(1, 4000);
+        sheet.setColumnWidth(3, 5000);
+        sheet.setColumnWidth(5, 6000);
+        sheet.setColumnWidth(6, 4000);
+        sheet.setColumnWidth(7, 4000);
+        sheet.setColumnWidth(22, 8000);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
         String name = "对账结算申请" + DateUtil.convert2String(new Date(), DateUtil.ymdhms) + ".xlsx";
@@ -803,7 +813,7 @@ public class BalanceAccountController {
         if (date == null) {
             return "";
         }
-        return DateUtil.convert2String(date, DateUtil.ymdhms);
+        return DateUtil.convert2String(date, DateUtil.ymd);
     }
 
 }
