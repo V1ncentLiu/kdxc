@@ -37,6 +37,7 @@ var clientVm = new Vue({
         	 proxyurl:'',
         	 isUserStatus:1,
         	 userId:'',
+             isDxzj:false
          },
          options: [{
              value: 1,

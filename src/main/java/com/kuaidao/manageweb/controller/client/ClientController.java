@@ -1,6 +1,9 @@
 package com.kuaidao.manageweb.controller.client;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.*;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import java.util.ArrayList;
@@ -55,10 +58,6 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RedisConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.IdListReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -92,6 +91,9 @@ public class ClientController {
 
     @Autowired
     RedisTemplate redisTemplate;
+
+    @Autowired
+    UserInfoFeignClient userInfoFeignClient;
 
     /**
      *  跳转天润坐席页面
@@ -454,6 +456,19 @@ public class ClientController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setCreateUser(curLoginUser.getId());
+        Long userId = reqDTO.getUserId();
+        if(userId!=null){
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(userId);
+            JSONResult<UserInfoDTO> userInfoJr = userInfoFeignClient.get(idEntityLong);
+            if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())){
+                return new JSONResult<Boolean>().fail(userInfoJr.getCode(),userInfoJr.getMsg());
+            }
+            UserInfoDTO userInfo = userInfoJr.getData();
+            reqDTO.setOrgId(userInfo.getOrgId());
+
+        }
+
         return clientFeignClient.saveQimoClient(reqDTO);
     }
 
@@ -477,6 +492,19 @@ public class ClientController {
         if (id == null) {
             return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+
+        Long userId = reqDTO.getUserId();
+        if(userId!=null){
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(userId);
+            JSONResult<UserInfoDTO> userInfoJr = userInfoFeignClient.get(idEntityLong);
+            if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())){
+                return new JSONResult<Boolean>().fail(userInfoJr.getCode(),userInfoJr.getMsg());
+            }
+            UserInfoDTO userInfo = userInfoJr.getData();
+            reqDTO.setOrgId(userInfo.getOrgId());
+
         }
 
 
@@ -522,7 +550,17 @@ public class ClientController {
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return clientFeignClient.queryQimoClientById(idEntity);
+
+        JSONResult<QimoClientRespDTO> qimoClientRespDTOJSONResult = clientFeignClient.queryQimoClientById(idEntity);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = CommUtil.getRoleCode(curLoginUser);
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                if(JSONResult.SUCCESS.equals(qimoClientRespDTOJSONResult.getCode()) && qimoClientRespDTOJSONResult.getData()!=null){
+                    QimoClientRespDTO qimoClient = qimoClientRespDTOJSONResult.getData();
+                    qimoClient.setIsDxzj(true);
+                }
+        }
+        return qimoClientRespDTOJSONResult;
     }
 
 
@@ -713,32 +751,41 @@ public class ClientController {
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
         String loginName = reqDTO.getLoginName();
         String bindType = reqDTO.getBindType();
-        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long accountId = curLoginUser.getId();
+       //JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        TrAxbOutCallReqDTO trAxbOutCallReqDTO = new TrAxbOutCallReqDTO();
+        trAxbOutCallReqDTO.setLoginClient(loginName);
+        trAxbOutCallReqDTO.setAccountId(accountId);
+        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClient(trAxbOutCallReqDTO);
+       
         if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
             QimoClientRespDTO qimoClient = qimoClientJr.getData();
             if(qimoClient==null) {
-                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"登录坐席不存在或坐席未启用");
+                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该坐席号不属于您");
             }else {
                 Session session = SecurityUtils.getSubject().getSession();
                 session.setAttribute("loginName", loginName);
                 if("2".equals(bindType)) {
                     session.setAttribute("bindType", bindType);
                 }
-                UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+             
                 ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
                 clientLoginRecord.setAccountId(curLoginUser.getId());
                 clientLoginRecord.setAccountType(reqDTO.getAccountType());
                 clientLoginRecord.setOrgId(curLoginUser.getOrgId());
                 clientLoginRecord.setCno(qimoClient.getClientNo());
                 clientLoginRecord.setClientType(reqDTO.getClientType());
+                clientLoginRecord.setAccountNo(qimoClient.getAccountNo());
                 JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
                 if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
                     logger.error("qimo_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
+                    return  new JSONResult<>().fail(loginRecordJr.getCode(),loginRecordJr.getMsg());
                 }
                 return new JSONResult<>().success(true);
             }
         }else {
-            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",loginName,qimoClientJr);
+            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",trAxbOutCallReqDTO,qimoClientJr);
         }
         return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
     }

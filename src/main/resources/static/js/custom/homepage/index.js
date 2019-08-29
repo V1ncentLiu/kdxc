@@ -59,7 +59,7 @@ var homePageVM=new Vue({
 	    		clientType:1,
 	    		cno:'',
 	    		bindPhone:'',
-	    		bindPhoneType:1,
+	    		bindPhoneType:2,
 	    	    loginClient:''
 	    		
 	    	},
@@ -73,13 +73,14 @@ var homePageVM=new Vue({
                 value: 3,
                 label: '登录合力呼叫中心'
             }],
-            bindPhoneTypeOptions: [{
-                value: 1,
-                label: '普通电话'
-            }, {
-                value: 2,
-                label: '手机外显'
-            }],
+            bindPhoneTypeOptions: [
+            	{
+					value: 2,
+						label: '手机外显'
+				},{
+						value: 1,
+						label: '普通电话'
+		       }],
             trClientFormRules:{//登录坐席校验规则
             	clientType:[
                     { required: true, message: '选择呼叫中心不能为空'}
@@ -313,7 +314,7 @@ var homePageVM=new Vue({
 			 }
         	
         	this.loginClientForm.clientType=1;//设置默认选中天润坐席
-    		this.loginClientForm.bindPhoneType=1;
+    		this.loginClientForm.bindPhoneType=2;
     		this.loginClientForm.cno='';
     		this.loginClientForm.bindPhone='';
     		this.loginClientForm.loginClient='';
@@ -397,6 +398,11 @@ var homePageVM=new Vue({
         loginQimoClient(){//七陌登录
         	var loginClient = this.loginClientForm.loginClient;
         	var bindType = this.loginClientForm.bindPhoneType;
+
+			if(bindType==1){
+				this.$message({message:"七陌不支持普通电话模式登录！",type:'warning'});
+				return;
+			}
         	var param={};
         	param.bindType = bindType+"";
         	param.loginName = loginClient;
@@ -441,7 +447,7 @@ var homePageVM=new Vue({
                      
                  }else{
                 	 console.error(data);
-                     homePageVM.$message({message:data.msg,type:'error'});
+                     homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
                  }
              })
              .catch(function (error) {
@@ -697,7 +703,7 @@ var homePageVM=new Vue({
                  localStorage.removeItem("clientInfo");
                  
                  homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
-                 homePageVM.loginClientForm.bindPhoneType=1;
+                 homePageVM.loginClientForm.bindPhoneType=2;
                  homePageVM.loginClientForm.cno='';
                  homePageVM.loginClientForm.bindPhone='';
                  homePageVM.loginClientForm.loginClient='';
@@ -732,7 +738,7 @@ var homePageVM=new Vue({
                      homePageVM.$message({message:"退出成功",type:'success'});
                      
                      homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
-                     homePageVM.loginClientForm.bindPhoneType=1;
+                     homePageVM.loginClientForm.bindPhoneType=2;
                      homePageVM.loginClientForm.cno='';
                      homePageVM.loginClientForm.bindPhone='';
                      homePageVM.loginClientForm.loginClient='';

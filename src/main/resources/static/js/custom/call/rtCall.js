@@ -110,7 +110,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
              	  }
               }else{
             	   clearTimer();//清除定时器
-             		homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
+             		homePageVM.$message({message:"外呼失败【"+data.msg+"】",type:'error'});
               }
           })
           .catch(function (error) {
