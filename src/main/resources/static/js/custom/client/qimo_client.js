@@ -56,7 +56,7 @@ var clientVm = new Vue({
          rules:{
         	 loginClient:[
         		 { required: true, message: '登录坐席不能为空'},
-        		 {validator:function(rule,value,callback){
+        		/* {validator:function(rule,value,callback){
         			 var param = {loginClient:value}
         			 axios.post('/client/client/queryQimoClientByParam', param)
                      .then(function (response) {
@@ -84,7 +84,7 @@ var clientVm = new Vue({
                           console.log(error);
                      });
         			 
-        		 },trigger:'blur'}
+        		 },trigger:'blur'}*/
         		 
         	],
         	 accountNo:[
@@ -102,7 +102,7 @@ var clientVm = new Vue({
        	        	  }
         			 
         		 },trigger:'blur'},*/
-        		 {validator:function(rule,value,callback){
+   /*     		 {validator:function(rule,value,callback){
         		
         			  var param = {clientNo:value};
         			   axios.post('/client/client/queryQimoClientByParam', param)
@@ -131,7 +131,7 @@ var clientVm = new Vue({
                             console.log(error);
                        });
         			 
-        		 },trigger:'blur'}
+        		 },trigger:'blur'}*/
         	 ],
         	 phone1:[
         		 {validator:function(rule,value,callback){
