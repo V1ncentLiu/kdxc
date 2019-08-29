@@ -76,9 +76,8 @@
         <el-row>
           <el-col :span="24">
             <div class="grid-content bg-purple-dark">
-              <div id="pieReport" style="width: 830px;height: 400px;">
-                
-              </div>
+                <div class="empty-show" v-if="emptyShow" style="width: 900px;text-align: center;line-height: 150px;font-size: 16px;position: absolute;left:0;">暂无数据</div>
+                <div id="pieReport" style="width: 830px;height: 400px;"></div>
             </div>
           </el-col>
         </el-row>
@@ -94,8 +93,6 @@
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
     var curUserId = [[${teleSaleId}]]; // 当前用户顾问Id
-
-    console.log(deptList,curOrgId, curUserId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -133,10 +130,8 @@
 
                 myChart: "",
                 legendData: [],
-                seriesData: [
-                //   { value: 12, name: "及格人数", itemStyle: "#1ab394",percent: 12},
-                //   { value: 18, name: "未及格人数", itemStyle: "#79d2c0",percent: 18}
-                ]
+                seriesData: [],
+                emptyShow: false,
             }             
         },
         methods: {
@@ -290,7 +285,7 @@
                 param.teleGroupId = this.form.teleGroupId;
                 param.teleSaleId = this.form.teleSaleId;
 
-                // this.loading = true; 
+                this.emptyShow = false; 
                 this.myChart.showLoading({color: '#C0DEFC'});
                 axios.post('/resourceFreed/queryList',param).then(function (response) {
                     if(!response || !response.data){
@@ -298,6 +293,9 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.seriesData = [];
+                        mainDivVM.drawPie(mainDivVM.seriesData);
+                        mainDivVM.emptyShow = true;
                         mainDivVM.myChart.hideLoading();
                         return ;
                     }
@@ -307,19 +305,21 @@
                             message: resobj.msg,
                             type: 'error'
                         });
+                        mainDivVM.seriesData = [];
+                        mainDivVM.drawPie(mainDivVM.seriesData);
+                        mainDivVM.emptyShow = true;
                         mainDivVM.myChart.hideLoading();
                         return ;
-                    }else if(resobj.data.length){
+                    }else if(resobj.data){
                         var resobjData = resobj.data;
-                        mainDivVM.seriesData = resobjData;
-                        mainDivVM.drawPie(mainDivVM.seriesData);
-                        // if( tableData.data.length && resobj.data.totalData ){
-                        //     var totalData = resobjData.totalData[0];
-                        //     mainDivVM.tableData.unshift(totalData);
-                        // }
-                        // mainDivVM.pager.currentPage = tableData.currentPage;
-                        // mainDivVM.pager.total = tableData.total;
-                        // mainDivVM.loading = false;
+                        if(resobjData.length){
+                            mainDivVM.seriesData = resobjData;
+                            mainDivVM.drawPie(mainDivVM.seriesData);
+                        }else{
+                            mainDivVM.seriesData = [];
+                            mainDivVM.drawPie(mainDivVM.seriesData);
+                            mainDivVM.emptyShow = true;
+                        }
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.category = mainDivVM.form.category;
@@ -328,11 +328,15 @@
                         mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
                         mainDivVM.myChart.hideLoading();
                     }else{
-                        // mainDivVM.loading = false;
+                        mainDivVM.seriesData = [];
+                        mainDivVM.drawPie(mainDivVM.seriesData);
+                        mainDivVM.emptyShow = true;
                         mainDivVM.myChart.hideLoading();
                     }
                 }).catch(function (error) {
-                    // mainDivVM.loading = false;
+                    mainDivVM.seriesData = [];
+                    mainDivVM.drawPie(mainDivVM.seriesData);
+                    mainDivVM.emptyShow = true;
                     mainDivVM.myChart.hideLoading();
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
