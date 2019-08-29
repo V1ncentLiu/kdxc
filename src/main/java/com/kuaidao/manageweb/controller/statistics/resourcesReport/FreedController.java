@@ -124,16 +124,16 @@ public class FreedController {
             queryDTO.setParentId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setId(curLoginUser.getOrgId());
-            request.setAttribute("deptId",curLoginUser.getOrgId());
+            request.setAttribute("deptId",curLoginUser.getOrgId()+"");
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             IdEntity idEntity=new IdEntity();
             idEntity.setId(curLoginUser.getOrgId().toString());
             JSONResult<OrganizationDTO> jsonResult= organizationFeignClient.queryOrgById(idEntity);
             queryDTO.setId(jsonResult.getData().getParentId());
-            request.setAttribute("deptId",jsonResult.getData().getParentId());
-            request.setAttribute("teleGroupId",curLoginUser.getOrgId());
+            request.setAttribute("deptId",jsonResult.getData().getParentId()+"");
+            request.setAttribute("teleGroupId",curLoginUser.getOrgId()+"");
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
-                request.setAttribute("teleSaleId",curLoginUser.getId());
+                request.setAttribute("teleSaleId",curLoginUser.getId()+"");
             }
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
