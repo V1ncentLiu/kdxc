@@ -66,11 +66,11 @@
                 :data="tableData"
                 v-loading="loading"
                 :cell-style="centerStyle"
-                :header-cell-style="centerStyle">
-                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                :header-cell-style="centerStyle"
+                :span-method="arraySpanMethod">
+                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="projectName" label="项目"></el-table-column>
                 <el-table-column prop="owedDays" label="欠款天数"></el-table-column>
-                <el-table-column prop="userName" label="商务经理"></el-table-column>
                 <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
                 <el-table-column prop="noCreditAmount" label="未收齐尾款金额"></el-table-column>
             </el-table>
@@ -92,7 +92,7 @@
     var projectList = [[${projectList}]];
     var orgIdList=[[${saleGroupList}]];
     var curOrgId = [[${curOrgId}]];
-    var curUserId = [[${curUserId}]];     
+    var curUserId = [[${curUserId}]];   
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -121,11 +121,6 @@
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
                 projectArr: projectList, // 来访项目
-                pickerOptions0: {
-                  disabledDate(time) {
-                    return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
-                  }
-                },
             }             
         },
         methods: {    
@@ -136,7 +131,51 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.getTelSale(seleVal);
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="SWJL";
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    mainDivVM.busSaleArr=response.data.data;
+                    var flag = true;
+                    for(var i=0;i<mainDivVM.busSaleArr.length;i++){
+                        if(mainDivVM.form.userId == mainDivVM.busSaleArr[i].id){
+                            flag = true;
+                            break;
+                        }
+                        flag = false;
+                    }
+                    if(!flag){
+                        mainDivVM.getAssignmentPerson(mainDivVM.form.userId);
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getAssignmentPerson(userId){
+                param={};
+                param.userId=userId;
+                param.roleCode="SWJL";
+                axios.post('/statistics/receptionVisit/getUserInfo',param).then(function (response) {
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }else{
+                        var arr = response.data.data;
+                        mainDivVM.busSaleArr.push(arr);
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             currentTelSale(seleVal){
                 if(seleVal==null||seleVal==""){
@@ -192,8 +231,9 @@
                 }
                 param.orgId = this.form.orgId;
                 param.userId = this.form.userId;
+                param.projectId = this.form.projectId;
                 this.loading = true; 
-                axios.post('/statistics/unpaidFunds/getDirectorOnePageList',param).then(function (response) {
+                axios.post('/statistics/unpaidFunds/getManagerOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -223,7 +263,7 @@
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
                         mainDivVM.export.userId = mainDivVM.form.userId;
-        
+                        mainDivVM.export.projectId = mainDivVM.form.projectId;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -313,7 +353,7 @@
                 param.orgId = this.export.orgId;
                 param.userId = this.export.userId;
                 param.projectId = this.export.projectId;
-                axios.post('/statistics/unpaidFunds/exportDirectorOneList',param,{responseType:'blob'})
+                axios.post('/statistics/unpaidFunds/exportManagerOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;

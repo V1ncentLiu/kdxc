@@ -63,7 +63,7 @@
             <el-table
                 ref="tableData"
                 tooltip-effect="dark"
-                style="width: 800px"
+                style="width: 900px"
                 border
                 :data="tableData"
                 v-loading="loading"
@@ -73,8 +73,8 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="owedDays" label="欠款天数">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.userId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.userName}}</el-button>
-                        <span v-else>{{scope.row.userName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.userId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.owedDays}}</el-button>
+                        <span v-else>{{scope.row.owedDays}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
@@ -192,8 +192,9 @@
                 }
                 param.orgId = this.form.orgId;
                 param.userId = this.form.userId;
+                param.projectId = this.form.projectId;
                 this.loading = true; 
-                axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
+                axios.post('/statistics/unpaidFunds/getDirectorOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -223,6 +224,7 @@
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
                         mainDivVM.export.userId = mainDivVM.form.userId;
+                        mainDivVM.export.projectId = mainDivVM.form.projectId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -259,12 +261,14 @@
                 }
             },
             gotoTeam(row){
-                var userId = row.userId;
+                var userId = this.export.userId;
                 var orgId = this.export.orgId;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
-                if(userId){
-                    window.location.href="/customerVisit/signDetailList?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime; 
+                if(curUserId){
+                    window.location.href="/statistics/unpaidFunds/businessTotalArrearsTableTeamPerson?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime; 
+                }else{
+                    window.location.href="/statistics/unpaidFunds/businessTotalArrearsTableTeamPerson?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -300,7 +304,7 @@
                 param.projectId = this.export.projectId;
                 param.orgId =  this.export.orgId;
                 param.userId = this.export.userId;
-                axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
+                axios.post('/statistics/unpaidFunds/exportDirectorOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
