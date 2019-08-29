@@ -61,8 +61,8 @@ public class UnpaidFundsController {
      * 总监一级级页面跳转
      */
     @RequestMapping("/businessTotalArrearsTable")
-    public String businessVisitReceptionTable(Long userId,Long orgId,Long endTime,Long projectId,HttpServletRequest request) {
-        pageParams(userId,orgId,endTime,projectId,request);
+    public String businessVisitReceptionTable(Long userId,Long orgId,Long endTime,Long projectId,Integer days,HttpServletRequest request) {
+        pageParams(userId,orgId,endTime,projectId,days,request);
         initAuth(null,request);
         return "reportformsBusiness/businessTotalArrearsTable";
     }
@@ -70,8 +70,8 @@ public class UnpaidFundsController {
      * 总监二级页面跳转
      */
     @RequestMapping("/businessTotalArrearsTableTeam")
-    public String businessVisitReceptionTablePerson(Long userId,Long orgId,Long endTime,Long projectId,HttpServletRequest request) {
-        pageParams(userId,orgId,endTime,projectId,request);
+    public String businessVisitReceptionTablePerson(Long userId,Long orgId,Long endTime,Long projectId,Integer days,HttpServletRequest request) {
+        pageParams(userId,orgId,endTime,projectId,days,request);
         initAuth(null,request);
         return "reportformsBusiness/businessTotalArrearsTableTeam";
     }
@@ -203,12 +203,13 @@ public class UnpaidFundsController {
     /**
      *  返回页面携带参数
      */
-    private void pageParams(Long userId,Long orgId,Long endTime,Long projectId,HttpServletRequest request){
+    private void pageParams(Long userId,Long orgId,Long endTime,Long projectId,Integer days,HttpServletRequest request){
         UnpaidFundsQueryDto unpaidFundsQueryDto = new UnpaidFundsQueryDto();
         unpaidFundsQueryDto.setOrgId(orgId);
         unpaidFundsQueryDto.setEndTime(endTime);
         unpaidFundsQueryDto.setUserId(userId);
         unpaidFundsQueryDto.setProjectId(projectId);
+        unpaidFundsQueryDto.setDays(days);
         request.setAttribute("unpaidFundsQueryDto",unpaidFundsQueryDto);
     }
 
