@@ -776,6 +776,7 @@ public class ClientController {
                 clientLoginRecord.setOrgId(curLoginUser.getOrgId());
                 clientLoginRecord.setCno(qimoClient.getClientNo());
                 clientLoginRecord.setClientType(reqDTO.getClientType());
+                clientLoginRecord.setAccountNo(qimoClient.getAccountNo());
                 JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
                 if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
                     logger.error("qimo_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
