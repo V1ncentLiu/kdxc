@@ -276,6 +276,15 @@ public class ReceptionVisitController {
         return listByOrgAndRole;
     }
 
+    @PostMapping("/getUserInfo")
+    @ResponseBody
+    public JSONResult<UserInfoDTO> getUserInfo(@RequestBody ReceptionVisitQueryDto receptionVisitQueryDto){
+        IdEntityLong idEntity=new IdEntityLong();
+        idEntity.setId(receptionVisitQueryDto.getUserId());
+        JSONResult<UserInfoDTO> userInfoDTOJSONResult = userInfoFeignClient.get(idEntity);
+        return userInfoDTOJSONResult;
+    }
+
     /**
      * 初始化权限
      */

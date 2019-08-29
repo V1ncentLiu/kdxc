@@ -11,12 +11,9 @@
         <el-breadcrumb-item>累计未收齐款统计</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <!-- <el-button type="primary" @click="searchYesterday">昨天</el-button>
-        <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button> -->
-        <shiro:hasPermission name="statistics:telemarketingFollow:export">
+        <!-- <shiro:hasPermission name="statistics:businessTotalArrearsTable:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        </shiro:hasPermission>
+        <!-- </shiro:hasPermission> -->
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
@@ -36,7 +33,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -46,7 +43,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务经理:">  
-                    <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
+                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
@@ -71,11 +68,11 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="firstVisit" label="项目"></el-table-column>
-                <el-table-column prop="firstVisit" label="欠款天数"></el-table-column>
-                <el-table-column prop="firstVisit" label="商务经理"></el-table-column>
-                <el-table-column prop="firstVisit" label="未收齐尾款笔数"></el-table-column>
-                <el-table-column prop="firstVisit" label="未收齐尾款金额"></el-table-column>
+                <el-table-column prop="projectName" label="项目"></el-table-column>
+                <el-table-column prop="owedDays" label="欠款天数"></el-table-column>
+                <el-table-column prop="userName" label="商务经理"></el-table-column>
+                <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
+                <el-table-column prop="noCreditAmount" label="未收齐尾款金额"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
@@ -91,9 +88,11 @@
     }
 </style>
 <script th:inline="javascript">
-    var orgIdList=[[${saleGroupList}]];//电销组
-    var clientRankIdList=[[${cusLevelListArray}]];//客户级别
-    var trackingQuery=[[${trackingQueryDto}]];//参数list    
+    var parentParam=[[${unpaidFundsQueryDto}]];
+    var projectList = [[${projectList}]];
+    var orgIdList=[[${saleGroupList}]];
+    var curOrgId = [[${curOrgId}]];
+    var curUserId = [[${curUserId}]];   
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -107,17 +106,15 @@
                     pageSize: 3,
                 },
                 form: {
-                    // startTime:'',
                     endTime:'',
-                    businessGroupId: '',
-                    businessManagerId: '',
+                    orgId: '',
+                    userId: '',
                     projectId: ''
                 },
                 export: {
-                    // startTime:'',
                     endTime:'',
-                    businessGroupId: '',
-                    businessManagerId: '',
+                    orgId: '',
+                    userId: '',
                     projectId: ''
                 },
                 tableData: [],
@@ -139,13 +136,57 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.getTelSale(seleVal);
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="SWJL";
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    mainDivVM.busSaleArr=response.data.data;
+                    var flag = true;
+                    for(var i=0;i<mainDivVM.busSaleArr.length;i++){
+                        if(mainDivVM.form.userId == mainDivVM.busSaleArr[i].id){
+                            flag = true;
+                            break;
+                        }
+                        flag = false;
+                    }
+                    if(!flag){
+                        mainDivVM.getAssignmentPerson(mainDivVM.form.userId);
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getAssignmentPerson(userId){
+                param={};
+                param.userId=userId;
+                param.roleCode="SWJL";
+                axios.post('/statistics/receptionVisit/getUserInfo',param).then(function (response) {
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }else{
+                        var arr = response.data.data;
+                        mainDivVM.busSaleArr.push(arr);
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             currentTelSale(seleVal){
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.form.businessManagerId = '';
+                this.form.userId = '';
                 this.getTelSale(seleVal);
             },
             getTelSale(seleVal){
@@ -162,43 +203,29 @@
                 });
             },
             searchTable(firstPage) { 
-                var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
+                if(endTime){
                     endTime = new Date(this.form.endTime);
-                    if(startTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                    var currentDateRes = new Date(currentDate);
-                    var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
-                        this.$message({
-                            message: '请选择近6个月内的时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    startTime = this.limitTime(startTime, null);
+                    // var date = new Date();
+                    // var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    // var currentDateRes = new Date(currentDate);
+                    // if(endTime > currentDateRes){
+                    //     this.$message({
+                    //         message: '不能超过当天时间',
+                    //         type: 'warning'
+                    //     });
+                    //     return;
+                    // }
                     endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
-                        message: '请选择起止时间',
+                        message: '请选择截止时间',
                         type: 'warning'
                     });
                     return;
                 }   
     
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
     
@@ -207,10 +234,10 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.businessGroupId = this.form.businessGroupId;
-                param.businessManagerId = this.form.businessManagerId;
+                param.orgId = this.form.orgId;
+                param.userId = this.form.userId;
                 this.loading = true; 
-                axios.post('/customerVisitSign/queryPageByManagerId',param).then(function (response) {
+                axios.post('/statistics/unpaidFunds/getDirectorOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -237,10 +264,9 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
-                        mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.userId = mainDivVM.form.userId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -324,51 +350,14 @@
                 var oHour = d.slice(8,10);
                 var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            }, 
-            searchYesterday(){ // 昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
-            },
-            searchWeek(){ // 近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable(1);
-            },
-            searchMonth(){ // 本月 
-                var a = new Date();
-                var year = a.getFullYear();
-                var month = a.getMonth();
-                var date = a.getDate();
-                var b = new Date(year,month,date);
-                var f= new Date(year,month,01);
-                var c = f.valueOf();
-                var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable(1);
             },
             exportRs(){
                 var param = {};
-                param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
+                param.orgId = this.export.orgId;
+                param.userId = this.export.userId;
                 param.projectId = this.export.projectId;
-                param.businessGroupId =  this.export.businessGroupId;
-                param.businessManagerId = this.export.businessManagerId;
-                axios.post('/customerVisitSign/exportExcelByManagerId',param,{responseType:'blob'})
+                axios.post('/statistics/unpaidFunds/exportDirectorOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -384,42 +373,36 @@
         },
         created(){ 
             var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curOrgId){ // 有角色
                 this.isDisabled = true;
-                this.form.businessGroupId = curOrgId;
+                this.form.orgId = curOrgId;
                 if(curUserId){
                     this.isDisabledUserId = true;
-                    this.form.businessManagerId = curUserId;
+                    this.form.userId = curUserId;
                 }else{
-                    this.form.businessManagerId = parentParam&&parentParam.businessManagerId?parentParam.businessManagerId:'';
+                    this.form.userId = parentParam&&parentParam.userId?parentParam.userId:'';
                 }
             }else{
-                this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
-                this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
+                this.form.orgId = parentParam&&parentParam.orgId ? parentParam.orgId:'';
+                this.form.userId = parentParam&&parentParam.userId ? parentParam.userId:'';
             }
-            if(parentParam && parentParam.startTime){
-                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
+            if(parentParam && parentParam.endTime){
                 this.form.endTime = this.dateTimeFormat(parentParam.endTime);
-
-                this.export.startTime = parentParam.startTime;
                 this.export.endTime = parentParam.endTime;
             }else{
-                this.form.startTime = startTime;
                 this.form.endTime = endTime;
-                this.export.startTime = this.minuteFormat(this.form.startTime);
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
             this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
-            this.export.businessGroupId = this.form.businessGroupId;
-            this.export.businessManagerId = this.form.businessManagerId; 
+            this.export.orgId = this.form.orgId;
+            this.export.userId = this.form.userId; 
             this.export.projectId = this.form.projectId; 
             
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.firstCurTelSale(this.export.businessGroupId); 
+            this.firstCurTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){
