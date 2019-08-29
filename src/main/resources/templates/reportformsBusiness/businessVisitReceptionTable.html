@@ -131,7 +131,43 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.getTelSale(seleVal);
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="SWJL";
+                axios.post('/statistics/receptionVisit/getSaleList' ,param).then(function (response) {
+                    mainDivVM.busSaleArr=response.data.data;
+                    // mainDivVM.busSaleArr.forEach(element => {
+                    //     if(curUserId != element.id){
+
+                    //     }
+                    // });
+                    for(var i=0;i<mainDivVM.busSaleArr.length;i++){
+                        if(curUserId !== mainDivVM.busSaleArr[i].id){
+                            // 执行
+                            mainDivVM.getAssignmentPerson(curUserId);
+                        }
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getAssignmentPerson(userId){
+                param={};
+                param.userId=userId;
+                param.roleCode="SWJL";
+                axios.post('/statistics/receptionVisit/getSaleList' ,param).then(function (response) {
+                    console.log(response.data.data);
+                    var arr = response.data.data[0];
+                    mainDivVM.busSaleArr.push(arr);
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             currentTelSale(seleVal){
                 if(seleVal==null||seleVal==""){
