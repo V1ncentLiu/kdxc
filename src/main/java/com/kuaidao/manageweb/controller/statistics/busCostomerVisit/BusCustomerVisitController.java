@@ -273,7 +273,8 @@ public class BusCustomerVisitController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //商务经理访问，则组查询条件设置为null，可以查询外访数据（外访数据在其他组）
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
-            customerVisitQueryDto.setBusinessManagerId(null);
+            customerVisitQueryDto.setBusinessGroupIds(null);
+            customerVisitQueryDto.setBusinessGroupId(null);
         }
     }
 
