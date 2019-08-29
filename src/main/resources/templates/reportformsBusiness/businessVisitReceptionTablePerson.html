@@ -143,7 +143,51 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.getTelSale(seleVal);
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="SWJL";
+                axios.post('/statistics/receptionVisit/getSaleList' ,param).then(function (response) {
+                    mainDivVM.busSaleArr=response.data.data;
+                    var flag = true;
+                    for(var i=0;i<mainDivVM.busSaleArr.length;i++){
+                        if(mainDivVM.form.userId == mainDivVM.busSaleArr[i].id){
+                            flag = true;
+                            break;
+                        }
+                        flag = false;
+                    }
+                    if(!flag){
+                        mainDivVM.getAssignmentPerson(mainDivVM.form.userId);
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getAssignmentPerson(userId){
+                param={};
+                param.userId=userId;
+                param.roleCode="SWJL";
+                axios.post('/statistics/receptionVisit/getUserInfo',param).then(function (response) {
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }else{
+                        var arr = response.data.data;
+                        mainDivVM.busSaleArr.push(arr);
+                    }
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             currentTelSale(seleVal){
                 if(seleVal==null||seleVal==""){
@@ -399,7 +443,7 @@
                     this.form.userId = parentParam.userId ?parentParam.userId:'';
                 }
             }else{
-                this.form.orgId = parentParam.orgId ? parentParam.orgId:''; 
+                this.form.orgId = parentParam.orgId ? parentParam.orgId:'';
                 this.form.userId = parentParam.userId ? parentParam.userId:'';
             }
             if(parentParam && parentParam.startTime){
@@ -419,8 +463,7 @@
             
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-
-            this.firstCurTelSale(this.export.orgId); 
+            this.firstCurTelSale(this.export.orgId);
             this.searchTable();
         },
         mounted(){
