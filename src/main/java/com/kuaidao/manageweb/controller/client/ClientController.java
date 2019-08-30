@@ -382,12 +382,12 @@ public class ClientController {
                  // 坐席号
                     rowDto.setClientNo(value);
                 }else if (j == 1) {
+                    //号码所属公司
+                    rowDto.setNumberAttributionCompany(value);
+                }else if (j == 2) {
                     //坐席归属地
                     rowDto.setAttribution(value);
-                } else if (j == 2) {
-                     //号码所属公司
-                    rowDto.setNumberAttributionCompany(value);
-                } else if (j == 3) {
+                }  else if (j == 3) {
                     // 电销组
                     rowDto.setOrgName(value);
                 } else if (j == 4) {
