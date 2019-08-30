@@ -165,7 +165,7 @@ public class FreedController {
                 dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
             }else {
                 OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-                //总监理查看下属所有事业部
+                //总经理查看下属所有事业部
                 queryDTO.setOrgType(OrgTypeConstant.DZSYB);
                 queryDTO.setParentId(curLoginUser.getOrgId());
                 JSONResult<List<OrganizationRespDTO>> result =
@@ -194,7 +194,7 @@ public class FreedController {
 
 
     /**
-     * 查询字典表
+     * 资源类别-查询字典表
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
         JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
