@@ -29,9 +29,9 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in projectArr"
+                            v-for="item in deptList"
                             :key="item.id"
                             :label="item.projectName"
                             :value="item.id">
@@ -39,7 +39,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组：">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -87,12 +87,12 @@
                 <el-table-column prop="invitationNum" label="首次分配资源数"></el-table-column>
                 <el-table-column prop="cancelInvitationNum" label="首访数"></el-table-column>
                 <el-table-column prop="deleteInvitationNum" label="签约数"></el-table-column>
-                <el-table-column prop="cancelInvitationFrequency" label="资源来访率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="deleteInvitationFrequency" label="签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="cancelInvitationFrequency" label="资源来访率"></el-table-column>
+                <el-table-column prop="deleteInvitationFrequency" label="签约率"></el-table-column>
                 <el-table-column prop="cancelInvitationFrequency" label="业绩金额"></el-table-column>
                 <el-table-column prop="deleteInvitationFrequency" label="签约单笔"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -103,10 +103,10 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var orgIdList=[[${busGroupList}]];// 商务组
-    var projectList=[[${projectList}]];// 来访项目
-    var curOrgId = [[${curOrgId}]];
-    console.log(curOrgId);
+    var deptList=[[${deptList}]];// 事业部
+    var clueCategoryList=[[${clueCategoryList}]];// 资源类别
+    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
+    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -122,29 +122,41 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessGroupId: '',
-                    projectId: '',
+                    deptId: '',
+                    teleGroupId: '',
                     category:'',
                     searchText: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessGroupId: '',
-                    projectId: '',
+                    deptId: '',
+                    teleGroupId: '',
                     category:'',
                     searchText: ''
                 },
                 tableData: [],
-                orgTeleArr: orgIdList, // 商务组
-                busSaleArr: '', // 商务经理
-                projectArr: projectList, // 来访项目
-                clueCategoryList: []
+                deptList: deptList,// 电销事业部
+                orgTeleArr: '', // 电销组
+                clueCategoryList: clueCategoryList
             }             
         },
         methods: {    
             centerStyle(){
                 return "text-align:center"
+            },
+            getTelGroupSale(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=1;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
@@ -264,13 +276,13 @@
                 }
             },
             gotoTeam(row){
-                var businessGroupId = row.businessGroupId;
+                var teleGroupId = row.teleGroupId;
+                var deptId = this.export.deptId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                var projectId = this.export.projectId;
-                var category = this.export.category;
+                var searchText = this.export.searchText;
                 if(businessGroupId){
-                    window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&category="+ category+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&deptId="+ deptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&searchText=" +searchText; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -285,11 +297,10 @@
             indexFun (index) { // 表格序号
                 return index;
             },
-            //百分比格式话
-            percentFormat(row, column) {
+            percentFormat(row, column) {//百分比格式化
                 var percent = row[column.property];
                 if (!percent) { // 如果没有值或值为0
-                    return percent + "%";
+                    return "0%";
                 }
                 percent = (percent * 1000) / 10 + "%";
                 return percent;
@@ -357,9 +368,9 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.projectId = this.export.projectId;
-                param.businessGroupId =  this.export.businessGroupId;
-                param.category = this.export.category;
+                param.deptId =  this.export.deptId;
+                param.teleGroupId = this.export.teleGroupId;
+                param.searchText = this.export.searchText;
                 axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
@@ -380,10 +391,17 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-            if(curOrgId){
+            if(curDeptId){
                 this.isDisabled = true;
-                this.form.businessGroupId = curOrgId;
-                this.export.businessGroupId = this.form.businessGroupId; 
+                this.form.deptId = curDeptId;
+                this.export.deptId = this.form.deptId;
+                // this.
+                if(curOrgId){
+                    this.isDisabled = true;
+                    this.form.teleGroupId = curOrgId;
+                    this.export.teleGroupId = this.form.curOrgId;
+            
+                }
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);

@@ -29,11 +29,11 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @click="curTelGroupSale">
                         <el-option
-                            v-for="item in projectArr"
+                            v-for="item in deptList"
                             :key="item.id"
-                            :label="item.projectName"
+                            :label="item.name"
                             :value="item.id">
                         </el-option>
                     </el-select>
@@ -90,19 +90,19 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="projectName" label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.projectId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.projectId!='99999'">{{scope.row.projectName}}</el-button>
                         <span v-else>{{scope.row.projectName}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="invitationNum" label="首次分配资源数"></el-table-column>
                 <el-table-column prop="cancelInvitationNum" label="首访数"></el-table-column>
                 <el-table-column prop="deleteInvitationNum" label="签约数"></el-table-column>
-                <el-table-column prop="cancelInvitationFrequency" label="资源来访率" :formatter="percentFormat"></el-table-column>
-                <el-table-column prop="deleteInvitationFrequency" label="签约率" :formatter="percentFormat"></el-table-column>
+                <el-table-column prop="cancelInvitationFrequency" label="资源来访率"></el-table-column>
+                <el-table-column prop="deleteInvitationFrequency" label="签约率"></el-table-column>
                 <el-table-column prop="cancelInvitationFrequency" label="业绩金额"></el-table-column>
                 <el-table-column prop="deleteInvitationFrequency" label="签约单笔"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -113,10 +113,11 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var orgIdList=[[${busGroupList}]];// 商务组
-    var projectList=[[${projectList}]];// 来访项目
-    var curOrgId = [[${curOrgId}]];
-    console.log(curOrgId);
+    var deptList=[[${deptList}]];// 事业部
+    var clueCategoryList=[[${clueCategoryList}]];// 资源类别
+    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
+    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curUserId = [[${teleSaleId}]]; // 当前用户顾问Id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -132,26 +133,26 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: '',
-                    projectId: '',
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: '',
                     category:'',
                     searchText: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId: '',
-                    userId: '',
-                    projectId: '',
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: '',
                     category:'',
                     searchText: ''
                 },
                 tableData: [],
-                orgTeleArr: orgIdList, // 商务组
-                busSaleArr: '', // 商务经理
-                projectArr: projectList, // 来访项目
-                clueCategoryList: []
+                deptList: deptList,// 电销事业部
+                orgTeleArr: orgIdList, // 电销组
+                busSaleArr: '', // 电销顾问
+                clueCategoryList: clueCategoryList, // 资源类别
             }             
         },
         methods: {    
@@ -275,16 +276,6 @@
                     return end;
                 }
             },
-            gotoTeam(row){
-                var businessGroupId = row.businessGroupId;
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                var projectId = this.export.projectId;
-                var category = this.export.category;
-                if(businessGroupId){
-                    window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&category="+ category+ "&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
-                }
-            },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
                     if (columnIndex === 0) {
@@ -297,11 +288,10 @@
             indexFun (index) { // 表格序号
                 return index;
             },
-            //百分比格式话
-            percentFormat(row, column) {
+            percentFormat(row, column) {//百分比格式化
                 var percent = row[column.property];
                 if (!percent) { // 如果没有值或值为0
-                    return percent + "%";
+                    return "0%";
                 }
                 percent = (percent * 1000) / 10 + "%";
                 return percent;
@@ -369,9 +359,9 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.projectId = this.export.projectId;
-                param.businessGroupId =  this.export.businessGroupId;
-                param.category = this.export.category;
+                param.deptId =  this.export.deptId;
+                param.teleGroupId = this.export.teleGroupId;
+                param.searchText = this.export.searchText;
                 axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
