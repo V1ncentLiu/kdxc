@@ -146,51 +146,7 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="SWJL";
-                axios.post('/base/getSaleList' ,param).then(function (response) {
-                    mainDivVM.busSaleArr=response.data.data;
-                    var flag = true;
-                    for(var i=0;i<mainDivVM.busSaleArr.length;i++){
-                        if(mainDivVM.form.userId && mainDivVM.form.userId == mainDivVM.busSaleArr[i].id){
-                            flag = true;
-                            break;
-                        }
-                        flag = false;
-                    }
-                    if(!flag){
-                        mainDivVM.getAssignmentPerson(mainDivVM.form.userId);
-                    }
-                }).catch(function (error) {
-                     mainDivVM.$message({
-                        message: "商务经理请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
-            getAssignmentPerson(userId){
-                param={};
-                param.userId=userId;
-                param.roleCode="SWJL";
-                axios.post('/statistics/receptionVisit/getUserInfo',param).then(function (response) {
-                    var resobj= response.data;
-                    if(resobj.code != '0'){
-                        mainDivVM.$message({
-                            message: resobj.msg,
-                            type: 'error'
-                        });
-                        return ;
-                    }else{
-                        var arr = response.data.data;
-                        mainDivVM.busSaleArr.push(arr);
-                    }
-                }).catch(function (error) {
-                     mainDivVM.$message({
-                        message: "商务经理请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
+                this.getTelSale(seleVal);
             },
             currentTelSale(seleVal){
                 if(seleVal==null||seleVal==""){
