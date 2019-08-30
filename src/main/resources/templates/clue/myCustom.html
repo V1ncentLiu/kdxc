@@ -388,7 +388,7 @@
             </el-row>
             <el-row>
                 <el-form-item label="重单员工：" :label-width="formLabelWidth" prop="employee">
-                    <el-select filterable v-model="repeatApplyForm.employee" placeholder="所有电销" style="width: 60%;">
+                    <el-select filterable v-model="repeatApplyForm.employee" @change="repeatApplyChangeTwo" placeholder="所有电销" style="width: 60%;">
                         <el-option
                             v-for="item in telePerArr"
                             :key="item.id"
@@ -1091,6 +1091,11 @@
       }
     },
     methods: {
+        repeatApplyChangeTwo(){
+            this.repeatApplyForm.repeatClue = "";
+            this.repeatApplyForm.repeatPhone="";
+            this.repeatCurClueArr=[];
+        },
       gettelNumberIcon(tel,clueId) {
         //外呼手机
         var param = {};
@@ -1679,6 +1684,8 @@
         var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
         if(localVal){this.pager.pageSize = localVal;}
       }
+      //是否已签约 -默认查未签约的
+        this.form.isSign = 0;
       //初始化数据列表
       this.initTableData();
       //客户状态
