@@ -316,12 +316,4 @@ public class BusCustomerVisitController {
     }
 
 
-    public static void main(String[] args) {
-        String name = "签约来访表{0}{1}{2}-{3}.xlsx";
-
-        Long time=System.currentTimeMillis()/1000/3600;
-        System.out.println(time);
-        System.out.println(time*3600l);
-//        System.out.println(MessageFormat.format(name,"","","20121717","20180808"));
-    }
 }
