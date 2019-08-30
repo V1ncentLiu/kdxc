@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "statstics-service3", path = "/statstics/resourceFree", fallback = StatisticsFreeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/resourceFree", fallback = StatisticsFreeFeignClient.HystrixClientFallback.class)
 public interface StatisticsFreeFeignClient {
 
     /**
