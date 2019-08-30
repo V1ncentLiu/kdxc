@@ -254,7 +254,7 @@ public class ExtendClueDistributionedTaskController {
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
     @LogRecord(description = "导出资源情况", operationType = OperationType.EXPORT,
-        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findClues")
     public void findClues(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -343,6 +343,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getMessagePoint()); // 留言内容
                 curList.add(taskDTO.getSearchWord()); // 搜索词
                 curList.add(taskDTO.getOperationName()); // 资源专员
+                curList.add(taskDTO.getSourcetwo()); // 所属组
                 curList.add(taskDTO.getIndustryCategoryName()); // 行业类别
                 curList.add(taskDTO.getRemark()); // 备注
                 curList.add(taskDTO.getTeleDirectorName()); // 电销组总监
@@ -367,6 +368,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getFirstAsssignTrafficGroupName());
                 // 首次分配电销组
                 curList.add(taskDTO.getFirstAsssignTeleGroupName());
+                // 首次分配电销总监
+                curList.add(taskDTO.getFirstAsssignTeleDirectorName());
                 dataList.add(curList);
             }
         }
@@ -384,10 +387,11 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
+     * 
      * @TODOif判断修改
      */
     @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT,
-        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findCommunicateRecords")
     public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
@@ -446,11 +450,11 @@ public class ExtendClueDistributionedTaskController {
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
-        //查询资源沟通情况集合
+        // 查询资源沟通情况集合
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
                 extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        //获取资源导出情况Excel表头
+        // 获取资源导出情况Excel表头
         dataList.add(getCommunicateRecordsHeadTitleList());
 
 
@@ -476,9 +480,9 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getPhone());
                 // 手机号2
                 curList.add(taskDTO.getPhone2());
-                //QQ
+                // QQ
                 curList.add(taskDTO.getQq());
-                //微信
+                // 微信
                 curList.add(taskDTO.getWechat());
                 // 搜索词
                 curList.add(taskDTO.getSearchWord());
@@ -521,8 +525,12 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getThreeCommunicateTime());
                 // 第三次沟通内容
                 curList.add(taskDTO.getThreeCommunicateContent());
-                //留言时间
+                // 留言时间
                 curList.add(taskDTO.getMessageTime());
+                // 资源专员
+                curList.add(taskDTO.getOperationName());
+                // 所属组
+                curList.add(taskDTO.getSourcetwo());
                 dataList.add(curList);
             }
         }
@@ -539,6 +547,7 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
+     * 
      * @return
      */
     private List<Object> getCommunicateRecordsHeadTitleList() {
@@ -565,6 +574,8 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("第三次沟通时间");
         headTitleList.add("第三次沟通内容");
         headTitleList.add("留言时间");
+        headTitleList.add("资源专员");
+        headTitleList.add("所属组");
         return headTitleList;
     }
 
@@ -594,6 +605,7 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("留言内容");
         headTitleList.add("搜索词");
         headTitleList.add("资源专员");
+        headTitleList.add("所属组");
         headTitleList.add("行业类别");
         headTitleList.add("备注");
         headTitleList.add("电销组总监");
@@ -602,6 +614,7 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("是否自建");
         headTitleList.add("首次分配话务组");
         headTitleList.add("首次分配电销组");
+        headTitleList.add("首次分配电销组总监");
         return headTitleList;
     }
 
@@ -630,16 +643,17 @@ public class ExtendClueDistributionedTaskController {
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()) {
             userList = userZxzjList.getData();
         }
-        //查询管理员放入user集合
-      List<UserInfoDTO> userAdminList = new ArrayList<UserInfoDTO>();
-      UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
-      userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
-      JSONResult<List<UserInfoDTO>> userAdminJson = userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
-      if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
-        userAdminList = userAdminJson.getData();
-      }
-      userList.addAll(userAdminList);
-      return userList;
+        // 查询管理员放入user集合
+        List<UserInfoDTO> userAdminList = new ArrayList<UserInfoDTO>();
+        UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
+        userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
+        JSONResult<List<UserInfoDTO>> userAdminJson =
+                userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
+        if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
+            userAdminList = userAdminJson.getData();
+        }
+        userList.addAll(userAdminList);
+        return userList;
 
     }
 
