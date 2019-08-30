@@ -89,10 +89,12 @@ public class FreedController {
      * @param dto
      * @param response
      */
+    //jia 日志
     @RequiresPermissions("statistics:resourceFreed:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody ResourceFreeQueryDto dto, HttpServletResponse response){
         try {
+            // 参数打印。。。。
             initParams(dto);
             JSONResult<List<ResourceFreeDto>> result = statisticsFreeFeignClient.queryList(dto);
             if ("0".equals(result.getCode())) {
@@ -123,7 +125,7 @@ public class FreedController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
 
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        //根据不同角色-查询电销事业部
+        //查询电销事业部
         queryDTO.setOrgType(OrgTypeConstant.DZSYB);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
@@ -165,7 +167,7 @@ public class FreedController {
                 dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
             }else {
                 OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-                //总经理查看下属所有事业部
+                //总监理查看下属所有事业部
                 queryDTO.setOrgType(OrgTypeConstant.DZSYB);
                 queryDTO.setParentId(curLoginUser.getOrgId());
                 JSONResult<List<OrganizationRespDTO>> result =
@@ -194,7 +196,7 @@ public class FreedController {
 
 
     /**
-     * 资源类别-查询字典表
+     * 查询字典表
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
         JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
