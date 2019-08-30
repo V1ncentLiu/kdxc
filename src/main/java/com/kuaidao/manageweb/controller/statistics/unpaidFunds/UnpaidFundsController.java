@@ -315,13 +315,12 @@ public class UnpaidFundsController {
         List<Object> curList = new ArrayList<>();
         curList.add("");
         if(type.equals(DIRECTOR_TWO)){
-            curList.add("");
-            curList.add("");
+            curList.add("合计");
         }
         if(type.equals(MANAGER_ONE)){
             curList.add("");
         }
-        curList.add("合计");
+        curList.add("");
         curList.add(ra.getNoCreditNum());
         curList.add(ra.getNoCreditAmount());
         dataList.add(curList);
