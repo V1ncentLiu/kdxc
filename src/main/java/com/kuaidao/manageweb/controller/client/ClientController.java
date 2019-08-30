@@ -621,10 +621,10 @@ public class ClientController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
                     SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        if (excelDataList.size() > 1000) {
-            logger.error("上传七陌坐席,大于1000条，条数{{}}", excelDataList.size());
+        if (excelDataList.size() > 5000) {
+            logger.error("上传七陌坐席,大于5000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
-                    "导入数据过多，已超过1000条！");
+                    "导入数据过多，已超过5000条！");
         }
 
         // 存放合法的数据
