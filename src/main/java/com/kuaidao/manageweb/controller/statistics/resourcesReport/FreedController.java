@@ -84,6 +84,11 @@ public class FreedController {
         return statisticsFreeFeignClient.queryList(dto);
     }
 
+    /**
+     * 根据搜索条件查询并导出数据
+     * @param dto
+     * @param response
+     */
     @RequiresPermissions("statistics:resourceFreed:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody ResourceFreeQueryDto dto, HttpServletResponse response){
