@@ -93,6 +93,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 @RequestMapping("/tele/clueMyCustomerInfo")
 public class MyCustomerClueController {
     private static Logger logger = LoggerFactory.getLogger(MyCustomerClueController.class);
+    private static final Integer IS_NOT_SIGN_NO = -1;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -815,7 +816,7 @@ public class MyCustomerClueController {
         }
         //查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
         ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(IS_NOT_SIGN_NO);
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
