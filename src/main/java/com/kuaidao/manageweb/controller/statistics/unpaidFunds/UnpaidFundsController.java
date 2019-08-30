@@ -75,6 +75,15 @@ public class UnpaidFundsController {
         initAuth(null,request);
         return "reportformsBusiness/businessTotalArrearsTableTeam";
     }
+    /**
+     * 商务经理跳转
+     */
+    @RequestMapping("/businessTotalArrearsTableTeamPerson")
+    public String businessTotalArrearsTableTeamPerson(Long userId,Long orgId,Long endTime,Long projectId,String days,HttpServletRequest request) {
+        pageParams(userId,orgId,endTime,projectId,days,request);
+        initAuth(null,request);
+        return "reportformsBusiness/businessTotalArrearsTableTeamPerson";
+    }
 
     /**
      * 商务总监一级页面查询 分页
