@@ -508,7 +508,7 @@ var clientVm = new Vue({
                             }
                              
                          }else{
-                        	 clientVm.$message({message:'系统错误',type:'error'});
+                        	 clientVm.$message({message:'系统错误:'+data.msg,type:'error'});
                          	 console.error(data);
                          }
                      
@@ -516,7 +516,7 @@ var clientVm = new Vue({
                      .catch(function (error) {
                           console.log(error);
                      }).then(function(){
-                    	 clientVm.initClientData
+                    	 clientVm.initClientData();
                      });
               	   
                 	 
