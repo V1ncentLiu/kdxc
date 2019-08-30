@@ -178,6 +178,10 @@ public class ExtendClueDistributionedTaskController {
             return new JSONResult<PageBean<ClueDistributionedTaskDTO>>()
                     .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
@@ -310,6 +314,10 @@ public class ExtendClueDistributionedTaskController {
             }
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
+        }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
@@ -447,6 +455,10 @@ public class ExtendClueDistributionedTaskController {
             }
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
+        }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());

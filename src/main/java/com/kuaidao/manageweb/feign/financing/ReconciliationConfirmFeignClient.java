@@ -1,20 +1,20 @@
 package com.kuaidao.manageweb.feign.financing;
 
 import java.math.BigDecimal;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 对账结算确认
@@ -35,6 +35,16 @@ public interface ReconciliationConfirmFeignClient {
      */
     @PostMapping("/list")
     public JSONResult<PageBean<ReconciliationConfirmDTO>> list(
+            @RequestBody ReconciliationConfirmPageParam param);
+
+    /**
+     * 对账结算确认列表
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/listNoPage")
+    public JSONResult<List<ReconciliationConfirmDTO>> listNoPage(
             @RequestBody ReconciliationConfirmPageParam param);
 
 
@@ -68,6 +78,16 @@ public interface ReconciliationConfirmFeignClient {
             @RequestBody ReconciliationConfirmPageParam param);
 
     /**
+     * 对账结算申请列表
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/applyListNoPage")
+    public JSONResult<List<ReconciliationConfirmDTO>> applyListNoPage(
+            @RequestBody ReconciliationConfirmPageParam param);
+
+    /**
      * 驳回
      * 
      * @param idEntity
@@ -75,16 +95,19 @@ public interface ReconciliationConfirmFeignClient {
      */
     @PostMapping("/rejectApply")
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req);
+
     /**
-     *根据对账申请表id获取已对账的佣金之和
+     * 根据对账申请表id获取已对账的佣金之和
+     * 
      * @author: Fanjd
-     * @param signId  签约单id
+     * @param signId 签约单id
      * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
      * @Date: 2019/6/14 18:25
      * @since: 1.0.0
      **/
     @PostMapping("/getConfirmCommission")
     JSONResult<BigDecimal> getConfirmCommission(@RequestParam("signId") Long signId);
+
     /**
      * 对账、申请
      * 
@@ -121,6 +144,12 @@ public interface ReconciliationConfirmFeignClient {
         }
 
         @Override
+        public JSONResult<List<ReconciliationConfirmDTO>> listNoPage(
+                ReconciliationConfirmPageParam param) {
+            return fallBackError("对账结算确认列表");
+        }
+
+        @Override
         public JSONResult<BigDecimal> sumCommissionMoney(ReconciliationConfirmPageParam param) {
             return fallBackError("已结算佣金总计");
         }
@@ -129,6 +158,12 @@ public interface ReconciliationConfirmFeignClient {
 
         @Override
         public JSONResult<PageBean<ReconciliationConfirmDTO>> applyList(
+                ReconciliationConfirmPageParam param) {
+            return fallBackError("对账申请列表");
+        }
+
+        @Override
+        public JSONResult<List<ReconciliationConfirmDTO>> applyListNoPage(
                 ReconciliationConfirmPageParam param) {
             return fallBackError("对账申请列表");
         }
@@ -148,9 +183,9 @@ public interface ReconciliationConfirmFeignClient {
 
 
         @Override
-		public JSONResult<Void> applyConfirm(ReconciliationConfirmReq req) {
-			 return fallBackError("对账申请");
-		}
+        public JSONResult<Void> applyConfirm(ReconciliationConfirmReq req) {
+            return fallBackError("对账申请");
+        }
 
 
 

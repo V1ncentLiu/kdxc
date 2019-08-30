@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -812,8 +813,11 @@ public class MyCustomerClueController {
         if (result.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("isInviteLetter", result.getData());
         }
+        //查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }

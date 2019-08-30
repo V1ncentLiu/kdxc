@@ -81,6 +81,16 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="资源类别:" class="formItem"  prop="category">
+                        <el-select v-model="appiontmentSearchForm.category" clearable placeholder="资源类别" filterable>
+                            <el-option
+                                v-for="item in categoryOptions"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="客户手机号:" class="formItem" prop="cusPhone">
                         <el-input v-model="appiontmentSearchForm.cusPhone" placeholder="请输入客户手机号" class="input-with-select"></el-input>
                     </el-form-item>
@@ -475,6 +485,7 @@
         teleDeptId: '',
         teleGorupId:ownOrgId,
         teleSaleId: '',
+        category: '',
         projectId: '',
         cusName: '',
         cusPhone:'',
@@ -527,6 +538,7 @@
       teleGorupOptions:orgList,
       teleSaleOptions:userList,
       projectOptions:projectList,
+      categoryOptions:clueCategoryList,
       areaOptions:[],
       busCompayOptions:[],
       busDirectorOptions:[],
@@ -617,6 +629,7 @@
         param.wechat = this.appiontmentSearchForm.wechat;
         param.isSign = this.appiontmentSearchForm.isSign;
         param.isTailMoney = this.appiontmentSearchForm.isTailMoney;
+        param.category = this.appiontmentSearchForm.category;
         console.info(param);
         axios.post('/clue/appiontment/list', param)
         .then(function (response) {

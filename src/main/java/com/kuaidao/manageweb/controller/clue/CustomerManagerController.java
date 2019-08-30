@@ -145,7 +145,7 @@ public class CustomerManagerController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
-
+        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         return "clue/customManagement";
     }
 
