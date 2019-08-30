@@ -389,7 +389,7 @@ public class BusCustomerManagerController {
         JSONResult<List<BusVisitPerDTO>> listJSONResult = busCustomerFeignClient
             .exportVisitPer(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        dataList.add(getHeadTitleList());
+        dataList.add(getHeadVisitPerTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
             && listJSONResult.getData().size() != 0) {
             List<BusVisitPerDTO> orderList = listJSONResult.getData();
@@ -411,10 +411,12 @@ public class BusCustomerManagerController {
                 curList.add(visitPerDTO.getAmountBalance());
                 curList.add(visitPerDTO.getMakeUpTime());
                 curList.add(visitPerDTO.getIsRemote());
+                curList.add(visitPerDTO.getArrVisitCity());
                 curList.add(visitPerDTO.getCompany());
                 curList.add(visitPerDTO.getBusManagerName());
                 curList.add(visitPerDTO.getRemark());
                 curList.add(visitPerDTO.getTeleGroupName());
+                curList.add(visitPerDTO.getTeleGroupProjectName());
                 curList.add(visitPerDTO.getTeleSaleName());
                 curList.add(visitPerDTO.getTeleDirectorName()); // 负责人
                 curList.add(visitPerDTO.getTakeOverNum());
@@ -442,7 +444,7 @@ public class BusCustomerManagerController {
      * 导出到访业绩
      * @return
      */
-    private List<Object> getHeadTitleList() {
+    private List<Object> getHeadVisitPerTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("来访日期");
         headTitleList.add("客户姓名");
@@ -459,10 +461,12 @@ public class BusCustomerManagerController {
         headTitleList.add("未收金额");
         headTitleList.add("预计补款日期");
         headTitleList.add("是否远程");
+        headTitleList.add("到访城市");
         headTitleList.add("所属公司");
         headTitleList.add("洽谈人员");
         headTitleList.add("备注（未签约原因内容）");
         headTitleList.add("电销部门");
+        headTitleList.add("部门项目");
         headTitleList.add("创业顾问");
         headTitleList.add("负责人");
         headTitleList.add("洽谈数量");

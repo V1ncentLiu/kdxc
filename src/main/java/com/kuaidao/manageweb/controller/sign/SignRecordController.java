@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.github.pagehelper.util.StringUtil;
 import com.kuaidao.common.constant.*;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.manageweb.constant.Constants;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,19 +226,6 @@ public class SignRecordController {
         Long businessGroupId = reqDTO.getBusinessGroupId();
         List<Long> businessGroupIdList = new ArrayList<>();
         if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
-            /*Long businessManagerId = reqDTO.getBusinessManagerId();
-            if (businessManagerId != null) {
-                List<Long> businessManagerIdList = new ArrayList<>();
-                businessManagerIdList.add(businessManagerId);
-                reqDTO.setBusinessManagerIdList(businessManagerIdList);
-            } else {
-                List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
-                if (CollectionUtils.isEmpty(accountIdList)) {
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                            "该用户下没有下属");
-                }
-                reqDTO.setBusinessManagerIdList(accountIdList);
-            }*/
             //商务经理外调，发起外调的商务总监进行审核,根据组id查询
             if (businessGroupId != null) {
                 businessGroupIdList.add(businessGroupId);
@@ -269,11 +258,9 @@ public class SignRecordController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
 
-        /*
-         * List<Long> accountIdList = new ArrayList<>(); accountIdList.add(1084621842175623168L);
-         * reqDTO.setBusinessManagerIdList(accountIdList);
-         */
-
+        if(StringUtils.isEmpty(reqDTO.getQueryType())) {
+            reqDTO.setStatus(1); //  待审核
+        }
 
         logger.info("listSignRecord{{}}", reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);
