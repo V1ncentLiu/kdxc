@@ -21,10 +21,10 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
-                <el-form-item label="统计截止日期:">
+                <el-form-item label="统计截止日期：">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="餐饮项目:">  
+                <el-form-item label="餐饮项目：">  
                     <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in projectArr"
@@ -34,7 +34,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务组:">  
+                <el-form-item label="商务组：">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -44,7 +44,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务经理:">  
+                <el-form-item label="商务经理：">  
                     <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in busSaleArr"
@@ -53,6 +53,10 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
+                </el-form-item>
+                <el-form-item label="大于等于：">
+                    <el-input @keyup.native="number" maxlength="3" v-model="form.days" placeholder="输入查询天数" class="input-with-select"></el-input>
+					<span>&nbsp;天</span> 
                 </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
@@ -73,8 +77,8 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="owedDays" label="欠款天数">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.userId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.owedDays}}</el-button>
-                        <span v-else>{{scope.row.owedDays}}</span>
+                        <span v-if="scope.row.owedDays!='99999'" @click="gotoTeam(scope.row)">{{scope.row.owedDays}}</span>
+                        <el-button type="text" size="small" v-else>{{scope.row.owedDays}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
@@ -114,13 +118,15 @@
                     endTime:'',
                     orgId: '',
                     userId: '',
-                    projectId: ''
+                    projectId: '',
+                    days: ''
                 },
                 export: {
                     endTime:'',
                     orgId: '',
                     userId: '',
-                    projectId: ''
+                    projectId: '',
+                    days: ''
                 },
                 tableData: [],
                 orgTeleArr: orgIdList, // 商务组
@@ -129,6 +135,10 @@
             }             
         },
         methods: {    
+            number(){
+        　　　 	 this.form.days=this.form.days.replace(/[^\.\d]/g,'');
+                this.form.days=this.form.days.replace('.','');
+        　　},
             centerStyle(){
                 return "text-align:center"
             },  
