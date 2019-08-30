@@ -77,8 +77,8 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="owedDays" label="欠款天数">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.owedDays!='合计'" @click="gotoTeam(scope.row)">{{scope.row.owedDays}}</span>
-                        <el-button type="text" size="small" v-else>{{scope.row.owedDays}}</el-button>
+                        <span v-if="scope.row.owedDays!='合计'">{{scope.row.owedDays}}</span>
+                        <el-button type="text" size="small" v-else  @click="gotoTeam(scope.row)">{{scope.row.owedDays}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
@@ -99,7 +99,6 @@
 </style>
 <script th:inline="javascript">
     var projectList = [[${projectList}]];
-    console.log(projectList)
     var orgIdList=[[${saleGroupList}]];
     var curOrgId = [[${curOrgId}]];
     var curUserId = [[${curUserId}]];
@@ -277,10 +276,11 @@
                 var orgId = this.export.orgId;
                 var endTime = this.export.endTime;
                 var projectId = this.export.projectId;
+                var days = this.export.days;
                 if(curUserId){
-                    window.location.href="/statistics/unpaidFunds/businessTotalArrearsTableTeamPerson?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime; 
+                    window.location.href="/statistics/unpaidFunds/businessTotalArrearsTableTeamPerson?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime + '&days=' + days; 
                 }else{
-                    window.location.href="/statistics/unpaidFunds/businessTotalArrearsTableTeamPerson?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime;
+                    window.location.href="/statistics/unpaidFunds/businessTotalArrearsTableTeamPerson?orgId=" + orgId + "&userId="+ userId+ "&projectId="+ projectId + "&endTime=" + endTime + '&days=' + days; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
