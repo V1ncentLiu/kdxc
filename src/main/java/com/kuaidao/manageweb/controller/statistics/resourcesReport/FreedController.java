@@ -118,7 +118,7 @@ public class FreedController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
 
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        //查询电销事业部
+        //根据不同角色-查询电销事业部
         queryDTO.setOrgType(OrgTypeConstant.DZSYB);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
