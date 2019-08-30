@@ -53,7 +53,7 @@ public class UnpaidFundsController {
 
     private static final Integer DIRECTOR_ONE = 1;
     private static final Integer DIRECTOR_TWO = 2;
-    private static final Integer MANAGER_ONE = 2;
+    private static final Integer MANAGER_ONE = 3;
 
 
 
@@ -110,11 +110,7 @@ public class UnpaidFundsController {
         //合计
         UnpaidFundsDto sumReadd = JSON.parseObject(totalDataStr, UnpaidFundsDto.class);
         //添加合计头
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
-        if(!RoleCodeEnum.SWJL.name().equals(roleCode)){
-            addTotalExportData(sumReadd,dataList,DIRECTOR_ONE);
-        }
+        addTotalExportData(sumReadd,dataList,DIRECTOR_ONE);
         buildList(dataList,orderList,DIRECTOR_ONE);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "累计未收齐款项统计" +unpaidFundsQueryDto.getEndTime() + ".xlsx";
@@ -152,11 +148,7 @@ public class UnpaidFundsController {
         //合计
         UnpaidFundsDto sumReadd = JSON.parseObject(totalDataStr, UnpaidFundsDto.class);
         //添加合计头
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
-        if(!RoleCodeEnum.SWJL.name().equals(roleCode)){
-            addTotalExportData(sumReadd,dataList,DIRECTOR_TWO);
-        }
+        addTotalExportData(sumReadd,dataList,DIRECTOR_TWO);
         buildList(dataList,orderList,DIRECTOR_TWO);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "累计未收齐款项统计" +unpaidFundsQueryDto.getEndTime() + ".xlsx";
@@ -193,11 +185,7 @@ public class UnpaidFundsController {
         //合计
         UnpaidFundsDto sumReadd = JSON.parseObject(totalDataStr, UnpaidFundsDto.class);
         //添加合计头
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
-        if(!RoleCodeEnum.SWJL.name().equals(roleCode)){
-            addTotalExportData(sumReadd,dataList,MANAGER_ONE);
-        }
+        addTotalExportData(sumReadd,dataList,MANAGER_ONE);
         buildList(dataList,orderList,MANAGER_ONE);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "累计未收齐款项统计" +unpaidFundsQueryDto.getEndTime() + ".xlsx";
@@ -315,12 +303,13 @@ public class UnpaidFundsController {
         List<Object> curList = new ArrayList<>();
         curList.add("");
         if(type.equals(DIRECTOR_TWO)){
-            curList.add("合计");
+            curList.add("");
+            curList.add("");
         }
         if(type.equals(MANAGER_ONE)){
             curList.add("");
         }
-        curList.add("");
+        curList.add(ra.getOwedDays());
         curList.add(ra.getNoCreditNum());
         curList.add(ra.getNoCreditAmount());
         dataList.add(curList);
