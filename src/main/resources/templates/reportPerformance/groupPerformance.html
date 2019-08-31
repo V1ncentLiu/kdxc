@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="getTelGroupSale">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -78,19 +78,19 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="projectName" label="电销组">
+                <el-table-column prop="orgName" label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.projectId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
-                        <span v-else>{{scope.row.projectName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.orgId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
+                        <span v-else>{{scope.row.orgName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="invitationNum" label="首次分配资源数"></el-table-column>
-                <el-table-column prop="cancelInvitationNum" label="首访数"></el-table-column>
-                <el-table-column prop="deleteInvitationNum" label="签约数"></el-table-column>
-                <el-table-column prop="cancelInvitationFrequency" label="资源来访率"></el-table-column>
-                <el-table-column prop="deleteInvitationFrequency" label="签约率"></el-table-column>
-                <el-table-column prop="cancelInvitationFrequency" label="业绩金额"></el-table-column>
-                <el-table-column prop="deleteInvitationFrequency" label="签约单笔"></el-table-column>
+                <el-table-column prop="firstAllocationNum" label="首次分配资源数"></el-table-column>
+                <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
+                <el-table-column prop="signNum" label="签约数"></el-table-column>
+                <el-table-column prop="resocrceVisitRate" label="资源来访率"></el-table-column>
+                <el-table-column prop="signRate" label="签约率"></el-table-column>
+                <el-table-column prop="performanceMoney" label="业绩金额"></el-table-column>
+                <el-table-column prop="signVisitNum" label="签约单笔"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
         </el-row>
@@ -113,7 +113,7 @@
             return {
                 loading: false,
                 isDisabled: false,
-                isDisabledUserId: false,
+                isDisabledOrgId: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -135,7 +135,21 @@
                     category:'',
                     searchText: ''
                 },
-                tableData: [],
+                tableData: [
+                    {
+                        teleGroupId: 1,
+                        orgId: "1",
+                        orgName: '电销组1',
+                        userName: '电销顾问1',
+                        firstAllocationNum: 10,
+                        firstVisitNum: 10,
+                        signNum: 10,
+                        resocrceVisitRate: 1,
+                        signRate: 10,
+                        performanceMoney: 1000,
+                        signVisitNum: 155799,
+                    },
+                ],
                 deptList: deptList,// 电销事业部
                 orgTeleArr: '', // 电销组
                 clueCategoryList: clueCategoryList
@@ -146,6 +160,7 @@
                 return "text-align:center"
             },
             getTelGroupSale(seleVal){
+                if(!seleVal){return;}
                 param={};
                 param.parentId=seleVal;
                 param.orgType=1;
@@ -204,9 +219,10 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.businessGroupId = this.form.businessGroupId;
+                param.deptId = this.form.deptId;
+                param.teleGroupId = this.form.teleGroupId;
                 param.category = this.form.category;
-                param.projectId = this.form.projectId;
+                param.searchText = this.form.searchText;
                 // this.loading = true; 
                 // axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
                 //     if(!response || !response.data){
@@ -237,9 +253,10 @@
                 //         mainDivVM.loading = false;
                 //         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                 //         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                //         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
+                //         mainDivVM.export.deptId = mainDivVM.form.deptId;
+                //         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                 //         mainDivVM.export.category = mainDivVM.form.category;
-                //         mainDivVM.export.projectId = mainDivVM.form.projectId;
+                //         mainDivVM.export.searchText = mainDivVM.form.searchText;
         
                 //     }else{
                 //         mainDivVM.loading = false;
@@ -282,7 +299,7 @@
                 var endTime = this.export.endTime;
                 var searchText = this.export.searchText;
                 if(businessGroupId){
-                    window.location.href="localhost:8180/performance/managerList?businessGroupId=" +businessGroupId + "&deptId="+ deptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&searchText=" +searchText; 
+                    window.location.href="localhost:8180/performance/managerList?&deptId="+ deptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&searchText=" +searchText; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -370,6 +387,7 @@
                 param.endTime = this.export.endTime;
                 param.deptId =  this.export.deptId;
                 param.teleGroupId = this.export.teleGroupId;
+                param.category = this.export.category;
                 param.searchText = this.export.searchText;
                 axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
                 .then(function (response) {
@@ -395,12 +413,11 @@
                 this.isDisabled = true;
                 this.form.deptId = curDeptId;
                 this.export.deptId = this.form.deptId;
-                // this.
+                this.getTelGroupSale(curDeptId);
                 if(curOrgId){
-                    this.isDisabled = true;
+                    this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
                     this.export.teleGroupId = this.form.curOrgId;
-            
                 }
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
