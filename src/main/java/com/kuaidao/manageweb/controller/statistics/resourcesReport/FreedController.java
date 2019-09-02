@@ -186,6 +186,9 @@ public class FreedController {
             dto.setTeleSaleId(curLoginUser.getId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
+            if(null!=dto.getTeleDeptId()){
+                dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
+            }
         }else{
             //other
             dto.setTeleSaleId(curLoginUser.getId());
