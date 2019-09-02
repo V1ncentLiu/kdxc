@@ -30,7 +30,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="getTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -40,7 +40,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="getSaleList" :disabled="isDisabledOrgId">
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="curTelSale" :disabled="isDisabledOrgId">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -87,6 +87,10 @@
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="days" :formatter="dateFormat" label="日期">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.days!='99999'">{{scope.row.days|dateFormatFilter}}</span>
+                        <span v-else>合计</span>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="allocationResorceNum" label="不跟进释放公共资源数"></el-table-column>
                 <el-table-column prop="noVisitRate" label="其他释放公共资源数"></el-table-column>
@@ -111,9 +115,10 @@
 <script th:inline="javascript">
     var parentParam=[[${receptionVisitQueryDto}]];
     var deptList=[[${deptList}]];// 事业部
-    var clueCategoryList=[[${clueCategoryList}]];// 分配来源
+    var clueCategoryList=[[${clueCategoryList}]];// 资源类别
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curUserId = [[${teleSaleId}]]; // 当前用户顾问Id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -145,7 +150,7 @@
                 },
                 tableData: [
                     {
-                        days: 20190101,
+                        days: 99999,
                         orgId: 99999,
                         userId: 99999,
                         userName: '合计',
@@ -180,8 +185,8 @@
                     }
                 ],
                 deptList: deptList, // 电销事业部
-                orgTeleArr: orgIdList, // 商务组
-                busSaleArr: '', // 商务经理
+                orgTeleArr: '', // 电销组
+                busSaleArr: '', // 电销顾问
                 clueCategoryList: clueCategoryList
             }             
         },
@@ -522,7 +527,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.searchTable();
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

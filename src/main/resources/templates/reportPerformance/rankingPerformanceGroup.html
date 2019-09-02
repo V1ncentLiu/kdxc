@@ -126,6 +126,7 @@
     var deptList=[[${deptList}]];// 事业部
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${curOrgId}]];
+    var rolecode="DXZJ";//DXZJL,DXFZ,  DXZJ,DXCYGW
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -134,7 +135,7 @@
                 loading: false,
                 // isDisabled: false,
                 // isDisabledUserId: false,
-                isShowDept: '1',
+                isShowDept: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -429,6 +430,11 @@
             }
         },
         created(){
+            if(rolecode=='DXZJL'|| rolecode=='DXFZ'){
+                this.isShowDept = true;
+            }else{
+                this.isShowDept = false;
+            }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // this.searchTable();

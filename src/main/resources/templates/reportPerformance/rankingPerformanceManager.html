@@ -132,11 +132,12 @@
     // var curOrgId=[[${curOrgId}]];
 
 
-    var curUserId='';
     var areaList='';// 地区
     var deptList='';// 事业部
     var curDeptId=''; // 当前用户事业部Id
     var curOrgId='';
+    var curUserId=1;
+    var rolecode="DXZJ";//DXZJL,DXFZ,  DXZJ,DXCYGW
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -145,8 +146,8 @@
                 loading: false,
                 // isDisabled: false,
                 // isDisabledUserId: false,
-                isShowDept: '1',
-                isShowOrgId: '1',
+                isShowDept: false,
+                isShowOrgId: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -468,6 +469,16 @@
             }
         },
 	created(){
+        if(rolecode=='DXZJL'|| rolecode=='DXFZ'){
+            this.isShowDept = true;
+            this.isShowOrgId = true;
+        }else if(rolecode=='DXZJ'){
+            this.isShowDept = false;
+            this.isShowOrgId = true;
+        }else{
+            this.isShowDept = false;
+            this.isShowOrgId = false;
+        }
         var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
         if(localVal){this.pager.pageSize = localVal;}
 		// this.searchTable();

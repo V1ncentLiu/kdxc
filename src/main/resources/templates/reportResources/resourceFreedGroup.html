@@ -30,7 +30,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="getTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -40,7 +40,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="getSaleList" :disabled="isDisabledOrgId">
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="curTelSale" :disabled="isDisabledOrgId">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -88,7 +88,7 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="userName" label="电销顾问">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.userId!='99999'" @click="gotoPerson(scope.row)">{{scope.row.userName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.teleSaleId!='99999'" @click="gotoPerson(scope.row)">{{scope.row.userName}}</el-button>
                         <span v-else>{{scope.row.userName}}</span>
                     </template>
                 </el-table-column>
@@ -115,9 +115,10 @@
 <script th:inline="javascript">
     var parentParam=[[${receptionVisitQueryDto}]];
     var deptList=[[${deptList}]];// 事业部
-    var clueCategoryList=[[${clueCategoryList}]];// 分配来源
+    var clueCategoryList=[[${clueCategoryList}]];// 资源类别
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curUserId = [[${teleSaleId}]]; // 当前用户顾问Id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -151,7 +152,7 @@
                 tableData: [
                     {
                         orgId: 99999,
-                        userId: 99999,
+                        teleSaleId: 99999,
                         userName: '合计',
                         orgName: '合计',
                         allocationResorceNum: 1,
@@ -167,7 +168,7 @@
                     },
                     {
                         orgId: 1,
-                        userId: 1,
+                        teleSaleId: 1,
                         userName: '电销顾问1',
                         orgName: '电销组名1',
                         allocationResorceNum: 1,
@@ -183,8 +184,8 @@
                     }
                 ],
                 deptList: deptList, // 电销事业部
-                orgTeleArr: orgIdList, // 商务组
-                busSaleArr: '', // 商务经理
+                orgTeleArr: '', // 电销组
+                busSaleArr: '', // 电销顾问
                 clueCategoryList: clueCategoryList
             }             
         },
@@ -385,7 +386,7 @@
                 var endTime = this.export.endTime;
                 var category = this.export.category;
                 if(teleSaleId){
-                    window.location.href="localhost:8180/freedReport/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime;
+                    window.location.href="/freedReport/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -537,7 +538,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.searchTable();
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

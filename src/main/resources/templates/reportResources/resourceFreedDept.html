@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="getTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -77,7 +77,7 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="orgName" label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.orgId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
                         <span v-else>{{scope.row.orgName}}</span>
                     </template>
                 </el-table-column>
@@ -135,7 +135,7 @@
                 },
                 tableData: [
                     {
-                        orgId: 99999,
+                        teleGroupId: 99999,
                         orgName: '合计',
                         allocationResorceNum: 1,
                         noVisitRate: 1,
@@ -149,7 +149,7 @@
                         twentyFourOutVisitRate: 1,
                     },
                     {
-                        orgId: 1,
+                        teleGroupId: 1,
                         orgName: '电销组名1',
                         allocationResorceNum: 1,
                         noVisitRate: 1,
@@ -164,8 +164,8 @@
                     }
                 ],
                 deptList: deptList, // 电销事业部
-                orgTeleArr: orgIdList, // 商务组
-                busSaleArr: '', // 商务经理
+                orgTeleArr: '', // 电销组
+                busSaleArr: '', // 电销顾问
                 clueCategoryList: clueCategoryList
             }             
         },
@@ -350,7 +350,7 @@
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(teleGroupId){
-                    window.location.href="localhost:8180/freedReport/groupList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/freedReport/groupList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -460,7 +460,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.searchTable();
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
