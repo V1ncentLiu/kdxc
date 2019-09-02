@@ -381,19 +381,22 @@ public class ClientController {
                 if (j == 0) {
                  // 坐席号
                     rowDto.setClientNo(value);
-                } else if (j == 1) {
-                 //坐席归属地
+                }else if (j == 1) {
+                    //号码所属公司
+                    rowDto.setNumberAttributionCompany(value);
+                }else if (j == 2) {
+                    //坐席归属地
                     rowDto.setAttribution(value);
-                } else if (j == 2) {
+                }  else if (j == 3) {
                     // 电销组
                     rowDto.setOrgName(value);
-                } else if (j == 3) {
+                } else if (j == 4) {
                     // 绑定电话
                     rowDto.setBindPhone(value);
-                } else if (j == 4) {
+                } else if (j == 5) {
                     // 回显号
                     rowDto.setDisplayPhone(value);
-                } else if (j == 5) {
+                } else if (j == 6) {
                     // 回呼号码
                     rowDto.setCallbackPhone(value);
                 }
@@ -637,21 +640,29 @@ public class ClientController {
                 String value = (String) object;
                 if (j == 0) {
                     rowDto.setName(value);
-                } else if (j == 1) {// 登录坐席
+                } else if (j == 1) {
+                    // 登录坐席
                     rowDto.setLoginClient(value);
-                } else if (j == 2) {// 坐席编号
+                } else if (j == 2) {
+                    // 坐席编号
                     rowDto.setClientNo(value);
-                } else if (j == 3) {// 坐席归属地
+                }else if (j == 3) {
+                    // 号码所属公司
+                    rowDto.setNumberAttributionCompany(value);
+                } else if (j == 4) {
+                    // 坐席归属地
                     rowDto.setAttribution(value);
-                } else if (j == 4) {// 账号编号
+                } else if (j == 5) {
+                    // 账号编号
                     rowDto.setAccountNo(value);
-                } else if (j == 5) {// 秘钥
-                    rowDto.setSecretKey(value);
                 } else if (j == 6) {
-                    rowDto.setPhone1(value);
+                    // 秘钥
+                    rowDto.setSecretKey(value);
                 } else if (j == 7) {
-                    rowDto.setPhone2(value);
+                    rowDto.setPhone1(value);
                 } else if (j == 8) {
+                    rowDto.setPhone2(value);
+                } else if (j == 9) {
                     rowDto.setProxyurl(value);
                 }
             }

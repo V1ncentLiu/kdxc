@@ -327,8 +327,11 @@ public class UserController {
             }
             // 带走资源将原属于本电销顾问的资源带着一起流转到此电销顾问新调整的所属组中。旧的组电销总监看不到此资源，新的组电销总监可以查看到此资源
             if (Constants.TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
+                //当前时间
+                Date now  = new Date();
                 ClueRelateReq clueRelateReq = getTeleSaleOrg(userInfoReq.getOrgId());
                 clueRelateReq.setTeleSaleId(userInfoReq.getId());
+                clueRelateReq.setCreateTime(now);
                 // 更新电销顾问电销组组织相关信息
                 clueRelateFeignClient.updateClueRelateByTeleSaleId(clueRelateReq);
                 // 添加换组记录
@@ -344,7 +347,7 @@ public class UserController {
                                     //创建人
                                     .createUser(CommUtil.getCurLoginUser().getId())
                                     //创建时间
-                                    .createTime(new Date()).build();
+                                    .createTime(now).build();
                 changeOrgFeignClient.insert(changeOrgRecordReqDto);
 
             }

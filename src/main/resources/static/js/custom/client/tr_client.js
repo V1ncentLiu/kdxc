@@ -29,6 +29,7 @@ var clientVm = new Vue({
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
+             numberAttributionCompany:'',
              attribution:'',
         	 bindPhone:'',
         	 displayPhone:'',
@@ -253,6 +254,7 @@ var clientVm = new Vue({
                  	//fieldMenuVM.$refs.confirmBtn.disabled=true;
                  	clientVm.confirmBtnDisabled=true;//禁用提交按钮
                     var param=this.form;
+                    debugger;
                    axios.post('/client/client/'+this.submitClientUrl, param)
                    .then(function (response) {
                        var resData = response.data;

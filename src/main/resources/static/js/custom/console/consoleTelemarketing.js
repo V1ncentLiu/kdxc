@@ -100,12 +100,18 @@ var mainDivVM = new Vue({
             //外呼手机
             var param = {};
             param.clueId = clueId;
-            window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
-                axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+            var sessionStorage =window.sessionStorage;
+            if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000) {
+                sessionStorage.setItem("phoneKey" + clueId, new Date().getTime());
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                    });
                 });
-            });
-            //跳转页面
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                //跳转页面
+                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+            }
+
+
         },
         gotoMyCustomer(){//跳转我的客户
             window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 

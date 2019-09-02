@@ -11,28 +11,28 @@
         <el-breadcrumb-item>累计未收齐款统计</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <!-- <shiro:hasPermission name="statistics:businessTotalArrearsTable:export"> -->
+         <shiro:hasPermission name="statistics:businessTotalArrearsTable:export">
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        <!-- </shiro:hasPermission> -->
+         </shiro:hasPermission>
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
-                <el-form-item label="统计截止日期:">
+                <el-form-item label="统计截止日期：">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="餐饮项目:">  
+                <el-form-item label="餐饮项目：">  
                     <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in projectArr"
                             :key="item.id"
-                            :label="item.name"
+                            :label="item.projectName"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务组:">  
+                <el-form-item label="商务组：">  
                     <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -42,7 +42,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务经理:">  
+                <el-form-item label="商务经理：">  
                     <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in busSaleArr"
@@ -51,6 +51,10 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
+                </el-form-item>
+                <el-form-item label="大于等于：">
+                    <el-input @keyup.native="number" maxlength="3" v-model="form.days" placeholder="输入查询天数" class="input-with-select"></el-input>
+					<span>&nbsp;天</span> 
                 </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
@@ -61,16 +65,21 @@
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
-                style="width: 100%"
+                style="width: 1100px;"
                 border
                 :data="tableData"
                 v-loading="loading"
                 :cell-style="centerStyle"
-                :header-cell-style="centerStyle">
-                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                :header-cell-style="centerStyle"
+                :span-method="arraySpanMethod">
+                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="projectName" label="项目"></el-table-column>
-                <el-table-column prop="owedDays" label="欠款天数"></el-table-column>
-                <el-table-column prop="userName" label="商务经理"></el-table-column>
+                <el-table-column prop="owedDays" label="欠款天数">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.owedDays!='合计'">{{scope.row.owedDays}}</span>
+                        <span v-else>{{scope.row.owedDays}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="noCreditNum" label="未收齐尾款笔数"></el-table-column>
                 <el-table-column prop="noCreditAmount" label="未收齐尾款金额"></el-table-column>
             </el-table>
@@ -90,9 +99,9 @@
 <script th:inline="javascript">
     var parentParam=[[${unpaidFundsQueryDto}]];
     var projectList = [[${projectList}]];
-    var orgIdList=[[${saleGroupList}]];
+    var orgIdList=[[${teleGroupList}]];
     var curOrgId = [[${curOrgId}]];
-    var curUserId = [[${curUserId}]];     
+    var curUserId = [[${curUserId}]];   
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -109,26 +118,27 @@
                     endTime:'',
                     orgId: '',
                     userId: '',
-                    projectId: ''
+                    projectId: '',
+                    days: ''
                 },
                 export: {
                     endTime:'',
                     orgId: '',
                     userId: '',
-                    projectId: ''
+                    projectId: '',
+                    days: ''
                 },
                 tableData: [],
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
                 projectArr: projectList, // 来访项目
-                pickerOptions0: {
-                  disabledDate(time) {
-                    return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
-                  }
-                },
             }             
         },
         methods: {    
+            number(){
+        　　　 	 this.form.days=this.form.days.replace(/[^\.\d]/g,'');
+                this.form.days=this.form.days.replace('.','');
+        　　},
             centerStyle(){
                 return "text-align:center"
             },  
@@ -192,8 +202,10 @@
                 }
                 param.orgId = this.form.orgId;
                 param.userId = this.form.userId;
+                param.projectId = this.form.projectId;
+                param.days = this.form.days;
                 this.loading = true; 
-                axios.post('/statistics/unpaidFunds/getDirectorOnePageList',param).then(function (response) {
+                axios.post('/statistics/unpaidFunds/getManagerOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -223,7 +235,8 @@
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
                         mainDivVM.export.userId = mainDivVM.form.userId;
-        
+                        mainDivVM.export.projectId = mainDivVM.form.projectId;
+                        mainDivVM.export.days = mainDivVM.form.days;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -266,7 +279,9 @@
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
-                        return [1, 2];
+                        return [0, 0];
+                    }else if (columnIndex === 2) {
+                        return [1, 3];
                     }
                 }
             },
@@ -313,7 +328,8 @@
                 param.orgId = this.export.orgId;
                 param.userId = this.export.userId;
                 param.projectId = this.export.projectId;
-                axios.post('/statistics/unpaidFunds/exportDirectorOneList',param,{responseType:'blob'})
+                param.days = this.export.days;
+                axios.post('/statistics/unpaidFunds/exportManagerOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -351,9 +367,11 @@
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
             this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
+            this.form.days = parentParam&&parentParam.days ? parentParam.days:''; 
             this.export.orgId = this.form.orgId;
             this.export.userId = this.form.userId; 
             this.export.projectId = this.form.projectId; 
+            this.export.days = this.form.days; 
             
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
