@@ -84,10 +84,17 @@ public class FreedController {
         return statisticsFreeFeignClient.queryList(dto);
     }
 
+    /**
+     * 根据搜索条件查询并导出数据
+     * @param dto
+     * @param response
+     */
+    //jia 日志
     @RequiresPermissions("statistics:resourceFreed:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody ResourceFreeQueryDto dto, HttpServletResponse response){
         try {
+            // 参数打印。。。。
             initParams(dto);
             JSONResult<List<ResourceFreeDto>> result = statisticsFreeFeignClient.queryList(dto);
             if ("0".equals(result.getCode())) {
@@ -179,6 +186,9 @@ public class FreedController {
             dto.setTeleSaleId(curLoginUser.getId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
+            if(null!=dto.getTeleDeptId()){
+                dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
+            }
         }else{
             //other
             dto.setTeleSaleId(curLoginUser.getId());
