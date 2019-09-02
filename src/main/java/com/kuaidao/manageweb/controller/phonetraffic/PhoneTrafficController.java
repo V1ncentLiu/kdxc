@@ -334,6 +334,18 @@ public class PhoneTrafficController {
         clueDTO.setOrg(user.getOrgId());
         clueDTO.setUpdateUser(user.getId());
         clueDTO.setPhUpdateTime(new Date());
+        if(clueDTO.getClueCustomer().getPhone2CreateTime() != null){
+            clueDTO.getClueCustomer().setPhone2CreateUser(user.getId());
+        }
+        if(clueDTO.getClueCustomer().getPhone3CreateTime() != null){
+            clueDTO.getClueCustomer().setPhone3CreateUser(user.getId());
+        }
+        if(clueDTO.getClueCustomer().getPhone4CreateTime() != null){
+            clueDTO.getClueCustomer().setPhone4CreateUser(user.getId());
+        }
+        if(clueDTO.getClueCustomer().getPhone5CreateTime() != null){
+            clueDTO.getClueCustomer().setPhone5CreateUser(user.getId());
+        }
         return phoneTrafficFeignClient.toTele(clueDTO);
     }
 
