@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Map;
 
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/unpaidFunds", fallback = UnpaidFundsFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/unpaidFunds", fallback = UnpaidFundsFeignClient.HystrixClientFallback.class)
 public interface UnpaidFundsFeignClient {
     /**
      * 商务总监一级页面查询 分页
