@@ -722,4 +722,26 @@ public class UserController {
         return releateReq;
     }
 
+    /**
+     * 查询 当前组织机构下所有用户
+     */
+    @PostMapping("/listUserInfoByOrgId")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> listUserInfoByOrgId() {
+        UserInfoParamListReqDTO reqDTO = new UserInfoParamListReqDTO();
+
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = CommUtil.getRoleCode(curLoginUser);
+        if(!RoleCodeEnum.GLY.name().equals(roleCode)){
+            //非管理员角色,查询同组织用户
+            reqDTO.setOrgId(curLoginUser.getOrgId());
+        }
+
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        reqDTO.setStatusList(statusList);
+        return userInfoFeignClient.listUserInfoByParam(reqDTO);
+    }
+
 }

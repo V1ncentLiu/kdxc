@@ -105,10 +105,17 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  		             }
       				
              	  }else{
-             		 clearTimer();//清除定时器
-               		  homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
+             	  	console.error(data);
+             		  clearTimer();//清除定时器
+					  var  qimoResMsg = resData.Message;
+					  if(qimoResMsg.indexOf("404") != -1){
+						  homePageVM.$message({message:"呼叫失败，绑定类型错误",type:'error'});
+					  }else{
+						  homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
+					  }
              	  }
               }else{
+				  console.error(data);
             	   clearTimer();//清除定时器
              		homePageVM.$message({message:"外呼失败【"+data.msg+"】",type:'error'});
               }
