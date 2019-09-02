@@ -63,14 +63,17 @@ var myCallRecordVm = new Vue({
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
     		 var startTimestamp = Date.parse(new Date(startTime));
-    		 var endTimestamp = new Date(endTime);
-    		 if(startTimestamp> endTimestamp){
-    			 this.$message({
-                     message: '开始时间必须小于结束时间',
-                     type: 'warning'
-                   });
-                 return;
-             }
+         debugger
+        if(endTime){
+        		 var endTimestamp = new Date(endTime);
+        		 if(startTimestamp> endTimestamp){
+        			 this.$message({
+                         message: '开始时间必须小于结束时间',
+                         type: 'warning'
+                       });
+                     return;
+                 }
+         }    
     		 var param = this.searchForm;
           var accountId =this.searchForm.accountId;
           if(accountId){
