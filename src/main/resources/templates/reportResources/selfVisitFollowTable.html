@@ -8,8 +8,8 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销报表</el-breadcrumb-item>
-        <el-breadcrumb-item>工作管理报表</el-breadcrumb-item>
-        <el-breadcrumb-item>分配资源跟访时间分布表</el-breadcrumb-item>
+        <el-breadcrumb-item>资源报表</el-breadcrumb-item>
+        <el-breadcrumb-item>自邀约跟踪表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
@@ -22,7 +22,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                <el-form-item label="统计日期：">
+                <el-form-item label="邀约来访日期：">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
@@ -48,7 +48,17 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="分配来源：">  
+                <el-form-item label="资源类别：">  
+                    <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in clueCategoryList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="客户级别：">  
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
@@ -81,16 +91,16 @@
                         <span v-else>{{scope.row.orgName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allocationResorceNum" label="分配资源数"></el-table-column>
-                <el-table-column prop="noVisitRate" label="未跟访占比"></el-table-column>
-                <el-table-column prop="thirtyMinVisitRate" label="30分钟内跟访占比"></el-table-column>
-                <el-table-column prop="oneVisitRate" label="1小时内跟访占比"></el-table-column>
-                <el-table-column prop="twoVisitRate" label="2小时内跟访占比"></el-table-column>
-                <el-table-column prop="threeVisitRate" label="3小时内跟访占比"></el-table-column>
-                <el-table-column prop="sixVisitRate" label="6小时内跟访占比"></el-table-column>
-                <el-table-column prop="twelveVisitRate" label="12小时内跟访占比"></el-table-column>
-                <el-table-column prop="twentyFourVisitRate" label="24小时内跟访占比"></el-table-column>
-                <el-table-column prop="twentyFourOutVisitRate" label="24小时外跟访占比"></el-table-column>
+                <el-table-column prop="allocationResorceNum" label="正常邀约数"></el-table-column>
+                <el-table-column prop="noVisitRate" label="取消邀约数"></el-table-column>
+                <el-table-column prop="thirtyMinVisitRate" label="删除邀约数"></el-table-column>
+                <el-table-column prop="oneVisitRate" label="来访客户数"></el-table-column>
+                <el-table-column prop="twoVisitRate" label="未来访客户数"></el-table-column>
+                <el-table-column prop="threeVisitRate" label="来访次数"></el-table-column>
+                <el-table-column prop="sixVisitRate" label="签约客户数"></el-table-column>
+                <el-table-column prop="twelveVisitRate" label="签约单数"></el-table-column>
+                <el-table-column prop="twentyFourVisitRate" label="邀约来访率"></el-table-column>
+                <el-table-column prop="twentyFourVisitRate2" label="邀约签约率"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -101,6 +111,9 @@
 </body>
 <style>
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .mainSearchFormBox form .el-form-item:first-child .el-form-item__label{
+        width: 100px;
+    }
 </style>
 <script th:inline="javascript">
     var deptList=[[${deptList}]];// 事业部
@@ -114,7 +127,7 @@
                 loading: false,
                 isDisabled: false,
                 isDisabledOrgId: false,
-                // isDisabledUserId: false,
+                isDisabledUserId: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -147,7 +160,7 @@
                         sixVisitRate: 1,
                         twelveVisitRate: 1,
                         twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
+                        twentyFourOutVisitRate2: 1,
                     },
                     {
                         teleGroupId: 1,
@@ -161,7 +174,7 @@
                         sixVisitRate: 1,
                         twelveVisitRate: 1,
                         twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
+                        twentyFourOutVisitRate2: 1,
                     }
                 ],
                 deptList: deptList, // 电销事业部
@@ -309,6 +322,7 @@
                         mainDivVM.export.deptId = mainDivVM.form.deptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                         mainDivVM.export.category = mainDivVM.form.category;
+       
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -350,7 +364,7 @@
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(teleGroupId){
-                    window.location.href="/resourceFollow/groupList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/freedReport/groupList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -447,12 +461,12 @@
                 this.isDisabled = true;
                 this.form.orgId = curOrgId; 
                 this.firstCurTelSale(curOrgId);
-                // if(curUserId){
-                //     this.form.userId = curUserId; 
-                //     this.isDisabledUserId = true;
-                // }
+                if(curUserId){
+                    this.form.userId = curUserId; 
+                    this.isDisabledUserId = true;
+                }
                 this.export.orgId = this.form.orgId; 
-                // this.export.userId = this.form.userId; 
+                this.export.userId = this.form.userId; 
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
