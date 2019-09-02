@@ -131,7 +131,7 @@ var homePageVM=new Vue({
                     { required: true, message: '绑定类型不能为空'}
                 ]
             },
-            trClientFormRules:{//登录坐席校验规则
+			heliClientFormRules:{//登录坐席校验规则
             	clientType:[
                     { required: true, message: '选择呼叫中心不能为空'}
                 ],
@@ -324,6 +324,12 @@ var homePageVM=new Vue({
         	this.$refs.loginClientForm.resetFields();
         	this.$refs.loginClientForm.clearValidate();
         	this.loginClientForm.clientType=selectedValue;
+        	if(selectedValue==2){//七陌
+        		this.loginClientForm.bindPhoneType = 1;
+			}else if (selectedValue==1 || selectedValue ==3){//天润 合力
+        		this.loginClientForm.bindPhoneType = 2;
+
+			}
         },
         loginClient(formName){
        	 this.$refs[formName].validate((valid) => {
@@ -399,10 +405,10 @@ var homePageVM=new Vue({
         	var loginClient = this.loginClientForm.loginClient;
         	var bindType = this.loginClientForm.bindPhoneType;
 
-			if(bindType==1){
+			/*if(bindType==1){
 				this.$message({message:"七陌不支持普通电话模式登录！",type:'warning'});
 				return;
-			}
+			}*/
         	var param={};
         	param.bindType = bindType+"";
         	param.loginName = loginClient;
