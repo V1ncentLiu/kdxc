@@ -164,8 +164,7 @@ public class OptRuleController {
                 JSONResult<List<OrganizationRespDTO>> orgList =
                         organizationFeignClient.queryOrgByParam(queryDTO);
                 List<OrganizationRespDTO> dxzList = orgList.getData();
-                Collections.sort(dxzList,
-                        Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
                 assignRuleTeamDTO.setTeleOptions(dxzList);
             }
         }
