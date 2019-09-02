@@ -22,13 +22,13 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                <el-form-item label="统计日期:">
+                <el-form-item label="统计日期：">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="签约餐饮集团:">  
+                <el-form-item label="签约餐饮集团：">  
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
@@ -38,7 +38,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="签约项目:">  
+                <el-form-item label="签约项目：">  
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
@@ -48,7 +48,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="签约店型:">  
+                <el-form-item label="签约店型：">  
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
@@ -58,10 +58,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="签约类型:">  
-                    <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
+                <el-form-item label="签约类型：">  
+                    <el-select v-model="form.signTypeList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
                         <el-option
-                            v-for="item in clueCategoryList"
+                            v-for="item in signTypeArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -78,7 +78,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="电销组:">  
+                    <el-form-item label="电销组：">  
                         <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  :disabled="isDisabledOrgId">
                             <el-option
                                 v-for="item in orgTeleArr"
@@ -97,7 +97,7 @@
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
-                style="width: 100%"
+                style="width: 1200px;"
                 border
                 :data="tableData"
                 v-loading="loading"
@@ -149,14 +149,16 @@
                     endTime:'',
                     deptId: '',
                     teleGroupId: '',
-                    category:''
+                    category:'',
+                    signTypeList: [] 
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     deptId: '',
                     teleGroupId: '',
-                    category: ''
+                    category: '',
+                    signTypeList:[],
                 },
                 tableData: [
                     {
@@ -177,9 +179,10 @@
                     }
                 ],
                 deptList: deptList, // 电销事业部
-                orgTeleArr: orgIdList, // 商务组
+                orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
-                clueCategoryList: clueCategoryList
+                clueCategoryList: clueCategoryList,
+                signTypeArr: ''
             }             
         },
         methods: {    
@@ -288,7 +291,8 @@
                 param.deptId = this.form.deptId;
                 param.teleGroupId = this.form.teleGroupId;
                 param.category = this.form.category;
-                this.loading = true; 
+                param.signTypeList = this.form.signTypeList;
+                this.loading = true;
                 axios.post('/statistics/receptionVisit/getPersonPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
@@ -321,6 +325,7 @@
                         mainDivVM.export.deptId = mainDivVM.form.deptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                         mainDivVM.export.category = mainDivVM.form.category;
+                        mainDivVM.export.signTypeList = mainDivVM.form.signTypeList;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -361,8 +366,13 @@
                 var category = this.export.category;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
+                var signTypeList=this.export.signTypeList;
+                var strSignType="";
+                if(signTypeList.length){
+                    strSignType=signTypeList.join(",");
+                } 
                 if(teleGroupId){
-                    window.location.href="/resourceFollow/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/resourceFollow/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime+ "&strSignType="+ strSignType; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -443,6 +453,7 @@
                 param.deptId = this.export.deptId;
                 param.teleGroupId = this.export.teleGroupId;
                 param.category = this.export.category;
+                param.signTypeList = this.export.signTypeList;
                 axios.post('/statistics/receptionVisit/exportPersonAllList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
