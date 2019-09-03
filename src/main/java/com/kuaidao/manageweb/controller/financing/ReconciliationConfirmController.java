@@ -194,7 +194,7 @@ public class ReconciliationConfirmController {
         }
 
         JSONResult<List<ReconciliationConfirmDTO>> listNoPage =
-                reconciliationConfirmFeignClient.applyListNoPage(pageParam);
+                reconciliationConfirmFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList(roleCode));
 
@@ -285,7 +285,7 @@ public class ReconciliationConfirmController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
-        String name = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms) + ".xlsx";
+        String name = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
