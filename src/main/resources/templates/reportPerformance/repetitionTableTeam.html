@@ -49,9 +49,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="签约店型：">  
-                    <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.signStoreList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
                         <el-option
-                            v-for="item in clueCategoryList"
+                            v-for="item in signStoreArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -59,9 +59,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="签约类型：">  
-                    <el-select v-model="form.signTypeList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                    <el-select v-model="form.signType" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in signTypeArr"
+                            v-for="item in signTypeList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -161,7 +161,8 @@
                     teleGroupId: '',
                     teleSaleId: '',
                     category:'',
-                    signTypeList: [] 
+                    signType: '',
+                    signStoreList: [] 
                 },
                 export: {
                     startTime:'',
@@ -170,7 +171,8 @@
                     teleGroupId: '',
                     teleSaleId: '',
                     category: '',
-                    signTypeList:[],
+                    signType: '',
+                    signStoreList:[],
                 },
                 tableData: [
                     {
@@ -194,7 +196,8 @@
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
                 clueCategoryList: clueCategoryList,
-                signTypeArr: ''
+                signStoreArr: '',
+                signTypeList: ''
             }             
         },
         methods: {    
@@ -303,7 +306,7 @@
                 param.deptId = this.form.deptId;
                 param.teleGroupId = this.form.teleGroupId;
                 param.category = this.form.category;
-                param.signTypeList = this.form.signTypeList;
+                param.signStoreList = this.form.signStoreList;
                 this.loading = true;
                 axios.post('/statistics/receptionVisit/getPersonPageList',param).then(function (response) {
                     if(!response || !response.data){
@@ -337,7 +340,7 @@
                         mainDivVM.export.deptId = mainDivVM.form.deptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                         mainDivVM.export.category = mainDivVM.form.category;
-                        mainDivVM.export.signTypeList = mainDivVM.form.signTypeList;
+                        mainDivVM.export.signStoreList = mainDivVM.form.signStoreList;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -378,13 +381,13 @@
                 var category = this.export.category;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                var signTypeList=this.export.signTypeList;
-                var strSignType="";
-                if(signTypeList.length){
-                    strSignType=signTypeList.join(",");
+                var signStoreList=this.export.signStoreList;
+                var strSignStore="";
+                if(signStoreList.length){
+                    strSignStore=signStoreList.join(",");
                 } 
                 if(teleGroupId){
-                    window.location.href="/resourceFollow/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime+ "&strSignType="+ strSignType; 
+                    window.location.href="/resourceFollow/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime+ "&strSignStore="+ strSignStore; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -465,7 +468,7 @@
                 param.deptId = this.export.deptId;
                 param.teleGroupId = this.export.teleGroupId;
                 param.category = this.export.category;
-                param.signTypeList = this.export.signTypeList;
+                param.signStoreList = this.export.signStoreList;
                 axios.post('/statistics/receptionVisit/exportPersonAllList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
@@ -523,13 +526,13 @@
             this.export.teleSaleId = this.form.teleSaleId; 
             this.export.category = this.form.category; 
             
-            var strSignType=parentParam.strSignType;
-            if(strSignType){
-                this.form.strSignType=strSignType.split(',');
+            var strSignStore=parentParam.strSignStore;
+            if(strSignStore){
+                this.form.strSignStore=strSignStore.split(',');
             }else{
-                this.form.signTypeList=[];
+                this.form.signStoreList=[];
             }
-            this.export.strSignType = this.form.strSignType; 
+            this.export.strSignStore = this.form.strSignStore; 
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
