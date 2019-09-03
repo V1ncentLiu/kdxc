@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.rule;
 
@@ -82,7 +82,7 @@ public class OptRuleController {
 
     /***
      * 优化规则列表页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initRuleList")
@@ -116,7 +116,7 @@ public class OptRuleController {
 
     /***
      * 新增优化规则页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initCreate")
@@ -144,7 +144,7 @@ public class OptRuleController {
 
     /***
      * 编辑优化规则页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initUpdate")
@@ -192,7 +192,7 @@ public class OptRuleController {
 
     /***
      * 优化规则列表
-     * 
+     *
      * @return
      */
     @PostMapping("/list")
@@ -207,7 +207,6 @@ public class OptRuleController {
 
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
@@ -220,7 +219,7 @@ public class OptRuleController {
 
     /**
      * 保存优化规则
-     * 
+     *
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
@@ -248,7 +247,7 @@ public class OptRuleController {
 
     /**
      * 修改优化规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -259,7 +258,6 @@ public class OptRuleController {
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
-
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -276,7 +274,7 @@ public class OptRuleController {
 
     /**
      * 启用规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -287,7 +285,6 @@ public class OptRuleController {
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
-
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -302,7 +299,7 @@ public class OptRuleController {
 
     /**
      * 禁用规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -313,11 +310,9 @@ public class OptRuleController {
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
-
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
         Long id = clueAssignRuleReq.getId();
         if (id == null) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
@@ -329,7 +324,7 @@ public class OptRuleController {
 
     /**
      * 删除优化规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -339,13 +334,12 @@ public class OptRuleController {
     @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
-
         return clueAssignRuleFeignClient.delete(idList);
     }
 
     /**
      * 复制规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -361,7 +355,7 @@ public class OptRuleController {
 
     /**
      * 导出
-     * 
+     *
      * @param reqDTO
      * @return
      */
@@ -379,12 +373,10 @@ public class OptRuleController {
 
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
         pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
-
         // 查询规则数据不分页
         JSONResult<List<ClueAssignRuleDTO>> listNoPage =
                 clueAssignRuleFeignClient.listNoPage(pageParam);
@@ -485,7 +477,7 @@ public class OptRuleController {
 
     /**
      * 获取当前登录账号
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -497,7 +489,7 @@ public class OptRuleController {
 
     /**
      * 查询系统参数
-     * 
+     *
      * @param code
      * @return
      */
@@ -513,7 +505,7 @@ public class OptRuleController {
 
     /***
      * 查询话务组的集合
-     * 
+     *
      * @return
      */
     private List<OrganizationRespDTO> getTrafficGroup() {
@@ -526,7 +518,7 @@ public class OptRuleController {
 
     /**
      * 查询系统参数优化资源类别
-     * 
+     *
      * @param code
      * @return
      */
@@ -551,7 +543,7 @@ public class OptRuleController {
 
     /**
      * 查询字典表
-     * 
+     *
      * @param code
      * @return
      */
