@@ -276,7 +276,7 @@ public class BalanceAccountController {
                 curList.add(dto.getAmountReceivable());
                 curList.add(dto.getAmountPerformance());
                 curList.add(dto.getMoney());
-                curList.add(dto.getRatio());
+                curList.add(dto.getRatio() + "%");
                 curList.add(dto.getCommissionMoney());
                 curList.add(dto.getFirstToll());
                 curList.add(dto.getPreferentialAmount());
@@ -301,7 +301,7 @@ public class BalanceAccountController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
-        String name = "对账结算申请" + DateUtil.convert2String(new Date(), DateUtil.ymdhms) + ".xlsx";
+        String name = "对账结算申请" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
