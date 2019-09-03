@@ -276,7 +276,7 @@ public class BalanceAccountController {
                 curList.add(dto.getAmountReceivable());
                 curList.add(dto.getAmountPerformance());
                 curList.add(dto.getMoney());
-                curList.add(dto.getRatio());
+                curList.add(dto.getRatio() + "%");
                 curList.add(dto.getCommissionMoney());
                 curList.add(dto.getFirstToll());
                 curList.add(dto.getPreferentialAmount());

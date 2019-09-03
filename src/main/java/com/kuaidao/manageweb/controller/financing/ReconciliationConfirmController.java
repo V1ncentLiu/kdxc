@@ -222,7 +222,7 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getAmountPerformance());
                     curList.add(dto.getMoney());
                     curList.add(dto.getAmountReceived());
-                    curList.add(dto.getRatio());
+                    curList.add(dto.getRatio() + "%");
                     curList.add(dto.getPreferentialAmount());
                     curList.add(dto.getGiveAmount());
                     curList.add(dto.getCommissionMoney());
@@ -252,7 +252,7 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getPreferentialAmount());
                     curList.add(dto.getGiveAmount());
                     curList.add(dto.getGiveTypeName());
-                    curList.add(dto.getRatio());
+                    curList.add(dto.getRatio() + "%");
                     curList.add(dto.getCommissionMoney());
                     curList.add(dto.getIsAccount());
                     curList.add(dto.getBusSaleName());
