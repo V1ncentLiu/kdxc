@@ -40,7 +40,6 @@ import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
@@ -151,7 +150,7 @@ public class BusinessMyCustomerController {
                 teleSaleList.add(entry.getValue());
             }
         }
-        Collections.sort(teleGroupList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
+        Collections.sort(teleGroupList, Comparator.comparing(OrganizationDTO::getCreateTime));
         map.put("teleGroupList", teleGroupList);
         map.put("teleSaleList", teleSaleList);
         return new JSONResult<Map>().success(map);
