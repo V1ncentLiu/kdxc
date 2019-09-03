@@ -56,8 +56,8 @@ import java.util.stream.Collectors;
  */
 @Controller
 @RequestMapping("/bus/userManager")
-public class BusArrangeController {
-  private static Logger logger = LoggerFactory.getLogger(BusArrangeController.class);
+public class BusController {
+  private static Logger logger = LoggerFactory.getLogger(BusController.class);
   @Autowired
   private OrganizationFeignClient organizationFeignClient;
   @Autowired
