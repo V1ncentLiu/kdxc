@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBeans;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.logmgt.dto.AccessLogReqDTO;
 import com.kuaidao.manageweb.feign.log.LogMgtFeignClient;
@@ -68,7 +68,7 @@ public class LogController {
           */
     @RequestMapping("/queryLogDataList")
     @ResponseBody
-    public JSONResult<PageBeans<AccessLogReqDTO>> queryLogDataList(
+    public JSONResult<PageBean<AccessLogReqDTO>> queryLogDataList(
             @RequestBody AccessLogReqDTO logReqDTO, HttpServletRequest request,
             HttpServletResponse response) {
         return logMgtFeignClient.queryLogRecord(logReqDTO);
