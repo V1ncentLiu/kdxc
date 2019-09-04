@@ -195,6 +195,7 @@ public class BusinessMyCustomerController {
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
         } else {
             param.setBusSaleId(user.getId());
+            param.setBusGroupId(user.getOrgId());
         }
         return busMyCustomerFeignClient.queryPageList(param);
     }
