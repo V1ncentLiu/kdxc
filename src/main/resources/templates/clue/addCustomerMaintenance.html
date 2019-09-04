@@ -10,12 +10,11 @@
         .openWechatbtn{position: absolute;top: 5px;left: 73%;}
         @media screen and (max-width: 1367px) {
             .openWechatbtn{position: relative;top: auto;left: auto;}
-        }
+        }        
     </style>
 </head>
 <body>
-<div id="addCustomer" class="addCustomer mainPadding"
-     style="display: none;">
+<div id="addCustomer" class="addCustomer mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
@@ -25,12 +24,11 @@
     <el-row class="borderbox">
         <!--<div class="inforTitle">维护客户</div>-->
         <el-form :model="form" :rules="rules" ref="form" class="padding20 paddingB100">
-            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span>
+            <div class="marginB20 fs16">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}</span>
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
-                <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户
-                </el-button>
-                <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息
-                </el-button>
+                <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户</el-button>
+                <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button>
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
             </div>
 
             <div class="borderbox padding20 resourceInfo">
@@ -245,6 +243,112 @@
                     </el-col>
                 </el-row>
             </div>
+            <div class="marginB20 fs16 paddingT20">跟进记录</div>
+            <el-row class="marginB10">
+                <el-col :span="16">
+                    <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
+                    <!--</el-button>-->
+                    <el-button size="small" type="primary" @click="editRecord">编辑
+                    </el-button>
+                </el-col>
+                <el-col :span="4" :offset="4" class="f-tar">
+                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow">取消添加</span><span v-else>添加</span>
+                    </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
+                    <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
+                    <el-table-column prop="callTime" label="拨打时间" align="center" min-width="12%">
+                    </el-table-column>
+                    <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="20%">
+                    </el-table-column>
+                    <el-table-column min-width="10%" prop="isCall" label="是否接通" align="center">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.isCall === 0">未接通</div>
+                            <div v-else-if="scope.row.isCall ===1">已接通</div>
+                        </template>
+                    </el-table-column>
+                    <!-- <el-table-column
+                          prop="resourceStatus"
+                          label="资源有效性"
+                          align="center">
+                          <template slot-scope="scope">
+                          <div v-if="scope.row.resourceStatus === 0">无效资源
+                          </div>
+                           <div v-else-if="scope.row.resourceStatus ===1">有效资源
+                           </div>
+                         </template>
+                        </el-table-column> -->
+                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
+                    <!--<el-table-column-->
+                    <!--prop="visitStatus" label="是否继续回访" align="center" width="210">-->
+                    <!--<template-->
+                    <!--slot-scope="scope">-->
+                    <!--<div v-if="scope.row.visitStatus == 0">否</div>-->
+                    <!--<div v-else-if="scope.row.visitStatus ==1">是</div>-->
+                    <!--</template>-->
+                    <!--</el-table-column>-->
+                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="12%">
+                    </el-table-column>
+                    <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
+                    </el-table-column>
+                    <div slot="append" v-show="lineFormShow" class="lineFormShow">
+                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
+                            <div style="float: left; width: 48px;">&nbsp;</div>
+                            <!-- :picker-options="expireTimeOption" -->
+                            <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
+                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
+                            </el-form-item>
+                            <div style="width: 24%;float: left;text-align: center;">
+                                <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
+                                    <el-select v-model="formInline.customerStatus" @change="customerStatusChange" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                        <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 160px;">
+                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="substatus" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
+                                        <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </div>
+                            <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
+                                <el-select v-model="formInline.isCall" placeholder="是否接通" style="width: 70%;display: block;margin:0 auto;" clearable>
+                                    <el-option label="是" value="1"></el-option>
+                                    <el-option label="否" value="0"></el-option>
+                                </el-select>
+                            </el-form-item>
+                            <!--
+                              <el-form-item label="" size="mini" prop="resourceStatus">
+                                <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
+                                  <el-option label="无效资源" value="0"></el-option>
+                                  <el-option label="有效资源" value="1"></el-option>
+                                </el-select>
+                              </el-form-item>
+                              -->
+                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
+                                <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
+                                <el-input type="textarea" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
+                            </el-form-item>
+                            <!--<el-form-item label="" size="mini">-->
+                            <!--<el-select-->
+                            <!--v-model="formInline.visitStatus" placeholder="是否继续回访">-->
+                            <!--<el-option-->
+                            <!--label="是" value="1"></el-option>-->
+                            <!--<el-option label="否" value="0"></el-option>-->
+                            <!--</el-select>-->
+                            <!--</el-form-item>-->
+                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
+                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;" @change="chooseTodayAfter">
+                                </el-date-picker>
+                            </el-form-item>
+                            <!--<el-form-item class="lineInherit">
+                                <el-button type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">确认</el-button>
+                            </el-form-item> -->
+                        </el-form>
+                    </div>
+                </el-table>
+            </el-row>
             <div class="marginB20 fs16 paddingT20">投资意向信息</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -339,112 +443,6 @@
                     </el-col>
                 </el-row>
             </div>
-            <div class="marginB20 fs16 paddingT20">跟进记录</div>
-            <el-row class="marginB10">
-                <el-col :span="16">
-                    <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
-                    <!--</el-button>-->
-                    <el-button size="small" type="primary" @click="editRecord">编辑
-                    </el-button>
-                </el-col>
-                <el-col :span="4" :offset="4" class="f-tar">
-                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow">取消添加</span><span v-else>添加</span>
-                    </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
-                    <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
-                    <el-table-column prop="callTime" label="拨打时间" align="center" min-width="12%">
-                    </el-table-column>
-                    <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="20%">
-                    </el-table-column>
-                    <el-table-column min-width="10%" prop="isCall" label="是否接通" align="center">
-                        <template slot-scope="scope">
-                            <div v-if="scope.row.isCall === 0">未接通</div>
-                            <div v-else-if="scope.row.isCall ===1">已接通</div>
-                        </template>
-                    </el-table-column>
-                    <!-- <el-table-column
-                          prop="resourceStatus"
-                          label="资源有效性"
-                          align="center">
-                          <template slot-scope="scope">
-	                      <div v-if="scope.row.resourceStatus === 0">无效资源
-	                      </div>
-	                       <div v-else-if="scope.row.resourceStatus ===1">有效资源
-	                       </div>
-	                     </template>
-                        </el-table-column> -->
-                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
-                    <!--<el-table-column-->
-                    <!--prop="visitStatus" label="是否继续回访" align="center" width="210">-->
-                    <!--<template-->
-                    <!--slot-scope="scope">-->
-                    <!--<div v-if="scope.row.visitStatus == 0">否</div>-->
-                    <!--<div v-else-if="scope.row.visitStatus ==1">是</div>-->
-                    <!--</template>-->
-                    <!--</el-table-column>-->
-                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="12%">
-                    </el-table-column>
-                    <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
-                    </el-table-column>
-                    <div slot="append" v-show="lineFormShow" class="lineFormShow">
-                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
-                            <div style="float: left; width: 48px;">&nbsp;</div>
-                            <!-- :picker-options="expireTimeOption" -->
-                            <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
-                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
-                            </el-form-item>
-                            <div style="width: 24%;float: left;text-align: center;">
-                                <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
-                                    <el-select v-model="formInline.customerStatus" @change="customerStatusChange" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
-                                        <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 160px;">
-                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="substatus" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
-                                        <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                            </div>
-                            <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通" style="width: 70%;display: block;margin:0 auto;" clearable>
-                                    <el-option label="是" value="1"></el-option>
-                                    <el-option label="否" value="0"></el-option>
-                                </el-select>
-                            </el-form-item>
-                            <!--
-                              <el-form-item label="" size="mini" prop="resourceStatus">
-                                <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
-                                  <el-option label="无效资源" value="0"></el-option>
-                                  <el-option label="有效资源" value="1"></el-option>
-                                </el-select>
-                              </el-form-item>
-                              -->
-                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
-                                <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
-                                <el-input type="textarea" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
-                            </el-form-item>
-                            <!--<el-form-item label="" size="mini">-->
-                            <!--<el-select-->
-                            <!--v-model="formInline.visitStatus" placeholder="是否继续回访">-->
-                            <!--<el-option-->
-                            <!--label="是" value="1"></el-option>-->
-                            <!--<el-option label="否" value="0"></el-option>-->
-                            <!--</el-select>-->
-                            <!--</el-form-item>-->
-                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
-                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;" @change="chooseTodayAfter">
-                                </el-date-picker>
-                            </el-form-item>
-                            <!--<el-form-item class="lineInherit">
-                                <el-button type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">确认</el-button>
-                            </el-form-item> -->
-                        </el-form>
-                    </div>
-                </el-table>
-            </el-row>
 
             <div class="marginB20 fs16 paddingT20 callLogBox">
                 通话记录
@@ -460,24 +458,26 @@
                     </el-table-column>
                     <el-table-column prop="roleName" label="角色" align="center">
                     </el-table-column>
-                    <el-table-column prop="callType" label="通话类型" align="center">
+                    <el-table-column prop="callType" label="通话类型" align="center" width="80">
                     </el-table-column>
                     <el-table-column prop="startTime" label="拨打时间" :formatter="getStartTimeText" align="center">
                     </el-table-column>
-                    <el-table-column prop="callStatus" label="接通情况" align="center">
+                    <el-table-column prop="callStatus" label="接通情况" align="center" width="100">
                     </el-table-column>
-                    <el-table-column prop="talkTime" label="接通时长" :formatter="getTalkTimeText" align="center">
+                    <el-table-column prop="talkTime" label="接通时长" :formatter="getTalkTimeText" align="center" width="100">
                     </el-table-column>
                     <el-table-column label="操作" align="center">
                         <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
                             <a :id="scope.row.id"
                                class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP"
                                @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-                				<span class="sound-trigger__inner">
-                		           <i class="fa fa-play-1 fa-lg"></i>
-                			 	</span>
+                                <span class="sound-trigger__inner">
+                                   <i class="fa fa-play-1 fa-lg"></i>
+                                </span>
                             </a>
-                            <a class="download_img cursorP" v-if="scope.row.accountId==loginUserId"
+                            <!--<a class="download_img cursorP" v-if="scope.row.accountId==loginUserId"
+                               @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>-->
+                            <a class="download_img cursorP"
                                @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                         </template>
                     </el-table-column>
@@ -576,7 +576,7 @@
                        required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
                 <div v-if="editPhone == 0 && domain.edit ==1">
-                    <el-input  v-model="domain.value" disabled  maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <el-input  v-model="domain.value" disabled  maxLength="11"  @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
                     <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
                 </div>
                 <div v-if="editPhone == 0 && domain.edit ==0">
@@ -735,6 +735,35 @@
             </el-form-item>
         </el-form>
     </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+        </div>
+    </el-dialog>
+
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -767,131 +796,6 @@
     #ossfile {
         text-align: right;
     }
-
-    /*.paddingL55 {
-        width: 1700px;
-    }
-    .paddingL55 .el-form-item__content {
-        line-height: 28px;
-    }
-    @media screen and (width: 1920px) {
-        .paddingL55 .el-date-editor.el-input {
-            width: 218px;
-        }
-        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
-            width: 202px;
-        }
-
-        .paddingL55 div.el-form-item:last-child {
-            width: 186px;
-            text-align: center;
-        }
-    }
-
-    @media screen and (max-width: 1190px) {
-        .paddingL55 {
-            width: 1610px;
-            line-height: 28px;
-        }
-
-        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
-            width: 200px;
-        }
-
-        .el-form--inline .el-form-item {
-            margin-right: 8px !important;
-        }
-
-        .paddingL55 div.el-form-item:last-child {
-            width: 60px;
-            text-align: center;
-        }
-
-        .paddingL55 .el-form-item__content {
-            line-height: 29px;
-        }
-    }
-
-    @media screen and (max-width: 1700px) {
-        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
-            width: 200px !important;
-        }
-
-        .paddingL55 div.el-form-item:last-child {
-            width: 60px !important;
-        }
-    }
-
-    @media screen and (min-width: 1709px) {
-        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
-            width: 197px;
-        }
-
-        .paddingL55 div.el-form-item:last-child {
-            width: 100px;
-        }
-    }
-
-    @media screen and (max-width: 1738px) {
-        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
-            width: 197px;
-        }
-
-        .paddingL55 div.el-form-item:last-child {
-            width: 100px;
-        }
-    }
-
-    @media screen and (width: 1744px) {
-        .paddingL55 {
-            line-height: 28px;
-        }
-
-        .paddingL55 .el-form-item__content {
-            line-height: 28px;
-        }
-
-        .paddingL55 .el-date-editor.el-input {
-            width: 184px;
-        }
-
-        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
-            width: 200px;
-        }
-
-        .paddingL55 .el-input--mini input.el-input__inner:nth-child(2) {
-            width: 50px !important;
-        }
-
-        .el-form--inline .el-form-item {
-            margin-right: 8px !important;
-        }
-
-        .paddingL55 .el-input--mini .el-input {
-            top: -3px;
-        }
-
-        .paddingL55 div.el-form-item:last-child {
-            width: 90px;
-            text-align: center;
-        }
-    }*/
-
-    /*20190423 start*/
-    /*.paddingL55 { width: 1665px; }
-    .paddingL55 .el-form-item__content {
-        width: 100%;
-        line-height: 28px;
-    }
-    .paddingL55 .el-select { width: 100%; }
-    .paddingL55 .lineForm_callTime { width: 220px; }
-    .paddingL55 .lineForm_customerStatus { width: 420px; }
-    .paddingL55 .lineForm_customerStatusSub { width: 210px; }
-    .paddingL55 .lineForm_isCall { width: 200px; }
-    .paddingL55 .lineForm_focusPoint { width: 210px; }
-    .paddingL55 .lineForm_nextVisitTime { width: 220px; }
-    .paddingL55 .lineForm_confirm_btn {}*/
-    /*20190423 end*/
     .lineFormShow .el-form-item__content{width: 100%;}
     .lineFormShow .el-input__inner{height: 35px!important;}
     .lineFormShow .el-form-item__error{text-align: center;width: 100%;}
@@ -972,7 +876,7 @@
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
-    if(loginUserId == teleSaleId){
+    if(loginUserId == teleSaleId || zjFalg == 1){
         editPhone = 0;
     }
     showConfirmButtonFlag = true;
@@ -983,6 +887,12 @@
         el: '#addCustomer',
         data: function () {
             return {
+                isActive:false,
+                isShowMoreBtn:false,
+                customerInfo:customer,
+                isShowOnlineRecordBtn:false,
+                onlineRecordData:[],
+                onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
                 phoneShow:false,//手机号2默认不显示
                 audioShow:false,//播放器默认不显示
@@ -1270,6 +1180,62 @@
             }
         },
         methods: {
+            isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
+            showOnlineRecord(){
+                this.onlineRecordDialogVisible=true;                
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){
+                            addCustomerVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            if(dataList.length>0){
+                                addCustomerVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    addCustomerVM.isShowMoreBtn=true;
+                                }else{
+                                    addCustomerVM.isShowMoreBtn=false;
+                                }
+                            }
+                        }                        
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        addCustomerVM.isShowOnlineRecordBtn=false;
+                    }                       
+
+                });
+
+            },
+            isShowOnlineRecordFun(){
+                // var param = {};
+                // param.clueId = clueId;
+                // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+                //     var data= response.data;                 
+                //     if(data){
+                //         addCustomerVM.isShowOnlineRecordBtn=true;
+                //     }else{
+                //         addCustomerVM.isShowOnlineRecordBtn=false;
+                //     }
+
+                // });
+            },
             chooseToday(val){
                 var dateNow=new Date();
                 dateToday = moment(dateNow).format("YYYY-MM-DD");
@@ -1396,10 +1362,15 @@
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;
-                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
-                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                var sessionStorage =window.sessionStorage;
+                if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000){
+                    sessionStorage.setItem("phoneKey"+clueId,new Date().getTime());
+                    window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                        axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                        });
                     });
-                });
+                }
+
             },
             formatTimeFn(date) {
                 if (null == date) {
@@ -1471,7 +1442,14 @@
                         valid = error;
                     });
                 }
-
+                if (valid) {
+                    this.$refs[form].validateField(["customerName"], (error) => {
+                        if (error) {
+                            valid = false;
+                            this.$alert('客户姓名不能为空', '提示');
+                        }
+                    });
+                }
                 if (valid) {
                     this.saveDisabled = true;
                     //----客户基本信息---//
@@ -2507,7 +2485,7 @@
                                 var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
                                  if(callSource=='3'){
-                                	 var decodeUrl = encodeURI(url);
+                                     var decodeUrl = encodeURI(url);
                                      url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
                                  }
                                 var x = new XMLHttpRequest();
@@ -2813,8 +2791,10 @@
                 }
             }
 
+
+
         },
-        created() {
+        created() {            
             //初始资源类别数据
             this.getUploadParam();
             var param = {};
@@ -2927,6 +2907,9 @@
             axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                 addCustomerVM.provinceArr = response.data.data.data;
             });
+            // 在线聊天记录data
+            this.initData();
+            this.isShowOnlineRecordFun();
         }
     })
 </script>

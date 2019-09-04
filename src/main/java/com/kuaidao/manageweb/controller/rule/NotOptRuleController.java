@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -179,8 +180,7 @@ public class NotOptRuleController {
                 JSONResult<List<OrganizationRespDTO>> orgList =
                         organizationFeignClient.queryOrgByParam(queryDTO);
                 List<OrganizationRespDTO> dxzList = orgList.getData();
-                Collections.sort(dxzList,
-                        Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
                 assignRuleTeamDTO.setTeleOptions(dxzList);
             }
         }
@@ -425,8 +425,19 @@ public class NotOptRuleController {
         } else {
             logger.error("export rule_report res{{}}", listNoPage);
         }
+        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
+        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelNotOptRule(dataList);
+        sheet.setColumnWidth(1, 8000);// 设置第二列的宽度为
+        sheet.setColumnWidth(6, 5000);// 设置第二列的宽度为
+        sheet.setColumnWidth(7, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(8, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(9, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(10, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(11, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(12, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(14, 4000);// 设置第二列的宽度为
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
         String name = "非优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";

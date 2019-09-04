@@ -10,6 +10,8 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.busCoustomerVisit.BusCousomerVisitFeignClient;
@@ -107,6 +109,7 @@ public class BusCustomerVisitController {
      */
     @RequiresPermissions("statistics:customerVisitSign:export")
     @RequestMapping("/exportExcel")
+    @LogRecord(description = "商务报表签约来访导出", operationType = LogRecord.OperationType.EXPORT, menuName = MenuEnum.VISIT_SIGN)
     public void exportExcel(HttpServletRequest request,
             HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         try{
@@ -186,6 +189,7 @@ public class BusCustomerVisitController {
     @RequiresPermissions("statistics:customerVisitSign:export")
     @RequestMapping("/exportExcelByManagerId")
     @ResponseBody
+    @LogRecord(description = "商务顾问签约来访导出", operationType = LogRecord.OperationType.EXPORT, menuName = MenuEnum.VISIT_SIGN)
     public void exportMExcel(HttpServletRequest request,
                             HttpServletResponse response, @RequestBody CustomerVisitQueryDto customerVisitQueryDto){
         try{
@@ -316,12 +320,4 @@ public class BusCustomerVisitController {
     }
 
 
-    public static void main(String[] args) {
-        String name = "签约来访表{0}{1}{2}-{3}.xlsx";
-
-        Long time=System.currentTimeMillis()/1000/3600;
-        System.out.println(time);
-        System.out.println(time*3600l);
-//        System.out.println(MessageFormat.format(name,"","","20121717","20180808"));
-    }
 }

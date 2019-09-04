@@ -139,12 +139,14 @@ public class BusinessCustomerController {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
 
+        UserInfoDTO user = getUser();
+
         // 点击查看
         ClueAppiontmentReq req = new ClueAppiontmentReq();
         req.setClueId(new Long(clueId));
+        req.setBusGroupId(user.getOrgId());
         appiontmentFeignClient.updateView(req);
 
-        UserInfoDTO user = getUser();
         request.setAttribute("loginUserId", user.getId());
         return "bus_mycustomer/editCustomerMaintenance";
     }
@@ -232,10 +234,14 @@ public class BusinessCustomerController {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
 
+        UserInfoDTO user = getUser();
+
         ClueAppiontmentReq req = new ClueAppiontmentReq();
         req.setClueId(new Long(clueId));
+        req.setBusGroupId(user.getOrgId());
         appiontmentFeignClient.updateView(req);
-        UserInfoDTO user = getUser();
+
+
         request.setAttribute("loginUserId", user.getId());
         request.setAttribute("ossUrl", ossUrl);
         return "bus_mycustomer/viewCustomerMainenance";

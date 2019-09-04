@@ -356,7 +356,7 @@
                             <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType"
                                           style="width: 100%;">
                                 <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType"
-                                           @change="selectUpdateSigningType" placeholder="请选择签约类型：" style="width:100%">
+                                           @change="selectUpdateSigningType" placeholder="请选择签约类型：" style="width:100%" disabled>
                                     <el-option
                                         v-for="item in option2s"
                                         :key="item.value"
@@ -510,8 +510,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="来访城市：" :label-width="formLabelWidth"  prop="visitCity">
-                            <el-input  v-model="updateFormSigning.visitCity" maxLength="10" >
+                        <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
+                            <el-input  v-model="updateFormSigning.arrVisitCity" maxLength="50" >
                             </el-input>
                         </el-form-item>
                     </el-col>
@@ -866,8 +866,8 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="来访城市：" :label-width="formLabelWidth"  prop="visitCity">
-                                <el-input  v-model="formSigning.visitCity" maxLength="10" >
+                            <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
+                                <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
                                 </el-input>
                             </el-form-item>
                         </el-col>
@@ -1318,8 +1318,8 @@
                 visitTime: [ //请选择到访时间
                     { required: true, message: '请选择到访时间', trigger: 'change' }
                 ],
-                visitCity: [ //请填写来访城市
-                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                arrVisitCity: [ //请填写来访城市
+                    { required: true, message: '请填写到访城市', trigger: 'change' }
                 ],
                 visitType: [ //请选择到访类型
                     { required: true, message: '请选择到访类型', trigger: 'change' }
@@ -1518,8 +1518,8 @@
                 visitTime: [ //请选择到访时间
                     { required: true, message: '请选择到访时间', trigger: 'change' }
                 ],
-                visitCity: [ //请填写来访城市
-                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                arrVisitCity: [ //请填写来访城市
+                    { required: true, message: '请填写到访城市', trigger: 'change' }
                 ],
                 visitType: [ //请选择到访类型
                     { required: true, message: '请选择到访类型', trigger: 'change' }
@@ -1548,7 +1548,7 @@
             formMoneyDetail: {
                 clueId:"",
                 visitTime:"",
-                visitCity:"",
+                arrVisitCity:"",
                 visitType:"",
                 visitShopType:"",
                 visitNum:"",
@@ -1592,7 +1592,7 @@
                 giveType:'',
 
                 visitTime:"",
-                visitCity:"",
+                arrVisitCity:"",
                 visitType:"",
                 visitShopType:"",
                 visitNum:"",
@@ -1804,7 +1804,7 @@
                 param.id = vclueId;
                 axios.post('/businesssign/visitEcho',param).then(function (response) {
                     var echoData = response.data.data;
-                    mainDivVM.formSigning.visitCity = echoData.visitCity;
+                    mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
                     if(echoData.visitNum>0){
                         mainDivVM.formSigning.visitNum=echoData.visitNum;
                     }
@@ -1815,7 +1815,7 @@
             suppHide(){
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
-                this.formSigning.visitCity = '';
+                this.formSigning.arrVisitCity = '';
                 this.formSigning.visitNum='';
                 this.formSigning.visitShopType='';
                 this.formSigning.visitTime='';
@@ -1830,7 +1830,7 @@
                 param.id = vclueId;
                 axios.post('/businesssign/visitEcho',param).then(function (response) {
                     var echoData = response.data.data;
-                    mainDivVM.formMoneyDetail.visitCity = echoData.visitCity;
+                    mainDivVM.formMoneyDetail.arrVisitCity = echoData.arrVisitCity;
                     if(echoData.visitNum>0){
                         mainDivVM.formMoneyDetail.visitNum=echoData.visitNum;
                     }
@@ -1841,7 +1841,7 @@
             suppDetailHide(){
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
-                this.formMoneyDetail.visitCity = '';
+                this.formMoneyDetail.arrVisitCity = '';
                 this.formMoneyDetail.visitNum='';
                 this.formMoneyDetail.visitShopType='';
                 this.formMoneyDetail.visitTime='';

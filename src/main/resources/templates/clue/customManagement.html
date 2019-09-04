@@ -313,7 +313,7 @@
                     <template slot-scope="scope" >
                         <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
                         <input type='hidden'>
-                        <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        <img th:src="@{/images/tel.png}" :readonly="phoneDisabled" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
@@ -367,7 +367,7 @@
                         <div v-else-if="scope.row.status ==1">是</div>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
+                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'updateTimeStr'||item.fieldCode == 'storeArea'"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
                 </el-table-column>
 
@@ -722,6 +722,8 @@
   var fieldList=[[${fieldList}]];//自定义字段
   var userFieldList=[[${userFieldList}]];//用户自定义字段
   var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+  //角色编码
+  var roleCode = [[${roleCode}]];
   // var userFieldList=[];
   var  customerManVM=new Vue({
     el: '#myCustom',
@@ -729,6 +731,7 @@
       return {
         paginationShow: false,//分页是否显示
         isShow:false,
+        phoneDisabled:false,
         btnDisabled: false,
         recordDialog:false,
         dialogChooseList:false,
@@ -957,24 +960,29 @@
     },
     methods: {
       gettelNumberIcon(tel,clueId) {
+          this.phoneDisabled = true;
+          var sessionStorage =window.sessionStorage;
+          if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000){
+              sessionStorage.setItem("phoneKey"+clueId,new Date().getTime());
+            //外呼手机
+              var param = {};
+              param.clueId = clueId;
+              // 存储选中信息--start
+              this.setSessionStore("telemarketingStoreForm", this.storeForm);
+              var otherVal = {
+                  "currentPage": this.pager.currentPage,
+                  "clueId": clueId
+              }
 
-        //外呼手机
-        var param = {};
-        param.clueId = clueId;
-        // 存储选中信息--start
-        this.setSessionStore("telemarketingStoreForm", this.storeForm);
-        var otherVal = {
-          "currentPage": this.pager.currentPage,
-          "clueId": clueId
-        }
-        this.setSessionStore("telemarketingOtherVal", otherVal);
-        // 存储选中信息--end
-        window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
-          axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
-          });
-        });
-        //跳转页面
-        this.showClueDetailInfo(clueId);
+              this.setSessionStore("telemarketingOtherVal", otherVal);
+              // 存储选中信息--end
+              window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                  axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                  });
+              });
+              //跳转页面
+              this.showClueDetailInfo(clueId);
+          }
       },
       //日期数据格式化方法
       dateFormat(row, column, cellValue, index) {
@@ -1430,19 +1438,23 @@
         // 存储选中信息--end
         window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
       },
-      //展现详情
+        //展现详情(总监编辑，其他角色查看)
       showClueDetailInfo1 (row, column) {
         var clueId=row.clueId;
-        // 存储选中信息--start
-        this.setSessionStore("telemarketingStoreForm", this.storeForm);
-        var otherVal = {
-          "currentPage": this.pager.currentPage,
-          "clueId": clueId,
-          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
-        }
-        this.setSessionStore("telemarketingOtherVal", otherVal);
-        // 存储选中信息--end
-        window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+          if (roleCode == "DXZJ") {
+              this.showClueDetailInfo(clueId);
+          } else {
+              // 存储选中信息--start
+              this.setSessionStore("telemarketingStoreForm", this.storeForm);
+              var otherVal = {
+                  "currentPage": this.pager.currentPage,
+                  "clueId": clueId,
+                  "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+              }
+              this.setSessionStore("telemarketingOtherVal", otherVal);
+              // 存储选中信息--end
+              window.location.href = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId=' + clueId;
+          }
       },
       submitVicemanagerForm(formName) {
         this.$refs[formName].validate((valid) => {

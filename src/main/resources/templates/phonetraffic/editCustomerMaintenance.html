@@ -18,7 +18,10 @@
     <el-row class="borderbox">
         <div class="inforTitle">维护客户</div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> </div>
+            <div class="marginB20 fs16 paddingT20">
+                资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> 
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
+            </div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
@@ -686,6 +689,34 @@
             <el-button type="primary" @click="showMessageDialog = false;"> 知道了</el-button>
         </div>
     </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span>在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+        </div>
+    </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -915,6 +946,12 @@
         el: '#addCustomer',
         data: function () {
             return {
+                isActive:false,
+                isShowMoreBtn:false,
+                customerInfo:customer,
+                isShowOnlineRecordBtn:false,
+                onlineRecordData:[],
+                onlineRecordDialogVisible:false,
                 audioShow:false,
                 expireTimeOption: {
                     disabledDate(date) { //disabledDate 文档上：设置禁用状态，参数为当前日期，要求返回 Boolean
@@ -1102,7 +1139,8 @@
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
-                        value: ''
+                        value: '',
+                        key: Date.now(),
                     }]
                 },
                 statusOptions: [{
@@ -1160,6 +1198,62 @@
             }
         },
         methods: {
+            isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
+            showOnlineRecord(){
+                this.onlineRecordDialogVisible=true;                
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){
+                            addCustomerVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            if(dataList.length>0){
+                                addCustomerVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    addCustomerVM.isShowMoreBtn=true;
+                                }else{
+                                    addCustomerVM.isShowMoreBtn=false;
+                                }
+                            }
+                        }                        
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        addCustomerVM.isShowOnlineRecordBtn=false;
+                    }                       
+
+                });
+
+            },
+            isShowOnlineRecordFun(){
+                // var param = {};
+                // param.clueId = clueId;
+                // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+                //     var data= response.data;                 
+                //     if(data){
+                //         addCustomerVM.isShowOnlineRecordBtn=true;
+                //     }else{
+                //         addCustomerVM.isShowOnlineRecordBtn=false;
+                //     }
+
+                // });
+            },
             lineFormShowFun(){
                 if(this.lineFormShow){
                     this.lineFormShow = false
@@ -1437,15 +1531,19 @@
                     for (var i = 0; i < phoneArr.length; i++) {
                         if (i == 0) {
                             clueCustomer.phone2 = phoneArr[i].value;
+                            clueCustomer.phone2CreateTime = phoneArr[i].key;
                         }
                         if (i == 1) {
                             clueCustomer.phone3 = phoneArr[i].value;
+                            clueCustomer.phone3CreateTime = phoneArr[i].key;
                         }
                         if (i == 2) {
                             clueCustomer.phone4 = phoneArr[i].value;
+                            clueCustomer.phone4CreateTime = phoneArr[i].key;
                         }
                         if (i == 3) {
                             clueCustomer.phone5 = phoneArr[i].value;
+                            clueCustomer.phone5CreateTime = phoneArr[i].key;
                         }
                     }
                 }
@@ -2137,9 +2235,10 @@
                     phoneArr.push(phone5);
                 }
                 if (phoneArr.length < 1) {
-                    var phone5 = {};
-                    phone5.value = "";
-                    phoneArr.push(phone5);
+                    var phone2 = {};
+                    phone2.value = "";
+                    phone2.key = Date.now();
+                    phoneArr.push(phone2);
                 }
                 this.dynamicValidateForm.domains = phoneArr;
                 if(phoneArr.length>0){
@@ -2309,7 +2408,9 @@
                 addCustomerVM.provinceArr = response.data.data.data;
             });
 
-
+            // 在线聊天记录data
+            this.initData();
+            this.isShowOnlineRecordFun();
         }
     })
 </script>

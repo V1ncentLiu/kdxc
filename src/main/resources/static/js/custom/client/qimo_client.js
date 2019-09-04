@@ -28,6 +28,7 @@ var clientVm = new Vue({
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
+             numberAttributionCompany:'',
              attribution:'',
         	 loginClient:'',
         	 accountNo:'',
@@ -186,7 +187,7 @@ var clientVm = new Vue({
          		this.$refs['clientForm'].resetFields();
          	 }
         	 //加载用户信息
-             axios.post('/user/userManager/listUserInfoByParam', {})
+             axios.post('/user/userManager/listUserInfoByOrgId', {})
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){
@@ -280,7 +281,7 @@ var clientVm = new Vue({
           	}
         	 
         	 //加载用户信息
-             axios.post('/user/userManager/listUserInfoByParam', {})
+             axios.post('/user/userManager/listUserInfoByOrgId', {})
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){

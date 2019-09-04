@@ -23,6 +23,9 @@
 		        <el-button type="warning" @click="settlementConfirm">结算确认</el-button>
 		    </shiro:hasPermission>
 		    <el-button type="success" @click="down">下载结算单</el-button>
+		    <shiro:hasPermission name="financing:reconciliationConfirmManager:export">
+	            <el-button type="warning" @click="exportFun"><i ></i>导出签约数据</el-button>
+	        </shiro:hasPermission>
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -473,6 +476,62 @@ var clueVM = new Vue({
                    //点击 页码
                  console.log(`当前页: ${val}`);
                  this.initTableData(val);
+               },
+               exportFun(){
+            	   var param ={};
+                   var startTime = this.searchForm.startTime;
+                   var endTime = this.searchForm.endTime;
+                   var payStartTime = this.searchForm.payStartTime;
+                   var payEndTime = this.searchForm.payEndTime;
+               	  var vilad=false;
+                   if(startTime&&endTime&&startTime> endTime){
+                   	  vilad=true;
+                   }
+                   if(payStartTime&&payEndTime&&payStartTime> payEndTime){
+                   	  vilad=true;
+                   }
+                   if(vilad){
+                   	  this.$message({
+                           message: '开始时间不能大于结束时间',
+                           type: 'warning'
+                       });
+                       return;
+                   }
+                   param.startTime = startTime;
+                   param.endTime = endTime;
+                   param.payStartTime = payStartTime;
+                   param.payEndTime = payEndTime;
+                   param.pageSize = this.pager.pageSize;
+                   param.pageNum = this.pager.currentPage;
+                   param.busAreaId = this.searchForm.busAreaId;
+                   param.busGroupId = this.searchForm.busGroupId;
+                   param.busSaleId = this.searchForm.busSaleId;
+                   param.status = this.searchForm.status;
+                   param.signProjectId = this.searchForm.signProjectId;
+                   param.cusName = this.searchForm.cusName;
+                   param.teleDeptId = this.searchForm.teleDeptId;
+                   param.teleGorupId = this.searchForm.teleGorupId;
+                   param.teleSaleId = this.searchForm.teleSaleId;
+                   param.signProvince = this.searchForm.signProvince;
+                   param.payType = this.searchForm.payType;
+                   param.phone = this.searchForm.phone;
+                   param.signNo = this.searchForm.signNo;
+                   param.statementNo = this.searchForm.statementNo;
+                   param.pageNum='';
+                   param.pageSize='';
+                   axios.post('/financing/reconciliationConfirm/export',param,{responseType:'blob'})
+                   .then(function (response) {
+                       console.log(response)
+                       var data =  response.data;
+                       var fileName = response.headers.filename;
+                           saveAs(data,decodeURI(fileName));
+                   })
+                   .catch(function (error) {
+                       console.log(error);
+                   }).then(function(){
+                	   clueVM.loading=false;
+                   });                     	
+               	
                },
                //是否转换方法
                transformSex(row, column, cellValue, index) {

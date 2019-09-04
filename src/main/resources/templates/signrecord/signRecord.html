@@ -17,11 +17,15 @@
         <el-breadcrumb-item>签约记录</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
+        <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+            <el-tab-pane label="待审核签约记录" name="first"></el-tab-pane>
+            <el-tab-pane label="已审核签约记录" name="second"></el-tab-pane>
+        </el-tabs>
         <shiro:hasPermission name=" aggregation:signRecord:reject">
-            <el-button type="danger" @click="OpenRejectSignRecordDialog">驳回</el-button>
+            <el-button type="danger" @click="OpenRejectSignRecordDialog" v-if="btnIsShow">驳回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name=" aggregation:signRecord:pass">
-            <el-button type="success" @click="pass">审核通过</el-button>
+            <el-button type="success" @click="pass" v-if="btnIsShow">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
@@ -106,7 +110,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="签约单状态:">
+                    <el-form-item label="签约单状态:" v-if="statusIsShow">
                         <el-select v-model="form.status" placeholder="签约单状态" clearable>
                             <el-option
                                     v-for="item in signOrderStatusOpt"
@@ -396,7 +400,7 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
+                <el-table-column align="center" prop="arrVisitCity" label="到访城市"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" width="140"></el-table-column>
                 <el-table-column align="center" prop="visitNum" label="到访次数" :formatter="transVisitNum"
                                  width="90"></el-table-column>
@@ -439,6 +443,9 @@
         el: '#businessContractRecord',
         data: function () {
             return {
+                btnIsShow:true,
+                statusIsShow:false,
+                activeName: 'first',//tabs:签约记录
                 btnDisabled: false,    
                 isShow: false,
                 showbutton: false,
@@ -455,6 +462,7 @@
                 isSWZDisabled:false,
                 curRow: "", // 列表数据：当前行，使用地点：付款明细
                 form: {
+                    queryType:'',
                     signProjectId: '',
                     businessGroupId: ownOrgId,
                     businessManagerId: '',
@@ -485,8 +493,9 @@
                 }],
                 isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
                 signOrderStatusOpt: [
+                    {value: '', label: '全部'},
                     {value: 0, label: '无效'},
-                    {value: 1, label: '待审核'},
+                    // {value: 1, label: '待审核'},
                     {value: 2, label: '有效'}
                 ],
                 value: '',//下拉选项默认值
@@ -514,7 +523,24 @@
             }
         },
         methods: {
-
+            handleClick(tab, event) {  //到访或者未到访tab切换
+                console.log(tab)
+                if(tab.name=='first'){
+                    this.form.queryType = '';
+                    this.pager.currentPage = 1;
+                    // this.dataTable=[];
+                    this.statusIsShow=false;
+                    this.btnIsShow=true;
+                    this.initSignRecordData();
+                }else{
+                    this.statusIsShow=true;
+                    this.btnIsShow=false;
+                    this.form.queryType = "1";
+                    this.pager.currentPage = 1;
+                    // this.dataTable=[];
+                    this.initSignRecordData();
+                }
+            },
             transGiveType(row, column, value, index) {
                 var text="";
                 for(var i=0;i<giveTypeList.length;i++) {
@@ -815,6 +841,7 @@
                         return;
                     }
                 }
+
                 var param = this.form;
                 param.pageNum = this.pager.currentPage;
                 param.pageSize = this.pager.pageSize;
