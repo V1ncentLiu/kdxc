@@ -1,7 +1,11 @@
 package com.kuaidao.manageweb.controller.log;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +13,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.PageBeans;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.logmgt.dto.AccessLogReqDTO;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.log.LogMgtFeignClient;
 
 /**
@@ -39,7 +42,9 @@ public class LogController {
      */
     @RequestMapping("/visitLog")
     public String visitLog(HttpServletRequest request) {
-
+    	SimpleDateFormat format =  new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+    	request.setAttribute("beginTime", format.format(DateUtil.getTodayStartTime()));
+    	request.setAttribute("endTime", format.format(new Date()));
         return "log/logPage";
     }
 
@@ -50,7 +55,10 @@ public class LogController {
      */
     @RequestMapping("/operationLog")
     public String operationLog(HttpServletRequest request) {
-        return "log/operationLog";
+    	SimpleDateFormat format =  new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+    	request.setAttribute("beginTime", format.format(DateUtil.getTodayStartTime()));
+    	request.setAttribute("endTime", format.format(new Date()));
+    	return "log/operationLog";
     }
 
     /* *//***
@@ -60,7 +68,7 @@ public class LogController {
           */
     @RequestMapping("/queryLogDataList")
     @ResponseBody
-    public JSONResult<PageBean<AccessLogReqDTO>> queryLogDataList(
+    public JSONResult<PageBeans<AccessLogReqDTO>> queryLogDataList(
             @RequestBody AccessLogReqDTO logReqDTO, HttpServletRequest request,
             HttpServletResponse response) {
         return logMgtFeignClient.queryLogRecord(logReqDTO);
