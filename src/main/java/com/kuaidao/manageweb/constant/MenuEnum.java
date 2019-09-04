@@ -47,7 +47,13 @@ public enum MenuEnum {
     /**
      * 版本管理
      */
-    VERSION_LIST("版本列表"),IOS_VERSION_LIST("IOS版本列表"),ANDROID_VERSION_LIST("ANDROID版本列表");
+    VERSION_LIST("版本列表"),IOS_VERSION_LIST("IOS版本列表"),ANDROID_VERSION_LIST("ANDROID版本列表"),
+
+    /**
+     *报表（商务模块）
+     */
+    VISIT_SIGN("签约来访");
+
 
     /**
      * 系统管理菜单
