@@ -110,7 +110,7 @@ public class AppointmentVisitController {
         addTotalExportData(sumReadd,dataList,GROUP);
         buildList(dataList, orderList,GROUP);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "话务预约来访表" +appointmentVisitQueryDto.getStartTime()+"-"+appointmentVisitQueryDto.getEndTime() + ".xlsx";
+        String name = "预约情况表" +appointmentVisitQueryDto.getStartTime()+"-"+appointmentVisitQueryDto.getEndTime() + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -149,7 +149,7 @@ public class AppointmentVisitController {
         addTotalExportData(sumReadd,dataList,GROUP_DAY);
         buildList(dataList, orderList,GROUP_DAY);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "话务预约来访表" +appointmentVisitQueryDto.getStartTime()+"-"+appointmentVisitQueryDto.getEndTime() + ".xlsx";
+        String name = "预约情况表" +appointmentVisitQueryDto.getStartTime()+"-"+appointmentVisitQueryDto.getEndTime() + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -219,7 +219,7 @@ public class AppointmentVisitController {
         headTitleList.add("正常邀约数");
         headTitleList.add("取消邀约数");
         headTitleList.add("删除邀约数");
-        headTitleList.add("邀约次数");
+        headTitleList.add("正常邀约次数");
         headTitleList.add("取消邀约次数");
         headTitleList.add("删除邀约次数");
         return headTitleList;
