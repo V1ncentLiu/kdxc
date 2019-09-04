@@ -341,6 +341,7 @@ public class SignRecordController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         reqDTO.setUserId(user.getId());
+        reqDTO.setOrgId(user.getOrgId());
         reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.REJECT);
         return signRecordFeignClient.rejectSignOrder(reqDTO);
     }
@@ -363,6 +364,7 @@ public class SignRecordController {
         reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.PASS);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        reqDTO.setOrgId(curLoginUser.getOrgId());
         return signRecordFeignClient.rejectSignOrder(reqDTO);
     }
 
