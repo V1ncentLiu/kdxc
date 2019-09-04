@@ -178,7 +178,7 @@ public class ReceptionVisitController {
             headTitleList.add("商务经理");
         }
         headTitleList.add("来访次数");
-        headTitleList.add("来访资源数");
+        headTitleList.add("来访客户数");
         headTitleList.add("首访数占比");
         headTitleList.add("签约单数");
         headTitleList.add("订金率");
