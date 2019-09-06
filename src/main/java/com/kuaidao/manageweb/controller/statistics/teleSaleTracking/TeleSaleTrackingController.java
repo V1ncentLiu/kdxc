@@ -564,10 +564,10 @@ public class TeleSaleTrackingController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         Integer dxcygwNum = getDXCYGWNum(orgId);
+        double dayOfper = 0.0;
         if(days != 0 && dxcygwNum != 0){
-
+            dayOfper = (double)countClueId / days / dxcygwNum;
         }
-        Double dayOfper = (double) (countClueId / days / dxcygwNum);
         List<TeleSaleTrackingDto> countList = new ArrayList<>();
         TeleSaleTrackingDto res = new TeleSaleTrackingDto();
         res.setCountResource(countResouce);
