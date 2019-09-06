@@ -12,6 +12,7 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.teleSaleTracking.TeleSaleTrackingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingQueryDto;
@@ -21,6 +22,8 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -36,7 +39,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,8 +53,9 @@ public class TeleSaleTrackingController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
-    DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private UserInfoFeignClient userFeignClient;
     private static Logger logger = LoggerFactory.getLogger(TeleSaleTrackingController.class);
 
     /**
@@ -557,7 +560,14 @@ public class TeleSaleTrackingController {
         //回访资源数
         Integer countDistinctClue = list.stream().mapToInt(TeleSaleTrackingDto::getCountDistinctClue).sum();
         //人均天回访次数
-        Double dayOfper = list.stream().mapToDouble(TeleSaleTrackingDto::getDayOfPer).sum();
+        Integer days = minusDay(trackingQueryDto.getStartTime(), trackingQueryDto.getEndTime());
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long orgId = curLoginUser.getOrgId();
+        Integer dxcygwNum = getDXCYGWNum(orgId);
+        if(days != 0 && dxcygwNum != 0){
+
+        }
+        Double dayOfper = (double) (countClueId / days / dxcygwNum);
         List<TeleSaleTrackingDto> countList = new ArrayList<>();
         TeleSaleTrackingDto res = new TeleSaleTrackingDto();
         res.setCountResource(countResouce);
@@ -605,5 +615,32 @@ public class TeleSaleTrackingController {
             return "普通";
         }
         return "";
+    }
+
+    /**
+     * 获取电销创业顾问
+     */
+    private Integer getDXCYGWNum(Long orgId) {
+        List<UserInfoDTO> userInfo = getUserInfo(orgId,RoleCodeEnum.DXCYGW.name());
+        if(CollectionUtils.isNotEmpty(userInfo)) {
+            return userInfo.size();
+        }
+        return 0;
+    }
+    private List<UserInfoDTO> getUserInfo(Long orgId, String roleName) {
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setRoleCode(roleName);
+        if (null != orgId) {
+            req.setOrgId(orgId);
+        }
+        return userFeignClient.listByOrgAndRole(req).getData();
+    }
+    private int minusDay(Long startTime,Long endTime) {
+        if(startTime==null || endTime==null) {
+            return 0;
+        }
+        Date beforDate = DateUtil.convert2Date(String.valueOf(startTime),DateUtil.ymdhm2);
+        Date endDate = DateUtil.convert2Date(String.valueOf(endTime),DateUtil.ymdhm2);
+        return DateUtil.diffDay(beforDate, endDate)+1;
     }
 }
