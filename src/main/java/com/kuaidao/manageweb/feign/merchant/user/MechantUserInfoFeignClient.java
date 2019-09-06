@@ -23,7 +23,7 @@ import java.util.List;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/merchant/userInfo",
+@FeignClient(name = "sys-service-1", path = "/sys/merchant/userInfo",
         fallback = MechantUserInfoFeignClient.HystrixClientFallback.class)
 public interface MechantUserInfoFeignClient {
 
