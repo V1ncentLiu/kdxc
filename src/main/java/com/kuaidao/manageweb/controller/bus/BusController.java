@@ -10,6 +10,7 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -19,15 +20,17 @@ import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.BusArrangeFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import com.kuaidao.sys.dto.role.RoleQueryDTO;
+import com.kuaidao.sys.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -68,16 +71,43 @@ public class BusController {
   private BusArrangeFeignClient busArrangeFeignClient;
   @Autowired
   UserInfoFeignClient userInfoFeignClient;
+  @Autowired
+  private SysSettingFeignClient sysSettingFeignClient;
 
-  /**
-   *
-   * @param request
-   * @return
-   */
-  @RequestMapping("/accountManagement")
-  public String accountManagement(HttpServletRequest request) {
-    return "businessVersion/accountManagement/accountManagement";
-  }
+
+    /***
+     * 用户列表页
+     *
+     * @return
+     */
+    @RequestMapping("/initUserList")
+    public String initUserList(HttpServletRequest request) {
+
+      JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
+
+      request.setAttribute("roleList", list.getData());
+
+      String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
+      String reminderTime = getSysSetting(SysConstant.REMINDER_TIME);
+      request.setAttribute("passwordExpires", passwordExpires);
+      if (reminderTime != null) {
+        request.setAttribute("reminderTime", reminderTime);
+      }
+      return "bus/user/userManagePage";
+    }
+
+    /***
+     * 用户列表
+     *
+     * @return
+     */
+    @PostMapping("/merchantlist")
+    @ResponseBody
+    public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
+                                                           HttpServletResponse response) {
+        JSONResult<PageBean<UserInfoDTO>> list = userInfoFeignClient.merchantlist(userInfoPageParam);
+        return list;
+    }
   /**
    *
    * @param request
@@ -86,5 +116,20 @@ public class BusController {
   @RequestMapping("/subAccountManagement")
   public String subAccountManagement(HttpServletRequest request) {
     return "businessVersion/accountManagement/subAccountManagement";
+  }
+  /**
+   * 查询系统参数
+   *
+   * @param code
+   * @return
+   */
+  private String getSysSetting(String code) {
+    SysSettingReq sysSettingReq = new SysSettingReq();
+    sysSettingReq.setCode(code);
+    JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+    if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+      return byCode.getData().getValue();
+    }
+    return null;
   }
 }
