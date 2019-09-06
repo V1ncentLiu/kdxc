@@ -76,7 +76,7 @@ public class BusController {
    */
   @RequestMapping("/accountManagement")
   public String accountManagement(HttpServletRequest request) {
-    return "businessVersion/accountManagement/accountManagement";
+    return "merchant/accountManagement/accountManagement";
   }
   /**
    *
@@ -85,6 +85,6 @@ public class BusController {
    */
   @RequestMapping("/subAccountManagement")
   public String subAccountManagement(HttpServletRequest request) {
-    return "businessVersion/accountManagement/subAccountManagement";
+    return "merchant/accountManagement/subAccountManagement";
   }
 }
