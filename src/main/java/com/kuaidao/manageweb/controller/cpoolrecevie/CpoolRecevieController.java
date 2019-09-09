@@ -1,14 +1,28 @@
 package com.kuaidao.manageweb.controller.cpoolrecevie;
 
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.cpoolrecevie.CpoolRecevieFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleInsertOrUpdateDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleReqDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleRespDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Auther: admin
@@ -23,18 +38,99 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @Description:
  */
 @Controller
-@RequestMapping("/console/console")
+@RequestMapping("/merchant/recevieRule")
 public class CpoolRecevieController {
   private static Logger logger = LoggerFactory.getLogger(CpoolRecevieController.class);
 
   @Autowired
   private CpoolRecevieFeignClient cpoolRecevieFeignClient;
+  @Autowired
+  UserInfoFeignClient userInfoFeignClient;
+  @Autowired
+  DictionaryItemFeignClient dictionaryItemFeignClient;
+  @Autowired
+  ProjectInfoFeignClient projectInfoFeignClient;
 
+  /**
+   * 设置商家
+   */
+  private void setMerchant(HttpServletRequest request){
+    UserInfoPageParam pageParam = new UserInfoPageParam();
+    JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.merchanListNoPage(pageParam);
+    if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+      if(CollectionUtils.isNotEmpty(listJSONResult.getData())){
+        request.setAttribute("merchantNames",listJSONResult.getData());
+      }
+    }
+  }
 
+  /**
+   * 查询字典表
+   *
+   * @param code
+   * @return
+   */
+  private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+    JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+    if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+      return queryDicItemsByGroupCode.getData();
+    }
+    return null;
+  }
 
+  private void projectList(HttpServletRequest request){
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.listNoPage(param);
+    if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+      if(CollectionUtils.isNotEmpty(listJSONResult.getData())){
+        request.setAttribute("projectList", listJSONResult.getData());
+      }
+    }
+  }
+  /**
+   * 跳转：list页面
+   */
+  @RequestMapping("/toList")
+  public String toList( HttpServletRequest request) {
+    // 获取全部商家名称
+    setMerchant(request);
+    projectList(request);
+    // 查询字典类别集合
+    request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+    // 查询字典类别集合
+    request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+    return "merchant/getResourceSetting/getResourceSetting";
+  }
+  /**
+   * 跳转：add页面
+   */
+  @RequestMapping("/toAdd")
+  public String toAdd( HttpServletRequest request) {
+    setMerchant(request);
+    projectList(request);
+    // 查询字典类别集合
+    request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+    // 查询字典类别集合
+    request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+    return "merchant/getResourceSetting/addGetResourceSetting";
+  }
+  /**
+   * 跳转：update页面
+   */
+  @RequestMapping("/toUpdate")
+  public String toUpdate( HttpServletRequest request) {
+    setMerchant(request);
+    projectList(request);
+    // 查询字典类别集合
+    request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+    // 查询字典类别集合
+    request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+    return "merchant/getResourceSetting/updateGetResourceSetting";
+  }
   /**
    * 创建共有池领取规则
    */
+  @ResponseBody
   @PostMapping("/create")
   public JSONResult<Long> create(@RequestBody CpoolReceivelRuleInsertOrUpdateDTO cpoolReceivelRule
      ) throws NoSuchAlgorithmException {
@@ -46,6 +142,7 @@ public class CpoolRecevieController {
   /**
    * 修改共有池领取规则
    */
+  @ResponseBody
   @PostMapping("/update")
   public JSONResult<String> update(@RequestBody CpoolReceivelRuleInsertOrUpdateDTO cpoolReceivelRule) throws NoSuchAlgorithmException {
     logger.info("更新参数{}",cpoolReceivelRule);
@@ -57,6 +154,7 @@ public class CpoolRecevieController {
   /**
    * 删除共有池领取规则
    */
+  @ResponseBody
   @PostMapping("/delete")
   public JSONResult<String> delete(@RequestBody IdListLongReq idList) {
     logger.info("删除参数{}",idList);
