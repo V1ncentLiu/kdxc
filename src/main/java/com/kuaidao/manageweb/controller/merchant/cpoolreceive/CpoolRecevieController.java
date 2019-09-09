@@ -130,6 +130,7 @@ public class CpoolRecevieController {
     JSONResult<CpoolReceivelRuleRespDTO> josnResult = cpoolRecevieFeignClient.getbyId(idEntity);
     if(JSONResult.SUCCESS.equals(josnResult.getCode())){
       CpoolReceivelRuleRespDTO data = josnResult.getData();
+      data.setId(idEntity.getId());
       request.setAttribute("cpoolReceiveRule",data);
     }
     return "merchant/getResourceSetting/updateGetResourceSetting";
@@ -190,6 +191,7 @@ public class CpoolRecevieController {
   /**
    * 更新状态接口
    */
+  @ResponseBody
   @PostMapping("/updateStatus")
   public JSONResult<String> updateStatus(@RequestBody CpoolReceivelRuleReqDTO param) throws NoSuchAlgorithmException {
     logger.info("更新状态参数{}",param);

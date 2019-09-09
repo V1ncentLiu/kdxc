@@ -35,7 +35,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源类别：" prop="source" :label-width="formLabelWidth">
-                        <el-select v-model="form.source" placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.source" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in categoryOptions"
                                 :key="item.value"
@@ -47,7 +47,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源项目：" prop="" :label-width="formLabelWidth">
-                        <el-select v-model="form.projectId" placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.projectId" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in projectInfo"
                                 :key="item.id"
@@ -59,7 +59,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源类型：" prop="" :label-width="formLabelWidth">
-                        <el-select v-model="form.sourceType" placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.sourceType" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in clueTypeList"
                                 :key="item.value"
@@ -76,7 +76,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="设定商家：" prop="" :label-width="formLabelWidth">
-                        <el-select v-model="form.setbusiness" placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.setbusiness" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in merchantNames"
                                 :key="item.id"
@@ -124,11 +124,11 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                     ruleName:"",
                     stime:"",
                     etime:"",
-                    source:"",
-                    projectId:"",
-                    sourceType:"",
+                    source:[],
+                    projectId:[],
+                    sourceType:[],
                     top:"",
-                    setbusiness:"",
+                    setbusiness:[],
                     status:1,
                 },
                 formLabelWidth: '180px',
@@ -238,7 +238,17 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                             });
                             return;
                         }
-                        var param=form;
+                        var param={};
+                        param.id= form.id;
+                        param.ruleName= form.ruleName;
+                        param.stime=form.stime;
+                        param.etime=form.etime;
+                        param.source=form.source.join(",");
+                        param.sourceType=form.sourceType.join(",");
+                        param.projectId=form.projectId.join(",");
+                        param.top=form.top;
+                        param.setbusiness=form.setbusiness.join(",");
+                        param.status=form.status;
                         param.stime = new Date(param.stime);
                         param.etime = new Date(param.etime);
                         aorVM.submitDisabled=true;
@@ -402,11 +412,11 @@ var merchantNames=[[${merchantNames}]];// 设定商家
             this.form.ruleName=cpoolReceiveRule.ruleName;
             this.form.stime=cpoolReceiveRule.stime;
             this.form.etime=cpoolReceiveRule.etime;
-            this.form.source= ""+cpoolReceiveRule.source
-            this.form.projectId=cpoolReceiveRule.project
-            this.form.sourceType=""+cpoolReceiveRule.sourceType
+            this.form.source= cpoolReceiveRule.source.split(",")
+            this.form.projectId=cpoolReceiveRule.project==null?[]:cpoolReceiveRule.project.split(",")
+            this.form.sourceType=cpoolReceiveRule.sourceType.split(",")
             this.form.top=cpoolReceiveRule.top
-            this.form.setbusiness=cpoolReceiveRule.setbusiness
+            this.form.setbusiness=cpoolReceiveRule.setbusiness.split(",")
             this.form.status=cpoolReceiveRule.status;
         }
     })

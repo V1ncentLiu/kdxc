@@ -29,25 +29,25 @@
                     <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
                 </el-form-item>
                 <el-form-item label="商家:">
-                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="商家账户名">
+                    <el-select v-model="form.setbusiness" filterable  clearable placeholder="商家账户名">
                         <el-option
-                            v-for="item in industryCategoryOptions"
-                            :key="item.value"
+                            v-for="item in merchantNames"
+                            :key="item.id"
                             :label="item.name"
-                            :value="item.value">
+                            :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="有效时间段:">
                     <el-date-picker
-                        v-model="form.searchStartTime"
+                        v-model="form.stime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.searchEndTime"
+                        v-model="form.etime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
@@ -152,8 +152,7 @@
 <script th:inline="javascript">
     var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
     var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
-    var mediumList=[[${mediumList}]];//媒介集合
-    var queryOrg=[[${queryOrg}]];//电销组
+    var merchantNames=[[${merchantNames}]];//媒介集合
     var userId=[[${userId}]];//登录人账号id
     var roleCode=[[${roleCode}]];//登录人角色code
     var ocmVM = new Vue({
@@ -171,14 +170,9 @@
                 },
                 form: {
                   ruleName:'',
-                  category:'',
-                  industryCategory:'',
-                  status:'',
-                  searchStartTime:'',
-                  searchEndTime:'',
-                  teleorg:'',
-                  updateTimeBegin:'',
-                  updateTimeEnd:''
+                  stime:'',
+                  etime:'',
+                  setBusiness:''
                 },
                 dialogForm:{
                   ruleName:'',
@@ -279,10 +273,7 @@
               var param = {};
               param.id=id;
               param.status=status;
-              var url='/clueAssignRule/optRule/updateStatusEnable';
-              if(status==0){
-            	  url='/clueAssignRule/optRule/updateStatusDisable';
-              }
+              var url='/merchant/recevieRule/updateStatus';
               axios.post(url, param)
               .then(function (response) {
                 var result =  response.data;
@@ -300,8 +291,8 @@
               });
             },
             searchTable() {
-            	var startTime=this.form.searchStartTime;
-                var endTime=this.form.searchEndTime;
+            	var startTime=this.form.stime;
+                var endTime=this.form.etime;
                 if(endTime && startTime>endTime){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
