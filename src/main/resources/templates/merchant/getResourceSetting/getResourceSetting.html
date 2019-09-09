@@ -73,11 +73,11 @@
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="ruleName" label="规则名称"></el-table-column>
-                <el-table-column align="center" prop="" label="商家账户"></el-table-column>
-                <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" width="80"></el-table-column>
-                <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="更新时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="setBusinessName" label="商家账户"></el-table-column>
+                <el-table-column align="center" prop="sourceTypeName" label="资源类别" width="80"></el-table-column>
+                <el-table-column align="center" prop="stime" label="规则开始时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="etime" label="规则结束时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="更新时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="updateUserName" label="最后操作人" width="120"></el-table-column>
                 <el-table-column align="center" prop="status" label="状态" width="80" :formatter="transformStatus"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
@@ -106,37 +106,37 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            {{dialogForm.category}}
+                            {{dialogForm.sourceName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="生效开始时间：" :label-width="formLabelWidth">
-                            {{dialogForm.startTime}}
+                            {{dialogForm.stime}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="生效结束时间：" :label-width="formLabelWidth">
-                            {{dialogForm.endTime}}
+                            {{dialogForm.etime}}
                         </el-form-item>
                     </el-col>                
                     <el-col :span="12">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
-                           
+                            {{dialogForm.projectName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth">
-                            
+                            {{dialogForm.sourceTypeName}}
                         </el-form-item>
                     </el-col>                
                     <el-col :span="12">
                         <el-form-item label="设定商家：" :label-width="formLabelWidth">
-                           
+                            {{dialogForm.setBusinessName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="每日领取上限（条）：" :label-width="formLabelWidth">
-                            
+                            {{dialogForm.top}}
                         </el-form-item>
                     </el-col> 
                 </el-row>
@@ -182,15 +182,14 @@
                 },
                 dialogForm:{
                   ruleName:'',
-                  category:'',
-                  source:'',
-                  industryCategory:'',
-                  searchWord:'',
-                  notSearchWord:'',
+                  sourceName:'',
+                  sourceTypeName:'',
+                  stime:'',
+                  etime:'',
+                  projectName:'',
                   province:'',
-                  notProvince:'',
-                  startTime:'',
-                  endTime:'',
+                  top:'',
+                  setBusinessName:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -235,11 +234,11 @@
              	   if(roleCode=="YHWY"||roleCode=="YHZG"){
              		   
              	   }else if(curRow.createUser+""!=userId){
-             		  this.$message({
-                          message: '不允许删除非本人创建的规则',
-                          type: 'warning'
-                        });
-                       return;
+             		  // this.$message({
+                   //        message: '不允许删除非本人创建的规则',
+                   //        type: 'warning'
+                   //      });
+                   //     return;
              	   }
                    rowIds.push(curRow.id);
                    rowNames.push("【"+curRow.ruleName+"】");
@@ -251,7 +250,7 @@
                 }).then(() => {
                     //删除
                     var param  = {idList:rowIds};
-                    axios.post('/clueAssignRule/optRule/delete',param)
+                    axios.post('/merchant/recevieRule/delete',param)
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
@@ -362,15 +361,13 @@
             rowDblClick(row, column, event){//双击查看详情
                 this.dialogFormVisible = true;
                 this.dialogForm.ruleName = row.ruleName;
-                this.dialogForm.category =this.transformCategory(null,null,row.category);;
-                this.dialogForm.source = this.transformSource(null,null,row.source);;
-                this.dialogForm.industryCategory = this.transformIndustry(null,null,row.industryCategory);;
-                this.dialogForm.searchWord = row.searchWord;
-                this.dialogForm.notSearchWord = row.notSearchWord;
-                this.dialogForm.province = row.province;;
-                this.dialogForm.notProvince = row.notProvince;
-                this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
-                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);;
+                this.dialogForm.stime =row.stime;
+                this.dialogForm.etime = row.etime;
+                this.dialogForm.sourceName = row.sourceName;
+                this.dialogForm.projectName = row.projectName;
+                this.dialogForm.sourceTypeName = row.sourceTypeName;
+                this.dialogForm.top = row.top;;
+                this.dialogForm.setBusinessName = row.setBusinessName;
             },
             addFun(){
             	document.location.href='/merchant/recevieRule/toAdd';
@@ -385,16 +382,16 @@
                     return;
                 }else{           
                     // 存储选中信息--start
-                    var clueId=rows[0].id; 
-                    this.setSessionStore("optRuleManagerStoreForm", this.storeForm);
-                    var otherVal = {
-                        "currentPage": this.pager.currentPage,
-                        "clueId": clueId,
-                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
-                    }
-                    this.setSessionStore("optRuleManagerOtherVal", otherVal);
+                    var id=rows[0].id;
+                    // this.setSessionStore("optRuleManagerStoreForm", this.storeForm);
+                    // var otherVal = {
+                    //     "currentPage": this.pager.currentPage,
+                    //     "clueId": clueId,
+                    //     "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    // }
+                    // this.setSessionStore("optRuleManagerOtherVal", otherVal);
                     // 存储选中信息--end
-                	document.location.href='/merchant/recevieRule/toUpdate?id='+clueId;
+                	document.location.href='/merchant/recevieRule/toUpdate?id='+id;
                 }                
             },
           //状态转换方法

@@ -24,18 +24,18 @@
                     </el-form-item>
                 </el-col>             
                 <el-col :span="12">
-                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                    <el-form-item label="规则有效开始时间：" prop="stime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.stime" style="width: 300px;"></el-date-picker>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                    <el-form-item label="规则有效结束时间：" prop="etime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.etime" style="width: 300px;"></el-date-picker>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                    <el-form-item label="资源类别：" prop="source" :label-width="formLabelWidth">
+                        <el-select v-model="form.source" placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in categoryOptions"
                                 :key="item.value"
@@ -47,21 +47,21 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源项目：" prop="" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.projectId" placeholder="请选择" style="width: 300px;">
                             <el-option
-                                v-for="item in categoryOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
+                                v-for="item in projectInfo"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
                             </el-option>
                         </el-select>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源类型：" prop="" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.sourceType" placeholder="请选择" style="width: 300px;">
                             <el-option
-                                v-for="item in categoryOptions"
+                                v-for="item in clueTypeList"
                                 :key="item.value"
                                 :label="item.name"
                                 :value="item.value">
@@ -71,15 +71,15 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="每日领取上限（条）：" prop="" :label-width="formLabelWidth">
-                        <el-input v-model="form.ruleName" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                        <el-input v-model="form.top" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="设定商家：" prop="" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.setbusiness" placeholder="请选择" style="width: 300px;">
                             <el-option
-                                v-for="item in categoryOptions"
-                                :key="item.value"
+                                v-for="item in merchantNames"
+                                :key="item.id"
                                 :label="item.name"
                                 :value="item.value">
                             </el-option>
@@ -123,16 +123,14 @@ var merchantNames=[[${merchantNames}]];// 设定商家
         data: function() {
             return {                
                 form: {
-                    ruleName:'',
-                    startTime:'',
-                    endTime:'',
-                    industryCategory:[],
-                    source:[],
-                    category:[],
-                    searchWord:'',
-                    notSearchWord:'',
-                    province:'',
-                    notProvince:'',
+                    ruleName:"",
+                    stime:"",
+                    etime:"",
+                    source:"",
+                    projectId:"",
+                    sourceType:"",
+                    top:"",
+                    setbusiness:"",
                     status:1,
                 },
                 formLabelWidth: '180px',
@@ -140,17 +138,14 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                     ruleName: [
                         { required: true, message: '请输入规则名称', trigger: 'blur' }
                     ],
-                    startTime: [
+                    stime: [
                         { required: true, message: '请选择规则有效开始时间', trigger: 'blur' }
                     ],
-                    endTime: [
+                    etime: [
                         { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
                     ],
-                    industryCategory: [
-                        {  required: true, message: '请至少选择一个行业类别', trigger: 'change' }
-                    ],
                     source: [
-                        { required: true, message: '请至少选择一个媒介', trigger: 'change' }
+                        {  required: true, message: '请至少选择一个行业类别', trigger: 'change' }
                     ],
                     category: [
                         { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
@@ -199,7 +194,6 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                 submitDisabled:false,
                 clueTypeList:clueTypeList,
                 merchantNames:merchantNames,
-                merchantNames:merchantNames,
                 categoryOptions:clueCategoryList,
                 projectInfo:projectList ,
                 statusOptions: [{
@@ -208,18 +202,7 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                 }, {
                     value: 0,
                     name: '禁用'
-                }],
-                priorOptions: [{
-                    value: 1,
-                    name: '优先'
-                }, {
-                    value: 0,
-                    name: '非优先'
-                }],
-                tags1: [],//包含搜索词
-                tags2: [],//不包含搜索词
-                tags3: [],//包含省
-                tags4: [],//不包含省
+                }]
             }             
         },
         methods: {
@@ -256,63 +239,10 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                             return;
                         }
                         // 不能选择重复电销组
-                        var orgIdChoose=form.teleRuleTeamList; 
-                        var ary=[];                   
-                        for(var i=0;i<orgIdChoose.length;i++){
-                            var split=orgIdChoose[i].orgId.split(",");
-                            orgIdChoose[i].orgId=split[0];
-                            orgIdChoose[i].orgType=split[1];
-                            ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
-                            var s = ary.join(",")+","; 
-                            for(var j=0;j<ary.length;j++) {
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要选择相同的电销组',
-                                            type: 'warning'
-                                        });
-                                        return;
-                                    }
-                                }                                
-                            }
-                        }
-                        // 不能选择重复话务组
-                        orgIdChoose=form.trafficRuleTeamList; 
-                        var ary=[];
-                        for(var i=0;i<orgIdChoose.length;i++){
-                            var split=orgIdChoose[i].orgId.split(",");
-                            orgIdChoose[i].orgId=split[0];
-                            orgIdChoose[i].orgType=split[1];
-                            ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
-                            var s = ary.join(",")+","; 
-                            for(var j=0;j<ary.length;j++) {
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要选择相同的话务组',
-                                            type: 'warning'
-                                        });
-                                        return;
-                                    }
-                                }                                
-                            }
-                        }
+
                         var param=form;
-                        param.ruleName=form.ruleName;
-                        param.startTime=form.startTime;
-                        param.endTime=form.endTime;
-                        param.status=form.status;
-                        param.teleList=form.teleRuleTeamList;
-                        param.trafficList=form.trafficRuleTeamList;
-                        param.source=form.source.join(',');
-                        param.industryCategory=form.industryCategory.join(',');
-                        param.category=this.form.category.join(',');
-                        param.searchWord=this.tags1.join(',');
-                        param.notSearchWord=this.tags2.join(',');
-                        param.province=this.tags3.join(',');
-                        param.notProvince=this.tags4.join(',');
                         aorVM.submitDisabled=true;
-                        axios.post('/clueAssignRule/optRule/save', param)
+                        axios.post('/merchant/recevieRule/create', param)
                         .then(function (response) {
                                console.info(response);
                             var data =response.data;
@@ -322,7 +252,7 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                             }else{
                                 aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
                                     aorVM.submitDisabled=false;
-                                    document.location.href='/clueAssignRule/optRule/initRuleList';
+                                    document.location.href='/merchant/recevieRule/toList';
                                 }});
                             }
                         })
@@ -445,7 +375,7 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                 }
         　　      }, 
         　　      cancelForm(){
-                document.location.href='/clueAssignRule/optRule/initRuleList';
+                document.location.href='/merchant/recevieRule/toList';
             },
           //根据电销组查询电销总监
             getTeleGroupList(index,rows) {

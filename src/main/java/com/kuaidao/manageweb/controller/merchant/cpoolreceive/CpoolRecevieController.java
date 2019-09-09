@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.controller.cpoolrecevie;
+package com.kuaidao.manageweb.controller.merchant.cpoolreceive;
 
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
@@ -11,6 +11,7 @@ import com.kuaidao.manageweb.feign.cpoolrecevie.CpoolRecevieFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleInsertOrUpdateDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleReqDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleRespDTO;
@@ -18,9 +19,7 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -118,13 +117,21 @@ public class CpoolRecevieController {
    * 跳转：update页面
    */
   @RequestMapping("/toUpdate")
-  public String toUpdate( HttpServletRequest request) {
+  public String toUpdate(HttpServletRequest request) {
     setMerchant(request);
     projectList(request);
     // 查询字典类别集合
     request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
     // 查询字典类别集合
     request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+    IdEntityLong idEntity = new IdEntityLong();
+    String id = request.getParameter("id");
+    idEntity.setId(Long.valueOf(id));
+    JSONResult<CpoolReceivelRuleRespDTO> josnResult = cpoolRecevieFeignClient.getbyId(idEntity);
+    if(JSONResult.SUCCESS.equals(josnResult.getCode())){
+      CpoolReceivelRuleRespDTO data = josnResult.getData();
+      request.setAttribute("cpoolReceiveRule",data);
+    }
     return "merchant/getResourceSetting/updateGetResourceSetting";
   }
   /**
@@ -134,6 +141,9 @@ public class CpoolRecevieController {
   @PostMapping("/create")
   public JSONResult<Long> create(@RequestBody CpoolReceivelRuleInsertOrUpdateDTO cpoolReceivelRule
      ) throws NoSuchAlgorithmException {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    cpoolReceivelRule.setCreateTime(new java.util.Date());
+    cpoolReceivelRule.setCreateUser(curLoginUser.getId());
     logger.info("创建参数{}",cpoolReceivelRule);
     JSONResult<Long> josnResult = cpoolRecevieFeignClient.create(cpoolReceivelRule);
     return josnResult;
@@ -146,6 +156,9 @@ public class CpoolRecevieController {
   @PostMapping("/update")
   public JSONResult<String> update(@RequestBody CpoolReceivelRuleInsertOrUpdateDTO cpoolReceivelRule) throws NoSuchAlgorithmException {
     logger.info("更新参数{}",cpoolReceivelRule);
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    cpoolReceivelRule.setUpdateTime(new java.util.Date());
+    cpoolReceivelRule.setUpdateUser(curLoginUser.getId());
     JSONResult<String> josnResult =
         cpoolRecevieFeignClient.update(cpoolReceivelRule);
     return josnResult;
@@ -180,6 +193,9 @@ public class CpoolRecevieController {
   @PostMapping("/updateStatus")
   public JSONResult<String> updateStatus(@RequestBody CpoolReceivelRuleReqDTO param) throws NoSuchAlgorithmException {
     logger.info("更新状态参数{}",param);
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    param.setUpdateTime(new java.util.Date());
+    param.setUpdateUser(curLoginUser.getId());
     JSONResult<String> stringJSONResult = cpoolRecevieFeignClient.updateStatus(param);
     return stringJSONResult;
   }
@@ -188,6 +204,7 @@ public class CpoolRecevieController {
    * 查询共有池分配规则列表
    * @return
    */
+  @ResponseBody
   @PostMapping("/list")
   public JSONResult<PageBean<CpoolReceivelRuleRespDTO>> list(@RequestBody CpoolReceivelRuleReqDTO pageParam) {
     logger.info("列表查询参数{}",pageParam);
