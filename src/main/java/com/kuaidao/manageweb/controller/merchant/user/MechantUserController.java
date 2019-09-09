@@ -160,4 +160,17 @@ public class MechantUserController {
         }
         return mechantUserInfoFeignClient.create(userInfoReq);
     }
+    /**
+     * 查询用户根据id
+     *
+     * @param
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/getMechantUserById")
+    @ResponseBody
+    public JSONResult<UserInfoReq> getMechantUserById(@RequestBody UserInfoReq userInfoReq) {
+        return mechantUserInfoFeignClient.getMechantUserById(userInfoReq);
+    }
 }
