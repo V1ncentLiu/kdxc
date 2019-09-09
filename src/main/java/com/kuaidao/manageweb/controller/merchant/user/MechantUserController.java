@@ -19,7 +19,7 @@ import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.merchant.user.MechantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  */
 
 @Controller
-@RequestMapping("/mechant/userManager")
+@RequestMapping("/merchant/userManager")
 public class MechantUserController {
     private static Logger logger = LoggerFactory.getLogger(MechantUserController.class);
     @Autowired
@@ -85,7 +85,7 @@ public class MechantUserController {
     @Autowired
     private ChangeOrgFeignClient changeOrgFeignClient;
     @Autowired
-    private MechantUserInfoFeignClient mechantUserInfoFeignClient;
+    private MerchantUserInfoFeignClient mechantUserInfoFeignClient;
 
     /***
      * 用户列表页
@@ -112,7 +112,15 @@ public class MechantUserController {
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
         }
-        return "mechant/user/userManagePage";
+        //查询商家版子账号对应的角色
+        RoleQueryDTO roleQueryDTO = new RoleQueryDTO();
+        roleQueryDTO.setRoleCode(RoleCodeEnum.SJZZH.name());
+        JSONResult<List<RoleInfoDTO>> subaccountRoleDTOs = roleManagerFeignClient.qeuryRoleByName(roleQueryDTO);
+        if (subaccountRoleDTOs != null && JSONResult.SUCCESS.equals(subaccountRoleDTOs.getCode())) {
+            request.setAttribute("subaccountRoleDTOs", subaccountRoleDTOs.getData());
+        }
+
+        return "merchant/user/userManagePage";
     }
     /***
      * 用户列表
@@ -184,12 +192,65 @@ public class MechantUserController {
      */
     @PostMapping("/updateUser")
     @ResponseBody
-    @RequiresPermissions("sys:userManager:add")
     @LogRecord(description = "新增用户", operationType = OperationType.INSERT, menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updateUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
         return mechantUserInfoFeignClient.updateUser(userInfoReq);
+    }
+
+    /***
+     * 子账号列表
+     *
+     * @return
+     */
+    @RequestMapping("/subaccountUserPage")
+    public String subaccountUserPage(HttpServletRequest request) {
+        String parentId = request.getParameter("parentId");
+        String name = request.getParameter("name");
+        String orgId = request.getParameter("orgId");
+        getSysSetting("mechantRole");
+        //查询商家端配置的角色
+        String roleIds = getSysSetting(SysConstant.MECHANTROLE);
+        if(StringUtils.isNotBlank(roleIds)){
+            List<String> list = Arrays.asList(roleIds.split(","));
+            IdListReq idListReq = new IdListReq();
+            idListReq.setIdList(list);
+            JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient.qeuryRoleListByRoleIds(idListReq);
+            request.setAttribute("roleList", roleInfoDTOs.getData());
+        }
+        //查询商家版子账号对应的角色
+        RoleQueryDTO roleQueryDTO = new RoleQueryDTO();
+        roleQueryDTO.setRoleCode(RoleCodeEnum.SJZZH.name());
+        JSONResult<List<RoleInfoDTO>> subaccountRoleDTOs = roleManagerFeignClient.qeuryRoleByName(roleQueryDTO);
+        if (subaccountRoleDTOs != null && JSONResult.SUCCESS.equals(subaccountRoleDTOs.getCode())) {
+            request.setAttribute("subaccountRoleDTOs", subaccountRoleDTOs.getData());
+        }
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(Long.parseLong(orgId));
+        JSONResult<List<TreeData>> accountDataTrees = organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
+        request.setAttribute("parentId", parentId);
+        request.setAttribute("name", name);
+        request.setAttribute("accountDataTrees", accountDataTrees);
+        return "merchant/user/subaccountUserPage";
+    }
+
+
+    /**
+     * 查询组织机构树
+     *
+     * @return
+     */
+    @PostMapping("/getAccountOrg")
+    @ResponseBody
+    public JSONResult<List<TreeData>> getAccountOrg(@RequestBody UserInfoReq userInfoReq) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+
+        RoleInfoDTO roleInfoDTO = curLoginUser.getRoleList().get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(userInfoReq.getOrgId());
+        return organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
     }
 }
