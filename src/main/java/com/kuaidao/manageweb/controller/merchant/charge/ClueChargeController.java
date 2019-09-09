@@ -90,10 +90,9 @@ public class ClueChargeController {
      */
     @PostMapping("/saveClueCharge")
     @ResponseBody
-    @RequiresPermissions("merchant:clueChargeManager:update")
+    @RequiresPermissions("merchant:clueChargeManager:edit")
     @LogRecord(description = "编辑资源资费", operationType = OperationType.UPDATE,
             menuName = MenuEnum.CLUE_CHARGE_MANAGEMENT)
-
     public JSONResult saveClueCharge(
             @Valid @RequestBody MerchantClueChargeReq merchantClueChargeReq, BindingResult result) {
         if (result.hasErrors()) {
