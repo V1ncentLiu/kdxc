@@ -24,8 +24,8 @@ import java.util.List;
  * @version V1.0
  */
 @FeignClient(name = "sys-service", path = "/sys/merchant/userInfo",
-        fallback = MechantUserInfoFeignClient.HystrixClientFallback.class)
-public interface MechantUserInfoFeignClient {
+        fallback = MerchantUserInfoFeignClient.HystrixClientFallback.class)
+public interface MerchantUserInfoFeignClient {
 
     /**
      * 查询商家用户集合
@@ -64,9 +64,9 @@ public interface MechantUserInfoFeignClient {
 
 
     @Component
-    static class HystrixClientFallback implements MechantUserInfoFeignClient {
+    static class HystrixClientFallback implements MerchantUserInfoFeignClient {
 
-        private static Logger logger = LoggerFactory.getLogger(MechantUserInfoFeignClient.class);
+        private static Logger logger = LoggerFactory.getLogger(MerchantUserInfoFeignClient.class);
 
 
         private JSONResult fallBackError(String name) {
