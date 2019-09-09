@@ -119,7 +119,7 @@ public interface UserInfoFeignClient {
      */
     @PostMapping("/merchantlist")
     public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam param);
-
+    @PostMapping("/merchanListNoPage")
     JSONResult<List<UserInfoDTO>> merchanListNoPage(UserInfoPageParam pageParam);
 
     @Component
