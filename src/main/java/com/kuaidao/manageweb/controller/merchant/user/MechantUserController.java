@@ -230,9 +230,11 @@ public class MechantUserController {
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.parseLong(orgId));
         JSONResult<List<TreeData>> accountDataTrees = organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
+        if (accountDataTrees != null && JSONResult.SUCCESS.equals(accountDataTrees.getCode())) {
+            request.setAttribute("accountDataTrees", accountDataTrees.getData());
+        }
         request.setAttribute("parentId", parentId);
         request.setAttribute("name", name);
-        request.setAttribute("accountDataTrees", accountDataTrees);
         return "merchant/user/subaccountUserPage";
     }
 
