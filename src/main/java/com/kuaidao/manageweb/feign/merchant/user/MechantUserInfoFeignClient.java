@@ -23,7 +23,7 @@ import java.util.List;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service-1", path = "/sys/merchant/userInfo",
+@FeignClient(name = "sys-service", path = "/sys/merchant/userInfo",
         fallback = MechantUserInfoFeignClient.HystrixClientFallback.class)
 public interface MechantUserInfoFeignClient {
 
@@ -43,6 +43,14 @@ public interface MechantUserInfoFeignClient {
      */
     @PostMapping("/create")
     public JSONResult<String> create(@RequestBody UserInfoReq req);
+    /**
+     * 根据id查询用户
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/getMechantUserById")
+    public JSONResult<UserInfoReq> getMechantUserById(@RequestBody UserInfoReq req);
 
     @Component
     static class HystrixClientFallback implements MechantUserInfoFeignClient {
@@ -65,6 +73,11 @@ public interface MechantUserInfoFeignClient {
         @Override
         public JSONResult<String> create(UserInfoReq req) {
             return fallBackError("添加商家账号失败");
+        }
+
+        @Override
+        public JSONResult<UserInfoReq> getMechantUserById(UserInfoReq req) {
+            return fallBackError("根据id查询商家详细信息");
         }
 
     }

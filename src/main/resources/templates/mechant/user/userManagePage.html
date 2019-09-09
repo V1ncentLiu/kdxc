@@ -66,7 +66,7 @@
             <el-table-column align="center" prop="name" label="账号余额"></el-table-column>
             <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
             <el-table-column align="center" prop="num" label="商家子账号">
-                <template slot-scope="scope">{{scope.row.num }}
+                <template slot-scope="scope">
                     <div v-if="scope.row.num > 0">
                         <a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&clueId='+item.clueId+''" target="_blank">子账号（{{scope.row.num}}）</a>
                     </div>
@@ -127,6 +127,7 @@
                                   :data="dataTree"
                                   node-key="id"
                                   :default-expanded-keys="expandedKeys"
+                                  :default-checked-keys="multipleTreeSelection"
                                   ref="tree"
                                   highlight-current
                                   @node-click="treeNodeClick">
@@ -193,12 +194,9 @@ var userVM = new Vue({
     dataTree: orgData,
     roleOptions: roleList,
     userSearchForm: {
-      roleId: '',
       status: '',
-      searchType: 2,
-      searchText: '',
-      orgId: '',
-      orgName:''
+      userName: '',
+      name: '',
     },
     clueTemplateForm:{
       username:"",
@@ -257,6 +255,7 @@ var userVM = new Vue({
       pageSize: 20,
     },
     multipleSelection:[],
+    multipleTreeSelection:[],
     passwordExpires:passwordExpires,
     reminderTime:reminderTime,
     radio:'',
@@ -362,8 +361,8 @@ var userVM = new Vue({
       var param ={};
 
       param.status = this.userSearchForm.status;
-      param.username = this.userSearchForm.searchText;
-      param.name = this.userSearchForm.searchText;
+      param.username = this.userSearchForm.userName;
+      param.name = this.userSearchForm.name;
       param.pageSize = this.pager.pageSize;
       param.pageNum = this.pager.currentPage;
       param.userType = 2;
@@ -436,18 +435,33 @@ var userVM = new Vue({
         });
         return;
       }
-      // 存储选中信息--start
-      var clueId=rows[0].id;  
-      setSessionStore("userManageStoreForm", this.storeForm);
-      var otherVal = {
-          "currentPage": this.pager.currentPage,
-          "clueId": clueId,
-          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
-      }
-      setSessionStore("userManageOtherVal", otherVal);
-      // 存储选中信息--end  
-      // document.location.href='/user/userManager/initUpdateUser?id='+rows[0].id;
-      document.location.href='/user/userManager/initUpdateUser?id='+clueId;
+        var param ={};
+        param.id = rows[0].id;
+        var url = "/mechant/userManager/getMechantUserById";
+        axios.post(url, param)
+            .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                    var user = result.data;
+                    userVM.clueTemplateForm.username = user.username ;
+                    userVM.clueTemplateForm.password = user.password;
+                    userVM.clueTemplateForm.phone = user.phone;
+                    userVM.clueTemplateForm.name = user.name;
+                    userVM.clueTemplateForm.orgId = user.orgId;
+                    userVM.clueTemplateForm.roleId = user.roleId;
+                    userVM.dialogFormVisible = true;
+                    userVM.addOrModifyDialogTitle = "修改商家账号"
+                    userVM.multipleTreeSelection=[];
+                    var orgId = user.orgId+"";
+                    userVM.multipleTreeSelection.push();
+
+                }else{
+                    userVM.$message.error(msg+"失败");
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     },
     //修改状态
     updateStatus(id,status,msg) {
