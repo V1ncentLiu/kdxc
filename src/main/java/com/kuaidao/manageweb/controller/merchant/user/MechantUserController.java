@@ -154,7 +154,7 @@ public class MechantUserController {
     @ResponseBody
     @RequiresPermissions("sys:userManager:add")
     @LogRecord(description = "新增用户", operationType = OperationType.INSERT, menuName = MenuEnum.USER_MANAGEMENT)
-    public JSONResult saveMenu(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
+    public JSONResult saveUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -172,5 +172,24 @@ public class MechantUserController {
     @ResponseBody
     public JSONResult<UserInfoReq> getMechantUserById(@RequestBody UserInfoReq userInfoReq) {
         return mechantUserInfoFeignClient.getMechantUserById(userInfoReq);
+    }
+
+    /**
+     * 保存用户
+     *
+     * @param
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/updateUser")
+    @ResponseBody
+    @RequiresPermissions("sys:userManager:add")
+    @LogRecord(description = "新增用户", operationType = OperationType.INSERT, menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updateUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return mechantUserInfoFeignClient.updateUser(userInfoReq);
     }
 }

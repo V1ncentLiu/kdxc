@@ -204,7 +204,8 @@ var userVM = new Vue({
       phone:"",
       password:"",
       orgName:"",
-      orgId:""
+      orgId:"",
+        id:""
    },
     addOrModifyDialogTitle:'添加商家账号',
     rules: {
@@ -317,10 +318,17 @@ var userVM = new Vue({
                   param.orgId = formData.orgId;
                   param.userType = 2;
                   param.status = 1;
+                  param.id = formData.id;
                   var roleList=new Array();
                   roleList.push(formData.roleId);
                   param.roleList=roleList;
-                  axios.post("/mechant/userManager/saveUser", param)
+                  var url = "";
+                  if(formData.id !=null && formData.id !=''){
+                      url =  "/mechant/userManager/updateUser";
+                  }else {
+                      url = "/mechant/userManager/saveUser";
+                  }
+                  axios.post(url, param)
                       .then(function (response) {
                           console.info(response);
                           var data =response.data;
@@ -328,14 +336,20 @@ var userVM = new Vue({
                               userVM.$message(data.msg);
                               userVM.btnDisabled = false;
                           }else{
-                              userVM.$message('新增成功');
+                              if(userVM.clueTemplateForm.id !=null && userVM.clueTemplateForm.id !=''){
+                                  userVM.$message('修改成功');
+                              }else {
+                                  userVM.$message('新增成功');
+                              }
+
+                              userVM.clueTemplateForm.phone ="";
+                              userVM.clueTemplateForm.name ="";
+                              userVM.clueTemplateForm.username ="";
+                              userVM.clueTemplateForm.password="";
+                              userVM.clueTemplateForm.roleId ="",
+                              userVM.clueTemplateForm.id ="";
                               userVM.btnDisabled = false;
                               userVM.dialogFormVisible = false;
-                              clueTemplateForm.phone ="";
-                              clueTemplateForm.name ="";
-                              clueTemplateForm.username ="";
-                              clueTemplateForm.password="";
-                              clueTemplateForm.roleId =""
                               userVM.searchTable()
                           }
                       })
@@ -423,6 +437,12 @@ var userVM = new Vue({
     },
     //跳转新增用户页
     toAddUser() {
+        userVM.clueTemplateForm.phone ="";
+        userVM.clueTemplateForm.name ="";
+        userVM.clueTemplateForm.username ="";
+        userVM.clueTemplateForm.password="";
+        userVM.clueTemplateForm.roleId ="",
+        userVM.clueTemplateForm.id ="";
         this.dialogFormVisible = true;
     },
     //跳转新增用户页
@@ -444,11 +464,12 @@ var userVM = new Vue({
                 if(result.code=="0"){
                     var user = result.data;
                     userVM.clueTemplateForm.username = user.username ;
-                    userVM.clueTemplateForm.password = user.password;
+                    userVM.clueTemplateForm.password = "******";
                     userVM.clueTemplateForm.phone = user.phone;
                     userVM.clueTemplateForm.name = user.name;
                     userVM.clueTemplateForm.orgId = user.orgId;
                     userVM.clueTemplateForm.roleId = user.roleId;
+                    userVM.clueTemplateForm.id = user.id;
                     userVM.dialogFormVisible = true;
                     userVM.addOrModifyDialogTitle = "修改商家账号"
                     userVM.multipleTreeSelection=[];

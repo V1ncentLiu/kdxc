@@ -52,6 +52,17 @@ public interface MechantUserInfoFeignClient {
     @PostMapping("/getMechantUserById")
     public JSONResult<UserInfoReq> getMechantUserById(@RequestBody UserInfoReq req);
 
+    /**
+     * 新增用户
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/updateUser")
+    public JSONResult<String> updateUser(@RequestBody UserInfoReq req);
+
+
+
     @Component
     static class HystrixClientFallback implements MechantUserInfoFeignClient {
 
@@ -78,6 +89,11 @@ public interface MechantUserInfoFeignClient {
         @Override
         public JSONResult<UserInfoReq> getMechantUserById(UserInfoReq req) {
             return fallBackError("根据id查询商家详细信息");
+        }
+
+        @Override
+        public JSONResult<String> updateUser(UserInfoReq req) {
+            return fallBackError("更新商家信息");
         }
 
     }
