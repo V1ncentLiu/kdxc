@@ -1,17 +1,17 @@
 package com.kuaidao.manageweb.feign.merchant.clue;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
-import com.kuaidao.sys.dto.user.UserInfoReq;
+import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
 
 /**
  * 资源
@@ -20,9 +20,10 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
  * @date: 2019年09月06日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
 public interface MerchantClueApplyFeignClient {
-
+    @PostMapping("/save")
+    JSONResult<Long> save(@Valid @RequestBody MerchantClueApplyDto reqDto);
 
     @Component
     static class HystrixClientFallback implements MerchantClueApplyFeignClient {
@@ -36,7 +37,10 @@ public interface MerchantClueApplyFeignClient {
         }
 
 
-
+        @Override
+        public JSONResult<Long> save(MerchantClueApplyDto reqDto) {
+            return fallBackError("资源需求申请保存失败");
+        }
     }
 
 
