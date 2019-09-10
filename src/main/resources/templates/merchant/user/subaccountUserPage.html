@@ -167,6 +167,7 @@
     var roleList=[[${roleList}]];//当前字段所属的菜单组
     var subaccountRoleDTOs= [[${subaccountRoleDTOs}]];
     var accountExpandedKeys =[];
+    var orgId =[[${orgId}]];
     if(accountDataTrees !=null){
         for(var i=0;i<accountDataTrees.length;i++){
             var curNode = accountDataTrees[i];
@@ -320,54 +321,8 @@
                         param.orgId = formData.orgId;
                         param.userType = 3;
                         param.status = 1;
-                        param.parentId= formData.id;
-                        var roleList=new Array();
-                        roleList.push(formData.roleId);
-                        param.roleList=roleList;
-                        var url = "";
-                        url = "/merchant/userManager/saveUser";
-                        axios.post(url, param)
-                            .then(function (response) {
-                                console.info(response);
-                                var data =response.data;
-                                if(data.code!="0"){
-                                    userVM.$message(data.msg);
-                                    userVM.btnDisabled = false;
-                                }else{
-                                    userVM.$message('新增成功');
-
-                                    userVM.subAccountForm.phone ="";
-                                    userVM.subAccountForm.name ="";
-                                    userVM.subAccountForm.username ="";
-                                    userVM.subAccountForm.password="";
-                                    userVM.subAccountForm.roleId ="",
-                                        userVM.subAccountForm.id ="";
-                                    userVM.btnDisabled = false;
-                                    userVM.dialogFormVisible = false;
-                                    userVM.searchTable()
-                                }
-                            })
-                            .catch(function (error) {
-                                userVM.btnDisabled = false;
-                                console.log(error);
-                            });
-                    }
-                })
-            },
-
-            saveUser(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        var formData = userVM.clueTemplateForm;
-                        var param={};
-                        param.name= formData.name;
-                        param.username= formData.username;
-                        param.password = formData.password;
-                        param.phone = formData.phone;
-                        param.orgId = formData.orgId;
-                        param.userType = 2;
-                        param.status = 1;
-                        param.id = formData.id;
+                        param.parentId= parentId;
+                        param.id= formData.id;
                         var roleList=new Array();
                         roleList.push(formData.roleId);
                         param.roleList=roleList;
@@ -385,22 +340,11 @@
                                     userVM.$message(data.msg);
                                     userVM.btnDisabled = false;
                                 }else{
-                                    if(userVM.clueTemplateForm.id !=null && userVM.clueTemplateForm.id !=''){
-                                        userVM.$message('修改成功');
-                                    }else {
-                                        userVM.$message('新增成功');
-                                    }
+                                    userVM.$message('新增成功');
 
-                                    userVM.clueTemplateForm.phone ="";
-                                    userVM.clueTemplateForm.name ="";
-                                    userVM.clueTemplateForm.username ="";
-                                    userVM.clueTemplateForm.password="";
-                                    userVM.clueTemplateForm.roleId ="",
-                                    userVM.subAccountForm.orgName = "";
-                                    userVM.clueTemplateForm.id ="";
                                     userVM.btnDisabled = false;
-                                    userVM.dialogFormVisible = false;
-                                    userVM.searchTable()
+                                    userVM.dialogsubAccountForm = false;
+                                    document.location.href = "/merchant/userManager/subaccountUserPage?parentId="+parentId+"&name="+merchantName+"&orgId=1133193188304097280"
                                 }
                             })
                             .catch(function (error) {
@@ -410,6 +354,8 @@
                     }
                 })
             },
+
+
             closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
                 if (this.$refs['clueTemplateForm']!==undefined) {
                     this.$refs['clueTemplateForm'].resetFields();
@@ -424,7 +370,7 @@
                 if (this.$refs[formName]!==undefined) {
                     this.$refs[formName].resetFields();
                 }
-                this.dialogFormVisible = false;
+                this.dialogsubAccountForm = false;
             },
             searchTable() {
                 var param ={};
@@ -492,13 +438,6 @@
             },
             //跳转新增用户页
             toAddUser() {
-                userVM.subAccountForm.phone ="";
-                userVM.subAccountForm.name ="";
-                userVM.subAccountForm.username ="";
-                userVM.subAccountForm.password="";
-                userVM.subAccountForm.roleId ="",
-                    userVM.subAccountForm.roleId ="",
-                    userVM.subAccountForm.id ="";
                 this.dialogsubAccountForm = true;
             },
             //跳转新增用户页
@@ -519,18 +458,18 @@
                         var result =  response.data;
                         if(result.code=="0"){
                             var user = result.data;
-                            userVM.clueTemplateForm.username = user.username ;
-                            userVM.clueTemplateForm.password = "******";
-                            userVM.clueTemplateForm.phone = user.phone;
-                            userVM.clueTemplateForm.name = user.name;
-                            userVM.clueTemplateForm.orgId = user.orgId;
-                            userVM.clueTemplateForm.roleId = user.roleId;
-                            userVM.clueTemplateForm.id = user.id;
-                            userVM.dialogFormVisible = true;
-                            userVM.addOrModifyDialogTitle = "修改商家账号"
+                            userVM.subAccountForm.username = user.username ;
+                            userVM.subAccountForm.password = "******";
+                            userVM.subAccountForm.phone = user.phone;
+                            userVM.subAccountForm.name = user.name;
+                            userVM.subAccountForm.orgId = user.orgId;
+                            userVM.subAccountForm.roleId = user.roleId;
+                            userVM.subAccountForm.orgName = user.orgName;
+                            userVM.subAccountForm.id = user.id;
+                            userVM.dialogsubAccountForm = true;
+                            userVM.addOrModifyDialogTitle = "修改商家子账号"
                             userVM.multipleTreeSelection=[];
-                            var orgId = user.orgId+"";
-                            userVM.multipleTreeSelection.push();
+                            userVM.multipleTreeSelection.push(orgId);
 
                         }else{
                             userVM.$message.error(msg+"失败");

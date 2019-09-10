@@ -93,6 +93,7 @@ public class MechantUserController {
      * @return
      */
     @RequestMapping("/initUserList")
+    @RequiresPermissions("sys:merchantUser:view")
     public String initUserList(HttpServletRequest request) {
         getSysSetting("mechantRole");
         //查询商家端配置的角色
@@ -105,7 +106,7 @@ public class MechantUserController {
             request.setAttribute("roleList", roleInfoDTOs.getData());
         }
         OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
-        reqDto.setSource(Constants.MERCHANT_ORG_SOURCE_TWO);
+        reqDto.setSource(SysConstant.MERCHANT_ORG_SOURCE_TWO);
         // 查询组织机构树
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.queryList(reqDto);
         // 查询组织机构树
@@ -162,8 +163,8 @@ public class MechantUserController {
      */
     @PostMapping("/saveUser")
     @ResponseBody
-    @RequiresPermissions("sys:userManager:add")
-    @LogRecord(description = "新增用户", operationType = OperationType.INSERT, menuName = MenuEnum.USER_MANAGEMENT)
+    @RequiresPermissions("sys:merchantUser:add")
+    @LogRecord(description = "新增商家账号", operationType = OperationType.INSERT, menuName = MenuEnum.MERCHANT_USER_MANAGEMENT)
     public JSONResult saveUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -194,7 +195,8 @@ public class MechantUserController {
      */
     @PostMapping("/updateUser")
     @ResponseBody
-    @LogRecord(description = "新增用户", operationType = OperationType.INSERT, menuName = MenuEnum.USER_MANAGEMENT)
+    @RequiresPermissions("sys:merchantUser:edit")
+    @LogRecord(description = "新增商家账号", operationType = OperationType.UPDATE, menuName = MenuEnum.MERCHANT_USER_MANAGEMENT)
     public JSONResult updateUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -237,6 +239,7 @@ public class MechantUserController {
         }
         request.setAttribute("parentId", parentId);
         request.setAttribute("name", name);
+        request.setAttribute("orgId", orgId);
         return "merchant/user/subaccountUserPage";
     }
 

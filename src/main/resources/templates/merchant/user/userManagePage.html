@@ -21,10 +21,10 @@
       <el-breadcrumb-item>商家账号管理</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-        <shiro:hasPermission name="sys:userManager:add">
+        <shiro:hasPermission name="sys:merchantUser:add">
           <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加账号</el-button>
         </shiro:hasPermission>
-        <shiro:hasPermission name="sys:userManager:edit">
+        <shiro:hasPermission name="sys:merchantUser:edit">
         <el-button type="success" @click="toUpdateUser"><i class="el-icon-edit"></i>编辑账号</el-button>
         </shiro:hasPermission>
     </el-row>
@@ -179,7 +179,7 @@
                   <el-input v-model="subAccountForm.username" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="所属组织架构：" :label-width="formLabelWidth" prop="orgName">
-                  <el-popover placement="bottom" trigger="click" v-model="isShow">
+                  <el-popover placement="bottom" trigger="click" v-model="subaccountisShow">
                       <div style="max-height: 300px;overflow-y: auto;">
                           <el-tree
                                   :data="accountDataTree"
@@ -213,7 +213,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align:center;">
               <el-button type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
-              <el-button @click="cancelForm('subAccountForm')">取 消</el-button>
+              <el-button @click="accountcancelForm('subAccountForm')">取 消</el-button>
           </div>
       </el-dialog>
 </div>
@@ -251,6 +251,7 @@ var userVM = new Vue({
       dialogsubAccountForm:false,
     paginationShow: false,
     isShow:false,
+    subaccountisShow:false,
     expandedKeys:expandedKeys,
     accountExpandedKeys:[],
     dataTree: orgData,
@@ -444,15 +445,9 @@ var userVM = new Vue({
                           }else{
                               userVM.$message('新增成功');
 
-                              userVM.subAccountForm.phone ="";
-                              userVM.subAccountForm.name ="";
-                              userVM.subAccountForm.username ="";
-                              userVM.subAccountForm.password="";
-                              userVM.subAccountForm.roleId ="",
-                                  userVM.subAccountForm.id ="";
                               userVM.btnDisabled = false;
                               userVM.dialogFormVisible = false;
-                              userVM.searchTable()
+                              document.location.href='/merchant/userManager/initUserList';
                           }
                       })
                       .catch(function (error) {
@@ -525,16 +520,9 @@ var userVM = new Vue({
                               }else {
                                   userVM.$message('新增成功');
                               }
-
-                              userVM.clueTemplateForm.phone ="";
-                              userVM.clueTemplateForm.name ="";
-                              userVM.clueTemplateForm.username ="";
-                              userVM.clueTemplateForm.password="";
-                              userVM.clueTemplateForm.roleId ="",
-                              userVM.clueTemplateForm.id ="";
                               userVM.btnDisabled = false;
                               userVM.dialogFormVisible = false;
-                              userVM.searchTable()
+                              document.location.href='/merchant/userManager/initUserList';
                           }
                       })
                       .catch(function (error) {
@@ -559,6 +547,12 @@ var userVM = new Vue({
               this.$refs[formName].resetFields();
           }
           this.dialogFormVisible = false;
+      },
+      accountcancelForm(formName) {
+          if (this.$refs[formName]!==undefined) {
+              this.$refs[formName].resetFields();
+          }
+          this.dialogsubAccountForm = false;
       },
     searchTable() {
       var param ={};
@@ -659,13 +653,11 @@ var userVM = new Vue({
                     userVM.clueTemplateForm.orgId = user.orgId;
                     userVM.clueTemplateForm.roleId = user.roleId;
                     userVM.clueTemplateForm.id = user.id;
-
-                    userVM.clueTemplateForm.orgName = "111";
+                    userVM.clueTemplateForm.orgName = user.orgName;
                     userVM.dialogFormVisible = true;
                     userVM.addOrModifyDialogTitle = "修改商家账号"
                     userVM.multipleTreeSelection=[];
-                    var orgId = user.orgId+"";
-                    userVM.multipleTreeSelection.push();
+                    userVM.multipleTreeSelection.push(user.orgId);
 
                 }else{
                     userVM.$message.error(msg+"失败");
@@ -846,7 +838,7 @@ var userVM = new Vue({
           //if(data.children==null){
           this.subAccountForm.orgName=data.label;
           this.subAccountForm.orgId=data.id;
-          this.isShow=false
+          this.subaccountisShow=false
           //}
       },
     seleckClick(){

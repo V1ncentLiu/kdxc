@@ -42,8 +42,13 @@ public class PubcustomerController {
         return "merchant/pubcustomer/publicCustomer";
     }
 
+  /**
+   * 资源领取
+   */
+  
 
-    @PostMapping("/queryPage")
+
+  @PostMapping("/queryPage")
     @ResponseBody
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(
             @RequestBody ClueQueryParamDTO dto) {
