@@ -6,6 +6,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.merchant.dto.pubcusres.ClueQueryParamDTO;
+import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.pubcusres.PublicCustomerResourcesRespDTO;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -45,9 +46,17 @@ public class PubcustomerController {
   /**
    * 资源领取
    */
-  
+  @PostMapping("/receiveClue")
+  @ResponseBody
+  public JSONResult<ClueReceiveRecordsDTO> receiveClue(
+      @RequestBody ClueReceiveRecordsDTO dto) {
+    return pubcustomerFeignClient.receiveClue(dto);
+  }
 
 
+  /**
+   *  List数据查询
+   */
   @PostMapping("/queryPage")
     @ResponseBody
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(
