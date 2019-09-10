@@ -35,7 +35,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="行业类别:"  prop="category">
-                        <el-select v-model="queryForm.industryCategory" placeholder="资源类别" width="100" clearable>
+                        <el-select v-model="queryForm.industryCategory" placeholder="行业类别" width="100" clearable>
                             <el-option v-for="item in industryCategoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
@@ -51,17 +51,17 @@
         </div>
         <el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable" @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>
-            <el-table-column prop="xh" label="序号"  align="center"></el-table-column>
-            <el-table-column prop="searchWord" label="搜索词" align="center"></el-table-column>
-            <el-table-column prop="categoryName" label="资源类别" align="center"></el-table-column>
-            <el-table-column prop="typeName" label="资源类型" align="center"></el-table-column>
+            <el-table-column prop="xh" label="序号" type="index" width="55"  align="center"></el-table-column>
+            <el-table-column prop="searchWord" label="搜索词" align="center"  ></el-table-column>
+            <el-table-column prop="categoryName" label="资源类型" align="center"  ></el-table-column>
+            <el-table-column prop="typeName" label="资源类别" align="center"  ></el-table-column>
             <!-- 预留字段，当前展示位空 -->
             <el-table-column prop="" label="资源地域" align="center" width="120"></el-table-column>
-            <el-table-column prop="intentProName" label="资源项目" align="center" width="120"></el-table-column>
-            <el-table-column prop="intentProName" label="媒介" align="center" width="120"></el-table-column>
-            <el-table-column prop="intentProName" label="行业类别" align="center" width="120"></el-table-column>
-            <el-table-column prop="intentProName" label="留言时间" align="center" width="120"></el-table-column>
-            <el-table-column prop="intentProName" label="留言内容" align="center" width="120"></el-table-column>
+            <el-table-column prop="projectName" label="资源项目" align="center"></el-table-column>
+            <el-table-column prop="sourceName" label="媒介" align="center" ></el-table-column>
+            <el-table-column prop="industryCategoryName" label="行业类别" align="center" ></el-table-column>
+            <el-table-column prop="messageTime" label="留言时间" align="center" ></el-table-column>
+            <el-table-column prop="messagePoint" label="留言内容" align="center" ></el-table-column>
         </el-table>
         <table-pagination v-if="paginationShow" :pager="pager"  @change="initList"></table-pagination>
     </div>
@@ -74,6 +74,8 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            isShow:false,
+            loading:false,
             paginationShow: false,
             formLabelWidth:"150px",
             tableData:[],
@@ -101,6 +103,13 @@
                        return "";
                  	}
                   	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }
             },
             formatCusLevel(row, column){
                 return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
@@ -131,7 +140,7 @@
                   }else {
                     this.oldPage = param.pageNum;
                   }
-                axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
+                axios.post('/merchant/pubcustomer/queryPage',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
                             mainDivVM.$message({message: response.data.msg, type: 'warning'});
@@ -194,7 +203,7 @@
                             			mainDivVM.receiveTable= data.clueCustomerDTOs;
                             		}else{
                             			mainDivVM.$message({message:'领取成功',type:'success',duration:1500,onClose:function(){
-                            				window.location.href="/aggregation/publiccustomer/listPage"; 
+                            				window.location.href="/merchant/pubcustomer/listPage";
                             			}});
                             			
                             		}
@@ -216,7 +225,6 @@
         created(){
             // 初始化表格
             this.initList();
-            this.initColumn();
             //初始资源类别数据
             var  param={};
             param.groupCode="clueCategory";
