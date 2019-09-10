@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.constant;
 
 /**
- * 
+ *
  * @Description: 维护后台的所有菜单，为了记录访问日志使用
  * @author: Chen Chengxue
  * @date: 2018年8月13日 上午9:02:21
@@ -12,7 +12,7 @@ public enum MenuEnum {
     /**
      * 系统管理菜单
      */
-    USER_MANAGEMENT("用户管理"), SCHEDULE_MANAGEMENT("任务管理"), ROLE_MANAGEMENT("角色管理"), AUTHORITY_MANAGEMENT("权限管理"), ACCOUNT_SUMMARY("公告管理"), MESSAGE_CENTER("消息中心"), INVITEAREA("商务布局管理"), TELEMARKTINGLAYOUT("电销布局管理"), ORGANIZATION_MANAGEMENT("组织机构管理"), CUSTOM_FIELD("自定义字段"), MODULE_MANAGEMENT("菜单管理"), IP_MANAGEMENT("IP管理"), IPPACKAGE_MANAGEMENT("IP包管理"), AREA_MANAGEMENT("区域管理"),
+    USER_MANAGEMENT("用户管理"), SCHEDULE_MANAGEMENT("任务管理"), ROLE_MANAGEMENT("角色管理"), AUTHORITY_MANAGEMENT("权限管理"), ACCOUNT_SUMMARY("账号汇总"), RESOURCE_MANAGEMENT("资源管理"), DICTIONARY_MANAGEMENT("字典管理"), DICTIONARY_MANAGEMENT_ITEM("字典-词条管理"), ANNOUNCE_MANAGEMENT("公告管理"), MESSAGE_CENTER("消息中心"), INVITEAREA("商务布局管理"), TELEMARKTINGLAYOUT("电销布局管理"), ORGANIZATION_MANAGEMENT("组织机构管理"), CUSTOM_FIELD("自定义字段"), MODULE_MANAGEMENT("菜单管理"), IP_MANAGEMENT("IP管理"), IPPACKAGE_MANAGEMENT("IP包管理"), AREA_MANAGEMENT("区域管理"),MERCHANT_USER_MANAGEMENT("商家账号管理"),MERCHANT_ORGANIZATION_MANAGEMENT("商家组织管理"),
 
 
     /**
@@ -25,7 +25,7 @@ public enum MenuEnum {
     TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), OPT_RULE_MANAGEMENT("优化分配规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
     /**
      * 总裁办
-     * 
+     *
      */
     REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认"), BUSINESSSIGNREPETITION("付款明细重单审批确认（总裁办）"), PAYDETAILREPETITION("付款明细分配比例（总裁办）"),
     /**
@@ -43,24 +43,21 @@ public enum MenuEnum {
     /**
      * 财务
      */
-    REFUNDREBATE_MANAGER("退返款申请"), REFUNDAPPLYLIST("退款申请列表"), REFUNDCONFIRM("退款确认"), REBATEAPPLYLIST("返款申请列表"), REBATECONFIRM(
-            "返款确认"), RECONCILIATIONCONFIRM_MANAGER("对账结算确认"), REFUNDREBATEAPPLY_MANAGER("对账结算申请"),
+    REFUNDREBATE_MANAGER("退返款申请"), REFUNDAPPLYLIST("退款申请列表"), REFUNDCONFIRM("退款确认"), REBATEAPPLYLIST("返款申请列表"), REBATECONFIRM("返款确认"), RECONCILIATIONCONFIRM_MANAGER("对账结算确认"), REFUNDREBATEAPPLY_MANAGER("对账结算申请"),
     /**
      * 版本管理
      */
     VERSION_LIST("版本列表"), IOS_VERSION_LIST("IOS版本列表"), ANDROID_VERSION_LIST("ANDROID版本列表"),
-
-
-
     /**
      * 商家端
      */
     AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"),
-
     /**
      * 报表（商务模块）
      */
     VISIT_SIGN("签约来访");
+
+
     /**
      * 系统管理菜单
      */
