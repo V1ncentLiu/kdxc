@@ -104,8 +104,10 @@ public class MechantUserController {
             JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient.qeuryRoleListByRoleIds(idListReq);
             request.setAttribute("roleList", roleInfoDTOs.getData());
         }
+        OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
+        reqDto.setSource(Constants.MERCHANT_ORG_SOURCE_TWO);
         // 查询组织机构树
-        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.queryList(reqDto);
         // 查询组织机构树
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());

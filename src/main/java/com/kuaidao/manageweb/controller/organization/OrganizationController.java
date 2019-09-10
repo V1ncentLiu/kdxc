@@ -85,14 +85,16 @@ public class OrganizationController {
         String roleCode = roleInfoDTO.getRoleCode();
         // JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         JSONResult<List<TreeData>> treeJsonRes = null;
+        OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
+        reqDto.setSource(1);
         if (RoleCodeEnum.GLY.name().equals(roleCode)) {
             // 管理员
-            treeJsonRes = organizationFeignClient.query();
+            treeJsonRes = organizationFeignClient.queryList(reqDto);
         } else {
             // 业务管理员
             Long orgId = curLoginUser.getOrgId();
-            OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
             reqDto.setParentId(orgId);
+
             treeJsonRes = organizationFeignClient.queryByOrg(reqDto);
         }
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
