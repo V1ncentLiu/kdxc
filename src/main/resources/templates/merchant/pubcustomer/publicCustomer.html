@@ -17,15 +17,13 @@
         <el-breadcrumb-item>公有池</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row type="flex" class="row-bg marginB20" justify="start">
-        <el-button type="primary"  @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
-        <shiro:hasPermission name="PublicCustomer:receive">
+        <shiro:hasPermission name="merchant:pubcustomer:receive">
         	<el-button type="success" @click="openReceive">领取</el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
             <el-form :inline="true" :model="queryForm" class="demo-form-inline mainSearchForm" ref="queryForm" >
-
                     <el-form-item label="资源类型:"  prop="type">
                         <el-select v-model="queryForm.type" placeholder="资源类型" width="100" clearable>
                             <el-option v-for="item in typeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
@@ -37,8 +35,8 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="行业类别:"  prop="category">
-                        <el-select v-model="queryForm.category" placeholder="资源类别" width="100" clearable>
-                            <el-option v-for="item in categoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        <el-select v-model="queryForm.industryCategory" placeholder="资源类别" width="100" clearable>
+                            <el-option v-for="item in industryCategoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="搜索词:">
@@ -73,8 +71,6 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    // <!--电销组-->
-    // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
@@ -83,10 +79,13 @@
             tableData:[],
             categoryArr:[],
             typeArr:[],
+            industryCategoryArr:[],
             multipleSelection:[],
             queryForm:{
                 searchWord:"",
-                category:""
+                category:"",
+                type:"",
+                industryCategory:"",
             },
             pager:{
                 total: 0,
@@ -231,6 +230,13 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 console.log(response.data.data)
                 mainDivVM.typeArr=response.data.data;
+            });
+            //初始化资行业类别数据
+            param={};
+            param.groupCode="industryCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                console.log(response.data.data)
+                mainDivVM.industryCategoryArr=response.data.data;
             });
         },
         mounted(){
