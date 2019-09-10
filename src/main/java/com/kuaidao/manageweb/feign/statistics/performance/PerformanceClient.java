@@ -34,6 +34,11 @@ public interface PerformanceClient {
     @RequestMapping("/querySaleList")
     public JSONResult<List<PerformanceDto>> querySaleListByParams(@RequestBody BaseQueryDto baseQueryDto);
 
+    @RequestMapping("/querySalePageAndUser")
+    public JSONResult<Map<String,Object>> querySalePageAndUser(@RequestBody BaseQueryDto baseQueryDto);
+
+    @RequestMapping("/querySaleListByUser")
+    public JSONResult<List<PerformanceDto>> querySaleListByUser(@RequestBody BaseQueryDto baseQueryDto);
 
     @Component
     class HystrixClientFallback implements PerformanceClient {
@@ -64,6 +69,16 @@ public interface PerformanceClient {
         @Override
         public JSONResult<List<PerformanceDto>> querySaleListByParams(BaseQueryDto baseQueryDto) {
             return fallBackError("顾问业绩表导出");
+        }
+
+        @Override
+        public JSONResult<Map<String, Object>> querySalePageAndUser(BaseQueryDto baseQueryDto) {
+            return fallBackError("电销顾问查询业绩");
+        }
+
+        @Override
+        public JSONResult<List<PerformanceDto>> querySaleListByUser(BaseQueryDto baseQueryDto) {
+            return fallBackError("电销顾问业绩导出");
         }
     }
 

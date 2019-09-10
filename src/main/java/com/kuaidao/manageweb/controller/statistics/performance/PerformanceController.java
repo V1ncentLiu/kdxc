@@ -64,6 +64,13 @@ public class PerformanceController extends BaseStatisticsController {
         //资源类别
         request.setAttribute("clueCategoryList",
                 getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null,null);
+            return "reportPerformance/managerPerformance";
+        }
+
         return "reportPerformance/groupPerformance";
     }
 
@@ -111,15 +118,36 @@ public class PerformanceController extends BaseStatisticsController {
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
         baseQueryDto.setTeleDeptId(null);
-        return performanceClient.querySalePage(baseQueryDto);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        //根据角色不同，使用查询方法不同
+        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            return performanceClient.querySalePageAndUser(baseQueryDto);
+        }else{
+            return performanceClient.querySalePage(baseQueryDto);
+        }
     }
 
+    /**
+     * 一级页面导出
+     * @param baseQueryDto
+     * @param response
+     */
     @RequestMapping("/export")
-    public void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
+    public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
-            JSONResult<List<PerformanceDto>> json= performanceClient.queryListByParams(baseQueryDto);
-            if("0".equals(json.getCode())){
+            JSONResult<List<PerformanceDto>> json=null;
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+            //根据角色不同，使用查询方法不同
+            if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+                json= performanceClient.querySaleListByUser(baseQueryDto);
+            }else{
+                json= performanceClient.queryListByParams(baseQueryDto);
+
+            }
+            if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
                 String[] keys = {"teleGroupName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","signAmount"};
                 String[] hader = {"电销组","首次分配资源数","首访数","签约数","资源来访率","签约率","业绩金额","签约单笔"};
@@ -138,8 +166,14 @@ public class PerformanceController extends BaseStatisticsController {
         }
     }
 
+
+    /**
+     * 二级页面数据导出
+     * @param baseQueryDto
+     * @param response
+     */
     @RequestMapping("/saleExport")
-    public void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
+    public @ResponseBody void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             JSONResult<List<PerformanceDto>> json= performanceClient.querySaleListByParams(baseQueryDto);
             if("0".equals(json.getCode())){
