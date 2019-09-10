@@ -65,7 +65,7 @@ public class MerchantOrganizationController {
      * 
      * @return
      */
-    @RequiresPermissions("organization:view")
+    @RequiresPermissions("merchantOrganization:view")
     @RequestMapping("/organizationPage")
     public String organizationPage(HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -102,5 +102,76 @@ public class MerchantOrganizationController {
         request.setAttribute("businessLineList", businessLineJR.getData());
 
         return "merchant/organization/organizationPage";
+    }
+
+    /**
+     * 保存或更新组织机构信息
+     *
+     * @param orgDTO
+     * @param result
+     * @return
+     * @throws Exception
+     */
+    @RequiresPermissions(value = "merchantOrganization:add")
+    @PostMapping("/save")
+    @ResponseBody
+    @LogRecord(description = "添加商家组织机构信息", operationType = OperationType.INSERT,
+            menuName = MenuEnum.MERCHANT_ORGANIZATION_MANAGEMENT)
+    public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
+                           BindingResult result) throws Exception {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        orgDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+
+        Long id = orgDTO.getId();
+        if (id != null) {
+            return organizationFeignClient.update(orgDTO);
+        } else {
+            Subject subject = SecurityUtils.getSubject();
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            orgDTO.setCreateUser(user.getId());
+            return organizationFeignClient.save(orgDTO);
+        }
+
+    }
+
+    /**
+     * 更新组织机构
+     *
+     * @param orgDTO
+     * @return
+     */
+    @RequiresPermissions("merchantOrganization:edit")
+    @PostMapping("/update")
+    @ResponseBody
+    @LogRecord(description = "修改商家组织机构信息", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.MERCHANT_ORGANIZATION_MANAGEMENT)
+    public JSONResult update(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
+                             BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return organizationFeignClient.update(orgDTO);
+    }
+    /**
+     * 删除组织机构
+     *
+     * @param
+     * @return
+     */
+    @RequiresPermissions("merchantOrganization:delete")
+    @PostMapping("/delete")
+    @ResponseBody
+    @LogRecord(description = "删除商家组织机构信息", operationType = OperationType.DELETE,
+            menuName = MenuEnum.MERCHANT_ORGANIZATION_MANAGEMENT)
+    public JSONResult delete(@RequestBody IdListReq idListReq) {
+        List<String> idList = idListReq.getIdList();
+        if (idList == null || idList.size() == 0) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        logger.info("delete organization by id{{}}", idList);
+        return organizationFeignClient.delete(idListReq);
     }
 }
