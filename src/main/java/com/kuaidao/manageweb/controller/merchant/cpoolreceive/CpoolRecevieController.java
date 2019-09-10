@@ -7,7 +7,7 @@ import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.feign.cpoolrecevie.CpoolRecevieFeignClient;
+import com.kuaidao.manageweb.feign.merchant.cpoolrecevie.CpoolRecevieFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
