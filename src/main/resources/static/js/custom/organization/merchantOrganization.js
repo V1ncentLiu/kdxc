@@ -213,7 +213,7 @@
               
                 param.parentId = parentId;
                 param.name = this.inputOrgName;
-                param.source = 1;
+                param.source = 2;
                 axios.post('/organization/organization/queryOrgDataByParam?pageNum='+pageNum+"&pageSize="+pageSize,param)
                     .then(function (response) {
                         var data =  response.data
@@ -327,7 +327,7 @@
                      }
                  
                     orgVM.btnDisabled = true;
-                      param.source = 1;
+                      param.source = 2;
                     axios.post('/organization/organization/'+this.submitUrl, param)
                     .then(function (response) {
                     	var resData = response.data;

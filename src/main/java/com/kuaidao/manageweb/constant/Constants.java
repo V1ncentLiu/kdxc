@@ -96,4 +96,9 @@ public class Constants {
      * 返回码成功
      */
     public static final String SUCCESS = "0";
+
+    //组织架构表 来源 0 根目录 1 推广 2 非推广
+    public static Integer MERCHANT_ORG_SOURCE_ONE = 1;
+    public static Integer MERCHANT_ORG_SOURCE_TWO = 2;
+
 }
