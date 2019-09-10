@@ -1,17 +1,19 @@
 package com.kuaidao.manageweb.feign.merchant.clue;
 
 import javax.validation.Valid;
-
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.merchant.dto.clue.ClueApplyAuditReqDto;
+import com.kuaidao.merchant.dto.clue.ClueApplyPageDto;
+import com.kuaidao.merchant.dto.clue.ClueApplyPageParamDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
+import com.kuaidao.merchant.dto.clue.ClueApplyReqDto;
 
 /**
  * 资源
@@ -23,7 +25,19 @@ import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
 @FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
 public interface MerchantClueApplyFeignClient {
     @PostMapping("/save")
-    JSONResult<Long> save(@Valid @RequestBody MerchantClueApplyDto reqDto);
+    JSONResult<Boolean> save(@Valid @RequestBody ClueApplyReqDto reqDto);
+
+    @PostMapping("/applyPage")
+    JSONResult<PageBean<ClueApplyPageDto>> applyPage(@RequestBody ClueApplyPageParamDto reqDto);
+
+    @PostMapping("/getPendingReview")
+    JSONResult<Integer> getPendingReview(@RequestBody ClueApplyPageParamDto reqDto);
+
+    @PostMapping("/pass")
+    JSONResult<Boolean> pass(@RequestBody ClueApplyAuditReqDto reqDto);
+
+    @PostMapping("/reject")
+    JSONResult<Boolean> reject(@RequestBody ClueApplyAuditReqDto reqDto);
 
     @Component
     static class HystrixClientFallback implements MerchantClueApplyFeignClient {
@@ -38,8 +52,28 @@ public interface MerchantClueApplyFeignClient {
 
 
         @Override
-        public JSONResult<Long> save(MerchantClueApplyDto reqDto) {
-            return fallBackError("资源需求申请保存失败");
+        public JSONResult<Boolean> save(ClueApplyReqDto reqDto) {
+            return fallBackError("资源需求申请保存");
+        }
+
+        @Override
+        public JSONResult<PageBean<ClueApplyPageDto>> applyPage(ClueApplyPageParamDto reqDto) {
+            return fallBackError("资源需求申请列表");
+        }
+
+        @Override
+        public JSONResult<Integer> getPendingReview(ClueApplyPageParamDto reqDto) {
+            return fallBackError("资源需求申请列表-待审核数");
+        }
+
+        @Override
+        public JSONResult<Boolean> pass(@RequestBody ClueApplyAuditReqDto reqDto) {
+            return fallBackError("资源需求审核通过");
+        }
+
+        @Override
+        public JSONResult<Boolean> reject(@RequestBody ClueApplyAuditReqDto reqDto) {
+            return fallBackError("资源需求审核驳回");
         }
     }
 
