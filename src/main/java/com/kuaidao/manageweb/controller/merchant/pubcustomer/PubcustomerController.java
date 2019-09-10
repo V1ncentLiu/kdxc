@@ -2,12 +2,15 @@ package com.kuaidao.manageweb.controller.merchant.pubcustomer;
 
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.pubcusres.PublicCustomerResourcesRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +53,11 @@ public class PubcustomerController {
   @ResponseBody
   public JSONResult<ClueReceiveRecordsDTO> receiveClue(
       @RequestBody ClueReceiveRecordsDTO dto) {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    dto.setReceiveUser(curLoginUser.getId());
+    dto.setReceiveTime(new java.util.Date());
     return pubcustomerFeignClient.receiveClue(dto);
   }
-
 
   /**
    *  List数据查询
