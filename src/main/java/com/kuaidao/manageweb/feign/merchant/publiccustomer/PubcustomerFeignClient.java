@@ -1,12 +1,11 @@
 package com.kuaidao.manageweb.feign.merchant.publiccustomer;
 
-import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient.HystrixClientFallback;
+import com.kuaidao.merchant.dto.pubcusres.ClueQueryParamDTO;
+import com.kuaidao.merchant.dto.pubcusres.PublicCustomerResourcesRespDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -22,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "merchant-service",path="/merchant/pubcustomer",fallback = HystrixClientFallback.class)
-public interface PublicCustomerFeignClient {
+@FeignClient(name = "merchant-service-ooo1",path="/merchant/pubcustomer",fallback = PubcustomerFeignClient.HystrixClientFallback.class)
+public interface PubcustomerFeignClient {
 
 
     @PostMapping("/queryPage")
@@ -33,7 +32,7 @@ public interface PublicCustomerFeignClient {
 
     @Component
     static class HystrixClientFallback implements
-        PublicCustomerFeignClient {
+        PubcustomerFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
 
