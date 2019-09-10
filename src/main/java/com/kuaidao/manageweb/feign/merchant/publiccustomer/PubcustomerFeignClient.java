@@ -5,6 +5,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient.HystrixClientFallback;
 import com.kuaidao.merchant.dto.pubcusres.ClueQueryParamDTO;
+import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.pubcusres.PublicCustomerResourcesRespDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "merchant-service-ooo1",path="/merchant/pubcustomer",fallback = PubcustomerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service",path="/merchant/pubcustomer",fallback = PubcustomerFeignClient.HystrixClientFallback.class)
 public interface PubcustomerFeignClient {
 
 
@@ -29,6 +30,8 @@ public interface PubcustomerFeignClient {
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(
         @RequestBody ClueQueryParamDTO dto);
 
+    @PostMapping("/receiveClue")
+    public JSONResult<ClueReceiveRecordsDTO> receiveClue(@RequestBody ClueReceiveRecordsDTO dto);
 
     @Component
     static class HystrixClientFallback implements
@@ -49,6 +52,11 @@ public interface PubcustomerFeignClient {
         public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(ClueQueryParamDTO dto) {
             return fallBackError("公共客户资源分页查询");
         }
+
+      @Override
+      public JSONResult<ClueReceiveRecordsDTO> receiveClue(ClueReceiveRecordsDTO dto) {
+        return fallBackError("公共客户资源-领取资源");
+      }
 
 
     }
