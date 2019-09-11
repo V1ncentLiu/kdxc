@@ -35,7 +35,17 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="资源类型:">
-                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="资源类型">
+                    <el-select v-model="form.type" filterable  clearable placeholder="资源类型">
+                        <el-option
+                            v-for="item in clueTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="行业类别:">
+                    <el-select v-model="form.industryCategory" clearable placeholder="行业类别">
                         <el-option
                             v-for="item in industryCategoryOptions"
                             :key="item.value"
@@ -44,18 +54,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="行业类别:">
-                    <el-select v-model="form.category" clearable placeholder="行业类别">
-                        <el-option
-                            v-for="item in categoryOptions"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <el-form-item label="搜索词:">
-                    <el-input v-model="form.ruleName" placeholder="搜索词"></el-input>
+                    <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
                 </el-form-item>
                 <el-form-item label="获取时间:">
                     <el-date-picker
@@ -73,7 +73,12 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="电话:">
-                        <el-input v-model="form.ruleName" placeholder="电话"></el-input>
+                        <el-input v-model="form.phone" placeholder="电话"></el-input>
+                    </el-form-item>
+                </el-row>
+                <el-row v-show="isShow">
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
                     </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
@@ -94,18 +99,18 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
-                <el-table-column align="center" prop="source" label="资源项目"></el-table-column>
-                <el-table-column align="center" prop="source" label="客户姓名"></el-table-column>
-                <el-table-column align="center" prop="source" label="搜索词"></el-table-column>
-                <el-table-column align="center" prop="source" label="留言内容"></el-table-column>
-                <el-table-column align="center" prop="source" label="联系电话"></el-table-column>
+                <el-table-column align="center" prop="sourceName" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="categoryName" label="资源项目"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+                <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+                <el-table-column align="center" prop="phone" label="联系电话"></el-table-column>
                 <el-table-column align="center" prop="source" label="用户行为">
                     
                 </el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源地域"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="startTime" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="clueArea" label="资源地域"></el-table-column>
+                <el-table-column align="center" prop="receiveTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="charge" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     
                 </el-table-column>
@@ -146,6 +151,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var saleList=[[${saleList}]];//电销顾问
+    var clueTypeList = [[${clueTypeList}]];//资源类型
     var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
     var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
     var mediumList=[[${mediumList}]];//媒介集合
@@ -167,21 +173,23 @@
                   pageSize: 20,
                 },
                 form: {
-                  ruleName:'',
-                  category:'',
-                  industryCategory:'',
-                  status:'',
-                  searchStartTime:'',
-                  searchEndTime:'',
-                  teleorg:'',
-                  updateTimeBegin:'',
-                  updateTimeEnd:''
+                    type: '',
+                    category: '',
+                    industryCategory: '',
+                    status: '',
+                    phone:'',
+                    searchStartTime: '',
+                    searchEndTime: '',
+                    searchWord: '',
+                    updateTimeBegin: '',
+                    updateTimeEnd: ''
                 },
                 formAllocat:{
                   telSales:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
+                clueTypeOptions:clueTypeList,
                 categoryOptions:clueCategoryList,
                 industryCategoryOptions:industryCategoryList,
             }        	  
@@ -198,29 +206,32 @@
                 console.log(index, row);
             },
             searchTable() {
-            	var startTime=this.form.searchStartTime;
-                var endTime=this.form.searchEndTime;
-                if(endTime && startTime>endTime){
+                var startTime = this.form.searchStartTime;
+                var endTime = this.form.searchEndTime;
+                if (endTime && startTime > endTime) {
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
                         type: 'warning'
                     });
                     return;
                 }
-                var param =this.form;
+                var param = this.form;
+                param.startTime = startTime;
+                param.endTime = startTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
-                axios.post('/clueAssignRule/optRule/list', param)
-                .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        ocmVM.dataTable= table.data;
-                        ocmVM.pager.total =  table.total;
-                        ocmVM.pager.currentPage = table.currentPage;
-
-                })
+                axios.post('/clue/management/queryPage', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            console.info(result);
+                            var table = result.data;
+                            ocmVM.dataTable = table.data;
+                            ocmVM.pager.total = table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        }
+                    })
                 .catch(function (error) {
                      console.log(error);
                 });
