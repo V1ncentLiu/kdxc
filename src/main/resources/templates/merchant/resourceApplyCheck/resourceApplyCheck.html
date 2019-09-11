@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/element-ui.css">
     <link rel="stylesheet" href="css/base.css">
     <style>
-        .dialogForm .el-form-item{margin-bottom: 5px;}
     </style>
 </head>
 <body>
@@ -24,7 +23,7 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
                 <el-form-item label="商家:">
-                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="商家账户名">
+                    <el-select v-model="form.applyPerson" filterable  clearable placeholder="商家账户名">
                         <el-option
                             v-for="item in industryCategoryOptions"
                             :key="item.value"
@@ -35,20 +34,20 @@
                 </el-form-item>
                 <el-form-item label="规则有效时间:">
                     <el-date-picker
-                        v-model="form.searchStartTime"
+                        v-model="form.applyStartTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.searchEndTime"
+                        v-model="form.applyEndTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="审核状态:">
-                    <el-select v-model="form.status" clearable placeholder="审核状态">
+                    <el-select v-model="form.auditStatus" clearable placeholder="审核状态">
                         <el-option
                             v-for="item in statusOptions"
                             :key="item.value"
@@ -68,7 +67,6 @@
                 border
                 :data="dataTable"
                 @row-click="clickRow"
-                @row-dblclick="rowDblClick"
                 @selection-change="handleSelectionChange"
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
@@ -83,13 +81,13 @@
                         <span v-if="scope.row.status == '0'">
                             <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">审核</el-button>
                         </span>
-                        <span v-else-if="scope.row.status == '1'">
+                        <span v-else-if="scope.row.status == '2'">
                             <el-button size="mini" type="text">已审核</el-button>
                         </span>
                     </template>
                 </el-table-column>
             </el-table>
-            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -109,9 +107,6 @@
         el: '#optimizeClueManagement',
         data: function() {
             return {
-                paginationShow: false,
-                isShow:false,
-                dialogFormVisible: false,
                 multipleSelection: [],//选择行
                 pager:{
                   total: 0,
@@ -119,54 +114,22 @@
                   pageSize: 20,
                 },
                 form: {
-                  ruleName:'',
-                  category:'',
-                  industryCategory:'',
-                  status:'',
-                  searchStartTime:'',
-                  searchEndTime:'',
-                  teleorg:'',
-                  updateTimeBegin:'',
-                  updateTimeEnd:''
-                },
-                dialogForm:{
-                  ruleName:'',
-                  category:'',
-                  source:'',
-                  industryCategory:'',
-                  searchWord:'',
-                  notSearchWord:'',
-                  province:'',
-                  notProvince:'',
-                  startTime:'',
-                  endTime:'',
+                  applyPerson:'',
+                  applyStartTime:'',
+                  applyEndTime:'',
+                  auditStatus:''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
-                dialogTableData:[],
-                categoryOptions:clueCategoryList,
                 industryCategoryOptions:industryCategoryList ,
                 orgTeleArr:queryOrg,
                 statusOptions: [{
-                  value: 1,
-                  name: '有效'
-                }, {
                   value: 0,
-                  name: '无效'
+                  name: '待审核'
+                }, {
+                  value: 2,
+                  name: '已审核'
                 }],
-                storeForm: {
-                    ruleName:'',
-                    category:'',
-                    industryCategory:'',
-                    status:'',
-                    searchStartTime:'',
-                    searchEndTime:'',
-                    teleorg:'',
-                    updateTimeBegin:'',
-                    updateTimeEnd:''
-                },
-                storeId: '',
-                scrollTop: 0,
             }        	  
         },
         methods: {
@@ -240,47 +203,6 @@
                     
              });
             },
-            copyFun() {
-            	var rows = this.multipleSelection;
-                if(rows.length!=1){
-                    this.$message({
-                       message: '请选择一条数据操作',
-                       type: 'warning'
-                     });
-                    return;
-                }
-             this.$confirm('确定要复制此规则吗？', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning'
-             }).then(() => {
-             	  //复制
-             	var param  = {id:rows[0].id};
-                 axios.post('/clueAssignRule/optRule/copy',param)
-                 .then(function (response) {
-                     var data =  response.data;
-                     if(data.code=='0'){
-                    	 ocmVM.$message({message:'复制成功',type:'success',duration:1000,onClose:function(){
-                     		ocmVM.searchTable();
-                 	    }});
-                         
-                     }else{
-                    	 ocmVM.$message({
-                             message: "接口调用失败",
-                             type: 'error'
-                           }); 
-                     }
-                 })
-                 .catch(function (error) {
-                   console.log(error);
-                 })
-                 .then(function () {
-                 	
-                 });
-             }).catch(() => {
-                    
-             });
-            },
             //修改状态
             updateStatus(id,status,msg) {
               var param = {};
@@ -304,8 +226,8 @@
               });
             },
             searchTable() {
-            	var startTime=this.form.searchStartTime;
-                var endTime=this.form.searchEndTime;
+            	var startTime=this.form.applyStartTime;
+                var endTime=this.form.applyEndTime;
                 if(endTime && startTime>endTime){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
@@ -316,17 +238,19 @@
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
+                param.applyPerson = this.form.applyPerson;
+                param.applyStartTime = this.pager.applyStartTime;
+                param.applyEndTime = this.form.applyEndTime;
+                param.auditStatus = this.form.auditStatus;
                 console.info(param);
-                axios.post('/clueAssignRule/optRule/list', param)
+                axios.post('/merchant/clue/setting/applyPage', param)
                 .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        ocmVM.dataTable= table.data;
-                        ocmVM.pager.total =  table.total;
-                        ocmVM.pager.currentPage = table.currentPage;
-
-
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    ocmVM.dataTable= table.data;
+                    ocmVM.pager.total =  table.total;
+                    ocmVM.pager.currentPage = table.currentPage;
                 })
                 .catch(function (error) {
                      console.log(error);
@@ -352,4 +276,4 @@
         }
   })
 </script>
-</html>s
+</html>
