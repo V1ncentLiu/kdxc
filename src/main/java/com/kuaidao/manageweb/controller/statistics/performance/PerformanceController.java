@@ -122,7 +122,6 @@ public class PerformanceController extends BaseStatisticsController {
     @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
-        baseQueryDto.setTeleDeptId(null);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //根据角色不同，使用查询方法不同
