@@ -66,10 +66,9 @@
                 style="width: 100%"
                 border
                 :data="dataTable"
-                @row-click="clickRow"
                 @selection-change="handleSelectionChange"
             >
-                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="applyPersonStr" label="商家账户"></el-table-column>
                 <el-table-column align="center" prop="applyNum" label="资源数"></el-table-column>
@@ -82,11 +81,11 @@
                 <el-table-column align="center" prop="applyArea" label="申请地域"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.status == '0'">
-                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">审核</el-button>
-                        </span>
-                        <span v-else-if="scope.row.status == '2'">
+                        <span v-if="scope.row.auditStatus == '2'">
                             <el-button size="mini" type="text">已审核</el-button>
+                        </span>
+                        <span v-else>
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">审核</el-button>
                         </span>
                     </template>
                 </el-table-column>
@@ -144,84 +143,33 @@
             },
             handleForbid(index, row) {
                 console.log(index, row);
-            },            
-            deleteFun() {
-            	var rows = this.multipleSelection;
-                if(rows.length==0){
-                    this.$message({
-                       message: '请选择数据进行删除',
-                       type: 'warning'
-                     });
-                    return;
-                }
-                var rowNames = [];
-                var rowIds = [];
-                for(var i=0;i<rows.length;i++){
-             	   var curRow = rows[i];
-             	   if(roleCode=="YHWY"||roleCode=="YHZG"){
-             		   
-             	   }else if(curRow.createUser+""!=userId){
-             		  this.$message({
-                          message: '不允许删除非本人创建的规则',
-                          type: 'warning'
-                        });
-                       return;
-             	   }
-                   rowIds.push(curRow.id);
-                   rowNames.push("【"+curRow.ruleName+"】");
-                }
-             this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning'
-             }).then(() => {
-             	  //删除
-             	var param  = {idList:rowIds};
-                 axios.post('/clueAssignRule/optRule/delete',param)
-                 .then(function (response) {
-                     var data =  response.data;
-                     if(data.code=='0'){
-                    	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
-                     		ocmVM.searchTable();
-                 	    }});
-                         
-                     }else{
-                    	 ocmVM.$message({
-                             message: "接口调用失败",
-                             type: 'error'
-                           }); 
-                     }
-                 })
-                 .catch(function (error) {
-                   console.log(error);
-                 })
-                 .then(function () {
-                 	
-                 });
-             }).catch(() => {
-                    
-             });
-            },
+            }, 
             //审核
             updateStatus(id) {
-              var param = {};
-              param.id=id;             
-              axios.post('/merchant/clue/setting/pass', param)
-              .then(function (response) {
-
-                var result =  response.data;
-                if(result.code=="0"){
-                	ocmVM.$message({message:'审核成功',type:'success',duration:1000,onClose:function(){
-                	ocmVM.searchTable();
-          	      }});
-                  
-                }else{
-                	ocmVM.$message.error("审核失败");
-                }
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+                var param = {};
+                param.id=id; 
+                this.$confirm('确认审核通过吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post('/merchant/clue/setting/pass', param)
+                    .then(function (response) {
+                        var result =  response.data;
+                        if(result.code=="0"){
+                        	  ocmVM.$message({message:'审核成功',type:'success',duration:1000,onClose:function(){
+                        	      ocmVM.searchTable();
+                  	        }});                          
+                        }else{
+                        	  ocmVM.$message.error("审核失败");
+                        }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    });
+                }).catch(() => {
+                    console.log(error);
+                });
             },
             searchTable() {
             	var startTime=this.form.applyStartTime;
@@ -243,12 +191,21 @@
                 console.info(param);
                 axios.post('/merchant/clue/setting/applyPage', param)
                 .then(function (response) {
+                    console.log(response)
                     var result =  response.data;
-                    console.info(result);
-                    var table=result.data;
-                    ocmVM.dataTable= table.data;
-                    ocmVM.pager.total =  table.total;
-                    ocmVM.pager.currentPage = table.currentPage;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message({
+                            message: result.msg,
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    
                 })
                 .catch(function (error) {
                      console.log(error);
@@ -276,10 +233,10 @@
                 axios.post('/merchant/clue/setting/getPendingReview', param)
                 .then(function (response) {
                     console.log(response)
-                   this.pendingReviewNum =  response.data.data;
+                    ocmVM.pendingReviewNum =  response.data.data;
                 })
                 .catch(function (error) {
-                     console.log(error);
+                    console.log(error);
                 });
                 
             },
