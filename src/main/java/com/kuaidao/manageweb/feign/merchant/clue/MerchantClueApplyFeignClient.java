@@ -1,10 +1,6 @@
 package com.kuaidao.manageweb.feign.merchant.clue;
 
 import javax.validation.Valid;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.merchant.dto.clue.ClueApplyAuditReqDto;
-import com.kuaidao.merchant.dto.clue.ClueApplyPageDto;
-import com.kuaidao.merchant.dto.clue.ClueApplyPageParamDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -12,8 +8,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.merchant.dto.clue.ClueApplyAuditReqDto;
+import com.kuaidao.merchant.dto.clue.ClueApplyPageDto;
+import com.kuaidao.merchant.dto.clue.ClueApplyPageParamDto;
 import com.kuaidao.merchant.dto.clue.ClueApplyReqDto;
+import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
 
 /**
  * 资源
@@ -22,7 +24,8 @@ import com.kuaidao.merchant.dto.clue.ClueApplyReqDto;
  * @date: 2019年09月06日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting",
+        fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
 public interface MerchantClueApplyFeignClient {
     @PostMapping("/save")
     JSONResult<Boolean> save(@Valid @RequestBody ClueApplyReqDto reqDto);
@@ -39,6 +42,9 @@ public interface MerchantClueApplyFeignClient {
     @PostMapping("/reject")
     JSONResult<Boolean> reject(@RequestBody ClueApplyAuditReqDto reqDto);
 
+    @PostMapping("/getPassByUserId")
+    JSONResult<MerchantClueApplyDto> getPassByUserId(@RequestBody IdEntityLong userId);
+
     @Component
     static class HystrixClientFallback implements MerchantClueApplyFeignClient {
 
@@ -47,7 +53,8 @@ public interface MerchantClueApplyFeignClient {
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
 
 
@@ -74,6 +81,11 @@ public interface MerchantClueApplyFeignClient {
         @Override
         public JSONResult<Boolean> reject(@RequestBody ClueApplyAuditReqDto reqDto) {
             return fallBackError("资源需求审核驳回");
+        }
+
+        @Override
+        public JSONResult<MerchantClueApplyDto> getPassByUserId(@RequestBody IdEntityLong userId) {
+            return fallBackError("查询商家最新审批过的申请");
         }
     }
 
