@@ -23,7 +23,7 @@
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                 <el-form-item label="资源类别:">
                     <el-select v-model="form.category" clearable placeholder="资源类别">
                         <el-option
@@ -98,6 +98,7 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="clueId" label="主键"  v-if="show"></el-table-column>
                 <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
                 <el-table-column align="center" prop="categoryName" label="资源项目"></el-table-column>
                 <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
@@ -105,10 +106,6 @@
                 <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
                 <el-table-column align="center" prop="phone" label="联系电话"></el-table-column>
                 <el-table-column align="center"  label="用户行为">
-                    <!--<template slot-scope="scope">
-                        <div v-else-if="scope.row.assignSubAccount == 1">已分配</div>
-                        <div v-else-if="scope.row.assignSubAccount == 0">未分配</div>
-                    </template>-->
                     <template slot-scope="scope">
                         <div v-if="scope.row.assignSubAccount == 0">未分配</div>
                         <div v-else-if="scope.row.assignSubAccount == 1">已分配</div>
@@ -129,14 +126,14 @@
         <el-form :model="formAllocat" ref="formAllocat">
             <el-form-item
                 label="员工："
-                prop="telSales"
+                prop="userId"
                 :rules="[
                     { required: true, message: '请选择员工姓名', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-select v-model="formAllocat.telSales" placeholder="员工姓名" style="width: 80%;">
+                <el-select v-model="formAllocat.userId" placeholder="员工姓名" style="width: 80%;">
                     <el-option
-                        v-for="item in saleList"
+                        v-for="item in userList"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
@@ -156,23 +153,24 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var saleList=[[${saleList}]];//电销顾问
+    var userList = [[${merchantUserList}]];//电销顾问
     var clueTypeList = [[${clueTypeList}]];//资源类型
-    var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
-    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
-    var mediumList=[[${mediumList}]];//媒介集合
-    var userId=[[${userId}]];//登录人账号id
-    var roleCode=[[${roleCode}]];//登录人角色code
+    var clueCategoryList = [[${clueCategoryList}]];//资源类别集合
+    var industryCategoryList = [[${industryCategoryList}]];//行业类别集合
+    var mediumList = [[${mediumList}]];//媒介集合
+    var userId = [[${userId}]];//登录人账号id
+    var roleCode = [[${roleCode}]];//登录人角色code
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                show:false,
                 btnDisabled:false,
                 paginationShow: false,
                 isShow:false,
                 allocateFormVisible: false,
                 multseleSelection:[],//选择行
-                saleList:saleList,
+                userList:userList,
                 pager:{
                   total: 0,
                   currentPage: 1,
@@ -191,7 +189,7 @@
                     updateTimeEnd: ''
                 },
                 formAllocat:{
-                  telSales:'',
+                    userId:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -313,15 +311,42 @@
             },
             submitAllocatForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                  if (valid) {                    
+                    if (valid) {
+                        this.btnDisabled = true;
+                        var rows = this.multseleSelection;
+                        var rowIds = [];
+                        for(var i=0;i<rows.length;i++){
+                            var curRow = rows[i];
+                            rowIds.push(curRow.clueId);
+                        }
+                        //分配
+                        var param = {};
+                        param.clueIds = rowIds;
+                        param.userId = formAllocat.userId;
+                        axios.post('/clue/management/clueAssign',param)
+                            .then(function (response) {
+                                var data =  response.data;
+                                if(data.code=='0'){
+                                    clueVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
+                                            clueVM.searchTable();
+                                        }});
+                                }else{
+                                    clueVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                            .then(function () {
 
-                    this.btnDisabled = true;
-
-                    
-                  } else {
-                    console.log('error submit!!');
-                    return false;
-                  }
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
                 });
             },
         },
@@ -336,4 +361,4 @@
         }
   })
 </script>
-</html>s
+</html>

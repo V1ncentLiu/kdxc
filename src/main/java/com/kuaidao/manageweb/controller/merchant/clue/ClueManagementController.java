@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -49,7 +51,8 @@ public class ClueManagementController {
     private ClueManagementFeignClient clueManagementFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
     /**
      * 资源管理页面初始化
      *
@@ -58,12 +61,25 @@ public class ClueManagementController {
      */
     @RequestMapping("/init")
     public String init(HttpServletRequest request) {
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        // 获取子账号集合
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        // 启用
+        userInfoDTO.setStatus(SysConstant.USER_STATUS_ENABLE);
+        //商家主账号id
+        userInfoDTO.setParentId(user.getId());
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("merchantUserList", merchantUserList.getData());
+        };
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList", getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         return "merchant/resourceManagement/resourceManagement";
@@ -96,7 +112,8 @@ public class ClueManagementController {
     @ResponseBody
     @PostMapping("/clueAssign")
     public JSONResult<String> clueAssign(@RequestBody ClueAssignReqDto reqDto) {
-
+        UserInfoDTO userInfoDTO = getUser();
+        reqDto.setAllotUserId(userInfoDTO.getId());
         return clueManagementFeignClient.clueAssign(reqDto);
     }
 
