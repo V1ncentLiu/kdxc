@@ -263,7 +263,7 @@ public class UserController {
     @RequiresPermissions("sys:userManager:view")
     public JSONResult<PageBean<UserInfoDTO>> queryRoleList(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
             HttpServletResponse response) {
-
+        userInfoPageParam.setUserType(SysConstant.USER_TYPE_ONE);
         JSONResult<PageBean<UserInfoDTO>> list = userInfoFeignClient.list(userInfoPageParam);
 
         return list;
