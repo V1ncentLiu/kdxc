@@ -285,7 +285,7 @@ public class UserController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
+        userInfoReq.setUserType(SysConstant.USER_TYPE_ONE);
         return userInfoFeignClient.create(userInfoReq);
     }
 

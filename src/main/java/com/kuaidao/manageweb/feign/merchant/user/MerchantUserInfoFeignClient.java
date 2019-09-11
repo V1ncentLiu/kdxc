@@ -61,6 +61,11 @@ public interface MerchantUserInfoFeignClient {
     @PostMapping("/updateUser")
     public JSONResult<String> updateUser(@RequestBody UserInfoReq req);
 
+    /**
+     * 根据参数查询用户列表
+     * @param userInfoDTO
+     * @return
+     */
     @PostMapping("/merchantUserList")
     public JSONResult<List<UserInfoDTO>> merchantUserList(@RequestBody UserInfoDTO userInfoDTO) ;
 
