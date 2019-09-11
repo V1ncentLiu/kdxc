@@ -107,7 +107,7 @@ public class ClueManagementController {
      * @return
      */
     @PostMapping("/export")
-    @RequiresPermissions("clue:management:export")
+   // @RequiresPermissions("clue:management:export")
     @LogRecord(description = "导出", operationType = LogRecord.OperationType.EXPORT, menuName = MenuEnum.CLUE_MANAGEMENT)
     public void export(@RequestBody ClueManagementParamDto reqDto, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long start = System.currentTimeMillis();
