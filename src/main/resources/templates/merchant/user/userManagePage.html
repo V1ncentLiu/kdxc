@@ -119,7 +119,7 @@
                   <el-input v-model="clueTemplateForm.password" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="username">
-                  <el-input v-model="clueTemplateForm.username" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
+                  <el-input v-model="clueTemplateForm.username" :disabled="loginDisabled" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="所属组织架构：" :label-width="formLabelWidth" prop="orgName">
                   <el-popover placement="bottom" trigger="click" v-model="isShow">
@@ -175,8 +175,8 @@
               <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
                   <el-input v-model="subAccountForm.password" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
               </el-form-item>
-              <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="username">
-                  <el-input v-model="subAccountForm.username" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
+              <el-form-item label="登录用户名："  :label-width="formLabelWidth" prop="username">
+                  <el-input v-model="subAccountForm.username"  onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="所属组织架构：" :label-width="formLabelWidth" prop="orgName">
                   <el-popover placement="bottom" trigger="click" v-model="subaccountisShow">
@@ -252,6 +252,7 @@ var userVM = new Vue({
     paginationShow: false,
     isShow:false,
     subaccountisShow:false,
+    loginDisabled:false,
     expandedKeys:expandedKeys,
     accountExpandedKeys:[],
     dataTree: orgData,
@@ -620,20 +621,22 @@ var userVM = new Vue({
     },
     //跳转新增用户页
     toAddUser() {
+        this.loginDisabled=false;
         userVM.addOrModifyDialogTitle = "添加商家账号"
         if (this.$refs['clueTemplateForm']!=undefined) {
-            userVM.clueTemplateForm.phone ="";
-            userVM.clueTemplateForm.name ="";
-            userVM.clueTemplateForm.username ="";
-            userVM.clueTemplateForm.password="";
-            userVM.clueTemplateForm.roleId ="",
-                userVM.clueTemplateForm.id ="";
+            this.clueTemplateForm.phone ="";
+            this.clueTemplateForm.name ="";
+            this.clueTemplateForm.username ="";
+            this.clueTemplateForm.password="";
+            this.clueTemplateForm.roleId ="",
+                this.clueTemplateForm.id ="";
             this.$refs['clueTemplateForm'].resetFields();
         }
         this.dialogFormVisible = true;
     },
     //编辑
     toUpdateUser() {
+        this.loginDisabled=true;
       var rows = this.multipleSelection;
       if(rows.length!=1){
         this.$message({
@@ -684,7 +687,7 @@ var userVM = new Vue({
       .then(function (response) {
         var result =  response.data;
         if(result.code=="0"){
-          userVM.$message({message:'用户'+msg+'成功',type:'success',duration:1000,onClose:function(){
+          userVM.$message({message:'商家账号'+msg+'成功。商家账号状态变为'+msg+'。',type:'success',duration:1000,onClose:function(){
         	  userVM.searchTable();
   	      }});
           
