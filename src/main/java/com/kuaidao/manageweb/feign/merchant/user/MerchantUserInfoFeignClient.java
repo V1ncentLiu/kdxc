@@ -1,20 +1,18 @@
 package com.kuaidao.manageweb.feign.merchant.user;
 
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.*;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.*;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.List;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoReq;
 
 /**
  * 用户
@@ -35,6 +33,7 @@ public interface MerchantUserInfoFeignClient {
      */
     @PostMapping("/merchantlist")
     public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam param);
+
     /**
      * 新增用户
      *
@@ -43,6 +42,7 @@ public interface MerchantUserInfoFeignClient {
      */
     @PostMapping("/create")
     public JSONResult<String> create(@RequestBody UserInfoReq req);
+
     /**
      * 根据id查询用户
      *
@@ -62,7 +62,7 @@ public interface MerchantUserInfoFeignClient {
     public JSONResult<String> updateUser(@RequestBody UserInfoReq req);
 
     @PostMapping("/merchantUserList")
-    public JSONResult<List<UserInfoDTO>> merchantUserList(@RequestBody UserInfoDTO userInfoDTO) ;
+    public JSONResult<List<UserInfoDTO>> merchantUserList(@RequestBody UserInfoDTO userInfoDTO);
 
 
     @Component
