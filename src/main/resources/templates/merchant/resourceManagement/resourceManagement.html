@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源列表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+
+        <el-button type="warning" @click="exportFun"><i ></i>批量导出</el-button>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.category" clearable placeholder="资源类别">
+                        <el-option
+                            v-for="item in categoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源类型:">
+                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="资源类型">
+                        <el-option
+                            v-for="item in industryCategoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="行业类别:">
+                    <el-select v-model="form.category" clearable placeholder="行业类别">
+                        <el-option
+                            v-for="item in categoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="搜索词:">
+                    <el-input v-model="form.ruleName" placeholder="搜索词"></el-input>
+                </el-form-item>
+                <el-form-item label="获取时间:">
+                    <el-date-picker
+                        v-model="form.searchStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.searchEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="电话:">
+                        <el-input v-model="form.ruleName" placeholder="电话"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="source" label="资源项目"></el-table-column>
+                <el-table-column align="center" prop="source" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="source" label="搜索词"></el-table-column>
+                <el-table-column align="center" prop="source" label="留言内容"></el-table-column>
+                <el-table-column align="center" prop="source" label="联系电话"></el-table-column>
+                <el-table-column align="center" prop="source" label="用户行为">
+                    
+                </el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源地域"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+                    
+                </el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
+    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
+    var mediumList=[[${mediumList}]];//媒介集合
+    var queryOrg=[[${queryOrg}]];//电销组
+    var userId=[[${userId}]];//登录人账号id
+    var roleCode=[[${roleCode}]];//登录人角色code
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  ruleName:'',
+                  category:'',
+                  industryCategory:'',
+                  status:'',
+                  searchStartTime:'',
+                  searchEndTime:'',
+                  teleorg:'',
+                  updateTimeBegin:'',
+                  updateTimeEnd:''
+                },
+                dialogForm:{
+                  ruleName:'',
+                  category:'',
+                  source:'',
+                  industryCategory:'',
+                  searchWord:'',
+                  notSearchWord:'',
+                  province:'',
+                  notProvince:'',
+                  startTime:'',
+                  endTime:'',
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],
+                categoryOptions:clueCategoryList,
+                industryCategoryOptions:industryCategoryList ,
+                orgTeleArr:queryOrg,
+                statusOptions: [{
+                  value: 1,
+                  name: '有效'
+                }, {
+                  value: 0,
+                  name: '无效'
+                }]
+            }        	  
+        },
+        methods: {
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+            	var startTime=this.form.searchStartTime;
+                var endTime=this.form.searchEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/clueAssignRule/optRule/list', param)
+                .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            exportFun(){
+                var param = this.form;
+                param.pageNum='';
+                param.pageSize='';
+                axios.post('/clueAssignRule/optRule/export',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                	ocmVM.loading=false;
+                });                     	
+            	
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+          //媒介转换方法
+            transformSource(row, column, cellValue, index) {
+         	   var text="";
+           	   if(mediumList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<mediumList.length;j++){
+	 	                		if(array[i]==mediumList[j].value){
+	 	                			if(i==0){
+		 	                			text=mediumList[j].name;
+	 	                			}else{
+		 	                			text=text+","+mediumList[j].name;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+             toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>s
