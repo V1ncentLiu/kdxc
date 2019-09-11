@@ -18,7 +18,7 @@
         <el-breadcrumb-item>资源列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-
+        <el-button type="primary" @click="openassignrDig"><i ></i>分配资源</el-button>
         <el-button type="warning" @click="exportFun"><i ></i>批量导出</el-button>
     </el-row>
     <div class="mainSearchBg">
@@ -113,6 +113,31 @@
             <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
+    <!-- 分配资源 -->
+    <el-dialog title="分配资源" :visible.sync="allocateFormVisible" width="540px">
+        <el-form :model="formAllocat" ref="formAllocat">
+            <el-form-item
+                label="员工："
+                prop="telSales"
+                :rules="[
+                    { required: true, message: '请选择员工姓名', trigger: 'change' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-select v-model="formAllocat.telSales" placeholder="员工姓名" style="width: 80%;">
+                    <el-option
+                        v-for="item in saleList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交</el-button>
+            <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
+        </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -120,20 +145,22 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
+    var saleList=[[${saleList}]];//电销顾问
     var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
     var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
     var mediumList=[[${mediumList}]];//媒介集合
-    var queryOrg=[[${queryOrg}]];//电销组
     var userId=[[${userId}]];//登录人账号id
     var roleCode=[[${roleCode}]];//登录人角色code
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                btnDisabled:false,
                 paginationShow: false,
                 isShow:false,
-                dialogFormVisible: false,
+                allocateFormVisible: false,
                 multipleSelection: [],//选择行
+                saleList:saleList,
                 pager:{
                   total: 0,
                   currentPage: 1,
@@ -150,31 +177,13 @@
                   updateTimeBegin:'',
                   updateTimeEnd:''
                 },
-                dialogForm:{
-                  ruleName:'',
-                  category:'',
-                  source:'',
-                  industryCategory:'',
-                  searchWord:'',
-                  notSearchWord:'',
-                  province:'',
-                  notProvince:'',
-                  startTime:'',
-                  endTime:'',
+                formAllocat:{
+                  telSales:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
-                dialogTableData:[],
                 categoryOptions:clueCategoryList,
-                industryCategoryOptions:industryCategoryList ,
-                orgTeleArr:queryOrg,
-                statusOptions: [{
-                  value: 1,
-                  name: '有效'
-                }, {
-                  value: 0,
-                  name: '无效'
-                }]
+                industryCategoryOptions:industryCategoryList,
             }        	  
         },
         methods: {
@@ -267,6 +276,36 @@
                 }else{
                     this.isShow=true
                 }          
+            },
+            openassignrDig(){
+                var rows = this.multseleSelection;
+                if(rows.length <1){
+                this.$message({
+                    message: '请选分配资源',
+                    type: 'warning'
+                });
+                return;
+                }
+                this.allocateFormVisible = true;
+                if(this.$refs['formAllocat']) {
+                    this.$refs['formAllocat'].resetFields();
+                }
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            submitAllocatForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {                    
+
+                    this.btnDisabled = true;
+
+                    
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
             },
         },
         created(){
