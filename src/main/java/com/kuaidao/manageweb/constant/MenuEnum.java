@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.constant;
 
 /**
- * 
+ *
  * @Description: 维护后台的所有菜单，为了记录访问日志使用
  * @author: Chen Chengxue
  * @date: 2018年8月13日 上午9:02:21
@@ -25,7 +25,7 @@ public enum MenuEnum {
     TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), OPT_RULE_MANAGEMENT("优化分配规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
     /**
      * 总裁办
-     * 
+     *
      */
     REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认"), BUSINESSSIGNREPETITION("付款明细重单审批确认（总裁办）"), PAYDETAILREPETITION("付款明细分配比例（总裁办）"),
     /**
@@ -48,7 +48,10 @@ public enum MenuEnum {
      * 版本管理
      */
     VERSION_LIST("版本列表"), IOS_VERSION_LIST("IOS版本列表"), ANDROID_VERSION_LIST("ANDROID版本列表"),
-
+    /**
+     * 商家端
+     */
+    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"),
     /**
      * 报表（商务模块）
      */
