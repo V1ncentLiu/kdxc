@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name="statstics-service3",path = "/statstics/performance",fallback = PerformanceClient.HystrixClientFallback.class)
+@FeignClient(name="statstics-service",path = "/statstics/performance",fallback = PerformanceClient.HystrixClientFallback.class)
 public interface PerformanceClient {
 
     @RequestMapping("/queryPage")
