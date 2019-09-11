@@ -61,6 +61,8 @@ public interface MerchantUserInfoFeignClient {
     @PostMapping("/updateUser")
     public JSONResult<String> updateUser(@RequestBody UserInfoReq req);
 
+    @PostMapping("/merchantUserList")
+    public JSONResult<List<UserInfoDTO>> merchantUserList(@RequestBody UserInfoDTO userInfoDTO) ;
 
 
     @Component
@@ -94,6 +96,11 @@ public interface MerchantUserInfoFeignClient {
         @Override
         public JSONResult<String> updateUser(UserInfoReq req) {
             return fallBackError("更新商家信息");
+        }
+
+        @Override
+        public JSONResult<List<UserInfoDTO>> merchantUserList(UserInfoDTO userInfoDTO) {
+            return fallBackError("查询账号失败");
         }
 
     }
