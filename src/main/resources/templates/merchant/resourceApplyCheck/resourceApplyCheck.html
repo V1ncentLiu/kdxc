@@ -25,7 +25,7 @@
                 <el-form-item label="商家:">
                     <el-select v-model="form.applyPerson" filterable  clearable placeholder="商家账户名">
                         <el-option
-                            v-for="item in industryCategoryOptions"
+                            v-for="item in merchantUserListOptions"
                             :key="item.value"
                             :label="item.name"
                             :value="item.value">
@@ -79,7 +79,7 @@
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status == '0'">
-                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">审核</el-button>
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">审核</el-button>
                         </span>
                         <span v-else-if="scope.row.status == '2'">
                             <el-button size="mini" type="text">已审核</el-button>
@@ -97,12 +97,7 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
-    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
-    var mediumList=[[${mediumList}]];//媒介集合
-    var queryOrg=[[${queryOrg}]];//电销组
-    var userId=[[${userId}]];//登录人账号id
-    var roleCode=[[${roleCode}]];//登录人角色code
+    var merchantUserList=[[${merchantUserList}]];//商户集合
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -121,8 +116,7 @@
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
-                industryCategoryOptions:industryCategoryList ,
-                orgTeleArr:queryOrg,
+                merchantUserListOptions:merchantUserList,
                 statusOptions: [{
                   value: 0,
                   name: '待审核'
@@ -203,22 +197,21 @@
                     
              });
             },
-            //修改状态
-            updateStatus(id,status,msg) {
+            //审核
+            updateStatus(id) {
               var param = {};
-              param.id=id;
-              param.status=status;
-              var url='/clueAssignRule/optRule/updateStatusEnable';
-              axios.post(url, param)
+              param.id=id;             
+              axios.post('/merchant/clue/setting/pass', param)
               .then(function (response) {
+
                 var result =  response.data;
                 if(result.code=="0"){
-                	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                	ocmVM.$message({message:'审核成功',type:'success',duration:1000,onClose:function(){
                 	ocmVM.searchTable();
           	      }});
                   
                 }else{
-                	ocmVM.$message.error(msg+"失败");
+                	ocmVM.$message.error("审核失败");
                 }
               })
               .catch(function (error) {
@@ -239,7 +232,7 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.applyPerson = this.form.applyPerson;
-                param.applyStartTime = this.pager.applyStartTime;
+                param.applyStartTime = this.form.applyStartTime;
                 param.applyEndTime = this.form.applyEndTime;
                 param.auditStatus = this.form.auditStatus;
                 console.info(param);
@@ -257,6 +250,33 @@
                 });
                 
             },
+            getPendingReview() {
+                var startTime=this.form.applyStartTime;
+                var endTime=this.form.applyEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.applyPerson = this.form.applyPerson;
+                param.applyStartTime = this.form.applyStartTime;
+                param.applyEndTime = this.form.applyEndTime;
+                param.auditStatus = this.form.auditStatus;
+                console.info(param);
+                axios.post('/merchant/clue/setting/getPendingReview', param)
+                .then(function (response) {
+                    console.log(response)
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
           //日期数据格式化方法
             dateFormat( row, column, cellValue, index) {
               if (cellValue == undefined) {
@@ -264,12 +284,14 @@
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
+
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
+            this.getPendingReview();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
