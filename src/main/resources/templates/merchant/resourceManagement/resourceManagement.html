@@ -35,7 +35,17 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="资源类型:">
-                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="资源类型">
+                    <el-select v-model="form.type" filterable  clearable placeholder="资源类型">
+                        <el-option
+                            v-for="item in clueTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="行业类别:">
+                    <el-select v-model="form.industryCategory" clearable placeholder="行业类别">
                         <el-option
                             v-for="item in industryCategoryOptions"
                             :key="item.value"
@@ -44,18 +54,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="行业类别:">
-                    <el-select v-model="form.category" clearable placeholder="行业类别">
-                        <el-option
-                            v-for="item in categoryOptions"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <el-form-item label="搜索词:">
-                    <el-input v-model="form.ruleName" placeholder="搜索词"></el-input>
+                    <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
                 </el-form-item>
                 <el-form-item label="获取时间:">
                     <el-date-picker
@@ -73,7 +73,12 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="电话:">
-                        <el-input v-model="form.ruleName" placeholder="电话"></el-input>
+                        <el-input v-model="form.phone" placeholder="电话"></el-input>
+                    </el-form-item>
+                </el-row>
+                <el-row v-show="isShow">
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
                     </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
@@ -146,6 +151,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var saleList=[[${saleList}]];//电销顾问
+    var clueTypeList = [[${clueTypeList}]];//资源类型
     var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
     var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
     var mediumList=[[${mediumList}]];//媒介集合
@@ -167,21 +173,23 @@
                   pageSize: 20,
                 },
                 form: {
-                  ruleName:'',
-                  category:'',
-                  industryCategory:'',
-                  status:'',
-                  searchStartTime:'',
-                  searchEndTime:'',
-                  teleorg:'',
-                  updateTimeBegin:'',
-                  updateTimeEnd:''
+                    type: '',
+                    category: '',
+                    industryCategory: '',
+                    status: '',
+                    phone:'',
+                    searchStartTime: '',
+                    searchEndTime: '',
+                    searchWord: '',
+                    updateTimeBegin: '',
+                    updateTimeEnd: ''
                 },
                 formAllocat:{
                   telSales:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
+                clueTypeOptions:clueTypeList,
                 categoryOptions:clueCategoryList,
                 industryCategoryOptions:industryCategoryList,
             }        	  
