@@ -61,7 +61,18 @@ public class MerchantClueSettingController {
         }
         return "merchant/clueSetting/clueApply";
     }
-
+    /***
+     * 资源需求申请跳转页面
+     *
+     * @return
+     */
+    @RequestMapping("/applyPageInit")
+    public String applyPageInit(HttpServletRequest request) {
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
+        request.setAttribute("user", user);
+        return "merchant/resourceApplyCheck/resourceApplyCheck";
+    }
     /***
      * 资源需求保存
      *

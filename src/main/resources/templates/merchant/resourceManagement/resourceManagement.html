@@ -206,29 +206,31 @@
                 console.log(index, row);
             },
             searchTable() {
-            	var startTime=this.form.searchStartTime;
-                var endTime=this.form.searchEndTime;
-                if(endTime && startTime>endTime){
+                var startTime = this.form.searchStartTime;
+                var endTime = this.form.searchEndTime;
+                if (endTime && startTime > endTime) {
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
                         type: 'warning'
                     });
                     return;
                 }
-                var param =this.form;
+                var param = this.form;
+                param.startTime = startTime;
+                param.endTime = startTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
-                axios.post('/clueAssignRule/optRule/list', param)
-                .then(function (response) {
-                        var result =  response.data;
+                axios.post('/clue/management/queryPage', param)
+                    .then(function (response) {
+                        var result = response.data;
                         console.info(result);
-                        var table=result.data;
-                        ocmVM.dataTable= table.data;
-                        ocmVM.pager.total =  table.total;
+                        var table = result.data;
+                        ocmVM.dataTable = table.data;
+                        ocmVM.pager.total = table.total;
                         ocmVM.pager.currentPage = table.currentPage;
 
-                })
+                    })
                 .catch(function (error) {
                      console.log(error);
                 });

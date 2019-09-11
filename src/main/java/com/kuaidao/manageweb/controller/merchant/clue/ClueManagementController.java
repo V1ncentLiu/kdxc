@@ -7,8 +7,9 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.kuaidao.merchant.constant.MerchantConstant;
-import lombok.extern.slf4j.Slf4j;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -27,11 +27,12 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
+import com.kuaidao.merchant.constant.MerchantConstant;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 资源管理
@@ -46,6 +47,8 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 public class ClueManagementController {
     @Autowired
     private ClueManagementFeignClient clueManagementFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 资源管理页面初始化
@@ -53,9 +56,14 @@ public class ClueManagementController {
      * @param
      * @return
      */
-    @PostMapping("/init")
+    @RequestMapping("/init")
     public String init(HttpServletRequest request) {
-
+        // 查询字典资源类别集合
+        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+        // 查询字典资源类型集合
+        request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList", getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         return "merchant/resourceManagement/resourceManagement";
     }
 
@@ -218,5 +226,19 @@ public class ClueManagementController {
             return "";
         }
         return DateUtil.convert2String(date, DateUtil.ymd);
+    }
+
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
     }
 }
