@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资费设置</el-breadcrumb-item>
+        <el-breadcrumb-item>商家资源申请审核</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        待审核：10条
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
+                <el-form-item label="商家:">
+                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in industryCategoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则有效时间:">
+                    <el-date-picker
+                        v-model="form.searchStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.searchEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="审核状态:">
+                    <el-select v-model="form.status" clearable placeholder="审核状态">
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @row-click="clickRow"
+                @row-dblclick="rowDblClick"
+                @selection-change="handleSelectionChange"
+            >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="applyPerson" label="商家账户"></el-table-column>
+                <el-table-column align="center" prop="source" label="资源数"></el-table-column>
+                <el-table-column align="center" prop="category" label="申请说明"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="申请时间周期"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="申请地域"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status == '0'">
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">审核</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status == '1'">
+                            <el-button size="mini" type="text">已审核</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
+    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
+    var mediumList=[[${mediumList}]];//媒介集合
+    var queryOrg=[[${queryOrg}]];//电销组
+    var userId=[[${userId}]];//登录人账号id
+    var roleCode=[[${roleCode}]];//登录人角色code
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  ruleName:'',
+                  category:'',
+                  industryCategory:'',
+                  status:'',
+                  searchStartTime:'',
+                  searchEndTime:'',
+                  teleorg:'',
+                  updateTimeBegin:'',
+                  updateTimeEnd:''
+                },
+                dialogForm:{
+                  ruleName:'',
+                  category:'',
+                  source:'',
+                  industryCategory:'',
+                  searchWord:'',
+                  notSearchWord:'',
+                  province:'',
+                  notProvince:'',
+                  startTime:'',
+                  endTime:'',
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],
+                categoryOptions:clueCategoryList,
+                industryCategoryOptions:industryCategoryList ,
+                orgTeleArr:queryOrg,
+                statusOptions: [{
+                  value: 1,
+                  name: '有效'
+                }, {
+                  value: 0,
+                  name: '无效'
+                }],
+                storeForm: {
+                    ruleName:'',
+                    category:'',
+                    industryCategory:'',
+                    status:'',
+                    searchStartTime:'',
+                    searchEndTime:'',
+                    teleorg:'',
+                    updateTimeBegin:'',
+                    updateTimeEnd:''
+                },
+                storeId: '',
+                scrollTop: 0,
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },            
+            deleteFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+             	   var curRow = rows[i];
+             	   if(roleCode=="YHWY"||roleCode=="YHZG"){
+             		   
+             	   }else if(curRow.createUser+""!=userId){
+             		  this.$message({
+                          message: '不允许删除非本人创建的规则',
+                          type: 'warning'
+                        });
+                       return;
+             	   }
+                   rowIds.push(curRow.id);
+                   rowNames.push("【"+curRow.ruleName+"】");
+                }
+             this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //删除
+             	var param  = {idList:rowIds};
+                 axios.post('/clueAssignRule/optRule/delete',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            copyFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据操作',
+                       type: 'warning'
+                     });
+                    return;
+                }
+             this.$confirm('确定要复制此规则吗？', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //复制
+             	var param  = {id:rows[0].id};
+                 axios.post('/clueAssignRule/optRule/copy',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'复制成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            //修改状态
+            updateStatus(id,status,msg) {
+              var param = {};
+              param.id=id;
+              param.status=status;
+              var url='/clueAssignRule/optRule/updateStatusEnable';
+              axios.post(url, param)
+              .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                	ocmVM.searchTable();
+          	      }});
+                  
+                }else{
+                	ocmVM.$message.error(msg+"失败");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            },
+            searchTable() {
+            	var startTime=this.form.searchStartTime;
+                var endTime=this.form.searchEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/clueAssignRule/optRule/list', param)
+                .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>s
