@@ -123,6 +123,7 @@ public class MerchantClueSettingController {
      * @param reqDto
      * @return
      */
+    @ResponseBody
     @PostMapping("/getPendingReview")
     public JSONResult<Integer> getPendingReview(@RequestBody ClueApplyPageParamDto reqDto) {
         return merchantClueApplyFeignClient.getPendingReview(reqDto);
@@ -135,6 +136,7 @@ public class MerchantClueSettingController {
      * @return
      */
     @PostMapping("/pass")
+    @ResponseBody
     @LogRecord(description = "审核通过", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.AUDIT_PASS)
     public JSONResult<Boolean> pass(@RequestBody ClueApplyAuditReqDto reqDto) {
         return merchantClueApplyFeignClient.pass(reqDto);
@@ -147,6 +149,7 @@ public class MerchantClueSettingController {
      * @return
      */
     @PostMapping("/reject")
+    @ResponseBody
     @LogRecord(description = "审核驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.AUDIT_REJECT)
     public JSONResult<Boolean> reject(@RequestBody ClueApplyAuditReqDto reqDto) {
         return merchantClueApplyFeignClient.reject(reqDto);

@@ -17,7 +17,7 @@
         <el-breadcrumb-item>商家资源申请审核</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-        待审核：10条
+        待审核：{{pendingReviewNum}}条
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
@@ -74,7 +74,7 @@
                 <el-table-column align="center" prop="applyPersonStr" label="商家账户"></el-table-column>
                 <el-table-column align="center" prop="applyNum" label="资源数"></el-table-column>
                 <el-table-column align="center" prop="remark" label="申请说明"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="申请时间周期"  :formatter="dateFormat" width="130">
+                <el-table-column align="center" prop="updateTime" label="申请时间周期"  :formatter="dateFormat" width="300">
                     <template slot-scope="scope">
                         {{scope.row.applyStartTime}} - {{scope.row.applyEndTime}}
                     </template>
@@ -106,6 +106,7 @@
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                pendingReviewNum:'',
                 multipleSelection: [],//选择行
                 pager:{
                   total: 0,
@@ -275,6 +276,7 @@
                 axios.post('/merchant/clue/setting/getPendingReview', param)
                 .then(function (response) {
                     console.log(response)
+                   this.pendingReviewNum =  response.data.data;
                 })
                 .catch(function (error) {
                      console.log(error);
@@ -295,7 +297,7 @@
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
-            //this.getPendingReview();
+            this.getPendingReview();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';

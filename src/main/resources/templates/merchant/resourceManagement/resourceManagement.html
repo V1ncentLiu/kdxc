@@ -89,6 +89,7 @@
             </el-form>
         </div>
         <el-row>
+            <div>今日分发 100 条 累计分发 100 条  今日领取100条  累计领取 100条</div>
             <el-table
                 ref="multipleTable"
                 tooltip-effect="dark"
@@ -99,14 +100,21 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="sourceName" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
                 <el-table-column align="center" prop="categoryName" label="资源项目"></el-table-column>
                 <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
                 <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
                 <el-table-column align="center" prop="phone" label="联系电话"></el-table-column>
-                <el-table-column align="center" prop="source" label="用户行为">
-                    
+                <el-table-column align="center"  label="用户行为">
+                    <!--<template slot-scope="scope">
+                        <div v-else-if="scope.row.assignSubAccount == 1">已分配</div>
+                        <div v-else-if="scope.row.assignSubAccount == 0">未分配</div>
+                    </template>-->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.assignSubAccount == 0">未分配</div>
+                        <div v-else-if="scope.row.assignSubAccount == 1">已分配</div>
+                    </template>
                 </el-table-column>
                 <el-table-column align="center" prop="clueArea" label="资源地域"></el-table-column>
                 <el-table-column align="center" prop="receiveTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
@@ -262,24 +270,24 @@
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
-          //媒介转换方法
+            //媒介转换方法
             transformSource(row, column, cellValue, index) {
-         	   var text="";
-           	   if(mediumList&&cellValue){
-	            	   var array=cellValue.split(",");
-	                   for(var i=0;i<array.length;i++){
-	                	   for(var j=0;j<mediumList.length;j++){
-	 	                		if(array[i]==mediumList[j].value){
-	 	                			if(i==0){
-		 	                			text=mediumList[j].name;
-	 	                			}else{
-		 	                			text=text+","+mediumList[j].name;
-	 	                			}
-	 	                		}
-	 	                	}
-	                	}
-           	    }
-                 return text;
+                var text = "";
+                if (mediumList && cellValue) {
+                    var array = cellValue.split(",");
+                    for (var i = 0; i < array.length; i++) {
+                        for (var j = 0; j < mediumList.length; j++) {
+                            if (array[i] == mediumList[j].value) {
+                                if (i == 0) {
+                                    text = mediumList[j].name;
+                                } else {
+                                    text = text + "," + mediumList[j].name;
+                                }
+                            }
+                        }
+                    }
+                }
+                return text;
             },
              toogleClick(){
                 if(this.isShow){

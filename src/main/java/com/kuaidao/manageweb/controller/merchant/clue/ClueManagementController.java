@@ -58,6 +58,8 @@ public class ClueManagementController {
      */
     @RequestMapping("/init")
     public String init(HttpServletRequest request) {
+        // 查询字典媒介集合
+        request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典资源类型集合
@@ -147,7 +149,7 @@ public class ClueManagementController {
                 // 价格(元)/条
                 curList.add(dto.getCharge());
                 // 是否分发
-                String str = MerchantConstant.ASSIGN_SUB_ACCOUNT_YES.equals(dto.getAssignSubAccount()) ? "是" : "否";
+                String str = MerchantConstant.ASSIGN_SUB_ACCOUNT_YES.equals(dto.getIsAssignSubAccount()) ? "是" : "否";
                 curList.add(str);
                 dataList.add(curList);
             }
