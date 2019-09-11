@@ -99,18 +99,18 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
-                <el-table-column align="center" prop="source" label="资源项目"></el-table-column>
-                <el-table-column align="center" prop="source" label="客户姓名"></el-table-column>
-                <el-table-column align="center" prop="source" label="搜索词"></el-table-column>
-                <el-table-column align="center" prop="source" label="留言内容"></el-table-column>
-                <el-table-column align="center" prop="source" label="联系电话"></el-table-column>
+                <el-table-column align="center" prop="sourceName" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="categoryName" label="资源项目"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+                <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+                <el-table-column align="center" prop="phone" label="联系电话"></el-table-column>
                 <el-table-column align="center" prop="source" label="用户行为">
                     
                 </el-table-column>
-                <el-table-column align="center" prop="createTime" label="资源地域"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="startTime" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="clueArea" label="资源地域"></el-table-column>
+                <el-table-column align="center" prop="receiveTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="charge" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     
                 </el-table-column>
@@ -224,12 +224,13 @@
                 axios.post('/clue/management/queryPage', param)
                     .then(function (response) {
                         var result = response.data;
-                        console.info(result);
-                        var table = result.data;
-                        ocmVM.dataTable = table.data;
-                        ocmVM.pager.total = table.total;
-                        ocmVM.pager.currentPage = table.currentPage;
-
+                        if (result.code == '0') {
+                            console.info(result);
+                            var table = result.data;
+                            ocmVM.dataTable = table.data;
+                            ocmVM.pager.total = table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        }
                     })
                 .catch(function (error) {
                      console.log(error);

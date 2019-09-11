@@ -2,10 +2,11 @@ package com.kuaidao.manageweb.controller.merchant.clue;
 
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
@@ -42,6 +42,8 @@ public class MerchantClueSettingController {
     private MerchantClueApplyFeignClient merchantClueApplyFeignClient;
     @Autowired
     private SysRegionFeignClient sysRegionFeignClient;
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
 
     /***
      * 资源需求申请跳转页面
@@ -61,6 +63,7 @@ public class MerchantClueSettingController {
         }
         return "merchant/clueSetting/clueApply";
     }
+
     /***
      * 资源需求申请跳转页面
      *
@@ -71,8 +74,19 @@ public class MerchantClueSettingController {
         // 获取当前登录人
         UserInfoDTO user = getUser();
         request.setAttribute("user", user);
+        // 获取商家主账号列表
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        // 商家主账户
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        // 启用
+        userInfoDTO.setStatus(SysConstant.USER_STATUS_ENABLE);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("merchantUserList", merchantUserList.getData());
+        }
         return "merchant/resourceApplyCheck/resourceApplyCheck";
     }
+
     /***
      * 资源需求保存
      *
