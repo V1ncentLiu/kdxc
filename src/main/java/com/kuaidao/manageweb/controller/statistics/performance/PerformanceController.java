@@ -21,6 +21,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class PerformanceController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/groupList")
     public String teamList(HttpServletRequest request){
         initSaleDept(request);
@@ -79,6 +81,7 @@ public class PerformanceController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request,Long deptId,Long teleGroupId,Long teleSaleId,Integer category,Long startTime,Long endTime,String searchText){
         if(null!=teleGroupId){
@@ -104,6 +107,7 @@ public class PerformanceController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>>  queryByPage(@RequestBody BaseQueryDto baseQueryDto){
         initParams(baseQueryDto);
@@ -115,6 +119,7 @@ public class PerformanceController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
         baseQueryDto.setTeleDeptId(null);
@@ -133,6 +138,7 @@ public class PerformanceController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:performance:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -172,6 +178,7 @@ public class PerformanceController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:performance:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
