@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 
 /**
  * 资源
@@ -53,6 +55,15 @@ public interface ClueManagementFeignClient {
     @PostMapping("/listNoPage")
     JSONResult<List<ClueManagementDto>> listNoPage(@RequestBody ClueManagementParamDto reqDto);
 
+    /**
+     * 根据子账号id获取分配的资源
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/getResourceStatistics")
+    JSONResult<ResourceStatisticsDto> getResourceStatistics(@RequestBody IdEntityLong reqDto);
+
     @Component
     static class HystrixClientFallback implements ClueManagementFeignClient {
 
@@ -78,6 +89,11 @@ public interface ClueManagementFeignClient {
         @Override
         public JSONResult<List<ClueManagementDto>> listNoPage(@RequestBody ClueManagementParamDto reqDto) {
             return fallBackError("资源导出");
+        }
+
+        @Override
+        public JSONResult<ResourceStatisticsDto> getResourceStatistics(@RequestBody IdEntityLong reqDto) {
+            return fallBackError("根据子账号id获取分配的资源");
         }
     }
 
