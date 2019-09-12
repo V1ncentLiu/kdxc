@@ -7,15 +7,11 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,12 +23,17 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.constant.MerchantConstant;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,6 +54,7 @@ public class ClueManagementController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+
     /**
      * 资源管理页面初始化
      *
@@ -74,12 +76,12 @@ public class ClueManagementController {
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
         // 启用
         userInfoDTO.setStatus(SysConstant.USER_STATUS_ENABLE);
-        //商家主账号id
+        // 商家主账号id
         userInfoDTO.setParentId(user.getId());
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
-        };
+        }
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList", getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         return "merchant/resourceManagement/resourceManagement";
@@ -118,13 +120,47 @@ public class ClueManagementController {
     }
 
     /**
+     * 获取资源统计
+     *
+     * @param
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/getResourceStatistics")
+    public JSONResult<ResourceStatisticsDto> getResourceStatistics(HttpServletRequest request) {
+        ResourceStatisticsDto dto = new ResourceStatisticsDto();
+        // 获取当前登录信息
+        UserInfoDTO userInfoDTO = getUser();
+        // 查询主账号信息
+        if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
+            // 获取主账号分发相关
+            // 获取主账号领取相关
+        }
+        // 查询子账号信息
+        if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
+            IdEntityLong reqDto = new IdEntityLong();
+            reqDto.setId(userInfoDTO.getId());
+            // 获取子账号分发相关
+            JSONResult<ResourceStatisticsDto> subAssignDto = clueManagementFeignClient.getResourceStatistics(reqDto);
+            if (subAssignDto.getCode().equals(JSONResult.SUCCESS)) {
+                // 今日分发资源
+                dto.setTodayAssignClueNum(subAssignDto.getData().getTodayAssignClueNum());
+                dto.setTotalAssignClueNum(subAssignDto.getData().getTotalAssignClueNum());
+            }
+            // 获取子账号领取相关
+
+        }
+        return new JSONResult<ResourceStatisticsDto>().success(dto);
+    }
+
+    /**
      * 资源管理-导出
      *
      * @param
      * @return
      */
     @PostMapping("/export")
-   // @RequiresPermissions("clue:management:export")
+    // @RequiresPermissions("clue:management:export")
     @LogRecord(description = "导出", operationType = LogRecord.OperationType.EXPORT, menuName = MenuEnum.CLUE_MANAGEMENT)
     public void export(@RequestBody ClueManagementParamDto reqDto, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long start = System.currentTimeMillis();

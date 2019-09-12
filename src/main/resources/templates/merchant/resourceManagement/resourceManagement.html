@@ -53,7 +53,7 @@
                             :value="item.value">
                         </el-option>
                     </el-select>
-                </el-form-item>                
+                </el-form-item>
                 <el-form-item label="获取时间:">
                     <el-date-picker
                         v-model="form.searchStartTime"
@@ -87,7 +87,7 @@
             </el-form>
         </div>
         <el-row>
-            <div class="greyTip">今日分发 100 条 累计分发 100 条  今日领取  100  条  累计领取 100 条</div>
+            <div class="greyTip">今日分发 {{todayAssignClueNum}} 条 累计分发 {{totalAssignClueNum}} 条  今日领取  {{todayReceiveClueNum}}  条  累计领取 {{totalReceiveClueNum}} 条</div>
             <el-table
                 ref="multipleTable"
                 tooltip-effect="dark"
@@ -115,7 +115,7 @@
                 <el-table-column align="center" prop="receiveTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="charge" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
-                    
+
                 </el-table-column>
             </el-table>
             <table-pagination  :pager="pager" @change="searchTable"></table-pagination>
@@ -164,6 +164,10 @@
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                todayAssignClueNum:'',//今日分发资源
+                totalAssignClueNum:'',//累计分发资源
+                todayReceiveClueNum:'',//今日领取资源
+                totalReceiveClueNum:'',// 累计领取资源
                 show:false,
                 btnDisabled:false,
                 paginationShow: false,
@@ -196,7 +200,7 @@
                 clueTypeOptions:clueTypeList,
                 categoryOptions:clueCategoryList,
                 industryCategoryOptions:industryCategoryList,
-            }        	  
+            }
         },
         methods: {
             handleSelectionChange(val) {//选择节点的事件
@@ -239,7 +243,25 @@
                 .catch(function (error) {
                      console.log(error);
                 });
-                
+
+            },
+            getResourceStatistics() {
+                var param = {};
+                axios.post('/clue/management/getResourceStatistics', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            var data = result.data;
+                            ocmVM.todayAssignClueNum = data.todayAssignClueNum;
+                            ocmVM.totalAssignClueNum = data.totalAssignClueNum;
+                            ocmVM.todayReceiveClueNum = data.todayReceiveClueNum;
+                            ocmVM.totalReceiveClueNum = data.totalReceiveClueNum;
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
             },
             exportFun(){
                 var param = this.form;
@@ -256,8 +278,8 @@
                     console.log(error);
                 }).then(function(){
                 	ocmVM.loading=false;
-                });                     	
-            	
+                });
+
             },
           //日期数据格式化方法
             dateFormat( row, column, cellValue, index) {
@@ -290,7 +312,7 @@
                     this.isShow=false
                 }else{
                     this.isShow=true
-                }          
+                }
             },
             openassignrDig(){
                 var rows = this.multseleSelection;
@@ -354,10 +376,12 @@
             },
         },
         created(){
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
-            // console.info("create method");
+            var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+            if (localVal) {
+                this.pager.pageSize = localVal;
+            }
             this.searchTable();
+            this.getResourceStatistics();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
