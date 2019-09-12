@@ -141,7 +141,7 @@ public class ClueManagementController {
             IdEntityLong reqDto = new IdEntityLong();
             reqDto.setId(userInfoDTO.getId());
             // 获取子账号分发相关
-            JSONResult<ResourceStatisticsDto> subAssignDto = clueManagementFeignClient.getResourceStatistics(reqDto);
+            JSONResult<ResourceStatisticsDto> subAssignDto = clueManagementFeignClient.getAssginResourceStatistics(reqDto);
             if (subAssignDto.getCode().equals(JSONResult.SUCCESS)) {
                 // 今日分发资源
                 dto.setTodayAssignClueNum(subAssignDto.getData().getTodayAssignClueNum());
