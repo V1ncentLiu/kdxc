@@ -62,7 +62,7 @@ public interface ClueManagementFeignClient {
      * @return
      */
     @PostMapping("/getAssginResourceStatistics")
-    JSONResult<ResourceStatisticsDto> getAssginResourceStatistics(@RequestBody IdEntityLong reqDto);
+    JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdEntityLong reqDto);
 
     @Component
     static class HystrixClientFallback implements ClueManagementFeignClient {
@@ -92,7 +92,7 @@ public interface ClueManagementFeignClient {
         }
 
         @Override
-        public JSONResult<ResourceStatisticsDto> getAssginResourceStatistics(@RequestBody IdEntityLong reqDto) {
+        public JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdEntityLong reqDto) {
             return fallBackError("根据子账号id获取分配的资源");
         }
     }
