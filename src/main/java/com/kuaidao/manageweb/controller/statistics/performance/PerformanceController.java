@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/performance")
 public class PerformanceController extends BaseStatisticsController {
-
     private static Logger logger = LoggerFactory.getLogger(PerformanceController.class);
    @Autowired
    private OrganizationFeignClient organizationFeignClient;
@@ -142,16 +141,7 @@ public class PerformanceController extends BaseStatisticsController {
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
-            JSONResult<List<PerformanceDto>> json=null;
-            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-            String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-            //根据角色不同，使用查询方法不同
-            if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
-                json= performanceClient.querySaleListByUser(baseQueryDto);
-            }else{
-                json= performanceClient.queryListByParams(baseQueryDto);
-
-            }
+            JSONResult<List<PerformanceDto>> json=performanceClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
                 String[] keys = {"teleGroupName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","signAmount"};
@@ -181,8 +171,17 @@ public class PerformanceController extends BaseStatisticsController {
     @RequestMapping("/saleExport")
     public @ResponseBody void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
-            JSONResult<List<PerformanceDto>> json= performanceClient.querySaleListByParams(baseQueryDto);
-            if("0".equals(json.getCode())){
+            JSONResult<List<PerformanceDto>> json= null;
+            //根据角色不同，使用查询方法不同
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+            if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+                json= performanceClient.querySaleListByUser(baseQueryDto);
+            }else{
+                json= performanceClient.queryListByParams(baseQueryDto);
+
+            }
+            if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
                 String[] keys = {"userName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","signAmount"};
                 String[] hader = {"电销顾问","首次分配资源数","首访数","签约数","资源来访率","签约率","业绩金额","签约单笔"};
