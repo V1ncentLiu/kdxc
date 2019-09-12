@@ -122,7 +122,6 @@ public class PerformanceController extends BaseStatisticsController {
     @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
-        baseQueryDto.setTeleDeptId(null);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //根据角色不同，使用查询方法不同
@@ -215,21 +214,40 @@ public class PerformanceController extends BaseStatisticsController {
         request.setAttribute("baseQueryDto",dto);
     }
 
+    /**
+     * 参数控制权限-已经显示结果
+     * 一级列表所有权限筛选由 组id控制
+     * @param baseQueryDto
+     */
     public void initParams(BaseQueryDto baseQueryDto){
+        //筛选组
+        if(null!=baseQueryDto.getTeleGroupId()){
+            List<Long> ids=Arrays.asList(baseQueryDto.getTeleGroupId());
+            baseQueryDto.setTeleGroupIds(ids);
+            return ;
+        }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         //电销组
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+
         queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
+            if(null!=baseQueryDto.getTeleDeptId()){
+                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            }
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             baseQueryDto.setTeleGroupIds(Arrays.asList(curLoginUser.getOrgId()));
             return;
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
+            queryDTO.setParentId(curLoginUser.getOrgId());
+            if(null!=baseQueryDto.getTeleDeptId()){
+                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            }
         }else{
             //other 没权限
             queryDTO.setId(curLoginUser.getOrgId());
