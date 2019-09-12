@@ -315,20 +315,23 @@
                         this.btnDisabled = true;
                         var rows = this.multseleSelection;
                         var rowIds = [];
-                        for(var i=0;i<rows.length;i++){
+                        for (var i = 0; i < rows.length; i++) {
                             var curRow = rows[i];
                             rowIds.push(curRow.clueId);
                         }
                         //分配
                         var param = {};
                         param.clueIds = rowIds;
-                        param.userId = formAllocat.userId;
+                        param.userId = this.formAllocat.userId;
                         axios.post('/clue/management/clueAssign',param)
                             .then(function (response) {
                                 var data =  response.data;
+                                debugger;
                                 if(data.code=='0'){
-                                    clueVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
-                                            clueVM.searchTable();
+                                    ocmVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
+                                            this.allocateFormVisible = false;
+                                            this.btnDisabled = false;
+                                            this.searchTable();
                                         }});
                                 }else{
                                     clueVM.$message({
