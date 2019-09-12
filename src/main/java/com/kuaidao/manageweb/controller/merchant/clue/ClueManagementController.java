@@ -127,7 +127,7 @@ public class ClueManagementController {
      */
     @ResponseBody
     @PostMapping("/getResourceStatistics")
-    public JSONResult<ResourceStatisticsDto> getResourceStatistics(HttpServletRequest request) {
+    public JSONResult<ResourceStatisticsDto> getResourceStatistics(@RequestBody IdEntityLong req) {
         ResourceStatisticsDto dto = new ResourceStatisticsDto();
         // 获取当前登录信息
         UserInfoDTO userInfoDTO = getUser();
