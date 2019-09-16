@@ -105,16 +105,16 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" label="电销组">
+                <el-table-column prop="teleGroupName" label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.companyId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
-                        <span v-else>{{scope.row.orgName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.teleGroupName}}</el-button>
+                        <span v-else>{{scope.row.teleGroupName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allocationResorceNum" label="签约单数"></el-table-column>
-                <el-table-column prop="noVisitRate" label="其中：自签约"></el-table-column>
-                <el-table-column prop="thirtyMinVisitRate" label="其中：重单签约"></el-table-column>
-                <el-table-column prop="oneVisitRate" label="重单率"></el-table-column>
+                <el-table-column prop="signNum" label="签约单数"></el-table-column>
+                <el-table-column prop="selfSign" label="其中：自签约"></el-table-column>
+                <el-table-column prop="dupSign" label="其中：重单签约"></el-table-column>
+                <el-table-column prop="dupRate" label="重单率"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -131,8 +131,8 @@
     var projectList=[[${projectList}]];// 签约项目
     var shopTypeList=[[${shopTypeList}]];// 签约店型
     var deptList=[[${deptList}]];// 事业部
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curDeptId=[[${deptId}]]; // 当前用户事业部Id
+    var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -166,24 +166,7 @@
                     signType: '',
                     shopTypes:[],
                 },
-                tableData: [
-                    {
-                        companyId: 99999,
-                        orgName: '合计',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1
-                    },
-                    {
-                        companyId: 1,
-                        orgName: '电销组名1',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1
-                    }
-                ],
+                tableData: [],
                 deptList: deptList, // 电销事业部
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
@@ -265,13 +248,10 @@
                     }
                     var date = new Date();
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
-                    var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(endTime > currentDateRes){
                         this.$message({
-                            message: '请选择近6个月内的时间',
+                            message: '请选择当前日期前的时间',
                             type: 'warning'
                         });
                         return;
@@ -284,7 +264,7 @@
                         type: 'warning'
                     });
                     return;
-                }   
+                }
     
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
@@ -379,13 +359,14 @@
                 var companyId = this.export.companyId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
+                var signType=this.export.signType;
                 var shopTypes=this.export.shopTypes;
                 var strSignStore="";
                 if(shopTypes.length){
                     strSignStore=shopTypes.join(",");
                 } 
                 if(teleGroupId){
-                    window.location.href="/repetition/repetitionTableTeam?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&companyId="+ companyId +"&startTime=" + startTime + "&endTime=" + endTime+ "&strSignStore="+ strSignStore; 
+                    window.location.href="/repetition/repetitionTableTeam?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&companyId="+ companyId +"&startTime=" + startTime + "&endTime=" + endTime+ "&signType="+ signType + "&strSignStore="+ strSignStore; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
