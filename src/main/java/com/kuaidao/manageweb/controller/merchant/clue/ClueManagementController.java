@@ -5,20 +5,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -31,6 +34,7 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
+import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.constant.MerchantConstant;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
@@ -40,6 +44,7 @@ import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -204,7 +209,7 @@ public class ClueManagementController {
      * @return
      */
     @PostMapping("/export")
-    // @RequiresPermissions("clue:management:export")
+    @RequiresPermissions("clue:management:export")
     @LogRecord(description = "导出", operationType = LogRecord.OperationType.EXPORT, menuName = MenuEnum.CLUE_MANAGEMENT)
     public void export(@RequestBody ClueManagementParamDto reqDto, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long start = System.currentTimeMillis();
