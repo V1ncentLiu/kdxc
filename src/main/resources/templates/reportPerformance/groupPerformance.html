@@ -28,7 +28,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="getTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -143,6 +143,19 @@
         methods: {    
             centerStyle(){
                 return "text-align:center"
+            },
+            firstCurTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getTelGroupSale(seleVal);
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.getTelGroupSale(seleVal);
             },
             getTelGroupSale(seleVal){
                 if(!seleVal){return;}
@@ -399,7 +412,7 @@
                 this.isDisabled = true;
                 this.form.teleDeptId = curDeptId;
                 this.export.teleDeptId = this.form.teleDeptId;
-                this.getTelGroupSale(curDeptId);
+                this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
