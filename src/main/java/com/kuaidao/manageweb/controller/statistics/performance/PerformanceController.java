@@ -110,6 +110,7 @@ public class PerformanceController extends BaseStatisticsController {
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>>  queryByPage(@RequestBody BaseQueryDto baseQueryDto){
         initParams(baseQueryDto);
+        baseQueryDto.setTeleDeptId(null);
         return performanceClient.queryByPage(baseQueryDto);
     }
 
@@ -234,7 +235,12 @@ public class PerformanceController extends BaseStatisticsController {
 
         queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
-            queryDTO.setParentId(curLoginUser.getOrgId());
+            //如果有事业部筛选
+            if(null!=baseQueryDto.getTeleDeptId()){
+                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            }else{
+                queryDTO.setParentId(curLoginUser.getOrgId());
+            }
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
             if(null!=baseQueryDto.getTeleDeptId()){
