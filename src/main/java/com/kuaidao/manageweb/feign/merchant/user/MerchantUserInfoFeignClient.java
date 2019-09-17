@@ -63,6 +63,7 @@ public interface MerchantUserInfoFeignClient {
 
     /**
      * 根据参数查询用户列表
+     * 
      * @param userInfoDTO
      * @return
      */
