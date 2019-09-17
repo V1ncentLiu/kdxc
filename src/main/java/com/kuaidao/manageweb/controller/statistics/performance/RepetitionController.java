@@ -1,3 +1,4 @@
+/*
 package com.kuaidao.manageweb.controller.statistics.performance;
 
 
@@ -43,9 +44,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+*/
 /**
  * 业绩 重单
- */
+ *//*
+
 @Controller
 @RequestMapping("/repetition")
 public class RepetitionController extends BaseStatisticsController {
@@ -59,11 +62,13 @@ public class RepetitionController extends BaseStatisticsController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
 
-    /**
+    */
+/**
      * 一级页面
      * @param request
      * @return
-     */
+     *//*
+
     @RequestMapping("/repetitionTable")
     public String repetitionTable(HttpServletRequest request){
         initSaleDept(request);
@@ -78,11 +83,13 @@ public class RepetitionController extends BaseStatisticsController {
         return "reportPerformance/repetitionTable";
     }
 
-    /**
+    */
+/**
      * 二级页面
      * @param request
      * @return
-     */
+     *//*
+
     @RequestMapping("/repetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request){
         initSaleDept(request);
@@ -91,11 +98,13 @@ public class RepetitionController extends BaseStatisticsController {
         return "reportPerformance/repetitionTableTeam";
     }
 
-    /**
+    */
+/**
      * 一级页面数据
      * @param baseQueryDto
      * @return
-     */
+     *//*
+
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         //查询组权限初始化
@@ -104,11 +113,13 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
 
-    /**
+    */
+/**
      * 二级页面数据
      * @param baseQueryDto
      * @return
-     */
+     *//*
+
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>> querySaleByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -121,11 +132,13 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
 
-    /**
+    */
+/**
      * 组级别导出excel
      * @param baseQueryDto
      * @param response
-     */
+     *//*
+
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
@@ -151,11 +164,13 @@ public class RepetitionController extends BaseStatisticsController {
         }
     }
 
-    /**
+    */
+/**
      * 二级页面导出
      * @param baseQueryDto
      * @param response
-     */
+     *//*
+
     @RequestMapping("/saleExport")
     public @ResponseBody void exportSale(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
@@ -216,11 +231,13 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
 
-    /**
+    */
+/**
      * 参数控制权限-已经显示结果
      * 一级列表所有权限筛选由 组id控制
      * @param baseQueryDto
-     */
+     *//*
+
     public void initParams(DupOrderQueryDto baseQueryDto){
         //筛选组
         if(null!=baseQueryDto.getTeleGroupId()){
@@ -261,3 +278,4 @@ public class RepetitionController extends BaseStatisticsController {
         }
     }
 }
+*/
