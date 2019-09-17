@@ -61,7 +61,7 @@ public interface ClueManagementFeignClient {
      * @param
      * @return
      */
-    @PostMapping("/getAssginResourceStatistics")
+    @PostMapping("/getAssignResourceStatistics")
     JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdEntityLong reqDto);
 
     @Component
