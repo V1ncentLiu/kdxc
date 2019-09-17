@@ -40,7 +40,7 @@ public interface MerchantRuleAssignRecordFeignClient {
      * @return
      */
     @PostMapping("/countAssginNum")
-    JSONResult<ResourceStatisticsDto> countAssginNum(@RequestBody IdEntityLong idEntity, BindingResult result);
+    JSONResult<ResourceStatisticsDto> countAssginNum(@RequestBody IdEntityLong idEntity);
 
 
     @Component
@@ -56,7 +56,7 @@ public interface MerchantRuleAssignRecordFeignClient {
 
 
         @Override
-        public JSONResult<ResourceStatisticsDto> countAssginNum(IdEntityLong idEntity, BindingResult result) {
+        public JSONResult<ResourceStatisticsDto> countAssginNum(IdEntityLong idEntity) {
             return fallBackError("查询商家查询分配数");
         }
 
