@@ -188,7 +188,7 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
     public void initBaseDto(HttpServletRequest request,Long deptId,Long groupId,Long saleId,
-                            Long startTime,Long endTime,Integer [] shopTypes,
+                            Long startTime,Long endTime,String [] shopTypes,
                             Integer signType,Integer projectId,Long companyId){
         DupOrderQueryDto dto=new DupOrderQueryDto();
         dto.setTeleDeptId(deptId);
