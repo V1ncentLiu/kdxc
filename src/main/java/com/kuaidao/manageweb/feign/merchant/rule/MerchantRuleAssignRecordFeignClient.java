@@ -1,27 +1,17 @@
 package com.kuaidao.manageweb.feign.merchant.rule;
 
-import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
-import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
-import com.kuaidao.merchant.dto.clue.ClueManagementDto;
-import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
-import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.merchant.dto.rule.MerchantAssignRuleDTO;
-import com.kuaidao.merchant.dto.rule.MerchantAssignRulePageParam;
-import com.kuaidao.merchant.dto.rule.MerchantAssignRuleReq;
-import feign.hystrix.FallbackFactory;
-import java.util.List;
+import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 
 /**
  * 查询商家查询分配数
