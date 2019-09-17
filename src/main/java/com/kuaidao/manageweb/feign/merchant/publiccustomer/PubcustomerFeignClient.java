@@ -40,8 +40,8 @@ public interface PubcustomerFeignClient {
      * @param
      * @return
      */
-    @PostMapping("/getAssignResourceStatistics")
-    JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdListLongReq reqDto);
+    @PostMapping("/getReceiveResourceStatistics")
+    JSONResult<ResourceStatisticsDto> getReceiveResourceStatistics(@RequestBody IdListLongReq reqDto);
     @Component
     static class HystrixClientFallback implements
         PubcustomerFeignClient {
@@ -67,7 +67,7 @@ public interface PubcustomerFeignClient {
         return fallBackError("公共客户资源-领取资源");
       }
         @Override
-        public JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdListLongReq reqDto){
+        public JSONResult<ResourceStatisticsDto> getReceiveResourceStatistics(@RequestBody IdListLongReq reqDto){
             return fallBackError("根据id集合获取领取资源");
         }
 
