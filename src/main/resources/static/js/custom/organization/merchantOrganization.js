@@ -139,7 +139,7 @@
                              callback: action => {
                                    if(isDelete & action=='confirm'){
                                        //删除
-                                	   axios.post('/organization/organization/delete',param)
+                                	   axios.post('/merchant/merchantorganization/delete',param)
                                        .then(function (response) {
                                     	   console.info(response);
                                            var data =  response.data;
@@ -213,7 +213,7 @@
               
                 param.parentId = parentId;
                 param.name = this.inputOrgName;
-                param.source = 1;
+                param.source = 2;
                 axios.post('/organization/organization/queryOrgDataByParam?pageNum='+pageNum+"&pageSize="+pageSize,param)
                     .then(function (response) {
                         var data =  response.data
@@ -327,8 +327,8 @@
                      }
                  
                     orgVM.btnDisabled = true;
-                      param.source = 1;
-                    axios.post('/organization/organization/'+this.submitUrl, param)
+                      param.source = 2;
+                    axios.post('/merchant/merchantorganization/'+this.submitUrl, param)
                     .then(function (response) {
                     	var resData = response.data;
                     	if(resData.code=='0'){

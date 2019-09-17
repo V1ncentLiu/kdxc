@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源列表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="openassignrDig"><i ></i>分配资源</el-button>
+        <shiro:hasPermission name="clue:management:export">
+        <el-button type="warning" @click="exportFun"><i ></i>批量导出</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.category" clearable placeholder="资源类别">
+                        <el-option
+                            v-for="item in categoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源类型:">
+                    <el-select v-model="form.type" filterable  clearable placeholder="资源类型">
+                        <el-option
+                            v-for="item in clueTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="行业类别:">
+                    <el-select v-model="form.industryCategory" clearable placeholder="行业类别">
+                        <el-option
+                            v-for="item in industryCategoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="获取时间:">
+                    <el-date-picker
+                        v-model="form.searchStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.searchEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="搜索词:">
+                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电话:">
+                        <el-input v-model="form.phone" placeholder="电话"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
+            </el-form>
+        </div>
+        <el-row>
+            <div class="greyTip">今日分发 <span v-if="todayAssignClueNum != null && todayAssignClueNum >0">{{todayAssignClueNum}}</span><span else>0</span> 条 累计分发 <span v-if="totalAssignClueNum != null && totalAssignClueNum >0">{{totalAssignClueNum}}</span><span else>0</span> 条  今日领取  <span v-if="todayReceiveClueNum != null && todayReceiveClueNum >0">{{todayReceiveClueNum}}</span><span else>0</span>  条  累计领取 <span v-if="totalReceiveClueNum != null && totalReceiveClueNum >0"> {{totalReceiveClueNum}}</span><span else>0</span> 条</div>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="clueId" label="主键"  v-if="show"></el-table-column>
+                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="categoryName" label="资源项目"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+                <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+                <el-table-column align="center" prop="phone" label="联系电话"></el-table-column>
+                <el-table-column align="center"  prop="isAssignSubAccount" label="用户行为">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isAssignSubAccount == 0">未分配</div>
+                        <div v-else="scope.row.isAssignSubAccount == 1">已分配</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="clueArea" label="资源地域"></el-table-column>
+                <el-table-column align="center" prop="receiveTime" label="获取时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="charge" label="价格（元）/条"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+
+                </el-table-column>
+            </el-table>
+            <table-pagination  :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- 分配资源 -->
+    <el-dialog title="分配资源" :visible.sync="allocateFormVisible" width="540px">
+        <el-form :model="formAllocat" ref="formAllocat">
+            <el-form-item
+                label="员工："
+                prop="userId"
+                :rules="[
+                    { required: true, message: '请选择员工姓名', trigger: 'change' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-select v-model="formAllocat.userId" placeholder="员工姓名" style="width: 80%;">
+                    <el-option
+                        v-for="item in userList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交</el-button>
+            <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var userList = [[${merchantUserList}]];//电销顾问
+    var clueTypeList = [[${clueTypeList}]];//资源类型
+    var clueCategoryList = [[${clueCategoryList}]];//资源类别集合
+    var industryCategoryList = [[${industryCategoryList}]];//行业类别集合
+    var mediumList = [[${mediumList}]];//媒介集合
+    var userId = [[${userId}]];//登录人账号id
+    var roleCode = [[${roleCode}]];//登录人角色code
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                todayAssignClueNum:'',//今日分发资源
+                totalAssignClueNum:'',//累计分发资源
+                todayReceiveClueNum:'',//今日领取资源
+                totalReceiveClueNum:'',// 累计领取资源
+                show:false,
+                btnDisabled:false,
+                paginationShow: false,
+                isShow:false,
+                allocateFormVisible: false,
+                multseleSelection:[],//选择行
+                userList:userList,
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                    type: '',
+                    category: '',
+                    industryCategory: '',
+                    status: '',
+                    phone:'',
+                    searchStartTime: '',
+                    searchEndTime: '',
+                    searchWord: '',
+                    updateTimeBegin: '',
+                    updateTimeEnd: ''
+                },
+                formAllocat:{
+                    userId:'',
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                clueTypeOptions:clueTypeList,
+                categoryOptions:clueCategoryList,
+                industryCategoryOptions:industryCategoryList,
+            }
+        },
+        methods: {
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multseleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+                var startTime = this.form.searchStartTime;
+                var endTime = this.form.searchEndTime;
+                if (endTime && startTime > endTime) {
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param = this.form;
+                param.startTime = startTime;
+                param.endTime = startTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/clue/management/queryPage', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            console.info(result);
+                            var table = result.data;
+                            ocmVM.dataTable = table.data;
+                            ocmVM.pager.total = table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        }
+                    })
+                .catch(function (error) {
+                     console.log(error);
+                });
+
+            },
+            getResourceStatistics() {
+                var param = {};
+                param.userId = userId;
+                axios.post('/clue/management/getResourceStatistics', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        console.info("getResourceStatistics:" + result);
+                        if (result.code == '0') {
+                            var data = result.data;
+                            ocmVM.todayAssignClueNum = data.todayAssignClueNum;
+                            ocmVM.totalAssignClueNum = data.totalAssignClueNum;
+                            ocmVM.todayReceiveClueNum = data.todayReceiveClueNum;
+                            ocmVM.totalReceiveClueNum = data.totalReceiveClueNum;
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            exportFun(){
+                var param = this.form;
+                param.pageNum='';
+                param.pageSize='';
+                axios.post('/clue/management/export',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                	ocmVM.loading=false;
+                });
+
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //媒介转换方法
+            transformSource(row, column, cellValue, index) {
+                var text = "";
+                if (mediumList && cellValue) {
+                    var array = cellValue.split(",");
+                    for (var i = 0; i < array.length; i++) {
+                        for (var j = 0; j < mediumList.length; j++) {
+                            if (array[i] == mediumList[j].value) {
+                                if (i == 0) {
+                                    text = mediumList[j].name;
+                                } else {
+                                    text = text + "," + mediumList[j].name;
+                                }
+                            }
+                        }
+                    }
+                }
+                return text;
+            },
+             toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }
+            },
+            openassignrDig(){
+                var rows = this.multseleSelection;
+                if(rows.length <1){
+                this.$message({
+                    message: '请选分配资源',
+                    type: 'warning'
+                });
+                return;
+                }
+                this.allocateFormVisible = true;
+                if(this.$refs['formAllocat']) {
+                    this.$refs['formAllocat'].resetFields();
+                }
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            submitAllocatForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        var rows = this.multseleSelection;
+                        var rowIds = [];
+                        for (var i = 0; i < rows.length; i++) {
+                            var curRow = rows[i];
+                            rowIds.push(curRow.clueId);
+                        }
+                        //分配
+                        var param = {};
+                        param.clueIds = rowIds;
+                        param.userId = this.formAllocat.userId;
+                        axios.post('/clue/management/clueAssign',param)
+                            .then(function (response) {
+                                var data =  response.data;
+                                debugger;
+                                if(data.code=='0'){
+                                    ocmVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
+                                            ocmVM.allocateFormVisible = false;
+                                            ocmVM.btnDisabled = false;
+                                            ocmVM.searchTable();
+                                        }});
+                                }else{
+                                    clueVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                            .then(function () {
+
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+        },
+        created(){
+            var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+            if (localVal) {
+                this.pager.pageSize = localVal;
+            }
+            this.searchTable();
+            this.getResourceStatistics();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
