@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -30,7 +31,6 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
-import com.kuaidao.manageweb.feign.merchant.rule.MerchantRuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.constant.MerchantConstant;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
@@ -62,7 +62,7 @@ public class ClueManagementController {
     @Autowired
     private PubcustomerFeignClient pubcustomerFeignClient;
     @Autowired
-    private MerchantRuleAssignRecordFeignClient merchantRuleAssignRecordFeignClient;
+    private RuleAssignRecordFeignClient ruleAssignRecordFeignClient;
 
     /**
      * 资源管理页面初始化
@@ -148,7 +148,7 @@ public class ClueManagementController {
             // 获取主账号分发相关
             IdEntityLong reqDto = new IdEntityLong();
             reqDto.setId(userInfoDTO.getId());
-            subAssignDto = merchantRuleAssignRecordFeignClient.countAssginNum(reqDto);
+            subAssignDto = ruleAssignRecordFeignClient.countAssginNum(reqDto);
             // 获取商家主账号下的子账号列表
             UserInfoDTO userReqDto = new UserInfoDTO();
             // 商家主账户
