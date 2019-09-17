@@ -18,6 +18,7 @@
         <!-- <shiro:hasPermission name="statistics:businessVisitReceptionTable:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
         <!-- </shiro:hasPermission> -->
+        <el-button type="primary" v-if="!isDisabledUserId" @click="goBack" style="float: right;">返回</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -29,47 +30,27 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="签约餐饮集团：">  
-                    <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.companyId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in clueCategoryList"
+                            v-for="item in companyList"
                             :key="item.id"
-                            :label="item.name"
+                            :label="item.companyName"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="签约项目：">  
-                    <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in clueCategoryList"
+                            v-for="item in projectList"
                             :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="签约店型：">  
-                    <el-select v-model="form.signStoreList" placeholder="全部" style="width: 100%;" clearable filterable multiple>
-                        <el-option
-                            v-for="item in signStoreArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="签约类型：">  
-                    <el-select v-model="form.signType" placeholder="全部" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in signTypeList"
-                            :key="item.id"
-                            :label="item.name"
+                            :label="item.projectName"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -98,6 +79,26 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="签约店型：">  
+                    <el-select v-model="form.shopTypes" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                        <el-option
+                            v-for="item in shopTypeList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="签约类型：">  
+                    <el-select v-model="form.signType" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in signTypeList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="loading">搜索</el-button>
                 </div>  
@@ -115,16 +116,16 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" label="电销顾问">
+                <el-table-column prop="userName" label="电销顾问">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.orgId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
-                        <span v-else>{{scope.row.orgName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.teleSaleId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.userName}}</el-button>
+                        <span v-else>{{scope.row.userName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allocationResorceNum" label="签约单数"></el-table-column>
-                <el-table-column prop="noVisitRate" label="其中：自签约"></el-table-column>
-                <el-table-column prop="thirtyMinVisitRate" label="其中：重单签约"></el-table-column>
-                <el-table-column prop="oneVisitRate" label="重单率"></el-table-column>
+                <el-table-column prop="signNum" label="签约单数"></el-table-column>
+                <el-table-column prop="selfSign" label="其中：自签约"></el-table-column>
+                <el-table-column prop="dupSign" label="其中：重单签约"></el-table-column>
+                <el-table-column prop="dupRate" label="重单率"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -135,12 +136,18 @@
 </body>
 <style>
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .mainSearchFormBox form .el-form-item:nth-child(3) .el-form-item__label{
+        width: 130px;
+    }
 </style>
 <script th:inline="javascript">
+    var companyList=[[${companyList}]]; // 签约餐饮集团
+    var projectList=[[${projectList}]];// 签约项目
+    var shopTypeList=[[${shopTypeList}]];// 签约店型
     var deptList=[[${deptList}]];// 事业部
-    var clueCategoryList=[[${clueCategoryList}]];// 分配来源
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curDeptId=[[${deptId}]]; // 当前用户事业部Id
+    var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
+    // var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -157,47 +164,33 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     teleSaleId: '',
-                    category:'',
+                    companyId:'',
+                    projectId: '',
                     signType: '',
-                    signStoreList: [] 
+                    shopTypes: [] 
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     teleSaleId: '',
-                    category: '',
+                    projectId: '',
+                    companyId: '',
                     signType: '',
-                    signStoreList:[],
+                    shopTypes:[],
                 },
-                tableData: [
-                    {
-                        orgId: 99999,
-                        orgName: '合计',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1
-                    },
-                    {
-                        orgId: 1,
-                        orgName: '电销组名1',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1
-                    }
-                ],
+                tableData: [],
                 deptList: deptList, // 电销事业部
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
-                clueCategoryList: clueCategoryList,
-                signStoreArr: '',
-                signTypeList: ''
+                companyList: companyList,
+                projectList: projectList,
+                shopTypeList: shopTypeList,
+                signTypeList: [{id: 1,name: '一次性全款'},{id: 2,name: '先交定金'}]
             }             
         },
         methods: {    
@@ -272,13 +265,10 @@
                     }
                     var date = new Date();
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
-                    var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(endTime > currentDateRes){
                         this.$message({
-                            message: '请选择近6个月内的时间',
+                            message: '请选择当前日期前的时间',
                             type: 'warning'
                         });
                         return;
@@ -292,7 +282,6 @@
                     });
                     return;
                 }   
-    
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
@@ -303,12 +292,15 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.deptId = this.form.deptId;
+                param.teleDeptId = this.form.teleDeptId;
                 param.teleGroupId = this.form.teleGroupId;
-                param.category = this.form.category;
-                param.signStoreList = this.form.signStoreList;
+                param.teleSaleId = this.form.teleSaleId;
+                param.companyId = this.form.companyId;
+                param.projectId = this.form.projectId;
+                param.signType = this.form.signType;
+                param.shopTypes = this.form.shopTypes;
                 this.loading = true;
-                axios.post('/statistics/receptionVisit/getPersonPageList',param).then(function (response) {
+                axios.post('/repetition/querySalePage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -337,10 +329,13 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.deptId = mainDivVM.form.deptId;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
-                        mainDivVM.export.category = mainDivVM.form.category;
-                        mainDivVM.export.signStoreList = mainDivVM.form.signStoreList;
+                        mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
+                        mainDivVM.export.companyId = mainDivVM.form.companyId;
+                        mainDivVM.export.projectId = mainDivVM.form.projectId;
+                        mainDivVM.export.signType = mainDivVM.form.signType;
+                        mainDivVM.export.shopTypes = mainDivVM.form.shopTypes;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -375,20 +370,8 @@
                     return end;
                 }
             },
-            gotoTeam(row){
-                var teleGroupId = row.teleGroupId;
-                var deptId = this.export.deptId;
-                var category = this.export.category;
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                var signStoreList=this.export.signStoreList;
-                var strSignStore="";
-                if(signStoreList.length){
-                    strSignStore=signStoreList.join(",");
-                } 
-                if(teleGroupId){
-                    window.location.href="/resourceFollow/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime+ "&strSignStore="+ strSignStore; 
-                }
+            goBack () {
+                window.history.go(-1);
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -465,11 +448,14 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.deptId = this.export.deptId;
+                param.teleDeptId = this.export.teleDeptId;
                 param.teleGroupId = this.export.teleGroupId;
-                param.category = this.export.category;
-                param.signStoreList = this.export.signStoreList;
-                axios.post('/statistics/receptionVisit/exportPersonAllList',param,{responseType:'blob'})
+                param.teleSaleId = this.export.teleSaleId;
+                param.companyId = this.export.companyId;
+                param.projectId = this.export.projectId;
+                param.signType = this.export.signType;
+                param.shopTypes = this.export.shopTypes;
+                axios.post('/repetition/saleExport',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -489,23 +475,27 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curDeptId){
                 this.isDisabled = true;
-                this.form.deptId = curDeptId;
+                this.form.teleDeptId = curDeptId;
                 this.firstCurTelGroupSale(curDeptId);
-                if(curOrgId){ // 有角色
+                if(curOrgId){ 
                     this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
                     this.firstCurTelSale(curOrgId);
                     if(curUserId){
                         this.isDisabledUserId = true;
                         this.form.teleSaleId = curUserId;
-                    }else{
-                        this.form.teleSaleId = parentParam&&parentParam.teleSaleId?parentParam.teleSaleId:'';
                     }
+                    // else{
+                    //     this.form.teleSaleId = parentParam&&parentParam.teleSaleId?parentParam.teleSaleId:'';
+                    // }
+                }else{
+                    this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
+                    // this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
                 }
             }else{
-                this.form.deptId = parentParam&&parentParam.deptId ? parentParam.deptId:'';
+                this.form.teleDeptId = parentParam&&parentParam.teleDeptId ? parentParam.teleDeptId:'';
                 this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
-                this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
+                // this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
             }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
@@ -519,20 +509,23 @@
                 this.export.startTime = this.minuteFormat(this.form.startTime);
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
-            this.form.category = parentParam&&parentParam.category ? parentParam.category:''; 
-            this.form.searchText = parentParam&&parentParam.searchText ? parentParam.searchText:''; 
-            this.export.deptId = this.form.deptId; 
+            this.form.companyId = parentParam&&parentParam.companyId ? parentParam.companyId:''; 
+            this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
+            this.form.signType = parentParam&&parentParam.v ? parentParam.signType:''; 
+            this.export.teleDeptId = this.form.teleDeptId; 
             this.export.teleGroupId = this.form.teleGroupId;
             this.export.teleSaleId = this.form.teleSaleId; 
-            this.export.category = this.form.category; 
+            this.export.companyId = this.form.companyId; 
+            this.export.projectId = this.form.projectId; 
+            this.export.signType = this.form.signType; 
             
-            var strSignStore=parentParam.strSignStore;
-            if(strSignStore){
-                this.form.strSignStore=strSignStore.split(',');
+            var shopTypes=parentParam.strSignStore;
+            if(shopTypes){
+                this.form.shopTypes=shopTypes.split(',');
             }else{
-                this.form.signStoreList=[];
+                this.form.shopTypes=[];
             }
-            this.export.strSignStore = this.form.strSignStore; 
+            this.export.shopTypes = this.form.shopTypes; 
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
