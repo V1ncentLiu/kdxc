@@ -1,9 +1,11 @@
 package com.kuaidao.manageweb.feign.merchant.publiccustomer;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient.HystrixClientFallback;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.merchant.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.pubcusres.PublicCustomerResourcesRespDTO;
@@ -32,7 +34,14 @@ public interface PubcustomerFeignClient {
 
     @PostMapping("/receiveClue")
     public JSONResult<ClueReceiveRecordsDTO> receiveClue(@RequestBody ClueReceiveRecordsDTO dto);
-
+    /**
+     * 根据用户id集合获取领取的的资源
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/getAssignResourceStatistics")
+    JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdListLongReq reqDto);
     @Component
     static class HystrixClientFallback implements
         PubcustomerFeignClient {
@@ -57,7 +66,10 @@ public interface PubcustomerFeignClient {
       public JSONResult<ClueReceiveRecordsDTO> receiveClue(ClueReceiveRecordsDTO dto) {
         return fallBackError("公共客户资源-领取资源");
       }
-
+        @Override
+        public JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdListLongReq reqDto){
+            return fallBackError("根据id集合获取领取资源");
+        }
 
     }
 
