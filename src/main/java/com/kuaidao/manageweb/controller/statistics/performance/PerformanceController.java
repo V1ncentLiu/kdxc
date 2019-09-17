@@ -144,6 +144,7 @@ public class PerformanceController extends BaseStatisticsController {
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
+            baseQueryDto.setTeleDeptId(null);
             JSONResult<List<PerformanceDto>> json=performanceClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
@@ -177,12 +178,12 @@ public class PerformanceController extends BaseStatisticsController {
             JSONResult<List<PerformanceDto>> json= null;
             //根据角色不同，使用查询方法不同
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            baseQueryDto.setTeleDeptId(null);
             String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
                 json= performanceClient.querySaleListByUser(baseQueryDto);
             }else{
-                json= performanceClient.queryListByParams(baseQueryDto);
-
+                json= performanceClient.querySaleListByParams(baseQueryDto);
             }
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
