@@ -4,11 +4,16 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
+import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -54,6 +59,8 @@ public class ClueManagementController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+    @Autowired
+    private PubcustomerFeignClient pubcustomerFeignClient;
 
     /**
      * 资源管理页面初始化
@@ -131,10 +138,28 @@ public class ClueManagementController {
         ResourceStatisticsDto dto = new ResourceStatisticsDto();
         // 获取当前登录信息
         UserInfoDTO userInfoDTO = getUser();
+        // 子账号集合
+        List<Long> subIds = new ArrayList<>();
         // 查询主账号信息
         if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
             // 获取主账号分发相关
-            // 获取主账号领取相关
+            // todo 调用兴宇接口
+
+
+            // 获取商家主账号下的子账号列表
+            UserInfoDTO userReqDto = new UserInfoDTO();
+            // 商家主账户
+            userReqDto.setUserType(SysConstant.USER_TYPE_TWO);
+            // 启用
+            userReqDto.setStatus(SysConstant.USER_STATUS_ENABLE);
+            userReqDto.setParentId(userInfoDTO.getId());
+            JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+            if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+                if (CollectionUtils.isNotEmpty(merchantUserList.getData())) {
+                    // 获取子账号id放入子账号集合中
+                    subIds.addAll(merchantUserList.getData().stream().map(UserInfoDTO::getId).collect(Collectors.toList()));
+                }
+            }
         }
         // 查询子账号信息
         if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
@@ -147,9 +172,23 @@ public class ClueManagementController {
                 dto.setTodayAssignClueNum(subAssignDto.getData().getTodayAssignClueNum());
                 dto.setTotalAssignClueNum(subAssignDto.getData().getTotalAssignClueNum());
             }
-            // 获取子账号领取相关
-
+            // 子账号id
+            subIds.add(userInfoDTO.getId());
         }
+        // 获取领取相关
+        if (CollectionUtils.isNotEmpty(subIds)) {
+            IdListLongReq ids = new IdListLongReq();
+            ids.setIdList(subIds);
+            JSONResult<ResourceStatisticsDto> receiveResourceList = pubcustomerFeignClient.getReceiveResourceStatistics(ids);
+            if (receiveResourceList.getCode().equals(JSONResult.SUCCESS)) {
+                ResourceStatisticsDto receiveResource = receiveResourceList.getData();
+                // 今日领取资源
+                dto.setTodayReceiveClueNum(receiveResource.getTodayReceiveClueNum());
+                // 累计领取资源
+                dto.setTotalReceiveClueNum(receiveResource.getTotalReceiveClueNum());
+            }
+        }
+
         return new JSONResult<ResourceStatisticsDto>().success(dto);
     }
 
