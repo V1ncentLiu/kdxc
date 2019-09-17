@@ -123,6 +123,8 @@ public class PerformanceController extends BaseStatisticsController {
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        //去掉事业部参数-保留电销组参数
+        baseQueryDto.setTeleDeptId(null);
         //根据角色不同，使用查询方法不同
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             return performanceClient.querySalePageAndUser(baseQueryDto);
