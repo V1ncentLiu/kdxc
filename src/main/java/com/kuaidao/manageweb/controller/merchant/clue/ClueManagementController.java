@@ -8,11 +8,6 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
-import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
-import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -23,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -32,11 +29,14 @@ import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
+import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
+import com.kuaidao.manageweb.feign.merchant.rule.MerchantRuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.constant.MerchantConstant;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -61,6 +61,8 @@ public class ClueManagementController {
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
     @Autowired
     private PubcustomerFeignClient pubcustomerFeignClient;
+    @Autowired
+    private MerchantRuleAssignRecordFeignClient merchantRuleAssignRecordFeignClient;
 
     /**
      * 资源管理页面初始化
@@ -140,12 +142,13 @@ public class ClueManagementController {
         UserInfoDTO userInfoDTO = getUser();
         // 子账号集合
         List<Long> subIds = new ArrayList<>();
+        JSONResult<ResourceStatisticsDto> subAssignDto = null;
         // 查询主账号信息
         if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
             // 获取主账号分发相关
-            // todo 调用兴宇接口
-
-
+            IdEntityLong reqDto = new IdEntityLong();
+            reqDto.setId(userInfoDTO.getId());
+            subAssignDto = merchantRuleAssignRecordFeignClient.countAssginNum(reqDto);
             // 获取商家主账号下的子账号列表
             UserInfoDTO userReqDto = new UserInfoDTO();
             // 商家主账户
@@ -166,14 +169,16 @@ public class ClueManagementController {
             IdEntityLong reqDto = new IdEntityLong();
             reqDto.setId(userInfoDTO.getId());
             // 获取子账号分发相关
-            JSONResult<ResourceStatisticsDto> subAssignDto = clueManagementFeignClient.getAssignResourceStatistics(reqDto);
-            if (subAssignDto.getCode().equals(JSONResult.SUCCESS)) {
-                // 今日分发资源
-                dto.setTodayAssignClueNum(subAssignDto.getData().getTodayAssignClueNum());
-                dto.setTotalAssignClueNum(subAssignDto.getData().getTotalAssignClueNum());
-            }
+            subAssignDto = clueManagementFeignClient.getAssignResourceStatistics(reqDto);
             // 子账号id
             subIds.add(userInfoDTO.getId());
+        }
+        // 获取分发
+        if (null != subAssignDto && subAssignDto.getCode().equals(JSONResult.SUCCESS)) {
+            // 今日分发资源
+            dto.setTodayAssignClueNum(subAssignDto.getData().getTodayAssignClueNum());
+            // 累计分发
+            dto.setTotalAssignClueNum(subAssignDto.getData().getTotalAssignClueNum());
         }
         // 获取领取相关
         if (CollectionUtils.isNotEmpty(subIds)) {
