@@ -6,6 +6,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.constant.Constants;
@@ -93,6 +94,15 @@ public class RepetitionController extends BaseStatisticsController {
         initSaleDept(request);
         //页面查询数据初始化
         initModel(request);
+        if(null!=teleGroupId && null==teleDeptId){
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            IdEntity id=new IdEntity();
+            id.setId(teleGroupId+"");
+            JSONResult<OrganizationDTO> result=organizationFeignClient.queryOrgById(id);
+            if("0".equals(result.getCode())){
+                teleDeptId=result.getData().getParentId();
+            }
+        }
         initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,startTime,endTime, strSignStore,signType,projectId,companyId);
         return "reportPerformance/repetitionTableTeam";
     }
