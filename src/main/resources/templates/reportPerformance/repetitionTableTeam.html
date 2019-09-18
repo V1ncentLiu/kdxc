@@ -141,13 +141,14 @@
     }
 </style>
 <script th:inline="javascript">
+    var parentParam=[[${baseQueryDto}]]; // 跳转参数
     var companyList=[[${companyList}]]; // 签约餐饮集团
     var projectList=[[${projectList}]];// 签约项目
     var shopTypeList=[[${shopTypeList}]];// 签约店型
     var deptList=[[${deptList}]];// 事业部
     var curDeptId=[[${deptId}]]; // 当前用户事业部Id
     var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
-    // var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
+    var curUserId=[[${teleSaleId}]]; // 当前用户电销顾问id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -509,7 +510,7 @@
             }
             this.form.companyId = parentParam&&parentParam.companyId ? parentParam.companyId:''; 
             this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
-            this.form.signType = parentParam&&parentParam.v ? parentParam.signType:''; 
+            this.form.signType = parentParam&&parentParam.signType ? parentParam.signType:''; 
             this.export.teleDeptId = this.form.teleDeptId; 
             this.export.teleGroupId = this.form.teleGroupId;
             this.export.teleSaleId = this.form.teleSaleId; 
@@ -517,7 +518,7 @@
             this.export.projectId = this.form.projectId; 
             this.export.signType = this.form.signType; 
             
-            var shopTypes=parentParam.strSignStore;
+            var shopTypes=parentParam&&parentParam.strSignStore ? parentParam.strSignStore:'';
             if(shopTypes){
                 this.form.shopTypes=shopTypes.split(',');
             }else{
