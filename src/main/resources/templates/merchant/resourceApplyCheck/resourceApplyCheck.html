@@ -80,7 +80,12 @@
                         {{scope.row.applyStartTime}} - {{scope.row.applyEndTime}}
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="applyArea" label="申请地域"></el-table-column>
+                <el-table-column align="center" prop="applyArea" label="申请地域">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.applyArea == null || scope.row.applyArea == ''">不限</div>
+                        <div v-else>{{scope.row.applyArea}}</div>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.auditStatus == '2'">
@@ -158,10 +163,13 @@
                     axios.post('/merchant/clue/setting/pass', param)
                     .then(function (response) {
                         var result =  response.data;
-                        if(result.code=="0"){
-                        	  ocmVM.$message({message:'审核成功',type:'success',duration:1000,onClose:function(){
-                        	      ocmVM.searchTable();
-                  	        }});                          
+                        if (result.code == "0") {
+                            ocmVM.$message({
+                                message: '审核成功', type: 'success', duration: 1000, onClose: function () {
+                                    ocmVM.searchTable();
+                                    ocmVM.getPendingReview();
+                                }
+                            });
                         }else{
                         	  ocmVM.$message.error("审核失败");
                         }
