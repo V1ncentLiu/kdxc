@@ -85,13 +85,7 @@ public class ClueManagementController {
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        // 获取子账号集合
-        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
-        // 启用
-        userInfoDTO.setStatus(SysConstant.USER_STATUS_ENABLE);
-        // 商家主账号id
-        userInfoDTO.setParentId(user.getId());
+        UserInfoDTO userInfoDTO = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getId());
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
@@ -155,13 +149,8 @@ public class ClueManagementController {
             reqDto.setId(userInfoDTO.getId());
             subAssignDto = ruleAssignRecordFeignClient.countAssginNum(reqDto);
             // 获取商家主账号下的子账号列表
-            UserInfoDTO userReqDto = new UserInfoDTO();
-            // 商家主账户
-            userReqDto.setUserType(SysConstant.USER_TYPE_TWO);
-            // 启用
-            userReqDto.setStatus(SysConstant.USER_STATUS_ENABLE);
-            userReqDto.setParentId(userInfoDTO.getId());
-            JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+            UserInfoDTO userReqDto = buildQueryReqDto(SysConstant.USER_TYPE_THREE, userInfoDTO.getId());
+            JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userReqDto);
             if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
                 if (CollectionUtils.isNotEmpty(merchantUserList.getData())) {
                     // 获取子账号id放入子账号集合中
@@ -344,5 +333,24 @@ public class ClueManagementController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+    /**
+     * 构建商家子账户查询实体
+     *
+     * @return
+     */
+    private UserInfoDTO buildQueryReqDto(Integer userType, Long id) {
+        // 获取商家主账号下的子账号列表
+        UserInfoDTO userReqDto = new UserInfoDTO();
+        // 商家主账户
+        userReqDto.setUserType(userType);
+        // 启用和锁定
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        userReqDto.setStatusList(statusList);
+        // 商家主账号id
+        userReqDto.setParentId(id);
+        return userReqDto;
     }
 }
