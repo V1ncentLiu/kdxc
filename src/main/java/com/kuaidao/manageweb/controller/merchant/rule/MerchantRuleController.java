@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.merchant.rule;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -360,6 +361,10 @@ public class MerchantRuleController {
     private List<UserInfoDTO> getMerchantUser() {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        List<Integer> arrayList = new ArrayList<Integer>();
+        arrayList.add(SysConstant.USER_STATUS_ENABLE);
+        arrayList.add(SysConstant.USER_STATUS_LOCK);
+        userInfoDTO.setStatusList(arrayList);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
