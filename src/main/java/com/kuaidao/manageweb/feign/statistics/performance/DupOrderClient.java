@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 重单
+ */
 @FeignClient(name="statstics-service3",path = "/statstics/dupOrder",fallback = DupOrderClient.HystrixClientFallback.class)
 public interface DupOrderClient {
 
     @RequestMapping("/queryPage")
     public JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto);
-
 
     @RequestMapping("/queryList")
     public JSONResult<List<DupOrderDto>> queryListByParams(@RequestBody DupOrderQueryDto baseQueryDto);
