@@ -143,6 +143,12 @@ public class MerchantClueSettingController {
     @ResponseBody
     @LogRecord(description = "审核通过", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.AUDIT_PASS)
     public JSONResult<Boolean> pass(@RequestBody ClueApplyAuditReqDto reqDto) {
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
+        //审核人
+        reqDto.setAuditPerson(user.getId());
+        //审核时间
+        reqDto.setAuditTime(new Date());
         return merchantClueApplyFeignClient.pass(reqDto);
     }
 
