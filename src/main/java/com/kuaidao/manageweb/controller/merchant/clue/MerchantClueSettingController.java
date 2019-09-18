@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.clue;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -78,8 +79,11 @@ public class MerchantClueSettingController {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         // 商家主账户
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
-        // 启用
-        userInfoDTO.setStatus(SysConstant.USER_STATUS_ENABLE);
+        // 启用和锁定
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        userInfoDTO.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
