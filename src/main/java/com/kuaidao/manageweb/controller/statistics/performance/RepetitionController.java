@@ -235,7 +235,11 @@ public class RepetitionController extends BaseStatisticsController {
 
         queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
-            queryDTO.setParentId(curLoginUser.getOrgId());
+            if(null!=baseQueryDto.getTeleDeptId()){
+                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            }else{
+                queryDTO.setParentId(curLoginUser.getOrgId());
+            }
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
             if(null!=baseQueryDto.getTeleDeptId()){
