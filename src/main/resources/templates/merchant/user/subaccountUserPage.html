@@ -207,7 +207,8 @@
                 password:"",
                 orgName:"",
                 orgId:"",
-                id:""
+                id:"",
+                roleId:""
             },
 
             addOrModifyDialogTitle:'添加商家账号',
@@ -439,6 +440,9 @@
             //跳转新增用户页
             toAddUser() {
                 this.dialogsubAccountForm = true;
+                if (this.$refs['subAccountForm']!=undefined) {
+                    this.$refs['subAccountForm'].resetFields();
+                }
             },
             //跳转新增用户页
             toUpdateUser() {
@@ -450,6 +454,8 @@
                     });
                     return;
                 }
+                this.dialogsubAccountForm = true;
+                this.addOrModifyDialogTitle = "修改商家子账号"
                 var param ={};
                 param.id = rows[0].id;
                 var url = "/merchant/userManager/getMechantUserById";
@@ -466,8 +472,6 @@
                             userVM.subAccountForm.roleId = user.roleId;
                             userVM.subAccountForm.orgName = user.orgName;
                             userVM.subAccountForm.id = user.id;
-                            userVM.dialogsubAccountForm = true;
-                            userVM.addOrModifyDialogTitle = "修改商家子账号"
                             userVM.multipleTreeSelection=[];
                             userVM.multipleTreeSelection.push(orgId);
 

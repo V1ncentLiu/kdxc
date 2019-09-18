@@ -270,7 +270,8 @@ var userVM = new Vue({
           password:"",
           orgName:"",
           orgId:"",
-          id:""
+          id:"",
+          roleId:""
       },
     clueTemplateForm:{
       username:"",
@@ -279,7 +280,8 @@ var userVM = new Vue({
       password:"",
       orgName:"",
       orgId:"",
-        id:""
+        id:"",
+        roleId:""
    },
     addOrModifyDialogTitle:'添加商家账号',
       subAccountRules:{
@@ -622,7 +624,8 @@ var userVM = new Vue({
     //跳转新增用户页
     toAddUser() {
         this.loginDisabled=false;
-        userVM.addOrModifyDialogTitle = "添加商家账号"
+        this.addOrModifyDialogTitle = "添加商家账号"
+        this.dialogFormVisible = true;
         if (this.$refs['clueTemplateForm']!=undefined) {
             this.clueTemplateForm.phone ="";
             this.clueTemplateForm.name ="";
@@ -632,7 +635,7 @@ var userVM = new Vue({
                 this.clueTemplateForm.id ="";
             this.$refs['clueTemplateForm'].resetFields();
         }
-        this.dialogFormVisible = true;
+
     },
     //编辑
     toUpdateUser() {
@@ -645,6 +648,8 @@ var userVM = new Vue({
         });
         return;
       }
+        this.dialogFormVisible = true;
+        this.addOrModifyDialogTitle = "修改商家账号"
         var param ={};
         param.id = rows[0].id;
         var url = "/merchant/userManager/getMechantUserById";
@@ -661,8 +666,6 @@ var userVM = new Vue({
                     userVM.clueTemplateForm.roleId = user.roleId;
                     userVM.clueTemplateForm.id = user.id;
                     userVM.clueTemplateForm.orgName = user.orgName;
-                    userVM.dialogFormVisible = true;
-                    userVM.addOrModifyDialogTitle = "修改商家账号"
                     userVM.multipleTreeSelection=[];
                     userVM.multipleTreeSelection.push(user.orgId);
 
@@ -690,7 +693,7 @@ var userVM = new Vue({
           userVM.$message({message:'商家账号'+msg+'成功。商家账号状态变为'+msg+'。',type:'success',duration:1000,onClose:function(){
         	  userVM.searchTable();
   	      }});
-          
+
         }else{
           userVM.$message.error(msg+"失败");
         }
@@ -798,7 +801,7 @@ var userVM = new Vue({
           this.$message({
             type: 'info',
             message: '已取消'
-          });          
+          });
         });
         } else {
           console.log('error submit!!');
