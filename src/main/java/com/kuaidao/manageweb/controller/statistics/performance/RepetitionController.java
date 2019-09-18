@@ -24,6 +24,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.netflix.client.http.HttpRequest;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ public class RepetitionController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/repetitionTable")
     public String repetitionTable(HttpServletRequest request){
         initSaleDept(request);
@@ -83,6 +85,7 @@ public class RepetitionController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/repetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request){
         initSaleDept(request);
@@ -96,6 +99,7 @@ public class RepetitionController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         //查询组权限初始化
@@ -109,6 +113,7 @@ public class RepetitionController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>> querySaleByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -126,6 +131,7 @@ public class RepetitionController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:repetition:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
@@ -156,6 +162,7 @@ public class RepetitionController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:repetition:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void exportSale(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
