@@ -1,4 +1,3 @@
-/*
 package com.kuaidao.manageweb.controller.statistics.performance;
 
 
@@ -25,6 +24,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.netflix.client.http.HttpRequest;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-*/
 /**
  * 业绩 重单
- *//*
-
+ */
 @Controller
 @RequestMapping("/repetition")
 public class RepetitionController extends BaseStatisticsController {
@@ -62,13 +60,12 @@ public class RepetitionController extends BaseStatisticsController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
 
-    */
-/**
+    /**
      * 一级页面
      * @param request
      * @return
-     *//*
-
+     */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/repetitionTable")
     public String repetitionTable(HttpServletRequest request){
         initSaleDept(request);
@@ -83,13 +80,12 @@ public class RepetitionController extends BaseStatisticsController {
         return "reportPerformance/repetitionTable";
     }
 
-    */
-/**
+    /**
      * 二级页面
      * @param request
      * @return
-     *//*
-
+     */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/repetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request){
         initSaleDept(request);
@@ -98,13 +94,12 @@ public class RepetitionController extends BaseStatisticsController {
         return "reportPerformance/repetitionTableTeam";
     }
 
-    */
-/**
+    /**
      * 一级页面数据
      * @param baseQueryDto
      * @return
-     *//*
-
+     */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         //查询组权限初始化
@@ -113,13 +108,12 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
 
-    */
-/**
+    /**
      * 二级页面数据
      * @param baseQueryDto
      * @return
-     *//*
-
+     */
+    @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>> querySaleByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -132,13 +126,12 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
 
-    */
-/**
+    /**
      * 组级别导出excel
      * @param baseQueryDto
      * @param response
-     *//*
-
+     */
+    @RequiresPermissions("statistics:repetition:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
@@ -164,13 +157,12 @@ public class RepetitionController extends BaseStatisticsController {
         }
     }
 
-    */
-/**
+    /**
      * 二级页面导出
      * @param baseQueryDto
      * @param response
-     *//*
-
+     */
+    @RequiresPermissions("statistics:repetition:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void exportSale(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
@@ -231,13 +223,11 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
 
-    */
-/**
+    /**
      * 参数控制权限-已经显示结果
      * 一级列表所有权限筛选由 组id控制
      * @param baseQueryDto
-     *//*
-
+     */
     public void initParams(DupOrderQueryDto baseQueryDto){
         //筛选组
         if(null!=baseQueryDto.getTeleGroupId()){
@@ -252,7 +242,11 @@ public class RepetitionController extends BaseStatisticsController {
 
         queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
-            queryDTO.setParentId(curLoginUser.getOrgId());
+            if(null!=baseQueryDto.getTeleDeptId()){
+                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            }else{
+                queryDTO.setParentId(curLoginUser.getOrgId());
+            }
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
             if(null!=baseQueryDto.getTeleDeptId()){
@@ -278,4 +272,3 @@ public class RepetitionController extends BaseStatisticsController {
         }
     }
 }
-*/
