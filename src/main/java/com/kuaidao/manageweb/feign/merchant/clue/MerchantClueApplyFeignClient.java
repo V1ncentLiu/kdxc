@@ -24,8 +24,7 @@ import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
  * @date: 2019年09月06日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting",
-        fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
 public interface MerchantClueApplyFeignClient {
     @PostMapping("/save")
     JSONResult<Boolean> save(@Valid @RequestBody ClueApplyReqDto reqDto);
@@ -45,6 +44,9 @@ public interface MerchantClueApplyFeignClient {
     @PostMapping("/getPassByUserId")
     JSONResult<MerchantClueApplyDto> getPassByUserId(@RequestBody IdEntityLong userId);
 
+    @PostMapping("/getByUserId")
+    JSONResult<MerchantClueApplyDto> getByUserId(@RequestBody IdEntityLong userId);
+
     @Component
     static class HystrixClientFallback implements MerchantClueApplyFeignClient {
 
@@ -53,8 +55,7 @@ public interface MerchantClueApplyFeignClient {
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
 
 
@@ -86,6 +87,10 @@ public interface MerchantClueApplyFeignClient {
         @Override
         public JSONResult<MerchantClueApplyDto> getPassByUserId(@RequestBody IdEntityLong userId) {
             return fallBackError("查询商家最新审批过的申请");
+        }
+        @Override
+        public JSONResult<MerchantClueApplyDto> getByUserId(@RequestBody IdEntityLong userId) {
+            return fallBackError("查询商家最新申请");
         }
     }
 

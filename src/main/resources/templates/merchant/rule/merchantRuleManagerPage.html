@@ -379,10 +379,21 @@
                 this.dialogFormVisible = true;
                 this.dialogForm.ruleName = row.ruleName;
                 this.dialogForm.category =this.transformCategory(null,null,row.category);;
-                this.dialogForm.projectName =this.transformCategory(null,null,row.projectId);;
+                this.dialogForm.projectName =this.transformProject(null,null,row.projectId);;
                 this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
-                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);;
-                this.dialogTableData=row.teamList;
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                var param={};
+                param.id=row.id;
+                axios.post('/merchant/merchantAssignRule/get', param)
+                .then(function (response) {
+                  var result =  response.data;
+                  if(result.code=="0"){
+                  	ocmVM.dialogTableData=result.data.teamList;
+                  }
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
             },
             addFun(){
             	document.location.href='/merchant/merchantAssignRule/initCreate';

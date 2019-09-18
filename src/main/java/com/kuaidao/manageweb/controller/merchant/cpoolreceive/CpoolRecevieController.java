@@ -9,8 +9,8 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.cpoolrecevie.CpoolRecevieFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleInsertOrUpdateDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleReqDTO;
@@ -45,7 +45,7 @@ public class CpoolRecevieController {
   @Autowired
   private CpoolRecevieFeignClient cpoolRecevieFeignClient;
   @Autowired
-  UserInfoFeignClient userInfoFeignClient;
+  private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
   @Autowired
   DictionaryItemFeignClient dictionaryItemFeignClient;
   @Autowired
@@ -61,7 +61,7 @@ public class CpoolRecevieController {
     statusIdList.add(SysConstant.USER_STATUS_ENABLE);
     statusIdList.add(SysConstant.USER_STATUS_LOCK);
     infoParam.setStatusList(statusIdList);
-    JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.merchantUserList(infoParam);
+    JSONResult<List<UserInfoDTO>> listJSONResult = merchantUserInfoFeignClient.merchantUserList(infoParam);
     if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
       if(CollectionUtils.isNotEmpty(listJSONResult.getData())){
         request.setAttribute("merchantNames",listJSONResult.getData());
