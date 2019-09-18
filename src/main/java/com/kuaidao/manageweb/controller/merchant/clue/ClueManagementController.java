@@ -158,8 +158,11 @@ public class ClueManagementController {
             UserInfoDTO userReqDto = new UserInfoDTO();
             // 商家主账户
             userReqDto.setUserType(SysConstant.USER_TYPE_TWO);
-            // 启用
-            userReqDto.setStatus(SysConstant.USER_STATUS_ENABLE);
+            // 启用和锁定
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            userReqDto.setStatusList(statusList);
             userReqDto.setParentId(userInfoDTO.getId());
             JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
             if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
