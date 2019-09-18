@@ -87,10 +87,12 @@ public class RepetitionController extends BaseStatisticsController {
      */
     @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/repetitionTableTeam")
-    public String selfVisitFollowTableTeam(HttpServletRequest request){
+    public String selfVisitFollowTableTeam(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long teleSaleId,
+                                           Long startTime,Long endTime,String [] shopTypes,Integer signType,Long projectId,Long companyId){
         initSaleDept(request);
         //页面查询数据初始化
         initModel(request);
+        initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,startTime,endTime,shopTypes,signType,projectId,companyId);
         return "reportPerformance/repetitionTableTeam";
     }
 
@@ -104,6 +106,7 @@ public class RepetitionController extends BaseStatisticsController {
     public @ResponseBody JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         //查询组权限初始化
         initParams(baseQueryDto);
+        baseQueryDto.setTeleDeptId(null);
         return dupOrderClient.queryByPage(baseQueryDto);
     }
 
@@ -196,7 +199,7 @@ public class RepetitionController extends BaseStatisticsController {
 
     public void initBaseDto(HttpServletRequest request,Long deptId,Long groupId,Long saleId,
                             Long startTime,Long endTime,String [] shopTypes,
-                            Integer signType,Integer projectId,Long companyId){
+                            Integer signType,Long projectId,Long companyId){
         DupOrderQueryDto dto=new DupOrderQueryDto();
         dto.setTeleDeptId(deptId);
         dto.setTeleGroupId(groupId);
