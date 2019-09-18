@@ -58,7 +58,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="资源类型：" prop="" :label-width="formLabelWidth">
+                    <el-form-item label="资源类型：" prop="sourceType" :label-width="formLabelWidth">
                         <el-select v-model="form.sourceType" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in clueTypeList"
@@ -70,12 +70,12 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="每日领取上限（条）：" prop="" :label-width="formLabelWidth">
+                    <el-form-item label="每日领取上限（条）：" prop="top" :label-width="formLabelWidth">
                         <el-input v-model="form.top" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="设定商家：" prop="" :label-width="formLabelWidth">
+                    <el-form-item label="设定商家：" prop="setbusiness" :label-width="formLabelWidth">
                         <el-select v-model="form.setbusiness" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in merchantNames"
@@ -87,7 +87,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="是否启用：" prop="isUse" :label-width="formLabelWidth">
+                    <el-form-item label="是否启用：" prop="status" :label-width="formLabelWidth">
                         <el-select v-model="form.status" placeholder="请选择" style="width:300px;">
                             <el-option
                                 v-for="item in statusOptions"
@@ -129,7 +129,7 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                     source:[],
                     projectId:[],
                     sourceType:[],
-                    top:"",
+                    top:1,
                     setbusiness:[],
                     status:1,
                 },
@@ -144,9 +144,15 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                     etime: [
                         { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
                     ],
-                    source: [
-                        {  required: true, message: '请至少选择一个行业类别', trigger: 'change' }
+                    sourceType: [
+                        {  required: true, message: '请至少选择一个资源类型', trigger: 'change' }
                     ],
+                  source: [
+                    {  required: true, message: '请至少选择一个资源类别', trigger: 'change' }
+                  ],
+                  setbusiness: [
+                    {  required: true, message: '请至少选择一个商家', trigger: 'change' }
+                  ],
                     category: [
                         { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
                     ],
@@ -179,14 +185,18 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                             callback();
                         }, trigger: 'change'}
                     ],
-                    resourceMaxNum: [
-                        { required: true, required: true, message: '请添加资源条数', trigger: 'change' },
+                    top: [
+                        { required: true, required: true, message: '每日领取上限', trigger: 'blur' },
                         { validator:function(rule,value,callback){               
                             if(/^[0-9]*$/.test(value) == false){
                                callback(new Error("请输入整数数字"));
+                            }else if(value <= 0){
+                              callback(new Error("请输入大于零的整数数字"));
+                            } else if(value > 999999999){
+                              callback(new Error("请输入小于10位数的整数数字"));
                             }else{
-                               callback();
-                            } 
+                              callback();
+                            }
                             callback();
                         }, trigger: 'change'}
                     ],
