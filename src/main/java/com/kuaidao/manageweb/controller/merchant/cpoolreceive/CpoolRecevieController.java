@@ -7,18 +7,19 @@ import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.feign.merchant.cpoolrecevie.CpoolRecevieFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.cpoolrecevie.CpoolRecevieFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleInsertOrUpdateDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleReqDTO;
 import com.kuaidao.merchant.dto.cpoolreceiverule.CpoolReceivelRuleRespDTO;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -54,8 +55,13 @@ public class CpoolRecevieController {
    * 设置商家
    */
   private void setMerchant(HttpServletRequest request){
-    UserInfoPageParam pageParam = new UserInfoPageParam();
-    JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.merchanListNoPage(pageParam);
+    UserInfoDTO infoParam = new UserInfoDTO();
+    infoParam.setUserType(SysConstant.USER_TYPE_TWO);
+    List<Integer> statusIdList = new ArrayList<>();
+    statusIdList.add(SysConstant.USER_STATUS_ENABLE);
+    statusIdList.add(SysConstant.USER_STATUS_LOCK);
+    infoParam.setStatusList(statusIdList);
+    JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.merchantUserList(infoParam);
     if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
       if(CollectionUtils.isNotEmpty(listJSONResult.getData())){
         request.setAttribute("merchantNames",listJSONResult.getData());

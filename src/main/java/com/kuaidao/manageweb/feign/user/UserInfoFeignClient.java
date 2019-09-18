@@ -119,8 +119,8 @@ public interface UserInfoFeignClient {
      */
     @PostMapping("/merchantlist")
     public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam param);
-    @PostMapping("/merchanListNoPage")
-    JSONResult<List<UserInfoDTO>> merchanListNoPage(UserInfoPageParam pageParam);
+    @PostMapping("/merchantUserList")
+    JSONResult<List<UserInfoDTO>> merchantUserList(UserInfoDTO userInfoDTO);
 
     @Component
     static class HystrixClientFallback implements UserInfoFeignClient {
@@ -200,7 +200,7 @@ public interface UserInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<UserInfoDTO>> merchanListNoPage(UserInfoPageParam pageParam) {
+        public JSONResult<List<UserInfoDTO>> merchantUserList(UserInfoDTO userInfoDTO) {
             return fallBackError("查询商家账号不带分页");
         }
 
