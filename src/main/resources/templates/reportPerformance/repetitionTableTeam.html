@@ -7,8 +7,7 @@
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销报表</el-breadcrumb-item>
-        <el-breadcrumb-item>业绩报表</el-breadcrumb-item>
+        <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>重单表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
@@ -85,7 +84,7 @@
                             v-for="item in shopTypeList"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -141,13 +140,14 @@
     }
 </style>
 <script th:inline="javascript">
+    var parentParam=[[${baseQueryDto}]]; // 跳转参数
     var companyList=[[${companyList}]]; // 签约餐饮集团
     var projectList=[[${projectList}]];// 签约项目
     var shopTypeList=[[${shopTypeList}]];// 签约店型
     var deptList=[[${deptList}]];// 事业部
     var curDeptId=[[${deptId}]]; // 当前用户事业部Id
     var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
-    // var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
+    var curUserId=[[${teleSaleId}]]; // 当前用户电销顾问id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -400,6 +400,16 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
+            dateTimeFormat (dt) {
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            },
             searchSeason(){ // 季
                 var today = new Date();
                 var month = today.getMonth()+1;
@@ -483,17 +493,12 @@
                         this.isDisabledUserId = true;
                         this.form.teleSaleId = curUserId;
                     }
-                    // else{
-                    //     this.form.teleSaleId = parentParam&&parentParam.teleSaleId?parentParam.teleSaleId:'';
-                    // }
                 }else{
                     this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
-                    // this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
                 }
             }else{
                 this.form.teleDeptId = parentParam&&parentParam.teleDeptId ? parentParam.teleDeptId:'';
                 this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
-                // this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
             }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
@@ -509,7 +514,7 @@
             }
             this.form.companyId = parentParam&&parentParam.companyId ? parentParam.companyId:''; 
             this.form.projectId = parentParam&&parentParam.projectId ? parentParam.projectId:''; 
-            this.form.signType = parentParam&&parentParam.v ? parentParam.signType:''; 
+            this.form.signType = parentParam&&parentParam.signType ? parentParam.signType:''; 
             this.export.teleDeptId = this.form.teleDeptId; 
             this.export.teleGroupId = this.form.teleGroupId;
             this.export.teleSaleId = this.form.teleSaleId; 
@@ -517,7 +522,7 @@
             this.export.projectId = this.form.projectId; 
             this.export.signType = this.form.signType; 
             
-            var shopTypes=parentParam.strSignStore;
+            var shopTypes=parentParam&&parentParam.strSignStore ? parentParam.strSignStore:'';
             if(shopTypes){
                 this.form.shopTypes=shopTypes.split(',');
             }else{
