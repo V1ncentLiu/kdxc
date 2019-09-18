@@ -81,14 +81,14 @@ var clueChargeVM = new Vue({
             rules:{
               charge: [
                   { required: true, message: '请输入价格', trigger: 'change'},
-                  { validator:function(rule,value,callback){               
-                      if(/^[0-9]*$/.test(value) == false){
-                         callback(new Error("请输入整数"));
-                      }else{
-                         callback();
-                      } 
-                      callback();
-                  }, trigger: 'change'}
+                  // { validator:function(rule,value,callback){               
+                  //     if(/^[0-9]*$/.test(value) == false){
+                  //        callback(new Error("请输入整数"));
+                  //     }else{
+                  //        callback();
+                  //     } 
+                  //     callback();
+                  // }, trigger: 'change'}
               ],
             }
         },
@@ -125,12 +125,21 @@ var clueChargeVM = new Vue({
                 row.editShow=false;
               },
               handleSave(index, row) {
+                var chargeVal=row.charge;
+                if(!chargeVal){
+                    this.$message({
+                      message: '价格不能为空',
+                      type: 'warning'
+                    });
+                    return;
+                }
                 row.disabled=true;
                 row.editShow=true;
+
                 var param ={};
                 param.id = row.id;
                 param.category = row.category;
-                param.charge = row.charge;
+                param.charge = chargeVal;
                 console.info(param);
                 axios.post('/merchant/clueChargeManager/saveClueCharge', param)
                 .then(function (response) {
@@ -144,8 +153,13 @@ var clueChargeVM = new Vue({
                 
               },
               number(index, rows){
-          　　    rows[index].charge=rows[index].charge.replace(/[^\.\d]/g,'');
-                  rows[index].charge=rows[index].charge.replace('.','');           
+                  // rows[index].charge=rows[index].charge.replace(/[^\.\d]/g,'');
+                  // rows[index].charge=rows[index].charge.replace('.','');
+                  rows[index].charge = rows[index].charge.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
+                  rows[index].charge = rows[index].charge.replace(/^\./g, ""); //验证第一个字符是数字
+                  rows[index].charge = rows[index].charge.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
+                  rows[index].charge = rows[index].charge.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+                  rows[index].charge = rows[index].charge.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数           
           　　},
         },
         created(){
