@@ -173,6 +173,21 @@ public class MerchantRuleController {
     }
 
     /***
+     * 商家规则列表
+     *
+     * @return
+     */
+    @PostMapping("/get")
+    @ResponseBody
+    @RequiresPermissions("merchantAssignRule:ruleManager:view")
+    public JSONResult<MerchantAssignRuleDTO> list(@RequestBody IdEntityLong idEntity,
+            HttpServletRequest request) {
+        JSONResult<MerchantAssignRuleDTO> jsonResult = merchantAssignRuleFeignClient.get(idEntity);
+
+        return jsonResult;
+    }
+
+    /***
      * 商家最新审批过的申请
      *
      * @return
