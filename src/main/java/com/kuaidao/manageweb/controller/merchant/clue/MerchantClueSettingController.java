@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.merchant.dto.clue.*;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import org.apache.shiro.SecurityUtils;
@@ -24,10 +26,6 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueApplyFeignClient;
-import com.kuaidao.merchant.dto.clue.ClueApplyAuditReqDto;
-import com.kuaidao.merchant.dto.clue.ClueApplyPageDto;
-import com.kuaidao.merchant.dto.clue.ClueApplyPageParamDto;
-import com.kuaidao.merchant.dto.clue.ClueApplyReqDto;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
@@ -122,6 +120,21 @@ public class MerchantClueSettingController {
     }
 
     /***
+     * 获取最新申请数据
+     *
+     * @return
+     */
+    @PostMapping("/getByUserId")
+    @ResponseBody
+    public JSONResult<MerchantClueApplyDto> getByUserId(HttpServletRequest request) {
+        IdEntityLong reqDto = new IdEntityLong();
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
+        reqDto.setId(user.getId());
+        return merchantClueApplyFeignClient.getByUserId(reqDto);
+    }
+
+    /***
      * 资源需求申请列表-待审核数
      *
      * @param reqDto
@@ -145,9 +158,9 @@ public class MerchantClueSettingController {
     public JSONResult<Boolean> pass(@RequestBody ClueApplyAuditReqDto reqDto) {
         // 获取当前登录人
         UserInfoDTO user = getUser();
-        //审核人
+        // 审核人
         reqDto.setAuditPerson(user.getId());
-        //审核时间
+        // 审核时间
         reqDto.setAuditTime(new Date());
         return merchantClueApplyFeignClient.pass(reqDto);
     }
