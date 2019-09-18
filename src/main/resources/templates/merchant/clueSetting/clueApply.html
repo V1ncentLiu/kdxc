@@ -46,8 +46,7 @@
                 <el-col :span="24">
                     <el-form-item label="资源数量：" :label-width="formLabelWidth" prop="applyNum">
                         <span style="margin-right: 10px">需要</span>
-                        <el-input v-model="form.applyNum" autocomplete="off" maxLength="10" style="width: 100px;"
-                                  :disabled="isDisabled"></el-input>
+                        <el-input v-model="form.applyNum" autocomplete="off" maxLength="10" style="width: 100px;" :disabled="isDisabled" @keyup.native="number"></el-input>
                         <span style="margin-left: 10px">条资源</span>
                     </el-form-item>
                 </el-col>
@@ -142,6 +141,19 @@
         },
         methods: {
             submitForm(form) {
+                var startTime = this.form.applyStartTime;
+                var endTime = this.form.applyEndTime;
+                var startTimestamp = Date.parse(new Date(startTime));
+                if(endTime){
+                    var endTimestamp = new Date(endTime);
+                    if(startTimestamp> endTimestamp){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
                 var param = this.form;
                 var applyAreaStrs = "";
                 if (param.radioApplyArea == 2) {
@@ -182,6 +194,18 @@
                     }
                 });
             },
+            getByUserId() {
+                var param = {};
+                axios.post('/merchant/clue/setting/getByUserId', param)
+                    .then(function (response) {
+                        debugger;
+                        ocmVM.form =  response.data.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
             // 单选切换
             projectChange() {
                 if (this.form.radioApplyArea == "2") {//省
@@ -191,13 +215,17 @@
                     this.applyAreaShow = false;
                 }
             },
-            // 取消事件
-            cancel() {
+            cancel(){
 
-            }
+            },
+            number(){
+    　　　      this.form.applyNum=this.form.applyNum.replace(/[^\.\d]/g,'');
+                this.form.applyNum=this.form.applyNum.replace('.','');
+        　　},
         },
         created() {
             console.info("create method");
+            this.getByUserId();
         },
         mounted() {
             document.getElementById('resourceApply').style.display = 'block';
