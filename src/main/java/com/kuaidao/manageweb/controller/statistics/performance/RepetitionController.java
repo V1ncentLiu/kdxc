@@ -23,6 +23,7 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.netflix.client.http.HttpRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -88,11 +89,11 @@ public class RepetitionController extends BaseStatisticsController {
     @RequiresPermissions("statistics:repetition:view")
     @RequestMapping("/repetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long teleSaleId,
-                                           Long startTime,Long endTime,String [] shopTypes,Integer signType,Long projectId,Long companyId){
+                                           Long startTime,Long endTime,String strSignStore,Integer signType,Long projectId,Long companyId){
         initSaleDept(request);
         //页面查询数据初始化
         initModel(request);
-        initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,startTime,endTime,shopTypes,signType,projectId,companyId);
+        initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,startTime,endTime, strSignStore,signType,projectId,companyId);
         return "reportPerformance/repetitionTableTeam";
     }
 
@@ -198,7 +199,7 @@ public class RepetitionController extends BaseStatisticsController {
     }
 
     public void initBaseDto(HttpServletRequest request,Long deptId,Long groupId,Long saleId,
-                            Long startTime,Long endTime,String [] shopTypes,
+                            Long startTime,Long endTime,String  shopTypes,
                             Integer signType,Long projectId,Long companyId){
         DupOrderQueryDto dto=new DupOrderQueryDto();
         dto.setTeleDeptId(deptId);
@@ -206,7 +207,7 @@ public class RepetitionController extends BaseStatisticsController {
         dto.setTeleSaleId(saleId);
         dto.setStartTime(startTime);
         dto.setEndTime(endTime);
-        dto.setShopTypes(shopTypes);
+        dto.setStrSignStore(shopTypes);
         dto.setSignType(signType);
         dto.setCompanyId(companyId);
         dto.setProjectId(projectId);
