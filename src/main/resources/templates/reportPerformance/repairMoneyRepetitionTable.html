@@ -22,10 +22,10 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="统计日期：">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd 00:00" v-model="form.startTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd 23:59" v-model="form.endTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="签约餐饮集团：">  
                     <el-select v-model="form.companyId" placeholder="全部" style="width: 100%;" clearable filterable>
@@ -316,27 +316,19 @@
                     });
                 });
             },
-            limitTime (start, end) {
+            limitTime (start, end) { // 禁止选择分钟
                 var endTime = this.minuteFormat (end);
                 var startTime = this.minuteFormat (start);
                 var date = new Date();
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
                 if(startTime){
-                    var s = startTime.slice(0,8);
-                    if(s < data){
-                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
-                        return this.form.startTime;
-                    }
-                    return start;
+                    this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                    return this.form.startTime;
                 }
                 if(endTime){
-                    var e = endTime.slice(0,8);
-                    if(e < data){
-                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
-                        return this.form.endTime;                        
-                    }
-                    return end;
+                    this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                    return this.form.endTime;   
                 }
             },
             gotoTeam(row){
