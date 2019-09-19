@@ -261,7 +261,7 @@ public class ClueManagementController {
         sheet.setColumnWidth(6, 4000);
         sheet.setColumnWidth(7, 10000);
         sheet.setColumnWidth(8, 4000);
-        sheet.setColumnWidth(9, 4000);
+        sheet.setColumnWidth(9, 8000);
         sheet.setColumnWidth(10, 8000);
         sheet.setColumnWidth(11, 4000);
 
@@ -325,7 +325,7 @@ public class ClueManagementController {
         if (date == null) {
             return "";
         }
-        return DateUtil.convert2String(date, DateUtil.ymd);
+        return DateUtil.convert2String(date, DateUtil.ymdhms);
     }
 
     /**
