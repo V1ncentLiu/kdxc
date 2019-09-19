@@ -187,9 +187,6 @@ var merchantAssignRule=[[${merchantAssignRule}]];//规则
                     endTime: [
                         { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
                     ],
-                    projectId: [
-                        { required: true, message: '请至少选择一个资源项目', trigger: 'change' }
-                    ],
                     category: [
                         { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
                     ],
@@ -295,7 +292,9 @@ var merchantAssignRule=[[${merchantAssignRule}]];//规则
                         param.endTime=form.endTime;
                         param.status=form.status;
                         param.teamList=form.teamList;
-                        param.projectId=this.form.projectId.join(',');
+                        if(this.form.projectId){
+	                        param.projectId=this.form.projectId.join(',');
+                        }
                         param.category=this.form.category.join(',');
                        
                         aorVM.submitDisabled=true;
@@ -392,7 +391,9 @@ var merchantAssignRule=[[${merchantAssignRule}]];//规则
             this.form.startTime=merchantAssignRule.startTime;
             this.form.endTime=merchantAssignRule.endTime;
             this.form.category=merchantAssignRule.category.split(',');
-            this.form.projectId=merchantAssignRule.projectId.split(',');
+            if(merchantAssignRule.projectId){
+	            this.form.projectId=merchantAssignRule.projectId.split(',');
+            }
             this.form.status=merchantAssignRule.status;
             var teamList=merchantAssignRule.teamList;
             for(var i=0;i<teamList.length;i++){
