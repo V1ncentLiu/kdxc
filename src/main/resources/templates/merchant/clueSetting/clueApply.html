@@ -198,7 +198,13 @@
                 var param = {};
                 axios.post('/merchant/clue/setting/getByUserId', param)
                     .then(function (response) {
-                        resourceApplyVm.form =  response.data.data;
+                        var result = response.data;
+                        console.info("getByUserId:" + result);
+                        if (result.code == '0') {
+                            var data = result.data;
+                            resourceApplyVm.form = data ;
+                            resourceApplyVm.form.radioApplyArea = data.applyArea;
+                        }
                     })
                     .catch(function (error) {
                         console.log(error);
