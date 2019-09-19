@@ -3,13 +3,10 @@ package com.kuaidao.manageweb.controller.merchant.clue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
-import com.kuaidao.merchant.dto.clue.*;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
@@ -26,6 +25,9 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueApplyFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.merchant.dto.clue.*;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
@@ -101,6 +103,10 @@ public class MerchantClueSettingController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        //防止审核通过之后再编辑将上一条审核信息带过来
+        reqDTO.setAuditPerson(null);
+        reqDTO.setAuditStatus(null);
+        reqDTO.setAuditTime(null);
         // 获取当前登录人
         UserInfoDTO user = getUser();
         reqDTO.setApplyPerson(user.getId());

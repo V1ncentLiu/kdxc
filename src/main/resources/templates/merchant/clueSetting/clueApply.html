@@ -12,6 +12,7 @@
     </el-breadcrumb>
     <el-row class="borderbox">
         <div class="inforTitle">资源需求申请</div>
+        <div class="greyTip" v-if="auditPassShow">审核通过 </div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
             <el-row>
                 <el-col :span="24">
@@ -110,6 +111,7 @@
                 user:user,
                 addApplyButtonAble: false,
                 isDisabled:false,
+                auditPassShow:false,
                 form: {
                     applyStartTime: '',
                     applyEndTime: '',
@@ -200,10 +202,42 @@
                     .then(function (response) {
                         var result = response.data;
                         console.info("getByUserId:" + result);
-                        if (result.code == '0') {
+                        if (result.code == '0' &&  result.data != null) {
                             var data = result.data;
+                            debugger;
                             resourceApplyVm.form = data ;
-                            resourceApplyVm.form.radioApplyArea = data.applyArea;
+                            if (data.auditStatus != 2) {
+                                resourceApplyVm.isDisabled = true;
+                                resourceApplyVm.addApplyButtonAble = true;
+                            }
+                            if (data.auditStatus == 2) {
+                                resourceApplyVm.auditPassShow = true;
+                            }
+                            //是否开启
+                            if (data.open == 1) {
+                                resourceApplyVm.form.open = "1";
+                            } else {
+                                resourceApplyVm.form.open = "0"
+                            }
+                            //申请区域
+                            var applyAreas = data.applyArea;
+                            if (applyAreas == null || applyAreas == "") {
+                                resourceApplyVm.form.radioApplyArea = "1";
+                            } else {
+                                resourceApplyVm.form.radioApplyArea = "2";
+                                resourceApplyVm.applyArea = provinceList;
+                                resourceApplyVm.applyAreaShow = true;
+                                var applyAreasMultiple = [];
+                                var applyAreasObj = applyAreas.split(',');
+                                if (applyAreasObj.length > 0) {
+                                    for (var i = 0; i < applyAreasObj.length; i++) {
+                                        applyAreasMultiple.push(applyAreasObj[i] + "");
+                                    }
+                                    if (applyAreasMultiple != null && applyAreasMultiple != "") {
+                                        resourceApplyVm.form.applyArea = applyAreasMultiple;
+                                    }
+                                }
+                            }
                         }
                     })
                     .catch(function (error) {

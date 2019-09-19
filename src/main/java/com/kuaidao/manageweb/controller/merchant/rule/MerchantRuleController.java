@@ -94,7 +94,7 @@ public class MerchantRuleController {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
         // 商家主账号
-        List<UserInfoDTO> userList = getMerchantUser();
+        List<UserInfoDTO> userList = getMerchantUser(null);
         request.setAttribute("userList", userList);
 
         return "merchant/rule/merchantRuleManagerPage";
@@ -108,8 +108,11 @@ public class MerchantRuleController {
     @RequestMapping("/initCreate")
     @RequiresPermissions("merchantAssignRule:ruleManager:add")
     public String initCreateProject(HttpServletRequest request) {
+        List<Integer> arrayList = new ArrayList<Integer>();
+        arrayList.add(SysConstant.USER_STATUS_ENABLE);
+        arrayList.add(SysConstant.USER_STATUS_LOCK);
         // 商家主账号
-        List<UserInfoDTO> userList = getMerchantUser();
+        List<UserInfoDTO> userList = getMerchantUser(arrayList);
         request.setAttribute("userList", userList);
         // 查询字典资源类别集合
         request.setAttribute("categoryList",
@@ -135,7 +138,10 @@ public class MerchantRuleController {
 
         request.setAttribute("merchantAssignRule", data);
         // 商家主账号
-        List<UserInfoDTO> userList = getMerchantUser();
+        List<Integer> arrayList = new ArrayList<Integer>();
+        arrayList.add(SysConstant.USER_STATUS_ENABLE);
+        arrayList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getMerchantUser(arrayList);
         request.setAttribute("userList", userList);
 
         // 查询字典资源类别集合
@@ -373,12 +379,9 @@ public class MerchantRuleController {
      * @param code
      * @return
      */
-    private List<UserInfoDTO> getMerchantUser() {
+    private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
-        List<Integer> arrayList = new ArrayList<Integer>();
-        arrayList.add(SysConstant.USER_STATUS_ENABLE);
-        arrayList.add(SysConstant.USER_STATUS_LOCK);
         userInfoDTO.setStatusList(arrayList);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
