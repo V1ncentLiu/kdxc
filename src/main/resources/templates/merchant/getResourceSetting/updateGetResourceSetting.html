@@ -71,7 +71,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="每日领取上限（条）：" prop="top" :label-width="formLabelWidth">
-                        <el-input v-model="form.top" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                        <el-input v-model="form.top" autocomplete="off" style="width: 300px;" maxlength="10"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -172,21 +172,17 @@ var merchantNames=[[${merchantNames}]];// 设定商家
                     businessLine: [
                         { required: true, required: true, message: '请选择业务线', trigger: 'change' }
                     ],
-                      top: [
-                        { required: true, required: true, message: '每日领取上限', trigger: 'blur' },
-                        { validator:function(rule,value,callback){
-                            if(/^[0-9]*$/.test(value) == false){
-                              callback(new Error("请输入整数数字"));
-                            }else if(value <= 0){
-                              callback(new Error("请输入大于零的整数数字"));
-                            } else if(value > 999999999){
-                              callback(new Error("请输入小于10位数的整数数字"));
-                            }else{
-                              callback();
-                            }
-                            callback();
-                          }, trigger: 'change'}
-                      ],
+                  top: [
+                    { required: true, required: true, message: '请输入每日领取上限', trigger: 'change' },
+                    { validator:function(rule,value,callback){
+                        if(/^[0-9]*$/.test(value) == false){
+                          callback(new Error("请输入整数数字"));
+                        }else{
+                          callback();
+                        }
+                        callback();
+                      }, trigger: 'change'}
+                  ],
                     resourceMaxNum: [
                         { required: true, required: true, message: '请添加资源条数', trigger: 'change' },
                         { validator:function(rule,value,callback){
