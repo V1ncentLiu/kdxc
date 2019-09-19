@@ -323,6 +323,10 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
@@ -400,7 +404,7 @@ public class ExtendClueDistributionedTaskController {
                 String phtraIsCall = "";
                 if (AggregationConstant.YES.equals(taskDTO.getPhtraIsCall())) {
                     phtraIsCall = "是";
-                } else if (AggregationConstant.NO.equals(taskDTO.getPhstatus())) {
+                } else if (AggregationConstant.NO.equals(taskDTO.getPhtraIsCall())) {
                     phtraIsCall = "否";
                 }
                 curList.add(phtraIsCall);
@@ -492,6 +496,10 @@ public class ExtendClueDistributionedTaskController {
         if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
+        }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
