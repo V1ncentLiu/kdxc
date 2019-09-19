@@ -158,6 +158,7 @@
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
             <el-table-column align="center" prop="userName" label="商家"></el-table-column>
             <el-table-column align="center" prop="applyArea" label="需求地域"></el-table-column>
+            <el-table-column align="center" prop="applyTime" label="申请周期"></el-table-column>
             <el-table-column align="center" prop="applyNum" label="需求资源上限（条）"></el-table-column>
             <el-table-column align="center" prop="resourceMaxNum" label="资源条数" :formatter="transformNum"></el-table-column>
         </el-table>
@@ -388,7 +389,15 @@
                 .then(function (response) {
                   var result =  response.data;
                   if(result.code=="0"){
-                  	ocmVM.dialogTableData=result.data.teamList;
+                  	var teamList =result.data.teamList;
+                  	if(teamList){
+	                  	for(var i=0;i<teamList.length;i++){
+	                    	if(teamList[i].applyStartTime&&teamList[i].applyEndTime){
+	                    		teamList[i].applyTime=moment(teamList[i].applyStartTime).format("YYYY-MM-DD HH:mm:ss")+"--"+moment(teamList[i].applyEndTime).format("YYYY-MM-DD HH:mm:ss")
+	                    	}
+	                    }
+                  	}
+                  	ocmVM.dialogTableData=teamList;
                   }
                 })
                 .catch(function (error) {
