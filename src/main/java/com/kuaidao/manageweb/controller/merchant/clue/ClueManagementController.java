@@ -239,7 +239,7 @@ public class ClueManagementController {
                 // 获取时间
                 curList.add(getTimeStr(dto.getReceiveTime()));
                 // 价格(元)/条
-                curList.add(dto.getCharge());
+                curList.add(dto.getCluePrice());
                 // 是否分发
                 String str = MerchantConstant.ASSIGN_SUB_ACCOUNT_YES.equals(dto.getIsAssignSubAccount()) ? "是" : "否";
                 curList.add(str);
