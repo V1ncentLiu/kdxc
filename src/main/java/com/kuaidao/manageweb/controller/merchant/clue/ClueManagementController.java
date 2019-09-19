@@ -254,11 +254,17 @@ public class ClueManagementController {
         XSSFSheet sheet = workBook.createSheet();
         // 设置宽度
         sheet.setColumnWidth(1, 4000);
-        sheet.setColumnWidth(3, 5000);
-        sheet.setColumnWidth(5, 6000);
+        sheet.setColumnWidth(2, 4000);
+        sheet.setColumnWidth(3, 4000);
+        sheet.setColumnWidth(4, 4000);
+        sheet.setColumnWidth(5, 4000);
         sheet.setColumnWidth(6, 4000);
         sheet.setColumnWidth(7, 4000);
-        sheet.setColumnWidth(22, 8000);
+        sheet.setColumnWidth(8, 4000);
+        sheet.setColumnWidth(9, 4000);
+        sheet.setColumnWidth(10, 8000);
+        sheet.setColumnWidth(11, 4000);
+
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
         String name = "资源列表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
