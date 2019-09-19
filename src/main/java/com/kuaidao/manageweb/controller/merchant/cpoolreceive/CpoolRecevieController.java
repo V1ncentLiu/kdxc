@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +55,15 @@ public class CpoolRecevieController {
   /**
    * 设置商家
    */
-  private void setMerchant(HttpServletRequest request){
+  private void setMerchant(HttpServletRequest request,String type){
     UserInfoDTO infoParam = new UserInfoDTO();
     infoParam.setUserType(SysConstant.USER_TYPE_TWO);
-    List<Integer> statusIdList = new ArrayList<>();
-    statusIdList.add(SysConstant.USER_STATUS_ENABLE);
-    statusIdList.add(SysConstant.USER_STATUS_LOCK);
-    infoParam.setStatusList(statusIdList);
+    if(StringUtils.isNotBlank(type)&& StringUtils.equals("addOrUpdate",type)){
+      List<Integer> statusIdList = new ArrayList<>();
+      statusIdList.add(SysConstant.USER_STATUS_ENABLE);
+      statusIdList.add(SysConstant.USER_STATUS_LOCK);
+      infoParam.setStatusList(statusIdList);
+    }
     JSONResult<List<UserInfoDTO>> listJSONResult = merchantUserInfoFeignClient.merchantUserList(infoParam);
     if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
       if(CollectionUtils.isNotEmpty(listJSONResult.getData())){
@@ -98,7 +101,7 @@ public class CpoolRecevieController {
   @RequestMapping("/toList")
   public String toList( HttpServletRequest request) {
     // 获取全部商家名称
-    setMerchant(request);
+    setMerchant(request,null);
     projectList(request);
     // 查询字典类别集合
     request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
@@ -111,7 +114,8 @@ public class CpoolRecevieController {
    */
   @RequestMapping("/toAdd")
   public String toAdd( HttpServletRequest request) {
-    setMerchant(request);
+    String type ="addOrUpdate";
+    setMerchant(request,type);
     projectList(request);
     // 查询字典类别集合
     request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
@@ -124,7 +128,8 @@ public class CpoolRecevieController {
    */
   @RequestMapping("/toUpdate")
   public String toUpdate(HttpServletRequest request) {
-    setMerchant(request);
+    String type ="addOrUpdate";
+    setMerchant(request,type);
     projectList(request);
     // 查询字典类别集合
     request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
