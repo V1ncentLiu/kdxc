@@ -120,6 +120,7 @@ public class ClueManagementController {
      * @return
      */
     @ResponseBody
+    @RequiresPermissions("clue:management:allocation")
     @PostMapping("/clueAssign")
     public JSONResult<String> clueAssign(@RequestBody ClueAssignReqDto reqDto) {
         UserInfoDTO userInfoDTO = getUser();
