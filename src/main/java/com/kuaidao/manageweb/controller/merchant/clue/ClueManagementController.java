@@ -142,13 +142,13 @@ public class ClueManagementController {
         UserInfoDTO userInfoDTO = getUser();
         // 子账号集合
         List<Long> subIds = new ArrayList<>();
-        JSONResult<ResourceStatisticsDto> subAssignDto = null;
+        JSONResult<ResourceStatisticsDto> assignDto = null;
         // 查询主账号信息
         if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
             // 获取主账号分发相关
             IdEntityLong reqDto = new IdEntityLong();
             reqDto.setId(userInfoDTO.getId());
-            subAssignDto = ruleAssignRecordFeignClient.countAssginNum(reqDto);
+            assignDto = ruleAssignRecordFeignClient.countAssginNum(reqDto);
             // 获取商家主账号下的子账号列表
             UserInfoDTO userReqDto = buildQueryReqDto(SysConstant.USER_TYPE_THREE, userInfoDTO.getId());
             JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userReqDto);
@@ -164,16 +164,16 @@ public class ClueManagementController {
             IdEntityLong reqDto = new IdEntityLong();
             reqDto.setId(userInfoDTO.getId());
             // 获取子账号分发相关
-            subAssignDto = clueManagementFeignClient.getAssignResourceStatistics(reqDto);
+            assignDto = clueManagementFeignClient.getAssignResourceStatistics(reqDto);
             // 子账号id
             subIds.add(userInfoDTO.getId());
         }
         // 获取分发
-        if (null != subAssignDto && subAssignDto.getCode().equals(JSONResult.SUCCESS)) {
+        if (null != assignDto && assignDto.getCode().equals(JSONResult.SUCCESS)) {
             // 今日分发资源
-            dto.setTodayAssignClueNum(subAssignDto.getData().getTodayAssignClueNum());
+            dto.setTodayAssignClueNum(assignDto.getData().getTodayAssignClueNum());
             // 累计分发
-            dto.setTotalAssignClueNum(subAssignDto.getData().getTotalAssignClueNum());
+            dto.setTotalAssignClueNum(assignDto.getData().getTotalAssignClueNum());
         }
         // 获取领取相关
         if (CollectionUtils.isNotEmpty(subIds)) {
