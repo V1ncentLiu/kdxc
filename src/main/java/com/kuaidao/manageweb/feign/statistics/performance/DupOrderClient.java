@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * 重单
  */
-@FeignClient(name="statstics-service3",path = "/statstics/dupOrder",fallback = DupOrderClient.HystrixClientFallback.class)
+@FeignClient(name="statstics-service",path = "/statstics/dupOrder",fallback = DupOrderClient.HystrixClientFallback.class)
 public interface DupOrderClient {
 
     @RequestMapping("/queryPage")
