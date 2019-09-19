@@ -288,7 +288,7 @@ public class ClueManagementController {
         headTitleList.add("留言时间");
         headTitleList.add("留言内容");
         headTitleList.add("联系电话");
-        headTitleList.add("资源区域");
+        headTitleList.add("资源地域");
         headTitleList.add("获取时间");
         headTitleList.add("价格(元)/条");
         headTitleList.add("是否分发");
