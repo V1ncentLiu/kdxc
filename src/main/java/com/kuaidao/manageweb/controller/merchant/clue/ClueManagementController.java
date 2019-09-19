@@ -259,7 +259,7 @@ public class ClueManagementController {
         sheet.setColumnWidth(4, 4000);
         sheet.setColumnWidth(5, 4000);
         sheet.setColumnWidth(6, 4000);
-        sheet.setColumnWidth(7, 4000);
+        sheet.setColumnWidth(7, 10000);
         sheet.setColumnWidth(8, 4000);
         sheet.setColumnWidth(9, 4000);
         sheet.setColumnWidth(10, 8000);
