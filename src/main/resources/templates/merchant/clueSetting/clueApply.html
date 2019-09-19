@@ -202,11 +202,10 @@
                     .then(function (response) {
                         var result = response.data;
                         console.info("getByUserId:" + result);
-                        debugger;
                         if (result.code == '0' &&  result.data != null) {
                             var data = result.data;
+                            debugger;
                             resourceApplyVm.form = data ;
-                            resourceApplyVm.form.radioApplyArea = data.applyArea;
                             if (data.auditStatus != 2) {
                                 resourceApplyVm.isDisabled = true;
                                 resourceApplyVm.addApplyButtonAble = true;
@@ -214,23 +213,29 @@
                             if (data.auditStatus == 2) {
                                 resourceApplyVm.auditPassShow = true;
                             }
-                        }
-                        //申请区域
-                        var applyAreas = data.applyArea;
-                        if (applyAreas == null || applyAreas == "") {
-                            resourceApplyVm.form.radioApplyArea = "1";
-                        } else {
-                            resourceApplyVm.form.radioApplyArea = "2";
-                            resourceApplyVm.applyArea = provinceList;
-                            resourceApplyVm.applyAreaShow = true;
-                            var applyAreasMultiple = [];
-                            var applyAreasObj = applyAreas.split(',');
-                            if (signProvincesObj.length > 0) {
-                                for (var i = 0; i < signProvincesObj.length; i++) {
-                                    applyAreasMultiple.push(applyAreasObj[i] + "");
-                                }
-                                if (applyAreasMultiple != null && applyAreasMultiple != "") {
-                                    resourceApplyVm.form.applyArea = applyAreasMultiple;
+                            //是否开启
+                            if (data.open == 1) {
+                                resourceApplyVm.form.open = "1";
+                            } else {
+                                resourceApplyVm.form.open = "0"
+                            }
+                            //申请区域
+                            var applyAreas = data.applyArea;
+                            if (applyAreas == null || applyAreas == "") {
+                                resourceApplyVm.form.radioApplyArea = "1";
+                            } else {
+                                resourceApplyVm.form.radioApplyArea = "2";
+                                resourceApplyVm.applyArea = provinceList;
+                                resourceApplyVm.applyAreaShow = true;
+                                var applyAreasMultiple = [];
+                                var applyAreasObj = applyAreas.split(',');
+                                if (applyAreasObj.length > 0) {
+                                    for (var i = 0; i < applyAreasObj.length; i++) {
+                                        applyAreasMultiple.push(applyAreasObj[i] + "");
+                                    }
+                                    if (applyAreasMultiple != null && applyAreasMultiple != "") {
+                                        resourceApplyVm.form.applyArea = applyAreasMultiple;
+                                    }
                                 }
                             }
                         }
