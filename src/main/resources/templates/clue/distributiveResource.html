@@ -237,6 +237,26 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="话务是否有效:">
+                        <el-select v-model="form.phStatus" placeholder="话务是否有效" clearable >
+                            <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="话务是否接通:">
+                        <el-select v-model="form.phtraIsCall" placeholder="话务是否接通" clearable >
+                            <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
@@ -283,6 +303,18 @@
                     <template slot-scope="scope">
                         <div v-if="scope.row.firstCall == 0">否</div>
                         <div v-else-if="scope.row.firstCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phstatus'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phstatus == 0">否</div>
+                        <div v-else-if="scope.row.phstatus ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phtraIsCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phtraIsCall == 0">否</div>
+                        <div v-else-if="scope.row.phtraIsCall ==1">是</div>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
@@ -462,6 +494,8 @@
                     clueId:'',
                     isCall:"",
                     status:"",
+                    phStatus:"",
+                    phtraIsCall:"",
                     firstCall:"",
                     qq:"",
                     wechat:"",
@@ -522,6 +556,8 @@
                     clueId:'',
                     isCall:"",
                     status:"",
+                    phStatus:"",
+                    phtraIsCall:"",
                     firstCall:"",
                     qq:"",
                     wechat:"",
@@ -600,6 +636,8 @@
                 param.type=this.form.type;
                 param.industryCategory=this.form.tradeType;
                 param.status = this.form.status;
+                param.phStatus = this.form.phStatus;
+                param.phtraIsCall = this.form.phtraIsCall;
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
@@ -922,6 +960,8 @@
                 param.type=this.form.type;
                 param.industryCategory=this.form.tradeType;
                 param.status = this.form.status;
+                param.phStatus = this.form.phStatus;
+                param.phtraIsCall = this.form.phtraIsCall;
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;

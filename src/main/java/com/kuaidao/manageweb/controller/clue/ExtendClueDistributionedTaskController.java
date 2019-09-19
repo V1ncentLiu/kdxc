@@ -4,11 +4,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
@@ -185,6 +182,10 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
@@ -330,7 +331,8 @@ public class ExtendClueDistributionedTaskController {
         dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
                 && listJSONResult.getData().size() != 0) {
-        	List<DictionaryItemRespDTO> dictionaryItemRespDTOs = getDictionaryByCode(DicCodeEnum.PHASE.getCode());
+            List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
+                    getDictionaryByCode(DicCodeEnum.PHASE.getCode());
             List<ClueDistributionedTaskDTO> orderList = listJSONResult.getData();
             int size = orderList.size();
             for (int i = 0; i < size; i++) {
@@ -383,17 +385,32 @@ public class ExtendClueDistributionedTaskController {
                 // 首次分配电销总监
                 curList.add(taskDTO.getFirstAsssignTeleDirectorName());
                 String phase = "";
-                //添加资源阶段
-                if(taskDTO.getPhase() !=null) {
-                	if(dictionaryItemRespDTOs !=null && dictionaryItemRespDTOs.size()>0) {
-                		for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
-							if(dictionaryItemRespDTO.getValue().equals(taskDTO.getPhase().toString())) {
-								phase = dictionaryItemRespDTO.getName();
-							}
-						}
-                	}
+                // 添加资源阶段
+                if (taskDTO.getPhase() != null) {
+                    if (dictionaryItemRespDTOs != null && dictionaryItemRespDTOs.size() > 0) {
+                        for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
+                            if (dictionaryItemRespDTO.getValue()
+                                    .equals(taskDTO.getPhase().toString())) {
+                                phase = dictionaryItemRespDTO.getName();
+                            }
+                        }
+                    }
                 }
                 curList.add(phase);
+                String phtraIsCall = "";
+                if (AggregationConstant.YES.equals(taskDTO.getPhtraIsCall())) {
+                    phtraIsCall = "是";
+                } else if (AggregationConstant.NO.equals(taskDTO.getPhstatus())) {
+                    phtraIsCall = "否";
+                }
+                curList.add(phtraIsCall);
+                String phstatus = "";
+                if (AggregationConstant.YES.equals(taskDTO.getPhstatus())) {
+                    phstatus = "是";
+                } else if (AggregationConstant.NO.equals(taskDTO.getPhstatus())) {
+                    phstatus = "否";
+                }
+                curList.add(phstatus);
                 dataList.add(curList);
             }
         }
@@ -644,6 +661,8 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("首次分配电销组");
         headTitleList.add("首次分配电销组总监");
         headTitleList.add("资源阶段");
+        headTitleList.add("话务是否接通");
+        headTitleList.add("话务是否有效");
         return headTitleList;
     }
 
@@ -759,14 +778,15 @@ public class ExtendClueDistributionedTaskController {
         }
         return null;
     }
-    
+
     /**
      * 导出资源情况数量，用于导出前提示
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/findCluesCount")
     @ResponseBody
-    public JSONResult<Long> findCluesCount(@RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
+    public JSONResult<Long> findCluesCount(@RequestBody ClueDistributionedTaskQueryDTO queryDto)
+            throws Exception {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
@@ -826,13 +846,11 @@ public class ExtendClueDistributionedTaskController {
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
-        JSONResult<Long> listJSONResult =
-                extendClueFeignClient.findCluesCount(queryDto);
+        JSONResult<Long> listJSONResult = extendClueFeignClient.findCluesCount(queryDto);
         Long count = 0L;
         JSONResult<Long> jsonResult = new JSONResult<Long>().success(count);
-        if (listJSONResult != null
-                && JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
-        	return listJSONResult;
+        if (listJSONResult != null && JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
+            return listJSONResult;
         }
         return jsonResult;
     }
