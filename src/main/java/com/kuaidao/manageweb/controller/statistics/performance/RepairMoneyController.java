@@ -55,6 +55,11 @@ public class RepairMoneyController extends BaseStatisticsController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
 
+    /**
+     * 一级页面
+     * @param request
+     * @return
+     */
     @RequestMapping("/repairMoneyRepetitionTable")
     public String repairMoneyRepetition(HttpServletRequest request){
         //事业部初始化
@@ -68,6 +73,18 @@ public class RepairMoneyController extends BaseStatisticsController {
         return "reportPerformance/repairMoneyRepetitionTable";
     }
 
+    /**
+     * 二级页面
+     * @param request
+     * @param teleDeptId
+     * @param teleGroupId
+     * @param startTime
+     * @param endTime
+     * @param strSignStore
+     * @param projectId
+     * @param companyId
+     * @return
+     */
     @RequestMapping("/repairMoneyRepetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request,Long teleDeptId,Long teleGroupId,
                                            Long startTime,Long endTime,String strSignStore,Long projectId,Long companyId){
