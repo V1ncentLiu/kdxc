@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/repetition")
 public class RepetitionController extends BaseStatisticsController {
-    private static Logger logger = LoggerFactory.getLogger(BaseStatisticsController.class);
+    private static Logger logger = LoggerFactory.getLogger(RepetitionController.class);
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
