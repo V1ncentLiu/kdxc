@@ -157,10 +157,13 @@ public class CpoolRecevieController {
     cpoolReceivelRule.setCreateTime(new java.util.Date());
     cpoolReceivelRule.setCreateUser(curLoginUser.getId());
     if(StringUtils.isBlank(cpoolReceivelRule.getSource())){
-      cpoolReceivelRule.setSource("-1");
+      cpoolReceivelRule.setSource(Constants.NO_LIMIT);
     }
     if(StringUtils.isBlank(cpoolReceivelRule.getSourceType())){
-      cpoolReceivelRule.setSourceType("-1");
+      cpoolReceivelRule.setSourceType(Constants.NO_LIMIT);
+    }
+    if(StringUtils.isBlank(cpoolReceivelRule.getProjectId())){
+      cpoolReceivelRule.setProjectId(Constants.NO_LIMIT);
     }
     logger.info("创建参数{}",cpoolReceivelRule);
     JSONResult<Long> josnResult = cpoolRecevieFeignClient.create(cpoolReceivelRule);
@@ -182,6 +185,9 @@ public class CpoolRecevieController {
     }
     if(StringUtils.isBlank(cpoolReceivelRule.getSourceType())){
       cpoolReceivelRule.setSourceType("-1");
+    }
+    if(StringUtils.isBlank(cpoolReceivelRule.getProjectId())){
+      cpoolReceivelRule.setProjectId(Constants.NO_LIMIT);
     }
     JSONResult<String> josnResult =
         cpoolRecevieFeignClient.update(cpoolReceivelRule);
