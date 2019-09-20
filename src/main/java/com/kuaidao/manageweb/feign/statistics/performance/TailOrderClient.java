@@ -6,6 +6,7 @@ import com.kuaidao.stastics.dto.dupOrder.DupOrderDto;
 import com.kuaidao.stastics.dto.dupOrder.DupOrderQueryDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.Map;
 
+@FeignClient(name="statstics-service3",path = "/statstics/tailOrder", fallback =TailOrderClient.HystrixClientFallback.class )
 public interface TailOrderClient {
 
 
