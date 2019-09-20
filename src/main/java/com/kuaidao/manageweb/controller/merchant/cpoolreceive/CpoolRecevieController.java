@@ -156,6 +156,12 @@ public class CpoolRecevieController {
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
     cpoolReceivelRule.setCreateTime(new java.util.Date());
     cpoolReceivelRule.setCreateUser(curLoginUser.getId());
+    if(StringUtils.isBlank(cpoolReceivelRule.getSource())){
+      cpoolReceivelRule.setSource("-1");
+    }
+    if(StringUtils.isBlank(cpoolReceivelRule.getSourceType())){
+      cpoolReceivelRule.setSourceType("-1");
+    }
     logger.info("创建参数{}",cpoolReceivelRule);
     JSONResult<Long> josnResult = cpoolRecevieFeignClient.create(cpoolReceivelRule);
     return josnResult;
@@ -171,6 +177,12 @@ public class CpoolRecevieController {
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
     cpoolReceivelRule.setUpdateTime(new java.util.Date());
     cpoolReceivelRule.setUpdateUser(curLoginUser.getId());
+    if(StringUtils.isBlank(cpoolReceivelRule.getSource())){
+      cpoolReceivelRule.setSource("-1");
+    }
+    if(StringUtils.isBlank(cpoolReceivelRule.getSourceType())){
+      cpoolReceivelRule.setSourceType("-1");
+    }
     JSONResult<String> josnResult =
         cpoolRecevieFeignClient.update(cpoolReceivelRule);
     return josnResult;
