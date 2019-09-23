@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商家充值记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">        
+        <el-button type="primary" @click="gotoAdd">录入线下充值</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
+                <el-form-item label="商家:" label-width="auto">
+                    <el-select v-model="form.applyPerson" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="充值时间:">
+                    <el-date-picker
+                        v-model="form.startTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.endTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="流水号:">
+                    <el-input v-model="form.serialNumber" placeholder=""></el-input>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <el-row class="greyTip">
+            <span>今日累积充值：{{pendingReviewNum}}元</span><span>本月累计充值：{{pendingReviewNum}}元</span>
+        </el-row>
+        <el-row>            
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>                
+                <el-table-column align="center" prop="applyPersonStr" label="流水号"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="充值日期"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="applyNum" label="充值金额"></el-table-column>
+                <el-table-column align="center" prop="remark" label="赠送金额"></el-table-column>
+                <el-table-column align="center" prop="applyArea" label="充值商家">
+                    <template slot-scope="scope">
+                        <span>商家账户名</span>
+                        <el-button type="text" @click="openImg">图片</el-button>
+                    </template>
+                </el-table-column> 
+                <el-table-column align="center" prop="remark" label="充值方式"></el-table-column>
+                <el-table-column align="center" prop="applyArea" label="充值类型">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.applyArea == null || scope.row.applyArea == ''">线上</div>
+                        <div v-else>线下</div>
+                    </template>
+                </el-table-column>                
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- 分配资源 -->
+    <el-dialog title="图片" :visible.sync="ImgFormVisible" width="540px">
+        <img src="" alt="">
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList=[[${merchantUserList}]];//商户集合
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                ImgFormVisible:false,
+                pendingReviewNum:'',
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  startTime:'',
+                  endTime:'',
+                  auditStatus:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                merchantUserListOptions:merchantUserList,
+                statusOptions: [{
+                  value: "",
+                  name: '全部'
+                },{
+                  value: 0,
+                  name: '待审核'
+                }, {
+                  value: 2,
+                  name: '已审核'
+                }],
+                formApply:{
+
+                }
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+            	var startTime=this.form.startTime;
+                var endTime=this.form.endTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;                
+                console.info(param);
+                axios.post('/merchant/clue/setting/applyPage', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }                    
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            gotoAdd(){
+                
+            },
+            openImg() {
+                this.ImgFormVisible = false;
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
