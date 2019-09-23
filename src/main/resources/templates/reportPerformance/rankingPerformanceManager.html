@@ -131,18 +131,28 @@
 </body>
 <div th:include="_footer_include :: #jsLib"></div>
 <script>
+
+    var curUserId=[[${curUserId}]];
     var areaList=[[${projectList}]];// 地区
     var deptList=[[${deptList}]];// 事业部
-    var curDeptId=[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId=[[${curOrgId}]];
-    var curUserId=[[${curUserId}]];
-    // var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
+    // var curDeptId=[[${deptId}]]; // 当前用户事业部Id
+    // var curOrgId=[[${curOrgId}]];
+    var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
+
+    // var areaList='';// 地区
+    // var deptList='';// 事业部
+    // var curDeptId=''; // 当前用户事业部Id
+    // var curOrgId='';
+    // var curUserId='';
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 activeName: 'third',
                 loading: false,
+                // isDisabled: false,
+                // isDisabledUserId: false,
+                curUserId: curUserId,
                 isShowDept: false,
                 isShowOrg: false,
                 pager:{
@@ -389,18 +399,15 @@
             }
         },
 	created(){
-        if(curUserId){
-            this.isShowDept = false;
-            this.isShowOrg = false;
-        }else if(curOrgId && !curUserId){
-            this.isShowDept = false;
-            this.isShowOrg = true;
-        }else if(curDeptId && !curOrgId && !curUserId){
+        if(rolecode=='DXZJL'|| rolecode=='DXFZ'){
             this.isShowDept = true;
-            this.isShowOrg = true;
+            this.isShowOrgId = true;
+        }else if(rolecode=='DXZJ'){
+            this.isShowDept = false;
+            this.isShowOrgId = true;
         }else{
-            this.isShowDept = true;
-            this.isShowOrg = true;
+            this.isShowDept = false;
+            this.isShowOrgId = false;
         }
         var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
         if(localVal){this.pager.pageSize = localVal;}
