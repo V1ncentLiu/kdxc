@@ -269,8 +269,7 @@ public class MechantUserController {
         Long id = user.getId();
         request.setAttribute("ossUrl", ossUrl);
         request.setAttribute("userId", id);
-        //todo
-        return "???";
+        return "merchant/merchantInfo/merchantInfo";
     }
 
     /**
