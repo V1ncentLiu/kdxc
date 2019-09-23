@@ -259,8 +259,10 @@
                 }
                 param.area = this.form.area;
                 param.teleDeptId = this.form.teleDeptId;
+                //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
+                param.selectType = "1";
                 this.loading = true; 
-                axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
+                axios.post('/ranking/getPerformanceRankPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -390,7 +392,8 @@
                 var param = {};
                 param.area = this.export.area;
                 param.teleDeptId = this.export.teleDeptId;
-                axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
+                param.selectType = "1";
+                axios.post('/ranking/exportPerformanceRankList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
