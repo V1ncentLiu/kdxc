@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.merchant.user;
 
@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -56,12 +57,12 @@ import java.util.stream.Collectors;
 
 /**
  * @author gpc
- *
  */
 
 @Controller
 @RequestMapping("/merchant/userManager")
 public class MechantUserController {
+
     private static Logger logger = LoggerFactory.getLogger(MechantUserController.class);
     @Autowired
     private RoleManagerFeignClient roleManagerFeignClient;
@@ -87,6 +88,9 @@ public class MechantUserController {
     @Autowired
     private MerchantUserInfoFeignClient mechantUserInfoFeignClient;
 
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
+
     /***
      * 用户列表页
      *
@@ -98,11 +102,12 @@ public class MechantUserController {
         getSysSetting("mechantRole");
         //查询商家端配置的角色
         String roleIds = getSysSetting(SysConstant.MECHANTROLE);
-        if(StringUtils.isNotBlank(roleIds)){
+        if (StringUtils.isNotBlank(roleIds)) {
             List<String> list = Arrays.asList(roleIds.split(","));
             IdListReq idListReq = new IdListReq();
             idListReq.setIdList(list);
-            JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient.qeuryRoleListByRoleIds(idListReq);
+            JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient
+                .qeuryRoleListByRoleIds(idListReq);
             request.setAttribute("roleList", roleInfoDTOs.getData());
         }
         OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
@@ -110,7 +115,8 @@ public class MechantUserController {
         // 查询组织机构树
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.queryList(reqDto);
         // 查询组织机构树
-        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
+            && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
@@ -118,13 +124,15 @@ public class MechantUserController {
         //查询商家版子账号对应的角色
         RoleQueryDTO roleQueryDTO = new RoleQueryDTO();
         roleQueryDTO.setRoleCode(RoleCodeEnum.SJZZH.name());
-        JSONResult<List<RoleInfoDTO>> subaccountRoleDTOs = roleManagerFeignClient.qeuryRoleByName(roleQueryDTO);
+        JSONResult<List<RoleInfoDTO>> subaccountRoleDTOs = roleManagerFeignClient
+            .qeuryRoleByName(roleQueryDTO);
         if (subaccountRoleDTOs != null && JSONResult.SUCCESS.equals(subaccountRoleDTOs.getCode())) {
             request.setAttribute("subaccountRoleDTOs", subaccountRoleDTOs.getData());
         }
 
         return "merchant/user/userManagePage";
     }
+
     /***
      * 用户列表
      *
@@ -132,16 +140,16 @@ public class MechantUserController {
      */
     @PostMapping("/merchantlist")
     @ResponseBody
-    public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
-                                                          HttpServletResponse response) {
-        JSONResult<PageBean<UserInfoDTO>> list = mechantUserInfoFeignClient.merchantlist(userInfoPageParam);
+    public JSONResult<PageBean<UserInfoDTO>> merchantlist(
+        @RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
+        HttpServletResponse response) {
+        JSONResult<PageBean<UserInfoDTO>> list = mechantUserInfoFeignClient
+            .merchantlist(userInfoPageParam);
         return list;
     }
+
     /**
      * 查询系统参数
-     *
-     * @param code
-     * @return
      */
     private String getSysSetting(String code) {
         SysSettingReq sysSettingReq = new SysSettingReq();
@@ -155,11 +163,6 @@ public class MechantUserController {
 
     /**
      * 保存用户
-     *
-     * @param
-     * @return
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
      */
     @PostMapping("/saveUser")
     @ResponseBody
@@ -171,13 +174,9 @@ public class MechantUserController {
         }
         return mechantUserInfoFeignClient.create(userInfoReq);
     }
+
     /**
      * 查询用户根据id
-     *
-     * @param
-     * @return
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
      */
     @PostMapping("/getMechantUserById")
     @ResponseBody
@@ -187,17 +186,13 @@ public class MechantUserController {
 
     /**
      * 保存用户
-     *
-     * @param
-     * @return
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
      */
     @PostMapping("/updateUser")
     @ResponseBody
     @RequiresPermissions("sys:merchantUser:edit")
     @LogRecord(description = "新增商家账号", operationType = OperationType.UPDATE, menuName = MenuEnum.MERCHANT_USER_MANAGEMENT)
-    public JSONResult updateUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
+    public JSONResult updateUser(@Valid @RequestBody UserInfoReq userInfoReq,
+        BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -217,23 +212,26 @@ public class MechantUserController {
         getSysSetting("mechantRole");
         //查询商家端配置的角色
         String roleIds = getSysSetting(SysConstant.MECHANTROLE);
-        if(StringUtils.isNotBlank(roleIds)){
+        if (StringUtils.isNotBlank(roleIds)) {
             List<String> list = Arrays.asList(roleIds.split(","));
             IdListReq idListReq = new IdListReq();
             idListReq.setIdList(list);
-            JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient.qeuryRoleListByRoleIds(idListReq);
+            JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient
+                .qeuryRoleListByRoleIds(idListReq);
             request.setAttribute("roleList", roleInfoDTOs.getData());
         }
         //查询商家版子账号对应的角色
         RoleQueryDTO roleQueryDTO = new RoleQueryDTO();
         roleQueryDTO.setRoleCode(RoleCodeEnum.SJZZH.name());
-        JSONResult<List<RoleInfoDTO>> subaccountRoleDTOs = roleManagerFeignClient.qeuryRoleByName(roleQueryDTO);
+        JSONResult<List<RoleInfoDTO>> subaccountRoleDTOs = roleManagerFeignClient
+            .qeuryRoleByName(roleQueryDTO);
         if (subaccountRoleDTOs != null && JSONResult.SUCCESS.equals(subaccountRoleDTOs.getCode())) {
             request.setAttribute("subaccountRoleDTOs", subaccountRoleDTOs.getData());
         }
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.parseLong(orgId));
-        JSONResult<List<TreeData>> accountDataTrees = organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
+        JSONResult<List<TreeData>> accountDataTrees = organizationFeignClient
+            .listOrgTreeDataByParentId(idEntityLong);
         if (accountDataTrees != null && JSONResult.SUCCESS.equals(accountDataTrees.getCode())) {
             request.setAttribute("accountDataTrees", accountDataTrees.getData());
         }
@@ -246,8 +244,6 @@ public class MechantUserController {
 
     /**
      * 查询组织机构树
-     *
-     * @return
      */
     @PostMapping("/getAccountOrg")
     @ResponseBody
@@ -259,5 +255,34 @@ public class MechantUserController {
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(userInfoReq.getOrgId());
         return organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
+    }
+
+    /***
+     * 用户信息页
+     *
+     * @return
+     */
+    @RequestMapping("/userInfo")
+    public String userInfo(HttpServletRequest request) {
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        Long id = user.getId();
+        request.setAttribute("ossUrl", ossUrl);
+        request.setAttribute("userId", id);
+        return "merchant/merchantInfo/merchantInfo";
+    }
+
+    /**
+     * 修改用户头像
+     */
+    @PostMapping("/updateIcon")
+    @ResponseBody
+    public JSONResult updateIcon(@RequestBody UserInfoReq userInfoReq) {
+        if (StringUtils.isBlank(userInfoReq.getMerchantIcon()) || null == userInfoReq.getId()) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+
+        JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
+        return jsonResult;
     }
 }
