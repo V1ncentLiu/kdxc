@@ -97,6 +97,21 @@ public class Constants {
      * 返回码成功
      */
     public static final String SUCCESS = "0";
+    /**
+     * 收款户名
+     */
+    //todo
+    public static final String PAYMENT_NAME = "???";
+    /**
+     * 收款银行
+     */
+    //todo
+    public static final String BANK = "???";
+    /**
+     * 收款账号
+     */
+    //todo
+    public static final String PAYMENT_ACCOUNT = "???";
 
 
 }
