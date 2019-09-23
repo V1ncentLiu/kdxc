@@ -227,7 +227,7 @@ public class ClueManagementController {
                 // 媒介
                 curList.add(dto.getSourceName());
                 // 资源项目
-                curList.add(dto.getCategoryName());
+                curList.add(dto.getProjectName());
                 // 客户姓名
                 curList.add(dto.getCusName());
                 // 搜索词
