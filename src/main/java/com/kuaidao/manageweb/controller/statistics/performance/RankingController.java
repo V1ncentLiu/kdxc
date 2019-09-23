@@ -89,7 +89,7 @@ public class RankingController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("areaList",queryOrgByParam.getData());
         request.setAttribute("curUserId",curLoginUser.getId()+"");
-        request.setAttribute("roleCode",roleCode);
+        request.setAttribute("roleCode",roleCode+"");
     }
 
     /**
