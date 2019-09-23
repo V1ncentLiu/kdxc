@@ -102,7 +102,7 @@ public class RankingController {
         JSONResult<List<TelePerformanceRankDto>> performanceRankList = telePerformanceRankFeignClient.getPerformanceRankList(telePerformanceRankQueryDto);
         String[] columnTitles = ReportExportEnum.getColumnTitles(selectType);
         String[] columnValue = ReportExportEnum.getColumnValue(selectType);
-        if(null!=performanceRankList && "0".equals(performanceRankList.getCode())){
+        if(null!=performanceRankList && "0".equals(performanceRankList.getCode()) && !performanceRankList.getData().isEmpty()){
             TelePerformanceRankDto[] dtos = performanceRankList.getData().isEmpty()?new TelePerformanceRankDto[]{}:performanceRankList.getData().toArray(new TelePerformanceRankDto[0]);
             Workbook wb = ExcelUtil.createWorkBook(dtos, columnValue, columnTitles);
             String name = MessageFormat.format("电销报表_业绩排名_{0}.xlsx", ReportExportEnum.getValue(selectType));
