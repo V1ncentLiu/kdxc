@@ -125,15 +125,14 @@
     var deptList=[[${deptList}]];// 事业部
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${curOrgId}]];
-    var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
+    // var curUserId = [[${curUserId}]];
+    // var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 activeName: 'second',
                 loading: false,
-                // isDisabled: false,
-                // isDisabledUserId: false,
                 isShowDept: false,
                 pager:{
                     total: 0,
@@ -351,10 +350,12 @@
             }
         },
         created(){
-            if(rolecode=='DXZJL'|| rolecode=='DXFZ'){
+            if(curDeptId && curOrgId){
+                this.isShowDept = false;
+            }else if(curOrgId && curUserId){
                 this.isShowDept = true;
             }else{
-                this.isShowDept = false;
+                this.isShowDept = true;
             }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
