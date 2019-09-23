@@ -3,7 +3,6 @@ package com.kuaidao.manageweb.feign.merchant.recharge;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.merchant.charge.ClueChargeFeignClient;
 import com.kuaidao.merchant.dto.recharge.MerchantRechargePreferentialDTO;
 import com.kuaidao.merchant.dto.recharge.MerchantRechargePreferentialReq;
 import feign.hystrix.FallbackFactory;
