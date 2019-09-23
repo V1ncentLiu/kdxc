@@ -179,6 +179,10 @@ public class ClueManagementController {
         if (CollectionUtils.isNotEmpty(subIds)) {
             IdListLongReq ids = new IdListLongReq();
             ids.setIdList(subIds);
+            //主账号也需要将自己领取的查出来
+            if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
+                subIds.add(userInfoDTO.getId());
+            }
             JSONResult<ResourceStatisticsDto> receiveResourceList = pubcustomerFeignClient.getReceiveResourceStatistics(ids);
             if (receiveResourceList.getCode().equals(JSONResult.SUCCESS)) {
                 ResourceStatisticsDto receiveResource = receiveResourceList.getData();
