@@ -125,7 +125,7 @@
     var deptList=[[${deptList}]];// 事业部
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${curOrgId}]];
-    var rolecode="DXZJ";//DXZJL,DXFZ,  DXZJ,DXCYGW
+    var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -150,49 +150,7 @@
                     teleDeptId: '',
                     teleGroupId: '',
                 },
-                tableData: [
-                    {
-                        allCountryPer: 1,
-                        areaPer: 1,
-                        allCountryAverage: 1,
-                        areaAverage: 1,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-1',
-                        branch: '分公司1-1',
-                        area: '秦皇岛'
-                    },
-                    {
-                        allCountryPer: 2,
-                        areaPer: 3,
-                        allCountryAverage: 2,
-                        areaAverage: 2,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-2',
-                        branch: '分公司1-2',
-                        area: '秦皇岛2'
-                    },
-                    {
-                        allCountryPer: 3,
-                        areaPer: 2,
-                        allCountryAverage: 2,
-                        areaAverage: 2,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-3',
-                        branch: '分公司1-3',
-                        area: '秦皇岛3'
-                    },
-                    {
-                        allCountryPer: 5,
-                        areaPer: 5,
-                        allCountryAverage: 5,
-                        areaAverage: 5,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-5',
-                        branch: '分公司1-5',
-                        area: '秦皇岛5'
-                    }
-
-                ],
+                tableData: [],
                 areaArr: areaList,
                 deptList: deptList,
                 orgTeleArr: '', // 电销组
@@ -216,7 +174,6 @@
                     return ;
                 }
                 this.form.teleGroupId = '';
-                this.form.teleSaleId = '';
                 this.getTelGroupSale(seleVal);
             },
             getTelGroupSale(seleVal){
@@ -232,45 +189,8 @@
                     });
                 });
             },
-            searchTable(firstPage) { 
-                // var startTime = this.form.startTime;
-                // var endTime = this.form.endTime;
-                // if(endTime && startTime){
-                //     startTime = new Date(this.form.startTime);
-                //     endTime = new Date(this.form.endTime);
-                //     if(startTime>endTime){
-                //         this.$message({
-                //             message: '开始时间不能大于结束时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     var date = new Date();
-                //     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                //     // date.setMonth(date.getMonth()-6);
-                //     // var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                //     var currentDateRes = new Date(currentDate);
-                //     // var beforeSixMonthRes = new Date(beforeSixMonth);
-                //     if(endTime > currentDateRes){
-                //         this.$message({
-                //             message: '请选择当前日期前的时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     startTime = this.limitTime(startTime, null);
-                //     endTime = this.limitTime(null, endTime);
-                // }else{
-                //     this.$message({
-                //         message: '请选择起止时间',
-                //         type: 'warning'
-                //     });
-                //     return;
-                // }   
-    
+            searchTable(firstPage) {
                 var param = {};
-                // param.startTime = this.minuteFormat(startTime);
-                // param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
     
                 if(firstPage){
@@ -300,9 +220,8 @@
                             type: 'error'
                         });
                         return ;
-                    }else if(resobj.data && resobj.data.tableData){
-                        var resobjData = resobj.data;    
-                        var tableData = resobjData.tableData;
+                    }else if(resobj.data){   
+                        var tableData = resobj.data;
                         mainDivVM.tableData = tableData.data;
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -439,7 +358,7 @@
             }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

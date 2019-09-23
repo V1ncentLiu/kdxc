@@ -32,7 +32,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @click="curTelGroupSale">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -173,45 +173,8 @@
                     });
                 });
             },
-            searchTable(firstPage) { 
-                // var startTime = this.form.startTime;
-                // var endTime = this.form.endTime;
-                // if(endTime && startTime){
-                //     startTime = new Date(this.form.startTime);
-                //     endTime = new Date(this.form.endTime);
-                //     if(startTime>endTime){
-                //         this.$message({
-                //             message: '开始时间不能大于结束时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     var date = new Date();
-                //     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                //     // date.setMonth(date.getMonth()-6);
-                //     // var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                //     var currentDateRes = new Date(currentDate);
-                //     // var beforeSixMonthRes = new Date(beforeSixMonth);
-                //     if(endTime > currentDateRes){
-                //         this.$message({
-                //             message: '请选择当前日期前的时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     startTime = this.limitTime(startTime, null);
-                //     endTime = this.limitTime(null, endTime);
-                // }else{
-                //     this.$message({
-                //         message: '请选择起止时间',
-                //         type: 'warning'
-                //     });
-                //     return;
-                // }   
-    
+            searchTable(firstPage) {
                 var param = {};
-                // param.startTime = this.minuteFormat(startTime);
-                // param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
     
                 if(firstPage){
@@ -240,9 +203,8 @@
                             type: 'error'
                         });
                         return ;
-                    }else if(resobj.data && resobj.data.tableData){
-                        var resobjData = resobj.data;    
-                        var tableData = resobjData.tableData;
+                    }else if(resobj.data){   
+                        var tableData = resobj.data;
                         mainDivVM.tableData = tableData.data;
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -372,7 +334,7 @@
         created(){     
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
