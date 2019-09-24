@@ -7,9 +7,8 @@
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销报表</el-breadcrumb-item>
-        <el-breadcrumb-item>业绩报表</el-breadcrumb-item>
-        <el-breadcrumb-item>业绩表</el-breadcrumb-item>
+        <el-breadcrumb-item>数据报表</el-breadcrumb-item>
+        <el-breadcrumb-item>电销业绩表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="searchMonth">月统计</el-button>
@@ -23,13 +22,13 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="统计日期：">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd 00:00" v-model="form.startTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd 23:59" v-model="form.endTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="getTelGroupSale">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -39,7 +38,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组：">  
-                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledOrgId">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -78,21 +77,21 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" label="电销组">
+                <el-table-column prop="teleGroupName" label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.orgId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
-                        <span v-else>{{scope.row.orgName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.teleGroupName}}</el-button>
+                        <span v-else>{{scope.row.teleGroupName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="firstAllocationNum" label="首次分配资源数"></el-table-column>
+                <el-table-column prop="culeNum" label="首次分配资源数"></el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
-                <el-table-column prop="resocrceVisitRate" label="资源来访率"></el-table-column>
+                <el-table-column prop="visitRate" label="资源来访率"></el-table-column>
                 <el-table-column prop="signRate" label="签约率"></el-table-column>
-                <el-table-column prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column prop="signVisitNum" label="签约单笔"></el-table-column>
+                <el-table-column prop="achievement" label="业绩金额"></el-table-column>
+                <el-table-column prop="signAmount" label="签约单笔"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()" :papernum="[3,5,10]"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -117,12 +116,12 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3,
+                    pageSize: 20,
                 },
                 form: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     category:'',
                     searchText: ''
@@ -130,39 +129,12 @@
                 export: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     category:'',
                     searchText: ''
                 },
-                tableData: [
-                    {
-                        teleGroupId: 2,
-                        orgId: "99999",
-                        orgName: '合计',
-                        userName: '电销顾问1',
-                        firstAllocationNum: 10,
-                        firstVisitNum: 10,
-                        signNum: 10,
-                        resocrceVisitRate: 1,
-                        signRate: 10,
-                        performanceMoney: 1000,
-                        signVisitNum: 155799,
-                    },
-                    {
-                        teleGroupId: 1,
-                        orgId: "1",
-                        orgName: '电销组1',
-                        userName: '电销顾问1',
-                        firstAllocationNum: 10,
-                        firstVisitNum: 10,
-                        signNum: 10,
-                        resocrceVisitRate: 1,
-                        signRate: 10,
-                        performanceMoney: 1000,
-                        signVisitNum: 155799,
-                    },
-                ],
+                tableData: [],
                 deptList: deptList,// 电销事业部
                 orgTeleArr: '', // 电销组
                 clueCategoryList: clueCategoryList
@@ -171,6 +143,19 @@
         methods: {    
             centerStyle(){
                 return "text-align:center"
+            },
+            firstCurTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getTelGroupSale(seleVal);
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.getTelGroupSale(seleVal);
             },
             getTelGroupSale(seleVal){
                 if(!seleVal){return;}
@@ -232,55 +217,55 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.deptId = this.form.deptId;
+                param.teleDeptId = this.form.teleDeptId;
                 param.teleGroupId = this.form.teleGroupId;
                 param.category = this.form.category;
                 param.searchText = this.form.searchText;
-                // this.loading = true; 
-                // axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
-                //     if(!response || !response.data){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }
-                //     var resobj= response.data;
-                //     if(resobj.code != '0'){
-                //         mainDivVM.loading = false;
-                //         mainDivVM.$message({
-                //             message: resobj.msg,
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }else if(resobj.data && resobj.data.tableData){
-                //         var resobjData = resobj.data;    
-                //         var tableData = resobjData.tableData;
-                //         mainDivVM.tableData = tableData.data;
-                //         if( tableData.data.length && resobj.data.totalData ){
-                //             var totalData = resobjData.totalData[0];
-                //             mainDivVM.tableData.unshift(totalData);
-                //         }
-                //         mainDivVM.pager.currentPage = tableData.currentPage;
-                //         mainDivVM.pager.total = tableData.total;
-                //         mainDivVM.loading = false;
-                //         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                //         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                //         mainDivVM.export.deptId = mainDivVM.form.deptId;
-                //         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
-                //         mainDivVM.export.category = mainDivVM.form.category;
-                //         mainDivVM.export.searchText = mainDivVM.form.searchText;
+                this.loading = true;
+                axios.post('/performance/queryPage',param).then(function (response) {
+                    if(!response || !response.data){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }else if(resobj.data && resobj.data.tableData){
+                        var resobjData = resobj.data;
+                        var tableData = resobjData.tableData;
+                        mainDivVM.tableData = tableData.data;
+                        if( tableData.data.length && resobj.data.totalData ){
+                            var totalData = resobjData.totalData[0];
+                            mainDivVM.tableData.unshift(totalData);
+                        }
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
+                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
+                        mainDivVM.export.category = mainDivVM.form.category;
+                        mainDivVM.export.searchText = mainDivVM.form.searchText;
         
-                //     }else{
-                //         mainDivVM.loading = false;
-                //     }
-                // }).catch(function (error) {
-                //     mainDivVM.loading = false;
-                //     mainDivVM.$message({
-                //         message: "请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                // });
+                    }else{
+                        mainDivVM.loading = false;
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             limitTime (start, end) {
                 var endTime = this.minuteFormat (end);
@@ -289,30 +274,23 @@
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
                 if(startTime){
-                    var s = startTime.slice(0,8);
-                    if(s < data){
-                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
-                        return this.form.startTime;
-                    }
-                    return start;
+                    this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                    return this.form.startTime;
                 }
                 if(endTime){
-                    var e = endTime.slice(0,8);
-                    if(e < data){
-                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
-                        return this.form.endTime;                        
-                    }
-                    return end;
+                    this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                    return this.form.endTime;      
                 }
             },
             gotoTeam(row){
                 var teleGroupId = row.teleGroupId;
-                var deptId = this.export.deptId;
+                var teleDeptId = this.export.teleDeptId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
+                var category = this.export.category;
                 var searchText = this.export.searchText;
                 if(teleGroupId){
-                    window.location.href="/performance/managerList?&deptId="+ deptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&searchText=" +searchText; 
+                    window.location.href="/performance/managerList?&teleDeptId="+ teleDeptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&category=" + category + "&searchText=" + searchText;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -398,11 +376,11 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.deptId =  this.export.deptId;
+                param.teleDeptId =  this.export.teleDeptId;
                 param.teleGroupId = this.export.teleGroupId;
                 param.category = this.export.category;
                 param.searchText = this.export.searchText;
-                axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
+                axios.post('/performance/export',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -424,13 +402,13 @@
             this.form.endTime=endTime; 
             if(curDeptId){
                 this.isDisabled = true;
-                this.form.deptId = curDeptId;
-                this.export.deptId = this.form.deptId;
-                this.getTelGroupSale(curDeptId);
+                this.form.teleDeptId = curDeptId;
+                this.export.teleDeptId = this.form.teleDeptId;
+                this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
-                    this.export.teleGroupId = this.form.curOrgId;
+                    this.export.teleGroupId = this.form.teleGroupId;
                 }
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);

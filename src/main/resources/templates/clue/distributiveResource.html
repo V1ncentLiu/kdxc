@@ -237,9 +237,29 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="话务是否有效:">
+                        <el-select v-model="form.phstatus" placeholder="话务是否有效" clearable >
+                            <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="话务是否接通:">
+                        <el-select v-model="form.phtraIsCall" placeholder="话务是否接通" clearable >
+                            <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
@@ -283,6 +303,18 @@
                     <template slot-scope="scope">
                         <div v-if="scope.row.firstCall == 0">否</div>
                         <div v-else-if="scope.row.firstCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phstatus'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phstatus == 0">否</div>
+                        <div v-else-if="scope.row.phstatus ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phtraIsCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phtraIsCall == 0">否</div>
+                        <div v-else-if="scope.row.phtraIsCall ==1">是</div>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
@@ -426,6 +458,7 @@
         el: '#optimizeClueManagement',
         data: function() {
             return {
+            	isShowTime:false,
                 timer:null,//计时器
                 isExport1:true,
                 isExport2:true,
@@ -461,6 +494,8 @@
                     clueId:'',
                     isCall:"",
                     status:"",
+                    phstatus:"",
+                    phtraIsCall:"",
                     firstCall:"",
                     qq:"",
                     wechat:"",
@@ -521,6 +556,8 @@
                     clueId:'',
                     isCall:"",
                     status:"",
+                    phstatus:"",
+                    phtraIsCall:"",
                     firstCall:"",
                     qq:"",
                     wechat:"",
@@ -565,7 +602,15 @@
                 });
             },
             initTableData(){
-                var param = {};
+            	var param = {};
+            	if(!this.isShowTime){
+            		var a = new Date();
+                    var year = a.getFullYear();
+                    var month = a.getMonth();
+                    var date = a.getDate();
+                    param.createTimeStart=new Date(year+"-" + month + "-" + date+" 00:00:00");
+                    param.createTimeEnd=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
+            	}
                 var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
                 param.pageNum=pageNum;
@@ -591,6 +636,8 @@
                 param.type=this.form.type;
                 param.industryCategory=this.form.tradeType;
                 param.status = this.form.status;
+                param.phstatus = this.form.phstatus;
+                param.phtraIsCall = this.form.phtraIsCall;
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
@@ -892,6 +939,14 @@
                 var pageNum = this.pager.currentPage;
                 param.pageNum=pageNum;
                 param.pageSize=pageSize;
+            	if(!this.isShowTime){
+            		var a = new Date();
+                    var year = a.getFullYear();
+                    var month = a.getMonth();
+                    var date = a.getDate();
+                    param.createTimeStart=new Date(year+"-" + month + "-" + date+" 00:00:00");
+                    param.createTimeEnd=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
+            	}
                 if(this.form.starTime){
                     param.createTimeStart=new Date(this.form.starTime);
                 }
@@ -913,6 +968,8 @@
                 param.type=this.form.type;
                 param.industryCategory=this.form.tradeType;
                 param.status = this.form.status;
+                param.phstatus = this.form.phstatus;
+                param.phtraIsCall = this.form.phtraIsCall;
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
@@ -940,7 +997,7 @@
                         return;
                     }
                 }
-                if(falg==1){ // 沟通情况
+           /*      if(falg==1){ // 沟通情况
                     this.isExport1=false;
                     // 存localstorage
                     localStorage.setItem('distributeExport1','1');
@@ -948,8 +1005,8 @@
                     this.isExport2=false;
                     // 存localstorage
                     localStorage.setItem('distributeExport2','2');
-                }
-                this.timedown();
+                } */
+                
                 // var methodStr;
                 // if(falg==1){ // 沟通情况
                 //     methodStr = 'findCommunicateRecords';
@@ -966,7 +1023,37 @@
                 // }).then(function(){
                 // });
                 var falgNew=falg;
-                window.parent.distributeExportFun(falgNew,param)
+                axios.post('/exetend/distributionedTaskManager/findCluesCount', param)
+                .then(function (response) {
+                	debugger;
+                	ocmVM.$confirm("当前导出数据量为"+response.data.data+"条，确认导出吗？", '提示', {
+                         confirmButtonText: '确认',
+                         cancelButtonText: '取消',
+                         type: 'warning'
+                     }).then(() => {
+                    	
+                    	 if(falg==1){ // 沟通情况
+                    		 ocmVM.isExport1=false;
+                             // 存localstorage
+                             localStorage.setItem('distributeExport1','1');
+                         }else{ // 资源记录
+                        	 ocmVM.isExport2=false;
+                             // 存localstorage
+                             localStorage.setItem('distributeExport2','2');
+                         }
+                    	 ocmVM.timedown();
+                    	 window.parent.distributeExportFun(falgNew,param)
+                     }).catch(() => {
+                         this.$message({
+                             type: 'info',
+                             message: '已取消导出'
+                         });          
+                     });
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+                
             },
             timedown(){
                 console.log(0)
@@ -1085,17 +1172,22 @@
                 if (!name) return
                 return window.sessionStorage.removeItem(name)
             },
+            search(){
+            	this.isShowTime = true;
+            	this.initTableData();
+            }
         },
         mounted(){
         	document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
-          var a = new Date();
+        /*   var a = new Date();
           var year = a.getFullYear();
           var month = a.getMonth();
           var date = a.getDate();
+          
           this.form.starTime=new Date(year+"-" + month + "-" + date+" 00:00:00");
-          this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
+          this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59"); */
             var storageDistributeExport1 = localStorage.getItem("distributeExport1");
             var storageDistributeExport2 = localStorage.getItem("distributeExport2");
             if(storageDistributeExport1){
