@@ -157,4 +157,15 @@ public class BaseStatisticsController {
         request.setAttribute("roleCode",roleCode);
     }
 
+
+    /**
+     * 获取当前登录用户角色码
+     * @return
+     */
+    protected String getRoleCode(){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        return roleCode;
+    }
+
 }
