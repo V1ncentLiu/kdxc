@@ -95,15 +95,21 @@ public class MechantUserController {
     @RequestMapping("/initUserList")
     @RequiresPermissions("sys:merchantUser:view")
     public String initUserList(HttpServletRequest request) {
-        getSysSetting("mechantRole");
         //查询商家端配置的角色
-        String roleIds = getSysSetting(SysConstant.MECHANTROLE);
+     /*   String roleIds = getSysSetting(SysConstant.MECHANTROLE);
         if(StringUtils.isNotBlank(roleIds)){
             List<String> list = Arrays.asList(roleIds.split(","));
             IdListReq idListReq = new IdListReq();
             idListReq.setIdList(list);
             JSONResult<List<RoleInfoDTO>> roleInfoDTOs = roleManagerFeignClient.qeuryRoleListByRoleIds(idListReq);
             request.setAttribute("roleList", roleInfoDTOs.getData());
+        }*/
+        //查询商家版账号对应的角色
+        RoleQueryDTO sjroleQueryDTO = new RoleQueryDTO();
+        sjroleQueryDTO.setRoleCode(RoleCodeEnum.SJZH.name());
+        JSONResult<List<RoleInfoDTO>> sjRoleDTOs = roleManagerFeignClient.qeuryRoleByName(sjroleQueryDTO);
+        if (sjRoleDTOs != null && JSONResult.SUCCESS.equals(sjRoleDTOs.getCode())) {
+            request.setAttribute("roleList", sjRoleDTOs.getData());
         }
         OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
         reqDto.setSource(SysConstant.MERCHANT_ORG_SOURCE_TWO);
