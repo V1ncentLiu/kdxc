@@ -56,6 +56,7 @@ public class RankingController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            request.setAttribute("curUserId",curLoginUser.getId()+"");
             return "reportPerformance/rankingPerformanceManager";
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
             return "reportPerformance/rankingPerformanceGroup";
@@ -97,19 +98,9 @@ public class RankingController {
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("areaList",queryOrgByParam.getData());
-        request.setAttribute("curUserId",curLoginUser.getId()+"");
         request.setAttribute("roleCode",roleCode+"");
 
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        // 查询电销分公司
-        orgDto = new OrganizationQueryDTO();
-        orgDto.setOrgType(OrgTypeConstant.DXFGS);
-        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        JSONResult<List<OrganizationRespDTO>> orgComJson =
-                organizationFeignClient.queryOrgByParam(orgDto);
-        if (orgComJson.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("orgCompany", orgComJson.getData());
-        }
         // 电销事业部
         orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.DZSYB);
