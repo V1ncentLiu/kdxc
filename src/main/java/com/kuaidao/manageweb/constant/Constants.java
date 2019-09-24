@@ -112,6 +112,10 @@ public class Constants {
      */
     //todo
     public static final String PAYMENT_ACCOUNT = "???";
+    /**
+     * 商家主账号
+     */
+    public static Integer MERCHANT_PRIMARY_ACCOUNT = 2;
 
 
 }
