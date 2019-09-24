@@ -58,12 +58,14 @@ public class PubcustomerController {
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
     if(curLoginUser.getUserType() != null && curLoginUser.getUserType() ==2){
       dto.setSetBusiness(curLoginUser.getId());
+      dto.setBusinessLine(curLoginUser.getBusinessLine());
     }else if(curLoginUser.getUserType() != null && curLoginUser.getUserType() ==3){
       UserInfoReq req = new UserInfoReq();
       req.setId(curLoginUser.getParentId());
       JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
       UserInfoReq userDto = jsonResult.getData();
       dto.setSetBusiness(userDto.getId());
+      dto.setBusinessLine(curLoginUser.getBusinessLine());
     }
     dto.setReceiveUser(curLoginUser.getId());
     dto.setReceiveTime(new java.util.Date());
