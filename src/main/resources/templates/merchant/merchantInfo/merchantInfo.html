@@ -34,14 +34,14 @@
         </el-col>
         <el-col :span="24" class="marginB20">
             <span>密码：</span>
-            <span class="marginR10">123</span><span class="bluecolor cursorP" @click="openWechat">更改密码</span>            
+            <span class="marginR10">******</span><span class="bluecolor cursorP" @click="changePassword">更改密码</span>            
         </el-col>
         <el-col :span="24" class="marginB20">
-            <span>联系人：</span><span>张先生</span>            
+            <span>联系人：</span><span>{{linkName}}</span>            
         </el-col>
         <div class="titleLine">绑定信息</div>
         <el-col :span="24">
-            <span>手机号：</span><span>151xxxx1601</span>            
+            <span>手机号：</span><span>{{phone}}</span>            
         </el-col>
     </el-row> 
     <el-dialog title="设置头像" :visible.sync="wechatVisible" width="540px">
@@ -95,6 +95,8 @@
         data: function() {
             return {
                 userName:'',//账号
+                linkName:'',
+                phone:'',
                 formLabelWidth: '140px',
                 wechatVisible:false,
                 wechatForm: {
@@ -210,31 +212,12 @@
                 return suffix;
             },
             wechatSumbit(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        var formData = this.wechatForm;
-                        var param={};
-                        param.merchantIcon = formData.wechatUrl;//url地址
-                        axios.post('/merchant/userManager/updateIcon',param).then(function (response) {
-                            console.log(response);
-                            
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
-                        .then(function () {
-                        // always executed
-                        });  
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
-            },
-            getInfo(){
+                var formData = this.wechatForm;
                 var param={};
+                param.merchantIcon = formData.wechatUrl;//url地址
                 // param.id=userId;
                 param.id='1153604277760090112';
-                axios.post('/user/userManager/getUser',param).then(function (response) {
+                axios.post('/merchant/userManager/updateIcon',param).then(function (response) {
                     console.log(response);
                     
                 }).catch(function (error) {
@@ -243,6 +226,31 @@
                 .then(function () {
                 // always executed
                 });  
+            },
+            getInfo(){
+                var param={};
+                // param.id=userId;
+                param.id='1153604277760090112';
+                axios.post('/user/userManager/getUser',param).then(function (response) {
+                    console.log(response);
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        addClueVM.userName=result.data.username;
+                        addClueVM.linkName=result.data.name;
+                        addClueVM.phone=result.data.phone;
+                    }else{
+                        
+                    }
+                    
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                // always executed
+                });  
+            },
+            changePassword(){
+
             }
         },
         created(){
