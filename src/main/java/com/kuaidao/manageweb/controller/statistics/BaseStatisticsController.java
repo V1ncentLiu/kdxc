@@ -138,4 +138,34 @@ public class BaseStatisticsController {
         return null;
     }
 
+    /**
+     * 按登录用户业务线查询-商务大区
+     * @param request
+     */
+    protected void initBugOrg(HttpServletRequest request){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+
+        //查询招商中心
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        request.setAttribute("areaList",queryOrgByParam.getData());
+        request.setAttribute("curUserId",curLoginUser.getId()+"");
+        request.setAttribute("roleCode",roleCode);
+    }
+
+
+    /**
+     * 获取当前登录用户角色码
+     * @return
+     */
+    protected String getRoleCode(){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        return roleCode;
+    }
+
 }
