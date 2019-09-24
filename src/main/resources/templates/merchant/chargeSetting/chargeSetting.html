@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        html,body{background: #eff3f6}
+        .titleLine{border-bottom: 1px solid #ecedf2;font-size: 16px;padding-bottom: 10px;padding-left: 10px;margin-bottom: 10px;}
+        .headerBox{width: 150px;height: 150px;border-radius: 50%;overflow: hidden;margin-bottom: 10px;border:1px solid #ecedf2;}
+        .headerBox img{width: 150px;height: 150px;border-radius: 50%;}
+        .changeHeaderImg{width: 150px;}
+    </style>
+</head>
+<body>
+<div id="resourceApply" class="resourceApply mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值优惠设置</el-breadcrumb-item>
+    </el-breadcrumb>     
+    <el-row class="borderbox padding20">         
+        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" :inline="true">
+            <div class="clearFix marginB20">
+                充值送金额：<el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i>新建优惠档</el-button>
+                <el-button type="success" class="f-fr"><i class="el-icon-edit"></i>编辑</el-button>
+            </div>
+            <el-row v-for="(domain, index) in dynamicValidateForm.domains">
+                <el-form-item
+                :label="'充值'"
+                :prop="'domains.' + index + '.value'"
+                :rules="{
+                  required: true, message: '充值信息不能为空', trigger: 'blur'
+                }">
+                    <el-input v-model="domain.value" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                </el-form-item>
+                <el-form-item
+                :label="'送'"
+                :prop="'domains.' + index + '.value2'"
+                :rules="{
+                  required: true, message: '不能为空', trigger: 'blur'
+                }">
+                    <el-input v-model="domain.value2" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                </el-form-item>
+                <el-form-item
+                :label="'总得'"
+                :prop="'domains.' + index + '.value3'">
+                    <el-input v-model="domain.value3" disabled></el-input>                    
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" style="margin-left: 10px;">删除</el-button>
+                </el-form-item>
+            </el-row>
+            <el-row class="f-tac">
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存设置</el-button>
+                    <el-button @click="resetForm('dynamicValidateForm')">取消</el-button>
+                </el-form-item>
+            </el-row>
+        </el-form>
+    </el-row> 
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+    var userId = [[${userId}]];//用户信息
+    console.log(userId)
+    var addClueVM = new Vue({
+        el: '#resourceApply',
+        data: function() {
+            return {  
+                
+                dynamicValidateForm: {
+                    domains: [{
+                        value: '1',
+                        value2: '1',
+                        value3: '2',
+                        isDisabled:true,
+                    }]
+                }
+            }      	  
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        alert('submit!');
+                    } else {
+                        console.log('error submit!!');
+                    return false;
+                    }
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item)
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+            },
+            addDomain() {
+                this.dynamicValidateForm.domains.unshift({
+                    value: '',
+                    value2: '',
+                    value3: ''
+                });
+            }
+        },
+        created(){
+            this.getUploadParam();
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            
+        },
+        mounted(){
+            document.getElementById('chargeSetting').style.display = 'block';
+        }
+  })
+</script>
+</html>
