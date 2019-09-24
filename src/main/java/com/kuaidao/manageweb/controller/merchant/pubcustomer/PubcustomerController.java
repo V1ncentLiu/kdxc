@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.pubcustomer;
 
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
@@ -79,12 +80,17 @@ public class PubcustomerController {
        UserInfoDTO user = CommUtil.getCurLoginUser();
        if(user.getUserType() != null && user.getUserType() ==2){
          dto.setBussinessAccount(user.getId());
+         dto.setUserType(2); // 主账户
        }else if(user.getUserType() != null && user.getUserType() ==3){
          UserInfoReq req = new UserInfoReq();
          req.setId(user.getParentId());
          JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
          UserInfoReq userDto = jsonResult.getData();
          dto.setBussinessAccount(userDto.getId());
+         dto.setUserType(3); // 子账户
+       }else {
+         dto.setUserType(0); // 默认为超级管理员
+         dto.setBussinessAccount(user.getId());
        }
         return pubcustomerFeignClient.queryListPage(dto);
     }
