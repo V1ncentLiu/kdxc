@@ -130,16 +130,13 @@
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <div th:include="_footer_include :: #jsLib"></div>
-<script>
+<script  th:inline="javascript">
 
-    var curUserId=[[${curUserId}]];
-    // var areaList=[[${areaList}]];// 地区
-    // var deptList=[[${areaList}]];// 事业部
-    var rolecode="DXZJL";//DXZJL,DXFZ,  DXZJ,DXCYGW
-
-    var areaList='';// 地区
-    var deptList='';// 事业部
-    
+    var curUserId="";
+    var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
+    var areaList=[[${areaList}]];// 地区
+    var deptList=[[${deptList}]];// 事业部
+    var teleGroupList = [[${teleGroupList}]];// 电销组
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -170,7 +167,7 @@
                 tableData: [],
                 areaArr: areaList,
                 deptList: deptList,
-                orgTeleArr: '', // 电销组
+                orgTeleArr:teleGroupList, // 电销组
                 busSaleArr: '', // 电销顾问
                 curUserId: curUserId
             }             
@@ -239,10 +236,10 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.area = this.form.area;
-                param.teleDeptId = this.form.teleDeptId;
-                param.teleGroupId = this.form.teleGroupId;
-                param.teleSaleId = this.form.teleSaleId;
+                param.centerId = this.form.area;
+                param.departId = this.form.teleDeptId;
+                param.groupId = this.form.teleGroupId;
+                param.userId = this.form.teleSaleId;
                 param.type = this.form.type;
                 //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
                 param.selectType = "3";
@@ -345,12 +342,12 @@
             },
             exportRs(){
                 var param = {};
-                param.area = this.export.area;
-                param.teleDeptId = this.export.teleDeptId;
-                param.teleGroupId = this.export.teleGroupId;
-                param.teleSaleId = this.export.teleSaleId;
+                param.centerId = this.form.area;
+                param.departId = this.form.teleDeptId;
+                param.groupId = this.form.teleGroupId;
+                param.userId = this.export.teleSaleId;
                 param.type = this.export.type;
-                param.selectType = "1";
+                param.selectType = "3";
                 axios.post('/ranking/exportPerformanceRankList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;

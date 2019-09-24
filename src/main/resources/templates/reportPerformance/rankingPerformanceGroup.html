@@ -121,8 +121,9 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var areaList=[[${projectList}]];// 地区
+    var areaList=[[${areaList}]];// 地区
     var deptList=[[${deptList}]];// 事业部
+    var teleGroupList = [[${teleGroupList}]];// 电销组
     var rolecode="";//DXZJL,DXFZ,  DXZJ,DXCYGW
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -151,7 +152,7 @@
                 tableData: [],
                 areaArr: areaList,
                 deptList: deptList,
-                orgTeleArr: '', // 电销组
+                orgTeleArr: teleGroupList, // 电销组
             }             
         },
         methods: {    
@@ -196,9 +197,9 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.area = this.form.area;
-                param.teleDeptId = this.form.teleDeptId;
-                param.teleGroupId = this.form.teleGroupId;
+                param.centerId = this.form.area;
+                param.departId = this.form.teleDeptId;
+                param.groupId = this.form.teleGroupId;
                 param.type = this.form.type;
                 //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
                 param.selectType = "2";
@@ -300,11 +301,12 @@
             },
             exportRs(){
                 var param = {};
-                param.area = this.export.area;
-                param.teleDeptId = this.export.teleDeptId;
-                param.teleGroupId = this.export.teleGroupId;
+                param.centerId = this.form.area;
+                param.departId = this.form.teleDeptId;
+                param.groupId = this.export.teleGroupId;
                 param.type = this.export.type;
-                param.selectType = "1";
+                //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
+                param.selectType = "2";
                 axios.post('/ranking/exportPerformanceRankList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;

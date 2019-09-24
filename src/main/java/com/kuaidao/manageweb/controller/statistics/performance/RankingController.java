@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.statistics.performance;
 
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
@@ -90,6 +91,35 @@ public class RankingController {
         request.setAttribute("areaList",queryOrgByParam.getData());
         request.setAttribute("curUserId",curLoginUser.getId()+"");
         request.setAttribute("roleCode",roleCode+"");
+
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        // 查询电销分公司
+        orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DXFGS);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        JSONResult<List<OrganizationRespDTO>> orgComJson =
+                organizationFeignClient.queryOrgByParam(orgDto);
+        if (orgComJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("orgCompany", orgComJson.getData());
+        }
+        // 电销事业部
+        orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DZSYB);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        JSONResult<List<OrganizationRespDTO>> orgDeptJson =
+                organizationFeignClient.queryOrgByParam(orgDto);
+        if (orgDeptJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("deptList", orgDeptJson.getData());
+        }
+        // 查询电销组
+        orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        JSONResult<List<OrganizationRespDTO>> orgJson =
+                organizationFeignClient.queryOrgByParam(orgDto);
+        if (orgJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("teleGroupList", orgJson.getData());
+        }
     }
 
     /**
