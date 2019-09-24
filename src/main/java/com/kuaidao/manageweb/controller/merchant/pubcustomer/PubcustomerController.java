@@ -85,8 +85,10 @@ public class PubcustomerController {
          UserInfoReq req = new UserInfoReq();
          req.setId(user.getParentId());
          JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
-         UserInfoReq userDto = jsonResult.getData();
-         dto.setBussinessAccount(userDto.getId());
+         if(JSONResult.SUCCESS.equals(jsonResult.getCode())){
+           UserInfoReq userDto = jsonResult.getData();
+           dto.setBussinessAccount(userDto.getId());
+         }
          dto.setUserType(3); // 子账户
        }else {
          dto.setUserType(0); // 默认为超级管理员

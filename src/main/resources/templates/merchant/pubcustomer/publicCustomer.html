@@ -52,6 +52,7 @@
         <el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable" @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>
             <el-table-column prop="xh" label="序号" type="index" width="55"  align="center"></el-table-column>
+            <el-table-column prop="cusName" label="客户姓名" align="center"  ></el-table-column>
             <el-table-column prop="searchWord" label="搜索词" align="center"  ></el-table-column>
             <el-table-column prop="typeName" label="资源类型" align="center"  ></el-table-column>
             <el-table-column prop="categoryName" label="资源类别" align="center"  ></el-table-column>
@@ -140,6 +141,7 @@
                   }else {
                     this.oldPage = param.pageNum;
                   }
+
                 axios.post('/merchant/pubcustomer/queryPage',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
@@ -151,6 +153,7 @@
                         mainDivVM.pager.currentPage= response.data.data.currentPage;
                         mainDivVM.pager.total= response.data.data.total;
                         mainDivVM.pager.pageSize =  response.data.data.pageSize;
+
                         // 取出存储的id
                         if(!mainDivVM.paginationShow){
                            if(mainDivVM.storeId){
@@ -223,6 +226,11 @@
             },
         },
         created(){
+
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
             // 初始化表格
             this.initList();
             //初始资源类别数据
