@@ -57,7 +57,7 @@ public class MerchantRechargePreferentialController {
     @RequiresPermissions("merchant:merchantRechargePreferential:view")
     public String initRechargePreferential(HttpServletRequest request) {
 
-        return "???";
+        return "merchant/chargeSetting/chargeSetting";
     }
 
     /***
