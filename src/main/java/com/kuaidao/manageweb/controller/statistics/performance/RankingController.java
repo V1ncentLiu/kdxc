@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.statistics.performance;
 
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -52,6 +53,13 @@ public class RankingController {
     @RequestMapping("/deptList")
     public String deptList(HttpServletRequest request){
         initOrg(request);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            return "reportPerformance/rankingPerformanceManager";
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
+            return "reportPerformance/rankingPerformanceGroup";
+        }
         return "reportPerformance/rankingPerformanceDept";
     }
 
