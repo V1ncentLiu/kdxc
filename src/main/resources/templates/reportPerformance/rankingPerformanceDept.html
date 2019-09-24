@@ -112,15 +112,12 @@
 <script th:inline="javascript">
     var areaList=[[${projectList}]];// 地区
     var deptList=[[${deptList}]];// 事业部
-    // var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 activeName: 'first',
                 loading: false,
-                // isDisabled: false,
-                // isDisabledUserId: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -128,11 +125,13 @@
                 },
                 form: {
                     area:'',
-                    teleDeptId: ''
+                    teleDeptId: '',
+                    type: 1
                 },
                 export: {
                     area:'',
-                    teleDeptId: ''
+                    teleDeptId: '',
+                    type: 1
                 },
                 tableData: [],
                 areaArr: areaList,
@@ -173,7 +172,7 @@
                     });
                 });
             },
-            searchTable(firstPage,type) {
+            searchTable(firstPage) {
                 var param = {};
                 param.pageSize = this.pager.pageSize;
     
@@ -184,9 +183,9 @@
                 }
                 param.area = this.form.area;
                 param.teleDeptId = this.form.teleDeptId;
+                param.type = this.form.type;
                 //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
                 param.selectType = "1";
-                param.type = type;
                 this.loading = true;
                 axios.post('/ranking/getPerformanceRankPage',param).then(function (response) {
                     if(!response || !response.data){
@@ -212,6 +211,7 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.area = mainDivVM.form.area;
                         mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
+                        mainDivVM.export.type = mainDivVM.form.type;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -269,19 +269,23 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            searchMonthAverage(){ // 年累计月均排名
-               this.searchTable(1,1);
+            searchMonth(){ // 月
+                this.form.type = 1
+                this.searchTable(1,1);
             },
             searchYear(){ // 年
+                this.form.type = 2
                this.searchTable(1,2);
             },
-            searchMonth(){ // 本月
-                this.searchTable(1,3);
+            searchMonthAverage(){ // 年累计月均排名
+               this.form.type = 3
+               this.searchTable(1,3);
             },
             exportRs(){
                 var param = {};
                 param.area = this.export.area;
                 param.teleDeptId = this.export.teleDeptId;
+                param.type = this.export.type;
                 param.selectType = "1";
                 axios.post('/ranking/exportPerformanceRankList',param,{responseType:'blob'})
                 .then(function (response) {
@@ -300,7 +304,7 @@
         created(){     
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            this.searchTable(1,1);
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
