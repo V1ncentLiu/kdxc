@@ -246,6 +246,10 @@ public class ClueManagementController {
                 curList.add(dto.getCluePrice());
                 // 是否分发
                 String str = MerchantConstant.ASSIGN_SUB_ACCOUNT_YES.equals(dto.getIsAssignSubAccount()) ? "是" : "否";
+                //公有池领取 此字段为空
+                if (MerchantConstant.CPOOLRECEIVE_FLAG_YES.equals(dto.getCpoolReceiveFlag())) {
+                    str = "";
+                }
                 curList.add(str);
                 dataList.add(curList);
             }
