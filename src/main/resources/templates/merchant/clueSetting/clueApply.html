@@ -11,7 +11,6 @@
         <el-breadcrumb-item>资源需求申请</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="borderbox">
-        <div class="inforTitle">资源需求申请</div>
         <div class="greyTip" v-if="auditPassShow">审核通过 </div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
             <el-row>
@@ -60,11 +59,11 @@
                                   :disabled="isDisabled">省
                         </el-radio>
                     </el-form-item>
-                    <el-form-item label="" prop="insideProject" v-if="applyAreaShow">
-                        <el-select v-model="form.applyArea" prop="radioApplyArea" multiple filterable placeholder="请选择"
+                    <el-form-item label="" prop="applyArea" v-if="applyAreaShow">
+                        <el-select v-model="form.applyArea" multiple filterable placeholder="请选择"
                                    :disabled="isDisabled" style="width: 292px">
                             <el-option
-                                    v-for="item in applyArea"
+                                    v-for="item in applyAreaList"
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.name">
@@ -121,6 +120,7 @@
                     applyArea: [],
                     remark: '',
                 },
+                applyAreaList:provinceList,
                 formLabelWidth: '150px',
                 rules: {
                     applyStartTime: [
@@ -156,19 +156,21 @@
                         return;
                     }
                 }
-                var param = this.form;
-                var applyAreaStrs = "";
+                // var param = this.form;
+                var param={};
+                
                 if (param.radioApplyArea == 2) {
-                    var appllyAreas = param.applyArea;
-                    for (var i = 0; i < appllyAreas.length; i++) {
-                        if (applyAreaStrs != "") {
-                            applyAreaStrs = applyAreaStrs + "," + appllyAreas[i];
-                        } else {
-                            applyAreaStrs = appllyAreas[i];
-                        }
-                    }
+                    // var appllyAreas = param.applyArea;
+                    // for (var i = 0; i < appllyAreas.length; i++) {
+                    //     if (applyAreaStrs != "") {
+                    //         applyAreaStrs = applyAreaStrs + "," + appllyAreas[i];
+                    //     } else {
+                    //         applyAreaStrs = appllyAreas[i];
+                    //     }
+                    // }
+                    param.applyArea = this.form.applyArea;
                 }
-                param.applyArea = applyAreaStrs;
+                
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         console.log('submit!');
@@ -249,13 +251,13 @@
             projectChange() {
                 if (this.form.radioApplyArea == "2") {//省
                     this.applyAreaShow = true;
-                    this.applyArea = provinceList;
+                    // this.applyArea = provinceList;
                 } else if (this.form.radioApplyArea == "1") {//不限
                     this.applyAreaShow = false;
                 }
             },
             cancel(){
-
+                window.location.href="/merchant/clue/setting/applyIndex";
             },
             number(){
     　　　      this.form.applyNum=this.form.applyNum.replace(/[^\.\d]/g,'');
