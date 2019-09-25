@@ -125,6 +125,11 @@ public class LoginController {
     private String wsUrlHttps;
     @Value("${session_time_out}")
     private int sessionTimeOut;
+    // 汇聚-商家端 域名：用来判断首页跳转
+    @Value("${merchantServletName}")
+    private String merchantServletName;
+
+
     /**
      * 是否显示验证码
      **/
@@ -155,12 +160,19 @@ public class LoginController {
         SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         request.setAttribute("isShowLogoutBox", isShowLogoutBox);
         request.setAttribute("verificationCodeShow", verificationCodeShow);
-        return "login/login";
+
+        String serverName = request.getServerName();
+        if(serverName.equals(merchantServletName)){
+            // 汇聚商家端：跳转
+            return "login/login";
+        }else{
+            // 系统默认 汇聚登录页
+            return "login/login";
+        }
     }
 
     /***
      * 修改密码页
-     *
      * @return
      */
     @RequestMapping("/login/resetPwd")

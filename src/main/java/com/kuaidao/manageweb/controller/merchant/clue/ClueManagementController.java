@@ -159,6 +159,7 @@ public class ClueManagementController {
                 }
             }
         }
+
         // 查询子账号信息
         if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
             IdEntityLong reqDto = new IdEntityLong();
@@ -175,6 +176,7 @@ public class ClueManagementController {
             // 累计分发
             dto.setTotalAssignClueNum(assignDto.getData().getTotalAssignClueNum());
         }
+
         // 获取领取相关
         if (CollectionUtils.isNotEmpty(subIds)) {
             IdListLongReq ids = new IdListLongReq();

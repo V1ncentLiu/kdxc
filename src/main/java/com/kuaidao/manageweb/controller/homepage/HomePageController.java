@@ -37,8 +37,14 @@ public class HomePageController {
     @Value("${ws_url_https}")
     private String wsUrlHttps;
 
+    // 汇聚-商家端 域名：用来判断首页跳转
+    @Value("${merchantServletName}")
+    private String merchantServletName;
+
     @Autowired
     DeptCallSetFeignClient deptCallSetFeignClient;
+
+
 
     /**
      * 首页 跳转
@@ -90,6 +96,7 @@ public class HomePageController {
             }
 
         }
+
       //判断是否显示控制台按钮
         List<RoleInfoDTO> roleList = user.getRoleList();
         boolean isShowConsoleBtn = false;
@@ -105,5 +112,6 @@ public class HomePageController {
         request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
         return "index";
     }
+
 
 }
