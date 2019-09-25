@@ -7,9 +7,12 @@ import com.kuaidao.manageweb.controller.merchant.charge.ClueChargeController;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
 import com.kuaidao.merchant.dto.recharge.MerchantRechargePreferentialDTO;
 import com.kuaidao.merchant.dto.recharge.MerchantRechargePreferentialReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +69,13 @@ public class MerchantRechargePreferentialController {
      * @return
      */
     @RequestMapping("/saveBatchRechargePreferential")
-    @RequiresPermissions("merchant:merchantRechargePreferential:save")
+    @RequiresPermissions("merchant:merchantRechargePreferential:add")
     @ResponseBody
     public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list) {
-        return merchantRechargePreferentialFeignClient.saveBatchRechargePreferential(list);
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        Long id = user.getId();
+        return merchantRechargePreferentialFeignClient.saveBatchRechargePreferential(list,id);
     }
 
     /***
@@ -81,7 +87,10 @@ public class MerchantRechargePreferentialController {
     @RequiresPermissions("merchant:merchantRechargePreferential:edit")
     @ResponseBody
     public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list) {
-        return merchantRechargePreferentialFeignClient.updateBatchRechargePreferential(list);
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        Long id = user.getId();
+        return merchantRechargePreferentialFeignClient.updateBatchRechargePreferential(list,id);
     }
 
     /***
