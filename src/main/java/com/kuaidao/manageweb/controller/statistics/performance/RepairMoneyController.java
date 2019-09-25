@@ -65,6 +65,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/repairMoneyRepetitionTable")
     public String repairMoneyRepetition(HttpServletRequest request){
         try {
@@ -95,6 +96,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param companyId
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/repairMoneyRepetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request,Long teleDeptId,Long teleGroupId,
                                            Long startTime,Long endTime,String strSignStore,Long projectId,Long companyId){
@@ -122,6 +124,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/queryPage")
     public @ResponseBody
     JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto){
@@ -136,6 +139,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>> querySaleByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -152,6 +156,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:repairMoney:export")
     @RequestMapping("export")
     public @ResponseBody void export(@RequestBody DupOrderQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -183,6 +188,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:repairMoney:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void exportSale(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
@@ -224,6 +230,10 @@ public class RepairMoneyController extends BaseStatisticsController {
         request.setAttribute("baseQueryDto",dto);
     }
 
+    /**
+     * 初始化查询参数-根据角色查对应事业部
+     * @param dto
+     */
     public void initParams(DupOrderQueryDto dto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
