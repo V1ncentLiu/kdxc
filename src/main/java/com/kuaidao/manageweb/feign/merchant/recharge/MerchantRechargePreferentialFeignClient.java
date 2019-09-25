@@ -28,7 +28,7 @@ public interface MerchantRechargePreferentialFeignClient {
      * @return
      */
     @PostMapping("/saveBatchRechargePreferential")
-    public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list);
+    public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long createUser);
 
     /**
      * 批量更新充值优惠
@@ -36,7 +36,7 @@ public interface MerchantRechargePreferentialFeignClient {
      * @return
      */
     @PostMapping("/updateBatchRechargePreferential")
-    public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list);
+    public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long updateUser);
 
     /**
      * 删除充值优惠
@@ -72,12 +72,12 @@ public interface MerchantRechargePreferentialFeignClient {
                 }
 
                 @Override
-                public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list) {
+                public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long createUser) {
                     return fallBackError("批量保存充值优惠");
                 }
 
                 @Override
-                public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list) {
+                public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long updateUser) {
                     return fallBackError("批量更新充值优惠");
                 }
 
