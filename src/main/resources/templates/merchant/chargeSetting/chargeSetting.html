@@ -24,7 +24,7 @@
         <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" :inline="true">
             <div class="clearFix marginB20">
                 充值送金额：<el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i>新建优惠档</el-button>
-                <el-button type="success" class="f-fr"><i class="el-icon-edit"></i>编辑</el-button>
+                <el-button type="success" class="f-fr" @click="editDomain"><i class="el-icon-edit"></i>编辑</el-button>
             </div>
             <el-row v-for="(domain, index) in dynamicValidateForm.domains">
                 <el-form-item
@@ -67,19 +67,20 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
-    var userId = [[${userId}]];//用户信息
-    console.log(userId)
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function() {
-            return {  
-                
+            return {
                 dynamicValidateForm: {
                     domains: [{
                         value: '1',
                         value2: '1',
                         value3: '2',
+                        isDisabled:true,
+                    },{
+                        value: '2',
+                        value2: '2',
+                        value3: '4',
                         isDisabled:true,
                     }]
                 }
@@ -89,7 +90,10 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        // alert('submit!');
+                        for(var i=0;i<this.dynamicValidateForm.domains.length;i++){
+                            this.dynamicValidateForm.domains[i].isDisabled=true;
+                        }
                     } else {
                         console.log('error submit!!');
                     return false;
@@ -101,27 +105,98 @@
             },
             removeDomain(item) {
                 var index = this.dynamicValidateForm.domains.indexOf(item)
-                if (index !== -1) {
-                    this.dynamicValidateForm.domains.splice(index, 1)
+                if(this.dynamicValidateForm.domains[index].isDisabled){//true为不可编辑
+                    // 条件改为根据后台返回的标识判断是否可编辑
+                    this.$confirm("确定要删除吗?", '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        // 查询 table 需要数据
+                        var param = {};
+                        var deleInfo=this.multipleSelection;
+                        var ids="";
+                        if(null!=deleInfo){
+                         for ( var i = 0; i <deleInfo.length; i++){
+                            if("" == ids){
+                                ids = deleInfo[i].id
+                            }else{
+                                ids = ids+","+deleInfo[i].id
+                            }
+                        }
+                        var param={};
+                        param.ids=ids;
+                        axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+                            //   console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                                window.location.href="/invitearea/inviteAreaList"; 
+                            }else{
+                                this.$message({
+                                     message: response.data.data.msg,
+                                     type: 'warning'
+                                });
+                                return ;
+                             } 
+                            }).catch(function (error) {
+                                console.log(error);
+                            })
+                            .then(function () {
+                                // always executed
+                            });  
+                          
+                        }
+
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });          
+                    });
+                }else{
+                    if (index !== -1) {
+                        this.dynamicValidateForm.domains.splice(index, 1)
+                    }
                 }
             },
             addDomain() {
                 this.dynamicValidateForm.domains.unshift({
                     value: '',
                     value2: '',
-                    value3: ''
+                    value3: '',
+                    isDisabled:null,
+                    id:''
                 });
-            }
+            },
+            editDomain() {
+                for(var i=0;i<this.dynamicValidateForm.domains.length;i++){
+                    this.dynamicValidateForm.domains[i].isDisabled=false;
+                }
+            },
+            searchTable() {
+                var param ={};
+                axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code=="0"){
+
+                    }else{
+                        addClueVM.$message.error(result.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });                
+            },
         },
         created(){
-            this.getUploadParam();
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
-            
+            this.searchTable();
         },
         mounted(){
-            document.getElementById('chargeSetting').style.display = 'block';
+            document.getElementById('resourceApply').style.display = 'block';
         }
   })
 </script>
