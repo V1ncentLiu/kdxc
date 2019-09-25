@@ -73,11 +73,13 @@
             return {
                 dynamicValidateForm: {
                     domains: [{
+                        id:'',
                         value: '1',
                         value2: '1',
                         value3: '2',
                         isDisabled:true,
                     },{
+                        id:'',
                         value: '2',
                         value2: '2',
                         value3: '4',
@@ -94,6 +96,7 @@
                         for(var i=0;i<this.dynamicValidateForm.domains.length;i++){
                             this.dynamicValidateForm.domains[i].isDisabled=true;
                         }
+
                     } else {
                         console.log('error submit!!');
                     return false;
@@ -114,37 +117,25 @@
                     }).then(() => {
                         // 查询 table 需要数据
                         var param = {};
-                        var deleInfo=this.multipleSelection;
-                        var ids="";
-                        if(null!=deleInfo){
-                         for ( var i = 0; i <deleInfo.length; i++){
-                            if("" == ids){
-                                ids = deleInfo[i].id
-                            }else{
-                                ids = ids+","+deleInfo[i].id
-                            }
-                        }
-                        var param={};
-                        param.ids=ids;
+                        param.id=item.id;
                         axios.post('/invitearea/deleInviteArea',param).then(function (response) {
-                            //   console.log(response);
+                              console.log(response);
                             if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/invitearea/inviteAreaList"; 
+                                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
                             }else{
-                                this.$message({
-                                     message: response.data.data.msg,
+                                addClueVM.$message({
+                                     message: response.data.msg,
                                      type: 'warning'
                                 });
                                 return ;
                              } 
-                            }).catch(function (error) {
-                                console.log(error);
-                            })
-                            .then(function () {
-                                // always executed
-                            });  
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                            // always executed
+                        });  
                           
-                        }
 
                     }).catch(() => {
                         this.$message({
@@ -179,7 +170,7 @@
                     console.log(response)
                     var result =  response.data;
                     if(result.code=="0"){
-
+                        addClueVM.dynamicValidateForm.domains=result.data
                     }else{
                         addClueVM.$message.error(result.msg);
                     }
