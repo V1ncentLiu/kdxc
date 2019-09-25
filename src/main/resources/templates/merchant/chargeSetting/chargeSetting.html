@@ -23,43 +23,44 @@
     <el-row class="borderbox padding20">         
         <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" :inline="true">
             <div class="clearFix marginB20">
-                充值送金额：<el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i>新建优惠档</el-button>
-                <el-button type="success" class="f-fr" @click="editDomain"><i class="el-icon-edit"></i>编辑</el-button>
+                充值送金额：<el-button type="primary" @click="addDomain" :disabled="addIsDisabled"><i class="el-icon-plus"></i>新建优惠档</el-button>
+                <el-button type="success" class="f-fr" @click="editDomain" :disabled="editIsDisabled"><i class="el-icon-edit"></i>编辑</el-button>
             </div>
             <el-row v-for="(domain, index) in dynamicValidateForm.domains">
                 <el-form-item
                 :label="'充值'"
-                :prop="'domains.' + index + '.value'"
+                :prop="'domains.' + index + '.rechargeAmount'"
                 :rules="{
                   required: true, message: '充值信息不能为空', trigger: 'blur'
                 }">
-                    <el-input v-model="domain.value" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                    <el-input v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'送'"
-                :prop="'domains.' + index + '.value2'"
+                :prop="'domains.' + index + '.givenAmount'"
                 :rules="{
                   required: true, message: '不能为空', trigger: 'blur'
                 }">
-                    <el-input v-model="domain.value2" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                    <el-input v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'总得'"
-                :prop="'domains.' + index + '.value3'">
-                    <el-input v-model="domain.value3" disabled></el-input>                    
+                :prop="'domains.' + index + '.totalAmount'">
+                    <el-input v-model="domain.totalAmount" disabled></el-input>                    
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="danger" @click.prevent="removeDomain(domain)" style="margin-left: 10px;">删除</el-button>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-if="domain.isShowDel" style="margin-left: 10px;">删除</el-button>
                 </el-form-item>
             </el-row>
             <el-row class="f-tac">
                 <el-form-item>
                     <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存设置</el-button>
-                    <el-button @click="resetForm('dynamicValidateForm')">取消</el-button>
+                    <el-button @click="cancel">取消</el-button>
                 </el-form-item>
             </el-row>
         </el-form>
     </el-row> 
+    <input type="hidden" value="" id="hiddenVal">
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -71,20 +72,19 @@
         el: '#resourceApply',
         data: function() {
             return {
+                addIsDisabled:false,
+                editIsDisabled:false,
                 dynamicValidateForm: {
-                    domains: [{
-                        id:'',
-                        value: '1',
-                        value2: '1',
-                        value3: '2',
-                        isDisabled:true,
-                    },{
-                        id:'',
-                        value: '2',
-                        value2: '2',
-                        value3: '4',
-                        isDisabled:true,
-                    }]
+                    domains: [
+                        // {
+                        //     id:'',
+                        //     rechargeAmount: '',
+                        //     givenAmount: '',
+                        //     totalAmount: '',
+                        //     isDisabled:null,
+                        //     isShowDel:null
+                        // }
+                    ]
                 }
             }      	  
         },
@@ -92,10 +92,40 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        // alert('submit!');
-                        for(var i=0;i<this.dynamicValidateForm.domains.length;i++){
-                            this.dynamicValidateForm.domains[i].isDisabled=true;
-                        }
+                        // var param = this.dynamicValidateForm.domains;   
+                        var param=[];
+                        var paramObj={};
+                        paramObj.rechargeAmount = "200";   
+                        paramObj.givenAmount = "10";   
+                        paramObj.totalAmount = "210";
+                        param.push(paramObj)
+                        var url="";
+                        var hiddenVal=$("#hiddenVal").val();
+                        if(hiddenVal=="1"){
+                            url="/merchant/merchantRechargePreferential/saveBatchRechargePreferential" //批量新增保存
+                        }else{
+                            url="/merchant/merchantRechargePreferential/updateBatchRechargePreferential" //批量修改保存
+                        } 
+                        console.log(url)                  
+                        console.log(param)                  
+                       
+                        axios.post(url,param).then(function (response) {
+                              console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                            }else{
+                                addClueVM.$message({
+                                     message: response.data.msg,
+                                     type: 'warning'
+                                });
+                                return ;
+                             } 
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                            // always executed
+                        });  
 
                     } else {
                         console.log('error submit!!');
@@ -106,9 +136,12 @@
             resetForm(formName) {
                 this.$refs[formName].resetFields();
             },
+            cancel(){
+                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+            },
             removeDomain(item) {
                 var index = this.dynamicValidateForm.domains.indexOf(item)
-                if(this.dynamicValidateForm.domains[index].isDisabled){//true为不可编辑
+                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑
                     // 条件改为根据后台返回的标识判断是否可编辑
                     this.$confirm("确定要删除吗?", '提示', {
                         confirmButtonText: '确定',
@@ -118,7 +151,7 @@
                         // 查询 table 需要数据
                         var param = {};
                         param.id=item.id;
-                        axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+                        axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
                               console.log(response);
                             if(null !==response && response.data !=null && response.data.code=='0'){
                                 window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
@@ -144,24 +177,43 @@
                         });          
                     });
                 }else{
-                    if (index !== -1) {
+                    if(index !== -1) {
                         this.dynamicValidateForm.domains.splice(index, 1)
                     }
                 }
             },
             addDomain() {
+                $("#hiddenVal").val("1");
+                this.editIsDisabled=true;//新增时候禁止编辑                
                 this.dynamicValidateForm.domains.unshift({
-                    value: '',
-                    value2: '',
-                    value3: '',
-                    isDisabled:null,
-                    id:''
+                    rechargeAmount: '',
+                    givenAmount: '',
+                    totalAmount: '',
+                    isDisabled:false,
+                    isShowDel:true
                 });
             },
             editDomain() {
-                for(var i=0;i<this.dynamicValidateForm.domains.length;i++){
-                    this.dynamicValidateForm.domains[i].isDisabled=false;
-                }
+                this.addIsDisabled=true;//编辑时候禁止新增 
+                $("#hiddenVal").val("2");
+                var param ={};
+                axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        addClueVM.dynamicValidateForm.domains=result.data
+                        for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
+                            addClueVM.dynamicValidateForm.domains[i].isDisabled=false;
+                            addClueVM.dynamicValidateForm.domains[i].isShowDel=true;
+                        }
+                    }else{
+                        addClueVM.$message.error(result.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }); 
             },
             searchTable() {
                 var param ={};
@@ -171,6 +223,9 @@
                     var result =  response.data;
                     if(result.code=="0"){
                         addClueVM.dynamicValidateForm.domains=result.data
+                        for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
+                            addClueVM.dynamicValidateForm.domains[i].isDisabled=true;
+                        }
                     }else{
                         addClueVM.$message.error(result.msg);
                     }
