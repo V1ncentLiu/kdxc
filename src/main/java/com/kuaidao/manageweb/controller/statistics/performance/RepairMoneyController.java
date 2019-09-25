@@ -76,7 +76,7 @@ public class RepairMoneyController extends BaseStatisticsController {
             String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
             if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
                 initBaseDto(request, null, curLoginUser.getOrgId(), curLoginUser.getId(), null, null, null, null, null, null);
-                return "reportPerformance/repetitionTableTeam";
+                return "reportPerformance/repairMoneyRepetitionTableTeam";
             }
         }catch (Exception e){
             logger.error(e.getMessage(),e);
