@@ -43,7 +43,6 @@ public class MerchantApplyInvoiceController {
      *
      * @return
      */
-    //todo
     @RequestMapping("/initApplyInvoiceRecord")
     @RequiresPermissions("merchant:merchantApplyInvoice:view")
     public String initApplyInvoiceRecord(HttpServletRequest request) {
@@ -59,7 +58,7 @@ public class MerchantApplyInvoiceController {
             request.setAttribute("userList",
                 userInfoDTOList);
         }
-        return "???";
+        return "merchant/merchantReceiptRecord/merchantReceiptRecord";
     }
 
     /***
