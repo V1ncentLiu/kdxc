@@ -13,6 +13,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Created on: 2019-09-23-9:16
@@ -28,7 +29,7 @@ public interface MerchantRechargePreferentialFeignClient {
      * @return
      */
     @PostMapping("/saveBatchRechargePreferential")
-    public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long createUser);
+    public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,@RequestParam("createUser")Long createUser);
 
     /**
      * 批量更新充值优惠
@@ -36,7 +37,7 @@ public interface MerchantRechargePreferentialFeignClient {
      * @return
      */
     @PostMapping("/updateBatchRechargePreferential")
-    public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long updateUser);
+    public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,@RequestParam("updateUser")Long updateUser);
 
     /**
      * 删除充值优惠
@@ -72,23 +73,23 @@ public interface MerchantRechargePreferentialFeignClient {
                 }
 
                 @Override
-                public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long createUser) {
+                public JSONResult saveBatchRechargePreferential(List<MerchantRechargePreferentialDTO> list,Long createUser) {
                     return fallBackError("批量保存充值优惠");
                 }
 
                 @Override
-                public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list,Long updateUser) {
+                public JSONResult updateBatchRechargePreferential(List<MerchantRechargePreferentialDTO> list,Long updateUser) {
                     return fallBackError("批量更新充值优惠");
                 }
 
                 @Override
-                public JSONResult deleteBatchRechargePreferential(@RequestBody IdEntityLong idEntityLong) {
+                public JSONResult deleteBatchRechargePreferential(IdEntityLong idEntityLong) {
                     return fallBackError("删除充值优惠");
                 }
 
                 @Override
                 public JSONResult<List<MerchantRechargePreferentialDTO>> findAllRechargePreferential(
-                    @RequestBody MerchantRechargePreferentialReq req) {
+                    MerchantRechargePreferentialReq req) {
                     return fallBackError("查询优惠金额");
                 }
             };
