@@ -19,7 +19,8 @@
   <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
     <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-    <el-breadcrumb-item>我的客户</el-breadcrumb-item>
+    <el-breadcrumb-item v-if="type ==1">我的客户</el-breadcrumb-item>
+    <el-breadcrumb-item v-if="type ==2">客户管理</el-breadcrumb-item>
   </el-breadcrumb>
   <div class="mainSearchBg">
     <div class="fs14 marginB10">签约单基本信息</div>
@@ -246,7 +247,9 @@
       </el-table>
     </div>
   </div>
-
+ 	<div  class="padding20 f-tac">
+         <el-button type="primary" @click="goback()">返回</el-button>
+     </div>
 
 
 </div>
@@ -255,6 +258,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
+  var type = [[${type}]];
   var vclueId = [[${clueId}]];
   var vsignId = [[${signId}]];
   var readOnly = [[${readyOnly}]];
@@ -437,6 +441,7 @@
       option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
       payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
       payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
+      type:type
     },
     computed: {
 
@@ -638,7 +643,8 @@
         this.formMoneyDetail.visitShopType='';
         this.formMoneyDetail.visitTime='';
         this.formMoneyDetail.visitType='';
-      }
+      },
+      goback(){window.history.go(-1);},
     },
     created(){
       // this.initList();

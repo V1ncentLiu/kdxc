@@ -500,7 +500,7 @@ public class BusinessSignController {
    */
   @RequestMapping("/myCustomSignRecordPage")
   public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId,
-      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam String createUser,@RequestParam(required = false) String showSignButton) throws Exception {
+      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam String createUser,@RequestParam(required = false) String showSignButton, @RequestParam String type) throws Exception {
     IdEntityLong idEntityLong = new IdEntityLong();
     idEntityLong.setId(Long.valueOf(signId));
     SignParamDTO paramDTO = new SignParamDTO();
@@ -629,6 +629,7 @@ public class BusinessSignController {
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
     request.setAttribute("signStatus",sign.getSignStatus());
     request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+    request.setAttribute("type", type);
     return "clue/showSignAndPayDetail";
   }
 
