@@ -22,7 +22,7 @@ public class BusVisitSignController extends BaseStatisticsController {
     @RequestMapping("/areaList")
     public String areaList(HttpServletRequest request){
         initBugOrg(request);
-        return "busPerformance/busAreaList";
+        return "reportBusPerformance/busAreaList";
     }
 
 
@@ -33,7 +33,7 @@ public class BusVisitSignController extends BaseStatisticsController {
     @RequestMapping("/groupList")
     public String gruopList(HttpServletRequest request){
         initBugOrg(request);
-        return "busPerformance/busGroupList";
+        return "reportBusPerformance/busGroupList";
     }
 
 }

@@ -38,9 +38,9 @@ public class BusPerformanceController extends BaseStatisticsController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null,null);
-            return "busPerformance/performanceManager";
+            return "reportBusPerformance/performanceManager";
         }
-        return "busPerformance/performanceGroup";
+        return "reportBusPerformance/performanceGroup";
     }
 
     /**
@@ -48,7 +48,6 @@ public class BusPerformanceController extends BaseStatisticsController {
      * @param request
      * @return
      */
-    @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request,Long deptId,Long teleGroupId,Long teleSaleId,Integer category,Long startTime,Long endTime,String searchText){
         if(null!=teleGroupId){
@@ -65,7 +64,7 @@ public class BusPerformanceController extends BaseStatisticsController {
         //资源类别
         request.setAttribute("clueCategoryList",
                 getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
-        return "reportPerformance/performanceManager";
+        return "reportBusPerformance/performanceManager";
     }
 
 
