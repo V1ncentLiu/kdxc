@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Created on: 2019-09-23-9:16
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchantRechargePreferential",
+@FeignClient(name = "account-service", path = "/account/merchantRechargePreferential",
     fallbackFactory = MerchantRechargePreferentialFeignClient.HystrixClientFallback.class)
 public interface MerchantRechargePreferentialFeignClient {
 
