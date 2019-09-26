@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.recharge;
 
+import com.kuaidao.account.constant.AccountConstant;
 import com.kuaidao.common.constant.ComConstant.INVOICE_APPLY_STATUS;
 import com.kuaidao.common.constant.ComConstant.USER_STATUS;
 import com.kuaidao.common.entity.JSONResult;
@@ -10,6 +11,7 @@ import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentia
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.dto.recharge.MerchantApplyInvoiceDTO;
 import com.kuaidao.merchant.dto.recharge.MerchantApplyInvoiceReq;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +50,10 @@ public class MerchantApplyInvoiceController {
     public String initApplyInvoiceRecord(HttpServletRequest request) {
         //获取所有非禁用商家主账号
         UserInfoDTO userInfoDTO = new UserInfoDTO();
-        List<Integer> list = new ArrayList<>();
-        list.add(USER_STATUS.ENABLE, USER_STATUS.LOCK);
-        userInfoDTO.setStatusList(list);
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        userInfoDTO.setStatusList(statusList);
         userInfoDTO.setUserType(Constants.MERCHANT_PRIMARY_ACCOUNT);
         JSONResult<List<UserInfoDTO>> userInfoDTOList = merchantUserInfoFeignClient
             .merchantUserList(userInfoDTO);
@@ -81,7 +84,7 @@ public class MerchantApplyInvoiceController {
     @RequestMapping("/markInvoiceIssued")
     @ResponseBody
     public JSONResult markInvoiceIssued(MerchantApplyInvoiceReq req) {
-        req.setStatus(INVOICE_APPLY_STATUS.HAVE_ISSUE);
+        req.setStatus(AccountConstant.INVOICE_APPLY_STATUS.HAVE_ISSUE);
         return merchantApplyInvoiceFeignClient.updateApplyInvoice(req);
     }
 }
