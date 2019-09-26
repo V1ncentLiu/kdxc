@@ -8,8 +8,10 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.controller.statistics.performance.PerformanceController;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.statistics.dwOrganization.DwOrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.dwOrganizationQueryDTO.DwOrganizationQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
@@ -41,6 +43,8 @@ public class BaseStatisticsController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private DwOrganizationFeignClient dwOrganizationFeignClient;
 
     /**
      * 根据商务组id和角色查询 用户
@@ -71,6 +75,23 @@ public class BaseStatisticsController {
         try {
             JSONResult<List<OrganizationRespDTO>> list =
                     organizationFeignClient.queryOrgByParam(dto);
+            return list;
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage(),e);
+        }
+        return new JSONResult<List<OrganizationRespDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"系统繁忙，请稍后再试");
+    }
+
+    /**
+     * 查询dw组织机构
+     */
+    @RequestMapping("/base/getDwOrgList")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> getDwOrgList(@RequestBody DwOrganizationQueryDTO dto) {
+        try {
+            JSONResult<List<OrganizationRespDTO>> list =
+                    dwOrganizationFeignClient.getDwOrganization(dto);
             return list;
         }catch (Exception e){
             e.printStackTrace();
