@@ -22,7 +22,7 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="地区：">
-                    <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable @change="curDepart">
                         <el-option
                             v-for="item in areaArr"
                             :key="item.id"
@@ -151,7 +151,7 @@
                 },
                 tableData: [],
                 areaArr: areaList,
-                deptList: deptList,
+                deptList: "",
                 orgTeleArr: "", // 电销组
             }             
         },
@@ -168,6 +168,29 @@
             centerStyle(){
                 return "text-align:center"
             },
+
+            curDepart(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleDeptId = '';
+                this.form.teleGroupId = '';
+                this.getDepart(seleVal);
+            },
+            getDepart(seleVal){
+                param={};
+                param.id=seleVal;
+                param.selectCode='SYB';
+                axios.post('/base/getDwOrgList',param).then(function (response) {
+                    mainDivVM.deptList=response.data.data;
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "查询事业部请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+
             curTelGroupSale(seleVal){
                 if(seleVal==null||seleVal==""){
                     return ;
@@ -177,9 +200,9 @@
             },
             getTelGroupSale(seleVal){
                 param={};
-                param.parentId=seleVal;
-                param.orgType=1;
-                axios.post('/base/getGroupList',param).then(function (response) {
+                param.id=seleVal;
+                param.selectCode='DXZ';
+                axios.post('/base/getDwOrgList',param).then(function (response) {
                     mainDivVM.orgTeleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
