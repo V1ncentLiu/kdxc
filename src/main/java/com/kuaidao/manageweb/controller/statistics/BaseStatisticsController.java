@@ -71,6 +71,12 @@ public class BaseStatisticsController {
         try {
             JSONResult<List<OrganizationRespDTO>> list =
                     organizationFeignClient.queryOrgByParam(dto);
+            //如果没有子集-则按id查询（返回自己）
+            if("0".equals(list.getData()) &&(list.getData()==null || list.getData().isEmpty())){
+                dto=new OrganizationQueryDTO();
+                dto.setId(dto.getParentId()==null?-1:dto.getParentId());
+                return organizationFeignClient.queryOrgByParam(dto);
+            }
             return list;
         }catch (Exception e){
             e.printStackTrace();
