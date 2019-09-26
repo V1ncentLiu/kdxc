@@ -1,13 +1,10 @@
 package com.kuaidao.manageweb.controller.merchant.recharge;
 
 import com.kuaidao.account.constant.AccountConstant;
-import com.kuaidao.common.constant.ComConstant.INVOICE_APPLY_STATUS;
-import com.kuaidao.common.constant.ComConstant.USER_STATUS;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantApplyInvoiceFeignClient;
-import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.dto.recharge.MerchantApplyInvoiceDTO;
 import com.kuaidao.merchant.dto.recharge.MerchantApplyInvoiceReq;
