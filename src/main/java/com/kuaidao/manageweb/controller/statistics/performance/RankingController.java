@@ -106,6 +106,7 @@ public class RankingController {
         DwOrganizationQueryDTO dto = new DwOrganizationQueryDTO();
         dto.setOrgIdList(orgIdList);
         dto.setSelectCode("DQ");
+        dto.setBusinessLine(curLoginUser.getBusinessLine());
         JSONResult<List<OrganizationRespDTO>> dwOrganization = dwOrganizationFeignClient.getDwOrganization(dto);
         request.setAttribute("areaList",dwOrganization.getData());
         request.setAttribute("roleCode",roleCode+"");
