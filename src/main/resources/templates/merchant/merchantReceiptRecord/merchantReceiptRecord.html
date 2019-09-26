@@ -59,21 +59,21 @@
             >
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="applyPersonStr" label="申请订单号"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="申请时间"  :formatter="dateFormat" width="300">
+                <el-table-column align="center" prop="invoiceOrderNum" label="申请订单号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="申请时间"  :formatter="dateFormat" width="300">
                     <template slot-scope="scope">
                         {{scope.row.applyStartTime}}
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="applyPersonStr" label="发票金额"></el-table-column>
-                <el-table-column align="center" prop="applyPersonStr" label="申请商家"></el-table-column>                
-                <el-table-column align="center" prop="handler" label="操作" width="80">
+                <el-table-column align="center" prop="invoiceAmount" label="发票金额"></el-table-column>
+                <el-table-column align="center" prop="applyUserId" label="申请商家"></el-table-column>                
+                <el-table-column align="center" prop="handler" label="操作" width="100">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status == 1">
-                            <el-button size="mini" type="text">已开具</el-button>
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">标记已开</el-button>
                         </span>
                         <span v-else>
-                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">标记已开</el-button>
+                            <el-button size="mini" type="text">已开具</el-button>
                         </span>
                     </template>
                 </el-table-column>
@@ -89,6 +89,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${userList}]];//商户集合
+    console.log(merchantUserList)
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -126,6 +127,7 @@
             }, 
             //审核
             updateStatus(id) {
+                debugger
                 var param = {};
                 param.id=id; 
                 // this.$confirm('确认审核通过吗？', '提示', {
