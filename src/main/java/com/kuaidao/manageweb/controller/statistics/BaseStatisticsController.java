@@ -96,6 +96,8 @@ public class BaseStatisticsController {
     @RequestMapping("/base/getDwOrgList")
     @ResponseBody
     public JSONResult<List<OrganizationRespDTO>> getDwOrgList(@RequestBody DwOrganizationQueryDTO dto) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        dto.setBusinessLine(curLoginUser.getBusinessLine());
         try {
             JSONResult<List<OrganizationRespDTO>> list =
                     dwOrganizationFeignClient.getDwOrganization(dto);
