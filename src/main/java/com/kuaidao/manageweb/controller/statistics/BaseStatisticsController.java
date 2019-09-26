@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -75,6 +76,12 @@ public class BaseStatisticsController {
         try {
             JSONResult<List<OrganizationRespDTO>> list =
                     organizationFeignClient.queryOrgByParam(dto);
+            //如果没有子集-则按id查询（返回自己）
+            if("0".equals(list.getCode()) &&(list.getData()==null || list.getData().isEmpty())){
+                dto.setId(dto.getParentId()==null?-1:dto.getParentId());
+                dto.setParentId(null);
+                return organizationFeignClient.queryOrgByParam(dto);
+            }
             return list;
         }catch (Exception e){
             e.printStackTrace();
@@ -108,6 +115,7 @@ public class BaseStatisticsController {
     protected void initSaleDept(HttpServletRequest request){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        request.setAttribute("roleCode",roleCode);
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         //查询电销事业部
         queryDTO.setOrgType(OrgTypeConstant.DZSYB);
@@ -117,22 +125,29 @@ public class BaseStatisticsController {
             queryDTO.setId(curLoginUser.getOrgId());
             request.setAttribute("deptId",curLoginUser.getOrgId()+"");
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.DXCYGW.name().equals(roleCode)){
-            IdEntity idEntity=new IdEntity();
-            idEntity.setId(curLoginUser.getOrgId().toString());
-            JSONResult<OrganizationDTO> jsonResult= organizationFeignClient.queryOrgById(idEntity);
+            JSONResult<OrganizationDTO> jsonResult= getOrganizationDTOById(curLoginUser.getOrgId());
             queryDTO.setId(jsonResult.getData().getParentId());
-            request.setAttribute("deptId",jsonResult.getData().getParentId()+"");
             request.setAttribute("teleGroupId",curLoginUser.getOrgId()+"");
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
                 request.setAttribute("teleSaleId",curLoginUser.getId()+"");
             }
+            JSONResult<List<OrganizationRespDTO>> jsonOrg =
+                    organizationFeignClient.queryOrgByParam(queryDTO);
+            //如果该用户所在组织结构没有事业部，则所在电销组补充为事业部
+            if(null==jsonOrg.getData() || jsonOrg.getData().isEmpty()){
+                request.setAttribute("deptList", Arrays.asList(jsonResult.getData()));
+                request.setAttribute("deptId",jsonResult.getData().getId()+"");
+            }else{
+                request.setAttribute("deptList",jsonOrg.getData());
+                request.setAttribute("deptId",jsonResult.getData().getParentId()+"");
+            }
+            return ;
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
         }else{
             //other 没权限
             queryDTO.setId(-1l);
         }
-        request.setAttribute("roleCode",roleCode);
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("deptList",queryOrgByParam.getData());
@@ -187,6 +202,19 @@ public class BaseStatisticsController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         return roleCode;
+    }
+
+
+    /**
+     * 根据组织机构id 查询
+     * @param orgId
+     * @return
+     */
+    public JSONResult<OrganizationDTO> getOrganizationDTOById(Long orgId){
+        IdEntity idEntity=new IdEntity();
+        idEntity.setId(orgId.toString());
+        JSONResult<OrganizationDTO> jsonResult= organizationFeignClient.queryOrgById(idEntity);
+        return jsonResult;
     }
 
 }
