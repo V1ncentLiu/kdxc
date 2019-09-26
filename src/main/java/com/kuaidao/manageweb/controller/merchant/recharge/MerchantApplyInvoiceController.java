@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -72,7 +73,7 @@ public class MerchantApplyInvoiceController {
     @RequestMapping("/findMerchantApplyInvoiceList")
     @ResponseBody
     public JSONResult<PageBean<MerchantApplyInvoiceDTO>> findMerchantApplyInvoiceList(
-        MerchantApplyInvoiceReq req) {
+        @RequestBody MerchantApplyInvoiceReq req) {
         return merchantApplyInvoiceFeignClient.findMerchantApplyInvoiceList(req);
     }
 
@@ -83,7 +84,7 @@ public class MerchantApplyInvoiceController {
      */
     @RequestMapping("/markInvoiceIssued")
     @ResponseBody
-    public JSONResult markInvoiceIssued(MerchantApplyInvoiceReq req) {
+    public JSONResult markInvoiceIssued(@RequestBody MerchantApplyInvoiceReq req) {
         req.setStatus(AccountConstant.INVOICE_APPLY_STATUS.HAVE_ISSUE);
         return merchantApplyInvoiceFeignClient.updateApplyInvoice(req);
     }
