@@ -1,19 +1,24 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
+import com.kuaidao.common.constant.ComConstant;
 import com.kuaidao.common.constant.ComConstant.UserStatus;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
+import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
+import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
+import com.kuaidao.merchant.dto.index.IndexReqDTO;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -54,6 +59,12 @@ public class MHomePageController {
 
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+
+    @Autowired
+    private ClueManagementFeignClient clueManagementFeignClient;
+
+    @Autowired
+    private PubcustomerFeignClient pubcustomerFeignClient;
 
     /**
      * 首页 跳转
@@ -113,32 +124,65 @@ public class MHomePageController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<Long> subIds = new ArrayList<>();
         // 获取主账号分发相关
+       JSONResult<ResourceStatisticsDto> assignDto = null;
         if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
             IdEntityLong reqDto = new IdEntityLong();
             reqDto.setId(curLoginUser.getId());
-            JSONResult<ResourceStatisticsDto> resourceStatisticsDtoJSONResult = ruleAssignRecordFeignClient
+            assignDto = ruleAssignRecordFeignClient
                 .countAssginNum(reqDto);
             subIds = merchantUserList(curLoginUser);
         }
 
-//        // 查询子账号信息
-//        if (SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())) {
-//            IdEntityLong reqDto = new IdEntityLong();
-//            reqDto.setId(curLoginUser.getId());
-//            // 获取子账号分发相关
-//             assignDto = clueManagementFeignClient.getAssignResourceStatistics(reqDto);
-//            // 子账号id
-//            subIds.add(userInfoDTO.getId());
-//        }
+        // 查询子账号信息
+        if (SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())) {
+            IdEntityLong reqDto = new IdEntityLong();
+            reqDto.setId(curLoginUser.getId());
+            // 获取子账号分发相关
+             assignDto = clueManagementFeignClient.getAssignResourceStatistics(reqDto);
+            // 子账号id
+            subIds.add(curLoginUser.getId());
+        }
 
-        JSONResult<ResourceStatisticsDto> assignDto = null;
+      // 获取分发
+      if (null != assignDto && assignDto.getCode().equals(JSONResult.SUCCESS)) {
+        // 今日分发资源
+        assignDto.getData().getTodayAssignClueNum();
+        // 累计分发
+        assignDto.getData().getTotalAssignClueNum();
+        // 本月分发资源
 
+      }
 
+      // 获取领取相关
+      if (CollectionUtils.isNotEmpty(subIds)) {
+        IdListLongReq ids = new IdListLongReq();
+        ids.setIdList(subIds);
+        //主账号也需要将自己领取的查出来
+        if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+          subIds.add(curLoginUser.getId());
+        }
+        JSONResult<ResourceStatisticsDto> receiveResourceList = pubcustomerFeignClient.getReceiveResourceStatistics(ids);
+        if (receiveResourceList.getCode().equals(JSONResult.SUCCESS)) {
+          ResourceStatisticsDto receiveResource = receiveResourceList.getData();
+          // 今日领取资源
+          receiveResource.getTodayReceiveClueNum();
+          // 累计领取资源
+          receiveResource.getTotalReceiveClueNum();
+          // 本月领取资源
 
-
+        }
+      }
     }
 
-    private List<Long> merchantUserList( UserInfoDTO curLoginUser){
+  /**
+   *  曲线图数据
+   */
+  private void  receiveStatics(IndexReqDTO indexReqDTO){
+
+  }
+
+
+  private List<Long> merchantUserList( UserInfoDTO curLoginUser){
         Integer userType = curLoginUser.getUserType();
         Long userId = curLoginUser.getId();
         List<Long> subIds = new ArrayList<>();
@@ -157,7 +201,6 @@ public class MHomePageController {
         }
         return subIds;
     }
-
 
     /**
      * 构建商家子账户查询实体
