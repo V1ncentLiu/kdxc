@@ -50,7 +50,7 @@ public class MerchantRechargeRecordManageController {
     }catch (Exception e){
       logger.error("initRechargeRecordManage:{}",e);
     }
-    return null;
+    return "/merchant/rechargeRecord/rechargeRecord";
   }
   /**
    * @Description 管理端充值记录列表查询
