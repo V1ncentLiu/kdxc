@@ -22,33 +22,26 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form"> 
-                <el-form-item label="搜索词:">
-                    <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-                </el-form-item> 
-                <el-form-item label="创建日期:">
-                    <el-date-picker
-                        v-model="form.startTime"
-                        type="datetime"
-                        placeholder="选择日期时间">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker
-                        v-model="form.endTime"
-                        type="datetime"
-                        placeholder="选择日期时间">
-                    </el-date-picker>
-                </el-form-item> 
+                <el-form-item label="消费商家:" label-width="auto">
+                    <el-select v-model="form.userId" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>                
                 <el-form-item label="消费日期:">
                     <el-date-picker
-                        v-model="form.startTime"
+                        v-model="form.createDateStart"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.endTime"
+                        v-model="form.createDateEnd"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
@@ -69,10 +62,10 @@
             >
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="applyPersonStr" label="商家名称"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="消费日期"  :formatter="dateFormat" width="130"></el-table-column>                
-                <el-table-column align="center" prop="applyNum" label="消费金额"></el-table-column>
-                <el-table-column align="center" prop="remark" label="获取资源条数"></el-table-column>
+                <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
+                <el-table-column align="center" prop="createDate" label="消费日期"  :formatter="dateFormat" width="130"></el-table-column>                
+                <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
+                <el-table-column align="center" prop="clueNum" label="获取资源条数"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -84,21 +77,23 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
+    var merchantUserList=[[${userList}]];//商户集合
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
                 pendingReviewNum:'',
                 multipleSelection: [],//选择行
+                merchantUserListOptions:merchantUserList,
                 pager:{
                   total: 0,
                   currentPage: 1,
                   pageSize: 20,
                 },
                 form: {
-                  startTime:'',
-                  endTime:'',
-                  auditStatus:''
+                  userId:'',
+                  createDateStart:'',
+                  createDateEnd:''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -119,8 +114,8 @@
                 console.log(index, row);
             },
             searchTable() {
-            	var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
+            	var startTime=this.form.createDateStart;
+                var endTime=this.form.createDateStart;
                 if(endTime && startTime>endTime){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
@@ -128,11 +123,15 @@
                     });
                     return;
                 }
-                var param =this.form;
+                var param ={};
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;                
+                param.pageNum = this.pager.currentPage;  
+                param.mainAccountId = this.form.mainAccountId; 
+                param.userId = this.form.userId; 
+                param.createDateStart = this.form.createDateStart; 
+                param.createDateStart = this.form.createDateStart; 
                 console.info(param);
-                axios.post('/merchant/clue/setting/applyPage', param)
+                axios.post('/merchant/consumeRecord/countListMerchant', param)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
@@ -155,7 +154,7 @@
               if (cellValue == undefined) {
                  return "";
               }
-              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+              return moment(cellValue).format("YYYY-MM-DD");
             }
         },
         created(){
