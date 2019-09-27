@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.ComConstant;
+import com.kuaidao.common.constant.ComConstant.DIMENSION;
 import com.kuaidao.common.constant.ComConstant.UserStatus;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
@@ -10,6 +11,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
@@ -19,11 +21,17 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.merchant.dto.index.IndexReqDTO;
+import com.kuaidao.merchant.dto.index.IndexRespDTO;
+import com.kuaidao.merchant.dto.index.ResourceCountDTO;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.awt.Dimension;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +45,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/mhomePage")
@@ -93,7 +102,7 @@ public class MHomePageController {
         // 判断显示主/子账户首页
         Integer userType = user.getUserType();
         request.setAttribute("isShowConsoleBtn", userType); // 主账户==2  子账户==3
-        return "index"; // 需要修改成对应的正确地址
+        return "merchantIndex"; // 需要修改成对应的正确地址
     }
 
     /***
@@ -105,21 +114,20 @@ public class MHomePageController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String username = curLoginUser.getUsername();
         Integer userType = curLoginUser.getUserType();
-        String path = "";
         if(Constants.USER_TYPE_TWO.equals(userType)){
             // 查询账户余额
             request.setAttribute("countBlance","111.1"); // 代码合并后，补上代码
             // 查询是否购买套餐
             request.setAttribute("buyedFlag",1); // 当前无法进行。在第四批需求
-            path = "console/consoleBusinessMajordomo"; // 跳转主账户首页
         }else{
-            path = "console/consoleBusinessMajordomo"; // 跳转子账户首页
         }
+        request.setAttribute("userType",userType);
         request.setAttribute("merchantName",username);
-        return  path;
+        request.setAttribute("countSources",countSource());
+        return  "merchant/homePage/accoun";
     }
 
-    private void countSource(){
+    private ResourceCountDTO countSource(){
         // 主账户相关统计
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<Long> subIds = new ArrayList<>();
@@ -143,44 +151,163 @@ public class MHomePageController {
             subIds.add(curLoginUser.getId());
         }
 
-      // 获取分发
-      if (null != assignDto && assignDto.getCode().equals(JSONResult.SUCCESS)) {
-        // 今日分发资源
-        assignDto.getData().getTodayAssignClueNum();
-        // 累计分发
-        assignDto.getData().getTotalAssignClueNum();
-        // 本月分发资源
+        Integer dayCount = 0;
+        Integer montCount = 0;
+        Integer allCount = 0;
 
-      }
-
-      // 获取领取相关
-      if (CollectionUtils.isNotEmpty(subIds)) {
-        IdListLongReq ids = new IdListLongReq();
-        ids.setIdList(subIds);
-        //主账号也需要将自己领取的查出来
-        if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
-          subIds.add(curLoginUser.getId());
+        // 获取分发
+        if (null != assignDto && assignDto.getCode().equals(JSONResult.SUCCESS)) {
+          // 今日分发资源
+          dayCount += assignDto.getData().getTodayAssignClueNum();
+          // 累计分发
+          allCount += assignDto.getData().getTotalAssignClueNum();
+          // 本月分发资源
+          montCount += assignDto.getData().getMonthAssignClueNum();
         }
-        JSONResult<ResourceStatisticsDto> receiveResourceList = pubcustomerFeignClient.getReceiveResourceStatistics(ids);
-        if (receiveResourceList.getCode().equals(JSONResult.SUCCESS)) {
-          ResourceStatisticsDto receiveResource = receiveResourceList.getData();
-          // 今日领取资源
-          receiveResource.getTodayReceiveClueNum();
-          // 累计领取资源
-          receiveResource.getTotalReceiveClueNum();
-          // 本月领取资源
 
+        // 获取领取相关
+        if (CollectionUtils.isNotEmpty(subIds)) {
+          IdListLongReq ids = new IdListLongReq();
+          ids.setIdList(subIds);
+          //主账号也需要将自己领取的查出来
+          if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+            subIds.add(curLoginUser.getId());
+          }
+          JSONResult<ResourceStatisticsDto> receiveResourceList = pubcustomerFeignClient.getReceiveResourceStatistics(ids);
+          if (receiveResourceList.getCode().equals(JSONResult.SUCCESS)) {
+            ResourceStatisticsDto receiveResource = receiveResourceList.getData();
+            // 今日领取资源
+            dayCount += receiveResource.getTodayReceiveClueNum();
+            // 累计领取资源
+            allCount += receiveResource.getTotalReceiveClueNum();
+            // 本月领取资源
+            montCount += receiveResource.getMonthReceiveClueNum();
+          }
         }
-      }
+
+        ResourceCountDTO resourceCount = new ResourceCountDTO();
+        resourceCount.setDayCount(dayCount);
+        resourceCount.setMonthCount(montCount);
+        resourceCount.setAllCount(allCount);
+        return resourceCount;
     }
 
   /**
    *  曲线图数据
    */
-  private void  receiveStatics(IndexReqDTO indexReqDTO){
+  @RequestMapping("/receiveStatics")
+  @ResponseBody
+  public JSONResult<IndexRespDTO> receiveStatics(IndexReqDTO indexReqDTO){
+    List<Integer> yList = new ArrayList<>();
 
+    IndexRespDTO indexRespDTO = new IndexRespDTO();
+    indexRespDTO.setXList(gainX(indexReqDTO));
+    indexRespDTO.setYList(yList);
+    return new JSONResult().success(indexRespDTO);
   }
 
+  private List<String> gainX(IndexReqDTO indexReqDTO){
+    List<String> xList = new ArrayList<>();
+    String dimension = indexReqDTO.getDimension();
+    Date stime = indexReqDTO.getStime(); // 开始时间
+    Date etime = indexReqDTO.getEtime(); // 结束时间
+    Calendar calendar = Calendar.getInstance();
+    Calendar calendar1 = Calendar.getInstance();
+    if(DIMENSION.DAY.equals(dimension)){
+      int diffDay = DateUtil.diffDay(stime, etime);
+      for(int i = 0 ; i <= diffDay ; i++){
+        Date date = DateUtil.addDays(stime, i);
+        calendar.setTime(date);
+        String s = DateUtil.convert2String(calendar.getTime(), DateUtil.ymd);
+        xList.add(s);
+      }
+    }else if(DIMENSION.MONTH.equals(dimension)){ // 完
+      calendar.setTime(stime);
+      int smonth = calendar.get(Calendar.MONTH);
+      int syear = calendar.get(Calendar.YEAR);
+      calendar1.setTime(etime);
+      int emonth = calendar1.get(Calendar.MONTH);
+      int eyear = calendar1.get(Calendar.YEAR);
+      while(!(smonth>emonth&&syear==eyear)){
+        if(smonth<10){
+          xList.add("0"+smonth);
+        }else{
+          xList.add(""+smonth);
+        }
+        smonth = smonth+1;
+        if(smonth>12){
+          smonth = 1;
+          syear = syear+1;
+        }
+      }
+    }else  if(DIMENSION.YRAR.equals(dimension)){ // 完
+      calendar.setTime(stime);
+      int syear = calendar.get(Calendar.YEAR);
+      calendar1.setTime(etime);
+      int eyear = calendar1.get(Calendar.YEAR);
+      for(int i = syear ; i <= eyear ;i++){
+        xList.add( ""+i );
+      }
+    }else  if(DIMENSION.WEEK.equals(dimension)){
+      calendar1.setTime(etime);
+      int emonth = calendar1.get(Calendar.MONTH);
+      int eyear = calendar1.get(Calendar.YEAR);
+      int week1 = calendar1.get(Calendar.WEEK_OF_MONTH);
+      String s1 = DateUtil.convert2String(etime, DateUtil.ym);
+
+
+      int diffDay = DateUtil.diffDay(stime, etime);
+      for(int i = 0 ; i <= diffDay ; i=i+7){
+        Date date = DateUtil.addDays(stime, i);
+        calendar.setTime(date);
+        int week = calendar.get(Calendar.WEEK_OF_YEAR);
+        String s = DateUtil.convert2String(calendar.getTime(), DateUtil.ym);
+        //xList.add(s+this.toWeek(calendar.get(Calendar.WEEK_OF_MONTH)));
+        if(week<10){
+          xList.add(s+""+week1);
+        }else{
+          xList.add(s+week1);
+        }
+//        if(){
+//
+//        }
+      }
+
+
+    } else if (DIMENSION.HOUR.equals(dimension)) { // 完
+      calendar.setTime(etime);
+      int hour = calendar.get(Calendar.HOUR_OF_DAY);
+      for(int i = 0 ; i<= hour ; i++){
+        if( i<10){
+          xList.add("0"+i);
+        }else{
+          xList.add(""+i);
+        }
+      }
+    }
+    return xList;
+  }
+
+  private String toWeek(int week){
+    String restr = "";
+     switch(week){
+      case 1 :
+        restr = " 1st星期";
+        break; //可选
+      case 2 :
+        restr = " 2nd星期";
+        break;
+      case 3 :
+       restr = " 3rd星期";
+       break; //可选
+      case 4 :
+       restr = " 4th星期";
+       break; //可选
+      default : restr = "";
+
+    }
+    return restr;
+  }
 
   private List<Long> merchantUserList( UserInfoDTO curLoginUser){
         Integer userType = curLoginUser.getUserType();
@@ -219,6 +346,35 @@ public class MHomePageController {
         // 商家主账号id
         userReqDto.setParentId(id);
         return userReqDto;
+    }
+
+
+  /**
+   *
+   * @param args
+   */
+  public static void main(String[] args){
+      Calendar c = Calendar.getInstance();
+      c.setTime(new java.util.Date());
+      int i = c.get(Calendar.WEEK_OF_MONTH);
+      int i1 = c.get(Calendar.WEEK_OF_YEAR);
+      int i2 = c.get(Calendar.HOUR_OF_DAY); // 24小时
+      int i3 = c.get(Calendar.HOUR); // 12小时
+      int i4 = c.get(Calendar.YEAR); // 12小时
+
+      int weeksInWeekYear = c.getWeeksInWeekYear();
+      int weekYear = c.getWeekYear();
+      logger.info(""+i);
+      logger.info(""+i1); // 和数据库中计算的星期数相同
+      logger.info(""+i2);
+      logger.info(""+i3);
+      logger.info(""+i4);
+      logger.info("月份"+c.get(Calendar.MONTH));
+      logger.info(""+weeksInWeekYear);
+      logger.info(""+weekYear);
+      SimpleDateFormat endSdf = new SimpleDateFormat("yyyy-MM-dd  23:59:59");
+      logger.info(endSdf.format(c.getTime()));
+
     }
 
 }
