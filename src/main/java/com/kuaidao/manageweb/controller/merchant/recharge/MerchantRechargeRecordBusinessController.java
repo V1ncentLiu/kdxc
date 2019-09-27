@@ -84,6 +84,7 @@ public class MerchantRechargeRecordBusinessController {
   * @Date 2019/9/26 17:41
   **/
   @RequestMapping("/applyInvoice")
+  @RequiresPermissions("merchant:merchantRechargeRecordBusiness:view")
   public JSONResult<Boolean> applyInvoice(@RequestBody MerchantApplyInvoiceReq req){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();

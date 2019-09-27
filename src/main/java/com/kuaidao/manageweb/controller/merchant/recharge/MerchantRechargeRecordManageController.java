@@ -9,6 +9,7 @@ import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordManag
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class MerchantRechargeRecordManageController {
    * @Date 2019/9/26 15:57
    **/
   @RequestMapping("/initRechargeRecordManage")
+  @RequiresPermissions("merchant:merchantRechargeRecordManage:view")
   public String initRechargeRecordBusiness(HttpServletRequest request){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
@@ -60,6 +62,7 @@ public class MerchantRechargeRecordManageController {
    * @Date 2019/9/26 16:07
    **/
   @RequestMapping("/queryManagePageList")
+  @RequiresPermissions("merchant:merchantRechargeRecordManage:view")
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(@RequestBody MerchantRechargeRecordQueryDTO queryDTO ){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
