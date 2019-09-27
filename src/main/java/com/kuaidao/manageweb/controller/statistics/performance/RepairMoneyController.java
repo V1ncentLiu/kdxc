@@ -146,7 +146,10 @@ public class RepairMoneyController extends BaseStatisticsController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             baseQueryDto.setTeleSaleId(curLoginUser.getId());
+            baseQueryDto.setTeleGroupId(null);
+            baseQueryDto.setTeleDeptId(null);
         }
+        baseQueryDto.setTeleDeptId(null);
         return  tailOrderClient.queryByPageBySale(baseQueryDto);
     }
 
@@ -192,6 +195,10 @@ public class RepairMoneyController extends BaseStatisticsController {
     @RequestMapping("/saleExport")
     public @ResponseBody void exportSale(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
+            if(RoleCodeEnum.DXCYGW.name().equals(super.getRoleCode())){
+                baseQueryDto.setTeleGroupId(null);
+                baseQueryDto.setTeleDeptId(null);
+            }
             JSONResult<List<DupOrderDto>> json=tailOrderClient.queryListBySale(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 DupOrderDto[] dtos = json.getData().isEmpty()?new DupOrderDto[]{}:json.getData().toArray(new DupOrderDto[0]);

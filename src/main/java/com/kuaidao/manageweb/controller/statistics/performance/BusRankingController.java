@@ -36,7 +36,7 @@ public class BusRankingController extends BaseStatisticsController {
     @RequestMapping("/busRankingList")
     public String  busTeamList(HttpServletRequest request){
         initBugOrg(request);
-        return "busPerformance/rankingGroup";
+        return "reportBusPerformance/rankingGroup";
     }
 
     /**
@@ -47,7 +47,7 @@ public class BusRankingController extends BaseStatisticsController {
     @RequestMapping("/busManageRankingList")
     public String busSaleList(HttpServletRequest request){
         initBugOrg(request);
-        return "busPerformance/rankingManager";
+        return "reportBusPerformance/rankingManager";
     }
 
 

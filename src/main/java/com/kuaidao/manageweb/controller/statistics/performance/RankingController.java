@@ -7,11 +7,14 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.statistics.dwOrganization.DwOrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.telePerformanceRank.TelePerformanceRankFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.constant.ReportExportEnum;
+import com.kuaidao.stastics.dto.dwOrganizationQueryDTO.DwOrganizationQueryDTO;
 import com.kuaidao.stastics.dto.telePerformanceRank.TelePerformanceRankDto;
 import com.kuaidao.stastics.dto.telePerformanceRank.TelePerformanceRankQueryDto;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -30,6 +33,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: guhuitao
@@ -44,6 +48,8 @@ public class RankingController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private TelePerformanceRankFeignClient telePerformanceRankFeignClient;
+    @Autowired
+    private DwOrganizationFeignClient dwOrganizationFeignClient;
 
     /**
      * 事业部业绩排名
@@ -91,13 +97,18 @@ public class RankingController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
 
-        //查询招商中心
+        //查询所有电销组
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setOrgType(OrgTypeConstant.ZSZX);
-        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        queryDTO.setOrgType(OrgTypeConstant.DXZ);
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
-        request.setAttribute("areaList",queryOrgByParam.getData());
+        List<Long> orgIdList = queryOrgByParam.getData().parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+        DwOrganizationQueryDTO dto = new DwOrganizationQueryDTO();
+        dto.setOrgIdList(orgIdList);
+        dto.setSelectCode("DQ");
+        dto.setBusinessLine(curLoginUser.getBusinessLine());
+        JSONResult<List<OrganizationRespDTO>> dwOrganization = dwOrganizationFeignClient.getDwOrganization(dto);
+        request.setAttribute("areaList",dwOrganization.getData());
         request.setAttribute("roleCode",roleCode+"");
 
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();

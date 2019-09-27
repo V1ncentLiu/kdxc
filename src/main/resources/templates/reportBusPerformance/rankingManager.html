@@ -8,7 +8,7 @@
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
             <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-            <el-breadcrumb-item>电销业绩排名</el-breadcrumb-item>
+            <el-breadcrumb-item>商务业绩排名</el-breadcrumb-item>
         </el-breadcrumb>
         <el-row class="marginB20">
             <el-button type="primary" @click="searchMonth">月累计排名</el-button>
@@ -21,7 +21,7 @@
         <div class="mainSearchBg">        
             <div class="mainSearchFormBox">
                 <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                    <el-form-item label="地区：">
+                    <el-form-item label="商务大区：">
                         <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable @change="curDepart">
                             <el-option
                                 v-for="item in areaArr"
@@ -31,7 +31,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="事业部：">  
+                    <el-form-item label="商务组：">  
                         <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale">
                             <el-option
                                 v-for="item in deptList"
@@ -41,7 +41,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="电销组：">  
+                    <el-form-item label="商务经理：">  
                         <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable @change="curTelSale" filterable>
                             <el-option
                                 v-for="item in orgTeleArr"
@@ -51,16 +51,6 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="电销顾问：">  
-                      <el-select v-model="form.teleSaleId" placeholder="全部" style="width: 100%;" filterable clearable>
-                          <el-option
-                              v-for="item in busSaleArr"
-                              :key="item.id"
-                              :label="item.name"
-                              :value="item.id">
-                          </el-option>
-                      </el-select>
-                    </el-form-item>
                     <div class="mainSearchBtnBox">
                         <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                     </div>  
@@ -68,9 +58,8 @@
             </div>
             <el-row>
                 <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
-                    <el-tab-pane label="事业部排名" name="first" v-if="isShowDept"></el-tab-pane>
-                    <el-tab-pane label="电销组排名" name="second" v-if="isShowOrg"></el-tab-pane>
-                    <el-tab-pane label="电销顾问排名" name="third"></el-tab-pane>
+                    <el-tab-pane label="商务组排名" name="first" v-if="isShowDept"></el-tab-pane>
+                    <el-tab-pane label="商务经理排名" name="second" v-if="isShowOrg"></el-tab-pane>
                 </el-tabs>
                 <el-table 
                     ref="tableData"
@@ -91,7 +80,7 @@
                             <span v-else>{{scope.row.businessLineRank}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="centerRank" label="区内排名">
+                    <el-table-column prop="centerRank" label="餐饮集团排名">
                         <template slot-scope="scope">
                             <div v-if="scope.row.centerRank == 1||scope.row.centerRank == 2||scope.row.centerRank == 3">
                                 <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
@@ -100,7 +89,7 @@
                             <span v-else>{{scope.row.centerRank}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="groupRank" label="组内排名">
+                    <el-table-column prop="groupRank" label="大区排名">
                         <template slot-scope="scope">
                             <div v-if="scope.row.groupRank == 1||scope.row.groupRank == 2||scope.row.groupRank == 3">
                                 <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
@@ -109,7 +98,16 @@
                             <span v-else>{{scope.row.groupRank}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="teleName" label="电销顾问">
+                    <el-table-column prop="groupRank" label="商务组内排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.groupRank == 1||scope.row.groupRank == 2||scope.row.groupRank == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.groupRank}}
+                            </div>
+                            <span v-else>{{scope.row.groupRank}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="teleName" label="商务经理">
                         <template slot-scope="scope">
                             <el-button type="text" size="small" v-if="scope.row.id == curUserId">
                                 {{scope.row.teleName}}
@@ -117,10 +115,8 @@
                             <span v-else>{{scope.row.teleName}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="groupName" label="电销组"></el-table-column>
-                    <el-table-column prop="departName" label="事业部"></el-table-column>
-                    <el-table-column prop="companyName" label="分公司"></el-table-column>
-                    <el-table-column prop="centerName" label="地区"></el-table-column>
+                    <el-table-column prop="groupName" label="商务组"></el-table-column>
+                    <el-table-column prop="departName" label="商务大区"></el-table-column>
                 </el-table>
                 <!--<table-pagination :pager="pager" @change="searchTable()"></table-pagination>-->
             </el-row>
@@ -141,7 +137,7 @@
         el: '#maindiv',
         data: function() {
             return {
-                activeName: 'third',
+                activeName: 'second',
                 loading: false,
                 isShowDept: false,
                 isShowOrg: false,
@@ -174,13 +170,10 @@
         },
         methods: {    
             handleClick(tab, event) {
-                // tab.index
                 if(tab.name=='first'){
-                	window.location.href="/ranking/deptList";
+                	window.location.href="/busperformance/groupList";
                 }else if (tab.name == 'second'){
-                	window.location.href="/ranking/groupList";
-                }else if (tab.name == 'third'){
-                    window.location.href="/ranking/managerList";
+                	window.location.href="/busperformance/managerList";
                 }
             },  
             centerStyle(){
@@ -395,7 +388,7 @@
         }else{
             this.isShowOrg = true;
         }
-		this.searchTable();
+		// this.searchTable();
 	},
 	mounted(){
         document.getElementById('maindiv').style.display = 'block';
