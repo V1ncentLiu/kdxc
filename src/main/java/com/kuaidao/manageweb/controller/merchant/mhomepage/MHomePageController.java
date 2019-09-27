@@ -250,8 +250,6 @@ public class MHomePageController {
       }
     }else  if(DIMENSION.WEEK.equals(dimension)){
       calendar1.setTime(etime);
-      int emonth = calendar1.get(Calendar.MONTH);
-      int eyear = calendar1.get(Calendar.YEAR);
       int week1 = calendar1.get(Calendar.WEEK_OF_MONTH);
       String s1 = DateUtil.convert2String(etime, DateUtil.ym);
 
@@ -264,9 +262,9 @@ public class MHomePageController {
         String s = DateUtil.convert2String(calendar.getTime(), DateUtil.ym);
         //xList.add(s+this.toWeek(calendar.get(Calendar.WEEK_OF_MONTH)));
         if(week<10){
-          xList.add(s+""+week1);
+          xList.add(s+"-0"+week1);
         }else{
-          xList.add(s+week1);
+          xList.add(s+"-"+week1);
         }
 //        if(){
 //
