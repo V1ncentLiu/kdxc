@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
     <title>后台管理系统</title>
-    <link rel="stylesheet" th:href="@{/css/custom/login/login.css}">
+    <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}">
     <style>
       /*去掉type为number的箭头*/
       input::-webkit-outer-spin-button,
@@ -24,28 +24,28 @@
     </div>
     <div id="loginbox" class="loginbox">
             <div class="control-group normal_text">
-                <img src="images/loginLogo.png" alt="Logo">                
+                <!-- <img src="images/loginLogo.png" alt="Logo">                 -->
+                <span>商机盒子商家版</span>    
             </div>
-            <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-loginForm" >
-                <el-row>
-                    <el-form-item  prop="nameInput">
-                        <span class="iconImg"><img th:src="@{/images/loginIco01.jpg}" alt=""></span>
-                        <el-input v-model="loginForm.nameInput" @input="checkLogin('loginForm')" maxlength="30" placeholder="登录用户名"></el-input>
+            <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-loginForm" label-width="110px">
+                <el-row class="accountNumber">
+                    <el-form-item  prop="nameInput" label="登陆账号">
+                        <el-input v-model="loginForm.nameInput" @input="checkLogin('loginForm')" maxlength="30" placeholder="请输入用户名"></el-input>
                     </el-form-item>
                 </el-row>
-                <el-row>
-                    <el-form-item  prop="pswInput">
-                        <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span>
+                <el-row class="accountNumber">
+                    <el-form-item  prop="pswInput" label="密码">
                         <el-input type="password" v-model="loginForm.pswInput" @input="checkLogin('loginForm')"  maxlength="30"  placeholder="登录密码"></el-input>
                         <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span>
                     </el-form-item>
                 </el-row>
                 <!-- 验证码是否显示增加判断，测试开发环境不显示，线上环境显示 -->
-                <div  v-if="verificationCodeShow">
+                <!-- v-if="verificationCodeShow" -->
+                <div style="margin-top: -30px" v-if="verificationCodeShow">
                     <el-row>
                         <el-col :span="14">
                             <el-form-item  prop="codeInput">
-                              <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span>
+                              <!-- <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span> -->
                               <el-input type="number" v-model="loginForm.codeInput" @keyup.native="checkLogin('loginForm')" oninput="if(value.length>6)value=value.slice(0,6)"  placeholder="输入验证码"></el-input>
                             </el-form-item>
                         </el-col>
@@ -66,9 +66,9 @@
                 <div class="control-group">
                     <!-- 提示语 -->
                     <div class="tipCntBox"><span id="errorSpan"  style="display: none;"></span></div>
-                    <el-form-item>
+                    <!-- <el-form-item> -->
                         <el-button type="primary" class="loginBtn" :disabled="loginDisabled" @click="submitForm('loginForm')">登&nbsp;&nbsp;录</el-button>
-                    <el-form-item>
+                    <!-- <el-form-item> -->
                     <a type="submit"  @click="toResetPwd();" class="pswForgetBtn">忘记密码</a>
                 </div>
                 <!-- 图形验证码弹窗 移除hideBox则显示-->
@@ -112,6 +112,15 @@ var disType="";
 var vm =  new Vue({
         el: '#loginbox',
         data: {
+            labelPosition: 'right',
+            formLabelAlign: {
+            name: '',
+            region: '',
+            type: ''
+            },
+
+
+
             buttonName: "获取语音验证码",
             isDisabled: false,
             loginDisabled: true,
@@ -288,7 +297,7 @@ var vm =  new Vue({
 	   	          }
        	      },
        	   	  toResetPwd() {
-       	    	document.location.href='/login/resetPwd';
+       	    	document.location.href='/merchantLogin/resetPwd';
        	      },
        	   	  checkLogin(formName) {
        	    	 var formData = this.loginForm;
