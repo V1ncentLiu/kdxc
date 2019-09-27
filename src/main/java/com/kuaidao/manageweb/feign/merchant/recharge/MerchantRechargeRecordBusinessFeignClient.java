@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.merchant.recharge;
 
+import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordQueryDTO;
 import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
@@ -12,6 +13,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @description: MerchantRechargeRecordFeignClient
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author: xuyunfeng
  * @version: 1.0
  */
-@FeignClient(name = "account-service", path = "/merchantRechargeBusinessRecord",
+@FeignClient(name = "account-service", path = "/account/merchantRechargeBusinessRecord",
     fallback = MerchantRechargeRecordBusinessFeignClient.HystrixClientFallbackBusiness.class)
 public interface MerchantRechargeRecordBusinessFeignClient {
 
@@ -44,6 +46,15 @@ public interface MerchantRechargeRecordBusinessFeignClient {
   @PostMapping("/queryBusinessPageList")
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(
       @RequestBody MerchantRechargeRecordQueryDTO queryDTO);
+  @RequestMapping("/applyInvoice")
+  /**
+   * @Description 申请发票
+   * @param req
+   * @Return com.kuaidao.common.entity.JSONResult<java.lang.Boolean>
+   * @Author xuyunfeng
+   * @Date 2019/9/26 17:41
+   **/
+  public JSONResult<Boolean> applyInvoice(@RequestBody MerchantApplyInvoiceReq req);
 
   @Component
   static class HystrixClientFallbackBusiness implements
@@ -68,6 +79,11 @@ public interface MerchantRechargeRecordBusinessFeignClient {
     public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(@RequestBody
         MerchantRechargeRecordQueryDTO queryDTO) {
       return fallBackError("商家端充值记录列表数据查询");
+    }
+
+    @Override
+    public JSONResult<Boolean> applyInvoice(MerchantApplyInvoiceReq req) {
+      return fallBackError("申请发票");
     }
   }
 }
