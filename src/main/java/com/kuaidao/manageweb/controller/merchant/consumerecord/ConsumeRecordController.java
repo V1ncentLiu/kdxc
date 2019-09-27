@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
@@ -99,9 +100,16 @@ public class ConsumeRecordController {
     @RequestMapping("/initSingleMerchant")
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initSingleMerchant(@RequestParam Long mainAccountId, HttpServletRequest request) {
-
+        UserInfoDTO user = getUser();
+        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+        userList.add(user);
         // 商家账号(当前登录商家主账号加子账号)
-        List<UserInfoDTO> userList = getMerchantUser(null);
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+        userInfoDTO.setParentId(user.getId());
+        JSONResult<List<UserInfoDTO>> merchantUserList =
+                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        userList.addAll(merchantUserList.getData());
         request.setAttribute("userList", userList);
         request.setAttribute("mainAccountId", mainAccountId);
 
