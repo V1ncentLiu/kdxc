@@ -113,7 +113,7 @@ public class ConsumeRecordController {
         request.setAttribute("userList", userList);
         request.setAttribute("mainAccountId", mainAccountId);
 
-        return "merchant/consumeRecord/consumeRecord";
+        return "merchant/consumeRecord/singleConsumeRecord";
     }
 
     /***
@@ -146,7 +146,7 @@ public class ConsumeRecordController {
 
         request.setAttribute("userList", userList);
 
-        return "merchant/consumeRecord/merchantConsumeRecordInfo";
+        return "merchant/consumeRecord/consumeRecordInfo";
     }
 
 
