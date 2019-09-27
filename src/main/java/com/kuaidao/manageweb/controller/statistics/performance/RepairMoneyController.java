@@ -147,7 +147,9 @@ public class RepairMoneyController extends BaseStatisticsController {
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             baseQueryDto.setTeleSaleId(curLoginUser.getId());
             baseQueryDto.setTeleGroupId(null);
+            baseQueryDto.setTeleDeptId(null);
         }
+        baseQueryDto.setTeleDeptId(null);
         return  tailOrderClient.queryByPageBySale(baseQueryDto);
     }
 
@@ -195,6 +197,7 @@ public class RepairMoneyController extends BaseStatisticsController {
         try{
             if(RoleCodeEnum.DXCYGW.name().equals(super.getRoleCode())){
                 baseQueryDto.setTeleGroupId(null);
+                baseQueryDto.setTeleDeptId(null);
             }
             JSONResult<List<DupOrderDto>> json=tailOrderClient.queryListBySale(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
