@@ -1,14 +1,17 @@
 package com.kuaidao.manageweb.controller.merchant.recharge;
 
+import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordQueryDTO;
 import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ public class MerchantRechargeRecordBusinessController {
   * @Date 2019/9/26 15:57
   **/
   @RequestMapping("/initRechargeRecordBusiness")
+  @RequiresPermissions("merchant:merchantRechargeRecordBusiness:view")
   public String initRechargeRecordBusiness(HttpServletRequest request){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
@@ -49,7 +53,7 @@ public class MerchantRechargeRecordBusinessController {
     }catch (Exception e){
       logger.error("initRechargeRecordBusiness:{}",e);
     }
-    return null;
+    return "/merchant/rechargeRecord/rechargeRecord";
   }
   /**
   * @Description 商家端充值记录列表查询
@@ -59,6 +63,7 @@ public class MerchantRechargeRecordBusinessController {
   * @Date 2019/9/26 16:07
   **/
   @RequestMapping("/queryBusinessPageList")
+  @RequiresPermissions("merchant:merchantRechargeRecordBusiness:view")
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(@RequestBody MerchantRechargeRecordQueryDTO queryDTO ){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
@@ -67,7 +72,26 @@ public class MerchantRechargeRecordBusinessController {
       return list;
     }catch (Exception e){
       logger.error("initRechargeRecordBusiness:{}",e);
-      return new JSONResult<PageBean<MerchantRechargeRecordDTO>>().fail("-1","queryBusinessPageList接口异常");
+      return new JSONResult<PageBean<MerchantRechargeRecordDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"queryBusinessPageList接口异常");
+    }
+  }
+
+  /**
+  * @Description 申请发票
+  * @param req
+  * @Return com.kuaidao.common.entity.JSONResult<java.lang.Boolean>
+  * @Author xuyunfeng
+  * @Date 2019/9/26 17:41
+  **/
+  @RequestMapping("/applyInvoice")
+  public JSONResult<Boolean> applyInvoice(@RequestBody MerchantApplyInvoiceReq req){
+    try {
+      UserInfoDTO user = CommUtil.getCurLoginUser();
+      req.setApplyUserId(user.getId());
+      return merchantRechargeRecordBusinessFeignClient.applyInvoice(req);
+    }catch (Exception e){
+      logger.error("applyInvoice:{}",e);
+      return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"applyInvoice接口异常");
     }
   }
 }
