@@ -6,8 +6,11 @@ import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordManageFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -31,7 +34,8 @@ public class MerchantRechargeRecordManageController {
 
   @Autowired
   MerchantRechargeRecordManageFeignClient merchantRechargeRecordManageFeignClient;
-
+  @Autowired
+  private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
   /**
    * @Description 初始化管理端充值记录页面
    * @param request
@@ -49,6 +53,9 @@ public class MerchantRechargeRecordManageController {
       JSONResult<RechargeAccountDTO> rechargeAccountDTOJSONResult = merchantRechargeRecordManageFeignClient.getNowDayAndMonthRechargeMoney(queryDTO);
       RechargeAccountDTO rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
       request.setAttribute("rechargeAccountDTO",rechargeAccountDTO);
+      // 商家账号
+      List<UserInfoDTO> userList = getMerchantUser(null);
+      request.setAttribute("merchantUserList",userList);
     }catch (Exception e){
       logger.error("initRechargeRecordManage:{}",e);
     }
@@ -73,5 +80,19 @@ public class MerchantRechargeRecordManageController {
       logger.error("queryManagePageList:{}",e);
       return new JSONResult<PageBean<MerchantRechargeRecordDTO>>().fail("-1","queryManagePageList接口异常");
     }
+  }
+  /**
+   * 查询商家账号
+   *
+   * @param arrayList
+   * @return
+   */
+  private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
+    UserInfoDTO userInfoDTO = new UserInfoDTO();
+    userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+    userInfoDTO.setStatusList(arrayList);
+    JSONResult<List<UserInfoDTO>> merchantUserList =
+        merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+    return merchantUserList.getData();
   }
 }
