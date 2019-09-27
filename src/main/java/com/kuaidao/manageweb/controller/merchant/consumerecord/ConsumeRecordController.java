@@ -98,12 +98,12 @@ public class ConsumeRecordController {
      */
     @RequestMapping("/initSingleMerchant")
     @RequiresPermissions("merchant:consumeRecord:view")
-    public String initSingleMerchant(@RequestParam Long id, HttpServletRequest request) {
+    public String initSingleMerchant(@RequestParam Long mainAccountId, HttpServletRequest request) {
 
         // 商家账号(当前登录商家主账号加子账号)
         List<UserInfoDTO> userList = getMerchantUser(null);
         request.setAttribute("userList", userList);
-        request.setAttribute("mainAccountId", id);
+        request.setAttribute("mainAccountId", mainAccountId);
 
         return "merchant/consumeRecord/consumeRecord";
     }
