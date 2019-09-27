@@ -184,7 +184,6 @@ public class MHomePageController {
             montCount += receiveResource.getMonthReceiveClueNum();
           }
         }
-
         ResourceCountDTO resourceCount = new ResourceCountDTO();
         resourceCount.setDayCount(dayCount);
         resourceCount.setMonthCount(montCount);
@@ -199,6 +198,11 @@ public class MHomePageController {
   @ResponseBody
   public JSONResult<IndexRespDTO> receiveStatics(IndexReqDTO indexReqDTO){
     List<Integer> yList = new ArrayList<>();
+    // 统计领取资源
+    //
+
+
+
 
     IndexRespDTO indexRespDTO = new IndexRespDTO();
     indexRespDTO.setXList(gainX(indexReqDTO));
@@ -250,28 +254,17 @@ public class MHomePageController {
       }
     }else  if(DIMENSION.WEEK.equals(dimension)){
       calendar1.setTime(etime);
-      int week1 = calendar1.get(Calendar.WEEK_OF_MONTH);
       String s1 = DateUtil.convert2String(etime, DateUtil.ym);
-
-
       int diffDay = DateUtil.diffDay(stime, etime);
-      for(int i = 0 ; i <= diffDay ; i=i+7){
+      for(int i = 0 ; i <= diffDay ; i++){
         Date date = DateUtil.addDays(stime, i);
         calendar.setTime(date);
-        int week = calendar.get(Calendar.WEEK_OF_YEAR);
         String s = DateUtil.convert2String(calendar.getTime(), DateUtil.ym);
-        //xList.add(s+this.toWeek(calendar.get(Calendar.WEEK_OF_MONTH)));
-        if(week<10){
-          xList.add(s+"-0"+week1);
-        }else{
-          xList.add(s+"-"+week1);
+        String week = s+this.toWeek(calendar.get(Calendar.WEEK_OF_MONTH));
+        if(!xList.contains(week)){
+          xList.add(week);
         }
-//        if(){
-//
-//        }
       }
-
-
     } else if (DIMENSION.HOUR.equals(dimension)) { // 完
       calendar.setTime(etime);
       int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -372,7 +365,6 @@ public class MHomePageController {
       logger.info(""+weekYear);
       SimpleDateFormat endSdf = new SimpleDateFormat("yyyy-MM-dd  23:59:59");
       logger.info(endSdf.format(c.getTime()));
-
     }
 
 }

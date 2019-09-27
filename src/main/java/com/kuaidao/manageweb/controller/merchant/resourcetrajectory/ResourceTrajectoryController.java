@@ -1,11 +1,15 @@
 package com.kuaidao.manageweb.controller.merchant.resourcetrajectory;
 
+import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.controller.merchant.pubcustomer.PubcustomerController;
+import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
+import com.kuaidao.merchant.dto.resourcetrajectory.ResourceTrajectoryDTO;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Auther: admin
@@ -23,4 +27,19 @@ public class ResourceTrajectoryController {
   public String listPage(HttpServletRequest request) {
     return "merchant/resourceTrajectory/resourceTrajectory";
   }
+
+  /**
+   * 页面数据接口
+   */
+
+  @ResponseBody
+  @RequestMapping("/data")
+  public JSONResult<ResourceTrajectoryDTO> data() {
+    ResourceTrajectoryDTO resourceTrajectory = new ResourceTrajectoryDTO();
+
+
+    return new JSONResult().success(resourceTrajectory);
+  }
+
+
 }
