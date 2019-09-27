@@ -1096,7 +1096,22 @@
             this.repeatApplyForm.repeatPhone="";
             this.repeatCurClueArr=[];
         },
-      gettelNumberIcon(tel,clueId) {
+        async gettelNumberIcon(tel,clueId) {
+        	var isReturn =false;
+        	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+            .then(function (response) {
+            	if(response.data !=""){
+            		mycustomVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+            		isReturn = true; ;
+            	}
+               ;
+            });
+        	if(isReturn){
+        		return;
+        	}
         //外呼手机
         var param = {};
         param.clueId = clueId;
@@ -1561,7 +1576,22 @@
         // }
       },
       //外呼号码
-      outboundCall(outboundInputPhone,clueId){//外呼
+      async outboundCall(outboundInputPhone,clueId){//外呼
+    	  var isReturn =false;
+      	await axios.post('/call/callRecord/missedCalPhone?phone='+outboundInputPhone, {})
+          .then(function (response) {
+          	if(response.data !=""){
+          		mycustomVM.$message({
+                      message: response.data,
+                      type: 'warning'
+                  });
+          		isReturn = true; ;
+          	}
+             ;
+          });
+      	if(isReturn){
+      		return;
+      	}
         var  param={};
         param.clueId=clueId;
         window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){
