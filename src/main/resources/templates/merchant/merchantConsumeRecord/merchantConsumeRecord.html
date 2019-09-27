@@ -16,25 +16,28 @@
         <el-breadcrumb-item>费用管理</el-breadcrumb-item>
         <el-breadcrumb-item>消费记录</el-breadcrumb-item>
     </el-breadcrumb>
+    <el-row class="marginB20">        
+        <el-button type="success" @click="gotoInfo">消费明细</el-button>
+    </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
-                <el-form-item label="时间:">
+                <el-form-item label="时间：" label-width="auto">
                     <el-date-picker
-                        v-model="form.startTime"
+                        v-model="form.createDateStart"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.endTime"
+                        v-model="form.createDateEnd"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="商家:" label-width="auto">
-                    <el-select v-model="form.applyPerson" filterable  clearable placeholder="商家账户名">
+                <el-form-item label="商家账户：">
+                    <el-select v-model="form.userId" filterable  clearable placeholder="商家账户名">
                         <el-option
                             v-for="item in merchantUserListOptions"
                             :key="item.id"
@@ -59,14 +62,10 @@
             >
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="applyPersonStr" label="商家账户"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="日期（天）"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="applyArea" label="消费资源数">
-                    <template slot-scope="scope">
-                        <el-button size="mini" type="text" @click="gotoInfo">100</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="applyNum" label="消费金额"></el-table-column>
+                <el-table-column align="center" prop="userName" label="商家账户"></el-table-column>
+                <el-table-column align="center" prop="createDate" label="日期（天）"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="clueNum" label="消费资源数"></el-table-column>
+                <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -78,7 +77,7 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var merchantUserList=[[${merchantUserList}]];//商户集合
+    var merchantUserList=[[${userList}]];//商户集合
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -90,9 +89,9 @@
                   pageSize: 20,
                 },
                 form: {
-                  startTime:'',
-                  endTime:'',
-                  auditStatus:''
+                  createDateStart:'',
+                  createDateEnd:'',
+                  userId:''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -114,8 +113,8 @@
                 console.log(index, row);
             },
             searchTable() {
-            	var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
+            	var startTime=this.form.createDateStart;
+                var endTime=this.form.createDateEnd;
                 if(endTime && startTime>endTime){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
@@ -125,9 +124,13 @@
                 }
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;                
+                param.pageNum = this.pager.currentPage; 
+                param.createDateStart = this.form.createDateStart;
+                param.createDateEnd = this.form.createDateEnd;
+                param.userId = this.form.userId;
+
                 console.info(param);
-                axios.post('/merchant/clue/setting/applyPage', param)
+                axios.post('/merchant/merchantConsumeRecord/countListMerchant', param)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
@@ -150,11 +153,11 @@
               if (cellValue == undefined) {
                  return "";
               }
-              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+              return moment(cellValue).format("YYYY-MM-DD");
             },
             gotoInfo(){
-                
-            }
+                window.location.href='/merchant/merchantConsumeRecord/initInfoList';
+            },
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
