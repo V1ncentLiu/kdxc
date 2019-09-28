@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.merchant.recharge;
 
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordQueryDTO;
+import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -81,6 +82,45 @@ public class MerchantRechargeRecordManageController {
       return new JSONResult<PageBean<MerchantRechargeRecordDTO>>().fail("-1","queryManagePageList接口异常");
     }
   }
+
+  /**
+  * @Description 加载管理端录入线下付款页面
+  * @param request
+  * @Return com.kuaidao.common.entity.JSONResult<java.lang.Boolean>
+  * @Author xuyunfeng
+  * @Date 2019/9/27 15:30
+  **/
+  @RequestMapping("/initOfflinePayment")
+  @RequiresPermissions("merchant:merchantRechargeRecordManage:add")
+  public JSONResult<Boolean> initOfflinePayment(HttpServletRequest request){
+    // 商家账号
+    List<UserInfoDTO> userList = getMerchantUser(null);
+    request.setAttribute("merchantUserList",userList);
+
+    return null;
+  }
+
+  /**
+  * @Description 录入线下付款信息
+  * @param
+  * @Return com.kuaidao.common.entity.JSONResult<java.lang.Boolean>
+  * @Author xuyunfeng
+  * @Date 2019/9/27 15:30
+  **/
+  @RequestMapping("/saveOfflinePayment")
+  @RequiresPermissions("merchant:merchantRechargeRecordManage:add")
+  public JSONResult<Boolean> saveOfflinePayment(@RequestBody  MerchantRechargeReq req){
+    try {
+      UserInfoDTO user = CommUtil.getCurLoginUser();
+      req.setCreateUser(user.getId());
+      JSONResult<Boolean> list = merchantRechargeRecordManageFeignClient.saveOfflinePayment(req);
+      return list;
+    }catch (Exception e){
+      logger.error("录入线下付款信息:{}",e);
+      return new JSONResult<Boolean>().fail("-1","录入线下付款信息接口异常");
+    }
+  }
+
   /**
    * 查询商家账号
    *
