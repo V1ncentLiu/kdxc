@@ -3,6 +3,8 @@ package com.kuaidao.manageweb.feign.merchant.recharge;
 import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordQueryDTO;
+import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
+import com.kuaidao.account.dto.recharge.MerchantRechargeResp;
 import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -55,6 +57,17 @@ public interface MerchantRechargeRecordBusinessFeignClient {
    * @Date 2019/9/26 17:41
    **/
   public JSONResult<Boolean> applyInvoice(@RequestBody MerchantApplyInvoiceReq req);
+  /**
+   * @Description 获取微信或支付宝的支付URL
+   * @param req
+   * @Return com.kuaidao.common.entity.JSONResult<com.kuaidao.account.dto.recharge.MerchantRechargeResp>
+   * @Author xuyunfeng
+   * @Date 2019/9/27 16:48
+   **/
+  @RequestMapping("/getWeChatAndAlipayCode")
+  public JSONResult<MerchantRechargeResp> getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req);
+
+
 
   @Component
   static class HystrixClientFallbackBusiness implements
@@ -84,6 +97,11 @@ public interface MerchantRechargeRecordBusinessFeignClient {
     @Override
     public JSONResult<Boolean> applyInvoice(MerchantApplyInvoiceReq req) {
       return fallBackError("申请发票");
+    }
+
+    @Override
+    public JSONResult<MerchantRechargeResp> getWeChatAndAlipayCode(MerchantRechargeReq req) {
+      return fallBackError("获取微信或支付宝的支付URL");
     }
   }
 }
