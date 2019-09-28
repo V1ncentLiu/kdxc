@@ -69,5 +69,6 @@ public class MerchantOnlineRechargeController {
     }catch (Exception e){
       logger.error("加载在线充值页面initOnlineRecharge:{}",e);
     }
+    return null;
   }
 }
