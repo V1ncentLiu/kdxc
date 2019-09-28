@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.feign.merchant.recharge;
 
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordQueryDTO;
+import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -12,6 +13,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @description: MerchantRechargeRecordFeignClient
@@ -45,6 +47,16 @@ public interface MerchantRechargeRecordManageFeignClient {
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryManagePageList(
       @RequestBody MerchantRechargeRecordQueryDTO queryDTO);
 
+  /**
+   * @Description 录入线下付款信息
+   * @param
+   * @Return com.kuaidao.common.entity.JSONResult<java.lang.Boolean>
+   * @Author xuyunfeng
+   * @Date 2019/9/27 15:30
+   **/
+  @RequestMapping("/saveOfflinePayment")
+  public JSONResult<Boolean> saveOfflinePayment(@RequestBody MerchantRechargeReq req);
+
   @Component
   static class HystrixClientFallbackBusiness implements
       MerchantRechargeRecordManageFeignClient {
@@ -67,7 +79,12 @@ public interface MerchantRechargeRecordManageFeignClient {
     @Override
     public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryManagePageList(@RequestBody
         MerchantRechargeRecordQueryDTO queryDTO) {
-      return fallBackError("管理端端充值记录列表数据查询");
+      return fallBackError("录入线下付款信息");
+    }
+
+    @Override
+    public JSONResult<Boolean> saveOfflinePayment(MerchantRechargeReq req) {
+      return fallBackError("获取管理人员当日和当月充值总金额");
     }
   }
 }
