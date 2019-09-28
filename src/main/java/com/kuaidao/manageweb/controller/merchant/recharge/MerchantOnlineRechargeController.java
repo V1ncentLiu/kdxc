@@ -6,8 +6,10 @@ import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeResp;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
+import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -35,6 +37,8 @@ public class MerchantOnlineRechargeController {
   private MerchantRechargePreferentialFeignClient merchantRechargePreferentialFeignClient;
   @Autowired
   private MerchantUserAccountFeignClient merchantUserAccountFeignClient;
+  @Autowired
+  private MerchantRechargeRecordBusinessFeignClient merchantRechargeRecordBusinessFeignClient;
   /**
   * @Description 加载在线充值页面
   * @param request
@@ -61,14 +65,22 @@ public class MerchantOnlineRechargeController {
     }
     return null;
   }
+  /**
+  * @Description 获取支付宝、微信支付URL
+  * @param req
+  * @Return com.kuaidao.common.entity.JSONResult<com.kuaidao.account.dto.recharge.MerchantRechargeResp>
+  * @Author xuyunfeng
+  * @Date 2019/9/28 15:52
+  **/
   @RequestMapping("/getWeChatAndAlipayCode")
   public JSONResult<MerchantRechargeResp> getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req){
-
     try {
-
+      UserInfoDTO user = CommUtil.getCurLoginUser();
+      req.setRechargeBusiness(user.getId());
+      return merchantRechargeRecordBusinessFeignClient.getWeChatAndAlipayCode(req);
     }catch (Exception e){
-      logger.error("加载在线充值页面initOnlineRecharge:{}",e);
+      logger.error("加载在线充值页面getWeChatAndAlipayCode:{}",e);
+      return new JSONResult<MerchantRechargeResp>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"getWeChatAndAlipayCode接口异常");
     }
-    return null;
   }
 }
