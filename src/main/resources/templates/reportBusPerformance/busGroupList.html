@@ -17,6 +17,7 @@
          <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
          <!-- </shiro:hasPermission> -->
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button> 
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -420,6 +421,7 @@
                     }
                 }
             },
+            goback(){window.history.go(-1);},
             limitTime (start, end) {
                 var endTime = this.minuteFormat (end);
                 var startTime = this.minuteFormat (start);
@@ -566,8 +568,21 @@
                     this.export.teleGroupId = this.form.teleGroupId;
                 }
             }
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+            if(parentParam && parentParam.startTime){
+                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
+                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
+
+                this.export.startTime = parentParam.startTime;
+                this.export.endTime = parentParam.endTime;
+            }else{
+                this.form.startTime = startTime;
+                this.form.endTime = endTime;
+                this.export.startTime = this.minuteFormat(this.form.startTime);
+                this.export.endTime = this.minuteFormat(this.form.endTime);
+            }
+
+            this.form.cateringGroup = parentParam.cateringGroup != null ?parentParam.cateringGroup.toString():'';
+            this.export.cateringGroup = this.form.cateringGroup;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}

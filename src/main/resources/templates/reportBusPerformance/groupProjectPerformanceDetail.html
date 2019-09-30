@@ -17,6 +17,7 @@
          <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
          <!-- </shiro:hasPermission> -->
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button> 
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -28,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd 23:59" v-model="form.endTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务大区:">  
-                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable  @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in businessRegionArr"
                             :key="item.id"
@@ -87,10 +88,11 @@
                 <el-table-column prop="teleGroupName" label="商务大区"></el-table-column>
                 <el-table-column prop="cateringGroup" label="餐饮集团">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.teleGroupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.teleGroupName}}</span>
-                        <el-button type="text" size="small" v-else>{{scope.row.teleGroupName}}</el-button>
+                        <span v-if="scope.row.teleGroupId!='99999'">{{scope.row.teleGroupName}}</span>
+                        <span v-else>{{scope.row.teleGroupName}}</span>
                     </template>
                 </el-table-column>
+                <el-table-column prop="firstVisitNum" label="项目"></el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
                 <el-table-column prop="visitRate" label="签约率"></el-table-column>
@@ -334,17 +336,7 @@
                     return this.form.endTime;      
                 }
             },
-            gotoLink(row){
-                var cateringGroup = row.cateringGroup;
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                var businessRegion = this.export.businessRegion;
-                var businessGroupId = this.export.businessGroupId;
-                var businessManagerId = this.export.businessManagerId;
-                if(cateringGroup){
-                    window.location.href="/performance/managerList?&businessRegion="+ businessRegion+ "&businessGroupId="+ businessGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&businessManagerId=" + businessManagerId + "&cateringGroup=" + cateringGroup;
-                }
-            },
+            goback(){window.history.go(-1);},
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
                     if (columnIndex === 0) {
@@ -352,7 +344,9 @@
                     } else if (columnIndex === 1) {
                         return [0, 0];
                     } else if (columnIndex === 2) {
-                        return [1, 3];
+                        return [1, 4];
+                    } else if (columnIndex === 3) {
+                        return [0, 0];
                     }
                 }
             },
@@ -454,24 +448,34 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-            // if(curDeptId){
-            //     this.isDisabled = true;
-            //     this.form.teleDeptId = curDeptId;
-            //     this.export.teleDeptId = this.form.teleDeptId;
-            //     this.firstCurTelGroupSale(curDeptId);
-            //     if(curOrgId){
-            //         this.isDisabledOrgId = true;
-            //         this.form.teleGroupId = curOrgId;
-            //         this.export.teleGroupId = this.form.teleGroupId;
-            //     }
+            
+            // if(curUserId){
+            //     this.isDisabledUserId = true;
+            //     this.form.businessManagerId = curUserId;
+            // }else{
+            //     this.form.businessManagerId = parentParam && parentParam.businessManagerId ?parentParam.businessManagerId:'';
             // }
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+
+            if(parentParam && parentParam.startTime){
+                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
+                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
+
+                this.export.startTime = parentParam.startTime;
+                this.export.endTime = parentParam.endTime;
+            }else{
+                this.form.startTime = startTime;
+                this.form.endTime = endTime;
+                this.export.startTime = this.minuteFormat(this.form.startTime);
+                this.export.endTime = this.minuteFormat(this.form.endTime);
+            }
+
+            this.form.cateringGroup = parentParam.cateringGroup != null ?parentParam.cateringGroup.toString():'';
+            this.export.cateringGroup = this.form.cateringGroup;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
