@@ -106,7 +106,7 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="teleGroupName" label="商务组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.teleGroupName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'">{{scope.row.teleGroupName}}</el-button>
                         <span v-else>{{scope.row.teleGroupName}}</span>
                     </template>
                 </el-table-column>
@@ -336,10 +336,12 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
-                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
+                        mainDivVM.export.businessRegion = mainDivVM.form.businessRegion;
+                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
+                        mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
+                        mainDivVM.export.shopType = mainDivVM.form.shopType;
+                        mainDivVM.export.payType = mainDivVM.form.payType;
                         mainDivVM.export.category = mainDivVM.form.category;
-                        mainDivVM.export.searchText = mainDivVM.form.searchText;
         
                     }else{
                         mainDivVM.loading = false;
@@ -365,17 +367,6 @@
                 if(endTime){
                     this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
                     return this.form.endTime;      
-                }
-            },
-            gotoTeam(row){
-                var teleGroupId = row.teleGroupId;
-                var teleDeptId = this.export.teleDeptId;
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                var category = this.export.category;
-                var searchText = this.export.searchText;
-                if(teleGroupId){
-                    window.location.href="/performance/managerList?&teleDeptId="+ teleDeptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&category=" + category + "&searchText=" + searchText;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -412,6 +403,14 @@
                 minRes = minRes < 10 ?  "0" + minRes : minRes;                
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
+            },
+            dateTimeFormat (dt) {
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                return oYear+"-"+oMonth+"-"+oDay;
             },
             searchSeason(){ // 季
                 var today = new Date();
@@ -491,7 +490,6 @@
                 this.isDisabled = true;
                 this.form.businessRegion = curDeptId;
                 this.export.businessRegion = this.form.businessRegion;
-                this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.isDisabledOrgId = true;
                     this.form.businessGroupId = curOrgId;
@@ -524,6 +522,58 @@
 
             this.firstCurTelGroupSale(this.form.businessRegion);
             this.firstCurTelSale(this.form.businessGroupId);
+            this.searchTable();
+            
+        },
+        created(){     
+            var today = new Date();
+            var startTime = moment(today).format("YYYY-MM-DD");
+            var endTime = moment(today).format("YYYY-MM-DD");
+            if(curDeptId){
+                this.isDisabled = true;
+                this.form.busAreaId = curDeptId;
+                if(curOrgId){
+                    this.isDisabledOrgId = true;
+                    this.form.businessGroupId = curOrgId;
+                    if(curUserId){
+                        this.isDisabledUserId = true;
+                        this.form.businessManagerId = curUserId;
+                    }
+                }else{
+                    this.form.businessRegion = parentParam&&parentParam.businessRegion ? parentParam.businessRegion:'';
+                }
+            }else{
+                this.form.businessRegion = parentParam&&parentParam.businessRegion ? parentParam.businessRegion:'';
+                this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
+            }
+            if(parentParam && parentParam.startTime){
+                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
+                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
+
+                this.export.startTime = parentParam.startTime;
+                this.export.endTime = parentParam.endTime;
+            }else{
+                this.form.startTime = startTime;
+                this.form.endTime = endTime;
+                this.export.startTime = this.minuteFormat(this.form.startTime);
+                this.export.endTime = this.minuteFormat(this.form.endTime);
+            }
+
+            this.form.shopType = parentParam&&parentParam.shopType ? parentParam.shopType:'';
+            this.form.payType = parentParam&&parentParam.payType ? parentParam.payType:'';
+            this.form.category = parentParam&&parentParam.category ? parentParam.category:'';
+            this.export.shopType = this.form.shopType;
+            this.export.payType = this.form.payType;
+            this.export.category = this.form.category;
+
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            if(this.form.businessRegion){
+                this.firstCurTelGroupSale(this.form.businessRegion);
+            }
+            if(this.form.businessGroupId){
+                this.firstCurTelSale(this.form.businessGroupId);
+            }
             this.searchTable();
         },
         mounted(){

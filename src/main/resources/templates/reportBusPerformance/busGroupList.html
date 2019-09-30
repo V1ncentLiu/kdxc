@@ -455,6 +455,14 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
+            dateTimeFormat (dt) {
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                return oYear+"-"+oMonth+"-"+oDay;
+            },
             searchSeason(){ // 季
                 var today = new Date();
                 var month = today.getMonth()+1;
@@ -526,17 +534,23 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            // if(curDeptId){
-            //     this.isDisabled = true;
-            //     this.form.businessRegion = curDeptId;
-            //     this.export.businessRegion = this.form.businessRegion;
-            //     this.firstCurTelGroupSale(curDeptId);
-            //     if(curOrgId){
-            //         this.isDisabledOrgId = true;
-            //         this.form.businessGroupId = curOrgId;
-            //         this.export.businessGroupId = this.form.businessGroupId;
-            //     }
-            // }
+            if(curDeptId){
+                this.isDisabled = true;
+                this.form.busAreaId = curDeptId;
+                if(curOrgId){
+                    this.isDisabledOrgId = true;
+                    this.form.businessGroupId = curOrgId;
+                    if(curUserId){
+                        this.isDisabledUserId = true;
+                        this.form.businessManagerId = curUserId;
+                    }
+                }else{
+                    this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
+                }
+            }else{
+                this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
+                this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
+            }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
                 this.form.endTime = this.dateTimeFormat(parentParam.endTime);
@@ -550,14 +564,17 @@
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
 
-            this.form.area = parentParam.area != null ?parentParam.area.toString():'';
-            this.export.area = this.form.area;
+            this.form.groupId = parentParam&&parentParam.groupId ? parentParam.groupId:'';
+            this.export.groupId = this.form.groupId;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-
-            // this.firstCurTelGroupSale(this.form.businessRegion);
-            // this.firstCurTelSale(this.form.businessGroupId);
+            if(this.form.busAreaId){
+                this.firstCurTelGroupSale(this.form.busAreaId);
+            }
+            if(this.form.businessGroupId){
+                this.firstCurTelSale(this.form.businessGroupId);
+            }
             this.searchTable();
         },
         mounted(){
