@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="recordPaymentOffline" class="recordPaymentOffline mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商家充值记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="inforTitle">录入线下充值</div> 
+    <el-form :model="form" ref="form" :rules="rules" :label-width="formLabelWidth">
+        <el-row class="borderbox padding20">
+            <el-form-item label="充值商家：" prop="seller">
+                <el-select v-model="form.seller" placeholder="请选择">
+                    <el-option
+                        v-for="item in options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>                  
+            </el-form-item>
+            <el-form-item label="充值金额：" prop="money">
+                <el-input v-model="form.money" placeholder="1-999999" style="width: 250px;"></el-input>                    
+            </el-form-item>
+            <el-form-item label="图片证明：" prop="fileList" style="width: 400px;">
+                <el-upload
+                    class="upload-demo"
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :on-preview="handlePreview"
+                    :on-remove="handleRemove"
+                    :before-remove="beforeRemove"
+                    multiple
+                    :limit="3"
+                    :on-exceed="handleExceed"
+                    :file-list="form.fileList">
+                    <el-button size="small" type="primary">点击上传</el-button>
+                </el-upload>                   
+            </el-form-item>
+            <div class="f-tac">
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('form')">保存</el-button>
+                    <el-button @click="resetForm('form')">取消</el-button>
+                </el-form-item>
+            </div>
+        </el-row>
+        
+    </el-form>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var ocmVM = new Vue({
+        el: '#recordPaymentOffline',
+        data: function() {
+            return {
+                form: {
+                    money:'',
+                    seller: '1',
+                    fileList: []
+                },
+                options: [{
+                    value: '1',
+                    label: '商家1'
+                },{
+                    value: '2',
+                    label: '商家2'
+                }],
+        
+                rules:{
+                    seller: [
+                        { required: true, message: '请输选充值择商家', trigger: 'blur' }
+                    ],
+                    money: [
+                        { required: true, message: '请输入充值金额', trigger: 'blur' }
+                    ],
+                    fileList: [
+                        { required: true, message: '请上传图片', trigger: 'blur' }
+                    ],
+                    
+                },
+                formLabelWidth:'150px',
+            }             
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        alert('submit!');
+                    } else {
+                        console.log('error submit!!');
+                    return false;
+                    }
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${ file.name }？`);
+            }
+        },
+        created(){
+            
+        },
+        mounted(){
+            document.getElementById('recordPaymentOffline').style.display = 'block';
+        }
+  })
+</script>
+</html>
