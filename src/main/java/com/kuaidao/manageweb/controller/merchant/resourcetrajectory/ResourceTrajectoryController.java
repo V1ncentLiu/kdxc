@@ -5,6 +5,8 @@ import com.kuaidao.manageweb.controller.merchant.pubcustomer.PubcustomerControll
 import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.resourcetrajectory.ResourceTrajectoryDTO;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -27,7 +29,10 @@ public class ResourceTrajectoryController {
   public String listPage(HttpServletRequest request) {
     return "merchant/resourceTrajectory/resourceTrajectory";
   }
-
+  @RequestMapping("/topage1")
+  public String listPage1(HttpServletRequest request) {
+    return "merchant/resourceTrajectory/resourceTrajectory";
+  }
   /**
    * 页面数据接口
    */

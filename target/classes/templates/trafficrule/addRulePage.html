@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+	<title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+     <style>
+        .addModule{width: 80%;}
+        .resourceRow .el-checkbox{margin-left: 0;margin-right: 30px;}
+    </style>
+</head>
+<body>
+<div id="addOptimizeRule" class="addOptimizeRule mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>话务专员分配规则</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">新建分配规则</div>
+        <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+            <div class="inforTitle1"><em class="redcolor">*</em>必填项</div>
+            <div class="borderbox padding20 marginB20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="规则名称：" prop="assignName" :label-width="formLabelWidth">
+                            <el-input v-model="form.assignName" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>                
+                    <el-col :span="12">
+                        <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
+                            <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
+                            <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row class="resourceRow">
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
+                            <el-checkbox-group v-model="form.category">
+                                <el-checkbox v-for="item in categoryOptions" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" prop="type" :label-width="formLabelWidth">
+                            <el-checkbox-group v-model="form.type">
+                                <el-checkbox v-for="item in typeOptions" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="inforTitle1">选填项</div>
+            <div class="borderbox padding20">
+                <!-- 显示新增的标签 -->
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
+                            <el-tag
+                                v-for="tag in tags1"
+                                :key="tag"
+                                closable
+                                @close="deleteFun1(tag)"
+                                style="margin-right: 10px;">
+                                {{tag}}
+                            </el-tag>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12" style="float: right;">
+                        <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
+                            <el-tag
+                                v-for="tag in tags2"
+                                :key="tag"
+                                closable
+                                @close="deleteFun2(tag)"
+                                style="margin-right: 10px;">
+                                {{tag}}
+                            </el-tag>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="包含搜索词：" :label-width="formLabelWidth" style="float: left;">
+                            <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50" style="width: 226px;margin-right: 6px;"></el-input>                            
+                        </el-form-item>
+                        <el-form-item style="float: left;">
+                            <el-button type="primary" @click="addFun1">添加</el-button>           
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="地区：" :label-width="formLabelWidth" style="float: left;">
+                            <el-input v-model="form.area" autocomplete="off"  maxlength="50" style="width: 226px;margin-right: 6px;"></el-input>
+                        </el-form-item>
+                        <el-form-item style="float: left;">
+                            <el-button type="primary" @click="addFun2">添加</el-button>           
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+               
+                <el-row>
+                    <el-form-item label="是否启用：" prop="isUse" :label-width="formLabelWidth">
+                        <el-select v-model="form.status" placeholder="请选择" style="width:300px;">
+                            <el-option
+                                v-for="item in statusOptions"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-row>   
+                <el-form-item label="设定组内人员：" prop="chooseTeam" :label-width="formLabelWidth">
+                    <span style="position: absolute;left: -120px;color: #f56c6c;">*</span>
+                    <el-button type="primary" @click="addDomain">添加人员</el-button>
+                </el-form-item>
+                <el-table :data="form.traffcList" style="width: 100%" border>
+                    <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                    <el-table-column align="center" prop="userId" label="姓名*">
+                        <template slot-scope="scope">
+                                <el-form-item :prop="'traffcList.' + scope.$index + '.userId'" :rules='rules.userId' style="width: 200px;margin:0 auto;height: 57px;">
+                                <el-select filterable v-model="scope.row.userId" placeholder="请选择">
+                                    <el-option
+                                        v-for="item in trafficOptions"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="resourceLimit" label="资源条数*">
+                        <span style="color: #f56c6c;">*</span>
+                        <template slot-scope="scope">
+                            <el-form-item :prop="'traffcList.' + scope.$index + '.resourceLimit'" :rules='rules.resourceLimit' style="width: 200px;margin:0 auto;height: 57px;">
+                                <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.traffcList)" v-model="scope.row.resourceLimit"></el-input>
+                            </el-form-item>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" label="操作" width="120">
+                        <template slot-scope="scope">
+                            <el-button @click.native.prevent="deleteRow(scope.$index, form.traffcList)" type="text" size="small">删除</el-button>
+                        </template>
+                </el-table-column>
+                </el-table>                
+            </div>     
+            <div class="padding20 f-tac">            
+                <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
+                <el-button @click="cancelForm()">取 消</el-button>
+            </div>    
+        </el-form>  
+    </el-row>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
+var clueTypeList=[[${clueTypeList}]];//资源类型集合
+var trafficList=[[${trafficList}]];//媒介集合
+    var aorVM = new Vue({
+        el: '#addOptimizeRule',
+        data: function() {
+            return {
+                form: {
+                    assignName:'',
+                    startTime:'',
+                    endTime:'',
+                    category:[],
+                    type:[],
+                    searchWord:'',
+                    area:'',
+                    status:1,
+                    traffcList: []
+                },
+                formLabelWidth: '150px',
+                rules:{
+                    assignName: [
+                        { required: true, message: '请输入规则名称', trigger: 'blur' }
+                    ],
+                    startTime: [
+                        { required: true, message: '请选择规则有效开始时间', trigger: 'blur' }
+                    ],
+                    endTime: [
+                        { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
+                    ],
+                    type: [
+                        {  required: true, message: '请至少选择一个资源类型', trigger: 'change' }
+                    ],
+                    category: [
+                        { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
+                    ],
+                    status: [
+                        { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
+                    ],                    
+                    chooseTeam: [
+                        { validator:function(rule,value,callback){
+                            if(aorVM.form.traffcList.length==0){
+                                callback(new Error("请添加组内人员"));
+                                return;
+                            }
+                            callback();
+                        }, trigger: 'change'}
+                    ],                    
+                    userId: [
+                        { required: true, required: true, message: '请选择组内人员', trigger: 'change' }
+                    ],
+                    resourceLimit: [
+                        { required: true, required: true, message: '请输入资源条数', trigger: 'change'},
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数数字"));
+                            }else{
+                               callback();
+                            } 
+                            callback();
+                        }, trigger: 'change'}
+                    ],
+                },
+                submitDisabled:false,
+                trafficOptions:trafficList,
+                categoryOptions:clueCategoryList,
+                typeOptions:clueTypeList,
+                statusOptions: [{
+                    value: 1,
+                    name: '启用'
+                }, {
+                    value: 0,
+                    name: '禁用'
+                }],
+                tags1: [],//搜索词
+                tags2: [],//地区
+            }        	  
+        },
+        methods: {
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        // 开始时间不能大约结束时间
+                        var startTime=this.form.startTime;
+                        var endTime=this.form.endTime;
+                        if(endTime && startTime>endTime){
+                            this.$message({
+                                message: '结束时间不允许选择早于开始时间',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+                        // 不能选择重复组内人员
+                        var userIdChoose=this.form.traffcList; 
+                        var ary=[];                   
+                        for(var i=0;i<userIdChoose.length;i++){
+                            ary.push(userIdChoose[i].userId);//把选择的值放入一个数组
+                            var s = ary.join(",")+","; 
+                            for(var j=0;j<ary.length;j++) {
+                                if(ary[j]!=""){
+                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
+                                        this.$message({
+                                            message: '请不要选择相同的组内人员',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }                                
+                            }
+                        }
+       	            	aorVM.submitDisabled=true;
+                        var param={};
+                        param.assignName=this.form.assignName;
+                        param.startTime=this.form.startTime;
+                        param.endTime=this.form.endTime;
+                        param.status=this.form.status;
+                        param.traffcList=this.form.traffcList;
+                        param.category=this.form.category.join(',');
+                        param.type=this.form.type.join(',');
+                        param.searchWord=this.tags1.join(',');
+                        param.area=this.tags2.join(',');
+                        axios.post('/trafficAssignRule/rule/save', param)
+	       	            .then(function (response) {
+	       	            	console.info(response);
+	       	            	var data =response.data;
+	       	            	if(data.code!="0"){
+	       	            		aorVM.$message(data.msg);
+	       	            	    aorVM.submitDisabled=false;
+	       	            	}else{
+	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    aorVM.submitDisabled=false;
+		       	                	document.location.href='/trafficAssignRule/rule/initRuleList';
+	                      	    }});
+	       	            	}
+	       	            })
+	       	            .catch(function (error) {
+	       	            	aorVM.submitDisabled=false;
+	       	                 console.log(error);
+	       	            });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            deleteRow(index, rows) {//删除一行表格
+                rows.splice(index, 1);
+            },
+            addFun1() {//添加搜索词
+                let searchWord = this.form.searchWord;
+                if (searchWord) {
+                    this.tags1.push(searchWord);
+                }
+                this.form.searchWord = '';
+            },
+            deleteFun1(tag) {//删除搜索词
+                this.tags1.splice(this.tags1.indexOf(tag), 1);
+            },
+            addFun2() {//添加地区
+                let area = this.form.area;
+                if (area) {
+                    this.tags2.push(area);
+                }
+                this.form.area = '';
+            },
+            deleteFun2(tag) {//删除地区
+                this.tags2.splice(this.tags2.indexOf(tag), 1);
+            },
+            addDomain() {
+                this.form.traffcList.push({
+                    userId: '',                    
+                    resourceLimit:'',
+                });
+            },
+            resourceMaxNumber(index, rows){
+                for(var i=0;i<rows.length;i++){                    
+        　　      	  			rows[i].resourceLimit=rows[i].resourceLimit.replace(/[^\.\d]/g,'');
+                    rows[i].resourceLimit=rows[i].resourceLimit.replace('.','');                    
+                }
+        　　		},
+        　　		cancelForm(){
+            	document.location.href='/trafficAssignRule/rule/initRuleList';
+            },
+        },
+        mounted(){
+            document.getElementById('addOptimizeRule').style.display = 'block';
+        }
+    })
+</script>
+</html>

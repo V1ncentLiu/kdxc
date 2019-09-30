@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>电销顾问通话时长</title>
+     <style>
+        .trClientManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .trClientManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .trClientManage .leftTree{padding:10px;}
+        .trClientManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+    </style>
+</head>
+<body>
+<div id="myCallRecordVm" class="trClientManage mainPadding" style="display:none">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>电销顾问通话时长</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="searchYesterday" >昨天</el-button>
+        <el-button type="success" @click="searchWeek" >近七天</el-button>
+        <el-button type="warning" @click="searchMonth" >本月</el-button>
+    </el-row>
+    <!-- <a href="javascript:void(0);" @click="searchYesterday" style="color:blue;font-size:15px">【昨天】</a>
+    <a href="javascript:void(0);" @click="searchWeek" style="color:blue;font-size:15px">【近七天】</a>
+    <a href="javascript:void(0);" @click="searchMonth" style="color:blue;font-size:15px;margin-right: 10px;">【本月】</a> -->
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" >
+                <el-form-item label="电销组:">
+                    <el-select v-model="searchForm.teleGroupId" placeholder="电销组" value-key="id"
+                               filterable clearable @change="changeTeleGroup" :disabled="isDXZDisabled">
+                        <el-option
+                            v-for="item in teleGroupList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:">
+                    <el-select v-model="searchForm.accountId" placeholder="电销顾问" filterable value-key="id" clearable>
+                        <el-option
+                            v-for="item in tmList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <!--<el-form-item label="电销顾问:" label-width="55px">-->
+                    <!--<el-input placeholder="电销顾问"  v-model="searchForm.accoutName"></el-input>-->
+                <!--</el-form-item>-->
+                <el-form-item label="通话时间段:">
+                    <el-date-picker v-model="searchForm.startTime" type="datetime" placeholder="选择开始日期"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="searchForm.endTime" type="datetime" placeholder="选择结束日期" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
+                </el-form-item>   
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="initCallRecordData" style="width: 90px;margin-left: 10px;">搜索</el-button>
+                    <!-- <el-button type="info" style="width: 90px;">取消</el-button> -->
+                </el-form-item> 
+            </el-form>
+        </div>
+        <div class="fs16 marginB20">通话总时长：<span style="color:red">{{totalTalkTime | fomatSeconds2}}</span></div>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="callRecordData" 
+            >
+            <el-table-column type="index" width="50" align="center" label="序号"> </el-table-column>
+            <el-table-column align="center" prop="accountName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="talkTime" label="通话总时长" :formatter="getTalkTimeText"></el-table-column>
+            
+            
+        </el-table>
+        <table-pagination :pager="pager" @change="initCallRecordData"></table-pagination>
+    </div>
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+  var teleGroupList = [[${teleGroupList}]];
+  var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+</script>
+
+<!-- 当前页面的js -->
+<script th:src="@{/js/custom/callrecord/tmTalkTimeCallRecord.js?v=1.0.1}"></script>
+</html>

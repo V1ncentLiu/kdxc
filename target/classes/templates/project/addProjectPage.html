@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+        .userManage .mainWhitePadding {
+            padding: 30px 10% 30px 10%;
+        }
+
+        .userManage .mainWhitePadding .el-form-item__content {
+            width: 290px;
+        }
+
+        .userManage .mainWhitePadding .shopType .el-form-item__content {
+            width: auto;
+        }
+
+        .userManage .mainWhitePadding .el-checkbox {
+            margin-left: 0;
+            margin-right: 10px !important;
+        }
+
+        /*提示样式修改*/
+        .el-tooltip__popper {
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+<div id="userManage" class="userManage mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>项目管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">添加项目</div>
+        <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="项目名称：" :label-width="formLabelWidth1" prop="projectName">
+                        <el-input v-model="form.projectName" maxlength="50" autocomplete="off"
+                                  style="width:100%;"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="选择所属品牌：" :label-width="formLabelWidth1" prop="brandName">
+                        <!-- <el-row>
+                            <el-col :span="12">
+                                <el-input v-model="form.brandName" autocomplete="off" :readonly="brandNameReadonly"></el-input>                                
+                            </el-col>
+                            <el-col :span="10">
+                                <el-button type="primary" size="small" @click="dialogFormChooseBrand = true">选择品牌</el-button>
+                            </el-col>    
+                        </el-row> -->
+                        <el-input v-model="form.brandName" autocomplete="off" :readonly="brandNameReadonly"
+                                  style="width:200px;margin-right: 6px;"></el-input>
+                        <el-button type="primary" size="small" @click="dialogFormChooseBrand = true">选择品牌</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="项目品类：" :label-width="formLabelWidth1" prop="category">
+                        <el-select v-model="form.category" placeholder="请选择" style="width:100%;">
+                            <el-option
+                                    v-for="item in categoryOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="搜索词：" :label-width="formLabelWidth1" prop="searchWord">
+                        <el-input v-model="form.searchWord" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <!--  <el-col :span="8">
+                     <el-form-item label="公司：" :label-width="formLabelWidth1" prop="companyId">
+                         <el-select v-model="form.companyId" placeholder="请选择" style="width:100%">
+                             <el-option
+                                 v-for="item in companyOptions"
+                                 :key="item.id"
+                                 :label="item.companyName"
+                                 :value="item.id">
+                             </el-option>
+                         </el-select>
+                     </el-form-item>
+                 </el-col> -->
+                <el-col :span="12">
+                    <el-form-item label="项目所属集团：" :label-width="formLabelWidth1" prop="groupId">
+                        <el-select filterable v-model="form.groupId" placeholder="请选择" style="width:100%">
+                            <el-option
+                                    v-for="item in companyOptions"
+                                    :key="item.id"
+                                    :label="item.groupName"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="品牌总部所在地：" :label-width="formLabelWidth1" prop="headAddress">
+                        <el-input v-model="form.headAddress" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="结算比例：" :label-width="formLabelWidth1" prop="ratio">
+                        <el-select v-model="form.ratio" placeholder="请选择" style="width:100%">
+                            <el-option
+                                    v-for="item in ratioList"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="品牌所属公司：" :label-width="formLabelWidth1" prop="brandCompany">
+                        <el-input v-model="form.brandCompany" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="保底服务费：" :label-width="formLabelWidth1" prop="lowestCommission">
+                        <el-input v-model="form.lowestCommission" maxlength="10" autocomplete="off"  @keyup.native="checkNum" style="width: 90%;"></el-input>&nbsp;&nbsp;元
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="行业类别：" :label-width="formLabelWidth1" prop="classification">
+                        <el-select v-model="form.classification" placeholder="请选择" style="width:100%">
+                            <el-option
+                                    v-for="item in classificationOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="是否给品牌商结算：" :label-width="formLabelWidth1" prop="isSettle">
+                        <el-select v-model="form.isSettle" placeholder="请选择" style="width:100%">
+                            <el-option
+                                    v-for="item in isSettleOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="市场负责人：" :label-width="formLabelWidth1" prop="marketLeader">
+                        <el-input v-model="form.marketLeader" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="推广负责人：" :label-width="formLabelWidth1" prop="promotionLeader">
+                        <el-input v-model="form.promotionLeader" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="主营产品：" :label-width="formLabelWidth1" prop="product">
+                        <el-input v-model="form.product" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="推广地域：" :label-width="formLabelWidth1" prop="phone">
+                        <el-input v-model="form.promotionArea" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="投资政策：" :label-width="formLabelWidth1" prop="password">
+                        <el-input v-model="form.investmentPolicy" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="是否不可签约：" :label-width="formLabelWidth1" prop="isNotSign">
+                        <el-select v-model="form.isNotSign" placeholder="请选择" style="width:100%">
+                            <el-option
+                                    v-for="item in isNotSignOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="招商负责人：" :label-width="formLabelWidth1" prop="investmentLeader">
+                        <el-input v-model="form.investmentLeader" maxlength="50" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="项目归属：" :label-width="formLabelWidth1" prop="projectAttributive">
+                        <el-select v-model="form.projectAttributive" placeholder="请选择" style="width:100%">
+                            <el-option
+                                    v-for="item in projectAttributiveOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12" class="shopType">
+                    <el-form-item label="店型：" :label-width="formLabelWidth1" prop="shopTypeList">
+                        <el-checkbox-group v-model="form.shopTypeList">
+                            <el-checkbox v-for="item in shopTypeOptions" :label="item.value" :key="item.value">
+                                {{item.name}}
+                            </el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row class="f-tac">
+                <el-button type="primary" :disabled="submitDisabled" @click="onSubmit('form')">确认</el-button>
+                <el-button @click="goBack()">取消</el-button>
+            </el-row>
+        </el-form>
+    </el-row>
+
+    <el-dialog title="选择品牌" :visible.sync="dialogFormChooseBrand" width="870px">
+        <el-form :inline="true" :model="brandSearchForm" class="demo-form-inline" ref="brandSearchForm">
+            <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+                <el-form-item class="formItem" prop="brandName">
+                    <el-input v-model="brandSearchForm.brandName" placeholder="品牌名"
+                              class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item prop="categoryId">
+                    <el-select v-model="brandSearchForm.category" clearable placeholder="选择品类">
+                        <el-option
+                                v-for="item in brandCategoryOptions"
+                                :key="item.id"
+                                :label="item.category_name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item class="formItem" prop="city">
+                    <el-input v-model="brandSearchForm.city" placeholder="总部所在城市" class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item class="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
+                </el-form-item>
+            </el-row>
+        </el-form>
+        <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTableBrand"
+        >
+            <el-table-column align="center" width="55" label="选择">
+                <template slot-scope="scope">
+                    <el-radio :label="scope.row.bid" v-model="tableRadio" @change="selectBrand(scope.row)">&nbsp;
+                    </el-radio>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" label="品牌logo">
+                <template slot-scope="scope">
+                    <img :src="scope.row.logo"></img>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="name" label="名称"></el-table-column>
+            <el-table-column align="center" prop="brand_join.join_investment" label="投资金额(万)"></el-table-column>
+            <el-table-column align="center" prop="categories" label="品类" :formatter="transCategories"></el-table-column>
+            <el-table-column align="center" prop="main_product_text" width="80px" :show-overflow-tooltip="true"
+                             label="产品"></el-table-column>
+            <el-table-column align="center" prop="company_city" label="总部城市"></el-table-column>
+            <el-table-column align="center" prop="company_name" label="公司名称"></el-table-column>
+            <el-table-column align="center" prop="company_phone" label="公司电话"></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-dialog>
+
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var classificationList = [[${classificationList}]];//项目类别集合
+    var categoryList = [[${categoryList}]];//品类集合
+    var shopTypeList = [[${shopTypeList}]];//店型集合
+    var projectAttributiveList = [[${projectAttributiveList}]];//店型集合
+    var companyList = [[${companyList}]];//店型集合
+    var brandCategoryList = [[${brandCategoryList}]];//品类集合
+    var project = [[${project}]];//品类集合
+    var ratioList = [[${ratioList}]];//比例集合
+
+    var projectVm = new Vue({
+        el: '#userManage',
+        data: function () {
+            return {
+                tableRadio: '',
+                dialogFormChooseBrand: false,
+                submitDisabled: false,
+                brandNameReadonly: true,
+                ratioList: ratioList,
+                isSettleOptions: [
+                    {
+                        value: '0',
+                        label: '否'
+                    },
+                    {
+                        value: '1',
+                        label: '是'
+                    }
+                ],
+                form: {
+                    id: '',
+                    projectName: '',
+                    category: '',
+                    brandId: '',
+                    brandName: '',
+                    companyId: '',
+                    classification: '',
+                    searchWord: '',
+                    brandCompany: '',
+                    marketLeader: '',
+                    investmentLeader: '',
+                    promotionLeader: '',
+                    product: '',
+                    investmentPolicy: '',
+                    promotionArea: '',
+                    isNotSign: '',
+                    projectAttributive: '',
+                    shopType: '',
+                    shopTypeList: [],
+                    headAddress: '',
+                    groupId: '',
+                    ratio: '',
+                    lowestCommission: '',
+                    isSettle: '0',
+
+                },
+                pager: {
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                brandSearchForm: {
+                    brandName: '',
+                    ctiy: '',
+                    categoryId: '',
+                },
+                rules: {
+                    projectName: [
+                        {required: true, message: '项目名称不能为空', trigger: 'blur'}
+                    ],
+                    product: [
+                        {max: 50, message: '最长50个字符', trigger: 'blur'}
+                    ],
+                    headAddress: [
+                        {max: 50, message: '最长50个字符', trigger: 'blur'}
+                    ],
+                    brandCompany: [
+                        {max: 50, message: '最长50个字符', trigger: 'blur'}
+                    ],
+                    ratio: [{required: true, message: '请选择结算比例', trigger: 'change'}],
+                    groupId: [{required: true, message: '请选择集团', trigger: 'change'}],
+                    isSettle: [{required: true, message: '请选择是否给品牌商结算', trigger: 'change'}],
+                    category: [{required: true, message: '请选择项目品类', trigger: 'change'}],
+
+                },
+                formLabelWidth1: '150px',
+                dataTableBrand: [],
+                classificationOptions: classificationList,
+                categoryOptions: categoryList,
+                shopTypeOptions: shopTypeList,
+                projectAttributiveOptions: projectAttributiveList,
+                companyOptions: companyList,
+                brandCategoryOptions: brandCategoryList,
+                isNotSignOptions: [{
+                    value: 1,
+                    name: '是'
+                }, {
+                    value: 0,
+                    name: '否'
+                }]
+            }
+        },
+        methods: {
+            //只输入数字
+            checkNum() {
+                this.form.lowestCommission = this.form.lowestCommission.replace(/[^\.\d]/g, '');
+                this.form.lowestCommission = this.form.lowestCommission.replace('.', '');
+            },
+            //选择品牌
+            selectBrand(row) {
+                projectVm.tableRadio = row.bid;
+                projectVm.form.brandName = row.name;
+                projectVm.form.brandId = row.bid;
+                projectVm.form.product = row.main_product_text;
+                projectVm.form.headAddress = row.company_city;
+                projectVm.form.brandCompany = row.company_name;
+                projectVm.form.category = '';
+                var categories = row.categories
+                if (categories != undefined && categories[0] != undefined) {
+                    for (var i = 0; i < categoryList.length; i++) {
+                        if (categoryList[i].name == categories[0].category_name) {
+                            projectVm.form.category = categoryList[i].value;
+                        }
+                    }
+                }
+                projectVm.dialogFormChooseBrand = false;
+            },
+            //品牌品类转换方法
+            transCategories(row, column, cellValue, index) {
+                var text = "";
+                if (cellValue != undefined) {
+                    for (var i = 0; i < cellValue.length; i++) {
+                        if (i == 0) {
+                            text = cellValue[i].category_name;
+                        } else {
+                            text = text + "," + cellValue[i].category_name;
+                        }
+                    }
+                }
+                return text;
+            },
+            //返回
+            goBack() {//点击左侧节点
+                document.location.href = '/aggregation/projectManager/initProjectList';
+            },
+            searchTable() {//品牌列表
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.brandName = this.brandSearchForm.brandName;
+                param.city = this.brandSearchForm.city;
+                param.categoryId = this.brandSearchForm.category;
+                console.info(param);
+                axios.post('/aggregation/projectManager/brandList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        projectVm.dataTableBrand = table.data;
+                        projectVm.pager.total = table.total;
+                        projectVm.pager.currentPage = table.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            onSubmit(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+
+                        var param = projectVm.form;
+                        var shopType = '';
+                        for (var i = 0; i < param.shopTypeList.length; i++) {
+                            if (i == 0) {
+                                shopType = param.shopTypeList[i];
+                            } else {
+                                shopType = shopType + "," + param.shopTypeList[i];
+                            }
+                        }
+                        param.ratio = param.ratio.replace("%", "");
+                        param.shopType = shopType;
+                        var url = "/aggregation/projectManager/saveProject";
+                        if (param.id != "") {
+                            url = "/aggregation/projectManager/updateProject";
+                        }
+                        projectVm.submitDisabled = true;
+                        axios.post(url, param)
+                            .then(function (response) {
+                                // console.info(response);
+                                var data = response.data;
+                                if (data.code != "0") {
+                                    projectVm.$message(data.msg);
+                                    projectVm.submitDisabled = false;
+                                } else {
+                                    projectVm.$message({
+                                        message: '提交成功', type: 'success', duration: 1000, onClose: function () {
+                                            projectVm.submitDisabled = false;
+                                            document.location.href = '/aggregation/projectManager/initProjectList';
+                                        }
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                projectVm.submitDisabled = false;
+                                console.log(error);
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            }
+        },
+        created() {
+            console.info("create method");
+            this.searchTable();
+            if (project != null) {
+                this.form.id = project.id;
+                this.form.projectName = project.projectName;
+                this.form.category = project.category;
+                this.form.brandId = project.brandId;
+                this.form.brandName = project.brandName;
+                this.form.companyId = project.companyId;
+                this.form.classification = project.classification;
+                this.form.brandCompany = project.brandCompany;
+                this.form.marketLeader = project.marketLeader;
+                this.form.investmentLeader = project.investmentLeader;
+                this.form.promotionLeader = project.promotionLeader;
+                this.form.product = project.product;
+                this.form.investmentPolicy = project.investmentPolicy;
+                this.form.promotionArea = project.promotionArea;
+                this.form.isNotSign = project.isNotSign;
+                this.form.projectAttributive = project.projectAttributive;
+                this.form.searchWord = project.searchWord;
+                this.form.headAddress = project.headAddress;
+                this.form.ratio = project.ratio + "%";
+                this.form.groupId = project.groupId;
+                this.form.isSettle = project.isSettle + "";
+                this.form.lowestCommission = project.lowestCommission;
+                if (project.shopType != null && project.shopType != "") {
+                    this.form.shopTypeList = project.shopType.split(",");
+                }
+            }
+        },
+        mounted() {
+            document.getElementById('userManage').style.display = 'block';
+        }
+    })
+</script>
+</html>
