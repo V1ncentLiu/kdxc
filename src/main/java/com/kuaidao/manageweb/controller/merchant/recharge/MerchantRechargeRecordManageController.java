@@ -94,12 +94,12 @@ public class MerchantRechargeRecordManageController {
   **/
   @RequestMapping("/initOfflinePayment")
   @RequiresPermissions("merchant:merchantRechargeRecordManage:add")
-  public JSONResult<Boolean> initOfflinePayment(HttpServletRequest request){
+  public String initOfflinePayment(HttpServletRequest request){
     // 商家账号
     List<UserInfoDTO> userList = getMerchantUser(null);
     request.setAttribute("merchantUserList",userList);
 
-    return null;
+    return "/merchant/rechargeRecord/rechargePaymentOffline";
   }
 
   /**
