@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{::link},~{})">
     <title>后台管理系统</title>
-    <link rel="stylesheet" th:href="@{/css/custom/login/login.css}">
+    <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}">
 </head>
 <body>
     <div id="Loading">
@@ -13,66 +13,68 @@
         </div>
     </div>
     <div id="loginbox" class="loginbox">
-            <div class="control-group normal_text">忘记密码-找回密码</div>
-            <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm" class="demo-resetPwdForm" >
-                <el-row>
-                    <el-form-item  prop="username">
-                      <span class="iconImg"><img th:src="@{/images/loginIco01.jpg}" alt=""></span>
-                      <el-input v-model="resetPwdForm.username" maxlength="30"  placeholder="输入登录用户名"></el-input>
+      <div id="passwordloginbox" class="passwordloginbox">
+        <div class="control-group normal_text">忘记密码-找回密码</div>
+        <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm" class="demo-resetPwdForm" label-width="100px">
+            <el-row class="accountNumber">
+                <el-form-item  prop="username" label="登陆账号">
+                  <!-- <span class="iconImg"><img th:src="@{/images/loginIco01.jpg}" alt=""></span> -->
+                  <el-input v-model="resetPwdForm.username" maxlength="30"  placeholder="请输入用户名"></el-input>
+                </el-form-item>
+            </el-row>
+            <el-row class="accountNumber" id="merchantloginbox">
+                <el-col :span="9">
+                    <el-form-item  prop="codeInput">
+                      <!-- <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span> -->
+                      <el-input v-model="resetPwdForm.codeInput" maxlength="6"  placeholder="请输入验证码     |"></el-input>
                     </el-form-item>
-                </el-row>
-                <el-row>
-                    <el-col :span="14">
-                        <el-form-item  prop="codeInput">
-                          <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span>
-                          <el-input v-model="resetPwdForm.codeInput" maxlength="6"  placeholder="输入验证码"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="10">
-                    	<el-button type="primary" class="codeBtn" @click="sendCode('resetPwdForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
-                    </el-col>
-                </el-row>
-                        
-                <div class="control-group">
-                    <div class="codeTip">
-                        未收到验证码，使用<span class="link">
-                          <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('resetPwdForm','1');">短信验证码</el-button>
-                          <!-- <a id="msgHref" type="submit" @click="sendCode('resetPwdForm','1');">短信验证码</a> -->
-                        </span>
-                    </div>              
-                </div>
-                <el-row>
-                    <el-form-item  prop="pswInput1">
-                      <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span>
-                      <el-input type="password" v-model="resetPwdForm.pswInput1" maxlength="30"  placeholder="新密码（6-30位，数字和字母组合）"></el-input>
-                      <!-- <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span> -->
-                    </el-form-item>
-                </el-row>
-                <el-row>
-                    <el-form-item  prop="pswInput2">
-                      <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span>
-                      <el-input type="password" v-model="resetPwdForm.pswInput2" maxlength="30"  placeholder="确认新密码"></el-input>
-                      <!-- <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span> -->
-                    </el-form-item>
-                </el-row>
-            </el-form>
+                </el-col>
+                <el-col :span="10">
+                  <el-button type="primary" class="codeBtn" @click="sendCode('resetPwdForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
+                </el-col>
+            </el-row>
+                    
             <div class="control-group">
-                <!-- 提示语 -->
-                <div class="tipBox">
-                    <div class="tipCntBox" id="errorSpan"></div>
+                <div class="codeTip">
+                    未收到验证码，使用<span class="link">
+                      <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('resetPwdForm','1');">短信验证码</el-button>
+                      <!-- <a id="msgHref" type="submit" @click="sendCode('resetPwdForm','1');">短信验证码</a> -->
+                    </span>
                 </div>              
-                <!-- 提示语结束 -->
-                <div class="loginBtnBox">
-                  <el-row :gutter="20">
-                    <el-col :span="14">
-                      <el-button class="resetBtn" type="primary" @click="submitForm('resetPwdForm')">提&nbsp;&nbsp;交</el-button>
-                    </el-col>
-                    <el-col :span="10">
-                      <el-button class="cancelBtn" @click="toLogin()">取&nbsp;&nbsp;消</el-button>
-                    </el-col>
-                  </el-row>
-                </div>
             </div>
+            <el-row class="accountNumber">
+                <el-form-item  prop="pswInput1" label="新密码">
+                  <!-- <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span> -->
+                  <el-input type="password" v-model="resetPwdForm.pswInput1" maxlength="30"  placeholder="请输入密码"></el-input>
+                  <!-- <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span> -->
+                </el-form-item>
+            </el-row>
+            <el-row class="accountNumber">
+                <el-form-item  prop="pswInput2" label="确认密码">
+                  <!-- <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span> -->
+                  <el-input type="password" v-model="resetPwdForm.pswInput2" maxlength="30"  placeholder="请输入密码"></el-input>
+                  <!-- <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span> -->
+                </el-form-item>
+            </el-row>
+        </el-form>
+        <div class="control-group">
+            <!-- 提示语 -->
+            <div class="tipBox">
+                <div class="tipCntBox" id="errorSpan"></div>
+            </div>              
+            <!-- 提示语结束 -->
+            <div class="loginBtnBox">
+              <el-row>
+                <el-col :span="11">
+                  <el-button class="resetBtn" type="primary" @click="submitForm('resetPwdForm')">提&nbsp;&nbsp;交</el-button>
+                </el-col>
+                <el-col :span="11" style="margin-left: 40px">
+                  <el-button class="cancelBtn" @click="toLogin()">取&nbsp;&nbsp;消</el-button>
+                </el-col>
+              </el-row>
+            </div>
+        </div>
+      </div>
     </div>
 </body>
 <!-- import common js-->
