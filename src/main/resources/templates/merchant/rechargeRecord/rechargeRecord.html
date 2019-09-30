@@ -55,7 +55,7 @@
             </el-form>
         </div>
         <el-row class="greyTip">
-            <span>今日累积充值：{{rechargeDTO.DaySumMoney}}元</span><span>本月累计充值：{{rechargeDTO.monthSumMoney}}元</span>
+            <span style="margin-right: 10px;">今日累积充值：{{rechargeDTO.DaySumMoney}}元</span><span>本月累计充值：{{rechargeDTO.monthSumMoney}}元</span>
         </el-row>
         <el-row>            
             <el-table
@@ -75,7 +75,7 @@
                 <el-table-column align="center" prop="rechargeBusinessName" label="充值商家">
                     <template slot-scope="scope">
                         <span>{{scope.row.rechargeBusinessName}}</span>
-                        <el-button type="text" @click="openImg">图片</el-button>
+                        <el-button type="text" @click="openImg(scope.row.imgUrl)">图片</el-button>
                     </template>
                 </el-table-column> 
                 <el-table-column align="center" prop="rechargeWay" label="充值方式">
@@ -96,7 +96,7 @@
     </div>
     <!-- 分配资源 -->
     <el-dialog title="图片" :visible.sync="ImgFormVisible" width="540px">
-        <img src="" alt="">
+        <img :src="imgUrl" alt="">
     </el-dialog>
 </div>
 </body>
@@ -114,6 +114,7 @@
             return {
                 rechargeDTO:rechargeAccountDTO,
                 ImgFormVisible:false,
+                imgUrl:'',
                 pendingReviewNum:'',
                 multipleSelection: [],//选择行
                 pager:{
@@ -189,10 +190,11 @@
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
             gotoAdd(){
-                
+                window.location.href="/merchant/merchantRechargeRecordManage/initOfflinePayment"
             },
-            openImg() {
-                this.ImgFormVisible = false;
+            openImg(url) {
+                this.ImgFormVisible = true;
+                this.imgUrl=url;
             },
         },
         created(){

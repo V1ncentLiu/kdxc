@@ -19,18 +19,18 @@
     <div class="inforTitle">录入线下充值</div> 
     <el-form :model="form" ref="form" :rules="rules" :label-width="formLabelWidth">
         <el-row class="borderbox padding20">
-            <el-form-item label="充值商家：" prop="seller">
-                <el-select v-model="form.seller" placeholder="请选择">
-                    <el-option
-                        v-for="item in options"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>                  
-            </el-form-item>
-            <el-form-item label="充值金额：" prop="money">
-                <el-input v-model="form.money" placeholder="1-999999" style="width: 250px;"></el-input>                    
+            <el-form-item label="充值商家：" prop="rechargeBusiness">
+                    <el-select v-model="form.rechargeBusiness" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            <el-form-item label="充值金额：" prop="rechargeMoney">
+                <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;"></el-input>                    
             </el-form-item>
             <el-form-item label="图片证明：" prop="fileList" style="width: 400px;">
                 <el-upload
@@ -59,16 +59,17 @@
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-
 <!-- import common js-->
 <script th:inline="javascript">
+    var merchantUserList=[[${merchantUserList}]];//商户集合
     var ocmVM = new Vue({
         el: '#recordPaymentOffline',
         data: function() {
             return {
+                merchantUserListOptions:merchantUserList,
                 form: {
-                    money:'',
-                    seller: '1',
+                    rechargeBusiness:'',
+                    rechargeMoney: '',
                     fileList: []
                 },
                 options: [{
@@ -80,10 +81,10 @@
                 }],
         
                 rules:{
-                    seller: [
+                    rechargeBusiness: [
                         { required: true, message: '请输选充值择商家', trigger: 'blur' }
                     ],
-                    money: [
+                    rechargeMoney: [
                         { required: true, message: '请输入充值金额', trigger: 'blur' }
                     ],
                     fileList: [
