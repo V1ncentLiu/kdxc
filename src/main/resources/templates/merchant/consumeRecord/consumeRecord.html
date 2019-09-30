@@ -86,35 +86,35 @@
         <el-form :model="formRemind" ref="formRemind">
             <el-form-item 
                 label="账户余额低于：" 
-                prop="invoiceTitle"
+                prop="amount"
                 :rules="[
                     { required: true, message: '账户余额低于不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="formRemind.invoiceTitle" placeholder=""></el-input>元
+                <el-input v-model="formRemind.amount" placeholder="" style="width: 290px;"></el-input>元
             </el-form-item>
             <el-form-item 
                 label="提醒标题：" 
-                prop="invoiceTitle"
+                prop="title"
                 :rules="[
                     { required: true, message: '提醒标题不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="formRemind.invoiceTitle" placeholder=""></el-input>
+                <el-input v-model="formRemind.title" placeholder="" style="width: 290px;"></el-input>
             </el-form-item>
             <el-form-item 
                 label="提醒内容：" 
-                prop="invoiceTitle"
+                prop="content"
                 :rules="[
                     { required: true, message: '提醒内容不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.invoiceTitle"></el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formRemind')">提交</el-button>
-            <el-button @click="resetForm('formRemind');remindFormVisible = false;">取 消</el-button>
+            <el-button @click="remindFormVisible= false">取 消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -148,7 +148,9 @@
                 dataTable: [],
                 merchantUserListOptions:merchantUserList,
                 formRemind:{
-
+                    amount:'',
+                    title:'',
+                    content:''
                 },
                 todayNum:'',
                 todayAmount:'',
@@ -213,44 +215,63 @@
             },
             openRemindDig(){
                 this.remindFormVisible = true;
+                var param={};
+                axios.post('/merchant/balanceWarnSetting/getBalanceWarnSetting',param)
+                .then(function (response) {
+                    var data =  response.data;
+                    debugger;
+                    if(data.code=='0'){
+                        ocmVM.formRemind.amount=data.amount;
+                        ocmVM.formRemind.title=data.title;
+                        ocmVM.formRemind.content=data.content;
+                    }else{
+                        ocmVM.$message({
+                            message: data.msg,
+                            type: 'error'
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+
+                });
             },
             submitApplyForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.btnDisabled = true;
-                        var rows = this.multseleSelection;
-                        var rowIds = [];
-                        for (var i = 0; i < rows.length; i++) {
-                            var curRow = rows[i];
-                            rowIds.push(curRow.clueId);
-                        }
                         //分配
                         var param = {};
-                        param.clueIds = rowIds;
-                        param.userId = this.formRemind.userId;
-                        axios.post('/clue/management/clueAssign',param)
-                            .then(function (response) {
-                                var data =  response.data;
-                                debugger;
-                                if(data.code=='0'){
-                                    ocmVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
-                                            ocmVM.remindFormVisible = false;
-                                            ocmVM.btnDisabled = false;
-                                            ocmVM.searchTable();
-                                        }});
-                                }else{
-                                    clueVM.$message({
-                                        message: "接口调用失败",
-                                        type: 'error'
-                                    });
-                                }
-                            })
-                            .catch(function (error) {
-                                console.log(error);
-                            })
-                            .then(function () {
+                        param.amount = this.formRemind.amount;
+                        param.title = this.formRemind.title;
+                        param.content = this.formRemind.content;
 
-                            });
+                        axios.post('/merchant/balanceWarnSetting/setting',param)
+                        .then(function (response) {
+                            var data =  response.data;
+                            debugger;
+                            if(data.code=='0'){
+                                ocmVM.$message({message:'设置成功',type:'success',duration:2000,onClose:function(){
+                                        ocmVM.remindFormVisible = false;
+                                        ocmVM.btnDisabled = false;
+                                        ocmVM.searchTable();
+                                    }});
+                            }else{
+                                ocmVM.$message({
+                                    message: data.msg,
+                                    type: 'error'
+                                });
+                                ocmVM.btnDisabled = false;
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+
+                        });
                     } else {
                         console.log('数据未通过校验！');
                         return false;
