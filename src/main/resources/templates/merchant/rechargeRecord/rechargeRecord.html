@@ -23,7 +23,7 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
                 <el-form-item label="商家:" label-width="auto">
-                    <el-select v-model="form.applyPerson" filterable  clearable placeholder="商家账户名">
+                    <el-select v-model="form.manageRechargeUser" filterable  clearable placeholder="商家账户名">
                         <el-option
                             v-for="item in merchantUserListOptions"
                             :key="item.id"
@@ -34,14 +34,14 @@
                 </el-form-item>
                 <el-form-item label="充值时间:">
                     <el-date-picker
-                        v-model="form.startTime"
+                        v-model="form.rechargeBeginTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.endTime"
+                        v-model="form.rechargeEndTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
@@ -68,23 +68,28 @@
             >
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>                
-                <el-table-column align="center" prop="applyPersonStr" label="流水号"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="充值日期"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="applyNum" label="充值金额"></el-table-column>
-                <el-table-column align="center" prop="remark" label="赠送金额"></el-table-column>
-                <el-table-column align="center" prop="applyArea" label="充值商家">
+                <el-table-column align="center" prop="serialNumber" label="流水号"></el-table-column>
+                <el-table-column align="center" prop="rechargeTime" label="充值日期"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="rechargeMoney" label="充值金额"></el-table-column>
+                <el-table-column align="center" prop="givenAmount" label="赠送金额"></el-table-column>
+                <el-table-column align="center" prop="rechargeBusiness" label="充值商家">
                     <template slot-scope="scope">
-                        <span>商家账户名</span>
+                        <span>{{scope.row.rechargeBusiness}}</span>
                         <el-button type="text" @click="openImg">图片</el-button>
                     </template>
                 </el-table-column> 
-                <el-table-column align="center" prop="remark" label="充值方式"></el-table-column>
-                <el-table-column align="center" prop="applyArea" label="充值类型">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.applyArea == null || scope.row.applyArea == ''">线上</div>
-                        <div v-else>线下</div>
+                <el-table-column align="center" prop="rechargeWay" label="充值方式">
+                    <template slot-scope="scope">                        
+                        <span v-if="scope.row.rechargeWay == 1">支付宝</span>
+                        <span v-if="scope.row.rechargeWay == 2">微信</span>
                     </template>
-                </el-table-column>                
+                </el-table-column>
+                <el-table-column align="center" prop="rechargeType" label="充值类型">
+                    <template slot-scope="scope">                        
+                        <span v-if="scope.row.rechargeType == 1">线上</span>
+                        <span v-if="scope.row.rechargeType == 2">线下</span>
+                    </template>
+                </el-table-column>               
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -102,40 +107,29 @@
 <script th:inline="javascript">
     var merchantUserList=[[${merchantUserList}]];//商户集合
     var rechargeAccountDTO=[[${rechargeAccountDTO}]];
+    console.log(rechargeAccountDTO)
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
-              rechargeDTO:rechargeAccountDTO,
+                rechargeDTO:rechargeAccountDTO,
                 ImgFormVisible:false,
                 pendingReviewNum:'',
                 multipleSelection: [],//选择行
                 pager:{
-                  total: 0,
-                  currentPage: 1,
-                  pageSize: 20,
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
                 },
                 form: {
-                  startTime:'',
-                  endTime:'',
-                  auditStatus:''
+                    manageRechargeUser:'',
+                    rechargeBeginTime:'',
+                    rechargeEndTime:'',
+                    serialNumber:''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
-                merchantUserListOptions:merchantUserList,
-                statusOptions: [{
-                  value: "",
-                  name: '全部'
-                },{
-                  value: 0,
-                  name: '待审核'
-                }, {
-                  value: 2,
-                  name: '已审核'
-                }],
-                formApply:{
-
-                }
+                merchantUserListOptions:merchantUserList
             }             
         },
         methods: {
@@ -153,8 +147,8 @@
                 console.log(index, row);
             },
             searchTable() {
-                var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
+                var startTime=this.form.rechargeBeginTime;
+                var endTime=this.form.rechargeEndTime;
                 if(endTime && startTime>endTime){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
@@ -164,9 +158,12 @@
                 }
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;                
-                console.info(param);
-                axios.post('/merchant/clue/setting/applyPage', param)
+                param.pageNum = this.pager.currentPage; 
+                param.manageRechargeUser = this.form.manageRechargeUser;
+                param.rechargeBeginTime = this.form.rechargeBeginTime; 
+                param.rechargeEndTime = this.form.rechargeEndTime;
+                param.serialNumber = this.form.serialNumber; 
+                axios.post('/merchant/merchantRechargeRecordBusiness/queryManagePageList', param)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;

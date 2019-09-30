@@ -22,7 +22,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
-                <el-form-item label="充值时间:">
+                <el-form-item label="充值时间:" label-width="auto">
                     <el-date-picker
                         v-model="form.rechargeBeginTime"
                         type="datetime"
@@ -63,30 +63,29 @@
                 :data="dataTable"
                 @selection-change="handleSelectionChange"
             >
-                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="充值时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="充值时间"  :formatter="dateFormat" width="200"></el-table-column>
                 <el-table-column align="center" prop="serialNumber" label="流水号"></el-table-column>
                 <el-table-column align="center" prop="rechargeMoney" label="充值金额"></el-table-column>
                 <el-table-column align="center" prop="givenAmount" label="赠送金额"></el-table-column>
-                <el-table-column align="center" prop="rechargeWay" label="充值方式"></el-table-column>
+                <el-table-column align="center" prop="rechargeWay" label="充值方式">
+                    <template slot-scope="scope">                        
+                        <span v-if="scope.row.rechargeWay == 1">支付宝</span>
+                        <span v-if="scope.row.rechargeWay == 2">微信</span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="rechargeType" label="充值类型">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.applyArea == null || scope.row.applyArea == ''">线上</div>
-                        <div v-else>线下</div>
+                    <template slot-scope="scope">                        
+                        <span v-if="scope.row.rechargeType == 1">线上</span>
+                        <span v-if="scope.row.rechargeType == 2">线下</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="invoiceStatus" label="发票状态" width="80">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.auditStatus == '2'">
-                            <el-button size="mini" type="text">已开具</el-button>
-                        </span>
-                        <span v-if="scope.row.auditStatus == '2'">
-                            <el-button size="mini" type="text">已申请</el-button>
-                        </span>
-                        <span v-else>
-                            <el-button size="mini" type="text">未申请</el-button>
-                        </span>
+                        <span v-if="scope.row.invoiceStatus == '0'">未申请</span>
+                        <span v-if="scope.row.invoiceStatus == '1'">已申请</span>
+                        <span v-if="scope.row.invoiceStatus == '2'">已开具</span>   
                     </template>
                 </el-table-column>
             </el-table>
@@ -103,7 +102,7 @@
                 label="发票抬头：" 
                 prop="invoiceHeader"
                 :rules="[
-                    { required: true, message: '发票抬头不能为空', trigger: 'change' }
+                    { required: true, message: '发票抬头不能为空', trigger: 'blur' }
                 ]"
                 :label-width="formLabelWidth">
                 <el-input v-model="formApply.invoiceHeader" placeholder=""></el-input>
@@ -112,7 +111,7 @@
                 label="纳税人识别号：" 
                 prop="taxpayerIdentificationNum"
                 :rules="[
-                    { required: true, message: '纳税人识别号不能为空', trigger: 'change' }
+                    { required: true, message: '纳税人识别号不能为空', trigger: 'blur' }
                 ]"
                 :label-width="formLabelWidth">
                 <el-input v-model="formApply.taxpayerIdentificationNum" placeholder=""></el-input>
@@ -121,7 +120,7 @@
                 label="邮寄地址：" 
                 prop="address"
                 :rules="[
-                    { required: true, message: '邮寄地址不能为空', trigger: 'change' }
+                    { required: true, message: '邮寄地址不能为空', trigger: 'blur' }
                 ]"
                 :label-width="formLabelWidth">
                 <el-input v-model="formApply.address" placeholder=""></el-input>
@@ -130,7 +129,7 @@
                 label="联系电话：" 
                 prop="phone"
                 :rules="[
-                    { required: true, message: '联系电话不能为空', trigger: 'change' }
+                    { required: true, message: '联系电话不能为空', trigger: 'blur' }
                 ]"
                 :label-width="formLabelWidth">
                 <el-input v-model="formApply.phone" placeholder=""></el-input>
@@ -139,7 +138,7 @@
                 label="联系人姓名：" 
                 prop="name"
                 :rules="[
-                    { required: true, message: '联系人姓名不能为空', trigger: 'change' }
+                    { required: true, message: '联系人姓名不能为空', trigger: 'blur' }
                 ]"
                 :label-width="formLabelWidth">
                 <el-input v-model="formApply.name" placeholder=""></el-input>
@@ -188,10 +187,13 @@
                   name: '全部'
                 },{
                   value: 0,
-                  name: '待审核'
+                  name: '未申请'
+                }, {
+                  value: 1,
+                  name: '已申请'
                 }, {
                   value: 2,
-                  name: '已审核'
+                  name: '已开具'
                 }],
                 formApply:{
                     invoiceHeader:'',
@@ -199,6 +201,7 @@
                     address:'',
                     phone:'',
                     name:'',
+                    invoiceAmount:1000
                 }
             }             
         },
@@ -259,7 +262,7 @@
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
             openassignrDig(){
-                var rows = this.multseleSelection;
+                var rows = this.multipleSelection;
                 if(rows.length <1){
                 this.$message({
                     message: '请选择数据',
