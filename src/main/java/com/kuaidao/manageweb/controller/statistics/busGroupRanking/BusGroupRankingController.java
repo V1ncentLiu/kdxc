@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -74,6 +75,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
      * 一级页面分页查询
      */
     @RequestMapping("/getOnePageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getOneBusGroupRankingPageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         JSONResult<Map<String, Object>> oneBusGroupRankingPageList = busGroupRankingFeignClient.getOneBusGroupRankingPageList(baseBusQueryDto);
         return oneBusGroupRankingPageList;
@@ -89,6 +91,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
      * 二级页面分页查询
      */
     @RequestMapping("/getTwoPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getTwoBusGroupRankingPageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         return busGroupRankingFeignClient.getTwoBusGroupRankingPageList(baseBusQueryDto);
     }
