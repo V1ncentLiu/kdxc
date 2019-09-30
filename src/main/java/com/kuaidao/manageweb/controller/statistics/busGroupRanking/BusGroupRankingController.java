@@ -203,6 +203,8 @@ public class BusGroupRankingController extends BaseStatisticsController {
     private void addTotalExportData(BaseBusinessDto ra, List<List<Object>> dataList, Integer type) {
         List<Object> curList = new ArrayList<>();
         curList.add("");
+        curList.add("");
+        curList.add("合计");
         if(type.equals(2)){
             curList.add("");
         }
@@ -219,8 +221,10 @@ public class BusGroupRankingController extends BaseStatisticsController {
             BaseBusinessDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getBusinessAreaName());
+            curList.add(ra.getGroupName());
             if(type == 2){
-                curList.add("");
+                curList.add(ra.getProjectName());
             }
             curList.add(ra.getFirstVisitNum());
             curList.add(ra.getSignNum());
