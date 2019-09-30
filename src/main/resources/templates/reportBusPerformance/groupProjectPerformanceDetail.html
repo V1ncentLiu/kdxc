@@ -68,6 +68,16 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="项目：">  
+                    <el-select v-model="form.project" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                        <el-option
+                            v-for="item in projectList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
@@ -113,6 +123,7 @@
     var orgIdList = '';
     var cateringGroup = ''; // 餐饮集团
     var businessRegionArr = ''; // 商务大区
+    var projectList = ''; // 项目
 
     var deptList=[[${deptList}]];// 事业部
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
@@ -137,6 +148,7 @@
                     businessGroupId: '',
                     businessManagerId: '',
                     cateringGroup:'',
+                    project: ''
                 },
                 export: {
                     startTime:'',
@@ -145,10 +157,12 @@
                     businessGroupId: '',
                     businessManagerId: '',
                     cateringGroup:'',
+                    project: ''
                 },
                 tableData: [],
                 cateringGroup: cateringGroup,
                 businessRegionArr: businessRegionArr,
+                projectList: projectList,
                 orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
             }             
@@ -276,6 +290,7 @@
                 param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
                 param.cateringGroup = this.form.cateringGroup;
+                param.project = this.form.project;
                 this.loading = true;
                 axios.post('/performance/queryPage',param).then(function (response) {
                     if(!response || !response.data){
@@ -310,6 +325,7 @@
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.cateringGroup = mainDivVM.form.cateringGroup;
+                        mainDivVM.export.project = mainDivVM.form.project;
         
                     }else{
                         mainDivVM.loading = false;
@@ -425,10 +441,11 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.businessRegion = this.form.businessRegion;
-                param.businessGroupId = this.form.businessGroupId;
-                param.businessManagerId = this.form.businessManagerId;
-                param.cateringGroup = this.form.cateringGroup;
+                param.businessRegion = this.export.businessRegion;
+                param.businessGroupId = this.export.businessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                param.cateringGroup = this.export.cateringGroup;
+                param.project = this.export.project;
                 axios.post('/performance/export',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
@@ -447,9 +464,6 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-            
             // if(curUserId){
             //     this.isDisabledUserId = true;
             //     this.form.businessManagerId = curUserId;

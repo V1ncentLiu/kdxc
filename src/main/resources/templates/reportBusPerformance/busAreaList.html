@@ -57,10 +57,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="餐饮集团：">  
-                    <el-select v-model="form.cateringGroup" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                <el-form-item label="区域：">  
+                    <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable multiple>
                         <el-option
-                            v-for="item in cateringGroup"
+                            v-for="item in areaList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.value">
@@ -84,13 +84,12 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="teleGroupName" label="商务大区"></el-table-column>
-                <el-table-column prop="cateringGroup" label="餐饮集团">
-                    <template slot-scope="scope">
-                        <span v-if="scope.row.teleGroupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.teleGroupName}}</span>
-                        <el-button type="text" size="small" v-else>{{scope.row.teleGroupName}}</el-button>
-                    </template>
-                </el-table-column>
+                <el-table-column prop="area" label="区域">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.teleGroupId!='99999'">{{scope.row.area}}</span>
+                            <el-button type="text" size="small" v-else @click="gotoLink()">{{scope.row.area}}</el-button>
+                        </template>
+                    </el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
                 <el-table-column prop="visitRate" label="签约率"></el-table-column>
@@ -108,11 +107,9 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var orgIdList = '';
-    var cateringGroup = ''; // 餐饮集团
     var businessRegionArr = ''; // 商务大区
-
-    var deptList=[[${deptList}]];// 事业部
+    var areaList=[[${areaList}]];// 区域
+    areaList = '';
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
     var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
     var mainDivVM = new Vue({
@@ -134,7 +131,7 @@
                     businessRegion: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
+                    area:'',
                 },
                 export: {
                     startTime:'',
@@ -142,12 +139,12 @@
                     businessRegion: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
+                    area:'',
                 },
                 tableData: [],
-                cateringGroup: cateringGroup,
+                areaList: areaList,
                 businessRegionArr: businessRegionArr,
-                orgTeleArr: orgIdList, // 商务组
+                orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
             }             
         },
@@ -273,7 +270,7 @@
                 param.businessRegion = this.form.businessRegion;
                 param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
-                param.cateringGroup = this.form.cateringGroup;
+                param.area = this.form.area;
                 this.loading = true;
                 axios.post('/performance/queryPage',param).then(function (response) {
                     if(!response || !response.data){
@@ -307,7 +304,7 @@
                         mainDivVM.export.businessRegion = mainDivVM.form.businessRegion;
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
-                        mainDivVM.export.cateringGroup = mainDivVM.form.cateringGroup;
+                        mainDivVM.export.area = mainDivVM.form.area;
         
                     }else{
                         mainDivVM.loading = false;
@@ -336,15 +333,13 @@
                 }
             },
             gotoLink(row){
-                var cateringGroup = row.cateringGroup;
+                var area =  this.export.area;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var businessRegion = this.export.businessRegion;
                 var businessGroupId = this.export.businessGroupId;
                 var businessManagerId = this.export.businessManagerId;
-                if(cateringGroup){
-                    window.location.href="/performance/managerList?businessRegion="+ businessRegion+ "&businessGroupId="+ businessGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&businessManagerId=" + businessManagerId + "&cateringGroup=" + cateringGroup;
-                }
+                window.location.href="/performance/managerList?businessRegion="+ businessRegion+ "&businessGroupId="+ businessGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&businessManagerId=" + businessManagerId + "&area=" + area;
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -431,10 +426,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.businessRegion = this.form.businessRegion;
-                param.businessGroupId = this.form.businessGroupId;
-                param.businessManagerId = this.form.businessManagerId;
-                param.cateringGroup = this.form.cateringGroup;
+                param.businessRegion = this.export.businessRegion;
+                param.businessGroupId = this.export.businessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                param.area = this.export.area;
                 axios.post('/performance/export',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;

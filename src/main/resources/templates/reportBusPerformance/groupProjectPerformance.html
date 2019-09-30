@@ -87,8 +87,8 @@
                 <el-table-column prop="teleGroupName" label="商务大区"></el-table-column>
                 <el-table-column prop="cateringGroup" label="餐饮集团">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.teleGroupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.teleGroupName}}</span>
-                        <el-button type="text" size="small" v-else>{{scope.row.teleGroupName}}</el-button>
+                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.teleGroupName}}</el-button>
+                        <span v-else>{{scope.row.teleGroupName}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
@@ -431,10 +431,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.businessRegion = this.form.businessRegion;
-                param.businessGroupId = this.form.businessGroupId;
-                param.businessManagerId = this.form.businessManagerId;
-                param.cateringGroup = this.form.cateringGroup;
+                param.businessRegion = this.export.businessRegion;
+                param.businessGroupId = this.export.businessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                param.cateringGroup = this.export.cateringGroup;
                 axios.post('/performance/export',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;

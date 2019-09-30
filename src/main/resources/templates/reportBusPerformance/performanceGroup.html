@@ -48,7 +48,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务大区:">  
-                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable  @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in businessRegionArr"
                             :key="item.id"
@@ -58,7 +58,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -210,6 +210,19 @@
             centerStyle(){
                 return "text-align:center"
             },
+            firstCurTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getTelSale(seleVal);
+            },
+            curTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.businessManagerId = '';
+                this.getTelSale(seleVal);
+            },
             firstCurTelGroupSale(seleVal){
                 if(seleVal==null||seleVal==""){
                     return ;
@@ -220,11 +233,11 @@
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.form.teleGroupId = '';
+                this.form.businessGroupId = '';
+                this.form.businessManagerId = '';
                 this.getTelGroupSale(seleVal);
             },
             getTelGroupSale(seleVal){
-                if(!seleVal){return;}
                 param={};
                 param.parentId=seleVal;
                 param.orgType=1;
@@ -232,7 +245,20 @@
                     mainDivVM.orgTeleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
-                        message: "电销组请求失败，请稍后重试",
+                        message: "商务组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getTelSale(seleVal){
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/base/getSaleList' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "商务经理请求失败，请稍后重试",
                         type: "error"
                     });
                 });
@@ -484,7 +510,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
