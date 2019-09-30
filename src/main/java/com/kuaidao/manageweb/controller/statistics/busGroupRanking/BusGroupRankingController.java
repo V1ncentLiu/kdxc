@@ -72,7 +72,8 @@ public class BusGroupRankingController extends BaseStatisticsController {
      * 二级页面跳转
      */
     @RequestMapping("/toGroupProjectPerformanceDetail")
-    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,HttpServletRequest request) {
+    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,HttpServletRequest request) {
+        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,request);
         //商务组
         initOrgList(request);
         //商务大区
@@ -228,6 +229,17 @@ public class BusGroupRankingController extends BaseStatisticsController {
             curList.add(ra.getSignSingle());
             dataList.add(curList);
         }
+    }
+
+    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,HttpServletRequest request){
+        BaseBusQueryDto baseBusQueryDto = new BaseBusQueryDto();
+        baseBusQueryDto.setBusAreaId(busAreaId);
+        baseBusQueryDto.setBusinessGroupId(businessGroupId);
+        baseBusQueryDto.setStartTime(startTime);
+        baseBusQueryDto.setEndTime(endTime);
+        baseBusQueryDto.setBusinessManagerId(businessManagerId);
+        baseBusQueryDto.setGroupId(groupId);
+        request.setAttribute("baseBusQueryDto",baseBusQueryDto);
     }
 
 }
