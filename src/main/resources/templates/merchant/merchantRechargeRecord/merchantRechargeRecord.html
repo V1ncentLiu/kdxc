@@ -24,20 +24,20 @@
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
                 <el-form-item label="充值时间:">
                     <el-date-picker
-                        v-model="form.startTime"
+                        v-model="form.rechargeBeginTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.endTime"
+                        v-model="form.rechargeEndTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="发票状态:">
-                    <el-select v-model="form.auditStatus" clearable placeholder="全部">
+                    <el-select v-model="form.invoiceStatus" clearable placeholder="全部">
                         <el-option
                             v-for="item in statusOptions"
                             :key="item.value"
@@ -65,18 +65,18 @@
             >
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="充值时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="applyPersonStr" label="流水号"></el-table-column>
-                <el-table-column align="center" prop="applyNum" label="充值金额"></el-table-column>
-                <el-table-column align="center" prop="remark" label="赠送金额"></el-table-column>
-                <el-table-column align="center" prop="remark" label="充值方式"></el-table-column>
-                <el-table-column align="center" prop="applyArea" label="充值类型">
+                <el-table-column align="center" prop="createTime" label="充值时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="serialNumber" label="流水号"></el-table-column>
+                <el-table-column align="center" prop="rechargeMoney" label="充值金额"></el-table-column>
+                <el-table-column align="center" prop="givenAmount" label="赠送金额"></el-table-column>
+                <el-table-column align="center" prop="rechargeWay" label="充值方式"></el-table-column>
+                <el-table-column align="center" prop="rechargeType" label="充值类型">
                     <template slot-scope="scope">
                         <div v-if="scope.row.applyArea == null || scope.row.applyArea == ''">线上</div>
                         <div v-else>线下</div>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="handler" label="发票状态" width="80">
+                <el-table-column align="center" prop="invoiceStatus" label="发票状态" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.auditStatus == '2'">
                             <el-button size="mini" type="text">已开具</el-button>
@@ -173,9 +173,9 @@
                   pageSize: 20,
                 },
                 form: {
-                  startTime:'',
-                  endTime:'',
-                  auditStatus:''
+                  rechargeBeginTime:'',
+                  rechargeEndTime:'',
+                  invoiceStatus:''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -210,8 +210,8 @@
                 console.log(index, row);
             },
             searchTable() {
-                var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
+                var startTime=this.form.rechargeBeginTime;
+                var endTime=this.form.rechargeEndTime;
                 if(endTime && startTime>endTime){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
@@ -222,8 +222,11 @@
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;                
+                param.rechargeBeginTime = this.form.rechargeBeginTime;                
+                param.rechargeEndTime = this.form.rechargeEndTime;                
+                param.invoiceStatus = this.form.invoiceStatus;                
                 console.info(param);
-                axios.post('/merchant/clue/setting/applyPage', param)
+                axios.post('/merchant/merchantRechargeRecordBusiness/queryBusinessPageList', param)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
