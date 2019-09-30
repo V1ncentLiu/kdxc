@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @description: MerchantRechargeRecordBusinessController
@@ -69,6 +70,7 @@ public class MerchantRechargeRecordManageController {
    * @Author xuyunfeng
    * @Date 2019/9/26 16:07
    **/
+  @ResponseBody
   @RequestMapping("/queryManagePageList")
   @RequiresPermissions("merchant:merchantRechargeRecordManage:view")
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(@RequestBody MerchantRechargeRecordQueryDTO queryDTO ){
@@ -107,6 +109,7 @@ public class MerchantRechargeRecordManageController {
   * @Author xuyunfeng
   * @Date 2019/9/27 15:30
   **/
+  @ResponseBody
   @RequestMapping("/saveOfflinePayment")
   @RequiresPermissions("merchant:merchantRechargeRecordManage:add")
   public JSONResult<Boolean> saveOfflinePayment(@RequestBody  MerchantRechargeReq req){

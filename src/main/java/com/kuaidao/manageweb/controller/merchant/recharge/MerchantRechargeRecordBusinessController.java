@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @description: MerchantRechargeRecordBusinessController
@@ -62,6 +63,7 @@ public class MerchantRechargeRecordBusinessController {
   * @Author xuyunfeng
   * @Date 2019/9/26 16:07
   **/
+  @ResponseBody
   @RequestMapping("/queryBusinessPageList")
   @RequiresPermissions("merchant:merchantRechargeRecordBusiness:view")
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(@RequestBody MerchantRechargeRecordQueryDTO queryDTO ){
@@ -83,6 +85,7 @@ public class MerchantRechargeRecordBusinessController {
   * @Author xuyunfeng
   * @Date 2019/9/26 17:41
   **/
+  @ResponseBody
   @RequestMapping("/applyInvoice")
   @RequiresPermissions("merchant:merchantRechargeRecordBusiness:view")
   public JSONResult<Boolean> applyInvoice(@RequestBody MerchantApplyInvoiceReq req){
