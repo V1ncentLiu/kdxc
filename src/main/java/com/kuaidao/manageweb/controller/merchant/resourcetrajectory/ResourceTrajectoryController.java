@@ -3,7 +3,9 @@ package com.kuaidao.manageweb.controller.merchant.resourcetrajectory;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
 import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
+import com.kuaidao.aggregation.dto.clue.ClueIntentionDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.ClueReceiveDTO;
 import com.kuaidao.aggregation.dto.log.ImLogsDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -97,17 +99,26 @@ public class ResourceTrajectoryController {
         resourceTrajectory.setMessagePoint(clueBasic.getMessagePoint());
         resourceTrajectory.setSearchWord(clueBasic.getSearchWord());
         resourceTrajectory.setProjectName(clueBasic.getProjectName());
-//        设置图片
-//        resourceTrajectory.setImageUrl();
-//        设置跳转URL
-//        resourceTrajectory.setUrl();
         resourceTrajectory.setSource(clueBasic.getSourceName());
         resourceTrajectory.setCategory(clueBasic.getCategoryName());
+        // 第5条中接口字段中广告位信息froms -- 解析后，为系统中广告位信息
+        resourceTrajectory.setTerminal(clueBasic.getSourceTypeName());
       }
-    }
-    // 设置地域
+      ClueIntentionDTO clueIntention = data.getClueIntention();
+      if(clueIntention!=null){
+        resourceTrajectory.setArea(clueIntention.getAddress());
+      }
 
-    // 设置终端
+      //设置跳转URL
+      ClueReceiveDTO clueReceive = data.getClueReceive();
+      if(clueReceive!=null){
+        String urlAddress = clueReceive.getUrlAddress();
+        resourceTrajectory.setUrl(urlAddress);
+      }
+      // 设置图片 -- 待定
+//        resourceTrajectory.setImageUrl();
+    }
+
     return new JSONResult().success(resourceTrajectory);
   }
 
