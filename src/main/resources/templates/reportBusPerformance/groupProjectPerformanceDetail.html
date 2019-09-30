@@ -23,10 +23,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="统计日期：">
-                    <el-date-picker format="yyyy-MM-dd 00:00" v-model="form.startTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.startTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd 23:59" v-model="form.endTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="YYYY-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务大区:">  
                     <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
@@ -257,7 +257,7 @@
                         return;
                     }
                     var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    var currentDate = moment(date).format("YYYY-MM-DD");
                     var currentDateRes = new Date(currentDate);
                     if(endTime > currentDateRes){
                         this.$message({
@@ -345,11 +345,11 @@
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
                 if(startTime){
-                    this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                    this.form.startTime = moment(start).format("YYYY-MM-DD");
                     return this.form.startTime;
                 }
                 if(endTime){
-                    this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                    this.form.endTime = moment(end).format("YYYY-MM-DD");
                     return this.form.endTime;      
                 }
             },
@@ -385,12 +385,8 @@
                 var monthRea = timeStr.getMonth()+1;
                 monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
                 var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
-                var hoursRes = timeStr.getHours();
-                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
-                var minRes = timeStr.getMinutes();
-                minRes = minRes < 10 ?  "0" + minRes : minRes;                
-                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;               
+                var timeRes = "" + yearRes + monthRea + dateRes;
                 return timeRes;
             },
             searchSeason(){ // 季
@@ -400,26 +396,26 @@
                 switch (month) {
                     case 1 : 
                     case 2 : 
-                    case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";break;
+                    case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01;break;
                     case 4 : 
                     case 5 : 
-                    case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01+" 00:00"; break;
+                    case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01; break;
                     case 7 : 
                     case 8 : 
-                    case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01+" 00:00";break;
+                    case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01;break;
                     case 10 :
                     case 11 :
-                    case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01+" 00:00";break;
+                    case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01;break;
                 }
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable(1);
             },
             searchYear(){ // 年
                var today = new Date();
-               var startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               var startTime = today.getFullYear()+"-" + 01 + "-" + 01;
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable(1);
@@ -433,8 +429,8 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
+                this.form.endTime=year+"-"+(month+1)+"-"+date;
                 this.searchTable(1);
             },
             exportRs(){
@@ -462,8 +458,8 @@
         },
         created(){     
             var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
+            var startTime = moment(today).format("YYYY-MM-DD");
+            var endTime = moment(today).format("YYYY-MM-DD");
             // if(curUserId){
             //     this.isDisabledUserId = true;
             //     this.form.businessManagerId = curUserId;
