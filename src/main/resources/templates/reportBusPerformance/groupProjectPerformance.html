@@ -28,9 +28,9 @@
                     <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务大区:">  
-                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.busAreaId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
-                            v-for="item in businessRegionArr"
+                            v-for="item in areaList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -58,9 +58,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="餐饮集团：">  
-                    <el-select v-model="form.cateringGroup" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                    <el-select v-model="form.groupId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in cateringGroup"
+                            v-for="item in companyList"
                             :key="item.id"
                             :label="item.groupName"
                             :value="item.id">
@@ -88,7 +88,7 @@
                 <el-table-column prop="groupName" label="餐饮集团">
                     <template slot-scope="scope">
                         <el-button type="text" size="small" v-if="scope.row.groupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.groupName}}</el-button>
-                        <span v-else>{{scope.row.groupName}}</span>
+                        <span v-else>合计</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
@@ -108,13 +108,12 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var orgIdList = '';
-    var cateringGroup = [[${companyList}]]; // 餐饮集团
-    var businessRegionArr = [[${areaList}]]; // 商务大区
+    var companyList = [[${companyList}]]; // 餐饮集团
+    var areaList = [[${areaList}]]; // 商务大区
 
-    var deptList=[[${deptList}]];// 事业部
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curDeptId=[[${busAreaId}]];// 当前商务大区
+    var curOrgId =[[${businessGroupId}]];
+    var curUserId = [[${businessManagerId}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -131,23 +130,23 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessRegion: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
+                    groupId:'',
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessRegion: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
+                    groupId:'',
                 },
                 tableData: [],
-                cateringGroup: cateringGroup,
-                businessRegionArr: businessRegionArr,
-                orgTeleArr: orgIdList, // 商务组
+                companyList: companyList,
+                areaList: areaList,
+                orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
             }             
         },
@@ -271,13 +270,13 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 //商务大区
-                param.busAreaId = this.form.businessRegion;
+                param.busAreaId = this.form.busAreaId;
                 //商务组
                 param.businessGroupId = this.form.businessGroupId;
                 //商务经理
                 param.businessManagerId = this.form.businessManagerId;
                 //餐饮集团
-                // param.groupId = this.form.cateringGroup;
+                param.groupId = this.form.groupId;
                 this.loading = true;
                 axios.post('/busGroupRanking/getOnePageList',param).then(function (response) {
                     if(!response || !response.data){
@@ -308,10 +307,10 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.businessRegion = mainDivVM.form.businessRegion;
+                        mainDivVM.export.busAreaId = mainDivVM.form.busAreaId;
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
-                        mainDivVM.export.cateringGroup = mainDivVM.form.cateringGroup;
+                        mainDivVM.export.groupId = mainDivVM.form.groupId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -340,14 +339,14 @@
                 }
             },
             gotoLink(row){
-                // var cateringGroup = row.groupId;
-                var businessRegion = row.businessAreaId;
+                var groupId = row.groupId;
+                var busAreaId = row.businessAreaId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var businessGroupId = this.export.businessGroupId;
                 var businessManagerId = this.export.businessManagerId;
 
-                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ businessRegion+ "&businessGroupId="+ businessGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&businessManagerId=" + businessManagerId;
+                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&startTime=" + startTime + "&endTime=" + endTime;
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -431,13 +430,13 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 //商务大区
-                param.busAreaId = this.form.businessRegion;
+                param.busAreaId = this.form.busAreaId;
                 //商务组
                 param.businessGroupId = this.form.businessGroupId;
                 //商务经理
                 param.businessManagerId = this.form.businessManagerId;
                 //餐饮集团
-                // param.groupId = this.form.cateringGroup;
+                param.groupId = this.form.groupId;
                 axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
@@ -458,17 +457,21 @@
             var endTime = moment(today).format("YYYY-MM-DD");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-            // if(curDeptId){
-            //     this.isDisabled = true;
-            //     this.form.teleDeptId = curDeptId;
-            //     this.export.teleDeptId = this.form.teleDeptId;
-            //     this.firstCurTelGroupSale(curDeptId);
-            //     if(curOrgId){
-            //         this.isDisabledOrgId = true;
-            //         this.form.teleGroupId = curOrgId;
-            //         this.export.teleGroupId = this.form.teleGroupId;
-            //     }
-            // }
+            if(curDeptId){
+                this.isDisabled = true;
+                this.form.busAreaId = curDeptId;
+                this.export.busAreaId = this.form.busAreaId;
+                this.firstCurTelGroupSale(curDeptId);
+                if(curOrgId){
+                    this.isDisabledOrgId = true;
+                    this.form.businessGroupId = curOrgId;
+                    this.firstCurTelSale(curOrgId);
+                    if(curUserId){
+                        this.isDisabledUserId = true;
+                        this.form.businessManagerId = curUserId;
+                    }
+                }
+            }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
 

@@ -26,12 +26,12 @@
                     <el-date-picker format="yyyy-MM-dd" v-model="form.startTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="YYYY-MM-dd" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="商务大区:">  
-                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.busAreaId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
-                            v-for="item in businessRegionArr"
+                            v-for="item in areaList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -59,9 +59,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="餐饮集团：">  
-                    <el-select v-model="form.cateringGroup" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                    <el-select v-model="form.groupId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in cateringGroup"
+                            v-for="item in companyList"
                             :key="item.id"
                             :label="item.groupName"
                             :value="item.id">
@@ -120,14 +120,14 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var orgIdList = '';
-    var cateringGroup = [[${companyList}]]; // 餐饮集团
-    var businessRegionArr = [[${areaList}]]; // 商务大区
-    var projectList = [[${projectList}]]; // 项目
+    var projectList = '';
+    var companyList = [[${companyList}]]; // 餐饮集团
+    var areaList = [[${areaList}]]; // 商务大区
+    var parentParam=[[${baseBusQueryDto }]];// 
 
-    var deptList=[[${deptList}]];// 事业部
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var curDeptId=[[${busAreaId}]];// 当前商务大区
+    var curOrgId =[[${businessGroupId}]];
+    var curUserId = [[${businessManagerId}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -144,26 +144,24 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessRegion: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
                     project: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessRegion: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
                     project: ''
                 },
                 tableData: [],
-                cateringGroup: cateringGroup,
-                businessRegionArr: businessRegionArr,
+                companyList: companyList,
+                areaList: areaList,
                 projectList: projectList,
-                orgTeleArr: orgIdList, // 商务组
+                orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
             }             
         },
@@ -286,11 +284,11 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                // param.businessRegion = this.form.businessRegion;
-                // param.businessGroupId = this.form.businessGroupId;
-                // param.businessManagerId = this.form.businessManagerId;
-                // param.cateringGroup = this.form.cateringGroup;
-                // param.project = this.form.project;
+                param.busAreaId = this.form.busAreaId;
+                param.businessGroupId = this.form.businessGroupId;
+                param.businessManagerId = this.form.businessManagerId;
+                param.groupId = this.form.groupId;
+                param.project = this.form.project;
                 this.loading = true;
                 axios.post('/busGroupRanking/getTwoPageList',param).then(function (response) {
                     if(!response || !response.data){
@@ -321,10 +319,10 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.businessRegion = mainDivVM.form.businessRegion;
+                        mainDivVM.export.busAreaId = mainDivVM.form.busAreaId;
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
-                        mainDivVM.export.cateringGroup = mainDivVM.form.cateringGroup;
+                        mainDivVM.export.groupId = mainDivVM.form.groupId;
                         mainDivVM.export.project = mainDivVM.form.project;
         
                     }else{
@@ -389,6 +387,14 @@
                 var timeRes = "" + yearRes + monthRea + dateRes;
                 return timeRes;
             },
+            dateTimeFormat (dt) {
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                return oYear+"-"+oMonth+"-"+oDay;
+            },
             searchSeason(){ // 季
                 var today = new Date();
                 var month = today.getMonth()+1;
@@ -437,10 +443,10 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.businessRegion = this.export.businessRegion;
+                param.busAreaId = this.export.busAreaId;
                 param.businessGroupId = this.export.businessGroupId;
                 param.businessManagerId = this.export.businessManagerId;
-                param.cateringGroup = this.export.cateringGroup;
+                param.groupId = this.export.groupId;
                 param.project = this.export.project;
                 axios.post('/performance/export',param,{responseType:'blob'})
                 .then(function (response) {
@@ -460,13 +466,23 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD");
             var endTime = moment(today).format("YYYY-MM-DD");
-            // if(curUserId){
-            //     this.isDisabledUserId = true;
-            //     this.form.businessManagerId = curUserId;
-            // }else{
-            //     this.form.businessManagerId = parentParam && parentParam.businessManagerId ?parentParam.businessManagerId:'';
-            // }
-
+            if(curDeptId){
+                this.isDisabled = true;
+                this.form.busAreaId = curDeptId;
+                if(curOrgId){
+                    this.isDisabledOrgId = true;
+                    this.form.businessGroupId = curOrgId;
+                    if(curUserId){
+                        this.isDisabledUserId = true;
+                        this.form.businessManagerId = curUserId;
+                    }
+                }else{
+                    this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
+                }
+            }else{
+                this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
+                this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
+            }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
                 this.form.endTime = this.dateTimeFormat(parentParam.endTime);
@@ -480,12 +496,17 @@
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
 
-            this.form.cateringGroup = parentParam.cateringGroup != null ?parentParam.cateringGroup.toString():'';
-            this.export.cateringGroup = this.form.cateringGroup;
+            this.form.groupId = parentParam&&parentParam.groupId ? parentParam.groupId:'';
+            this.export.groupId = this.form.groupId;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-
+            if(this.form.busAreaId){
+                this.firstCurTelGroupSale(this.form.busAreaId);
+            }
+            if(this.form.businessGroupId){
+                this.firstCurTelSale(this.form.businessGroupId);
+            }
             this.searchTable();
         },
         mounted(){
