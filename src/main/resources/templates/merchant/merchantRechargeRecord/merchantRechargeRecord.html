@@ -52,7 +52,7 @@
             </el-form>
         </div>
         <el-row class="greyTip">
-            <span>累计充值：{{rechargeDTO.totalRechargeMoney}}元</span><span>累计赠送：{{rechargeDTO.totalGivenMoney}}元</span><span>剩余金额：{{rechargeDTO.totalAmounts}}元</span>
+            <span style="margin-right: 10px;">累计充值：{{rechargeDTO.totalRechargeMoney}}元</span><span style="margin-right: 10px;">累计赠送：{{rechargeDTO.totalGivenMoney}}元</span><span style="margin-right: 10px;">剩余金额：{{rechargeDTO.totalAmounts}}元</span>
         </el-row>
         <el-row>            
             <el-table
@@ -97,52 +97,52 @@
     <el-dialog title="申请开发票" :visible.sync="applyFormVisible" width="540px">
         <el-form :model="formApply" ref="formApply">
             <el-form-item label="发票金额：" :label-width="formLabelWidth">
-                <span>8000</span>
+                <span>{{formApply.invoiceAmount}}</span>
             </el-form-item>
             <el-form-item 
                 label="发票抬头：" 
-                prop="invoiceTitle"
+                prop="invoiceHeader"
                 :rules="[
                     { required: true, message: '发票抬头不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="form.invoiceTitle" placeholder=""></el-input>
+                <el-input v-model="formApply.invoiceHeader" placeholder=""></el-input>
             </el-form-item>
             <el-form-item 
                 label="纳税人识别号：" 
-                prop="invoiceTitle"
+                prop="taxpayerIdentificationNum"
                 :rules="[
                     { required: true, message: '纳税人识别号不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="form.invoiceTitle" placeholder=""></el-input>
+                <el-input v-model="formApply.taxpayerIdentificationNum" placeholder=""></el-input>
             </el-form-item>
             <el-form-item 
                 label="邮寄地址：" 
-                prop="invoiceTitle"
+                prop="address"
                 :rules="[
                     { required: true, message: '邮寄地址不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="form.invoiceTitle" placeholder=""></el-input>
+                <el-input v-model="formApply.address" placeholder=""></el-input>
             </el-form-item>
             <el-form-item 
                 label="联系电话：" 
-                prop="invoiceTitle"
+                prop="phone"
                 :rules="[
                     { required: true, message: '联系电话不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="form.invoiceTitle" placeholder=""></el-input>
+                <el-input v-model="formApply.phone" placeholder=""></el-input>
             </el-form-item>
             <el-form-item 
                 label="联系人姓名：" 
-                prop="invoiceTitle"
+                prop="name"
                 :rules="[
                     { required: true, message: '联系人姓名不能为空', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-                <el-input v-model="form.invoiceTitle" placeholder=""></el-input>
+                <el-input v-model="formApply.name" placeholder=""></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
@@ -194,7 +194,11 @@
                   name: '已审核'
                 }],
                 formApply:{
-
+                    invoiceHeader:'',
+                    taxpayerIdentificationNum:'',
+                    address:'',
+                    phone:'',
+                    name:'',
                 }
             }             
         },
@@ -272,17 +276,13 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.btnDisabled = true;
-                        var rows = this.multseleSelection;
-                        var rowIds = [];
-                        for (var i = 0; i < rows.length; i++) {
-                            var curRow = rows[i];
-                            rowIds.push(curRow.clueId);
-                        }
-                        //分配
                         var param = {};
-                        param.clueIds = rowIds;
-                        param.userId = this.formApply.userId;
-                        axios.post('/clue/management/clueAssign',param)
+                        param.invoiceHeader = this.formApply.invoiceHeader;
+                        param.taxpayerIdentificationNum = this.formApply.taxpayerIdentificationNum;
+                        param.address = this.formApply.address;
+                        param.phone = this.formApply.phone;
+                        param.name = this.formApply.name;
+                        axios.post('/merchant/merchantRechargeRecordBusiness/applyInvoice',param)
                             .then(function (response) {
                                 var data =  response.data;
                                 debugger;
