@@ -270,10 +270,14 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.businessAreaId = this.form.businessRegion;
+                //商务大区
+                param.busAreaId = this.form.businessRegion;
+                //商务组
                 param.businessGroupId = this.form.businessGroupId;
+                //商务经理
                 param.businessManagerId = this.form.businessManagerId;
-                param.groupId = this.form.cateringGroup;
+                //餐饮集团
+                // param.groupId = this.form.cateringGroup;
                 this.loading = true;
                 axios.post('/busGroupRanking/getOnePageList',param).then(function (response) {
                     if(!response || !response.data){
@@ -336,14 +340,14 @@
                 }
             },
             gotoLink(row){
-                var cateringGroup = row.groupId;
+                // var cateringGroup = row.groupId;
                 var businessRegion = row.businessAreaId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var businessGroupId = this.export.businessGroupId;
                 var businessManagerId = this.export.businessManagerId;
 
-                window.location.href="/performance/managerList?businessRegion="+ businessRegion+ "&businessGroupId="+ businessGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&businessManagerId=" + businessManagerId + "&cateringGroup=" + cateringGroup;
+                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ businessRegion+ "&businessGroupId="+ businessGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&businessManagerId=" + businessManagerId;
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -426,11 +430,15 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.businessRegion = this.export.businessRegion;
-                param.businessGroupId = this.export.businessGroupId;
-                param.businessManagerId = this.export.businessManagerId;
-                param.cateringGroup = this.export.cateringGroup;
-                axios.post('/performance/export',param,{responseType:'blob'})
+                //商务大区
+                param.busAreaId = this.form.businessRegion;
+                //商务组
+                param.businessGroupId = this.form.businessGroupId;
+                //商务经理
+                param.businessManagerId = this.form.businessManagerId;
+                //餐饮集团
+                // param.groupId = this.form.cateringGroup;
+                axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
