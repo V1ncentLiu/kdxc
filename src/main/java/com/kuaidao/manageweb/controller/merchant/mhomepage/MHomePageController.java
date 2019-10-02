@@ -12,6 +12,7 @@ import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
 import com.kuaidao.merchant.dto.index.IndexReqDTO;
 import com.kuaidao.merchant.dto.index.IndexRespDTO;
 import com.kuaidao.merchant.dto.index.ResourceCountDTO;
@@ -187,15 +188,50 @@ public class MHomePageController {
   @RequestMapping("/receiveStatics")
   @ResponseBody
   public JSONResult<IndexRespDTO> receiveStatics(IndexReqDTO indexReqDTO){
+
+
+    ResourceStatisticsParamDTO paramDTO = new ResourceStatisticsParamDTO();
+    paramDTO.setDimension(indexReqDTO.getDimension());
+    paramDTO.setEtime(indexReqDTO.getEtime());
+    paramDTO.setStime(indexReqDTO.getStime());
     List<Integer> yList = new ArrayList<>();
-    // 统计领取资源
-    //
+    List<String> xList = gainX(indexReqDTO);
+    // 主账户相关统计
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    List<Long> subIds = new ArrayList<>();
+    // 获取主账号分发相关
+    JSONResult<List<ResourceStatisticsDto>> assignDto = null;
+    if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+      paramDTO.setUserId(curLoginUser.getId());
+      assignDto = ruleAssignRecordFeignClient
+          .countAssginStatistic(paramDTO);
+      subIds = merchantUserList(curLoginUser);
+    }
 
+    // 查询子账号信息
+    if (SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())) {
+      paramDTO.setUserId(curLoginUser.getId());
+      // 获取子账号分发相关
+      assignDto = clueManagementFeignClient.countAssignResourceStatistics(paramDTO);
+      // 子账号id
+      subIds.add(curLoginUser.getId());
+    }
+    // 获取领取相关
+    if (CollectionUtils.isNotEmpty(subIds)) {
+      paramDTO.setIdList(subIds);
+      //主账号也需要将自己领取的查出来
+      if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+        subIds.add(curLoginUser.getId());
+      }
+      JSONResult<List<ResourceStatisticsDto>> listJSONResult = pubcustomerFeignClient
+          .countReceiveResourceStatistics(paramDTO);
+    }
 
+    // 进行数据整合
 
 
     IndexRespDTO indexRespDTO = new IndexRespDTO();
-    indexRespDTO.setXList(gainX(indexReqDTO));
+    indexRespDTO.setXList(xList);
     indexRespDTO.setYList(yList);
     return new JSONResult().success(indexRespDTO);
   }
