@@ -8,6 +8,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
@@ -18,6 +19,8 @@ import com.kuaidao.manageweb.feign.statistics.busGroupRanking.BusGroupRankingFei
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.base.BaseBusinessDto;
+import com.kuaidao.stastics.dto.receptionVisit.ReceptionVisitQueryDto;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -37,6 +40,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * / 商务报表 / 业绩报表 / 集团项目业绩表
@@ -72,8 +76,8 @@ public class BusGroupRankingController extends BaseStatisticsController {
      * 二级页面跳转
      */
     @RequestMapping("/toGroupProjectPerformanceDetail")
-    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,HttpServletRequest request) {
-        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,request);
+    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,HttpServletRequest request) {
+        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,projectId,request);
         //商务组
         initOrgList(request);
         //商务大区
@@ -88,6 +92,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
     @RequestMapping("/getOnePageList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getOneBusGroupRankingPageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
+        initAuth(baseBusQueryDto);
         JSONResult<Map<String, Object>> oneBusGroupRankingPageList = busGroupRankingFeignClient.getOneBusGroupRankingPageList(baseBusQueryDto);
         return oneBusGroupRankingPageList;
     }
@@ -96,6 +101,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
      */
     @RequestMapping("/exportOneList")
     public void exportOneList(HttpServletResponse response, @RequestBody BaseBusQueryDto baseBusQueryDto) throws IOException {
+        initAuth(baseBusQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getTitleList(1));
         JSONResult<Map<String, Object>> result =  busGroupRankingFeignClient.getOneBusGroupRankingList(baseBusQueryDto);
@@ -124,6 +130,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
     @RequestMapping("/getTwoPageList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getTwoBusGroupRankingPageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
+        initAuth(baseBusQueryDto);
         JSONResult<Map<String, Object>> twoBusGroupRankingPageList = busGroupRankingFeignClient.getTwoBusGroupRankingPageList(baseBusQueryDto);
         return twoBusGroupRankingPageList;
     }
@@ -132,6 +139,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
      */
     @RequestMapping("/exportTwoList")
     public void exportTwoList(HttpServletResponse response, @RequestBody BaseBusQueryDto baseBusQueryDto) throws IOException {
+        initAuth(baseBusQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getTitleList(2));
         JSONResult<Map<String, Object>> result =  busGroupRankingFeignClient.getTwoBusGroupRankingList(baseBusQueryDto);
@@ -155,13 +163,22 @@ public class BusGroupRankingController extends BaseStatisticsController {
         outputStream.close();
     }
     private void initOrgList(HttpServletRequest request){
+        String busAreaId="";// 当前商务大区
+        String businessGroupId ="";//商务组
+        String businessManagerId = "";//商务经理
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         //商务组
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
+            busAreaId = String.valueOf(curLoginUser.getOrgId());
             busGroupReqDTO.setParentId(curLoginUser.getOrgId());
-        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            businessGroupId = String .valueOf(curLoginUser.getOrgId());
+            busGroupReqDTO.setId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            businessGroupId = String.valueOf(curLoginUser.getOrgId());
+            businessManagerId = String.valueOf(curLoginUser.getId());
             busGroupReqDTO.setId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
@@ -174,6 +191,10 @@ public class BusGroupRankingController extends BaseStatisticsController {
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
         JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         List<OrganizationRespDTO> data = listJSONResult.getData();
+
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
+            busAreaId = String.valueOf(data.get(0).getParentId());
+        }
         request.setAttribute("busGroupList",data);
 
         // 查询所有项目
@@ -183,6 +204,10 @@ public class BusGroupRankingController extends BaseStatisticsController {
         //餐饮集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
+
+        request.setAttribute("busAreaId",busAreaId);
+        request.setAttribute("businessGroupId",businessGroupId);
+        request.setAttribute("businessManagerId",businessManagerId);
     }
 
     private List<Object> getTitleList(Integer type) {
@@ -236,7 +261,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
         }
     }
 
-    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,HttpServletRequest request){
+    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,HttpServletRequest request){
         BaseBusQueryDto baseBusQueryDto = new BaseBusQueryDto();
         baseBusQueryDto.setBusAreaId(busAreaId);
         baseBusQueryDto.setBusinessGroupId(businessGroupId);
@@ -244,7 +269,60 @@ public class BusGroupRankingController extends BaseStatisticsController {
         baseBusQueryDto.setEndTime(endTime);
         baseBusQueryDto.setBusinessManagerId(businessManagerId);
         baseBusQueryDto.setGroupId(groupId);
+        baseBusQueryDto.setProjectId(projectId);
         request.setAttribute("baseBusQueryDto",baseBusQueryDto);
+    }
+
+    /**
+     * 初始化权限
+     */
+    private void initAuth(BaseBusQueryDto baseBusQueryDto){
+        List<OrganizationDTO> teleGroupList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            teleGroupList = getCurOrgGroupByOrgId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            teleGroupList = getCurOrgGroupByOrgId(curLoginUser.getOrgId());
+        }else{
+            teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.SWZ);
+        }
+        if(null != baseBusQueryDto && null != teleGroupList && teleGroupList.size() > 0){
+            List<Long> orgIdList = teleGroupList.parallelStream().map(OrganizationDTO::getId).collect(Collectors.toList());
+            baseBusQueryDto.setBusinessGroupIds(orgIdList);
+        }
+        //商务经理查询 考虑借调 删除组限制
+        if(null != baseBusQueryDto && RoleCodeEnum.SWJL.name().equals(roleCode)){
+            baseBusQueryDto.setBusinessGroupIds(null);
+            baseBusQueryDto.setBusinessGroupId(null);
+        }
+
+    }
+    /**
+     * 获取当前 orgId所在的组
+     */
+    private List<OrganizationDTO> getCurOrgGroupByOrgId(Long orgId) {
+        // 商务组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(String.valueOf(orgId));
+        List<OrganizationDTO> data = new ArrayList<>();
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        data.add(orgJr.getData());
+        return data;
+    }
+    private List<OrganizationDTO> getOrgGroupByOrgId(Long orgId,Integer orgType){
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(orgType);
+        busGroupReqDTO.setParentId(orgId);
+        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        List<OrganizationDTO> data = listJSONResult.getData();
+        return data;
+    }
+
+    public static void main(String[] args) {
+        String name = RoleCodeEnum.SWDQZJ.name();
+        System.out.println(name.equals("SWDQZJ"));
     }
 
 }
