@@ -40,7 +40,7 @@
                     :on-remove="handleRemove"
                     :before-remove="beforeRemove"
                     multiple
-                    :limit="3"
+                    :limit="1"
                     :on-exceed="handleExceed"
                     :file-list="form.fileList">
                     <el-button size="small" type="primary">点击上传</el-button>
@@ -49,7 +49,7 @@
             <div class="f-tac">
                 <el-form-item>
                     <el-button type="primary" @click="submitForm('form')">保存</el-button>
-                    <el-button @click="resetForm('form')">取消</el-button>
+                    <el-button @click="cancel">取消</el-button>
                 </el-form-item>
             </div>
         </el-row>
@@ -70,25 +70,14 @@
                 form: {
                     rechargeBusiness:'',
                     rechargeMoney: '',
-                    fileList: []
+                    fileList: [],                    
                 },
-                options: [{
-                    value: '1',
-                    label: '商家1'
-                },{
-                    value: '2',
-                    label: '商家2'
-                }],
-        
                 rules:{
                     rechargeBusiness: [
                         { required: true, message: '请输选充值择商家', trigger: 'blur' }
                     ],
                     rechargeMoney: [
                         { required: true, message: '请输入充值金额', trigger: 'blur' }
-                    ],
-                    fileList: [
-                        { required: true, message: '请上传图片', trigger: 'blur' }
                     ],
                     
                 },
@@ -99,6 +88,18 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        var param ={};   
+                        param.rechargeBusiness = this.form.rechargeBusiness;
+                        param.rechargeMoney = this.form.rechargeMoney; 
+                        param.imgUrl = this.form.fileList.url; 
+                        axios.post('/merchant/merchantRechargeRecordManage/saveOfflinePayment', param)
+                        .then(function (response) {
+                            console.log(response)
+                                              
+                        })
+                        .catch(function (error) {
+                             console.log(error);
+                        });
                         alert('submit!');
                     } else {
                         console.log('error submit!!');
@@ -120,6 +121,9 @@
             },
             beforeRemove(file, fileList) {
                 return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            cancel(){
+                window.location.href="/merchant/merchantRechargeRecordManage/initRechargeRecordManage"
             }
         },
         created(){
