@@ -96,7 +96,22 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
-        gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
+    	async gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
+        	var isReturn =false;
+        	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+            .then(function (response) {
+            	if(response.data !=""){
+            		mainDivVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+            		isReturn = true; ;
+            	}
+               ;
+            });
+        	if(isReturn){
+        		return;
+        	}
             //外呼手机
             var param = {};
             param.clueId = clueId;

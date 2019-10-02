@@ -1,10 +1,14 @@
 package com.kuaidao.manageweb.controller.statistics.performance;
 
 
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
@@ -14,6 +18,7 @@ import com.kuaidao.manageweb.feign.statistics.performance.TailOrderClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.dupOrder.DupOrderDto;
 import com.kuaidao.stastics.dto.dupOrder.DupOrderQueryDto;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -60,15 +65,21 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/repairMoneyRepetitionTable")
     public String repairMoneyRepetition(HttpServletRequest request){
-        //事业部初始化
-        super.initSaleDept(request);
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
-            initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null,null,null,null);
-            return "reportPerformance/repetitionTableTeam";
+        try {
+            //事业部初始化
+            super.initSaleDept(request);
+            initModel(request);
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+            if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+                initBaseDto(request, null, curLoginUser.getOrgId(), curLoginUser.getId(), null, null, null, null, null, null);
+                return "reportPerformance/repairMoneyRepetitionTableTeam";
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
         }
         return "reportPerformance/repairMoneyRepetitionTable";
     }
@@ -85,11 +96,26 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param companyId
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/repairMoneyRepetitionTableTeam")
     public String selfVisitFollowTableTeam(HttpServletRequest request,Long teleDeptId,Long teleGroupId,
                                            Long startTime,Long endTime,String strSignStore,Long projectId,Long companyId){
-        super.initSaleDept(request);
-        initBaseDto(request,teleDeptId,teleGroupId,null,startTime,endTime,strSignStore,null,projectId,companyId);
+        try{
+            super.initSaleDept(request);
+            initModel(request);
+            if(null!=teleGroupId && null==teleDeptId){
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                IdEntity id=new IdEntity();
+                id.setId(teleGroupId+"");
+                JSONResult<OrganizationDTO> result=organizationFeignClient.queryOrgById(id);
+                if("0".equals(result.getCode())){
+                    teleDeptId=result.getData().getParentId();
+                }
+            }
+            initBaseDto(request,teleDeptId,teleGroupId,null,startTime,endTime,strSignStore,null,projectId,companyId);
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+        }
         return "reportPerformance/repairMoneyRepetitionTableTeam";
     }
 
@@ -98,6 +124,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/queryPage")
     public @ResponseBody
     JSONResult<Map<String,Object>> queryByPage(@RequestBody DupOrderQueryDto baseQueryDto){
@@ -112,13 +139,17 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:repairMoney:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>> querySaleByPage(@RequestBody DupOrderQueryDto baseQueryDto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             baseQueryDto.setTeleSaleId(curLoginUser.getId());
+            baseQueryDto.setTeleGroupId(null);
+            baseQueryDto.setTeleDeptId(null);
         }
+        baseQueryDto.setTeleDeptId(null);
         return  tailOrderClient.queryByPageBySale(baseQueryDto);
     }
 
@@ -128,6 +159,7 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:repairMoney:export")
     @RequestMapping("export")
     public @ResponseBody void export(@RequestBody DupOrderQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -159,9 +191,14 @@ public class RepairMoneyController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:repairMoney:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void exportSale(@RequestBody DupOrderQueryDto baseQueryDto,HttpServletResponse response){
         try{
+            if(RoleCodeEnum.DXCYGW.name().equals(super.getRoleCode())){
+                baseQueryDto.setTeleGroupId(null);
+                baseQueryDto.setTeleDeptId(null);
+            }
             JSONResult<List<DupOrderDto>> json=tailOrderClient.queryListBySale(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 DupOrderDto[] dtos = json.getData().isEmpty()?new DupOrderDto[]{}:json.getData().toArray(new DupOrderDto[0]);
@@ -200,6 +237,10 @@ public class RepairMoneyController extends BaseStatisticsController {
         request.setAttribute("baseQueryDto",dto);
     }
 
+    /**
+     * 初始化查询参数-根据角色查对应事业部
+     * @param dto
+     */
     public void initParams(DupOrderQueryDto dto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
@@ -234,6 +275,22 @@ public class RepairMoneyController extends BaseStatisticsController {
             //other
             dto.setTeleSaleId(curLoginUser.getId());
         }
+    }
+
+
+    /**
+     * 列表页model
+     * @param request
+     */
+    private void initModel(HttpServletRequest request){
+        // 签约店型
+        request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        //签约项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
+        //签约集团
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
+        request.setAttribute("companyList", listNoPage.getData());
     }
 
 }

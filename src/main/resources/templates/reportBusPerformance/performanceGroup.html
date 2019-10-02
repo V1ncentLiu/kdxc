@@ -8,66 +8,26 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>补尾款重单表</el-breadcrumb-item>
-    </el-breadcrumb>    
+        <el-breadcrumb-item>商务业绩表</el-breadcrumb-item>
+    </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="searchMonth">月统计</el-button>
         <el-button type="success" @click="searchSeason">季统计</el-button>
         <el-button type="warning" @click="searchYear">年统计</el-button> 
-        <!-- <shiro:hasPermission name="statistics:businessVisitReceptionTable:export"> -->
-        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        <!-- </shiro:hasPermission> -->
+         <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
+         <!-- </shiro:hasPermission> -->
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="统计日期：">
                     <el-date-picker format="yyyy-MM-dd 00:00" v-model="form.startTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker format="yyyy-MM-dd 23:59" v-model="form.endTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="签约餐饮集团：">  
-                    <el-select v-model="form.companyId" placeholder="全部" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in companyList"
-                            :key="item.id"
-                            :label="item.groupName"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="签约项目：">  
-                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in projectList"
-                            :key="item.id"
-                            :label="item.projectName"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="事业部：">  
-                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
-                        <el-option
-                            v-for="item in deptList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销组：">  
-                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  :disabled="isDisabledOrgId">
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="签约店型：">  
+                <el-form-item label="来访签约店型：">  
                     <el-select v-model="form.shopTypes" placeholder="全部" style="width: 100%;" clearable filterable multiple>
                         <el-option
                             v-for="item in shopTypeList"
@@ -77,8 +37,58 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="付款类型：">  
+                    <el-select v-model="form.payType" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in payTypeList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="商务大区:">  
+                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                        <el-option
+                            v-for="item in businessRegionArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="商务组:">  
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <!-- <el-form-item label="商务经理:">  
+                    <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
+                        <el-option
+                            v-for="item in busSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> -->
+                <el-form-item label="项目类别：">
+                    <el-select v-model="form.category" placeholder="资源类别" clearable filterable>
+                        <el-option
+                            v-for="item in clueCategoryList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="loading">搜索</el-button>
+                    <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -86,7 +96,7 @@
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
-                style="width: 1200px;"
+                style="width: 100%"
                 border
                 :data="tableData"
                 v-loading="loading"
@@ -94,16 +104,20 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="teleGroupName" label="电销组">
+                <el-table-column prop="teleGroupName" label="商务组">
                     <template slot-scope="scope">
                         <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.teleGroupName}}</el-button>
                         <span v-else>{{scope.row.teleGroupName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="tailNum" label="补尾款单数"></el-table-column>
-                <el-table-column prop="selfSign" label="其中：自签约"></el-table-column>
-                <el-table-column prop="dupSign" label="其中：重单签约"></el-table-column>
-                <el-table-column prop="tailRate" label="补尾款重单率"></el-table-column>
+                <el-table-column prop="firstVisitNum " label="首访数"></el-table-column>
+                <el-table-column prop="signNum" label="签约数"></el-table-column>
+                <el-table-column prop="visitRate" label="签约率"></el-table-column>
+                <el-table-column prop="culeNum" :formatter="format_number" label="净业绩金额"></el-table-column>
+                <el-table-column prop="signRate" :formatter="format_number" label="首访单笔"></el-table-column>
+                <el-table-column prop="achievement" label="签约单笔" :formatter="format_number"></el-table-column>
+                <el-table-column prop="signAmount" label="签约单数"></el-table-column>
+                <el-table-column prop="signAmount" label="付款笔数" ></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -119,12 +133,15 @@
     }
 </style>
 <script th:inline="javascript">
-    var companyList=[[${companyList}]]; // 签约餐饮集团
-    var projectList=[[${projectList}]];// 签约项目
     var shopTypeList=[[${shopTypeList}]];// 签约店型
+    shopTypeList = '';
+    var orgIdList = '';
+    var clueCategoryList=[[${clueCategoryList}]];// 资源类别
+
+
     var deptList=[[${deptList}]];// 事业部
-    var curDeptId=[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId=[[${teleGroupId}]]; // 当前用户电销组id
+    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
+    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -140,46 +157,57 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    teleDeptId: '',
-                    teleGroupId: '',
-                    companyId:'',
-                    projectId: '',
-                    shopTypes: [] 
+                    shopType: '',
+                    payType: '',
+                    businessRegion: '',
+                    businessGroupId: '',
+                    businessManagerId: '',
+                    category:'',
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    teleDeptId: '',
-                    teleGroupId: '',
-                    companyId: '',
-                    projectId: '',
-                    shopTypes:[],
+                    shopType: '',
+                    payType: '',
+                    businessRegion: '',
+                    businessGroupId: '',
+                    businessManagerId: '',
+                    category:'',
                 },
                 tableData: [],
-                deptList: deptList, // 电销事业部
-                orgTeleArr: '', // 商务组
+                payTypeList: [{id: 1,name: '全款'},{id: 2,name: '定金'},{id: 3,name: '追加定金'},{id: 4,name: '尾款'}],
+                shopTypeList: shopTypeList,
+                businessRegionArr: [],
+
+                deptList: deptList,// 电销事业部
+                clueCategoryList: clueCategoryList,
+
+                orgTeleArr: orgIdList, // 商务组
                 busSaleArr: '', // 商务经理
-                companyList: companyList,
-                projectList: projectList,
-                shopTypeList: shopTypeList
+                projectArr: '', // 来访项目
             }             
         },
-        methods: {    
+        methods: {   
+            format_number(row, column){
+                var nStr = row[column.property];
+                if('--'==nStr){
+                    return nStr;
+                }
+                nStr += '';  
+                x = nStr.split('.');  
+                x1 = x[0];
+                if(!x[1]){
+                    x[1] = '00';
+                }  
+                x2 = x.length > 1 ? '.' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;  
+                while (rgx.test(x1)) {  
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');  
+                }  
+                return x1 + x2;  
+            },
             centerStyle(){
                 return "text-align:center"
-            },
-            firstCurTelSale(seleVal){
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.getTelSale(seleVal);
-            },
-            curTelSale(seleVal){
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.form.teleSaleId = '';
-                this.getTelSale(seleVal);
             },
             firstCurTelGroupSale(seleVal){
                 if(seleVal==null||seleVal==""){
@@ -192,10 +220,10 @@
                     return ;
                 }
                 this.form.teleGroupId = '';
-                this.form.teleSaleId = '';
                 this.getTelGroupSale(seleVal);
             },
             getTelGroupSale(seleVal){
+                if(!seleVal){return;}
                 param={};
                 param.parentId=seleVal;
                 param.orgType=1;
@@ -204,19 +232,6 @@
                 }).catch(function (error) {
                         mainDivVM.$message({
                         message: "电销组请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
-            getTelSale(seleVal){
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/base/getSaleList' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                }).catch(function (error) {
-                        mainDivVM.$message({
-                        message: "电销顾问请求失败，请稍后重试",
                         type: "error"
                     });
                 });
@@ -252,7 +267,7 @@
                         type: 'warning'
                     });
                     return;
-                }
+                }   
     
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
@@ -264,13 +279,14 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.teleDeptId = this.form.teleDeptId;
-                param.teleGroupId = this.form.teleGroupId;
-                param.companyId = this.form.companyId;
-                param.projectId = this.form.projectId;
-                param.shopTypes = this.form.shopTypes;
+                param.shopType = this.form.shopType;
+                param.payType = this.form.payType;
+                param.businessRegion = this.form.businessRegion;
+                param.businessGroupId = this.form.businessGroupId;
+                param.businessManagerId = this.form.businessManagerId;
+                param.category = this.form.category;
                 this.loading = true;
-                axios.post('/repairMoney/queryPage',param).then(function (response) {
+                axios.post('/performance/queryPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -287,7 +303,7 @@
                         });
                         return ;
                     }else if(resobj.data && resobj.data.tableData){
-                        var resobjData = resobj.data;    
+                        var resobjData = resobj.data;
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
                         if( tableData.data.length && resobj.data.totalData ){
@@ -301,10 +317,9 @@
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
-                        mainDivVM.export.companyId = mainDivVM.form.companyId;
-                        mainDivVM.export.projectId = mainDivVM.form.projectId;
-                        mainDivVM.export.shopTypes = mainDivVM.form.shopTypes;
-                        
+                        mainDivVM.export.category = mainDivVM.form.category;
+                        mainDivVM.export.searchText = mainDivVM.form.searchText;
+        
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -316,7 +331,7 @@
                     });
                 });
             },
-            limitTime (start, end) { // 禁止选择分钟
+            limitTime (start, end) {
                 var endTime = this.minuteFormat (end);
                 var startTime = this.minuteFormat (start);
                 var date = new Date();
@@ -328,22 +343,18 @@
                 }
                 if(endTime){
                     this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
-                    return this.form.endTime;   
+                    return this.form.endTime;      
                 }
             },
             gotoTeam(row){
                 var teleGroupId = row.teleGroupId;
                 var teleDeptId = this.export.teleDeptId;
-                var companyId = this.export.companyId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                var shopTypes=this.export.shopTypes;
-                var strSignStore="";
-                if(shopTypes.length){
-                    strSignStore=shopTypes.join(",");
-                } 
+                var category = this.export.category;
+                var searchText = this.export.searchText;
                 if(teleGroupId){
-                    window.location.href="/repairMoney/repairMoneyRepetitionTableTeam?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&companyId="+ companyId +"&startTime=" + startTime + "&endTime=" + endTime+ "&strSignStore="+ strSignStore; 
+                    window.location.href="/performance/managerList?&teleDeptId="+ teleDeptId+ "&teleGroupId="+ teleGroupId +"&startTime=" + startTime + "&endTime=" + endTime + "&category=" + category + "&searchText=" + searchText;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -357,6 +368,14 @@
             },
             indexFun (index) { // 表格序号
                 return index;
+            },
+            percentFormat(row, column) {//百分比格式化
+                var percent = row[column.property];
+                if (!percent) { // 如果没有值或值为0
+                    return "0%";
+                }
+                percent = (percent * 1000) / 10 + "%";
+                return percent;
             },
             minuteFormat (m) {
                 if (!m) {return "";}
@@ -391,18 +410,18 @@
                     case 11 :
                     case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01+" 00:00";break;
                 }
-                var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-                this.form.startTime=startTime;
-                this.form.endTime=endTime;
-                this.searchTable(1);
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable(1);
             },
             searchYear(){ // 年
-                var today = new Date();
-                var startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";
-                var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-                this.form.startTime=startTime;
-                this.form.endTime=endTime;
-                this.searchTable(1);
+               var today = new Date();
+               var startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable(1);
             },
             searchMonth(){ // 本月 
                 var a = new Date();
@@ -421,12 +440,13 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.teleDeptId = this.export.teleDeptId;
-                param.teleGroupId = this.export.teleGroupId;
-                param.companyId = this.export.companyId;
-                param.projectId = this.export.projectId;
-                param.shopTypes = this.export.shopTypes;
-                axios.post('/repairMoney/export',param,{responseType:'blob'})
+                param.shopType = this.export.shopType;
+                param.payType = this.export.payType;
+                param.businessRegion = this.export.businessRegion;
+                param.businessGroupId = this.export.businessGroupId;
+                param.businessManagerId = this.export.businessManagerId;
+                param.category = this.export.category;
+                axios.post('/performance/export',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -440,7 +460,7 @@
                 });
             }
         },
-        created(){ 
+        created(){     
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
@@ -454,7 +474,7 @@
                 if(curOrgId){
                     this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
-                    this.export.teleGroupId = this.form.curOrgId;
+                    this.export.teleGroupId = this.form.teleGroupId;
                 }
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
@@ -463,7 +483,7 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.searchTable();
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
