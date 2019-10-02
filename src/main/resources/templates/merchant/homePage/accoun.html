@@ -13,7 +13,7 @@
 
     <div id="merchantHome" style="display: none;">
         <!-- 主账户会显示 -->
-        <div class="fatherShow">
+        <div class="fatherShow" v-if="fatherShow">
             <el-row type="flex" class="row-bg marginB20" justify="start">
                 <el-col :span="12">
                     <div class="name">
@@ -25,11 +25,11 @@
                 <el-col :span="12">
                     <div class="name money">
                         <div class="difference">
-                            <img src="https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png" alt="">
+                            <img th:src="@{/images/merchantmoney.png}" alt="">
                             <span>12245.00</span>
                         </div>
                         <p class="balance">账户余额</p>
-                        <p class="look"><span>立即充值</span></p>
+                        <p class="look"><span @click="immediateRecharge">立即充值</span></p>
                     </div>
                 </el-col>
             </el-row>
@@ -37,29 +37,25 @@
         <!-- 根据日期筛选 -->
         <div class="homeTime">
             <el-row :gutter="20">
-                <el-col :span="2">
-                    <span class="active time">昨天</span>
+                <el-col :span="6">
+                    <span @click="timeClick(0)" class="time" :class="{active:showButton===0} ">昨天</span>
+                    <span @click="timeClick(1)" class="time" :class="{active:showButton===1}">近7天</span>
+                    <span @click="timeClick(2)" class="time" :class="{active:showButton===2}">近30天</span>
                 </el-col>
-                <el-col :span="2">
-                    <span class="time">近7天</span>
-                </el-col>
-                <el-col :span="3">
-                    <span class="time">近30天</span>
-                </el-col>
-                <el-col :span="11">
+                <el-col :span="12">
                     <div class="dateTime">
                         <b>日期</b>
-                        <el-date-picker v-model="value1" type="date" placeholder=" 请选择时间">
+                        <el-date-picker v-model="from.startTime" type="datetime" placeholder=" 请选择时间">
                         </el-date-picker>
                         <span>&nbsp;&nbsp;---&nbsp;&nbsp;</span>
-                        <el-date-picker v-model="value2" type="date" placeholder=" 请选择时间">
+                        <el-date-picker v-model="from.endTime" type="datetime" placeholder=" 请选择时间">
                         </el-date-picker>
                     </div>
                 </el-col>
                 <el-col :span="4">
                     <div class="grain">
                         <b>颗粒</b>
-                        <el-select v-model="selectValue" placeholder="请选择" style="width: 110px;">
+                        <el-select v-model="from.selectValue" placeholder="请选择" style="width: 110px;">
                             <el-option v-for="item in options" :key="item.value" :label="item.label"
                                 :value="item.value">
                             </el-option>
@@ -67,41 +63,24 @@
                     </div>
                 </el-col>
                 <el-col :span="2">
-                    <div class="query">查询</div>
+                    <div class="query" @click="submitQuery">查询</div>
                 </el-col>
         </div>
         <!-- 获取资源 -->
         <div class="resources">
             <el-row type="flex" class="row-bg">
-                <el-col :span="8">
-                    <div class="content">
+                <el-col :span="8" v-for="(item,index) in this.resources" :key="item.id">
+                    <div class="content" :class="{other:index===2} ">
                         <div class="top">
-                            <img src="/images/errorIcon.png" alt="">
-                            <span>今日获取资源</span>
+                            <img th:src="@{/images/merchantmoney.png}" alt="">
+                            <span>{{item.text}}</span>
                         </div>
-                        <p>9778</p>
-                    </div>
-                </el-col>
-                <el-col :span="8">
-                    <div class="content">
-                        <div class="top">
-                            <img src="/images/errorIcon.png" alt="">
-                            <span>今日获取资源</span>
-                        </div>
-                        <p>9778</p>
-                    </div>
-                </el-col>
-                <el-col :span="8">
-                    <div class="content">
-                        <div class="top">
-                            <img src="/images/errorIcon.png" alt="">
-                            <span>今日获取资源</span>
-                        </div>
-                        <p>9778</p>
+                        <p>{{item.number}}</p>
                     </div>
                 </el-col>
             </el-row>
         </div>
+        <div class="textContent">资源获取量</div>
         <!-- 曲线图 -->
         <div id="resourceMap" style="width: 100%;height:415px;background: #ffffff;"></div>
     </div>
@@ -114,30 +93,21 @@
         var mainDivVM = new Vue({
             el: '#merchantHome',
             data: {
-                value1: '',
-                value2: '',
-                selectValue: '',
+                from: {
+                    startTime: '',
+                    endTime: '',
+                    selectValue: '',
+                },
                 myChart: '',
-                options: [{
-                    value: '选项1',
-                    label: '黄金糕'
-                }, {
-                    value: '选项2',
-                    label: '双皮奶'
-                }, {
-                    value: '选项3',
-                    label: '蚵仔煎'
-                }, {
-                    value: '选项4',
-                    label: '龙须面'
-                }, {
-                    value: '选项5',
-                    label: '北京烤鸭'
-                }],
+                fatherShow: true,
+                showButton: 0,
+                options: '',
+                // 今日获取资源
+                resources: '',
                 // 指定图表的配置项和数据
                 option: {
                     title: {
-                        text: '资源获取量',
+                        text: '',
                     },
                     tooltip: {},
                     xAxis: {
@@ -161,10 +131,10 @@
                                         //三种由深及浅的颜色
                                         [{
                                             offset: 0,
-                                            color: '#3a84f4'
+                                            color: '#769DF8'
                                         }, {
                                             offset: 0.5,
-                                            color: '#a5c4f7'
+                                            color: '#769DF8'
                                         }, {
                                             offset: 1,
                                             color: '#fff'
@@ -173,6 +143,14 @@
                                 },
                                 lineStyle: {
                                     color: '#3c85f4'
+                                },
+                                label: {
+                                    show: true,
+                                    position: 'top',
+                                    textStyle: {
+                                        color: '#000',
+                                        fontSize: 18
+                                    }
                                 }
                             }
                         }
@@ -185,9 +163,52 @@
                     this.myChart = echarts.init(document.getElementById(id));
                     this.myChart.setOption(this.option);
                 },
-
+                immediateRecharge() {
+                    alert("跳转充值页面")
+                },
+                timeClick(data) {
+                    this.showButton = data
+                },
+                submitQuery() {
+                    console.log(this.from)
+                }
             },
             created() {
+                this.options = [{
+                    value: '黄金糕',
+                    label: '黄金糕'
+                }, {
+                    value: '双皮奶',
+                    label: '双皮奶'
+                }, {
+                    value: '蚵仔煎',
+                    label: '蚵仔煎'
+                }, {
+                    value: '龙须面',
+                    label: '龙须面'
+                }, {
+                    value: '北京烤鸭',
+                    label: '北京烤鸭'
+                }]
+                this.resources = [{
+                    id: '0',
+                    images: 'https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png',
+                    text: '今日获取资源',
+                    number: '9778',
+                },
+                {
+                    id: '1',
+                    images: 'https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png',
+                    text: '本月获取资源',
+                    number: '9438',
+                },
+                {
+                    id: '2',
+                    images: 'https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png',
+                    text: '累计获取资源',
+                    number: '5478',
+                },
+                ]
             },
             mounted() {
                 document.getElementById('merchantHome').style.display = 'block';
