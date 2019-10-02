@@ -4,6 +4,7 @@ import com.kuaidao.common.constant.ComConstant.DIMENSION;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
@@ -23,7 +24,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -190,7 +194,6 @@ public class MHomePageController {
   @ResponseBody
   public JSONResult<IndexRespDTO> receiveStatics(@RequestBody IndexReqDTO indexReqDTO){
 
-
     ResourceStatisticsParamDTO paramDTO = new ResourceStatisticsParamDTO();
     paramDTO.setDimension(indexReqDTO.getDimension());
     paramDTO.setEtime(indexReqDTO.getEtime());
@@ -207,6 +210,12 @@ public class MHomePageController {
       assignDto = ruleAssignRecordFeignClient
           .countAssginStatistic(paramDTO);
       subIds = merchantUserList(curLoginUser);
+    }
+
+    Map<String,Integer> map = new HashMap<>();
+    if(CommonUtil.resultCheck(assignDto)){
+      List<ResourceStatisticsDto> data = assignDto.getData();
+      map = data.stream().collect(Collectors.toMap(ResourceStatisticsDto::getDimension,ResourceStatisticsDto::getReceiveNum));
     }
 
     // 查询子账号信息
@@ -226,10 +235,20 @@ public class MHomePageController {
       }
       JSONResult<List<ResourceStatisticsDto>> listJSONResult = pubcustomerFeignClient
           .countReceiveResourceStatistics(paramDTO);
+      if(CommonUtil.resultCheck(listJSONResult)){
+        List<ResourceStatisticsDto> data = listJSONResult.getData();
+        for(ResourceStatisticsDto resource:data){
+          Integer integer = map.get(resource.getDimension());
+          if(integer!=null){
+            map.put(resource.getDimension(),resource.getReceiveNum()+map.get(resource.getDimension()));
+          }else{
+            map.put(resource.getDimension(),resource.getReceiveNum());
+          }
+        }
+      }
     }
-
-    // 进行数据整合
-
+    // 数据排序
+    
 
     IndexRespDTO indexRespDTO = new IndexRespDTO();
     indexRespDTO.setXList(xList);
