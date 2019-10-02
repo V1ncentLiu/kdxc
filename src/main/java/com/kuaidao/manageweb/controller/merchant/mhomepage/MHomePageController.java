@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -187,7 +188,7 @@ public class MHomePageController {
    */
   @RequestMapping("/receiveStatics")
   @ResponseBody
-  public JSONResult<IndexRespDTO> receiveStatics(IndexReqDTO indexReqDTO){
+  public JSONResult<IndexRespDTO> receiveStatics(@RequestBody IndexReqDTO indexReqDTO){
 
 
     ResourceStatisticsParamDTO paramDTO = new ResourceStatisticsParamDTO();

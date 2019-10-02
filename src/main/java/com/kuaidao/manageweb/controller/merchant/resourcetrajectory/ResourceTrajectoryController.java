@@ -51,6 +51,7 @@ public class ResourceTrajectoryController {
    */
   @RequestMapping("/topage")
   public String listPage(HttpServletRequest request) {
+    request.setAttribute("clueId",request.getParameter("clueId"));
     return "merchant/resourceTrajectory/resourceTrajectory";
   }
   @RequestMapping("/topage1")
