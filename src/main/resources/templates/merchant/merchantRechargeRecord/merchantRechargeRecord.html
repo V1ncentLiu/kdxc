@@ -52,7 +52,7 @@
             </el-form>
         </div>
         <el-row class="greyTip">
-            <span style="margin-right: 10px;">累计充值：{{rechargeDTO.totalRechargeMoney}}元</span><span style="margin-right: 10px;">累计赠送：{{rechargeDTO.totalGivenMoney}}元</span><span style="margin-right: 10px;">剩余金额：{{rechargeDTO.totalAmounts}}元</span>
+            <!-- <span style="margin-right: 10px;">累计充值：{{rechargeDTO.totalRechargeMoney}}元</span><span style="margin-right: 10px;">累计赠送：{{rechargeDTO.totalGivenMoney}}元</span><span style="margin-right: 10px;">剩余金额：{{rechargeDTO.totalAmounts}}元</span> -->
         </el-row>
         <el-row>            
             <el-table
@@ -180,7 +180,26 @@
                   invoiceStatus:''
                 },
                 formLabelWidth: '120px',
-                dataTable: [],
+                dataTable: [
+                // {
+                //     createTime:'1',
+                //     serialNumber:'1',
+                //     rechargeMoney:1,
+                //     givenAmount:'1',
+                //     rechargeWay:'1',
+                //     rechargeType:'1',
+                //     invoiceStatus:'0',
+                // },
+                // {
+                //     createTime:'1',
+                //     serialNumber:'1',
+                //     rechargeMoney:2,
+                //     givenAmount:'1',
+                //     rechargeWay:'1',
+                //     rechargeType:'1',
+                //     invoiceStatus:'0',
+                // }
+                ],
                 merchantUserListOptions:merchantUserList,
                 statusOptions: [{
                   value: "",
@@ -201,7 +220,7 @@
                     address:'',
                     phone:'',
                     name:'',
-                    invoiceAmount:1000
+                    invoiceAmount:0,
                 }
             }             
         },
@@ -210,8 +229,8 @@
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
             handleSelectionChange(val) {//选择节点的事件
-                // console.log(val)
-                this.multipleSelection = val;
+                console.log(val)
+                this.multipleSelection = val;                 
             },
             handleStart(index, row) {
                 console.log(index, row);
@@ -229,7 +248,7 @@
                     });
                     return;
                 }
-                var param =this.form;
+                var param ={};
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;                
                 param.rechargeBeginTime = this.form.rechargeBeginTime;                
@@ -264,12 +283,17 @@
             openassignrDig(){
                 var rows = this.multipleSelection;
                 if(rows.length <1){
-                this.$message({
-                    message: '请选择数据',
-                    type: 'warning'
-                });
-                return;
+                    this.$message({
+                        message: '请选择数据',
+                        type: 'warning'
+                    });
+                    return;
                 }
+                var multipleSelectionVal=0;
+                for(var i=0;i<rows.length;i++){
+                    multipleSelectionVal+=rows[i].rechargeMoney;
+                }
+                this.formApply.invoiceAmount=multipleSelectionVal;
                 this.applyFormVisible = true;
                 if(this.$refs['formApply']) {
                     this.$refs['formApply'].resetFields();
@@ -280,26 +304,28 @@
                     if (valid) {
                         this.btnDisabled = true;
                         var param = {};
+                        param.invoiceAmount = this.formApply.invoiceAmount;
                         param.invoiceHeader = this.formApply.invoiceHeader;
                         param.taxpayerIdentificationNum = this.formApply.taxpayerIdentificationNum;
                         param.address = this.formApply.address;
                         param.phone = this.formApply.phone;
                         param.name = this.formApply.name;
+                        console.log(param)
                         axios.post('/merchant/merchantRechargeRecordBusiness/applyInvoice',param)
                             .then(function (response) {
                                 var data =  response.data;
-                                debugger;
                                 if(data.code=='0'){
                                     ocmVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
-                                            ocmVM.applyFormVisible = false;
-                                            ocmVM.btnDisabled = false;
-                                            ocmVM.searchTable();
-                                        }});
+                                        ocmVM.applyFormVisible = false;
+                                        ocmVM.btnDisabled = false;
+                                        ocmVM.searchTable();
+                                    }});
                                 }else{
-                                    clueVM.$message({
-                                        message: "接口调用失败",
+                                    ocmVM.$message({
+                                        message: data.msg,
                                         type: 'error'
                                     });
+                                    ocmVM.btnDisabled = false;
                                 }
                             })
                             .catch(function (error) {
