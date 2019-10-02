@@ -18,7 +18,11 @@
     <el-row class="borderbox">
         <div class="inforTitle">维护客户</div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> </div>
+            <div class="marginB20 fs16 paddingT20">
+                资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> 
+                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
+            </div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
@@ -611,7 +615,7 @@
                     required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
                 <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 200px;margin-right: 10px;"></el-input>
-                <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                <!--<el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>-->
                 <!-- <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i> -->
                 <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)" style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt=""> 
             </el-form-item>
@@ -684,6 +688,34 @@
         </div>
         <div slot="footer" class="dialog-footer" style="text-align: center;">
             <el-button type="primary" @click="showMessageDialog = false;"> 知道了</el-button>
+        </div>
+    </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
 </div>
@@ -915,6 +947,12 @@
         el: '#addCustomer',
         data: function () {
             return {
+                isActive:false,
+                isShowMoreBtn:false,
+                customerInfo:customer,
+                isShowOnlineRecordBtn:false,
+                onlineRecordData:[],
+                onlineRecordDialogVisible:false,
                 audioShow:false,
                 expireTimeOption: {
                     disabledDate(date) { //disabledDate 文档上：设置禁用状态，参数为当前日期，要求返回 Boolean
@@ -1102,7 +1140,8 @@
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
-                        value: ''
+                        value: '',
+                        key: Date.now(),
                     }]
                 },
                 statusOptions: [{
@@ -1160,6 +1199,62 @@
             }
         },
         methods: {
+            isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
+            showOnlineRecord(){
+                this.onlineRecordDialogVisible=true;                
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){
+                            addCustomerVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            if(dataList.length>0){
+                                addCustomerVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    addCustomerVM.isShowMoreBtn=true;
+                                }else{
+                                    addCustomerVM.isShowMoreBtn=false;
+                                }
+                            }
+                        }                        
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        addCustomerVM.isShowOnlineRecordBtn=false;
+                    }                       
+
+                });
+
+            },
+            isShowOnlineRecordFun(){
+                // var param = {};
+                // param.clueId = clueId;
+                // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+                //     var data= response.data;                 
+                //     if(data){
+                //         addCustomerVM.isShowOnlineRecordBtn=true;
+                //     }else{
+                //         addCustomerVM.isShowOnlineRecordBtn=false;
+                //     }
+
+                // });
+            },
             lineFormShowFun(){
                 if(this.lineFormShow){
                     this.lineFormShow = false
@@ -1208,6 +1303,7 @@
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;
+                param.stage = 1;
                 window.parent.parent.outboundCallPhone(tel, 3, clueId, function (res) { // 话务外呼 3   电销外呼 2
                     axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
                     });
@@ -1265,6 +1361,55 @@
             },
 
             saveClue(form,flag){
+                // 手机号重复验证开始
+                var domains = this.dynamicValidateForm.domains;
+                var customerPhone = this.form.customerPhone;
+                var phone="";
+                if(this.form.phone){
+                    phone=this.form.phone
+                }
+                if(this.form.customerPhone){
+                    phone=customerPhone;
+                }                        
+                var ary = [];
+                console.log(domains)
+                for (var i = 0; i < domains.length; i++) {
+                    // 判断弹框里的值是否与页面的手机号1重复
+                    if (domains[i].value == phone&&phone!="") {
+                        this.$message({
+                            message: '请不要提交重复手机号',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                    ary.push(domains[i].value);//把输入的手机号放入一个数组
+                    var s = ary.join(",") + ",";
+                    console.log(ary)
+                    for (var j = 0; j < ary.length; j++) {
+                        console.log(ary[j])
+                        if (ary[j] != "") {
+                            if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                this.$message({
+                                    message: '请不要提交重复手机号',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+                        }
+
+                    }
+                    // 如果输入的是非数字
+                    if (/^[0-9]*$/.test(domains[i].value) == false) {
+                        this.$message({
+                            message: '请输入数字',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+
+                }
+                // 手机号重复验证结束
                 if(flag=="toTele"){ // 仅保存时候不需要对 意向项目进行必填验证
                     if( this.form.radioProject == 1){ // 内部项目
                         if(!this.form.insideProject){
@@ -1387,15 +1532,19 @@
                     for (var i = 0; i < phoneArr.length; i++) {
                         if (i == 0) {
                             clueCustomer.phone2 = phoneArr[i].value;
+                            clueCustomer.phone2CreateTime = phoneArr[i].key;
                         }
                         if (i == 1) {
                             clueCustomer.phone3 = phoneArr[i].value;
+                            clueCustomer.phone3CreateTime = phoneArr[i].key;
                         }
                         if (i == 2) {
                             clueCustomer.phone4 = phoneArr[i].value;
+                            clueCustomer.phone4CreateTime = phoneArr[i].key;
                         }
                         if (i == 3) {
                             clueCustomer.phone5 = phoneArr[i].value;
+                            clueCustomer.phone5CreateTime = phoneArr[i].key;
                         }
                     }
                 }
@@ -1490,13 +1639,21 @@
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        debugger
                         var domains = this.dynamicValidateForm.domains;
                         var customerPhone = this.form.customerPhone;
+                        var phone="";
+                        if(this.form.phone){
+                            phone=this.form.phone
+                        }
+                        if(this.form.customerPhone){
+                            phone=customerPhone;
+                        }                        
                         var ary = [];
                         console.log(domains)
                         for (var i = 0; i < domains.length; i++) {
                             // 判断弹框里的值是否与页面的手机号1重复
-                            if (domains[i].value == customerPhone) {
+                            if (domains[i].value == phone&&phone!="") {
                                 this.$message({
                                     message: '请不要提交重复手机号',
                                     type: 'warning'
@@ -1961,11 +2118,13 @@
                 $(".downloadMp3:eq(" + index + ") a>p").trigger("click");
             },
             switchSoundBtn(id, url, callSource) {
-                this.audioShow=true;
+                // this.audioShow=true;
                 if (callSource == '2') {
-                    switchSound(id, url);
+                    // switchSound(id, url);
+                    window.parent.open(url)
                     return;
                 }
+                var newWindow = window.open();
                 var param = {};
                 param.id = id;
                 axios.post('/call/callRecord/getRecordFile', param)
@@ -1973,7 +2132,8 @@
                         var data = response.data
                         if (data.code == '0') {
                             var url = data.data;
-                            switchSound(id, url);
+                            // switchSound(id, url);
+                            newWindow.location.href = url;
 
                         } else {
                             console.error(data);
@@ -2002,6 +2162,9 @@
                                 var fileName = url.split('?')[0];
                                 var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
+                                 if(callSource=='3'){
+                                     url = "/client/heliClient/downloadHeliClientAudio?url="+url;
+                                 }
                                 var x=new XMLHttpRequest();
                                 x.open("GET", url, true);
                                 x.responseType = 'blob';
@@ -2073,9 +2236,10 @@
                     phoneArr.push(phone5);
                 }
                 if (phoneArr.length < 1) {
-                    var phone5 = {};
-                    phone5.value = "";
-                    phoneArr.push(phone5);
+                    var phone2 = {};
+                    phone2.value = "";
+                    phone2.key = Date.now();
+                    phoneArr.push(phone2);
                 }
                 this.dynamicValidateForm.domains = phoneArr;
                 if(phoneArr.length>0){
@@ -2245,7 +2409,9 @@
                 addCustomerVM.provinceArr = response.data.data.data;
             });
 
-
+            // 在线聊天记录data
+            this.initData();
+            this.isShowOnlineRecordFun();
         }
     })
 </script>

@@ -37,7 +37,14 @@ public interface CallRecordFeign {
      */
     @PostMapping("/listAllTmCallRecord")
     JSONResult<Map<String,Object>> listAllTmCallRecord(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
-    
+
+    /**
+     *话务通话记录  分页展示 ，参数模糊匹配
+     * @param myCallRecordReqDTO
+     * @return
+     */
+    @PostMapping("/listHwAllTmCallRecord")
+    JSONResult<Map<String,Object>> listHwAllTmCallRecord(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
     /***
      * 电销通话时长统计 分页
      * @param myCallRecordReqDTO
@@ -130,6 +137,11 @@ public interface CallRecordFeign {
         public JSONResult<Map<String, Object>> listAllTmCallRecord(
                 CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("电销通话记录");
+        }
+        @Override
+        public JSONResult<Map<String, Object>> listHwAllTmCallRecord(
+            CallRecordReqDTO myCallRecordReqDTO) {
+            return fallBackError("话务通话记录");
         }
         @Override
         public JSONResult<Map<String, Object>> listAllTmCallTalkTime(

@@ -866,6 +866,48 @@ if(notOptList){
             openViewForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
+                        // 判断手机号是否重复开始
+                        var domains=this.dynamicValidateForm.domains;
+                        var phone=this.form.phone; 
+                        var ary=[];   
+                        console.log(domains)                  
+                        for(var i=0;i<domains.length;i++){
+                            // 判断弹框里的值是否与页面的手机号1重复
+                            if(domains[i].value==phone&&phone!=""){
+                                this.$message({
+                                    message: '请不要提交重复手机号',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+                          // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                          ary.push(domains[i].value);//把输入的手机号放入一个数组
+                          var s = ary.join(",")+",";                            
+                          console.log(ary)
+                          for(var j=0;j<ary.length;j++) {
+                              console.log(ary[j])
+                              if(ary[j]!=""){
+                                  if((","+s.replace(ary[j]+",","")).indexOf(","+ary[j]+",")>-1) {
+                                      this.$message({
+                                          message: '请不要提交重复手机号',
+                                          type: 'warning'
+                                      });
+                                      return;
+                                  }
+                              }
+                              
+                          }   
+                          // 如果输入的是非数字
+                          if(/^[0-9]*$/.test(domains[i].value) == false){
+                              this.$message({
+                                  message: '请输入数字',
+                                  type: 'warning'
+                              });
+                              return;
+                          }
+
+                        }
+                        //判断手机号是否重复结束
                         //----资源基本信息---//
                         this.viewFormVisible=true;
                         this.viewForm=this.form;
@@ -1151,7 +1193,7 @@ if(notOptList){
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
             	this.form.wechatUrl=this.wechatForm.wechatUrl;
-                if(this.wechatForm.wechat2!==""){
+                if(this.wechatForm.wechat2!=""||this.wechatForm.wechatUrl!=""){
                     addClueVM.$message({ message: "提交成功", type: 'success' }); 
                     this.wechatVisible = false;
                 }else{

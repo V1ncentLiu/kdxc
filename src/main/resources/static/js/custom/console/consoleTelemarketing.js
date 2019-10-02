@@ -96,6 +96,38 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+    	async gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
+        	var isReturn =false;
+        	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+            .then(function (response) {
+            	if(response.data !=""){
+            		mainDivVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+            		isReturn = true; ;
+            	}
+               ;
+            });
+        	if(isReturn){
+        		return;
+        	}
+            //外呼手机
+            var param = {};
+            param.clueId = clueId;
+            var sessionStorage =window.sessionStorage;
+            if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000) {
+                sessionStorage.setItem("phoneKey" + clueId, new Date().getTime());
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                    });
+                });
+                //跳转页面
+                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+            }
+
+
+        },
         gotoMyCustomer(){//跳转我的客户
             window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
         },

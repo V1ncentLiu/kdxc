@@ -1,5 +1,11 @@
 package com.kuaidao.manageweb.controller.client;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.*;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,10 +58,6 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RedisConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.IdListReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -90,6 +92,9 @@ public class ClientController {
     @Autowired
     RedisTemplate redisTemplate;
 
+    @Autowired
+    UserInfoFeignClient userInfoFeignClient;
+
     /**
      *  跳转天润坐席页面
      * @return
@@ -97,16 +102,30 @@ public class ClientController {
     @RequiresPermissions("aggregation:trClient:view")
     @RequestMapping("/trClientIndex")
     public String trClientIndex(HttpServletRequest request) {
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-//      queryDTO.setOrgType(OrgTypeConstant.DXZ);
-        //查询全部
-        JSONResult<List<OrganizationRespDTO>> orgListJr =
-                organizationFeignClient.queryOrgByParam(queryDTO);
-        if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
-            logger.error("跳转天润坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+        List<OrganizationDTO> orgList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
         } else {
-            request.setAttribute("orgList", orgListJr.getData());
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+//      queryDTO.setOrgType(OrgTypeConstant.DXZ);
+            //查询全部
+            JSONResult<List<OrganizationRespDTO>> orgListJr =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+            if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+                logger.error("跳转天润坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+            } else {
+                request.setAttribute("orgList", orgListJr.getData());
+            }
         }
         return "client/trClientPage";
     }
@@ -119,14 +138,28 @@ public class ClientController {
     @RequiresPermissions("aggregation:qimoClient:view")
     @RequestMapping("/qimoClientIndex")
     public String qimoClientIndex(HttpServletRequest request) {
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        JSONResult<List<OrganizationRespDTO>> orgListJr =
-                organizationFeignClient.queryOrgByParam(queryDTO);
-        if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
-            logger.error("跳转七陌坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+        List<OrganizationDTO> orgList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
         } else {
-            request.setAttribute("orgList", orgListJr.getData());
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            JSONResult<List<OrganizationRespDTO>> orgListJr =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+            if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+                logger.error("跳转七陌坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+            } else {
+                request.setAttribute("orgList", orgListJr.getData());
+            }
         }
         return "client/qimoClientPage";
     }
@@ -268,7 +301,15 @@ public class ClientController {
     @ResponseBody
     public JSONResult<PageBean<TrClientDataRespDTO>> listTrClientPage(
             @RequestBody QueryTrClientDTO queryClientDTO) {
-
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        Long orgId = curLoginUser.getOrgId();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            queryClientDTO.setOrgId(orgId);
+        }
         return clientFeignClient.listTrClientPage(queryClientDTO);
     }
 
@@ -340,19 +381,22 @@ public class ClientController {
                 if (j == 0) {
                  // 坐席号
                     rowDto.setClientNo(value);
-                } else if (j == 1) {
-                 //坐席归属地
+                }else if (j == 1) {
+                    //号码所属公司
+                    rowDto.setNumberAttributionCompany(value);
+                }else if (j == 2) {
+                    //坐席归属地
                     rowDto.setAttribution(value);
-                } else if (j == 2) {
+                }  else if (j == 3) {
                     // 电销组
                     rowDto.setOrgName(value);
-                } else if (j == 3) {
+                } else if (j == 4) {
                     // 绑定电话
                     rowDto.setBindPhone(value);
-                } else if (j == 4) {
+                } else if (j == 5) {
                     // 回显号
                     rowDto.setDisplayPhone(value);
-                } else if (j == 5) {
+                } else if (j == 6) {
                     // 回呼号码
                     rowDto.setCallbackPhone(value);
                 }
@@ -415,6 +459,19 @@ public class ClientController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setCreateUser(curLoginUser.getId());
+        Long userId = reqDTO.getUserId();
+        if(userId!=null){
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(userId);
+            JSONResult<UserInfoDTO> userInfoJr = userInfoFeignClient.get(idEntityLong);
+            if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())){
+                return new JSONResult<Boolean>().fail(userInfoJr.getCode(),userInfoJr.getMsg());
+            }
+            UserInfoDTO userInfo = userInfoJr.getData();
+            reqDTO.setOrgId(userInfo.getOrgId());
+
+        }
+
         return clientFeignClient.saveQimoClient(reqDTO);
     }
 
@@ -438,6 +495,19 @@ public class ClientController {
         if (id == null) {
             return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+
+        Long userId = reqDTO.getUserId();
+        if(userId!=null){
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(userId);
+            JSONResult<UserInfoDTO> userInfoJr = userInfoFeignClient.get(idEntityLong);
+            if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())){
+                return new JSONResult<Boolean>().fail(userInfoJr.getCode(),userInfoJr.getMsg());
+            }
+            UserInfoDTO userInfo = userInfoJr.getData();
+            reqDTO.setOrgId(userInfo.getOrgId());
+
         }
 
 
@@ -483,7 +553,17 @@ public class ClientController {
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return clientFeignClient.queryQimoClientById(idEntity);
+
+        JSONResult<QimoClientRespDTO> qimoClientRespDTOJSONResult = clientFeignClient.queryQimoClientById(idEntity);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = CommUtil.getRoleCode(curLoginUser);
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+                if(JSONResult.SUCCESS.equals(qimoClientRespDTOJSONResult.getCode()) && qimoClientRespDTOJSONResult.getData()!=null){
+                    QimoClientRespDTO qimoClient = qimoClientRespDTOJSONResult.getData();
+                    qimoClient.setIsDxzj(true);
+                }
+        }
+        return qimoClientRespDTOJSONResult;
     }
 
 
@@ -511,7 +591,15 @@ public class ClientController {
     @ResponseBody
     public JSONResult<PageBean<QimoDataRespDTO>> listQimoClientPage(
             @RequestBody QueryQimoDTO queryClientDTO) {
-
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        Long orgId = curLoginUser.getOrgId();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            queryClientDTO.setOrgId(orgId);
+        }
         return clientFeignClient.listQimoClientPage(queryClientDTO);
     }
 
@@ -536,10 +624,10 @@ public class ClientController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
                     SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        if (excelDataList.size() > 1000) {
-            logger.error("上传七陌坐席,大于1000条，条数{{}}", excelDataList.size());
+        if (excelDataList.size() > 5000) {
+            logger.error("上传七陌坐席,大于5000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
-                    "导入数据过多，已超过1000条！");
+                    "导入数据过多，已超过5000条！");
         }
 
         // 存放合法的数据
@@ -552,21 +640,29 @@ public class ClientController {
                 String value = (String) object;
                 if (j == 0) {
                     rowDto.setName(value);
-                } else if (j == 1) {// 登录坐席
+                } else if (j == 1) {
+                    // 登录坐席
                     rowDto.setLoginClient(value);
-                } else if (j == 2) {// 坐席编号
+                } else if (j == 2) {
+                    // 坐席编号
                     rowDto.setClientNo(value);
-                } else if (j == 3) {// 坐席归属地
+                }else if (j == 3) {
+                    // 号码所属公司
+                    rowDto.setNumberAttributionCompany(value);
+                } else if (j == 4) {
+                    // 坐席归属地
                     rowDto.setAttribution(value);
-                } else if (j == 4) {// 账号编号
+                } else if (j == 5) {
+                    // 账号编号
                     rowDto.setAccountNo(value);
-                } else if (j == 5) {// 秘钥
-                    rowDto.setSecretKey(value);
                 } else if (j == 6) {
-                    rowDto.setPhone1(value);
+                    // 秘钥
+                    rowDto.setSecretKey(value);
                 } else if (j == 7) {
-                    rowDto.setPhone2(value);
+                    rowDto.setPhone1(value);
                 } else if (j == 8) {
+                    rowDto.setPhone2(value);
+                } else if (j == 9) {
                     rowDto.setProxyurl(value);
                 }
             }
@@ -661,37 +757,46 @@ public class ClientController {
      */
     @PostMapping("/qimoLogin")
     @ResponseBody
-    @LogRecord(description = "七陌坐席", operationType = OperationType.LOGIN,
+    @LogRecord(description = "七陌坐席", operationType = OperationType.CLIENT_LOGIN,
             menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
         String loginName = reqDTO.getLoginName();
         String bindType = reqDTO.getBindType();
-        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long accountId = curLoginUser.getId();
+       //JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        TrAxbOutCallReqDTO trAxbOutCallReqDTO = new TrAxbOutCallReqDTO();
+        trAxbOutCallReqDTO.setLoginClient(loginName);
+        trAxbOutCallReqDTO.setAccountId(accountId);
+        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClient(trAxbOutCallReqDTO);
+       
         if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
             QimoClientRespDTO qimoClient = qimoClientJr.getData();
             if(qimoClient==null) {
-                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"登录坐席不存在或坐席未启用");
+                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该坐席号不属于您");
             }else {
                 Session session = SecurityUtils.getSubject().getSession();
                 session.setAttribute("loginName", loginName);
                 if("2".equals(bindType)) {
                     session.setAttribute("bindType", bindType);
                 }
-                UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+             
                 ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
                 clientLoginRecord.setAccountId(curLoginUser.getId());
                 clientLoginRecord.setAccountType(reqDTO.getAccountType());
                 clientLoginRecord.setOrgId(curLoginUser.getOrgId());
                 clientLoginRecord.setCno(qimoClient.getClientNo());
                 clientLoginRecord.setClientType(reqDTO.getClientType());
+                clientLoginRecord.setAccountNo(qimoClient.getAccountNo());
                 JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
                 if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
                     logger.error("qimo_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
+                    return  new JSONResult<>().fail(loginRecordJr.getCode(),loginRecordJr.getMsg());
                 }
                 return new JSONResult<>().success(true);
             }
         }else {
-            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",loginName,qimoClientJr);
+            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",trAxbOutCallReqDTO,qimoClientJr);
         }
         return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
     }
@@ -721,7 +826,7 @@ public class ClientController {
      */
     @PostMapping("/qimoLogout")
     @ResponseBody
-    @LogRecord(description = "七陌坐席退出登录", operationType = OperationType.LOGINOUT,
+    @LogRecord(description = "七陌坐席退出登录", operationType = OperationType.CLIENT_LOGOUT,
         menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult loginout(HttpServletRequest request) {
         Session session = SecurityUtils.getSubject().getSession();
@@ -779,7 +884,7 @@ public class ClientController {
     
     /**
      * 根据坐席号查询坐席的信息，判断坐席号是否属于当前用户
-     * @param cno  坐席号
+     * @param trClientQueryDTO  坐席号
      * @return
      */
     @PostMapping("/queryClientInfoByCno")
@@ -814,7 +919,7 @@ public class ClientController {
      */
     @PostMapping("/trClientLogout")
     @ResponseBody
-    @LogRecord(description = "天润坐席退出", operationType = OperationType.LOGINOUT,
+    @LogRecord(description = "天润坐席退出", operationType = OperationType.CLIENT_LOGOUT,
     menuName = MenuEnum.TR_CLIENT_MANAGEMENT)
     public JSONResult trClientLogout(@RequestBody TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
         String cno = trAxbOutCallReqDTO.getCno();
@@ -827,4 +932,21 @@ public class ClientController {
         return clientFeignClient.trClientLogout(trAxbOutCallReqDTO);
     }
 
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
+    }
 }

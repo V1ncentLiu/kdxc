@@ -74,10 +74,20 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
-                    <el-form-item label="媒介:">
+                    <!--<el-form-item label="媒介:">
                         <el-select v-model="form.source" placeholder="媒介" clearable filterable>
                             <el-option
                                     v-for="item in mediumArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>-->
+                    <el-form-item label="资源类别：">
+                        <el-select v-model="form.resourceType" placeholder="请选择" clearable filterable>
+                            <el-option
+                                    v-for="item in categoryArr"
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.value">
@@ -93,6 +103,9 @@
                                     :value="item.value">
                             </el-option>
                         </el-select>
+                    </el-form-item>
+                    <el-form-item label="搜索词：">
+                        <el-input v-model="form.searchWord" autocomplete="off" maxlength="50" ></el-input>
                     </el-form-item>
                     <el-form-item label="请选择:" style="margin-right: 10px;">
                         <el-select v-model="form.defineColumn">
@@ -178,7 +191,7 @@
     <!-- 重复手机号 -->
     <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'"    :visible.sync="repeatPhonesDialog" width="1160px">
         <div v-show="showPhoneTable">
-            <p style="margin:10px 0;">手机号{{phone}}重复手机号资源</p>
+            <p style="margin:10px 0;">手机号<span style="color: red">(1)</span>{{phone}}重复手机号资源</p>
             <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
@@ -211,7 +224,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable2">
-            <p style="margin:10px 0;">手机号{{phone2}}重复手机号资源</p>
+            <p style="margin:10px 0;">手机号<span style="color: red">(2)</span>{{phone2}}重复手机号资源</p>
             <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
@@ -244,7 +257,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable3">
-            <p style="margin:10px 0;">手机号{{phone3}}重复手机号资源</p>
+            <p style="margin:10px 0;">手机号<span style="color: red">(3)</span>{{phone3}}重复手机号资源</p>
             <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
@@ -277,7 +290,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable4">
-            <p style="margin:10px 0;">手机号{{phone4}}重复手机号资源</p>
+            <p style="margin:10px 0;">手机号<span style="color: red">(4)</span>{{phone4}}重复手机号资源</p>
             <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
@@ -310,7 +323,7 @@
             </el-table>
         </div>
         <div v-show="showPhoneTable5">
-            <p style="margin:10px 0;">手机号{{phone5}}重复手机号资源</p>
+            <p style="margin:10px 0;">手机号<span style="color: red">(5)</span>{{phone5}}重复手机号资源</p>
             <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="130"></el-table-column>
@@ -404,7 +417,9 @@ var phtrafficList=[[${phtrafficList}]];// 话务员工
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
 var editflag=[[${editflag}]];//可编辑标志
-
+var roleCode=[[${roleCode}]];
+var statusVal=(roleCode=='HWJL' || roleCode=='HWZG')?'已分配':'已处理';
+var readyStatusVal=(roleCode=='HWJL' || roleCode=='HWZG')?'待分配':'待处理';
 var phoneButton = false;
      editflag = 1
      if(editflag == 1){
@@ -447,7 +462,7 @@ var phoneButton = false;
                     tableData:[]
                 },
                 adviserValue: '', //电销顾问
-                dealStatusArr:[{value: '', label: '全部' },{value: '0', label: '待处理' }, {value: '1', label: '已处理'}],
+                dealStatusArr:[{value: '', label: '全部' },{value: '0', label: readyStatusVal }, {value: '1', label: statusVal}],
 
                 form: {
                     defineColumn:"phone",
@@ -462,7 +477,8 @@ var phoneButton = false;
                     type: [],
                 },
                 cusStatusArr:[],
-                mediumArr:[],
+                //mediumArr:[],
+                categoryArr:[],
                 userArr:phtrafficList.phAllUsers,
                 userArr1:phtrafficList.phUsers,
                 orgTeleArr:queryOrg,
@@ -515,6 +531,7 @@ var phoneButton = false;
         	initTableData(){
                 var param = {};
                 param=this.form
+                param.category = this.form.resourceType;
                 param.pageNum=this.pager.currentPage ;
                 param.pageSize=this.pager.pageSize;
      		    axios.post('/phonetraffic/queryPage',param).then(function (response) {
@@ -568,6 +585,7 @@ var phoneButton = false;
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;
+                param.stage = 1;
                 //客户维护界面   
                 // 存储选中信息--start
                 this.setSessionStore("customManagementStoreForm", this.storeForm);
@@ -578,10 +596,13 @@ var phoneButton = false;
                 }
                 this.setSessionStore("customManagementOtherVal", otherVal);
                 // 存储选中信息--end             
-                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
-                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                //话务经理不做电话判断
+                if(roleCode!='HWJL'){
+                    window.parent.parent.outboundCallPhone(tel, 3, clueId, function (res) {
+                        axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                        });
                     });
-                });
+                }
                 //跳转页面
                 this.customerEidt(clueId);
                
@@ -984,9 +1005,10 @@ var phoneButton = false;
     		//初始化数据列表
     		this.initTableData();
     		//客户状态
-            var param={};
-            param.groupCode="PhCustomerStatus";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            debugger;
+            var paramStatus={};
+            paramStatus.groupCode="PhCustomerStatus";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',paramStatus).then(function (response) {
                 var arr =  response.data.data;
 
                 for(var i =0 ; i < arr.length ;i++){
@@ -997,10 +1019,16 @@ var phoneButton = false;
              });
 
             //客户媒介
-            param={};
+           /* param={};
             param.groupCode="medium";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 customerManVM.mediumArr=response.data.data;
+            });*/
+            //资源类别
+            var paramCategory={};
+            paramCategory.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',paramCategory).then(function (response) {
+                customerManVM.categoryArr=response.data.data;
             });
             this.initColumn();
     	}

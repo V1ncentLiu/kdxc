@@ -51,6 +51,7 @@ var homePageVM=new Vue({
 		   	isLogin:false,//坐席是否登录
 		   	isTrClient:false,//天润坐席是否登录
 		   	isQimoClient:false,//七陌坐席是否登录
+		   	isHeliClient:false,//合力坐席是否登录
 	    	callTitle:'呼叫中心',
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
@@ -58,7 +59,7 @@ var homePageVM=new Vue({
 	    		clientType:1,
 	    		cno:'',
 	    		bindPhone:'',
-	    		bindPhoneType:1,
+	    		bindPhoneType:2,
 	    	    loginClient:''
 	    		
 	    	},
@@ -68,14 +69,18 @@ var homePageVM=new Vue({
             }, {
                 value: 2,
                 label: '登录七陌呼叫中心'
-            }],
-            bindPhoneTypeOptions: [{
-                value: 1,
-                label: '普通电话'
             }, {
-                value: 2,
-                label: '手机外显'
+                value: 3,
+                label: '登录合力呼叫中心'
             }],
+            bindPhoneTypeOptions: [
+            	{
+					value: 2,
+						label: '手机外显'
+				},{
+						value: 1,
+						label: '普通电话'
+		       }],
             trClientFormRules:{//登录坐席校验规则
             	clientType:[
                     { required: true, message: '选择呼叫中心不能为空'}
@@ -126,6 +131,23 @@ var homePageVM=new Vue({
                     { required: true, message: '绑定类型不能为空'}
                 ]
             },
+			heliClientFormRules:{//登录坐席校验规则
+            	clientType:[
+                    { required: true, message: '选择呼叫中心不能为空'}
+                ],
+            	cno:[
+            		 { required: true, message: '坐席号不能为空'},
+            		 {validator:function(rule,value,callback){
+            			 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入数字,不超过10位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+            			 
+            		 },trigger:'blur'},
+            	]
+            },
+          /*  clientRules:'trClientFormRules',*/
             enterpriseId:enterpriseId,
             token:token,
             dialogOutboundVisible:false,//外呼dialog
@@ -263,6 +285,9 @@ var homePageVM=new Vue({
         		}else if(this.isTrClient){
         			this.loginClientForm.clientType=1;
         			this.dialogLogoutClientVisible  = true;
+        		}else if(this.isHeliClient){
+        			this.loginClientForm.clientType=3;
+        			this.dialogLogoutClientVisible  = true;
         		}else{
         			 if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
@@ -289,7 +314,7 @@ var homePageVM=new Vue({
 			 }
         	
         	this.loginClientForm.clientType=1;//设置默认选中天润坐席
-    		this.loginClientForm.bindPhoneType=1;
+    		this.loginClientForm.bindPhoneType=2;
     		this.loginClientForm.cno='';
     		this.loginClientForm.bindPhone='';
     		this.loginClientForm.loginClient='';
@@ -297,7 +322,14 @@ var homePageVM=new Vue({
         },
         changeClientType(selectedValue){
         	this.$refs.loginClientForm.resetFields();
+        	this.$refs.loginClientForm.clearValidate();
         	this.loginClientForm.clientType=selectedValue;
+        	if(selectedValue==2){//七陌
+        		this.loginClientForm.bindPhoneType = 1;
+			}else if (selectedValue==1 || selectedValue ==3){//天润 合力
+        		this.loginClientForm.bindPhoneType = 2;
+
+			}
         },
         loginClient(formName){
        	 this.$refs[formName].validate((valid) => {
@@ -307,7 +339,8 @@ var homePageVM=new Vue({
              		this.loginTrClient();
              	}else if(clientType==2){
              		this.loginQimoClient();
-             		
+             	}else if(clientType==3){
+             		this.loginHeliClient();
              	}
              	
              } else {
@@ -317,9 +350,65 @@ var homePageVM=new Vue({
         	
         	
         },
+        loginHeliClient(){//合力 登录
+        	var bindType = this.loginClientForm.bindPhoneType;
+        	if(bindType==1){
+    		     this.$message({message:"合力不支持普通电话模式登录！",type:'warning'});
+    		     return;
+        	}
+        	var cno = this.loginClientForm.cno;
+        	//验证坐席是否属于自己
+        	if(!this.validHeliClientNo(cno)){
+        		return;
+        	}
+        	var param = {};
+        	param.bindType = bindType+"";
+        	param.clientNo = cno;
+        	param.accountType = homePageVM.accountType;
+        	param.clientType = homePageVM.loginClientForm.clientType;
+	       	 axios.post('/client/heliClient/login',param)
+	         .then(function (response) {
+	             var data =  response.data;
+	             
+	             if(data.code=='0'){
+	                 var resData = data.data;
+	                 homePageVM.$message({message:"登录成功",type:'success'});
+	                 homePageVM.callTitle="呼叫中心（合力ON）";
+	                 homePageVM.dialogLoginClientVisible =false;
+	                 homePageVM.isHeliClient=true;
+	                 homePageVM.isTrClient=false;
+	                 homePageVM.isQimoClient = false;
+	                 //sessionStorage.setItem("loginClient","qimo");
+	                 //sessionStorage.setItem("accountId",homePageVM.accountId);
+	                 var clientInfo={};
+	                 clientInfo.loginClientType="heli";
+	                 clientInfo.clientNo = homePageVM.loginClientForm.cno;
+	                 clientInfo.clientType = homePageVM.loginClientForm.clientType;
+	                 clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+	                 localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+	                 
+	             }else{
+	            	 console.error(data);
+	                 homePageVM.$message({message:"合力坐席登录："+data.msg,type:'error'});
+	             }
+	         })
+	         .catch(function (error) {
+	            console.log(error);
+	         })
+	         .then(function () {
+	           // always executed
+	         });
+        	
+        	
+        },
         loginQimoClient(){//七陌登录
         	var loginClient = this.loginClientForm.loginClient;
         	var bindType = this.loginClientForm.bindPhoneType;
+
+			/*if(bindType==1){
+				this.$message({message:"七陌不支持普通电话模式登录！",type:'warning'});
+				return;
+			}*/
         	var param={};
         	param.bindType = bindType+"";
         	param.loginName = loginClient;
@@ -336,6 +425,7 @@ var homePageVM=new Vue({
                      homePageVM.dialogLoginClientVisible =false;
                      homePageVM.isQimoClient=true;
                      homePageVM.isTrClient=false;
+                     homePageVM.isHeliClient=false;
                      //sessionStorage.setItem("loginClient","qimo");
                      //sessionStorage.setItem("accountId",homePageVM.accountId);
                      var clientInfo={};
@@ -363,7 +453,7 @@ var homePageVM=new Vue({
                      
                  }else{
                 	 console.error(data);
-                     homePageVM.$message({message:data.msg,type:'error'});
+                     homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
                  }
              })
              .catch(function (error) {
@@ -387,7 +477,9 @@ var homePageVM=new Vue({
               	   ,915157339774915,915390540464159,115450274113949,115450274246648
               	   ,115450529284536,115451100381743,915319637549027,915319637639747
               	   ,915319638079196,915320465997397,915320621197701,214991403833604
-              	   ,115410338236403,115565818271983,115622112138370
+              	   ,115410338236403,115565818271983,115622112138370,1154293728744181760
+              	   ,1149232865020612608,1149232925418590208,1149232985145479168,1149233047493808128
+              	   ,1149636656941375488,1149232583238885376
               	   ];
              	var  curOrgId = this.user.orgId;
              	var isLimit = false;
@@ -478,6 +570,7 @@ var homePageVM=new Vue({
 			                     homePageVM.dialogLoginClientVisible =false;
 			                     homePageVM.isQimoClient=false;
 			                     homePageVM.isTrClient=true;
+			                     homePageVM.isHeliClient=false;
 			                     //sessionStorage.setItem("loginClient","tr");
 			                    // sessionStorage.setItem("accountId",homePageVM.accountId);
 			                     
@@ -548,6 +641,7 @@ var homePageVM=new Vue({
                          homePageVM.callTitle="呼叫中心";
                          homePageVM.isQimoClient=false;
                          homePageVM.isTrClient=false;
+                         homePageVM.isHeliClient=false;
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -593,7 +687,42 @@ var homePageVM=new Vue({
          	    });*/
         		
          	   this.trClientLogout();
+        	}else if(this.isHeliClient){
+        		this.heliClientLogout();
         	}
+        },
+        heliClientLogout(){
+         var param = {};
+         param.clientNo = this.loginClientForm.cno;
+   		 axios.post('/client/heliClient/logout',param)
+         .then(function (response) {
+             var data =  response.data;
+             if(data.code=='0'){
+            	 homePageVM.dialogLogoutClientVisible =false;
+                 homePageVM.$message({message:"退出成功",type:'success'});
+                 homePageVM.callTitle="呼叫中心";
+                 homePageVM.isQimoClient=false;
+                 homePageVM.isTrClient=false;
+                 homePageVM.isHeliClient=false;
+             	// sessionStorage.removeItem("loginClient");
+             	// sessionStorage.removeItem("accountId");
+                 localStorage.removeItem("clientInfo");
+                 
+                 homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
+                 homePageVM.loginClientForm.bindPhoneType=2;
+                 homePageVM.loginClientForm.cno='';
+                 homePageVM.loginClientForm.bindPhone='';
+                 homePageVM.loginClientForm.loginClient='';
+             }else{
+            		homePageVM.$message({message:data.msg,type:'error'});
+             }
+         })
+         .catch(function (error) {
+            console.log(error);
+         })
+         .then(function () {
+           // always executed
+         });
         },
         trClientLogout(){
         	 var cno = homePageVM.loginClientForm.cno;
@@ -605,8 +734,9 @@ var homePageVM=new Vue({
                  console.info(resData);
                  if(resData.code=='0'){
                 	 homePageVM.dialogLogoutClientVisible =false;
-                     homePageVM.isQimoClient=false;
+                	 homePageVM.isQimoClient=false;
                      homePageVM.isTrClient=false;
+                     homePageVM.isHeliClient=false;
                      homePageVM.callTitle="呼叫中心";
                     // sessionStorage.removeItem("loginClient");
                    //  sessionStorage.removeItem("accountId");
@@ -614,7 +744,7 @@ var homePageVM=new Vue({
                      homePageVM.$message({message:"退出成功",type:'success'});
                      
                      homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
-                     homePageVM.loginClientForm.bindPhoneType=1;
+                     homePageVM.loginClientForm.bindPhoneType=2;
                      homePageVM.loginClientForm.cno='';
                      homePageVM.loginClientForm.bindPhone='';
                      homePageVM.loginClientForm.loginClient='';
@@ -668,7 +798,22 @@ var homePageVM=new Vue({
     		this.dialogOutboundVisible = false;
     		this.outboundDialogMin=true;
     	},
-    	outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    	async outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    		var isReturn =false;
+        	await axios.post('/call/callRecord/missedCalPhone?phone='+outboundInputPhone, {})
+            .then(function (response) {
+            	if(response.data !=""){
+            		homePageVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+            		isReturn = true; ;
+            	}
+               ;
+            });
+        	if(isReturn){
+        		return;
+        	}
     		outboundCallPhone(outboundInputPhone,callSource,clueId,null);
     		//stopSound();//停止播放录音
     		/*clearTimer();//清除定时器
@@ -799,7 +944,35 @@ var homePageVM=new Vue({
     			
     			return isPass;
     		
-    	}
+    	},
+    	validHeliClientNo(cno){//验证合力坐席是否属于自己
+			var isPass =false;
+			$.ajax({  
+				type: "POST",  
+				url: "/client/heliClient/queryClientInfoByCno",          
+				data: JSON.stringify({clientNo:cno}),   
+				dataType: 'json',     
+				async: false, //设置为同步请求
+				contentType:"application/json",
+				success: function(data){  
+					console.info(data);
+					if(data.code==0){
+						isPass= data.data;
+						if(!isPass){
+							homePageVM.$message({message:"登陆失败，该坐席号不属于您的归属部门",type:'error'});
+						}
+					}else{
+						homePageVM.$message({message:data.msg+"(验证坐席号归属部门)",type:'error'});
+					}
+				},  
+				error: function() {     
+				     
+				}
+			})
+			
+			return isPass;
+		
+	}
     
          
   	},
@@ -809,7 +982,20 @@ var homePageVM=new Vue({
 		if(isUpdatePassword=="1"){
 			this.dialogModifyPwdVisible=true;
 		}
-	}
+	},
+	computed: {
+	    clientRules:function() {
+	    	var clientType = this.loginClientForm.clientType;
+	    	var ruleName="";
+	        if(clientType==1){
+	    	  return this.trClientFormRules;
+	    	}else if(clientType==2){
+	    		 return this.qimoClientFormRules;
+	    	}else if(clientType==3){
+	    		 return this.heliClientFormRules;
+	    	}
+	    }
+	 }
 })
 // 点击导航赋值ifream的src值
 $(function () { 

@@ -158,7 +158,7 @@ var mainDivVM = new Vue({
             signProvince:"",
             signCity:"",
             signDistrict:"",
-            visitCity:"",
+            arrVisitCity:"",
             isSign:1,
             visitPeopleNum:"",
             notSignReason:""
@@ -175,7 +175,7 @@ var mainDivVM = new Vue({
             signProvince:"",
             signCity:"",
             signDistrict:"",
-            visitCity:"",
+            arrVisitCity:"",
             isSign:1,
             // visitPeopleNum:"",
             notSignReason:"",
@@ -203,7 +203,7 @@ var mainDivVM = new Vue({
             isRemoteSign:'',
 
             visitTime:"",
-            visitCity:"",
+            arrVisitCity:"",
             visitType:"",
             visitShopType:"",
             visitNum:"",
@@ -240,6 +240,13 @@ var mainDivVM = new Vue({
             rebutTime:"",
             rebutReason:"",
             isRemoteSign:0,
+
+            visitDetailRecordId:"",
+            visitTime: "",
+            arrVisitCity: "",
+            visitType: "",
+            visitShopType: "",
+            visitNum: "",
 
             payDetailId:"",
             payType:'1',
@@ -287,8 +294,8 @@ var mainDivVM = new Vue({
             // signCity: [
             //     { required: true, message: '请选择签约城市', trigger: 'change' }
             // ],
-            visitCity: [ //请填写来访城市
-                { required: true, message: '请填写来访城市', trigger: 'change' }
+            arrVisitCity: [ //请填写来访城市
+                { required: true, message: '请填写到访城市', trigger: 'change' }
             ],
             signShopType: [
                 { required: true, message: '请选择签约店型', trigger: 'change' }
@@ -497,8 +504,8 @@ var mainDivVM = new Vue({
             visitTime: [ //请选择到访时间
                 { required: true, message: '请选择到访时间', trigger: 'change' }
             ],
-            visitCity: [ //请填写来访城市
-                { required: true, message: '请填写来访城市', trigger: 'change' }
+            arrVisitCity: [ //请填写来访城市
+                { required: true, message: '请填写到访城市', trigger: 'change' }
             ],
             visitType: [ //请选择到访类型
                 { required: true, message: '请选择到访类型', trigger: 'change' }
@@ -789,7 +796,7 @@ var mainDivVM = new Vue({
             param.id = mainDivVM.formSigning.clueId;
             axios.post('/businesssign/visitEcho',param).then(function (response) {
                 var echoData = response.data.data;
-                mainDivVM.formSigning.visitCity = echoData.visitCity;
+                mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
                 if(echoData.visitNum>0){
                     mainDivVM.formSigning.visitNum=echoData.visitNum;
                 }
@@ -801,12 +808,49 @@ var mainDivVM = new Vue({
             this.suppWrap = false;
             this.shouAddVisitButton = true;
             //清空补充到访记录数据
-            this.formSigning.visitCity = '';
+            this.formSigning.arrVisitCity = '';
             this.formSigning.visitNum='';
             this.formSigning.visitShopType='';
             this.formSigning.visitTime='';
             this.formSigning.visitType='';
         },
+
+        suppUpdateShow() { //补充到访记录展开
+            this.suppWrap = true;
+            this.shouAddVisitButton = false;
+            var param = {};
+            console.log(mainDivVM.updateFormSigning.visitDetailRecordId)
+            if(!mainDivVM.updateFormSigning.visitDetailRecordId){
+                return false;
+            }
+            param.id = mainDivVM.updateFormSigning.visitDetailRecordId;
+            //TODO
+            axios.post('/busVisitRecord/one', param).then(function (response) {
+                var echoData = response.data.data;
+                console.log("============================")
+                console.log(echoData)
+                if(echoData.arrVisitCity){
+                    mainDivVM.updateFormSigning.arrVisitCity = echoData.arrVisitCity;
+                }
+                if (echoData.visitPeopleNum > 0) {
+                    mainDivVM.updateFormSigning.visitNum = echoData.visitPeopleNum;
+                }
+                mainDivVM.updateFormSigning.visitShopType = echoData.vistitStoreType;
+                mainDivVM.updateFormSigning.visitType = echoData.visitType;
+                mainDivVM.updateFormSigning.visitTime = echoData.vistitTime;
+            });
+        },
+        suppUpdateHide() {
+            this.suppWrap = false;
+            this.shouAddVisitButton = true;
+            //清空补充到访记录数据
+            this.updateFormSigning.arrVisitCity = '';
+            this.updateFormSigning.visitNum = '';
+            this.updateFormSigning.visitShopType = '';
+            this.updateFormSigning.visitTime = '';
+            this.updateFormSigning.visitType = '';
+        },
+
         changePayType(val){
             if(val==3){
                 this.isAllMoney = true;
@@ -950,7 +994,7 @@ var mainDivVM = new Vue({
                     param.signProvince=this.updateVisitRecord.signProvince;
                     param.signCity=this.updateVisitRecord.signCity;
                     param.signDistrict=this.updateVisitRecord.signDistrict;
-                    param.visitCity=this.updateVisitRecord.visitCity;
+                    param.arrVisitCity=this.updateVisitRecord.arrVisitCity;
                     param.isSign=this.updateVisitRecord.isSign;
                     param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
                     if( param.isSign==1){ // 已签约
@@ -1352,7 +1396,7 @@ var mainDivVM = new Vue({
                     param.signProvince=this.updateVisitRecord.signProvince;
                     param.signCity=this.updateVisitRecord.signCity;
                     param.signDistrict=this.updateVisitRecord.signDistrict;
-                    param.visitCity=this.updateVisitRecord.visitCity;
+                    param.arrVisitCity=this.updateVisitRecord.arrVisitCity;
                     param.isSign=this.updateVisitRecord.isSign;
                     param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
                     param.notSignReason=this.updateVisitRecord.notSignReason;
@@ -1462,7 +1506,7 @@ var mainDivVM = new Vue({
                             }else{
                                 mainDivVM.isAllMoney = false;
                             }
-                            mainDivVM.notEditRebutSign = true;
+                           // mainDivVM.notEditRebutSign = true;
                             mainDivVM.payTypeSelect = false;
                             mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
                         }else{
@@ -1485,6 +1529,8 @@ var mainDivVM = new Vue({
                         var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
                         mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                     }
+
+                    mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
                     mainDivVM.dialogUpdateFormSigningVisible = true;
                 }
             })
@@ -1582,6 +1628,9 @@ var mainDivVM = new Vue({
             console.log(param)
             if(param.makeUpTime){
                 param.makeUpTime = new Date(param.makeUpTime)
+            }
+            if(param.visitTime){
+                param.visitTime = new Date(param.visitTime);
             }
            if(param.payTime){
                param.payTime = new Date( param.payTime)

@@ -31,12 +31,12 @@
         <shiro:hasPermission name="aggregation:trClient:import">
             <el-button type="warning" @click="addBatchClient"><i class="el-icon-download"></i>导入坐席</el-button>
         </shiro:hasPermission>
-        <!--  <el-button type="success" @click="trCall"><i class="el-icon-edit"></i>外呼</el-button> -->
+         <el-button type="success" @click="trCall"><i class="el-icon-edit"></i>外呼</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
           <el-form :inline="true" class="demo-form-inline mainSearchForm">
-            <el-form-item label="所在组织:" label-width="55px">        
+            <el-form-item label="所在组织:" label-width="78px">        
               <el-select v-model="searchForm.orgId" placeholder="请选择所在组织"  clearable filterable  value-key="value" >
                 <el-option
                     v-for="item in orgList"
@@ -46,15 +46,18 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="坐席编号:" label-width="90px">
+            <el-form-item label="坐席编号:" label-width="78px">
               <el-input placeholder="请输入坐席编号"  v-model="searchForm.clientNo"></el-input>
             </el-form-item>
-            <el-form-item label="A(呼叫号):" label-width="90px">
+            <el-form-item label="A(呼叫号):" label-width="78px">
               <el-input placeholder="A(呼叫号)"  v-model="searchForm.bindPhone"></el-input>
             </el-form-item>
-            <el-form-item label="外显手机号:" label-width="90px" style="margin-right: 10px;">
+            <el-form-item label="外显手机号:" label-width="78px" style="margin-right: 10px;">
               <el-input placeholder="外显手机号"  v-model="searchForm.displayPhone"></el-input>
             </el-form-item>
+              <el-form-item label="号码所属公司:" label-width="78px" style="margin-right: 10px;">
+                  <el-input placeholder="号码所属公司"  v-model="searchForm.numberAttributionCompany"></el-input>
+              </el-form-item>
             <el-form-item label="">
               <el-button icon="el-icon-search" type="primary" @click="initClientData" >搜索</el-button>
             </el-form-item>
@@ -72,6 +75,7 @@
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
+                <el-table-column align="center" prop="numberAttributionCompany" label="号码所属公司"></el-table-column>
                 <el-table-column align="center" prop="attribution" label="坐席归属地"></el-table-column>
                 <el-table-column align="center" prop="bindPhone" label="A(呼叫号)"></el-table-column>
                 <el-table-column align="center" prop="displayPhone" label="外显手机号"></el-table-column>
@@ -94,6 +98,9 @@
         <el-form :model="form" ref="clientForm" :rules="rules">
             <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
                 <el-input v-model="form.clientNo" autocomplete="off"  maxlength="50" style="width:310px;"></el-input>
+            </el-form-item>
+            <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="numberAttributionCompany">
+                <el-input v-model="form.numberAttributionCompany" autocomplete="off"  maxlength="50" style="width:310px;"></el-input>
             </el-form-item>
             <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="attribution">
                 <el-input v-model="form.attribution" autocomplete="off"  maxlength="50" style="width:310px;"></el-input>
@@ -196,6 +203,11 @@
 		      label="坐席号"
 		      width="180">
 		    </el-table-column>
+               <el-table-column
+                       prop="numberAttributionCompany"
+                       label="号码所属公司"
+                       width="180">
+               </el-table-column>
             <el-table-column
               prop="attribution"
               label="坐席归属地"
@@ -244,6 +256,11 @@
               label="坐席号"
               width="180">
             </el-table-column>
+               <el-table-column
+                       prop="numberAttributionCompany"
+                       label="号码所属公司"
+                       width="180">
+               </el-table-column>
            <el-table-column
                prop="attribution"
                label="坐席归属地"

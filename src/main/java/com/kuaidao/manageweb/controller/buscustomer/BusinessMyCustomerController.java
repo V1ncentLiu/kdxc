@@ -1,5 +1,23 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
@@ -24,20 +42,6 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author yangbiao 接口层 Created on 2019-2-12 15:06:38 商务模块--我的客户
@@ -57,7 +61,7 @@ public class BusinessMyCustomerController {
 
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
-    
+
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
 
@@ -66,16 +70,55 @@ public class BusinessMyCustomerController {
         logger.info("------------ 商务：我的客户列表 ---------------");
         UserInfoDTO user = CommUtil.getCurLoginUser();
         // 电销组
-        List teleGroupList = new ArrayList();
-        Map<Long, OrganizationDTO> groupMap = new HashMap();
-        List teleSaleList = new ArrayList();
-        Map<Long, OrganizationDTO> saleMap = new HashMap();
-        List tasteProList = new ArrayList();
-        Map tasteMap = new HashMap();
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-        }else{
+        } else {
+            dto.setBusSaleId(user.getId());
+        }
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proAllSelect", proJson.getData());
+            if (!CollectionUtils.isEmpty(proJson.getData())) {
+                List<ProjectInfoDTO> data = proJson.getData();
+                List<ProjectInfoDTO> alist = new ArrayList<>();
+                for (ProjectInfoDTO infoDTO : data) {
+                    if (AggregationConstant.NO.equals(infoDTO.getIsNotSign())) {
+                        alist.add(infoDTO);
+                    }
+                }
+                request.setAttribute("proSelect", alist);
+            }
+        }
+        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
+            request.setAttribute("companySelect", proJson.getData());
+        }
+        // 查询赠送类型集合
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
+        // request.setAttribute("teleGroupList", teleGroupList);
+        // request.setAttribute("teleSaleList", teleSaleList);
+        request.setAttribute("loginUserId", user.getId());
+        return "bus_mycustomer/mycustomerList";
+    }
+
+
+    @PostMapping("/teleSaleAndGroupName")
+    @ResponseBody
+    public JSONResult<Map> teleSaleAndGroupName(@RequestBody MyCustomerParamDTO param) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        Map<String, List<OrganizationDTO>> map = new HashMap<>();
+        Map<Long, OrganizationDTO> groupMap = new HashMap();
+        List teleGroupList = new ArrayList();
+        List teleSaleList = new ArrayList();
+        Map<Long, OrganizationDTO> saleMap = new HashMap();
+
+        MyCustomerParamDTO dto = new MyCustomerParamDTO();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+        } else {
             dto.setBusSaleId(user.getId());
         }
 
@@ -88,26 +131,18 @@ public class BusinessMyCustomerController {
                     OrganizationDTO organizationDTO = new OrganizationDTO();
                     organizationDTO.setId(myCustomerRespDTO.getTeleGorupId());
                     organizationDTO.setName(myCustomerRespDTO.getTeleGorupName());
-                    // teleGroupList.add(organizationDTO);
+                    organizationDTO.setCreateTime(myCustomerRespDTO.getTeleGorupCreateTime());
                     groupMap.put(organizationDTO.getId(), organizationDTO);
                 }
-
                 // 创业顾问
                 if (myCustomerRespDTO.getTeleSaleId() != null) {
                     OrganizationDTO organizationDTO = new OrganizationDTO();
                     organizationDTO.setId(myCustomerRespDTO.getTeleSaleId());
                     organizationDTO.setName(myCustomerRespDTO.getTeleSaleName());
-                    // teleSaleList.add(organizationDTO);
                     saleMap.put(myCustomerRespDTO.getTeleSaleId(), organizationDTO);
                 }
-                // 品尝项目
-                // if(myCustomerRespDTO.getTasteProjectId()!=null){
-                // OrganizationDTO organizationDTO = new OrganizationDTO();
-                // organizationDTO.setId(myCustomerRespDTO.getTasteProjectId());
-                // organizationDTO.setName(myCustomerRespDTO.getTasteProjectName());
-                // tasteProList.add(organizationDTO);
-                // }
             }
+
             for (Map.Entry<Long, OrganizationDTO> entry : groupMap.entrySet()) {
                 teleGroupList.add(entry.getValue());
             }
@@ -115,33 +150,13 @@ public class BusinessMyCustomerController {
                 teleSaleList.add(entry.getValue());
             }
         }
-
-        // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(-1);
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-            request.setAttribute("proSelect", proJson.getData());
-        }
-
-        // 项目
-        JSONResult<List<ProjectInfoDTO>> proallJson = projectInfoFeignClient.allProject();
-        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-            request.setAttribute("proAllSelect", proallJson.getData());
-        }
-
-        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
-        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
-            request.setAttribute("companySelect", proJson.getData());
-        }
-     // 查询赠送类型集合
-        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
-        request.setAttribute("teleGroupList", teleGroupList);
-        request.setAttribute("teleSaleList", teleSaleList);
-        request.setAttribute("tasteProList", tasteProList);
-        request.setAttribute("loginUserId", user.getId());
-        return "bus_mycustomer/mycustomerList";
+        Collections.sort(teleGroupList, Comparator.comparing(OrganizationDTO::getCreateTime));
+        map.put("teleGroupList", teleGroupList);
+        map.put("teleSaleList", teleSaleList);
+        return new JSONResult<Map>().success(map);
     }
+
+
 
     @PostMapping("/queryPage")
     @ResponseBody
@@ -178,8 +193,9 @@ public class BusinessMyCustomerController {
          */
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-        }else{
+        } else {
             param.setBusSaleId(user.getId());
+            param.setBusGroupId(user.getOrgId());
         }
         return busMyCustomerFeignClient.queryPageList(param);
     }
@@ -190,11 +206,11 @@ public class BusinessMyCustomerController {
     @PostMapping("/notVisit")
     @ResponseBody
     @LogRecord(description = "标记未到访", operationType = OperationType.UPDATE,
-        menuName = MenuEnum.BUS_MY_CUSTOMER)
+            menuName = MenuEnum.BUS_MY_CUSTOMER)
     public JSONResult<Boolean> notVisit(@RequestBody BusMyCustomerReqDTO param) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         param.setUserId(curLoginUser.getId());
-        if(curLoginUser.getBusinessLine() != null){
+        if (curLoginUser.getBusinessLine() != null) {
             param.setBusinessLine(curLoginUser.getBusinessLine());
         }
         return busMyCustomerFeignClient.notVisit(param);
@@ -215,6 +231,7 @@ public class BusinessMyCustomerController {
         JSONResult<List<CompanyInfoDTO>> list = companyInfoFeignClient.allCompany();
         return list;
     }
+
     /**
      * 查询字典表
      * 

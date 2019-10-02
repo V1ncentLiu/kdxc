@@ -174,7 +174,6 @@ public class BusPendingAllocationController {
         busAllocationClueReq.setOrg(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             busAllocationClueReq.setRoleId(roleList.get(0).getId());
             busAllocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }

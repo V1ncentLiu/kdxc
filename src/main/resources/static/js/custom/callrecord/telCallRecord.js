@@ -3,6 +3,7 @@ var myCallRecordVm = new Vue({
     data: {
         audioShow:false,
         isShow:false,
+      isDXZDisabled:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -44,8 +45,8 @@ var myCallRecordVm = new Vue({
         	cno:'',
         	bindPhone:'',
         	accountId:'',
-        	teleGroupId:'',
-        		
+        	teleGroupId:ownOrgId,
+            categoryArr:[]
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
@@ -54,8 +55,7 @@ var myCallRecordVm = new Vue({
     methods:{
       transCusPhone(row) {
         var text="";
-        // if((roleCode =='DXCYGW' && row.accountId!=userId) || (row.clueId != null &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
-        if((roleCode =='DXCYGW' && row.accountId!=userId) || ((row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+""))) )){
+        if(row.clueId &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) )){
           text ="***"
         }else{
           text = row.customerPhone;
@@ -96,6 +96,7 @@ var myCallRecordVm = new Vue({
     		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
+        	 debugger;
         	 axios.post('/call/callRecord/listAllTmCallRecord',param)
              .then(function (response) {
             	 
@@ -259,6 +260,13 @@ var myCallRecordVm = new Vue({
             this.initCallRecordData();
     	},
     	downloadAudio(id,url,callSource){
+      	     if(roleCode =='ZCBWY'){
+                 this.$message({
+                     message: '您没有下载权限',
+                     type: 'warning'
+                 });
+                 return;
+             }
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
@@ -269,11 +277,16 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
+                		 if(callSource=='3'){
+                			 var decodeUrl = encodeURI(url);
+                			 url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                		 }
             			 var x=new XMLHttpRequest();
-            			 x.open("GET", url, true);
-            			 x.responseType = 'blob';
-            			 x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
-            			 x.send();
+             			x.open("GET", url, true);
+             			x.responseType = 'blob';
+             			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+             			x.send(); 
+                		 
                 	 }
                      
                  }else{
@@ -289,12 +302,14 @@ var myCallRecordVm = new Vue({
     		
     	},
     	switchSoundBtn(id,url,callSource){
-            debugger
-            this.audioShow=true;
+            // debugger
+            // this.audioShow=true;
     		if(callSource=='2'){
-                switchSound(id,url);
+                // switchSound(id,url);
+                window.parent.open(url)
     			return;
     		}
+            var newWindow = window.open();
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
@@ -302,7 +317,8 @@ var myCallRecordVm = new Vue({
             	 var data =  response.data
                  if(data.code=='0'){
                 	 var url = data.data;
-                	 switchSound(id,url);                     
+                	 // switchSound(id,url);
+                    newWindow.location.href = url;
                  }else{
                 	 console.error(data);
                 	 myCallRecordVm.$message({message:data.msg,type:'error'});
@@ -356,7 +372,29 @@ var myCallRecordVm = new Vue({
         var date = a.getDate();
         this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
         this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
-    	
+      if(ownOrgId){
+        this.isDXZDisabled= true;
+        var param ={};
+        param.orgId = ownOrgId;
+        param.roleCode="DXCYGW";
+        param.statusList =[1,3];
+        axios.post('/user/userManager/listByOrgAndRole', param)
+        .then(function (response) {
+          var result =  response.data;
+          var table=result.data;
+          myCallRecordVm.tmList= table;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      }
+        //初始资源类别数据
+        param={};
+        param.groupCode="clueCategory";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            myCallRecordVm.categoryArr=response.data.data;
+        });
+      //电销总监电销组筛选按钮不可点击
       this.initCallRecordData();
    },
    mounted(){

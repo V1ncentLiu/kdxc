@@ -7,11 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
-import com.kuaidao.manageweb.feign.dashboard.DashboardTeleGroupFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -53,6 +47,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
 import com.kuaidao.dashboard.dto.bussale.BusSaleDTO;
+import com.kuaidao.dashboard.dto.tele.DashboardTeleGroupDto;
 import com.kuaidao.dashboard.dto.tele.DashboardTeleSaleDto;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
@@ -65,6 +60,7 @@ import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.PendingVisitFeignClient;
 import com.kuaidao.manageweb.feign.console.sale.DashboardSaleFeignClient;
 import com.kuaidao.manageweb.feign.console.sale.DashboardTeleSaleFeignClient;
+import com.kuaidao.manageweb.feign.dashboard.DashboardTeleGroupFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -144,6 +140,7 @@ public class ConsoleController {
     DashboardTeleSaleFeignClient dashboardTeleSaleFeignClient;
     @Autowired
     private DashboardTeleGroupFeignClient dashboardTeleGroupFeignClient;
+
     /***
      * 跳转控制台页面
      *
@@ -159,13 +156,13 @@ public class ConsoleController {
         String path = "";
 
         if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
-        	IdEntityLong idEntityLong = new IdEntityLong();
+            IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getId());
-            JSONResult<DashboardTeleSaleDto> jsonResult = dashboardTeleSaleFeignClient
-                .findDashboardTeleSaleByUserId(idEntityLong);
+            JSONResult<DashboardTeleSaleDto> jsonResult =
+                    dashboardTeleSaleFeignClient.findDashboardTeleSaleByUserId(idEntityLong);
             DashboardTeleSaleDto dashboardTeleSaleDto = new DashboardTeleSaleDto();
-            if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
-            	dashboardTeleSaleDto = jsonResult.getData();
+            if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
+                dashboardTeleSaleDto = jsonResult.getData();
             }
             request.setAttribute("dashboardTelSale", dashboardTeleSaleDto);
             // 电销顾问
@@ -180,7 +177,8 @@ public class ConsoleController {
             request.setAttribute("saleList", userList);
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getOrgId());
-            JSONResult<DashboardTeleGroupDto> dashboard = dashboardTeleGroupFeignClient.findTeleGroupDataByOrgId(idEntityLong);
+            JSONResult<DashboardTeleGroupDto> dashboard =
+                    dashboardTeleGroupFeignClient.findTeleGroupDataByOrgId(idEntityLong);
             DashboardTeleGroupDto data = dashboard.getData();
             if (data == null) {
                 data = new DashboardTeleGroupDto();
@@ -204,10 +202,10 @@ public class ConsoleController {
 
             IdEntityLong idEntityLong = new IdEntityLong();
             idEntityLong.setId(curLoginUser.getId());
-            JSONResult<BusSaleDTO> dashboard = dashboardSaleFeignClient
-                .findDataByUserId(idEntityLong);
+            JSONResult<BusSaleDTO> dashboard =
+                    dashboardSaleFeignClient.findDataByUserId(idEntityLong);
             BusSaleDTO data = dashboard.getData();
-            if(data==null){
+            if (data == null) {
                 data = new BusSaleDTO();
             }
             request.setAttribute("dashboardSale", data);
@@ -696,7 +694,7 @@ public class ConsoleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
 
-        pageParam.setDelFalg(DelFlag.NOT_DEL);
+        pageParam.setDelFalg(AggregationConstant.INVITIT_DEL_FALG.NORMAL);
 
         JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
                 pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
@@ -931,10 +929,10 @@ public class ConsoleController {
         }
 
         Date createTime = data.getCreateTime();
-        logger.info(DateUtil.getStartOrEndOfDay(createTime,LocalTime.MIN).toString());
-        logger.info(DateUtil.getStartOrEndOfDay(new Date(),LocalTime.MAX).toString());
-//        int diffDay = DateUtil.diffDay(createTime,new Date())+1;
-        int diffDay = DateUtil.differentDays(createTime,new Date())+1;
+        logger.info(DateUtil.getStartOrEndOfDay(createTime, LocalTime.MIN).toString());
+        logger.info(DateUtil.getStartOrEndOfDay(new Date(), LocalTime.MAX).toString());
+        // int diffDay = DateUtil.diffDay(createTime,new Date())+1;
+        int diffDay = DateUtil.differentDays(createTime, new Date()) + 1;
         return new JSONResult<String>().success(diffDay + "");
 
     }
@@ -992,7 +990,7 @@ public class ConsoleController {
     public JSONResult<BusGroupDTO> busGroupDayQuery() {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Map map = new HashMap();
-        map.put("busDirectorId",curLoginUser.getId());
+        map.put("busDirectorId", curLoginUser.getId());
         map.put("flag", 1);
         JSONResult<BusGroupDTO> jsonResult = busGroupDashboardFeignClient.busGroupDataQuery(map);
         if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
@@ -1012,7 +1010,7 @@ public class ConsoleController {
     public JSONResult<BusGroupDTO> busGroupNotDayQuery() {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Map map = new HashMap();
-        map.put("busDirectorId",curLoginUser.getId());
+        map.put("busDirectorId", curLoginUser.getId());
         map.put("flag", 2);
         JSONResult<BusGroupDTO> jsonResult = busGroupDashboardFeignClient.busGroupDataQuery(map);
         if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {

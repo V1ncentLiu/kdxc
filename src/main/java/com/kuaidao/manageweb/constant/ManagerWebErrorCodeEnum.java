@@ -21,6 +21,8 @@ public enum ManagerWebErrorCodeEnum {
 
     ERR_CODE_NULL("21604", "请输入验证码！"),
 
+    ERR_LOGIN_ERROR("21606", "登录错误"),
+
     ERR_RESET_LOGIN("21605", "请重新登录！");
 
     private String code;
@@ -60,6 +62,8 @@ public enum ManagerWebErrorCodeEnum {
                 return ERR_CODE_NULL;
             case 21605:
                 return ERR_RESET_LOGIN;
+            case 21606:
+                return ERR_LOGIN_ERROR;
             default:
                 return NONE;
         }

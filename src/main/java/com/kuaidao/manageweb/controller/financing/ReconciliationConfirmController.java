@@ -3,13 +3,19 @@
  */
 package com.kuaidao.manageweb.controller.financing;
 
-import com.kuaidao.manageweb.constant.Constants;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -30,8 +36,11 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
@@ -39,6 +48,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.financing.ReconciliationConfirmFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
@@ -50,6 +60,8 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -76,6 +88,8 @@ public class ReconciliationConfirmController {
 
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     /***
      * 对账结算确认页
@@ -139,13 +153,208 @@ public class ReconciliationConfirmController {
         pageParam.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         pageParam.setBusinessLine(user.getBusinessLine());
+        String notInCompanyIds = getSysSetting(SysConstant.NOT_IN_CONFIRM_COMPANY_IDS);
+        if (notInCompanyIds != null && StringUtils.isNotBlank(notInCompanyIds)) {
+            pageParam.setNotInCompanyIds(notInCompanyIds);
+        }
         JSONResult<PageBean<ReconciliationConfirmDTO>> list =
                 reconciliationConfirmFeignClient.list(pageParam);
         return list;
+    }
+
+    /**
+     * 导出
+     * 
+     * @param reqDTO
+     * @return
+     */
+    @RequiresPermissions("financing:reconciliationConfirmManager:export")
+    @PostMapping("/export")
+    @LogRecord(description = "导出", operationType = OperationType.EXPORT,
+            menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
+    public void export(@RequestBody ReconciliationConfirmPageParam pageParam,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logger.debug("list param{}", pageParam);
+        UserInfoDTO user = getUser();
+        // 插入当前用户、角色信息
+        pageParam.setUserId(user.getId());
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        String roleCode = "";
+        if (roleList != null) {
+            roleCode = roleList.get(0).getRoleCode();
+            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+        }
+        pageParam.setBusinessLine(user.getBusinessLine());
+        String notInCompanyIds = getSysSetting(SysConstant.NOT_IN_CONFIRM_COMPANY_IDS);
+        if (notInCompanyIds != null && StringUtils.isNotBlank(notInCompanyIds)) {
+            pageParam.setNotInCompanyIds(notInCompanyIds);
+        }
+
+        JSONResult<List<ReconciliationConfirmDTO>> listNoPage =
+                reconciliationConfirmFeignClient.listNoPage(pageParam);
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitleList(roleCode));
+
+        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
+                && listNoPage.getData().size() != 0) {
+
+            List<ReconciliationConfirmDTO> resultList = listNoPage.getData();
+            int size = resultList.size();
+
+            for (int i = 0; i < size; i++) {
+                ReconciliationConfirmDTO dto = resultList.get(i);
+                List<Object> curList = new ArrayList<>();
+                curList.add(i + 1);
+                if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
+                    // 渠道速建财务（小物种业务线）导出表格为：
+                    // 付款日期，客户姓名，结算单位，电销组，签约项目，付款类型，签约店型，业绩金额，结算金额，
+                    // 实收金额，结算比例，优惠金额，赠送金额，佣金，路费，赠送类型，备注，商务经理，签约区域，是否已结算
+                    curList.add(getTimeStr(dto.getPayTime()));
+                    curList.add(dto.getCusName());
+                    curList.add(dto.getSignCompanyName());
+                    curList.add(dto.getTeleGorupName());
+                    curList.add(dto.getProjectName());
+                    curList.add(dto.getPayTypeName());
+                    curList.add(dto.getSignShopTypeName());
+                    curList.add(dto.getAmountPerformance());
+                    curList.add(dto.getMoney());
+                    curList.add(dto.getAmountReceived());
+                    curList.add(dto.getRatio() + "%");
+                    curList.add(dto.getPreferentialAmount());
+                    curList.add(dto.getGiveAmount());
+                    curList.add(dto.getCommissionMoney());
+                    curList.add(dto.getFirstToll());
+                    curList.add(dto.getGiveTypeName());
+                    curList.add(dto.getRemarks());
+                    curList.add(dto.getBusSaleName());
+                    curList.add(dto.getSignProvince() + dto.getSignCity() + dto.getSignDictrict());
+                    curList.add(dto.getIsAccount());
+                    dataList.add(curList);
+                } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+                    // (商机盒子财务)商务盒子业务线导出表格为：
+                    // 付款日期，客户姓名，签约项目，签约店型，签约区域，支付方式，付款类型，结算单位，电销组，签约项目，付款类型，
+                    // 结算金额，实收金额，路费，优惠金额，赠送金额，赠送类型，结算比例，佣金，是否已结算，商务经理，电销组，电销顾问，电销总监，备注
+                    curList.add(getTimeStr(dto.getPayTime()));
+                    curList.add(dto.getCusName());
+                    curList.add(dto.getProjectName());
+                    curList.add(dto.getSignShopTypeName());
+                    curList.add(dto.getSignProvince() + dto.getSignCity() + dto.getSignDictrict());
+                    curList.add(dto.getPayModeName());
+                    curList.add(dto.getPayTypeName());
+                    curList.add(dto.getSignCompanyName());
+                    curList.add(dto.getTeleGorupName());
+                    curList.add(dto.getMoney());
+                    curList.add(dto.getAmountReceived());
+                    curList.add(dto.getFirstToll());
+                    curList.add(dto.getPreferentialAmount());
+                    curList.add(dto.getGiveAmount());
+                    curList.add(dto.getGiveTypeName());
+                    curList.add(dto.getRatio() + "%");
+                    curList.add(dto.getCommissionMoney());
+                    curList.add(dto.getIsAccount());
+                    curList.add(dto.getBusSaleName());
+                    curList.add(dto.getTeleSaleName());
+                    curList.add(dto.getTeleDirectorName());
+                    curList.add(dto.getRemarks());
+                    dataList.add(curList);
+                }
+            }
+
+        } else {
+            logger.error("export rule_report res{{}}", listNoPage);
+        }
+        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
+        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
+        // 设置宽度
+        if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
+            sheet.setColumnWidth(1, 4000);
+            sheet.setColumnWidth(3, 4000);
+            sheet.setColumnWidth(5, 6000);
+            sheet.setColumnWidth(17, 6000);
+            sheet.setColumnWidth(19, 6000);
+        } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+
+            sheet.setColumnWidth(1, 4000);
+            sheet.setColumnWidth(3, 5000);
+            sheet.setColumnWidth(5, 6000);
+            sheet.setColumnWidth(22, 8000);
+        }
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
+
+
+        String name = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
+
+    }
+
+    private List<Object> getHeadTitleList(String roleCode) {
+
+        List<Object> headTitleList = new ArrayList<>();
+        if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
+            // 渠道速建财务（小物种业务线）导出表格为：
+            // 付款日期，客户姓名，结算单位，电销组，签约项目，付款类型，签约店型，业绩金额，结算金额，
+            // 实收金额，结算比例，优惠金额，赠送金额，佣金，路费，赠送类型，备注，商务经理，签约区域，是否已结算
+
+            headTitleList.add("序号");
+            headTitleList.add("付款日期");
+            headTitleList.add("客户姓名");
+            headTitleList.add("结算单位");
+            headTitleList.add("电销组");
+            headTitleList.add("签约项目");
+            headTitleList.add("付款类型");
+            headTitleList.add("签约店型");
+            headTitleList.add("业绩金额");
+            headTitleList.add("结算金额");
+            headTitleList.add("实收金额");
+            headTitleList.add("结算比例");
+            headTitleList.add("优惠金额");
+            headTitleList.add("赠送金额");
+            headTitleList.add("佣金");
+            headTitleList.add("路费");
+            headTitleList.add("赠送类型");
+            headTitleList.add("备注");
+            headTitleList.add("商务经理");
+            headTitleList.add("签约区域");
+            headTitleList.add("是否已结算");
+        } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+            // (商机盒子财务)商务盒子业务线导出表格为：
+            // 付款日期，客户姓名，签约项目，签约店型，签约区域，支付方式，付款类型，结算单位，电销组，签约项目，付款类型，
+            // 结算金额，实收金额，路费，优惠金额，赠送金额，赠送类型，结算比例，佣金，是否已结算，商务经理，电销组，电销顾问，电销总监，备注
+            headTitleList.add("序号");
+            headTitleList.add("付款日期");
+            headTitleList.add("客户姓名");
+            headTitleList.add("签约项目");
+            headTitleList.add("签约店型");
+            headTitleList.add("签约区域");
+            headTitleList.add("支付方式");
+            headTitleList.add("付款类型");
+            headTitleList.add("结算单位");
+            headTitleList.add("电销组");
+            headTitleList.add("结算金额");
+            headTitleList.add("实收金额");
+            headTitleList.add("路费");
+            headTitleList.add("优惠金额");
+            headTitleList.add("赠送金额");
+            headTitleList.add("赠送类型");
+            headTitleList.add("结算比例");
+            headTitleList.add("佣金");
+            headTitleList.add("是否已结算");
+            headTitleList.add("商务经理");
+            headTitleList.add("电销顾问");
+            headTitleList.add("电销总监");
+            headTitleList.add("备注");
+        }
+
+        return headTitleList;
     }
 
     /***
@@ -318,4 +527,26 @@ public class ReconciliationConfirmController {
         return null;
     }
 
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
+
+    private String getTimeStr(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return DateUtil.convert2String(date, DateUtil.ymd);
+    }
 }

@@ -1,16 +1,22 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.rule;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -36,6 +42,8 @@ import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
@@ -74,7 +82,7 @@ public class OptRuleController {
 
     /***
      * 优化规则列表页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initRuleList")
@@ -90,12 +98,17 @@ public class OptRuleController {
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
         // 当前人员id
         request.setAttribute("userId", user.getId() + "");
+        // 当前人员角色code
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null && roleList.size() != 0) {
+            request.setAttribute("roleCode", roleList.get(0).getRoleCode());
+        }
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.DXZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 电销小组
         JSONResult<List<OrganizationRespDTO>> dzList =
-            organizationFeignClient.queryOrgByParam(orgDto);
+                organizationFeignClient.queryOrgByParam(orgDto);
         List<OrganizationRespDTO> data = dzList.getData();
         request.setAttribute("queryOrg", data);
         return "rule/optRuleManagerPage";
@@ -103,7 +116,7 @@ public class OptRuleController {
 
     /***
      * 新增优化规则页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initCreate")
@@ -111,7 +124,8 @@ public class OptRuleController {
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
         List<OrganizationRespDTO> orgList = getTrafficGroup();
-        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        Collections.sort(orgList,
+                Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
         request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
@@ -130,7 +144,7 @@ public class OptRuleController {
 
     /***
      * 编辑优化规则页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initUpdate")
@@ -150,7 +164,7 @@ public class OptRuleController {
                 JSONResult<List<OrganizationRespDTO>> orgList =
                         organizationFeignClient.queryOrgByParam(queryDTO);
                 List<OrganizationRespDTO> dxzList = orgList.getData();
-                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
                 assignRuleTeamDTO.setTeleOptions(dxzList);
             }
         }
@@ -159,7 +173,8 @@ public class OptRuleController {
         request.setAttribute("clueAssignRule", data);
         // 查询话务组
         List<OrganizationRespDTO> orgList = getTrafficGroup();
-        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        Collections.sort(orgList,
+                Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
         request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
@@ -177,7 +192,7 @@ public class OptRuleController {
 
     /***
      * 优化规则列表
-     * 
+     *
      * @return
      */
     @PostMapping("/list")
@@ -192,7 +207,6 @@ public class OptRuleController {
 
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
@@ -205,7 +219,7 @@ public class OptRuleController {
 
     /**
      * 保存优化规则
-     * 
+     *
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
@@ -233,7 +247,7 @@ public class OptRuleController {
 
     /**
      * 修改优化规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -244,7 +258,6 @@ public class OptRuleController {
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
-
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -261,7 +274,7 @@ public class OptRuleController {
 
     /**
      * 启用规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -272,7 +285,6 @@ public class OptRuleController {
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
-
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -287,7 +299,7 @@ public class OptRuleController {
 
     /**
      * 禁用规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -298,11 +310,9 @@ public class OptRuleController {
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
-
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
         Long id = clueAssignRuleReq.getId();
         if (id == null) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
@@ -314,7 +324,7 @@ public class OptRuleController {
 
     /**
      * 删除优化规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -324,13 +334,12 @@ public class OptRuleController {
     @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
-
         return clueAssignRuleFeignClient.delete(idList);
     }
 
     /**
      * 复制规则
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -344,10 +353,131 @@ public class OptRuleController {
         return clueAssignRuleFeignClient.copy(clueAssignRuleReq);
     }
 
+    /**
+     * 导出
+     *
+     * @param reqDTO
+     * @return
+     */
+    @RequiresPermissions("clueAssignRule:optRuleManager:export")
+    @PostMapping("/export")
+    @LogRecord(description = "优化规则导出", operationType = OperationType.EXPORT,
+            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+    public void export(@RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        logger.debug("list param{}", pageParam);
+        UserInfoDTO user = getUser();
+        // 插入当前用户、角色信息
+        pageParam.setUserId(user.getId());
+        pageParam.setOrgId(user.getOrgId());
+
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null) {
+            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+        }
+        // 优化规则
+        pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        // 查询规则数据不分页
+        JSONResult<List<ClueAssignRuleDTO>> listNoPage =
+                clueAssignRuleFeignClient.listNoPage(pageParam);
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitleList());
+
+        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
+                && listNoPage.getData().size() != 0) {
+
+            List<ClueAssignRuleDTO> resultList = listNoPage.getData();
+            int size = resultList.size();
+
+            for (int i = 0; i < size; i++) {
+                ClueAssignRuleDTO clueAssignRuleDTO = resultList.get(i);
+                List<Object> curList = new ArrayList<>();
+                curList.add(i + 1);
+                curList.add(clueAssignRuleDTO.getRuleName());
+                curList.add(clueAssignRuleDTO.getSourceName());
+                curList.add(clueAssignRuleDTO.getCategoryName());
+                curList.add(clueAssignRuleDTO.getIndustryCategoryName());
+                curList.add(clueAssignRuleDTO.getSearchWord());
+                curList.add(clueAssignRuleDTO.getNotSearchWord());
+                curList.add(clueAssignRuleDTO.getProvince());
+                curList.add(clueAssignRuleDTO.getNotProvince());
+                curList.add(getTimeStr(clueAssignRuleDTO.getUpdateTime()));
+                curList.add(getTimeStr(clueAssignRuleDTO.getCreateTime()));
+                curList.add(getTimeStr(clueAssignRuleDTO.getStartTime()));
+                curList.add(getTimeStr(clueAssignRuleDTO.getEndTime()));
+                curList.add(clueAssignRuleDTO.getCreateUserName());
+                curList.add(clueAssignRuleDTO.getUpdateUserName());
+                curList.add(clueAssignRuleDTO.getTeamName());
+                curList.add(clueAssignRuleDTO.getStatusName());
+                dataList.add(curList);
+            }
+
+        } else {
+            logger.error("export rule_report res{{}}", listNoPage);
+        }
+        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
+        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
+
+        sheet.setColumnWidth(1, 8000);// 设置第二列的宽度为
+        sheet.setColumnWidth(5, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(6, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(7, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(8, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(9, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(10, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(11, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(12, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(14, 4000);// 设置第二列的宽度为
+        sheet.setColumnWidth(15, 4000);// 设置第二列的宽度为
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
+
+
+        String name = "优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        try (ServletOutputStream outputStream = response.getOutputStream();) {
+
+            wbWorkbook.write(outputStream);
+        } catch (Exception e) {
+            logger.error("导出异常{}", e);
+        }
+
+    }
+
+    private List<Object> getHeadTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("规则名称");
+        headTitleList.add("媒介");
+        headTitleList.add("资源类别");
+        headTitleList.add("行业类别");
+        headTitleList.add("包含搜索词");
+        headTitleList.add("不包含搜索词");
+        headTitleList.add("包含省份");
+        headTitleList.add("不包含省份");
+        headTitleList.add("最后编辑时间");
+        headTitleList.add("创建时间");
+        headTitleList.add("规则有效开始时间");
+        headTitleList.add("规则有效结束时间");
+        headTitleList.add("创建人");
+        headTitleList.add("最后编辑人");
+        headTitleList.add("分配电销组");
+        headTitleList.add("状态");
+        return headTitleList;
+    }
+
+    private String getTimeStr(Date date) {
+        if (date == null) {
+            return "";
+        }
+        return DateUtil.convert2String(date, DateUtil.ymdhms);
+    }
 
     /**
      * 获取当前登录账号
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -359,7 +489,7 @@ public class OptRuleController {
 
     /**
      * 查询系统参数
-     * 
+     *
      * @param code
      * @return
      */
@@ -375,7 +505,7 @@ public class OptRuleController {
 
     /***
      * 查询话务组的集合
-     * 
+     *
      * @return
      */
     private List<OrganizationRespDTO> getTrafficGroup() {
@@ -388,7 +518,7 @@ public class OptRuleController {
 
     /**
      * 查询系统参数优化资源类别
-     * 
+     *
      * @param code
      * @return
      */
@@ -413,7 +543,7 @@ public class OptRuleController {
 
     /**
      * 查询字典表
-     * 
+     *
      * @param code
      * @return
      */

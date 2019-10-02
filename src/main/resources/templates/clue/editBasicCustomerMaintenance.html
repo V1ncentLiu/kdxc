@@ -24,6 +24,8 @@
             <div class="marginB20 fs16 paddingT20">基本信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span>
                 <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息
                 </el-button>
+                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </div>
             <div class="borderbox padding20">
                 <el-row>
@@ -390,7 +392,7 @@
             </el-table>
             <div class="padding20 f-tac">
             <el-button type="primary" :disabled="saveDisabled" @click="submitForm('form')">保存客户信息</el-button>
-            <el-button @click="rebackClue">取 消</el-button>
+            <el-button @click="rebackClue">返回</el-button>
         </div>
         </el-form>
     </el-row>
@@ -571,6 +573,34 @@
             </el-form-item>
         </el-form>
     </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px"  class="onlineRecordDialog">
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+        </div>
+    </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -680,7 +710,7 @@
   var repeatClueList = [[${repeatClueList}]];
   var repeatClueStatus = [[${repeatClueStatus}]];
   var repeatStatus =false;
-  var editPhone = 1;
+  var editPhone = 0;
   for(var i = 0 ; i < proSelect.length ; i++){
     if( proSelect[i].id == intention.purInProject){
       intention.purInProject =  proSelect[i].projectName;
@@ -689,13 +719,16 @@
   if(repeatClueStatus == 1 ){
     repeatStatus = true;
   }
-  if(loginUserId == teleSaleId){
-    editPhone = 0;
-  }
   var addCustomerVM = new Vue({
     el: '#addCustomer',
     data: function () {
       return {
+        isActive:false,
+        isShowMoreBtn:false,
+        customerInfo:customer,
+        isShowOnlineRecordBtn:false,
+        onlineRecordData:[],
+        onlineRecordDialogVisible:false,
         showAddDomainBtn:true,
         phoneShow:false,//手机号2默认不显示
         audioShow:false,//播放器默认不显示
@@ -938,6 +971,63 @@
       }
     },
     methods: {
+        isActiveFun(){
+            this.isActive=true;
+            this.isShowMoreBtn=false;
+        },
+        showOnlineRecord(){
+            this.onlineRecordDialogVisible=true;                
+        },
+        initData(){
+            debugger
+            var param = {};
+            param.clueId = clueId;
+            param.pageNum = 1;
+            param.pageSize = 10;
+            axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                var recordData=response.data;
+                if(recordData){
+                    var dataList=recordData.data
+                    if(dataList){
+                        addCustomerVM.onlineRecordData=dataList;
+                        for(var i=0;i<dataList.length;i++){
+                            if(dataList[i].messageTime){
+                                dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                            }
+                        }
+                        if(dataList.length>0){
+                            addCustomerVM.isShowOnlineRecordBtn=true;
+                            if(dataList.length>10){
+                                addCustomerVM.isShowMoreBtn=true;
+                            }else{
+                                addCustomerVM.isShowMoreBtn=false;
+                            }
+                        }
+                    }                        
+                }else{
+                    addCustomerVM.$message({
+                        message: recordData.msg,
+                        type: 'warning'
+                    });
+                    addCustomerVM.isShowOnlineRecordBtn=false;
+                }                       
+
+            });
+
+        },
+        isShowOnlineRecordFun(){
+            // var param = {};
+            // param.clueId = clueId;
+            // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+            //     var data= response.data;                 
+            //     if(data){
+            //         addCustomerVM.isShowOnlineRecordBtn=true;
+            //     }else{
+            //         addCustomerVM.isShowOnlineRecordBtn=false;
+            //     }
+
+            // });
+        },
         showAddDomain(){//点击添加手机号
             this.showAddDomainBtn=false;
             this.phoneShow=true;
@@ -1003,7 +1093,22 @@
         addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
             addCustomerVM.uploadParamData.realName= file.name
       },
-      gettelNumberIcon(tel) {
+      async gettelNumberIcon(tel) {
+    	  var isReturn =false;
+      	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+          .then(function (response) {
+          	if(response.data !=""){
+          		addCustomerVM.$message({
+                      message: response.data,
+                      type: 'warning'
+                  });
+          		isReturn = true; ;
+          	}
+             ;
+          });
+      	if(isReturn){
+      		return;
+      	}
         //外呼手机
         var param = {};
         param.clueId = clueId;
@@ -1502,11 +1607,13 @@
       },
       switchSoundBtn(id, url, callSource) {
         // 播放器显示
-        this.audioShow=true;
+        // this.audioShow=true;
         if (callSource == '2') {
-          switchSound(id, url);
+          // switchSound(id, url);
+          window.parent.open(url)
           return;
         }
+        var newWindow = window.open();
         var param = {};
         param.id = id;
         axios.post('/call/callRecord/getRecordFile', param)
@@ -1514,7 +1621,8 @@
           var data = response.data
           if (data.code == '0') {
             var url = data.data;
-            switchSound(id, url);
+            // switchSound(id, url);
+             newWindow.location.href = url;
 
           } else {
             console.error(data);
@@ -1539,6 +1647,10 @@
               var fileName = url.split('?')[0];
               var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
+                if(callSource=='3'){
+                	var decodeUrl = encodeURI(url);
+                 url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+             }
               var x = new XMLHttpRequest();
               x.open("GET", url, true);
               x.responseType = 'blob';
@@ -1977,9 +2089,12 @@
         addCustomerVM.provinceArr = response.data.data.data;
       });
 
+        // 在线聊天记录data
+        this.initData();
+        this.isShowOnlineRecordFun();
 
     }
-  })
+})
 </script>
 <script type="text/javascript"
         th:src="@{'/js/custom/file_upload/lib/crypto1/crypto/crypto.js'}"></script>

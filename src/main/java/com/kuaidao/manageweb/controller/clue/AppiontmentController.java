@@ -1,10 +1,13 @@
 
 package com.kuaidao.manageweb.controller.clue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -16,15 +19,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -84,16 +90,23 @@ public class AppiontmentController {
     public String initAppiontmentList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
-
+        String ownOrgId = "";
         // 如果当前登录的为电销总监,查询所有下属电销员工
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
+            List<OrganizationDTO> orgList = new ArrayList<OrganizationDTO>();
             UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
             userOrgRoleReq.setOrgId(user.getOrgId());
             userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
             JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                     userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
             request.setAttribute("userList", listByOrgAndRole.getData());
-
+            ownOrgId =  String.valueOf(user.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
+            request.setAttribute("ownOrgId", ownOrgId);
         } else if (roleList != null
                 && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
             // 如果当前登录的为电销副总,查询所有下属电销组
@@ -201,6 +214,29 @@ public class AppiontmentController {
     @ResponseBody
     public JSONResult<Map> repeatPhoneMap(@RequestBody ClueAppiontmentReq param,
             HttpServletRequest request) {
+    	 UserInfoDTO user = getUser();
+    	 if(user.getBusinessLine() !=null ) {
+    		 param.setBusinessLine(user.getBusinessLine());
+    		 List<Integer> phaseList = new ArrayList<>();
+    		 if(user.getRoleList() !=null && user.getRoleList().size()>0) {
+    			 RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+    			 if(RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())) {
+    				 phaseList.add(CluePhase.PHASE_1ST.getCode());
+    				 phaseList.add(CluePhase.PHAE_2ND.getCode());
+    				 phaseList.add(CluePhase.PHAE_3RD.getCode());
+    				 phaseList.add(CluePhase.PHAE_4TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_6TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_10TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_11TH.getCode());
+    				 phaseList.add(CluePhase.PHAE_12TH.getCode());
+    			 }else {
+    				 phaseList.add(CluePhase.PHASE_1ST.getCode());
+    				 phaseList.add(CluePhase.PHAE_2ND.getCode());
+    			 }
+    		 }
+    		 param.setPhaseList(phaseList);
+    	 }
+    	
         JSONResult<Map> map = appiontmentFeignClient.repeatPhoneMap(param);
         return map;
     }
@@ -253,7 +289,7 @@ public class AppiontmentController {
     /**
      * 修改预约来访信息
      * 
-     * @param orgDTO
+     * @param clueAppiontmentReq
      * @return
      */
     @PostMapping("/updateAppiontment")
@@ -279,7 +315,7 @@ public class AppiontmentController {
     /**
      * 删除预约来访信息
      * 
-     * @param orgDTO
+     * @param idList
      * @return
      */
     @PostMapping("/deleteAppiontment")
@@ -310,8 +346,7 @@ public class AppiontmentController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -334,5 +369,23 @@ public class AppiontmentController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 }

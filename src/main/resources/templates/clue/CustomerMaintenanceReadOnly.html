@@ -18,65 +18,67 @@
     </el-breadcrumb>
     <el-row class="borderbox">
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <el-breadcrumb separator="  " class="elBreadcrumb marginB20">
+            <el-breadcrumb separator="  " class="elBreadcrumb">
                 <el-breadcrumb-item><font color="red" class="fs16">资源ID：<span th:text="${clueId}"></span></font> <span v-show="repeatShowFalg">[{{teleReceiveSource}}] {{teleReceiveTime}}</span></el-breadcrumb-item>
                 <el-breadcrumb-item><el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button></el-breadcrumb-item>
+                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </el-breadcrumb>
-            <div class="marginB20 fs16 paddingT20">资源信息</div>
+            <div class="marginB20 fs16">资源信息</div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{clueBase.typeName}}</el-button>
+                            <span>{{clueBase.typeName}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{clueBase.categoryName}}</el-button>
+                            <span>{{clueBase.categoryName}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
+                            <span>{{clueBase.messageTime}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="搜索词：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
+                            <span>{{clueBase.searchWord}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="地域信息：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>{{intention.address}}</el-button>
+                            <span>{{intention.address}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth120" class="messagePointStyle">
-                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
+                            <span>{{clueBase.messagePoint}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="备注：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>{{clueBase.remark}}</el-button>
+                            <span>{{clueBase.remark}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8" v-show="repeatShowFalg">
                         <el-form-item label="创建人：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>{{clueBase.createUserName}}</el-button>
+                            <span>{{clueBase.createUserName}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8" v-show="repeatShowFalg">
                         <el-form-item label="创建时间：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>{{clueBase.createTime}}</el-button>
+                            <span>{{clueBase.createTime}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8" v-show="repeatShowFalg">
                         <el-form-item label="创建角色：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>{{clueBase.createUserRole}}</el-button>
+                            <span>{{clueBase.createUserRole}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -86,12 +88,26 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.customerName}}</el-button>
+                            <span>{{form.customerName}}</span>
+                        </el-form-item>
+                        <el-form-item label="创建：" :label-width="formLabelWidth120">
+                            <div v-show="showPhone">
+                                <span >{{form.cusNameCreateUserRoleName}}</span>
+                                <span v-show="form.cusNameCreateUserName !=null && form.cusNameCreateUserName !=''">[{{form.cusNameCreateUserName}}]</span>
+                                <span >{{formatTimeFn(form.cusNameCreateTime)}}</span>
+                            </div>
+                        </el-form-item>
+                        <el-form-item  label="修改：" :label-width="formLabelWidth120" v-show="form.cusNameUpdateUserName !=null && form.cusNameUpdateUserName !=''">
+                            <div >
+                                <font >{{form.cusNameUpdateUserRoleName}}</font>
+                                <font >[{{form.cusNameUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.cusNameUpdateTime)}}</font>
+                            </div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="客户级别：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>
+                            <span>
                                 {{form.customerLevel}}
                             </el-button>
                         </el-form-item>
@@ -106,16 +122,24 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
-                        <el-form-item  :label-width="formLabelWidth120" >
-                            <div v-show="showPhone">
-                                <font >{{form.customerPhoneCreateUserRoleMame}}</font>
-                                <font v-show="form.customerPhoneCreateUser !=null && form.customerPhoneCreateUser !=''">[{{form.customerPhoneCreateUser}}]</font>
-                                <font >{{formatTimeFn(form.phoneCreateTime)}}</font>
-                            </div>
-                            <div v-show="!showPhone">
-                                <font color="red">领取后显示</font>
-                            </div>
+                        <el-form-item label="手机号创建:"  :label-width="formLabelWidth120" >
+                        <div v-show="showPhone">
+                            <font >{{form.customerPhoneCreateUserRoleMame}}</font>
+                            <font v-show="form.customerPhoneCreateUser !=null && form.customerPhoneCreateUser !=''">[{{form.customerPhoneCreateUser}}]</font>
+                            <font >{{formatTimeFn(form.phoneCreateTime)}}</font>
+
+                        </div>
+                        <div v-show="!showPhone">
+                            <font color="red">领取后显示</font>
+                        </div>
+                    </el-form-item>
+                    <div v-show="form.customerPhoneUpdateUser !=null && form.customerPhoneUpdateUser !=''">
+                        <el-form-item label="手机号修改:"  :label-width="formLabelWidth120" >
+                            <font >{{form.customerPhoneUpdateUserRoleMame}}</font>
+                            <font >[{{form.customerPhoneUpdateUserName}}]</font>
+                            <font >{{formatTimeFn(form.phoneUpdateTime)}}</font>
                         </el-form-item>
+                    </div>
                     </el-col>
                 </el-row>
                 <el-row v-show="form.phone2 !=null && form.phone2 !=''">
@@ -129,7 +153,7 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
-                        <el-form-item label="" prop="phone2" :label-width="formLabelWidth120" >
+                        <el-form-item label="手机号2创建:" prop="phone2" :label-width="formLabelWidth120" >
                             <div v-show="showPhone">
                                 <font >{{form.customerPhone2CreateUserRoleMame}}</font>
                                 <font v-show="form.customerPhone2CreateUser !=null && form.customerPhone2CreateUser !=''">[{{form.customerPhone2CreateUser}}]</font>
@@ -139,6 +163,14 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
+                        <div v-show="form.customerPhone2UpdateUser !=null && form.customerPhone2UpdateUser !=''">
+                            <el-form-item label="手机号2修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.customerPhone2UpdateUserRoleMame}}</font>
+                                <font >[{{form.customerPhone2UpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.phone2UpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
+
                     </el-col>
                     <el-col :span="8" v-show="form.phone3 !=null && form.phone3 !=''">
                         <el-form-item label="手机号3：" prop="phone3" :label-width="formLabelWidth120" >
@@ -150,7 +182,7 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
-                        <el-form-item label="" prop="phone3" :label-width="formLabelWidth120" >
+                        <el-form-item label="手机号3创建:" prop="phone3" :label-width="formLabelWidth120" >
                             <div v-show="showPhone">
                                 <font >{{form.phone3CreateUserRoleMame}}</font>
                                 <font v-show="form.phone3CreateUser !=null && form.phone3CreateUser !=''">[{{form.phone3CreateUser}}]</font>
@@ -160,6 +192,13 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
+                        <div v-show="form.customerPhone3UpdateUser !=null && form.customerPhone3UpdateUser !=''">
+                        <el-form-item label="手机号3修改:" :label-width="formLabelWidth120" >
+                            <font >{{form.customerPhone3UpdateUserRoleMame}}</font>
+                            <font >[{{form.customerPhone3UpdateUserName}}]</font>
+                            <font >{{formatTimeFn(form.phone3UpdateTime)}}</font>
+                        </el-form-item>
+                        </div>
                     </el-col>
                     <el-col :span="8" v-show="form.phone4 !=null && form.phone4 !=''">
                         <el-form-item label="手机号4：" prop="phone4" :label-width="formLabelWidth120" >
@@ -171,7 +210,7 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
-                        <el-form-item label="" prop="phone4" :label-width="formLabelWidth120" >
+                        <el-form-item label="手机号4创建:" prop="phone4" :label-width="formLabelWidth120" >
                             <div v-show="showPhone">
                                 <font >{{form.phone4CreateUserRoleMame}}</font>
                                 <font v-show="form.phone4CreateUser !=null && form.phone4CreateUser !=''">[{{form.phone4CreateUser}}]</font>
@@ -181,6 +220,13 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
+                        <div v-show="form.customerPhone4UpdateUser !=null && form.customerPhone4UpdateUser !=''">
+                            <el-form-item  label="手机号4修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.customerPhone4UpdateUserRoleMame}}</font>
+                                <font >[{{form.customerPhone4UpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.phone4UpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
                     </el-col>
                 </el-row>
                 <el-row v-show="form.phone5 !=null && form.phone5 !=''">
@@ -194,7 +240,7 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
-                        <el-form-item label="" prop="phone5" :label-width="formLabelWidth120" >
+                        <el-form-item label="手机号5创建:" prop="phone5" :label-width="formLabelWidth120" >
                             <div v-show="showPhone">
                                 <font >{{form.phone5CreateUserRoleMame}}</font>
                                 <font v-show="form.phone5CreateUser !=null && form.phone5CreateUser !=''">[{{form.phone5CreateUser}}]</font>
@@ -204,39 +250,46 @@
                                 <font color="red">领取后显示</font>
                             </div>
                         </el-form-item>
+                        <div v-show="form.customerPhone5UpdateUser !=null && form.customerPhone5UpdateUser !=''">
+                            <el-form-item label="手机号5修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.customerPhone5UpdateUserRoleMame}}</font>
+                                <font >[{{form.customerPhone5UpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.phone5UpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth120" >
                             <div v-if="showPhone">
-                                <el-button type="text" disabled>{{form.qq}}</el-button>
+                                <span>{{form.qq}}</span>
                             </div>
                             <div v-else>
-                                <el-button type="text" disabled>{{(form.qq==null||form.qq=='')?'':'***'}}</el-button>
+                                <span>{{(form.qq==null||form.qq=='')?'':'***'}}</span>
                             </div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth120">
                             <div v-if="showPhone">
-                                <el-button type="text" disabled>{{form.wechat}}</el-button>
+                                <span>{{form.wechat}}</span>
                                 <span v-if="form.wechat2 || form.wechatUrl">
                                     <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
                                 </span>
                             </div>
                             <div v-else>
-                                <el-button type="text" disabled>{{(form.wechat==null||form.wechat=='')?'':'***'}}</el-button>
+                                <span>{{(form.wechat==null||form.wechat=='')?'':'***'}}</span>
                             </div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth120">
                             <div v-if="showPhone">
-                                <el-button type="text" disabled>{{form.customerEmail}}</el-button>
+                                <span>{{form.customerEmail}}</span>
                             </div>
                             <div v-else>
-                                <el-button type="text" disabled>{{(form.customerEmail==null||form.customerEmail=='')?'':'***'}}</el-button>
+                                <span>{{(form.customerEmail==null||form.customerEmail=='')?'':'***'}}</span>
                             </div>
                         </el-form-item>
                     </el-col>
@@ -244,54 +297,54 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>
+                            <span>
                                 {{form.customerSex==null?'':form.customerSex==1?'男':'女'}}
-                            </el-button>
+                            </span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="年龄：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.customerAge}}</el-button>
+                            <span>{{form.customerAge}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="职业：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.customerJob}}</el-button>
+                            <span>{{form.customerJob}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="选址情况：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>{{form.address}}</el-button>
+                            <span>{{form.address}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="餐饮经验：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.experience}}</el-button>
+                            <span>{{form.experience}}</span>
                             <el-button   v-show="form.experience!=''&&form.experience!='0'&&form.experience!='无'" type="text" disabled>{{form.cateringType}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="合伙人：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.customerPartner}}</el-button>
-                            <el-button type="text" disabled>{{form.customerPartnerDetail}}</el-button>
+                            <span>{{form.customerPartner}}</span>
+                            <span>{{form.customerPartnerDetail}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="决策人：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>
+                            <span>
                                 {{form.decisionMaker==2?'他人 '+(form.decisionMakerOther==null?'':form.decisionMakerOther) :(form.decisionMaker==1?'自己本人 ':'')}}
-                            </el-button>
+                            </span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="出资人：" :label-width="formLabelWidth120">
-                            <el-button type="text" disabled>
+                            <span>
                                 {{form.sponsor==2?'他人 '+(form.sponsorOther==null?'':form.sponsorOther) :(form.sponsor==1?'自己本人 ' :'')}}
-                            </el-button>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -301,17 +354,17 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="投资金额：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.money}}</el-button>
+                            <span>{{form.money}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="店面大小：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.area}}</el-button>
+                            <span>{{form.area}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="开店紧迫性：" :label-width="formLabelWidth120"  >
-                            <el-button type="text" disabled>{{form.urgency}}</el-button>
+                            <span>{{form.urgency}}</span>
                             <span style="padding-left: 5px;" v-if="form.urgency">之前启动</span>
                         </el-form-item>
                     </el-col>
@@ -319,27 +372,27 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="意向品类：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.intentionCategory}}</el-button>
+                            <span>{{form.intentionCategory}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth120" >
-                            <el-button type="text" disabled>{{form.radioProject==1? form.insideProject:form.outsideProject}}</el-button>
+                            <span>{{form.radioProject==1? form.insideProject:form.outsideProject}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="是否在考虑同行业：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>
+                            <span>
                                 {{form.istrade == 1?'是':'否'}}
                                 {{form.tradeProject}}
-                            </el-button>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="开店区域：" :label-width="formLabelWidth120" style="width: 33.3%;float: left;" >
-                            <el-button type="text" disabled>{{form.province}}{{form.city}}{{form.district}}</el-button>
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth120">
+                            <span>{{form.province}}{{form.city}}{{form.district}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -437,7 +490,7 @@
     				        <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
                         </a>
                         
-                        <a v-if="scope.row.accountId==loginUserId" class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                        <a class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                     </template>
                 </el-table-column>
             </el-table>
@@ -645,6 +698,34 @@
                 <img v-show="repeatCustomer.wechatCode!=''"  :src="repeatCustomer.wechatCode">
             </el-form-item>
         </el-form>
+    </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+        </div>
     </el-dialog>
 </div>
 
@@ -939,7 +1020,13 @@ var vxShow = false;
 var showwchatcode = "/images/errorIcon.jpg";
 if(customer==null){
     vform= {
-        customerName:"",
+            customerName:"",
+            cusNameCreateUserRoleName:"",
+            cusNameUpdateUserRoleName:"",
+            cusNameCreateUserName:"",
+            cusNameUpdateUserName:"",
+            cusNameCreateTime:"",
+            cusNameUpdateTime:"",
             customerPhone:"",
             phoneCreateTime:"",
             customerPhoneCreateUser:"",
@@ -1003,6 +1090,12 @@ if(customer==null){
     }
     vform={
         customerName:customer.cusName,
+        cusNameCreateUserRoleName:customer.cusNameCreateUserRoleName,
+        cusNameUpdateUserRoleName:customer.cusNameUpdateUserRoleName,
+        cusNameCreateUserName:customer.cusNameCreateUserName,
+        cusNameUpdateUserName:customer.cusNameUpdateUserName,
+        cusNameCreateTime:customer.cusNameCreateTime,
+        cusNameUpdateTime:customer.cusNameUpdateTime,
         customerPhone:customer.phone,
         phoneCreateTime:customer.phoneCreateTime,
         customerPhoneCreateUser:customer.phoneCreateUserName,
@@ -1057,7 +1150,34 @@ if(customer==null){
         sponsorOther:customer.investorsNamePhone,//其它出资人的姓名及联系方式
         decisionMaker: customer.decide,//决策人
         decisionMakerOther: customer.decideNamePhone,//其它决策人的姓名及联系方式
-        customerPartnerDetail:customer.partnerNamePhone//合伙人姓名及联系方式
+        customerPartnerDetail:customer.partnerNamePhone,//合伙人姓名及联系方式
+
+        phoneUpdateTime:customer.phoneUpdateTime,
+        customerPhoneUpdateUser:customer.phoneUpdateUser,
+        customerPhoneUpdateUserRoleMame:customer.phoneUpdateUserRoleMame,
+        customerPhoneUpdateUserName:customer.phoneUpdateUserName,
+
+        phone2UpdateTime:customer.phone2UpdateTime,
+        customerPhone2UpdateUser:customer.phone2UpdateUser,
+        customerPhone2UpdateUserRoleMame:customer.phone2UpdateUserRoleMame,
+        customerPhone2UpdateUserName:customer.phone2UpdateUserName,
+
+        phone3UpdateTime:customer.phone3UpdateTime,
+        customerPhone3UpdateUser:customer.phone3UpdateUser,
+        customerPhone3UpdateUserRoleMame:customer.phone3UpdateUserRoleMame,
+        customerPhone3UpdateUserName:customer.phone3UpdateUserName,
+
+        phone4UpdateTime:customer.phone4UpdateTime,
+        customerPhone4UpdateUser:customer.phone4UpdateUser,
+        customerPhone4UpdateUserRoleMame:customer.phone4UpdateUserRoleMame,
+        customerPhone4UpdateUserName:customer.phone4UpdateUserName,
+
+        phone5UpdateTime:customer.phone5UpdateTime,
+        customerPhone5UpdateUser:customer.phone5UpdateUser,
+        customerPhone5UpdateUserRoleMame:customer.phone5UpdateUserRoleMame,
+        customerPhone5UpdateUserName:customer.phone5UpdateUserName
+
+
     }
     if(customer.wechatCode !=null && customer.wechatCode!=''){
         showwchatcode = customer.wechatCode;
@@ -1090,21 +1210,28 @@ if(base==null){
         el: '#addCustomer',
         data: function() {
             return {
-              repeatWeDialogForm:{},
-              repeatCustomer:{},
-              repeatWechatVisible:false,
-              dialogFormVisible1: false,
-              repeatStatus:repeatStatus,
-              repeatShowFalg:repeatShowFalg,
+                isActive:false,
+                isShowMoreBtn:false,
+                customerInfo:customer,
+                isShowOnlineRecordBtn:false,
+                onlineRecordData:[],
+                onlineRecordDialogVisible:false,
+
+                repeatWeDialogForm:{},
+                repeatCustomer:{},
+                repeatWechatVisible:false,
+                dialogFormVisible1: false,
+                repeatStatus:repeatStatus,
+                repeatShowFalg:repeatShowFalg,
                 teleReceiveSource:teleReceiveSource,
                 teleReceiveTime:teleReceiveTime,
-              repeatClueList:repeatClueList,
+                repeatClueList:repeatClueList,
                 audioShow:false,//播放器默认不显示
             	loginUserId:loginUserId,
                 showPhone:showPhone,
                 showwchatcode:showwchatcode,
                 isDisabled:true,//默认不可点击
-              wechatVisible: false,//查看微信号
+                wechatVisible: false,//查看微信号
                 dialogFormUploadImgSrc: '',
                 radioProject:'',
                 dialogFormVisible: false,
@@ -1113,7 +1240,7 @@ if(base==null){
                 dialogFormUploadImg:false,
                 form:vform,
                 clueBase:base,
-              intention:intention,
+                intention:intention,
                 categoryArr:[],
                 typeArr:[],
                 mediumArry:[],
@@ -1130,14 +1257,14 @@ if(base==null){
                 cityArr:[],
                 districtArr:[],
                 proSelect:proSelect,
-              wechatForm: {
-                wechat2:'',
-                wechatUrl:'',
-                fileList:[]
-              },
-              formLabelWidth: '150px',
-              formLabelWidth1: '140px',
-              formLabelWidth120: '120px',
+                wechatForm: {
+                    wechat2:'',
+                    wechatUrl:'',
+                    fileList:[]
+                },
+                formLabelWidth: '150px',
+                formLabelWidth1: '140px',
+                formLabelWidth120: '120px',
                 rules:{
                     // customerName: [
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
@@ -1223,6 +1350,62 @@ if(base==null){
             }             
         },
         methods: {
+            isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
+            showOnlineRecord(){
+                this.onlineRecordDialogVisible=true;                
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){
+                            addCustomerVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            if(dataList.length>0){
+                                addCustomerVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    addCustomerVM.isShowMoreBtn=true;
+                                }else{
+                                    addCustomerVM.isShowMoreBtn=false;
+                                }
+                            }
+                        }                        
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        addCustomerVM.isShowOnlineRecordBtn=false;
+                    }                       
+
+                });
+
+            },
+            isShowOnlineRecordFun(){
+                // var param = {};
+                // param.clueId = clueId;
+                // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+                //     var data= response.data;                 
+                //     if(data){
+                //         addCustomerVM.isShowOnlineRecordBtn=true;
+                //     }else{
+                //         addCustomerVM.isShowOnlineRecordBtn=false;
+                //     }
+
+                // });
+            },
           getPhones(cus){
             var phones = '';
             phones = cus.phone;
@@ -1365,11 +1548,13 @@ if(base==null){
             },
             switchSoundBtn(id,url,callSource){
                 // 播放器显示
-                this.audioShow=true;
+                // this.audioShow=true;
                 if(callSource=='2'){
-                    switchSound(id,url);
+                    // switchSound(id,url);
+                    window.parent.open(url)
                     return;
                 }
+                var newWindow = window.open();
                 var param = {};
                 param.id=id;
                 axios.post('/call/callRecord/getRecordFile',param)
@@ -1377,7 +1562,8 @@ if(base==null){
                         var data =  response.data
                         if(data.code=='0'){
                             var url = data.data;
-                            switchSound(id,url);
+                            // switchSound(id,url);
+                            newWindow.location.href = url;
                         }else{
                             console.error(data);
                             addCustomerVM.$message({message:data.msg,type:'error'});
@@ -1427,6 +1613,10 @@ if(base==null){
                         var fileName = url.split('?')[0];
                         var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
+                        if(callSource=='3'){
+                        	var decodeUrl = encodeURI(url);
+                             url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                         }
                       var x=new XMLHttpRequest();
                       x.open("GET", url, true);
                       x.responseType = 'blob';
@@ -1716,6 +1906,10 @@ if(base==null){
           axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
        	   addCustomerVM.provinceArr=response.data.data.data;
           });
+
+          // 在线聊天记录data
+            this.initData();
+            this.isShowOnlineRecordFun();
 
 
     	}

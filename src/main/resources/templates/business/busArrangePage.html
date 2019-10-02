@@ -25,7 +25,7 @@
 
               <el-form-item label="商务组:" prop="busGroupId">
                 <el-select v-model="searchForm.busGroupId" clearable @change="currentBusSale"
-                           placeholder="商务组" filterable>
+                           placeholder="商务组" filterable :disabled="isSWZDisabled">
                   <el-option v-for="item in busGroupOptions" :key="item.id" :label="item.name"
                              :value="item.id"></el-option>
                 </el-select>
@@ -117,13 +117,15 @@
 var dxList=[[${dxList}]];//电销组
 var projectList=[[${projectList}]];//项目
 var swList = [[${swList}]];//商务组
+var ownOrgId=[[${ownOrgId}]];//商务总监商务组
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
             isShow:false,
+            isSWZDisabled:false,
         		searchForm: {
 	        		teleGorupId: '',
-              busGroupId: '',
+              busGroupId: ownOrgId,
               busSaleId: '',
               startReserveTime: '',
               endReserveTime: '',
@@ -350,7 +352,16 @@ var clueVM = new Vue({
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            
+          if(ownOrgId){
+            this.isSWZDisabled= true;
+            var param={};
+            param.orgId=ownOrgId;
+            param.roleCode="SWJL";
+            param.statusList =[1,3];
+            axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
+              clueVM.busSaleOptions=response.data.data;
+            });
+            }//商务总监商务组筛选按钮不可点击
             this.searchTable();
            
         },

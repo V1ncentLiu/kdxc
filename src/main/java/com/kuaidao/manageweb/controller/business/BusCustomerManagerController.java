@@ -3,11 +3,27 @@
  */
 package com.kuaidao.manageweb.controller.business;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.clue.BusVisitPerDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -72,11 +88,19 @@ public class BusCustomerManagerController {
     @RequiresPermissions("business:busCustomerManager:view")
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
-
+        String ownOrgId = "";
         // 查询所有电销组
         List<OrganizationRespDTO> teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ,null);
         request.setAttribute("teleSaleGroupList", teleSaleGroupList);
         List<RoleInfoDTO> roleList = user.getRoleList();
+        // 获取业务线
+        Integer businessLine = null;
+        if(user.getBusinessLine() != null ){
+            businessLine = user.getBusinessLine();
+        }
+        // 获取人员所在组织
+        Long orgId =user.getOrgId();
+
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             // 管理员 可以选择所有商务组 商务总监
             // 查询所有商务组
@@ -86,31 +110,50 @@ public class BusCustomerManagerController {
             // 查询所有商务总监
             List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null,null);
             request.setAttribute("busDirectorList", busDirectorList);
-        } else if (roleList != null
+        }
+        else if (roleList != null
                 && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.BUSBIGAREAW.name().equals(roleList.get(0).getRoleCode())
                         || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
+
+            // 商务中心查询业务线下数据。
+            if( RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())){
+                orgId =null;
+            }
+
             // 商务大区总监 可以选择本区下的商务组 商务总监
             // 商务总监 可以选择本商务组下的商务经理
             // 查询下属商务组
-            Integer businessLine = null;
-            if(user.getBusinessLine() != null ){
-                businessLine = user.getBusinessLine();
-            }
             List<OrganizationRespDTO> busSaleGroupList =
-                    getSaleGroupList(user.getOrgId(), OrgTypeConstant.SWZ,businessLine);
-            request.setAttribute("busSaleGroupList", busSaleGroupList);
+                    getSaleGroupList(orgId, OrgTypeConstant.SWZ,businessLine);
             // 查询本区商务总监
             List<UserInfoDTO> busDirectorList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null,businessLine);
+                    getUserList(orgId, RoleCodeEnum.SWZJ.name(), null,businessLine);
             request.setAttribute("busDirectorList", busDirectorList);
             // 查询组织下商务经理
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> saleList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList,businessLine);
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList,businessLine);
             request.setAttribute("busSaleList", saleList);
+
+            //商务总监固定商务组筛选条件为本组
+            if(RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())){
+                ownOrgId = String.valueOf(user.getOrgId());
+                OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+                if(curOrgGroupByOrgId!=null) {
+                    OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                    organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                    organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                    busSaleGroupList.add(organizationRespDTO);
+                }
+            }
+            request.setAttribute("busSaleGroupList", busSaleGroupList);
+            request.setAttribute("ownOrgId", ownOrgId);
         }
+
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
@@ -152,6 +195,8 @@ public class BusCustomerManagerController {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
+        pageParam.setBusinessLine(user.getBusinessLine());
+        pageParam.setOrgId(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
@@ -162,6 +207,10 @@ public class BusCustomerManagerController {
         return busCustomerList;
     }
 
+
+
+
+
     /***
      * 下属商务经理列表
      * 
@@ -169,7 +218,6 @@ public class BusCustomerManagerController {
      */
     @PostMapping("/getSaleList")
     @ResponseBody
-    @RequiresPermissions("aggregation:appiontmentManager:view")
     public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
             HttpServletRequest request) {
         userOrgRoleReq.setRoleCode(RoleCodeEnum.SWJL.name());
@@ -180,8 +228,7 @@ public class BusCustomerManagerController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -192,8 +239,7 @@ public class BusCustomerManagerController {
 
     /**
      * 获取所有组织组
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private List<OrganizationRespDTO> getSaleGroupList(Long parentId, Integer type,Integer businessLine) {
@@ -210,8 +256,7 @@ public class BusCustomerManagerController {
 
     /**
      * 获取所有商务经理（组织名-大区名）
-     * 
-     * @param orgDTO
+     *
      * @return
      */
     private List<Map<String, Object>> getAllSaleList() {
@@ -273,7 +318,10 @@ public class BusCustomerManagerController {
     /**
      * 根据机构和角色类型获取用户
      * 
-     * @param orgDTO
+     * @param orgId
+     * @param roleCode
+     * @param statusList
+     * @param businessLine
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList,Integer businessLine) {
@@ -301,6 +349,134 @@ public class BusCustomerManagerController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
+    }
+
+    /**
+     * 导出到访业绩
+     */
+    @LogRecord(description = "导出到访业绩", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.BUSS_MANAGER)
+    @PostMapping("/exportVisitPer")
+    public void exportVisitPer(HttpServletRequest request, HttpServletResponse response,
+        @RequestBody BusCustomerPageParam pageParam) throws Exception {
+        UserInfoDTO user = getUser();
+
+        pageParam.setUserId(user.getId());
+        pageParam.setBusinessLine(user.getBusinessLine());
+        pageParam.setOrgId(user.getOrgId());
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null) {
+            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+        }
+        JSONResult<List<BusVisitPerDTO>> listJSONResult = busCustomerFeignClient
+            .exportVisitPer(pageParam);
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadVisitPerTitleList());
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
+            && listJSONResult.getData().size() != 0) {
+            List<BusVisitPerDTO> orderList = listJSONResult.getData();
+            int size = orderList.size();
+            for (BusVisitPerDTO visitPerDTO : orderList) {
+                List<Object> curList = new ArrayList<>();
+                curList.add(visitPerDTO.getVisitTime());
+                curList.add(visitPerDTO.getCusName());
+                curList.add(visitPerDTO.getArea());
+                curList.add(visitPerDTO.getVisitType());
+                curList.add(visitPerDTO.getVisitNum());
+                curList.add(visitPerDTO.getIsSign());
+                curList.add(visitPerDTO.getSignProject());
+                curList.add(visitPerDTO.getSignType());
+                curList.add(visitPerDTO.getSignShopType());
+                curList.add(visitPerDTO.getFirstVisitTime());
+                curList.add(visitPerDTO.getAmountReceivable());
+                curList.add(visitPerDTO.getAmountReceivedSum());
+                curList.add(visitPerDTO.getAmountBalance());
+                curList.add(visitPerDTO.getMakeUpTime());
+                curList.add(visitPerDTO.getIsRemote());
+                curList.add(visitPerDTO.getArrVisitCity());
+                curList.add(visitPerDTO.getCompany());
+                curList.add(visitPerDTO.getBusManagerName());
+                curList.add(visitPerDTO.getRemark());
+                curList.add(visitPerDTO.getTeleGroupName());
+                curList.add(visitPerDTO.getTeleGroupProjectName());
+                curList.add(visitPerDTO.getTeleSaleName());
+                curList.add(visitPerDTO.getTeleDirectorName()); // 负责人
+                curList.add(visitPerDTO.getTakeOverNum());
+                curList.add(visitPerDTO.getSignNum());
+                curList.add(visitPerDTO.getIsPreferential());
+                curList.add(visitPerDTO.getConcrete());
+                curList.add(visitPerDTO.getVisitProvince());
+                curList.add(visitPerDTO.getProjectCategory());
+                curList.add(visitPerDTO.getValue());
+                dataList.add(curList);
+            }
+        }
+
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+        String name = "到访业绩" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        response.addHeader("Content-Disposition",
+            "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
+    }
+    /**
+     * 导出到访业绩
+     * @return
+     */
+    private List<Object> getHeadVisitPerTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("来访日期");
+        headTitleList.add("客户姓名");
+        headTitleList.add("来访区域");
+        headTitleList.add("到访类别");
+        headTitleList.add("来访次数");
+        headTitleList.add("是否成功");
+        headTitleList.add("合作项目");
+        headTitleList.add("签约类型");
+        headTitleList.add("签约店型");
+        headTitleList.add("二次来访客户首次来访洽谈日期");
+        headTitleList.add("合同金额");
+        headTitleList.add("已收金额");
+        headTitleList.add("未收金额");
+        headTitleList.add("预计补款日期");
+        headTitleList.add("是否远程");
+        headTitleList.add("到访城市");
+        headTitleList.add("所属公司");
+        headTitleList.add("洽谈人员");
+        headTitleList.add("备注（未签约原因内容）");
+        headTitleList.add("电销部门");
+        headTitleList.add("部门项目");
+        headTitleList.add("创业顾问");
+        headTitleList.add("负责人");
+        headTitleList.add("洽谈数量");
+        headTitleList.add("签约数量");
+        headTitleList.add("是否有特殊优惠以及赠送");
+        headTitleList.add("具体内容");
+        headTitleList.add("来访省份");
+        headTitleList.add("项目类别（饮品／非饮品）");
+        headTitleList.add("值");
+        return headTitleList;
     }
 
 }
