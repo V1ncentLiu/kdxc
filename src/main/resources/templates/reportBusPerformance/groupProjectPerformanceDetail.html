@@ -95,19 +95,19 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="teleGroupName" label="商务大区"></el-table-column>
-                <el-table-column prop="cateringGroup" label="餐饮集团">
+                <el-table-column prop="businessAreaName" label="商务大区"></el-table-column>
+                <el-table-column prop="groupName" label="餐饮集团">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.teleGroupId!='99999'">{{scope.row.teleGroupName}}</span>
-                        <span v-else>{{scope.row.teleGroupName}}</span>
+                        <span v-if="scope.row.groupId!='99999'">{{scope.row.groupName}}</span>
+                        <span v-else>合计</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="firstVisitNum" label="项目"></el-table-column>
+                <el-table-column prop="projectName" label="项目"></el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
-                <el-table-column prop="visitRate" label="签约率"></el-table-column>
-                <el-table-column prop="culeNum" label="净业绩金额" :formatter="format_number"></el-table-column>
-                <el-table-column prop="achievement" label="签约单笔" :formatter="format_number"></el-table-column>
+                <el-table-column prop="signRate" label="签约率"></el-table-column>
+                <el-table-column prop="amount" label="净业绩金额" :formatter="format_number"></el-table-column>
+                <el-table-column prop="signSingle" label="签约单笔" :formatter="format_number"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -120,7 +120,7 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var projectList = '';
+    var projectList =[[${projectList}]];
     var companyList = [[${companyList}]]; // 餐饮集团
     var areaList = [[${areaList}]]; // 商务大区
     var parentParam=[[${baseBusQueryDto }]];// 
@@ -147,6 +147,7 @@
                     busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
+                    groupId: '',
                     project: ''
                 },
                 export: {
@@ -155,6 +156,7 @@
                     busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
+                    groupId: '',
                     project: ''
                 },
                 tableData: [],
@@ -448,7 +450,7 @@
                 param.businessManagerId = this.export.businessManagerId;
                 param.groupId = this.export.groupId;
                 param.project = this.export.project;
-                axios.post('/performance/export',param,{responseType:'blob'})
+                axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;

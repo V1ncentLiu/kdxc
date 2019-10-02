@@ -124,7 +124,8 @@ public class BusGroupRankingController extends BaseStatisticsController {
     @RequestMapping("/getTwoPageList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getTwoBusGroupRankingPageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
-        return busGroupRankingFeignClient.getTwoBusGroupRankingPageList(baseBusQueryDto);
+        JSONResult<Map<String, Object>> twoBusGroupRankingPageList = busGroupRankingFeignClient.getTwoBusGroupRankingPageList(baseBusQueryDto);
+        return twoBusGroupRankingPageList;
     }
     /**
      * 二级页面查询全部
