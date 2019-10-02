@@ -69,13 +69,31 @@
         <!-- 获取资源 -->
         <div class="resources">
             <el-row type="flex" class="row-bg">
-                <el-col :span="8" v-for="(item,index) in this.resources" :key="item.id">
-                    <div class="content" :class="{other:index===2} ">
+                <el-col :span="8">
+                    <div class="content">
                         <div class="top">
-                            <img th:src="@{/images/merchantmoney.png}" alt="">
-                            <span>{{item.text}}</span>
+                            <img th:src="@{/images/today.png}" alt="">
+                            <span>今日获取资源</span>
                         </div>
-                        <p>{{item.number}}</p>
+                        <p>{{countSources.dayCount}}</p>
+                    </div>
+                </el-col>
+                <el-col :span="8">
+                    <div class="content">
+                        <div class="top">
+                            <img th:src="@{/images/month.png}" alt="">
+                            <span>本月获取资源</span>
+                        </div>
+                        <p>{{countSources.monthCoun}}</p>
+                    </div>
+                </el-col>
+                <el-col :span="8">
+                    <div class="content other">
+                        <div class="top">
+                            <img th:src="@{/images/cumulative.png}" alt="">
+                            <span>累计获取资源数</span>
+                        </div>
+                        <p>{{countSources.allCount}}</p>
                     </div>
                 </el-col>
             </el-row>
@@ -90,7 +108,7 @@
     <script th:src="@{/js/common/echarts.min.js?v=1.0.0}"></script>
 
     <script th:inline="javascript">
-        var mainDivVM = new Vue({
+        var merchantHomeDivVM = new Vue({
             el: '#merchantHome',
             data: {
                 from: {
@@ -103,7 +121,7 @@
                 showButton: 0,
                 options: '',
                 // 今日获取资源
-                resources: '',
+                countSources: '',
                 // 指定图表的配置项和数据
                 option: {
                     title: {
@@ -171,7 +189,7 @@
                 },
                 submitQuery() {
                     console.log(this.from)
-                }
+                },
             },
             created() {
                 this.options = [{
@@ -190,25 +208,19 @@
                     value: '北京烤鸭',
                     label: '北京烤鸭'
                 }]
-                this.resources = [{
-                    id: '0',
-                    images: 'https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png',
-                    text: '今日获取资源',
-                    number: '9778',
-                },
-                {
-                    id: '1',
-                    images: 'https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png',
-                    text: '本月获取资源',
-                    number: '9438',
-                },
-                {
-                    id: '2',
-                    images: 'https://huiju-pre.oss-cn-beijing.aliyuncs.com/common/icon_feiyong.png',
-                    text: '累计获取资源',
-                    number: '5478',
-                },
-                ]
+                this.countSources = {
+                    dayCount :'34234',
+                    monthCoun:'34234',
+                    allCount:'34234',
+                }
+                axios.post('/annReceive/batchUpdate')
+                    .then(function (response) {
+
+                    })
+                    .catch(function (error) {
+                        merchantHomeDivVM.$message.error(error);
+                    });
+
             },
             mounted() {
                 document.getElementById('merchantHome').style.display = 'block';
