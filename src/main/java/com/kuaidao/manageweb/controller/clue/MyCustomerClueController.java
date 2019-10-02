@@ -1286,6 +1286,5 @@ public class MyCustomerClueController {
     }
 
 	public static void main(String[] args) {
-		addCustomerMaintenance
 	}
 }
