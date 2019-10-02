@@ -285,7 +285,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
         }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
             teleGroupList = getCurOrgGroupByOrgId(curLoginUser.getOrgId());
         }else{
-            teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.SWZ);
+//            teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.SWZ);
         }
         if(null != baseBusQueryDto && null != teleGroupList && teleGroupList.size() > 0){
             List<Long> orgIdList = teleGroupList.parallelStream().map(OrganizationDTO::getId).collect(Collectors.toList());
@@ -318,11 +318,6 @@ public class BusGroupRankingController extends BaseStatisticsController {
         JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
         List<OrganizationDTO> data = listJSONResult.getData();
         return data;
-    }
-
-    public static void main(String[] args) {
-        String name = RoleCodeEnum.SWDQZJ.name();
-        System.out.println(name.equals("SWDQZJ"));
     }
 
 }
