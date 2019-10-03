@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @description: MerchantOnlineRechargeController在线充值类
@@ -80,6 +81,7 @@ public class MerchantOnlineRechargeController {
   * @Author xuyunfeng
   * @Date 2019/9/28 15:52
   **/
+  @ResponseBody
   @RequestMapping("/getWeChatAndAlipayCode")
   @RequiresPermissions("merchant:merchantOnlineRecharge:add")
   public JSONResult<MerchantRechargeResp> getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req,HttpServletRequest request){
