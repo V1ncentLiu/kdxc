@@ -35,7 +35,7 @@ public interface TailOrderClient {
     @Component
     class HystrixClientFallback implements TailOrderClient {
 
-        private static Logger logger = LoggerFactory.getLogger(PerformanceClient.class);
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
