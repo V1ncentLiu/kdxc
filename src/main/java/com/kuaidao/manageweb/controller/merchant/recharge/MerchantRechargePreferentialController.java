@@ -38,7 +38,6 @@ public class MerchantRechargePreferentialController {
      *
      * @return
      */
-    //todo
     @RequestMapping("/initOfflinePayment")
 //    @RequiresPermissions("???")
     public String initOfflinePayment(HttpServletRequest request) {
@@ -48,7 +47,7 @@ public class MerchantRechargePreferentialController {
             Constants.PAYMENT_ACCOUNT);
         request.setAttribute("bank",
             Constants.BANK);
-        return "???";
+        return "merchant/payment/paymentOffline";
     }
 
     /***
