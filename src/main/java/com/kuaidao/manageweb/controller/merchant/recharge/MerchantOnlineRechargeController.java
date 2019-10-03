@@ -13,6 +13,7 @@ import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusin
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -61,7 +62,12 @@ public class MerchantOnlineRechargeController {
       MerchantUserAccountQueryDTO dto = new MerchantUserAccountQueryDTO();
       dto.setUserId(user.getId());
       JSONResult<MerchantUserAccountDTO> accountDTOJSONResult = merchantUserAccountFeignClient.getMerchantUserAccountInfo(dto);
-      request.setAttribute("merchantUserAccountDTO",accountDTOJSONResult.getData());
+      MerchantUserAccountDTO merchantUserAccountDTO = new MerchantUserAccountDTO();
+      merchantUserAccountDTO = accountDTOJSONResult.getData();
+      if(merchantUserAccountDTO == null || merchantUserAccountDTO.getBalance() == null){
+        merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+      }
+      request.setAttribute("merchantUserAccountDTO",merchantUserAccountDTO);
     }catch (Exception e){
       logger.error("加载在线充值页面initOnlineRecharge:{}",e);
     }
