@@ -14,6 +14,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class MerchantOnlineRechargeController {
   * @Date 2019/9/24 16:07
   **/
   @RequestMapping("/initOnlineRecharge")
+  @RequiresPermissions("merchant:merchantOnlineRecharge:add")
   public String initMerchantOnlineRecharge(HttpServletRequest request){
     try {
       //查询优惠信息
@@ -72,6 +74,7 @@ public class MerchantOnlineRechargeController {
   * @Date 2019/9/28 15:52
   **/
   @RequestMapping("/getWeChatAndAlipayCode")
+  @RequiresPermissions("merchant:merchantOnlineRecharge:add")
   public String getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req,HttpServletRequest request){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
