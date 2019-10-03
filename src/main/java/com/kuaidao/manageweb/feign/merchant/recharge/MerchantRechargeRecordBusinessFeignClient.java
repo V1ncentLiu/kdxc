@@ -48,7 +48,6 @@ public interface MerchantRechargeRecordBusinessFeignClient {
   @PostMapping("/queryBusinessPageList")
   public JSONResult<PageBean<MerchantRechargeRecordDTO>> queryBusinessPageList(
       @RequestBody MerchantRechargeRecordQueryDTO queryDTO);
-  @RequestMapping("/applyInvoice")
   /**
    * @Description 申请发票
    * @param req
@@ -56,6 +55,7 @@ public interface MerchantRechargeRecordBusinessFeignClient {
    * @Author xuyunfeng
    * @Date 2019/9/26 17:41
    **/
+  @RequestMapping("/applyInvoice")
   public JSONResult<Boolean> applyInvoice(@RequestBody MerchantApplyInvoiceReq req);
   /**
    * @Description 获取微信或支付宝的支付URL
