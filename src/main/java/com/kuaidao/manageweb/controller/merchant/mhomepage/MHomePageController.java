@@ -247,8 +247,15 @@ public class MHomePageController {
         }
       }
     }
+
     // 数据排序
-    
+    for(String str:xList){
+      Integer integer = map.get(str);
+      if(integer==null){
+        integer = 0 ;
+      }
+      yList.add(integer);
+    }
 
     IndexRespDTO indexRespDTO = new IndexRespDTO();
     indexRespDTO.setXList(xList);
