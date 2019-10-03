@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
 import com.kuaidao.common.constant.ComConstant.DIMENSION;
+import com.kuaidao.common.constant.ComConstant.QFLAG;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -193,6 +194,20 @@ public class MHomePageController {
   @RequestMapping("/receiveStatics")
   @ResponseBody
   public JSONResult<IndexRespDTO> receiveStatics(@RequestBody IndexReqDTO indexReqDTO){
+    int diffDay = DateUtil.differentDays(indexReqDTO.getEtime(), indexReqDTO.getStime());
+    if(diffDay<=30){
+      String qflag = indexReqDTO.getQflag();
+      if(QFLAG.ONE.equals(qflag)){
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date()));
+        indexReqDTO.setEtime(DateUtil.getPriorDay(new Date()));
+      }else if(QFLAG.SEVEN.equals(qflag)){
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),7));
+        indexReqDTO.setEtime(new Date());
+      }else if(QFLAG.THREETH.equals(qflag)){
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),30));
+        indexReqDTO.setEtime(new Date());
+      }
+    }
 
     ResourceStatisticsParamDTO paramDTO = new ResourceStatisticsParamDTO();
     paramDTO.setDimension(indexReqDTO.getDimension());
@@ -262,6 +277,7 @@ public class MHomePageController {
     indexRespDTO.setYList(yList);
     return new JSONResult().success(indexRespDTO);
   }
+
 
   private List<String> gainX(IndexReqDTO indexReqDTO){
     List<String> xList = new ArrayList<>();
