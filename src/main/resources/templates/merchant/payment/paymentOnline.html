@@ -42,7 +42,7 @@
             <div style="width: 540px;margin:0 auto 40px">
                 <el-row class="marginB20"> 
                     <el-form-item label="当前余额：" label-width="auto">
-                        <span>{{merchantUserAccountDTO.balance}}</span>
+                        <!-- <span>{{merchantUserAccountDTO.balance}}</span> -->
                     </el-form-item>
                     <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney">
                         <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;" maxLength="9"></el-input>元
@@ -59,17 +59,17 @@
                 </div>
                 <el-button type="primary" @click="submitForm('form')" style="width:140px;height: 50px;">下一步</el-button>
             </div>
-        </el-row>
-        <el-row class="borderbox padding20 marginB20" v-if="codeIsShow">
-            <div style="text-align: center;margin:50px 0 80px;"><img th:src="@{/images/step2.jpg}" alt=""> </div>
-            <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
-                <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">¥1200</span>，请使用支付宝扫描下方二维码完成支付</p>
-                <img :src="codeUrl" alt="">
-                <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
-                <el-button type="primary" style="width:140px;height: 50px;" @click="submitForm">上一步</el-button>
-            </div>
-        </el-row>
+        </el-row>        
     </el-form>
+    <el-row class="borderbox padding20 marginB20" v-if="codeIsShow">
+        <div style="text-align: center;margin:50px 0 80px;"><img th:src="@{/images/step2.jpg}" alt=""> </div>
+        <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
+            <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">¥1200</span>，请使用支付宝扫描下方二维码完成支付</p>
+            <img :src="codeUrl" alt="">
+            <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
+            <el-button type="primary" style="width:140px;height: 50px;" @click="submitForm">上一步</el-button>
+        </div>
+    </el-row>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -81,6 +81,7 @@
     var rechargeAccountDTO=[[${rechargeAccountDTO}]];
     var merchantUserAccountDTO=[[${merchantUserAccountDTO}]];//账户余额
     var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息
+    console.log(merchantUserAccountDTO)
     var ocmVM = new Vue({
         el: '#paymentOnline',
         data: function() {
@@ -95,7 +96,7 @@
                     rechargeWay:'1'
                 },
                 rules:{
-                    money: [
+                    rechargeMoney: [
                         { required: true, message: '充值金额不能为空', trigger: 'blur' }
                     ],
                 },
