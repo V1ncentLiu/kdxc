@@ -6,7 +6,6 @@ import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeResp;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
@@ -59,11 +58,11 @@ public class MerchantOnlineRechargeController {
       MerchantUserAccountQueryDTO dto = new MerchantUserAccountQueryDTO();
       dto.setUserId(user.getId());
       JSONResult<MerchantUserAccountDTO> accountDTOJSONResult = merchantUserAccountFeignClient.getMerchantUserAccountInfo(dto);
-      request.setAttribute("MerchantUserAccountDTO",accountDTOJSONResult.getData());
+      request.setAttribute("merchantUserAccountDTO",accountDTOJSONResult.getData());
     }catch (Exception e){
       logger.error("加载在线充值页面initOnlineRecharge:{}",e);
     }
-    return null;
+    return "/merchant/payment/paymentOnline";
   }
   /**
   * @Description 获取支付宝、微信支付URL
@@ -73,14 +72,16 @@ public class MerchantOnlineRechargeController {
   * @Date 2019/9/28 15:52
   **/
   @RequestMapping("/getWeChatAndAlipayCode")
-  public JSONResult<MerchantRechargeResp> getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req){
+  public String getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req,HttpServletRequest request){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setRechargeBusiness(user.getId());
-      return merchantRechargeRecordBusinessFeignClient.getWeChatAndAlipayCode(req);
+      JSONResult<MerchantRechargeResp> jsonResult = merchantRechargeRecordBusinessFeignClient.getWeChatAndAlipayCode(req);
+      MerchantRechargeResp merchantRechargeResp = jsonResult.getData();
+      request.setAttribute("merchantRechargeResp",merchantRechargeResp);
     }catch (Exception e){
       logger.error("加载在线充值页面getWeChatAndAlipayCode:{}",e);
-      return new JSONResult<MerchantRechargeResp>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"getWeChatAndAlipayCode接口异常");
     }
+    return "/merchant/payment/paymentConfirm";
   }
 }
