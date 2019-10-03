@@ -168,7 +168,7 @@ public class RepairMoneyController extends BaseStatisticsController {
             JSONResult<List<DupOrderDto>> json=tailOrderClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 DupOrderDto[] dtos = json.getData().isEmpty()?new DupOrderDto[]{}:json.getData().toArray(new DupOrderDto[0]);
-                String[] keys = {"teleGroupName","tailNum","selfSign","dupSign","dupRate"};
+                String[] keys = {"teleGroupName","tailNum","selfSign","dupSign","tailRate"};
                 String[] hader = {"电销组","补尾款单数","其中:自签约","其中:重单签约","补尾款重单率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("补尾款重单表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
@@ -202,7 +202,7 @@ public class RepairMoneyController extends BaseStatisticsController {
             JSONResult<List<DupOrderDto>> json=tailOrderClient.queryListBySale(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 DupOrderDto[] dtos = json.getData().isEmpty()?new DupOrderDto[]{}:json.getData().toArray(new DupOrderDto[0]);
-                String[] keys = {"userName","tailNum","selfSign","dupSign","dupRate"};
+                String[] keys = {"userName","tailNum","selfSign","dupSign","tailRate"};
                 String[] hader = {"电销顾问","补尾款单数","其中:自签约","其中:重单签约","补尾款重单率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("顾问补尾款重单表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
