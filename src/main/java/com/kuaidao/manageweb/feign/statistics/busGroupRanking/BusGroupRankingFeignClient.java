@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * 集团项目业绩表
  */
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/busGroupRanking", fallback = BusGroupRankingFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/busGroupRanking", fallback = BusGroupRankingFeignClient.HystrixClientFallback.class)
 public interface BusGroupRankingFeignClient {
 
 
