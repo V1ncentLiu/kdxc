@@ -6,6 +6,7 @@ import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeResp;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
@@ -75,17 +76,15 @@ public class MerchantOnlineRechargeController {
   **/
   @RequestMapping("/getWeChatAndAlipayCode")
   @RequiresPermissions("merchant:merchantOnlineRecharge:add")
-  public String getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req,HttpServletRequest request){
+  public JSONResult<MerchantRechargeResp> getWeChatAndAlipayCode(@RequestBody MerchantRechargeReq req,HttpServletRequest request){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setRechargeBusiness(user.getId());
-      req.setCreateUser(user.getId());
       JSONResult<MerchantRechargeResp> jsonResult = merchantRechargeRecordBusinessFeignClient.getWeChatAndAlipayCode(req);
-      MerchantRechargeResp merchantRechargeResp = jsonResult.getData();
-      request.setAttribute("merchantRechargeResp",merchantRechargeResp);
+      return jsonResult;
     }catch (Exception e){
       logger.error("加载在线充值页面getWeChatAndAlipayCode:{}",e);
+      return new JSONResult<MerchantRechargeResp>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"getWeChatAndAlipayCode接口异常");
     }
-    return "/merchant/payment/paymentConfirm";
   }
 }
