@@ -79,6 +79,7 @@ public class MerchantOnlineRechargeController {
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setRechargeBusiness(user.getId());
+      req.setCreateUser(user.getId());
       JSONResult<MerchantRechargeResp> jsonResult = merchantRechargeRecordBusinessFeignClient.getWeChatAndAlipayCode(req);
       MerchantRechargeResp merchantRechargeResp = jsonResult.getData();
       request.setAttribute("merchantRechargeResp",merchantRechargeResp);
