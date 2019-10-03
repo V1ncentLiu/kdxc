@@ -65,10 +65,10 @@
     <el-row class="borderbox padding20 marginB20" v-if="codeIsShow">
         <div style="text-align: center;margin:50px 0 80px;"><img th:src="@{/images/step2.jpg}" alt=""> </div>
         <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
-            <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">¥1200</span>，请使用支付宝扫描下方二维码完成支付</p>
-            <img :src="codeUrl" alt="">
+            <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">￥{{rechargeMoneyWx}}</span>，请使用微信扫描下方二维码完成支付</p>
+
             <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
-            <el-button type="primary" style="width:140px;height: 50px;" @click="submitForm">上一步</el-button>
+            <el-button type="primary" style="width:140px;height: 50px;" @click="goback">上一步</el-button>
         </div>
     </el-row>
 </div>
@@ -102,7 +102,7 @@
                         { required: true, message: '充值金额不能为空', trigger: 'blur' }
                     ],
                 },
-                codeUrl:'',
+                rechargeMoneyWx:''
             }              
         },
         methods: {
@@ -123,10 +123,15 @@
                         axios.post('/merchant/merchantOnlineRecharge/getWeChatAndAlipayCode', param)
                         .then(function (response) {
                             console.log(response)
-                            ocmVM.paymentIsShow=false
-                            ocmVM.codeIsShow=true  
+                            if(param.rechargeWay=="1"){
+                                // window.location.href=response.data.data.payUrl
+                                window.parent.open(response.data.data.payUrl)
+                            }else{
+                                ocmVM.paymentIsShow=false
+                                ocmVM.codeIsShow=true 
+                                ocmVM.rechargeMoneyWx=ocmVM.form.rechargeMoney;
 
-
+                            }
                         })
                         .catch(function (error) {
                              console.log(error);
@@ -138,6 +143,10 @@
                     }
                 });
             },
+            goback(){
+                this.paymentIsShow=true
+                this.codeIsShow=false 
+            }
         },
         created(){
             
