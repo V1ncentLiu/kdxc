@@ -1742,6 +1742,8 @@
                 }
             },
             editSign(){
+              this.suppWrap = true;
+              this.shouAddVisitButton = false;
                 mainDivVM.resetForm('formSigning');
                 var param = {};
                 param.id = vclueId;
@@ -1804,7 +1806,9 @@
                 param.id = vclueId;
                 axios.post('/businesssign/visitEcho',param).then(function (response) {
                     var echoData = response.data.data;
-                    mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                    if(echoData.arrVisitCity){
+                      mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                    }
                     if(echoData.visitNum>0){
                         mainDivVM.formSigning.visitNum=echoData.visitNum;
                     }
@@ -1815,11 +1819,21 @@
             suppHide(){
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
-                this.formSigning.arrVisitCity = '';
-                this.formSigning.visitNum='';
-                this.formSigning.visitShopType='';
-                this.formSigning.visitTime='';
-                this.formSigning.visitType='';
+                if(this.formSigning.arrVisitCity){
+                  this.formSigning.arrVisitCity = '';
+                }
+                if(this.formSigning.visitNum){
+                  this.formSigning.visitNum='';
+                }
+                if(this.formSigning.visitShopType){
+                  this.formSigning.visitShopType='';
+                }
+                if(this.formSigning.visitTime){
+                  this.formSigning.visitTime='';
+                }
+                if(this.formSigning.visitType){
+                  this.formSigning.visitType='';
+                }
             },
 
             suppDetailShow(){ //补充到访记录展开
