@@ -19,7 +19,7 @@ import feign.hystrix.FallbackFactory;
  * @date: 2019年3月14日
  * @version V1.0
  */
-@FeignClient(name = "account-service-zhang", path = "/account/balanceWarnSetting",
+@FeignClient(name = "account-service", path = "/account/balanceWarnSetting",
         fallbackFactory = BalanceWarnSettingFeignClient.HystrixClientFallback.class)
 public interface BalanceWarnSettingFeignClient {
     /**
