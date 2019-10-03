@@ -17,7 +17,7 @@
          <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
          <!-- </shiro:hasPermission> -->
-        <el-button type="primary" style="float: right;" @click="window.history.go(-1)" v-if="!isDisabledUserId">返回</el-button>
+        <el-button type="primary" style="float: right;" @click="goback()" v-if="!isDisabledUserId">返回</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -107,11 +107,11 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="businessGroupId" label="商务组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.businessManagerId!='99999'">{{scope.row.businessGroupName}}</el-button>
+                        <span v-if="scope.row.businessManagerId!='99999'">{{scope.row.businessGroupName}}</span>
                         <span v-else>合计</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="businessManagerName" label="商务经理">
+                <el-table-column prop="businssManagerName" label="商务经理">
                 </el-table-column>
                 <el-table-column prop="firstSign" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
@@ -194,8 +194,7 @@
                 if('--'==nStr){
                     return nStr;
                 }
-                if(!nStr){return};
-                nStr += '';  
+                nStr += '';
                 x = nStr.split('.');  
                 x1 = x[0];
                 if(!x[1]){
@@ -375,6 +374,9 @@
                     this.form.endTime = moment(end).format("YYYY-MM-DD");
                     return this.form.endTime;      
                 }
+            },
+            goback(){
+                window.history.go(-1);
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
