@@ -81,7 +81,6 @@ public class MerchantOnlineRechargeController {
       request.setAttribute("merchantRechargeResp",merchantRechargeResp);
     }catch (Exception e){
       logger.error("加载在线充值页面getWeChatAndAlipayCode:{}",e);
-     // return new JSONResult<MerchantRechargeResp>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"getWeChatAndAlipayCode接口异常");
     }
     return "/merchant/payment/paymentConfirm";
   }
