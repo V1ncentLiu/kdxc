@@ -15,6 +15,7 @@
         .paymentBtnType span.current{background: #5c6be8;}
         .paymentImg .f-fl{margin-right: 50px;}
         .paymentImg img{width: 250px;}
+        .rechargeMoney .el-form-item__error{padding-left: 72px;}
     </style>
 </head>
 <body>
@@ -31,7 +32,7 @@
                 <li><p><span>充值<em>20000</em></span><span>送<em>300</em></span><span>得<em>20300</em></span></p></li>
                 <li><p><span>充值<em>30000</em></span><span>送<em>500</em></span><span>得<em>30500</em></span></p></li>
                 <li><p><span>充值<em>50000</em></span><span>送<em>1000</em></span><span>得<em>51000</em></span></p></li> -->
-                <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li>
+                <!-- <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li> -->
             </ul>
             <!-- <div class="f-tac marginB20">
                 <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
@@ -43,10 +44,10 @@
             <div style="width: 540px;margin:0 auto 40px">
                 <el-row class="marginB20"> 
                     <el-form-item label="当前余额：" label-width="auto">
-                         <span>{{merchantUserAccountDTO.balance}}</span>
+                         <!-- <span>{{merchantUserAccountDTO.balance}}</span> -->
                     </el-form-item>
-                    <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney">
-                        <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;" maxLength="9"></el-input>元
+                    <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney" class="rechargeMoney">
+                        <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;" maxLength="9" @keyup.native="number"></el-input>元
                     </el-form-item>
                 </el-row>            
                 <div class="paymentTitle marginB20"><span class="redcolor" style="margin-right: 5px;">*</span>选择支付方式：<span style="padding:0 55px 0 30px;">线上支付</span><span><a href="paymentOffline.html" style="color: #3a84f4;text-decoration: underline;">线下支付</a></span></div> 
@@ -99,13 +100,27 @@
                 },
                 rules:{
                     rechargeMoney: [
-                        { required: true, message: '充值金额不能为空', trigger: 'blur' }
+                        { required: true, message: '充值金额不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            // var reg =  /^[0-9]+[0-9]*]*$/ ;
+                            var reg =  /^\+?[1-9][0-9]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}
                     ],
                 },
                 rechargeMoneyWx:''
             }              
         },
         methods: {
+            number(){
+            　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
+                this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
+            },
             toogleClick(){
                 if(this.isShow){
                     this.isShow=false
