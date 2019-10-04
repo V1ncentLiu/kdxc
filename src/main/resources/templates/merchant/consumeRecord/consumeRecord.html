@@ -18,7 +18,7 @@
     </el-breadcrumb>
     <el-row class="marginB20">        
         <el-button type="primary" @click="openRemindDig">设置余额不足提醒</el-button>
-        <el-button type="warning" @click="">导出消费记录</el-button>
+        <el-button type="warning" @click="exportFun">导出消费记录</el-button>
         <el-button type="success" @click="gotoInfo">商家消费明细</el-button>
     </el-row>
     <div class="mainSearchBg">        
@@ -304,6 +304,31 @@
             },
             gotoInfo(){
                 window.location.href='/merchant/consumeRecord/initInfoList';
+            },
+            exportFun(){
+                var rows = this.multipleSelection;
+                if(rows.length <1){
+                    this.$message({
+                        message: '请选择导出的数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param = rows;
+                console.log(param)
+                axios.post('/merchant/consumeRecord/countListExport',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                    ocmVM.loading=false;
+                });
+
             },
         },
         created(){
