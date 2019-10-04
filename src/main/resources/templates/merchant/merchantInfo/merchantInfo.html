@@ -24,7 +24,8 @@
         <div class="titleLine">用户信息</div>         
         <el-col :span="24" class="marginB20">
             <div class="headerBox">
-                <img :src="merchantIcon" alt="">
+                <img v-if="merchantIconShow" th:src="@{/images/icon_head.png}" alt="">
+                <img else :src="merchantIcon" alt="">
             </div>
             <el-button type="text" class="changeHeaderImg" @click="openWechat">更改头像</el-button>
         </el-col>
@@ -93,6 +94,7 @@
         el: '#resourceApply',
         data: function() {
             return {
+                merchantIconShow:true,
                 merchantIcon:'',
                 userName:'',//账号
                 linkName:'',
@@ -223,6 +225,7 @@
                     if(result.code=="0"){
                         addClueVM.wechatVisible = false;
                         addClueVM.merchantIcon=formData.wechatUrl;
+                        addClueVM.merchantIconShow=false;
                     }else{
                         addClueVM.$message.error(result.msg+',修改头像失败');
                         addClueVM.wechatVisible = false;
@@ -243,7 +246,14 @@
                     console.log(response);
                     var result =  response.data;
                     if(result.code=="0"){
-                        addClueVM.merchantIcon=result.data.merchantIcon;
+                        if(result.data.merchantIcon){
+                            addClueVM.merchantIcon=result.data.merchantIcon;
+                            addClueVM.merchantIconShow=false;
+                        }else{
+                            addClueVM.merchantIcon='@{/images/header.png}';
+                            addClueVM.merchantIconShow=true;//显示默认头像
+                        }
+                        
                         addClueVM.userName=result.data.username;
                         addClueVM.linkName=result.data.name;
                         addClueVM.phone=result.data.phone;
