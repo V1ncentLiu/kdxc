@@ -107,7 +107,6 @@
 <script th:inline="javascript">
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var userId = [[${userId}]];//用户信息
-    console.log(userId)
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function() {
@@ -326,9 +325,14 @@
              saveModifyForm(formName){//保存
                  this.$refs[formName].validate((valid) => {
                      if (valid) {
-                        var param=this.modifyForm;
-                       axios.post('/user/userManager/updatePassword', param)
-                       .then(function (response) {
+                        var param={};
+                        param.id=userId;
+                        // param.id="1153604277760090112";
+                        param.oldPassword=this.modifyForm.oldPassword;
+                        param.newPassword=this.modifyForm.newPassword;
+                        param.confirmPwd=this.modifyForm.confirmPwd;                        
+                        axios.post('/user/userManager/updatePassword', param)
+                        .then(function (response) {
                            var resData = response.data;
                            if(resData.code=='0'){
                                addClueVM.$message({message:'请使用新密码重新登录',type:'success'});
