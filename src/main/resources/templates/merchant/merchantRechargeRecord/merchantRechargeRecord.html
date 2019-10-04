@@ -298,10 +298,29 @@
                 }
             },
             submitApplyForm(formName) {
+                var rows = this.multipleSelection;
+                if(rows.length <1){
+                    this.$message({
+                        message: '请选择数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var str = "";
+                for (var i = 0; i < rows.length; i++) {
+                    str += rows[i].serialNumber+ ",";
+                }
+                //去掉最后一个逗号(如果不需要去掉，就不用写)
+                if (str.length > 0) {
+                    str = str.substr(0, str.length - 1);
+                }
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.btnDisabled = true;
-                        var param = {};
+                        var param = {};                        
+                         
+                        // 申请开发票id集合，逗号隔开字符串
+                        param.rechangeId = str;
                         param.invoiceAmount = this.formApply.invoiceAmount;
                         param.invoiceHeader = this.formApply.invoiceHeader;
                         param.taxpayerIdentificationNum = this.formApply.taxpayerIdentificationNum;
