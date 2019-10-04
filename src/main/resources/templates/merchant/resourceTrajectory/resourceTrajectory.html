@@ -1,209 +1,248 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
-  <title>资源用户轨迹</title>
+  <title>后台管理系统</title>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="css/element-ui.css">
+  <link rel="stylesheet" href="css/base.css">
   <style>
-    button a {
-      color: #fff !important;
+    .dialogForm .el-form-item {
+      margin-bottom: 5px;
     }
 
-    .formItem,
-    .formItem .el-form-item__content {
-      width: 100%
+    .invite-area {
+      width: 94px;
     }
 
-    .fontColor {
-      color: #000;
+    .invite-margin {
+      margin: 0 10px;
     }
 
-    .fontColor1 {
-      color: #57586C
+    .xreuired .el-form-item__label:before {
+      content: '* ';
+      color: red;
     }
 
-    .fontColor2 {
-      color: #3A84F4
+    .input-width {
+      width: 310px;
     }
 
-    .fontSize18 {
-      font-size: 18px;
+    .el-date-editor.el-input,
+    .el-date-editor.el-input__inner {
+      width: 310px;
     }
 
-    .marign30 {
-      margin-top: 30px;
-    }
-
-    .marign14 {
+    .invite-top {
       margin-top: 14px;
     }
-
-    .title {
-      height: 36px;
-      line-height: 36px;
-    }
-
-    .grid-content {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      width: 100%
-    }
-
-    .grid-content ul {
-      margin-left: 10px;
-    }
-
-    .grid-content img.resourse-user-photo {
-      width: 58px;
-      height: 58px;
-    }
-
-    .resourse-user-info li {
-      height: 40px;
-      line-height: 40px;
-    }
-
-    .row-bg {
-      padding: 30px;
-      background: #fff;
-      border-radius: 8px;
-      margin-bottom: 20px
-    }
-
-    .resourse-ad-box {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      width: 430px;
-    }
-
-    .resorse-ad-time {
-      border-left: 6px dotted #3A84F4;
-    }
-
-    .resorse-ad-time {
-      border-left: 6px dotted #3A84F4;
-      height: 200px;
-    }
-   .resourse-ad-main{
-     margin-left:15px;
-
-   }
-
-    .resorse-ad-time div {
-      width: 44px;
-      height: 70px;
-      background: #fff;
-      margin-left: -22px;
-    }
-
-    .resorse-ad-time div span {
-      display: block;
-      color: #fff;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      line-height: 44px;
-      text-align: center;
-      background: #3A84F4;
+    .el-input__inner{
+      background: #F2F4F8;
+      border:none;
+      border-radius: 6px;
     }
   </style>
 </head>
 
 <body>
-  <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding">
-    <el-breadcrumb separator="/" class="elBreadcrumb">
+  <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
       <el-breadcrumb-item>Home</el-breadcrumb-item>
-      <el-breadcrumb-item>费用设置</el-breadcrumb-item>
-      <el-breadcrumb-item>资源需求审批</el-breadcrumb-item>
+      <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+      <el-breadcrumb-item>邀约来访记录</el-breadcrumb-item>
     </el-breadcrumb>
-    <h3 class="fontColor fontSize14 title marign14">
-      用户行为轨迹
-    </h3>
-    <el-row type="flex" class="row-bg" justify="space-around">
-      <el-col :span="6">
-        <div class="grid-content">
-          <img th:src="@{/images/user_photo.png}" class="resourse-user-photo marign30" />
-          <ul class="resourse-user-info">
-            <li>
-              <span>地址：</span><span class="fontColor1">北京</span>
-            </li>
-            <li>
-              <span>终端：</span><span class="fontColor1">移动端/pc端</span>
-            </li>
-            <li>
-              <span>手机：</span><span>170 <strong class="fontColor2">/ 查看多个手机号</strong></span>
-            </li>
-          </ul>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple-light">
-          <ul class="resourse-user-info">
-            <li>
-              <span>客户姓名：</span><span class="fontColor1">李先生</span>
-            </li>
-            <li>
-              <span>QQ：</span><span class="fontColor1">565788909</span>
-            </li>
-            <li>
-              <span>性别：</span><span class="fontColor1">男</span>
-            </li>
-          </ul>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="grid-content bg-purple">
-          <ul class="resourse-user-info">
-            <li>
-              <span>微信：</span><span class="fontColor1">dhehgk2343 <strong class="fontColor2">/ 二维码</strong></span>
-            </li>
-            <li>
-              <span>邮箱：</span><span class="fontColor1">1329393@qq.common</span>
-            </li>
-            <li>
-              <span>年龄：</span><span class="fontColor1">35岁</span>
-            </li>
-          </ul>
-        </div>
-      </el-col>
-    </el-row>
-    <el-row class="row-bg">
-      <div class="resourse-ad-box">
-        <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
-        </div>
-        <div class="resourse-ad-main">
-          <h3>广告投放落地页</h3>
-          <a href="https://www.ele.me" target="_blank">
-          <img th:src="@{/images/ad_link.png}">
-        </a>
-        </div>
+    <div class="mainSearchBg">
+      <div class="mainSearchFormBox">
+        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+          <el-form-item label="客户姓名:">
+            <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
+          </el-form-item>
+          <el-form-item label="预约来访时间:">
+            <el-date-picker v-model="form.reserveStartTime" type="datetime" placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="—" class="widthauto">
+            <el-date-picker v-model="form.reserveEndTime" type="datetime" placeholder="选择日期时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="考察项目:">
+            <el-select v-model="form.proSelect" clearable placeholder="请选择">
+              <el-option v-for="item in proSelect" :key="item.value" :label="item.projectName" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="开店区域：">
+            <el-select filterable v-model="form.province" placeholder="省" class="invite-area"
+              @change="currentProvince" clearable>
+              <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <div class="mainSearchBtnBox">
+              
+            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
+              搜索</el-button>
+          </div>
+        </el-form>
       </div>
-      <div class="resourse-ad-box">
-        <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
-        </div>
-        <div class="resourse-ad-main">
-          <h3>广告投放落地页</h3>
-          <a href="https://www.ele.me" target="_blank">
-          <img th:src="@{/images/ad_link.png}" >
-        </a>
-        </div>
-      </div>
-    </el-row>
-  </div>
+      <el-row>
+        <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="dataTable">
+          <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+          <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+          <el-table-column align="center" prop="cusNum" label="客户人数"></el-table-column>
+            <el-table-column align="center" prop="province" label="开店区域"></el-table-column>
+          <el-table-column align="center" prop="receiverName" label="接待人"></el-table-column>
+         <el-table-column align="center" prop="reserveTime" label="预约来访时间" :formatter="dateFormat" width="130">
+          </el-table-column>
+          <el-table-column align="center" prop="projectName" label="考察项目"></el-table-column>
+          <el-table-column align="center" prop="remark" label="备注"></el-table-column>
+</el-table>
+                <table-pagination :pager=" pager" @change="searchTable">
+            </table-pagination>
+      </el-row>
+    </div>
 
+  </div>
 </body>
+<!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
+
 <!-- import common js-->
 <script th:inline="javascript">
+  var userId = [[${ userId }]];//登录人账号id
+  var roleCode = [[${ roleCode }]];//登录人角色code
+  var clueInfo = [[${ clueInfo }]];//资源信息
+  var merchantUserList = [[${ merchantAppiontUserList }]]; //接待人
+  var proSelect = [[${ proSelect }]]; //考察项目
+  merchantUserList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
+  proSelect = [{ id: "1", projectName: "项目一" }, { id: "1", projectName: "项目二" }];
   var ocmVM = new Vue({
     el: '#optimizeClueManagement',
     data: function () {
       return {
-
+        provinceArr: [],
+        merchantUserList: merchantUserList, //接待人
+        proSelect: proSelect,//考察项目
+        pager: {
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
+        },
+        form: {
+          type: '',
+          reserveStartTime: '',
+          reserveEndTime: '',
+          province: '',
+          city: '',
+          district: '',
+          cusName: '',
+          age: '',
+          receiver: '',
+          remark: '',
+          reserveTime: '',
+          proSelect: '',
+        },
+        formLabelWidth: '120px',
+        dataTable: [],
       }
+    },
+    methods: {
+      _initData() {
+        this.dataTable = [{
+          clueId: "1174528102999789568",
+          cusName: "拉卡1",
+          cusNum: "3",
+          province: "北京",
+          city: "北京1",
+          district: "朝阳区",
+          receiverId: "1",
+          receiverName: "张三",
+          reserveTime: "2019-02-19 22:55:13",
+          projectId: "1",
+          projectName: "项目一",
+          remark: "我是备注"
+        },
+        {
+          clueId: "1334528102999789568",
+          cusName: "拉卡2",
+          cusNum: "3",
+          province: "北京",
+          city: "北京1",
+          district: "朝阳区",
+          receiverId: "1",
+          receiverName: "张三",
+          reserveTime: "2019-02-19 22:55:13",
+          projectId: "1",
+          projectName: "项目一",
+          remark: "我是备注"
+        }]
+
+      },
+      searchTable() {
+        var startTime = this.form.searchStartTime;
+        var endTime = this.form.searchEndTime;
+        if (endTime && startTime > endTime) {
+          this.$message({
+            message: '结束时间不允许选择早于开始时间',
+            type: 'warning'
+          });
+          return;
+        }
+        var param = this.form;
+        param.cusName = this.form.cusName;
+        param.reserveStartTime = startTime;
+        param.reserveEndTime = endTime;
+        param.pageSize = this.pager.pageSize;
+        param.pageNum = this.pager.currentPage;
+        param.projectId = this.form.proSelect;
+        param.province = this.form.province;
+        console.info(param);
+        this._initData();
+       /*  axios.post('/merchant/merchantAppiontment/queryPage', param)
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              console.info(result);
+              var table = result.data;
+
+              ocmVM.dataTable = table.data; //列表数据
+              ocmVM.pager.total = table.total;
+              ocmVM.pager.currentPage = table.currentPage;
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          }); */
+
+      },
+      //日期数据格式化方法
+      dateFormat(row, column, cellValue, index) {
+        if (cellValue == undefined) {
+          return "";
+        }
+        return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+      },
+      resetForm(formName) {
+        this.$refs[formName].resetFields();
+      },
+    },
+    created() {
+      var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+      if (localVal) {
+        this.pager.pageSize = localVal;
+      }
+      this.searchTable();
+      this._initData();
+      var param = {};
+      param.type = "0";
+      axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+        ocmVM.provinceArr = response.data.data.data;
+      });
+    },
+    mounted() {
+      document.getElementById('optimizeClueManagement').style.display = 'block';
     }
   })
 </script>
