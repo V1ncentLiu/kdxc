@@ -32,18 +32,26 @@
             <el-form-item label="充值金额：" prop="rechargeMoney">
                 <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;"></el-input>                    
             </el-form-item>
-            <el-form-item label="图片证明：" prop="fileList" style="width: 400px;">
+            <el-form-item label="图片证明：" prop="fileList" style="width: 500px;">
                 <el-upload
                     class="upload-demo"
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :action="uploadOssHost"
+                    ref="refundApplyImgUpload"
                     :on-preview="handlePreview"
                     :on-remove="handleRemove"
-                    :before-remove="beforeRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
+                    accept=".jpg,.png"
                     multiple
-                    :limit="1"
+                    :data="uploadParamData"
+                    :on-change="selectFile"
                     :on-exceed="handleExceed"
-                    :file-list="form.fileList">
-                    <el-button size="small" type="primary">点击上传</el-button>
+                    :auto-upload="false"
+                    :file-list="fileList">
+                    <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
+                    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                    <div slot="tip" class="el-upload__tip">支持图片大小2M以内，jpg/jpeg/png格式的图片</div>
                 </el-upload>                   
             </el-form-item>
             <div class="f-tac">
@@ -61,8 +69,9 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <!-- import common js-->
 <script th:inline="javascript">
+    var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var merchantUserList=[[${merchantUserList}]];//商户集合
-    var ocmVM = new Vue({
+    var addClueVM = new Vue({
         el: '#recordPaymentOffline',
         data: function() {
             return {
@@ -70,7 +79,8 @@
                 form: {
                     rechargeBusiness:'',
                     rechargeMoney: '',
-                    fileList: [],                    
+                    fileList: [],  
+                    imgUrl:''                  
                 },
                 rules:{
                     rechargeBusiness: [
@@ -82,16 +92,32 @@
                     
                 },
                 formLabelWidth:'150px',
+                uploadOssHost:'',
+                uploadParamData: {
+                    key:'22',
+                    policy:'',
+                    OSSAccessKeyId:'',
+                    success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                    signature:'', 
+                    'x:params':'',
+                    'realName':''
+                },
+                fileList:[],
+                limit:1,
+                ossUrl:ossSignatureUrl,
             }             
         },
         methods: {
+            cancel(){
+                window.location.href="/merchant/merchantRechargeRecordManage/initRechargeRecordManage"
+            },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var param ={};   
                         param.rechargeBusiness = this.form.rechargeBusiness;
                         param.rechargeMoney = this.form.rechargeMoney; 
-                        param.imgUrl = this.form.fileList.url; 
+                        param.imgUrl = this.form.imgUrl; 
                         console.log(param)
                         axios.post('/merchant/merchantRechargeRecordManage/saveOfflinePayment', param)
                         .then(function (response) {
@@ -110,24 +136,98 @@
             resetForm(formName) {
                 this.$refs[formName].resetFields();
             },
-            handleRemove(file, fileList) {
-                console.log(file, fileList);
+            getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
+                
+                 axios.get(signUrl, param)
+                .then(function (response) {
+                   // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                            dir:respData.dir,
+                            'policy': respData.policy,
+                            'OSSAccessKeyId': respData.accessid,
+                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                            'signature': respData.signature,
+                            'x:params':params,//自定义编码，basse64编码后的字符串,
+                            'realName':''
+                   };
+                  addClueVM.uploadParamData= new_multipart_params;
+                  addClueVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
             },
-            handlePreview(file) {
-                console.log(file);
+            selectFile(file, fileList){
+                addClueVM.uploadParamData.key= addClueVM.uploadParamData.dir+addClueVM.random_string(10)+addClueVM.get_suffix(file.name),
+                addClueVM.uploadParamData.realName= file.name
+            },
+            submitUpload(){
+                //this.customUpload();
+                this.$refs.refundApplyImgUpload.submit();
+            },
+            handlePreview(file){
+             
+            },
+            handleRemove(file,fileList){
+                this.fileList=[];
+                this.form.fileList=[];
             },
             handleExceed(files, fileList) {
-                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+             //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
             },
-            beforeRemove(file, fileList) {
-                return this.$confirm(`确定移除 ${ file.name }？`);
+            handleSuccess(response, file, fileList){
+                console.info(fileList);
+                console.info(addClueVM.fileList);
+                var realName = file.name;
+                var randomName = addClueVM.uploadParamData.key;
+                var imgUrl =  addClueVM.uploadOssHost+"/"+randomName;
+                this.form.imgUrl=imgUrl;
+                this.form.fileList.push(realName);
+                this.fileList=[];
+                this.form.fileList=[];
             },
-            cancel(){
-                window.location.href="/merchant/merchantRechargeRecordManage/initRechargeRecordManage"
-            }
+            handleError(err, file, fileList){
+                console.info(err);
+            },
+            handleBefore(file){
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                if(!isTextComputer){
+                   this.fileList=[];
+                   this.$message.error('文件格式错误');
+                   return false;
+                }
+                if(file.size>2*1024*1024){
+                   this.fileList=[];
+                   this.$message.error('图片最大为2MB');
+                   return false;
+                }
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                   suffix = filename.substring(pos);
+                }
+                return suffix;
+            },
         },
         created(){
-            
+            this.getUploadParam();
         },
         mounted(){
             document.getElementById('recordPaymentOffline').style.display = 'block';
