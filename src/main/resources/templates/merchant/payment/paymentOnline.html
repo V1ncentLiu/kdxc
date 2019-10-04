@@ -27,12 +27,8 @@
     <el-form :model="form" ref="form" label-width="73px" class="demo-dynamic" :rules="rules">
         <el-row class="borderbox marginB20" style="padding: 20px 40px 30px;"> 
             <div class="marginB20" style="color: #333;font-size: 16px;">充值优惠</div>
-            <ul>
-                <!-- <li><p><span>充值<em>10000</em></span><span>送<em>100</em></span><span>得<em>10100</em></span></p></li>
-                <li><p><span>充值<em>20000</em></span><span>送<em>300</em></span><span>得<em>20300</em></span></p></li>
-                <li><p><span>充值<em>30000</em></span><span>送<em>500</em></span><span>得<em>30500</em></span></p></li>
-                <li><p><span>充值<em>50000</em></span><span>送<em>1000</em></span><span>得<em>51000</em></span></p></li> -->
-                <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li>
+            <ul>                
+                <!-- <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li> -->
             </ul>
             <!-- <div class="f-tac marginB20">
                 <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
@@ -44,7 +40,7 @@
             <div style="width: 540px;margin:0 auto 40px">
                 <el-row class="marginB20"> 
                     <el-form-item label="当前余额：" label-width="auto">
-                         <span>{{merchantUserAccountDTO.balance}}</span>
+                         <!-- <span>{{merchantUserAccountDTO.balance}}</span> -->
                     </el-form-item>
                     <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney" class="rechargeMoney">
                         <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;" maxLength="9" @keyup.native="number"></el-input>元
@@ -63,20 +59,21 @@
             </div>
         </el-row>        
     </el-form>
-    <el-row class="borderbox padding20 marginB20" v-if="codeIsShow">
+    <el-row class="borderbox padding20 marginB20" v-show="codeIsShow">
         <div style="text-align: center;margin:50px 0 80px;"><img th:src="@{/images/step2.jpg}" alt=""> </div>
         <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
             <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">￥{{rechargeMoneyWx}}</span>，请使用微信扫描下方二维码完成支付</p>
-
+            <div id="qrCode" ref="qrCodeDiv" style="margin: 0 auto 15px;width: 120px;"></div>
             <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
             <el-button type="primary" style="width:140px;height: 50px;" @click="goback">上一步</el-button>
         </div>
     </el-row>
+    
 </div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-
+<script type="text/javascript" src="//static.runoob.com/assets/qrcode/qrcode.min.js"></script>
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${merchantUserList}]];//商户集合
@@ -113,10 +110,21 @@
                         }, trigger: 'blur'}
                     ],
                 },
-                rechargeMoneyWx:''
+                rechargeMoneyWx:'',
+                payUrl:''
             }              
         },
         methods: {
+            bindQRCode() {
+                new QRCode(this.$refs.qrCodeDiv, {
+                  text: this.payUrl,
+                  width: 120,
+                  height: 120,
+                  colorDark: "#000", //二维码颜色
+                  colorLight: "#ffffff", //二维码背景色
+                  correctLevel: QRCode.CorrectLevel.L//容错率，L/M/H
+                })
+            },
             number(){
             　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
                 this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
@@ -129,12 +137,20 @@
                 }          
             },
             submitForm(form) {
+                // this.paymentIsShow=false
+                // this.codeIsShow=true                
+                // this.payUrl="https://www.baidu.com";
+                // document.getElementById("qrCode").innerHTML = "";
+                // this.$nextTick(function () {
+                //     this.bindQRCode();
+                // })
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         var param ={};   
                         param.rechargeMoney = this.form.rechargeMoney;
                         param.rechargeWay = this.form.rechargeWay; 
                         console.log(param)
+                        
                         axios.post('/merchant/merchantOnlineRecharge/getWeChatAndAlipayCode', param)
                         .then(function (response) {
                             console.log(response)
@@ -147,7 +163,11 @@
                                     ocmVM.paymentIsShow=false
                                     ocmVM.codeIsShow=true 
                                     ocmVM.rechargeMoneyWx=ocmVM.form.rechargeMoney;
-
+                                    ocmVM.payUrl=result.data.payUrl;
+                                    document.getElementById("qrCode").innerHTML = "";
+                                    ocmVM.$nextTick(function () {
+                                        ocmVM.bindQRCode();
+                                    })
                                 }
                             }else{
                                 ocmVM.$message.error(result.msg);
