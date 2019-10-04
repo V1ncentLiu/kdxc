@@ -17,7 +17,6 @@
          <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
          <!-- </shiro:hasPermission> -->
-        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button> 
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -32,16 +31,6 @@
                     <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销组：">  
-                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable  :disabled="isDisabledOrgId">
-                        <el-option
-                            v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -88,16 +77,6 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="项目：">  
-                    <el-select v-model="form.project" placeholder="全部" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in projectList"
-                            :key="item.id"
-                            :label="item.projectName"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
@@ -118,12 +97,10 @@
                 <el-table-column prop="businessAreaName" label="商务大区"></el-table-column>
                 <el-table-column prop="groupName" label="餐饮集团">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.groupId!='99999'">{{scope.row.groupName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.groupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.groupName}}</el-button>
                         <span v-else>合计</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="projectName" label="电销事业部"></el-table-column>
-                <el-table-column prop="projectName" label="电销组"></el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
                 <el-table-column prop="signRate" label="签约率"></el-table-column>
@@ -141,11 +118,9 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var projectList =[[${projectList}]];
     var companyList = [[${companyList}]]; // 餐饮集团
     var areaList = [[${areaList}]]; // 商务大区
-    var parentParam=[[${baseBusQueryDto }]];// 
-
+    var deptList = [[${deptList}]]; // 电销事业部
     var curDeptId=[[${busAreaId}]];// 当前商务大区
     var curOrgId =[[${businessGroupId}]];
     var curUserId = [[${businessManagerId}]];
@@ -166,29 +141,24 @@
                     startTime:'',
                     endTime:'',
                     teleDeptId: '',
-                    teleGroupId: '',
                     busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    groupId: '',
-                    project: ''
+                    groupId:'',
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     teleDeptId: '',
-                    teleGroupId: '',
                     busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    groupId: '',
-                    project: ''
+                    groupId:'',
                 },
                 tableData: [],
                 companyList: companyList,
                 areaList: areaList,
                 deptList: deptList,
-                projectList: projectList,
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
             }             
@@ -199,7 +169,6 @@
                 if('--'==nStr){
                     return nStr;
                 }
-                if(!nStr){return};
                 nStr += '';  
                 x = nStr.split('.');  
                 x1 = x[0];
@@ -313,14 +282,16 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 param.teleDeptId = this.form.teleDeptId;
-                param.teleGroupId = this.form.teleGroupId;
+                //商务大区
                 param.busAreaId = this.form.busAreaId;
+                //商务组
                 param.businessGroupId = this.form.businessGroupId;
+                //商务经理
                 param.businessManagerId = this.form.businessManagerId;
+                //餐饮集团
                 param.groupId = this.form.groupId;
-                param.projectId = this.form.project;
                 this.loading = true;
-                axios.post('/busGroupRanking/getTwoPageList',param).then(function (response) {
+                axios.post('/busGroupRanking/getOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -353,9 +324,7 @@
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.groupId = mainDivVM.form.groupId;
-                        mainDivVM.export.project = mainDivVM.form.project;
                         mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
-                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -383,17 +352,40 @@
                     return this.form.endTime;      
                 }
             },
-            goback(){window.history.go(-1);},
+            gotoLink(row){
+                var groupId = row.groupId;
+                var busAreaId = row.businessAreaId;
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                var businessGroupId = this.export.businessGroupId;
+                var businessManagerId = this.export.businessManagerId;
+                var teleDeptId = this.export.teleDeptId;
+                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&teleDeptId="+teleDeptId +"&startTime=" + startTime + "&endTime=" + endTime;
+            },
+            // arraySpanMethod({
+            //     row,
+            //     column,
+            //     rowIndex,
+            //     columnIndex
+            // }) { // 合并第一行
+            //     if (row.area && row.area == '合计') {
+            //         if (columnIndex === 1) {
+            //             return [1, 2]
+            //         } else if (columnIndex === 2) {
+            //             return [0, 0]
+            //         } else if (columnIndex === 3) {
+            //             return [0, 0]
+            //         }
+            //     }
+            // },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
-                        return [1, 4];
+                        return [0, 0];
                     } else if (columnIndex === 2) {
-                        return [0, 0];
-                    } else if (columnIndex === 3) {
-                        return [0, 0];
+                        return [1, 3];
                     }
                 }
             },
@@ -418,14 +410,6 @@
                 dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;               
                 var timeRes = "" + yearRes + monthRea + dateRes;
                 return timeRes;
-            },
-            dateTimeFormat (dt) {
-                if (!dt) {return "";}
-                var d = dt.toString();
-                var oYear = d.slice(0,4);
-                var oMonth = d.slice(4,6);
-                var oDay = d.slice(6,8);
-                return oYear+"-"+oMonth+"-"+oDay;
             },
             searchSeason(){ // 季
                 var today = new Date();
@@ -475,14 +459,16 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
+                //商务大区
                 param.busAreaId = this.export.busAreaId;
+                //商务组
                 param.businessGroupId = this.export.businessGroupId;
+                //商务经理
                 param.businessManagerId = this.export.businessManagerId;
+                //餐饮集团
                 param.groupId = this.export.groupId;
-                param.projectId = this.export.project;
                 param.teleDeptId = this.export.teleDeptId;
-                param.teleGroupId = this.export.teleGroupId;
-                axios.post('/busGroupRanking/exportTwoList',param,{responseType:'blob'})
+                axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -500,54 +486,29 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD");
             var endTime = moment(today).format("YYYY-MM-DD");
+            this.form.startTime=startTime;
+            this.form.endTime=endTime; 
             if(curDeptId){
                 this.isDisabled = true;
                 this.form.busAreaId = curDeptId;
+                this.export.busAreaId = this.form.busAreaId;
+                this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.isDisabledOrgId = true;
                     this.form.businessGroupId = curOrgId;
+                    this.firstCurTelSale(curOrgId);
                     if(curUserId){
                         this.isDisabledUserId = true;
                         this.form.businessManagerId = curUserId;
-                    }else{
-                        this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
                     }
-                }else{
-                    this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
-                    this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
                 }
-            }else{
-                this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
-                this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
-                this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
             }
-            if(parentParam && parentParam.startTime){
-                this.form.startTime = this.dateTimeFormat(parentParam.startTime);
-                this.form.endTime = this.dateTimeFormat(parentParam.endTime);
-
-                this.export.startTime = parentParam.startTime;
-                this.export.endTime = parentParam.endTime;
-            }else{
-                this.form.startTime = startTime;
-                this.form.endTime = endTime;
-                this.export.startTime = this.minuteFormat(this.form.startTime);
-                this.export.endTime = this.minuteFormat(this.form.endTime);
-            }
-
-            this.form.groupId = parentParam&&parentParam.groupId ? parentParam.groupId:'';
-            this.export.groupId = this.form.groupId;
-            this.export.busAreaId = this.form.busAreaId;
-            this.export.businessGroupId = this.form.businessGroupId;
-            this.export.businessManagerId = this.form.businessManagerId;
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            if(this.form.busAreaId){
-                this.firstCurTelGroupSale(this.form.busAreaId);
-            }
-            if(this.form.businessGroupId){
-                this.firstCurTelSale(this.form.businessGroupId);
-            }
+
             this.searchTable();
         },
         mounted(){
