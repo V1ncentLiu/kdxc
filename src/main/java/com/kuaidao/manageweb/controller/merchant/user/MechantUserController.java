@@ -275,7 +275,7 @@ public class MechantUserController {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         Long id = user.getId();
         request.setAttribute("ossUrl", ossUrl);
-        request.setAttribute("userId", id);
+        request.setAttribute("userId", String.valueOf(id));
         return "merchant/merchantInfo/merchantInfo";
     }
 
