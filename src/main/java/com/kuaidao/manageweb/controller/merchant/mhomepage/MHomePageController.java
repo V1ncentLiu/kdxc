@@ -1,9 +1,11 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
 import com.kuaidao.common.constant.ComConstant.DIMENSION;
+import com.kuaidao.common.constant.ComConstant.QFLAG;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
@@ -12,6 +14,7 @@ import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
 import com.kuaidao.merchant.dto.index.IndexReqDTO;
 import com.kuaidao.merchant.dto.index.IndexRespDTO;
 import com.kuaidao.merchant.dto.index.ResourceCountDTO;
@@ -22,7 +25,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -186,19 +193,91 @@ public class MHomePageController {
    */
   @RequestMapping("/receiveStatics")
   @ResponseBody
-  public JSONResult<IndexRespDTO> receiveStatics(IndexReqDTO indexReqDTO){
+  public JSONResult<IndexRespDTO> receiveStatics(@RequestBody IndexReqDTO indexReqDTO){
+    int diffDay = DateUtil.differentDays(indexReqDTO.getEtime(), indexReqDTO.getStime());
+    if(diffDay<=30){
+      String qflag = indexReqDTO.getQflag();
+      if(QFLAG.ONE.equals(qflag)){
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date()));
+        indexReqDTO.setEtime(DateUtil.getPriorDay(new Date()));
+      }else if(QFLAG.SEVEN.equals(qflag)){
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),6));
+        indexReqDTO.setEtime(new Date());
+      }else if(QFLAG.THREETH.equals(qflag)){
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),29));
+        indexReqDTO.setEtime(new Date());
+      }
+    }
+
+    ResourceStatisticsParamDTO paramDTO = new ResourceStatisticsParamDTO();
+    paramDTO.setDimension(indexReqDTO.getDimension());
+    paramDTO.setEtime(indexReqDTO.getEtime());
+    paramDTO.setStime(indexReqDTO.getStime());
     List<Integer> yList = new ArrayList<>();
-    // 统计领取资源
-    //
+    List<String> xList = gainX(indexReqDTO);
+    // 主账户相关统计
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    List<Long> subIds = new ArrayList<>();
+    // 获取主账号分发相关
+    JSONResult<List<ResourceStatisticsDto>> assignDto = null;
+    if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+      paramDTO.setUserId(curLoginUser.getId());
+      assignDto = ruleAssignRecordFeignClient
+          .countAssginStatistic(paramDTO);
+      subIds = merchantUserList(curLoginUser);
+    }
 
+    Map<String,Integer> map = new HashMap<>();
+    if(CommonUtil.resultCheck(assignDto)){
+      List<ResourceStatisticsDto> data = assignDto.getData();
+      map = data.stream().collect(Collectors.toMap(ResourceStatisticsDto::getDimension,ResourceStatisticsDto::getReceiveNum));
+    }
 
+    // 查询子账号信息
+    if (SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())) {
+      paramDTO.setUserId(curLoginUser.getId());
+      // 获取子账号分发相关
+      assignDto = clueManagementFeignClient.countAssignResourceStatistics(paramDTO);
+      // 子账号id
+      subIds.add(curLoginUser.getId());
+    }
+    // 获取领取相关
+    if (CollectionUtils.isNotEmpty(subIds)) {
+      paramDTO.setIdList(subIds);
+      //主账号也需要将自己领取的查出来
+      if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+        subIds.add(curLoginUser.getId());
+      }
+      JSONResult<List<ResourceStatisticsDto>> listJSONResult = pubcustomerFeignClient
+          .countReceiveResourceStatistics(paramDTO);
+      if(CommonUtil.resultCheck(listJSONResult)){
+        List<ResourceStatisticsDto> data = listJSONResult.getData();
+        for(ResourceStatisticsDto resource:data){
+          Integer integer = map.get(resource.getDimension());
+          if(integer!=null){
+            map.put(resource.getDimension(),resource.getReceiveNum()+map.get(resource.getDimension()));
+          }else{
+            map.put(resource.getDimension(),resource.getReceiveNum());
+          }
+        }
+      }
+    }
 
+    // 数据排序
+    for(String str:xList){
+      Integer integer = map.get(str);
+      if(integer==null){
+        integer = 0 ;
+      }
+      yList.add(integer);
+    }
 
     IndexRespDTO indexRespDTO = new IndexRespDTO();
-    indexRespDTO.setXList(gainX(indexReqDTO));
+    indexRespDTO.setXList(xList);
     indexRespDTO.setYList(yList);
     return new JSONResult().success(indexRespDTO);
   }
+
 
   private List<String> gainX(IndexReqDTO indexReqDTO){
     List<String> xList = new ArrayList<>();

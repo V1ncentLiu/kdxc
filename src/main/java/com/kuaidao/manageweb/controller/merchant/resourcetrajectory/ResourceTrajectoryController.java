@@ -51,6 +51,7 @@ public class ResourceTrajectoryController {
    */
   @RequestMapping("/topage")
   public String listPage(HttpServletRequest request) {
+    request.setAttribute("clueId",request.getParameter("clueId"));
     return "merchant/resourceTrajectory/resourceTrajectory";
   }
   @RequestMapping("/topage1")
@@ -93,8 +94,10 @@ public class ResourceTrajectoryController {
         resourceTrajectory.setPhone4(clueCustomer.getPhone4());
         resourceTrajectory.setPhone5(clueCustomer.getPhone5());
         resourceTrajectory.setWechat(clueCustomer.getWechat());
+        resourceTrajectory.setWechat2(clueCustomer.getWechat2());
+        resourceTrajectory.setWechatCode(clueCustomer.getWechatCode());
         resourceTrajectory.setQq(clueCustomer.getQq());
-        resourceTrajectory.setSex(clueCustomer.getSex()==1?"男":"女");
+        resourceTrajectory.setSex(clueCustomer.getSex()!=null&&clueCustomer.getSex()==1?"男":"女");
       }
       ClueBasicDTO clueBasic = data.getClueBasic();
       if(clueBasic!=null){
