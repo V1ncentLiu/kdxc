@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class MerchantRechargeRecordManageController {
   private static Logger logger = LoggerFactory.getLogger(MerchantRechargeRecordManageController.class);
 
-  @Value("oss.url.directUpload")
+  @Value("${oss.url.directUpload}")
   private String ossUrl;
 
   @Autowired
