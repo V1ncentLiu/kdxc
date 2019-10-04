@@ -83,33 +83,15 @@
     </div>
     <!-- 分配资源 -->
     <el-dialog title="余额不足提醒" :visible.sync="remindFormVisible" width="540px">
-        <el-form :model="formRemind" ref="formRemind">
-            <el-form-item 
-                label="账户余额低于：" 
-                prop="amount"
-                :rules="[
-                    { required: true, message: '账户余额低于不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formRemind.amount" placeholder="" style="width: 290px;"></el-input>元
+        <el-form :model="formRemind" ref="formRemind" :rules="rules">
+            <el-form-item label="账户余额低于：" prop="amount" :label-width="formLabelWidth">
+                <el-input v-model="formRemind.amount" placeholder="" style="width: 290px;" maxLength="9" @keyup.native="number"></el-input>元
             </el-form-item>
-            <el-form-item 
-                label="提醒标题：" 
-                prop="title"
-                :rules="[
-                    { required: true, message: '提醒标题不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formRemind.title" placeholder="" style="width: 290px;"></el-input>
+            <el-form-item label="提醒标题：" prop="title" :label-width="formLabelWidth">
+                <el-input v-model="formRemind.title" placeholder="" style="width: 290px;" maxLength="20"></el-input>
             </el-form-item>
-            <el-form-item 
-                label="提醒内容：" 
-                prop="content"
-                :rules="[
-                    { required: true, message: '提醒内容不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;"></el-input>
+            <el-form-item label="提醒内容：" prop="content" :label-width="formLabelWidth">
+                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;" maxLength="50"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
@@ -156,9 +138,34 @@
                 todayAmount:'',
                 yesterdayNum:'',
                 yesterdayAmount:'',
+                rules:{                    
+                    amount: [
+                        { required: true, message: '账户余额低于不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            // var reg =  /^[0-9]+[0-9]*]*$/ ;
+                            var reg =  /^\+?[1-9][0-9]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正确格式，仅支持正整数"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    title: [
+                        { required: true, message: '标题不能为空', trigger: 'blur' }
+                    ],
+                    content: [
+                        { required: true, message: '提醒内容不能为空', trigger: 'blur' }
+                    ],
+                },
             }        	  
         },
         methods: {
+            number(){
+            　　this.formRemind.amount=this.formRemind.amount.replace(/[^\.\d]/g,'');
+                this.formRemind.amount=this.formRemind.amount.replace('.','');
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -219,7 +226,6 @@
                 axios.post('/merchant/balanceWarnSetting/getBalanceWarnSetting',param)
                 .then(function (response) {
                     var data =  response.data;
-                    debugger;
                     if(data.code=='0'){
                         ocmVM.formRemind.amount=data.data.amount;
                         ocmVM.formRemind.title=data.data.title;
