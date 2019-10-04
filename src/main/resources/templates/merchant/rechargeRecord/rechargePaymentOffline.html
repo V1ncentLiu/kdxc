@@ -30,7 +30,7 @@
                     </el-select>
                 </el-form-item>
             <el-form-item label="充值金额：" prop="rechargeMoney">
-                <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;"></el-input>                    
+                <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;" maxLength="9" @keyup.native="number"></el-input>                    
             </el-form-item>
             <el-form-item label="图片证明：" prop="fileList" style="width: 500px;">
                 <el-upload
@@ -87,7 +87,17 @@
                         { required: true, message: '请输选充值择商家', trigger: 'blur' }
                     ],
                     rechargeMoney: [
-                        { required: true, message: '请输入充值金额', trigger: 'blur' }
+                        { required: true, message: '请输入充值金额', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            // var reg =  /^[0-9]+[0-9]*]*$/ ;
+                            var reg =  /^\+?[1-9][0-9]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}
                     ],
                     fileList: [
                         { required: true, message: '请上传图片', trigger: 'change' }
@@ -231,6 +241,10 @@
                    suffix = filename.substring(pos);
                 }
                 return suffix;
+            },
+            number(){
+            　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
+                this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
             },
         },
         created(){
