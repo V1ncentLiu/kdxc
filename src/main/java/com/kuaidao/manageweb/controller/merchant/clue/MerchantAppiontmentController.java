@@ -47,6 +47,7 @@ public class MerchantAppiontmentController {
      * @return
      */
     @RequestMapping("/init")
+    @RequiresPermissions("merchant:merchantAppiontment:view")
     public String init(HttpServletRequest request) {
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -67,6 +68,7 @@ public class MerchantAppiontmentController {
      */
     @ResponseBody
     @PostMapping("/queryPage")
+    @RequiresPermissions("merchant:merchantAppiontment:view")
     public JSONResult<PageBean<MerchantAppiontmentDTO>> queryPage(@RequestBody MerchantAppiontmentReq req) {
         UserInfoDTO userInfoDTO = getUser();
         req.setUserId(userInfoDTO.getId());
@@ -81,6 +83,7 @@ public class MerchantAppiontmentController {
      */
     @ResponseBody
     @PostMapping("/insertMerchantAppiontment")
+    @RequiresPermissions("merchant:merchantAppiontment:add")
     public JSONResult<Boolean> insertMerchantAppiontment(@RequestBody MerchantAppiontmentDTO dto) {
         UserInfoDTO userInfoDTO = getUser();
         dto.setCreateUser(userInfoDTO.getId());
