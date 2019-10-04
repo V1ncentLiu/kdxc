@@ -52,6 +52,7 @@ public class BusPerformanceController extends BaseStatisticsController {
     @Autowired
     private BusPerformanceClient busPerformanceClient;
 
+    @RequiresPermissions("statistics:busperformance:view")
     @RequestMapping("/groupList")
     public String teamList(HttpServletRequest request){
         initBugOrg(request);
@@ -78,6 +79,7 @@ public class BusPerformanceController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:busperformance:view")
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request,Long busAreaId,Long businessGroupId,Long businessManagerId,Integer payTpye,
                               Integer signShop,Long projectId,Long startTime,Long endTime){
@@ -115,6 +117,7 @@ public class BusPerformanceController extends BaseStatisticsController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("statistics:busperformance:view")
     @RequestMapping("queryByPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryByPage(@RequestBody BaseBusQueryDto dto){
         initParams(dto);
@@ -126,6 +129,7 @@ public class BusPerformanceController extends BaseStatisticsController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("statistics:busperformance:view")
     @RequestMapping("/queryBusPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryList(@RequestBody BaseBusQueryDto dto){
         initParams(dto);
@@ -138,6 +142,7 @@ public class BusPerformanceController extends BaseStatisticsController {
      * @param dto
      * @param response
      */
+    @RequiresPermissions("statistics:busperformance:export")
     @RequestMapping("/export")
     @ResponseBody
     public void export(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
@@ -145,7 +150,7 @@ public class BusPerformanceController extends BaseStatisticsController {
             initParams(dto);
             JSONResult<List<BusPerformanceDto>> json=busPerformanceClient.queryList(dto);
             if(null!=json && "0".equals(json.getCode())){
-                DupOrderDto[] dtos = json.getData().isEmpty()?new DupOrderDto[]{}:json.getData().toArray(new DupOrderDto[0]);
+                BusPerformanceDto[] dtos = json.getData().isEmpty()?new BusPerformanceDto[]{}:json.getData().toArray(new BusPerformanceDto[0]);
                 String[] keys = {"businessGroupName","firstSign","signNum","signRate","amount","firstMoney","signMoney","signOrderNum","payCount"};
 
                 String[] hader = {"商务组","首访数","签约数","签约率","净业绩金额","首访单笔","签约单笔","签约单数","付款笔数"};
@@ -169,6 +174,7 @@ public class BusPerformanceController extends BaseStatisticsController {
      * @param dto
      * @param response
      */
+    @RequiresPermissions("statistics:busperformance:export")
     @RequestMapping("/exportBus")
     @ResponseBody
     public void exportBus(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
@@ -176,7 +182,7 @@ public class BusPerformanceController extends BaseStatisticsController {
             initParams(dto);
             JSONResult<List<BusPerformanceDto>> json=busPerformanceClient.queryBusList(dto);
             if(null!=json && "0".equals(json.getCode())){
-                DupOrderDto[] dtos = json.getData().isEmpty()?new DupOrderDto[]{}:json.getData().toArray(new DupOrderDto[0]);
+                BusPerformanceDto[] dtos = json.getData().isEmpty()?new BusPerformanceDto[]{}:json.getData().toArray(new BusPerformanceDto[0]);
                 String[] keys = {"businessGroupName","businssManagerName","firstSign","signNum","signRate","amount","firstMoney","signMoney","signOrderNum","payCount"};
 
                 String[] hader = {"商务组","商务经理","首访数","签约数","签约率","净业绩金额","首访单笔","签约单笔","签约单数","付款笔数"};
