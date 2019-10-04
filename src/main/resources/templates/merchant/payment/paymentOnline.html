@@ -138,15 +138,20 @@
                         axios.post('/merchant/merchantOnlineRecharge/getWeChatAndAlipayCode', param)
                         .then(function (response) {
                             console.log(response)
-                            if(param.rechargeWay=="1"){
-                                // window.location.href=response.data.data.payUrl
-                                window.parent.open(response.data.data.payUrl)
-                            }else{
-                                ocmVM.paymentIsShow=false
-                                ocmVM.codeIsShow=true 
-                                ocmVM.rechargeMoneyWx=ocmVM.form.rechargeMoney;
+                            var result =  response.data;
+                            if(result.code=="0"){
+                                if(param.rechargeWay=="1"){
+                                    // window.location.href=response.data.data.payUrl
+                                    window.parent.open(result.data.payUrl)
+                                }else{
+                                    ocmVM.paymentIsShow=false
+                                    ocmVM.codeIsShow=true 
+                                    ocmVM.rechargeMoneyWx=ocmVM.form.rechargeMoney;
 
-                            }
+                                }
+                            }else{
+                                ocmVM.$message.error(result.msg);
+                            }                            
                         })
                         .catch(function (error) {
                              console.log(error);
