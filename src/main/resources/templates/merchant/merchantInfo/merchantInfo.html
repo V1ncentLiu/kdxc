@@ -80,6 +80,24 @@
             </div>
         </template>
     </el-dialog> 
+    <!-- 修改密码 dialog start -->
+     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog" width="540px">
+        <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
+            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
+                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
+                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
+                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" center="true">
+            <el-button type="primary" @click="saveModifyForm('modifyForm')">保存</el-button>
+            <el-button @click="cancelModifyForm('modifyForm')">取 消</el-button>
+        </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -93,7 +111,38 @@
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function() {
+            var validatePass = (rule, value, callback) => {
+                if (value !== this.modifyForm.newPassword) {
+                    callback(new Error('确认密码与新密码不一致，请重新输入'));
+                } else {
+                    callback();
+                }
+            };
             return {
+                dialogModifyPwdVisible:false,//修改密码dialog 是否显示
+                modifyForm:{
+                    oldPassword:'',
+                    newPassword:'',
+                    confirmPwd:''
+                },
+                modifyFormRules:{
+                    oldPassword:[
+                        { required: true, message: '当前密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符' },
+                        {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}  
+                      ],
+                    newPassword:[
+                        { required: true, message: '新密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+                        {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}  
+                     ],
+                     confirmPwd:[
+                        { required: true, message: '确认密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+                        { validator: validatePass, trigger: 'blur' }
+                     ]
+                    
+                },
                 merchantIconShow:true,
                 merchantIcon:'',
                 userName:'',//账号
@@ -217,8 +266,8 @@
                 var formData = this.wechatForm;
                 var param={};
                 param.merchantIcon = formData.wechatUrl;//url地址
-                // param.id=userId;
-                param.id='1153604277760090112';
+                param.id=userId;
+                // param.id='1153604277760090112';
                 axios.post('/merchant/userManager/updateIcon',param).then(function (response) {
                     console.log(response);
                     var result =  response.data;
@@ -240,8 +289,8 @@
             },
             getInfo(){
                 var param={};
-                // param.id=userId;
-                param.id='1153604277760090112';
+                param.id=userId;
+                // param.id='1153604277760090112';
                 axios.post('/user/userManager/getUser',param).then(function (response) {
                     console.log(response);
                     var result =  response.data;
@@ -268,8 +317,48 @@
                 });  
             },
             changePassword(){
-
-            }
+                this.dialogModifyPwdVisible=true;
+            },
+            cancelModifyForm(formName){//取消修改密码
+                this.$refs[formName].resetFields();
+                 this.dialogModifyPwdVisible = false;
+             },
+             saveModifyForm(formName){//保存
+                 this.$refs[formName].validate((valid) => {
+                     if (valid) {
+                        var param=this.modifyForm;
+                       axios.post('/user/userManager/updatePassword', param)
+                       .then(function (response) {
+                           var resData = response.data;
+                           if(resData.code=='0'){
+                               addClueVM.$message({message:'请使用新密码重新登录',type:'success'});
+                               addClueVM.cancelModifyForm(formName);
+                               
+                               setTimeout(function(){//去登录页
+                                   window.location.href="/login";
+                               },2000);
+                           }else{
+                               addClueVM.$message(resData.msg);
+                               console.error(resData);
+                           }
+                       
+                       })
+                       .catch(function (error) {
+                            console.log(error);
+                            addClueVM.$message({
+                                message: "系统出错",
+                                type: 'error'
+                            }); 
+                       });
+                        
+                     } else {
+                       return false;
+                     }
+                   });
+            },
+            closeModifyPwdDialog(){
+                this.$refs.modifyForm.resetFields();
+            },
         },
         created(){
             this.getUploadParam();
