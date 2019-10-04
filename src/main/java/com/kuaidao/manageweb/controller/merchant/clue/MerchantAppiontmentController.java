@@ -86,7 +86,7 @@ public class MerchantAppiontmentController {
     @RequiresPermissions("merchant:merchantAppiontment:add")
     public JSONResult<Boolean> insertMerchantAppiontment(@RequestBody MerchantAppiontmentDTO dto) {
         UserInfoDTO userInfoDTO = getUser();
-        dto.setCreateUser(userInfoDTO.getId());
+        dto.setCreateUserId(userInfoDTO.getId());
         //存储主账号id
         if(SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
             dto.setPrimaryAccountId(userInfoDTO.getId());
