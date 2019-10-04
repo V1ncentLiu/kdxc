@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="recordPaymentOffline" class="recordPaymentOffline mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商家充值记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="inforTitle">录入线下充值</div> 
+    <el-form :model="form" ref="form" :rules="rules" :label-width="formLabelWidth">
+        <el-row class="borderbox padding20">
+            <el-form-item label="充值商家：" prop="rechargeBusiness">
+                    <el-select v-model="form.rechargeBusiness" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            <el-form-item label="充值金额：" prop="rechargeMoney">
+                <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;"></el-input>                    
+            </el-form-item>
+            <el-form-item label="图片证明：" prop="fileList" style="width: 400px;">
+                <el-upload
+                    class="upload-demo"
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :on-preview="handlePreview"
+                    :on-remove="handleRemove"
+                    :before-remove="beforeRemove"
+                    multiple
+                    :limit="1"
+                    :on-exceed="handleExceed"
+                    :file-list="form.fileList">
+                    <el-button size="small" type="primary">点击上传</el-button>
+                </el-upload>                   
+            </el-form-item>
+            <div class="f-tac">
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('form')">保存</el-button>
+                    <el-button @click="cancel">取消</el-button>
+                </el-form-item>
+            </div>
+        </el-row>
+        
+    </el-form>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList=[[${merchantUserList}]];//商户集合
+    var ocmVM = new Vue({
+        el: '#recordPaymentOffline',
+        data: function() {
+            return {
+                merchantUserListOptions:merchantUserList,
+                form: {
+                    rechargeBusiness:'',
+                    rechargeMoney: '',
+                    fileList: [],                    
+                },
+                rules:{
+                    rechargeBusiness: [
+                        { required: true, message: '请输选充值择商家', trigger: 'blur' }
+                    ],
+                    rechargeMoney: [
+                        { required: true, message: '请输入充值金额', trigger: 'blur' }
+                    ],
+                    
+                },
+                formLabelWidth:'150px',
+            }             
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param ={};   
+                        param.rechargeBusiness = this.form.rechargeBusiness;
+                        param.rechargeMoney = this.form.rechargeMoney; 
+                        param.imgUrl = this.form.fileList.url; 
+                        console.log(param)
+                        axios.post('/merchant/merchantRechargeRecordManage/saveOfflinePayment', param)
+                        .then(function (response) {
+                            console.log(response)
+                                              
+                        })
+                        .catch(function (error) {
+                             console.log(error);
+                        });
+                    } else {
+                        console.log('error submit!!');
+                    return false;
+                    }
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            cancel(){
+                window.location.href="/merchant/merchantRechargeRecordManage/initRechargeRecordManage"
+            }
+        },
+        created(){
+            
+        },
+        mounted(){
+            document.getElementById('recordPaymentOffline').style.display = 'block';
+        }
+  })
+</script>
+</html>
