@@ -201,10 +201,10 @@ public class MHomePageController {
         indexReqDTO.setStime(DateUtil.getPriorDay(new Date()));
         indexReqDTO.setEtime(DateUtil.getPriorDay(new Date()));
       }else if(QFLAG.SEVEN.equals(qflag)){
-        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),7));
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),6));
         indexReqDTO.setEtime(new Date());
       }else if(QFLAG.THREETH.equals(qflag)){
-        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),30));
+        indexReqDTO.setStime(DateUtil.getPriorDay(new Date(),29));
         indexReqDTO.setEtime(new Date());
       }
     }
