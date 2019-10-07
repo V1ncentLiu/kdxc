@@ -54,7 +54,7 @@ public class MerchantRechargeRecordBusinessController {
     }catch (Exception e){
       logger.error("initRechargeRecordBusiness:{}",e);
     }
-    return "/merchant/merchantRechargeRecord/merchantRechargeRecord";
+    return "merchant/merchantRechargeRecord/merchantRechargeRecord";
   }
   /**
   * @Description 商家端充值记录列表查询

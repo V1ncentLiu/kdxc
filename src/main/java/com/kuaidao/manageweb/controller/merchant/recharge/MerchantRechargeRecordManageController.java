@@ -64,7 +64,7 @@ public class MerchantRechargeRecordManageController {
     }catch (Exception e){
       logger.error("initRechargeRecordManage:{}",e);
     }
-    return "/merchant/rechargeRecord/rechargeRecord";
+    return "merchant/rechargeRecord/rechargeRecord";
   }
   /**
    * @Description 管理端充值记录列表查询
@@ -103,7 +103,7 @@ public class MerchantRechargeRecordManageController {
     request.setAttribute("merchantUserList",userList);
     request.setAttribute("ossUrl",ossUrl);
 
-    return "/merchant/rechargeRecord/rechargePaymentOffline";
+    return "merchant/rechargeRecord/rechargePaymentOffline";
   }
 
   /**
