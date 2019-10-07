@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Map;
 
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/busTeleDistribution", fallback = BusTeleDistributionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service-wyp", path = "/statstics/busTeleDistribution/", fallback = BusTeleDistributionFeignClient.HystrixClientFallback.class)
 public interface BusTeleDistributionFeignClient {
 
 
