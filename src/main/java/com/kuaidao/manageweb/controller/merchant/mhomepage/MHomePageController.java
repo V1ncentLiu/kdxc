@@ -194,7 +194,8 @@ public class MHomePageController {
   @RequestMapping("/receiveStatics")
   @ResponseBody
   public JSONResult<IndexRespDTO> receiveStatics(@RequestBody IndexReqDTO indexReqDTO){
-    int diffDay = DateUtil.differentDays(indexReqDTO.getEtime(), indexReqDTO.getStime());
+    int diffDay = 0;
+    diffDay = DateUtil.differentDays(indexReqDTO.getEtime(), indexReqDTO.getStime());
     if(diffDay<=30){
       String qflag = indexReqDTO.getQflag();
       if(QFLAG.ONE.equals(qflag)){
@@ -220,7 +221,8 @@ public class MHomePageController {
     List<Long> subIds = new ArrayList<>();
     // 获取主账号分发相关
     JSONResult<List<ResourceStatisticsDto>> assignDto = null;
-    if (SysConstant.USER_TYPE_TWO.equals(curLoginUser.getUserType())) {
+    Integer userType = curLoginUser.getUserType();
+    if (SysConstant.USER_TYPE_TWO.equals(userType)) {
       paramDTO.setUserId(curLoginUser.getId());
       assignDto = ruleAssignRecordFeignClient
           .countAssginStatistic(paramDTO);
@@ -296,16 +298,16 @@ public class MHomePageController {
       }
     }else if(DIMENSION.MONTH.equals(dimension)){ // 完
       calendar.setTime(stime);
-      int smonth = calendar.get(Calendar.MONTH);
+      int smonth = calendar.get(Calendar.MONTH)+1;
       int syear = calendar.get(Calendar.YEAR);
       calendar1.setTime(etime);
-      int emonth = calendar1.get(Calendar.MONTH);
+      int emonth = calendar1.get(Calendar.MONTH)+1;
       int eyear = calendar1.get(Calendar.YEAR);
       while(!(smonth>emonth&&syear==eyear)){
         if(smonth<10){
-          xList.add("0"+smonth);
+          xList.add(syear+"-0"+smonth);
         }else{
-          xList.add(""+smonth);
+          xList.add(syear+"-"+smonth);
         }
         smonth = smonth+1;
         if(smonth>12){
