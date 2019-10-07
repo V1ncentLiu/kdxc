@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
@@ -122,6 +125,7 @@ public class BusinessSignController {
   @RequestMapping("/businessSignValidPage")
   public String businessSignValidPage(HttpServletRequest request) {
     UserInfoDTO user = CommUtil.getCurLoginUser();
+    List<RoleInfoDTO> roleList = user.getRoleList();
     OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
     orgDto.setOrgType(OrgTypeConstant.SWZ);
     orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -145,7 +149,13 @@ public class BusinessSignController {
     request.setAttribute("dxList", dxList.getData());
     request.setAttribute("projectList", allProject.getData());
     request.setAttribute("provinceList", proviceslist);
-    return "business/businessSignValidPage";
+    if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZG.name())){
+      List<UserInfoDTO> userInfoList = getUserList(null,RoleCodeEnum.PDZY.name(),user.getBusinessLine());
+      request.setAttribute("userInfoList", userInfoList);
+      return "business/businessSignValidPage";
+    }else{
+      return "business/businessSignValidPageByPdzy";
+    }
   }
 
   /**
@@ -158,8 +168,12 @@ public class BusinessSignController {
   public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(HttpServletRequest request,
       @RequestBody BusinessSignDTO businessSignDTO) {
     UserInfoDTO user = CommUtil.getCurLoginUser();
+    List<RoleInfoDTO> roleList = user.getRoleList();
     if(user.getBusinessLine() != null){
       businessSignDTO.setBusinessLine(user.getBusinessLine());
+    }
+    if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZY.name())){
+      businessSignDTO.setPdUser(user.getId());
     }
     JSONResult<PageBean<BusinessSignDTO>> list =
         businessSignFeignClient.businessSignValidList(businessSignDTO);
@@ -882,4 +896,31 @@ public class BusinessSignController {
       }
       return businessSignFeignClient.updateSignDetail(dto);
     }
+
+  /**
+   * 根据机构和角色类型获取用户
+   *
+   * @param
+   * @return
+   */
+  private List<UserInfoDTO> getUserList(Long orgId, String roleCode,Integer businessLise) {
+    UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+    userOrgRoleReq.setOrgId(orgId);
+    userOrgRoleReq.setRoleCode(roleCode);
+    userOrgRoleReq.setBusinessLine(businessLise);
+    JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+    return listByOrgAndRole.getData();
+  }
+
+  /**
+   * 分配判单用户
+   *
+   * @return
+   */
+  @RequestMapping("/distributionPdUser")
+  @ResponseBody
+  public JSONResult distributionPdUser(@RequestBody BusinessSignDTO businessSignDTO){
+    return businessSignFeignClient.distributionPdUser(businessSignDTO);
+  }
 }
