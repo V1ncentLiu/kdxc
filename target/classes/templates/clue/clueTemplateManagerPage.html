@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+</head>
+<body>
+<div id="clueTemplateManage" class="clueTemplateManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>资源模板</el-breadcrumb-item>
+    </el-breadcrumb>    
+    <el-row class="marginB20">
+      <el-col :span="12">
+    		<shiro:hasPermission name="aggregation:clueTemplate:add">
+		        <el-button type="primary" @click="toAddClueTemplate"><i class="el-icon-plus"></i>新建模板</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:clueTemplate:edit">
+		        <el-button type="success" @click="toUpdateClueTemplate"><i class="el-icon-edit"></i>编辑模板</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:clueTemplate:delete">
+		        <el-button type="danger" @click="deleteClueTemplate"><i class="el-icon-delete"></i>删除模板</el-button>
+		    </shiro:hasPermission>
+      </el-col>
+	  </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="clueTemplateSearchForm" class="demo-form-inline mainSearchForm" ref="clueTemplateSearchForm">
+            	  <el-form-item label="资源项目:" label-width="55px">
+                    <el-select v-model="clueTemplateSearchForm.clueProjectId" placeholder="资源项目" clearable filterable>
+                        <el-option
+                            v-for="item in projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="媒介:" >
+                    <el-select v-model="clueTemplateSearchForm.source" placeholder="媒介" clearable filterable>
+                        <el-option
+                            v-for="item in sourceOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="广告位:" >
+                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable filterable>
+                        <el-option
+                            v-for="item in sourceTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源类别:" >
+                    <el-select v-model="clueTemplateSearchForm.category" placeholder="资源类别" clearable filterable>
+                        <el-option
+                            v-for="item in categoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>               
+                <el-form-item label="资源类型:" >
+                    <el-select v-model="clueTemplateSearchForm.type" placeholder="资源类型" clearable filterable>
+                        <el-option
+                            v-for="item in typeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item  prop="name" label="模板名称:" label-width="55px">
+                        <el-input v-model="clueTemplateSearchForm.name" placeholder="模板名称" class="input-with-select"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+                style="width: 100%"  :data="dataTable" >
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="name" label="模板名称"></el-table-column>
+                <el-table-column align="center" prop="clueProjectName" label="资源项目"></el-table-column>
+                <el-table-column align="center" prop="source" label="媒介"  :formatter="transformSource" width="110"></el-table-column>
+                <el-table-column align="center" prop="sourceType" label="广告位"  :formatter="transformSourceType" width="110"></el-table-column>
+                <el-table-column align="center" prop="category" label="资源类别"  :formatter="transformCategory" width="85"></el-table-column>
+                <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType" width="85"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" width="140"></el-table-column>
+               <el-table-column align="center" prop="createUserName" label="创建人" width="110"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="540px">
+        <el-form :model="clueTemplateForm" ref="clueTemplateForm" :rules="rules">
+            <el-form-item v-show="isShowPrompt" label="" :label-width="formLabelWidth" >
+                <span style="color: red;">有相同的资源模版，请勿重复提交！</span>
+            </el-form-item>
+            <el-form-item label="模板名称：" :label-width="formLabelWidth" prop="name">
+                <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category">
+                <el-select v-model="clueTemplateForm.category" placeholder="资源类别" clearable filterable style="width: 290px;">
+                    <el-option
+                        v-for="item in categoryOptions"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="资源项目：" :label-width="formLabelWidth" prop="clueProjectId">
+            	<el-select v-model="clueTemplateForm.clueProjectId" placeholder="资源项目" clearable filterable style="width: 290px;">
+                   <el-option
+                       v-for="item in projectOptions"
+                       :key="item.id"
+                       :label="item.projectName"
+                       :value="item.id">
+                   </el-option>
+               </el-select>
+            </el-form-item>
+            <el-form-item label="媒介：" :label-width="formLabelWidth" prop="source">
+                <el-select v-model="clueTemplateForm.source" placeholder="媒介" clearable filterable style="width: 290px;">
+                        <el-option
+                            v-for="item in sourceOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+            </el-form-item>
+            <el-form-item label="广告位：" :label-width="formLabelWidth" prop="sourceType">
+                <el-select v-model="clueTemplateForm.sourceType" placeholder="广告位" filterable clearable style="width: 290px;">
+                        <el-option
+                            v-for="item in sourceTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+            </el-form-item>
+            <el-form-item label="资源类型：" :label-width="formLabelWidth" prop="type">
+                <el-select v-model="clueTemplateForm.type" placeholder="资源类型" filterable clearable style="width: 290px;">
+                        <el-option
+                            v-for="item in typeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" :disabled="submitDisabled" @click="saveClueTemplate('clueTemplateForm')">提交</el-button>
+            <el-button @click="cancelForm('clueTemplateForm')">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
+var projectList=[[${projectList}]];//项目集合
+var adsenseList=[[${adsenseList}]];//广告位集合
+var clueTypeList=[[${clueTypeList}]];//资源类型集合
+var mediumList=[[${mediumList}]];//媒介集合
+var userId=[[${userId}]];//媒介集合
+var clueTemplateVM = new Vue({
+        el: '#clueTemplateManage',
+        data: {
+        	isShowPrompt:false,
+            isShow:false,
+        		clueTemplateSearchForm: {
+	        		name: '',
+	        		clueProjectId: '',
+	        		category: '',
+	        		type: '',
+	        		source: '',
+	        		sourceType: ''
+	            },
+	            clueTemplateForm: {
+	            	id:'',
+	            	name: '',
+	        		clueProjectId: '',
+	        		category: '',
+	        		type: '',
+	        		source: '',
+	        		sourceType: ''
+                },
+	            dataTable:[],
+	            dialogFormVisible: false,
+	            submitDisabled: false,
+	            addOrModifyDialogTitle:'',
+	            pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+	            projectOptions:projectList,
+	            sourceTypeOptions:adsenseList,
+	            typeOptions:clueTypeList,
+	            sourceOptions:mediumList,
+	            categoryOptions:clueCategoryList,
+	            multipleSelection:[],
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px',
+                rules: {
+                	name: [
+                      { required: true, message: '模板名称不能为空', trigger: 'blur' }
+                    ]
+                  },
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.name = this.clueTemplateSearchForm.name;
+                param.clueProjectId = this.clueTemplateSearchForm.clueProjectId;
+                param.category = this.clueTemplateSearchForm.category;
+                param.type = this.clueTemplateSearchForm.type;
+                param.source = this.clueTemplateSearchForm.source;
+                param.sourceType = this.clueTemplateSearchForm.sourceType;
+                console.info(param);
+                axios.post('/aggregation/clueTemplate/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                	  console.info(result);
+                      var table=result.data;
+                      clueTemplateVM.dataTable= table.data;
+                      clueTemplateVM.pager.total =  table.total;
+                      clueTemplateVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              //添加模板弹窗
+              toAddClueTemplate() {
+                  	this.clueTemplateForm.id='';
+                  	if (this.$refs['clueTemplateForm']!==undefined) {
+	               		this.$refs['clueTemplateForm'].resetFields();
+	               	}
+                  	this.dialogFormVisible = true;
+                  	this.isShowPrompt=false;
+                  	this.addOrModifyDialogTitle="新建模板";
+              },
+              //跳转修改模板页
+              toUpdateClueTemplate() {
+            	  this.isShowPrompt=false;
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+                  this.addOrModifyDialogTitle="编辑模板";
+                  if(rows[0].createUser!=userId){
+                	  this.$message({
+                          message: ' 非本人创建的模版，不可编辑',
+                          type: 'warning'
+                        });
+                       return;
+                  }
+                  var param={id:rows[0].id};
+                  //根据id获取数据
+                  axios.post('/aggregation/clueTemplate/get',param)
+                  .then(function (response) {
+                      var data =  response.data;
+                      if(data.code=='0'){
+                    	  clueTemplateVM.clueTemplateForm.id= data.data.id;
+                    	  clueTemplateVM.clueTemplateForm.name= data.data.name;
+                    	  if(data.data.clueProjectId){
+	                    	  clueTemplateVM.clueTemplateForm.clueProjectId= data.data.clueProjectId;
+                    	  }
+                    	  if(data.data.category){
+	                    	  clueTemplateVM.clueTemplateForm.category= data.data.category+"";
+                    	  }
+                    	  if(data.data.type){
+    	                	  clueTemplateVM.clueTemplateForm.type= data.data.type+"";
+                    	  }
+                    	  if(data.data.source){
+	                    	  clueTemplateVM.clueTemplateForm.source= data.data.source+"";
+                    	  }
+                    	  if(data.data.sourceType){
+	                    	  clueTemplateVM.clueTemplateForm.sourceType= data.data.sourceType+"";
+                    	  }
+                      }else{
+                      	console.error(data);
+                      }
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  }); 
+                  this.dialogFormVisible = true;
+              	
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+               cancelForm(formName) {
+            	   if (this.$refs[formName]!==undefined) {
+               		this.$refs[formName].resetFields();
+               		}
+               	   this.dialogFormVisible = false;
+               },
+               closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+	               	if (this.$refs['clueTemplateForm']!==undefined) {
+	               		this.$refs['clueTemplateForm'].resetFields();
+	               	}
+               },
+               saveClueTemplate(formName){//保存自定义字段
+            	  this.isShowPrompt=false;
+                  this.$refs[formName].validate((valid) => {
+                      if (valid) {
+                    	 clueTemplateVM.submitDisabled=true;
+                         var param=clueTemplateVM.clueTemplateForm;
+                         var url="";
+                         if(param.id!=""){
+                        	 url="/aggregation/clueTemplate/update";
+                         }else{
+                        	 url="/aggregation/clueTemplate/save";
+                         }
+                        axios.post(url, param)
+                        .then(function (response) {
+                            var resData = response.data;
+                            if(resData.code=='0'){
+                            	clueTemplateVM.cancelForm(formName);
+                            	clueTemplateVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    clueTemplateVM.submitDisabled=false;
+                            		clueTemplateVM.searchTable();
+                          	    }});
+                            }else if(resData.code=='21916'){
+                            	clueTemplateVM.isShowPrompt=true;
+                                clueTemplateVM.submitDisabled=false;
+                            }else{
+                            	clueTemplateVM.$message('提交失败');
+                                clueTemplateVM.submitDisabled=false;
+                                console.error(resData);
+                            }
+                        })
+                        .catch(function (error) {
+                        	clueTemplateVM.submitDisabled=false;
+                            console.log(error);
+                        });
+                         
+                      } else {
+                        return false;
+                      }
+                    });
+                 },// method end
+                 deleteClueTemplate() {
+              	   var rows = this.multipleSelection;
+                     if(rows.length==0){
+                         this.$message({
+                            message: '请选中一条数据进行删除',
+                            type: 'warning'
+                          });
+                         return;
+                     }
+                     //var rowNames = [];
+                     var rowIds = [];
+                     for(var i=0;i<rows.length;i++){
+                  	   	 var curRow = rows[i];
+	                  	 if(curRow.createUser!=userId){
+	                     	 this.$message({
+	                               message: ' 非本人创建的模版，不可删除',
+	                               type: 'warning'
+	                             });
+	                         return;
+	                     }
+                         rowIds.push(curRow.id);
+                         //rowNames.push("【"+curRow.clueTemplateName+"】");
+                     }
+                     
+                     //var clueTemplateNames = rowNames.join(" ");
+                  this.$confirm('删除后不可恢复，确定要删除 选中的模板？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+                  	  //删除
+                  	var param  = {idList:rowIds};
+                      axios.post('/aggregation/clueTemplate/delete',param)
+                      .then(function (response) {
+                          var data =  response.data;
+                          if(data.code=='0'){
+                          	clueTemplateVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                          		clueTemplateVM.searchTable();
+                      	    }});
+                              
+                          }else{
+                          	clueTemplateVM.$message({
+                                  message: "接口调用失败",
+                                  type: 'error'
+                                }); 
+                          }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      })
+                      .then(function () {
+                      	
+                      });
+                  }).catch(() => {
+                         
+                  });
+              },//end
+            //资源类别转换方法
+              transformCategory(row, column, cellValue, index) {
+            	 var text="";
+              	 if(clueCategoryList){
+	                  for(var i=0;i<clueCategoryList.length;i++){
+	                		if(cellValue==clueCategoryList[i].value){
+	                			text=clueCategoryList[i].name;
+	                		}
+	                	}
+            	  }
+                  return text;
+               },
+            //资源类型转换方法
+              transformType(row, column, cellValue, index) {
+            	   var text="";
+              	   if(clueTypeList){
+	                  for(var i=0;i<clueTypeList.length;i++){
+	                		if(cellValue==clueTypeList[i].value){
+	                			text=clueTypeList[i].name;
+	                		}
+	                	}
+           	  		}
+                    return text;
+               },
+            //广告位转换方法
+              transformSourceType(row, column, cellValue, index) {
+            	   var text="";
+              	 if(adsenseList){
+	                  for(var i=0;i<adsenseList.length;i++){
+	                		if(cellValue==adsenseList[i].value){
+	                			text=adsenseList[i].name;
+	                		}
+	                	}
+          	  		}
+                    return text;
+               },
+             //媒介转换方法
+            transformSource(row, column, cellValue, index) {
+            	  var text="";
+              	if(mediumList){
+	                  for(var i=0;i<mediumList.length;i++){
+	                		if(cellValue==mediumList[i].value){
+	                			text=mediumList[i].name;
+	                		}
+	                	}
+         	  		}
+                return text;
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+          
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+           document.getElementById('clueTemplateManage').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>

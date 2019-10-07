@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+</head>
+<body>
+    <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>电销报表</el-breadcrumb-item>
+            <el-breadcrumb-item>业绩报表</el-breadcrumb-item>
+            <el-breadcrumb-item>业绩排名</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="marginB20">
+            <el-button type="primary" @click="searchMonth">月累计排名</el-button>
+            <el-button type="success" @click="searchYear">年累计排名</el-button>
+            <el-button type="warning" @click="searchMonthAverage">年累计月均排名</el-button> 
+            <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
+            <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
+            <!-- </shiro:hasPermission> -->
+        </el-row>
+        <div class="mainSearchBg">        
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                    <el-form-item label="地区；">  
+                        <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable>
+                            <el-option
+                                v-for="item in areaArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="事业部：">  
+                        <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale">
+                            <el-option
+                                v-for="item in deptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="电销组：">  
+                        <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable @change="curTelSale" filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="电销顾问：">  
+                      <el-select v-model="form.teleSaleId" placeholder="电销顾问" style="width: 100%;" filterable clearable>
+                          <el-option
+                              v-for="item in busSaleArr"
+                              :key="item.id"
+                              :label="item.name"
+                              :value="item.id">
+                          </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <div class="mainSearchBtnBox">
+                        <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
+                    </div>  
+                </el-form>
+            </div>
+            <el-row>
+                <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+                    <el-tab-pane label="事业部排名" name="first" v-if="isShowDept"></el-tab-pane>
+                    <el-tab-pane label="电销组排名" name="second" v-if="isShowOrgId"></el-tab-pane>
+                    <el-tab-pane label="电销顾问排名" name="third"></el-tab-pane>
+                </el-tabs>
+                <el-table 
+                    ref="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="tableData"
+                    v-loading="loading"
+                    :cell-style="centerStyle"
+                    :header-cell-style="centerStyle">
+                    <el-table-column type="index" label="序号" width="55"></el-table-column>
+                    <el-table-column prop="allCountryRanking" label="全国排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.allCountryRanking == 1||scope.row.allCountryRanking == 2||scope.row.allCountryRanking == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.allCountryRanking}}
+                            </div>
+                            <span v-else>{{scope.row.allCountryRanking}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="areaRanking" label="区内排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.areaRanking == 1||scope.row.areaRanking == 2||scope.row.areaRanking == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.areaRanking}}
+                            </div>
+                            <span v-else>{{scope.row.areaRanking}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="groupRanking" label="组内排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.groupRanking == 1||scope.row.groupRanking == 2||scope.row.groupRanking == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.groupRanking}}
+                            </div>
+                            <span v-else>{{scope.row.groupRanking}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="teleName" label="电销顾问">
+                        <template slot-scope="scope">
+                            <el-button type="text" size="small" v-if="scope.row.userId == curUserId">
+                                {{scope.row.teleName}}
+                            </el-button>
+                            <span v-else>{{scope.row.teleName}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="teleGroupName" label="电销组"></el-table-column>
+                    <el-table-column prop="deptName" label="事业部"></el-table-column>
+                    <el-table-column prop="branch" label="分公司"></el-table-column>
+                    <el-table-column prop="area" label="地区"></el-table-column>
+                </el-table>
+                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            </el-row>
+        </div>
+    </div>
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
+</body>
+<div th:include="_footer_include :: #jsLib"></div>
+<script>
+    // var curUserId=[[${curUserId}]];
+    // var areaList=[[${projectList}]];// 地区
+    // var deptList=[[${deptList}]];// 事业部
+    // var curDeptId=[[${deptId}]]; // 当前用户事业部Id
+    // var curOrgId=[[${curOrgId}]];
+
+
+    var areaList='';// 地区
+    var deptList='';// 事业部
+    var curDeptId=''; // 当前用户事业部Id
+    var curOrgId='';
+    var curUserId=1;
+    var rolecode="DXZJ";//DXZJL,DXFZ,  DXZJ,DXCYGW
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                activeName: 'third',
+                loading: false,
+                // isDisabled: false,
+                // isDisabledUserId: false,
+                curUserId: curUserId,
+                isShowDept: false,
+                isShowOrgId: false,
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                form: {
+                    area:'',
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: ''
+                },
+                export: {
+                    area:'',
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: ''
+                },
+                tableData: [
+                    {
+                        userId: 1,
+                        allCountryRanking: 1,
+                        areaRanking: 1,
+                        groupRanking: 1,
+                        teleName: '电销顾问name',
+                        teleGroupName: '电销组name',
+                        deptName: '事业部1-1',
+                        branch: '分公司1-1',
+                        area: '秦皇岛'
+                    },
+                    {
+                        userId: 3,
+                        allCountryRanking: 2,
+                        areaRanking: 3,
+                        groupRanking: 2,
+                        teleName: '电销顾问name',
+                        teleGroupName: '电销组name',
+                        deptName: '事业部1-2',
+                        branch: '分公司1-2',
+                        area: '秦皇岛2'
+                    },
+                    {
+                        userId: 4,
+                        allCountryRanking: 3,
+                        areaRanking: 2,
+                        groupRanking: 2,
+                        teleName: '电销顾问name',
+                        teleGroupName: '电销组name',
+                        deptName: '事业部1-3',
+                        branch: '分公司1-3',
+                        area: '秦皇岛3'
+                    },
+                    {
+                        allCountryRanking: 5,
+                        areaRanking: 5,
+                        groupRanking: 5,
+                        teleName: '电销顾问name',
+                        teleGroupName: '电销组name',
+                        deptName: '事业部1-5',
+                        branch: '分公司1-5',
+                        area: '秦皇岛5'
+                    }
+
+                ],
+                areaArr: areaList,
+                deptList: deptList,
+                orgTeleArr: '', // 电销组
+                busSaleArr: '', // 电销顾问
+            }             
+        },
+        methods: {    
+            handleClick(tab, event) {
+                // tab.index
+                if(tab.name=='first'){
+                	window.location.href="/ranking/deptList";
+                }else if (tab.name == 'second'){
+                	window.location.href="/ranking/groupList";
+                }else if (tab.name == 'third'){
+                    window.location.href="/ranking/managerList";
+                }
+            },  
+            centerStyle(){
+                return "text-align:center"
+            },
+            curTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleSaleId = '';
+                this.getTelSale(seleVal);
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.form.teleSaleId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=1;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getTelSale(seleVal){
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/base/getSaleList' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            searchTable(firstPage) { 
+                // var startTime = this.form.startTime;
+                // var endTime = this.form.endTime;
+                // if(endTime && startTime){
+                //     startTime = new Date(this.form.startTime);
+                //     endTime = new Date(this.form.endTime);
+                //     if(startTime>endTime){
+                //         this.$message({
+                //             message: '开始时间不能大于结束时间',
+                //             type: 'warning'
+                //         });
+                //         return;
+                //     }
+                //     var date = new Date();
+                //     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                //     // date.setMonth(date.getMonth()-6);
+                //     // var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                //     var currentDateRes = new Date(currentDate);
+                //     // var beforeSixMonthRes = new Date(beforeSixMonth);
+                //     if(endTime > currentDateRes){
+                //         this.$message({
+                //             message: '请选择当前日期前的时间',
+                //             type: 'warning'
+                //         });
+                //         return;
+                //     }
+                //     startTime = this.limitTime(startTime, null);
+                //     endTime = this.limitTime(null, endTime);
+                // }else{
+                //     this.$message({
+                //         message: '请选择起止时间',
+                //         type: 'warning'
+                //     });
+                //     return;
+                // }   
+    
+                var param = {};
+                // param.startTime = this.minuteFormat(startTime);
+                // param.endTime = this.minuteFormat(endTime);
+                param.pageSize = this.pager.pageSize;
+    
+                if(firstPage){
+                    param.pageNum = firstPage;
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
+                param.area = this.form.area;
+                param.teleDeptId = this.form.teleDeptId;
+                param.teleGroupId = this.form.teleGroupId;
+                param.teleSaleId = this.form.teleSaleId;
+                this.loading = true; 
+                axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
+                    if(!response || !response.data){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }else if(resobj.data && resobj.data.tableData){
+                        var resobjData = resobj.data;    
+                        var tableData = resobjData.tableData;
+                        mainDivVM.tableData = tableData.data;
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
+                        mainDivVM.export.area = mainDivVM.form.area;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
+                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
+                        mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
+                    }else{
+                        mainDivVM.loading = false;
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            limitTime (start, end) {
+                var endTime = this.minuteFormat (end);
+                var startTime = this.minuteFormat (start);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
+            },
+            percentFormat(row, column) { //百分比格式化
+                var percent = row[column.property];
+                if (!percent) { // 如果没有值或值为0
+                    return "0%";
+                }
+                percent = (percent * 1000) / 10 + "%";
+                return percent;
+            },
+            minuteFormat (m) {
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear()
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                return timeRes;
+            },
+            searchMonthAverage(){ // 年累计月均排名
+                var today = new Date();
+                var month = today.getMonth()+1;
+                var startTime = '';
+                switch (month) {
+                    case 1 : 
+                    case 2 : 
+                    case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";break;
+                    case 4 : 
+                    case 5 : 
+                    case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01+" 00:00"; break;
+                    case 7 : 
+                    case 8 : 
+                    case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01+" 00:00";break;
+                    case 10 :
+                    case 11 :
+                    case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01+" 00:00";break;
+                }
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable(1);
+            },
+            searchYear(){ // 年
+               var today = new Date();
+               var startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable(1);
+            },
+            searchMonth(){ // 本月 
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var f= new Date(year,month,01);
+                var c = f.valueOf();
+                var startTime= new Date(c);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
+                this.searchTable(1);
+            },
+            exportRs(){
+                var param = {};
+                param.area = this.export.area;
+                param.teleDeptId = this.export.teleDeptId;
+                param.teleGroupId = this.export.teleGroupId;
+                param.teleSaleId = this.export.teleSaleId;
+                axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
+                .then(function (response) {
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    mainDivVM.$message({
+                        message: "导出失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            }
+        },
+	created(){
+        if(rolecode=='DXZJL'|| rolecode=='DXFZ'){
+            this.isShowDept = true;
+            this.isShowOrgId = true;
+        }else if(rolecode=='DXZJ'){
+            this.isShowDept = false;
+            this.isShowOrgId = true;
+        }else{
+            this.isShowDept = false;
+            this.isShowOrgId = false;
+        }
+        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+        if(localVal){this.pager.pageSize = localVal;}
+		// this.searchTable();
+	},
+	mounted(){
+        document.getElementById('maindiv').style.display = 'block';
+    }
+});
+</script>
+</body>
+</html>

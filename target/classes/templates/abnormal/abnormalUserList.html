@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>标记异常客户</title>
+
+</head>
+<body>
+
+<div id="mainDiv"  class="mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>标记异常客户</el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <el-row type="flex" class="row-bg marginB20" justify="start">
+        <el-button type="primary" @click="openAddDialog()"><i class="el-icon-plus"></i>添加异常客户</el-button>
+        <el-button type="danger" @click="deletebatch()"><i class="el-icon-delete"></i>删除</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="queryForm" class="demo-form-inline mainSearchForm" ref="queryForm" >
+                <el-form-item label="状态搜索:">
+                    <el-select v-model="queryForm.status" placeholder="状态搜索" width="100" clearable>
+                        <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="异常类型:">
+                    <el-select v-model="queryForm.type" placeholder="异常类型" width="100" clearable>
+                        <el-option v-for="item in abnorMalType" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="客户电话:" prop="name">
+                    <el-input v-model="queryForm.phone" placeholder="客户电话"></el-input>
+                </el-form-item>
+                <el-form-item label="创建时间:">
+                    <el-date-picker v-model="queryForm.time1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item> 
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="queryForm.time2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item>
+                <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" @click="initList" class="searchBtn">搜索</el-button>
+                        <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                </div> 
+            </el-form>
+        </div>
+        <el-table :data="tableData" style="width: 100%" tooltip-effect="dark" border ref="multipleTable" @selection-change="handleSelectionChange" >
+            <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+            <el-table-column prop="phone" label="客户电话" align="center"></el-table-column>
+            <el-table-column prop="type" label="异常类型" align="center" :c="transformType"></el-table-column>
+            <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
+            <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
+            <el-table-column  prop="status" label="状态"  align="center">
+                <template slot-scope="scope">
+                    <span style="" v-if="scope.row.status!=1">正常标记</span>
+                    <span style="color: red" v-else>标记已删除</span>
+                </template>
+            </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager"  @change="initList"></table-pagination>
+    </div>
+
+    <el-dialog
+            title="添加异常客户"
+            :visible.sync="addDialogVisible"  width="650px">
+        <template>
+            <el-form :model="add" ref="add" :rules="rules">
+                <el-form-item label="客户手机号"  :label-width="formLabelWidth"  prop="phone">
+                    <el-input v-model="add.phone" autocomplete="off"  maxlength="11"   style="width: 80%" ></el-input>
+                </el-form-item>
+                <el-form-item label="异常类型"    :label-width="formLabelWidth"  prop="type">
+                    <el-select v-model="add.type" placeholder="异常类型" style="width: 80%">
+                        <el-option v-for="item in abnorMalType" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" :disabled="btnDisabled" @click="saveOne">提 交</el-button>
+                <el-button  @click="addDialogVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+</div>
+
+
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<script>
+    const validateAcquaintance= (rule, value, callback) => {
+        if (!value) {
+            callback(new Error('必须输入'))
+        }
+        if(value.indexOf(".")!=-1){
+            callback(new Error('输入的值为正整数'))
+        }
+        value = Number(value)
+        if (typeof value === 'number' && !isNaN(value)&&(value%1 === 0)) {
+            if (value <=0) {
+                callback(new Error('输入的值为正整数'))
+            } else {
+                callback()
+            }
+        } else {
+            callback(new Error('输入的值为正整数'))
+        }
+    }
+    // 查询 模块
+    var mainDivVM = new Vue({
+        el: '#mainDiv',
+        data: {
+            btnDisabled: false, 
+            formLabelWidth:'150px',
+            addDialogVisible:false,
+            add:{
+                phone:"",
+                type:""
+            },
+            rules:{
+                phone: [
+                    { required: true, message: '客户手机号为必填项', trigger: 'blur' },
+                    {
+                        validator: validateAcquaintance, // 自定义验证
+                        trigger: 'blur'
+                    }
+
+                ],
+                type: [
+                    {  required: true, message: '异常类型为必填项', trigger: 'change' }
+                ],
+            },
+            queryForm:{
+                type:"",
+                status:"",
+                time1:"",
+                time2:"",
+                phone:""
+            },
+            abnorMalType: [],
+            statusOptions: [{
+                value: '0',
+                label: '正常标记'
+            }, {
+                value: '1',
+                label: '标记已删除'
+            }],
+            tableData:[],
+            multipleSelection:[],
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+        },
+        methods: {
+            initList() {
+                var param = this.queryForm;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                // console.log(param)
+                axios.post('/abnoramluser/queryAbnoramlUsers',param).then(function (response) {
+                    console.log(response.data)
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        // console.log(response.data)
+                        if(response.data.code!='0'){
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    }else{
+                        // console.log(response.data.data.data)
+                        mainDivVM.tableData =response.data.data.data;
+                        mainDivVM.pager.currentPage= response.data.data.currentPage;
+                        mainDivVM.pager.total= response.data.data.total;
+                    }
+                })
+            },
+          //合伙人转换方法
+            transformType(row, column, cellValue, index) {
+            	var typeList=this.abnorMalType;
+          	  var text="";
+          	  if(typeList){
+	                  for(var i=0;i<typeList.length;i++){
+	                		if(cellValue==typeList[i].value){
+	                			text=typeList[i].name;
+	                		}
+	                	}
+          	  }
+                return text;
+            },
+            initAbnormalType(){
+                var param = {}
+                axios.post('/abnoramluser/AbnoramlType',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        return ;
+                    }else{
+                        var datas = response.data.data;
+                        mainDivVM.abnorMalType = datas
+                        // mainDivVM.abnorMalType.unshift({
+                        //     value:"",
+                        //     name:"异常类型"
+                        // })
+                    }
+                })
+            },
+            deletebatch(){
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({message: '请选择删除数据', type: 'warning'});
+                    return false;
+                }else{
+                    this.$confirm("您确定要删除选中的异常客户吗?", '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
+                        //拼接rowIds
+                        var rowIds = [];
+                        for(var i=0;i<rows.length;i++){
+                            rowIds.push(rows[i].id)
+                        }
+                        var param={};
+                        param.ids = rowIds;
+                        axios.post('/abnoramluser/deleteAbnoramlUser', param)
+                            .then(function (response) {
+                                mainDivVM.$message({type: 'success', message: '确定删除!',duration:2000,onClose:function(){
+                                        mainDivVM.pager.pageNum = 1
+                                        mainDivVM.initList();
+                                }});
+                            }).catch(function (error) {mainDivVM.$message.error(error);});
+
+                    }).catch(() => {this.$message({type: 'info', message: '已取消删除'});});
+                }
+            },
+            openAddDialog(){
+                this.addDialogVisible= true;
+                this.resetForm("add");
+            },
+            saveOne(){
+                var param = this.add;
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true; 
+                        axios.post("/abnoramluser/saveOne", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
+                                            mainDivVM.pager.pageNum = 1
+                                            mainDivVM.initList();
+                                            mainDivVM.addDialogVisible = false;
+                                            mainDivVM.btnDisabled = false; 
+                                        }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.btnDisabled = false; 
+                                }
+                            }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
+                    } else {return false;}
+                });
+            },
+            formatStatus(row, column){
+                return row.status == 0 ? "正常标记" : "标记已删除";
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            resetForm(formName) {
+                if( mainDivVM.$refs[formName]){
+                    mainDivVM.$refs[formName].resetFields();
+                    this.$refs[formName].resetFields();
+                }
+            }
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            
+            this.initAbnormalType();
+            this.initList();
+        },//created方法 结束
+        mounted(){
+            document.getElementById('mainDiv').style.display = 'block';
+        }
+    });
+
+</script>
+<style>
+    .dialog-footer{
+        text-align: center;
+    }
+    .el-input__inner{
+     /* width: 200px; */
+    }
+
+</style>
+</body>
+</html>

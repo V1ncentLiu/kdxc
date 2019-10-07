@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{::style},~{})" >
+    <title>客户详情信息</title>
+    <meta charset="UTF-8">
+    <style>
+        .borderbox .el-button{font-size: 12px;float: left;}
+        .borderbox .messagePointStyle span{word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;text-align: left;float: left;line-height: 1.5;}
+    	.fa-play::before {content: "";}
+    </style>
+</head>
+<body>
+<div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="borderbox">
+        <el-form :model="form" :rules="rules" ref="form" class="padding20">
+            <el-breadcrumb separator="  " class="elBreadcrumb">
+                <el-breadcrumb-item><font color="red" class="fs16">资源ID：<span th:text="${clueId}"></span></font> <span v-show="repeatShowFalg">[{{teleReceiveSource}}] {{teleReceiveTime}}</span></el-breadcrumb-item>
+                <el-breadcrumb-item><el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button></el-breadcrumb-item>
+                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
+            </el-breadcrumb>
+            <div class="marginB20 fs16">资源信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth120" >
+                            <span>{{clueBase.typeName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth120" >
+                            <span>{{clueBase.categoryName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth120" >
+                            <span>{{clueBase.messageTime}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth120" >
+                            <span>{{clueBase.searchWord}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth120">
+                            <span>{{intention.address}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth120" class="messagePointStyle">
+                            <span>{{clueBase.messagePoint}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="备注：" :label-width="formLabelWidth120">
+                            <span>{{clueBase.remark}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-show="repeatShowFalg">
+                        <el-form-item label="创建人：" :label-width="formLabelWidth120">
+                            <span>{{clueBase.createUserName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-show="repeatShowFalg">
+                        <el-form-item label="创建时间：" :label-width="formLabelWidth120">
+                            <span>{{clueBase.createTime}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-show="repeatShowFalg">
+                        <el-form-item label="创建角色：" :label-width="formLabelWidth120">
+                            <span>{{clueBase.createUserRole}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">基本信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth120" >
+                            <span>{{form.customerName}}</span>
+                        </el-form-item>
+                        <el-form-item label="创建：" :label-width="formLabelWidth120">
+                            <div v-show="showPhone">
+                                <span >{{form.cusNameCreateUserRoleName}}</span>
+                                <span v-show="form.cusNameCreateUserName !=null && form.cusNameCreateUserName !=''">[{{form.cusNameCreateUserName}}]</span>
+                                <span >{{formatTimeFn(form.cusNameCreateTime)}}</span>
+                            </div>
+                        </el-form-item>
+                        <el-form-item  label="修改：" :label-width="formLabelWidth120" v-show="form.cusNameUpdateUserName !=null && form.cusNameUpdateUserName !=''">
+                            <div >
+                                <font >{{form.cusNameUpdateUserRoleName}}</font>
+                                <font >[{{form.cusNameUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.cusNameUpdateTime)}}</font>
+                            </div>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth120">
+                            <span>
+                                {{form.customerLevel}}
+                            </el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.customerPhone}}</font>
+                                <!--<span @click="dialogFormVisible = true" v-if="form.customerPhone2 !=null && form.customerPhone2 !=''" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>-->
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="手机号创建:"  :label-width="formLabelWidth120" >
+                        <div v-show="showPhone">
+                            <font >{{form.customerPhoneCreateUserRoleMame}}</font>
+                            <font v-show="form.customerPhoneCreateUser !=null && form.customerPhoneCreateUser !=''">[{{form.customerPhoneCreateUser}}]</font>
+                            <font >{{formatTimeFn(form.phoneCreateTime)}}</font>
+
+                        </div>
+                        <div v-show="!showPhone">
+                            <font color="red">领取后显示</font>
+                        </div>
+                    </el-form-item>
+                    <div v-show="form.customerPhoneUpdateUser !=null && form.customerPhoneUpdateUser !=''">
+                        <el-form-item label="手机号修改:"  :label-width="formLabelWidth120" >
+                            <font >{{form.customerPhoneUpdateUserRoleMame}}</font>
+                            <font >[{{form.customerPhoneUpdateUserName}}]</font>
+                            <font >{{formatTimeFn(form.phoneUpdateTime)}}</font>
+                        </el-form-item>
+                    </div>
+                    </el-col>
+                </el-row>
+                <el-row v-show="form.phone2 !=null && form.phone2 !=''">
+                    <el-col :span="8" v-show="form.phone2 !=null && form.phone2 !=''">
+                        <el-form-item label="手机号2：" prop="phone2" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.phone2}}</font>
+                                <!--<span @click="dialogFormVisible = true" v-if="form.customerPhone2 !=null && form.customerPhone2 !=''" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>-->
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="手机号2创建:" prop="phone2" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.customerPhone2CreateUserRoleMame}}</font>
+                                <font v-show="form.customerPhone2CreateUser !=null && form.customerPhone2CreateUser !=''">[{{form.customerPhone2CreateUser}}]</font>
+                                <font >{{formatTimeFn(form.phone2CreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.customerPhone2UpdateUser !=null && form.customerPhone2UpdateUser !=''">
+                            <el-form-item label="手机号2修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.customerPhone2UpdateUserRoleMame}}</font>
+                                <font >[{{form.customerPhone2UpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.phone2UpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
+
+                    </el-col>
+                    <el-col :span="8" v-show="form.phone3 !=null && form.phone3 !=''">
+                        <el-form-item label="手机号3：" prop="phone3" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.phone3}}</font>
+                                <!--<span @click="dialogFormVisible = true" v-if="form.customerPhone2 !=null && form.customerPhone2 !=''" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>-->
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="手机号3创建:" prop="phone3" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.phone3CreateUserRoleMame}}</font>
+                                <font v-show="form.phone3CreateUser !=null && form.phone3CreateUser !=''">[{{form.phone3CreateUser}}]</font>
+                                <font >{{formatTimeFn(form.phone3CreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.customerPhone3UpdateUser !=null && form.customerPhone3UpdateUser !=''">
+                        <el-form-item label="手机号3修改:" :label-width="formLabelWidth120" >
+                            <font >{{form.customerPhone3UpdateUserRoleMame}}</font>
+                            <font >[{{form.customerPhone3UpdateUserName}}]</font>
+                            <font >{{formatTimeFn(form.phone3UpdateTime)}}</font>
+                        </el-form-item>
+                        </div>
+                    </el-col>
+                    <el-col :span="8" v-show="form.phone4 !=null && form.phone4 !=''">
+                        <el-form-item label="手机号4：" prop="phone4" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.phone4}}</font>
+                                <!--<span @click="dialogFormVisible = true" v-if="form.customerPhone2 !=null && form.customerPhone2 !=''" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>-->
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="手机号4创建:" prop="phone4" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.phone4CreateUserRoleMame}}</font>
+                                <font v-show="form.phone4CreateUser !=null && form.phone4CreateUser !=''">[{{form.phone4CreateUser}}]</font>
+                                <font >{{formatTimeFn(form.phone4CreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.customerPhone4UpdateUser !=null && form.customerPhone4UpdateUser !=''">
+                            <el-form-item  label="手机号4修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.customerPhone4UpdateUserRoleMame}}</font>
+                                <font >[{{form.customerPhone4UpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.phone4UpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row v-show="form.phone5 !=null && form.phone5 !=''">
+                    <el-col :span="8" v-show="form.phone5 !=null && form.phone5 !=''">
+                        <el-form-item label="手机号5：" prop="phone5" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.phone5}}</font>
+                                <!--<span @click="dialogFormVisible = true" v-if="form.customerPhone2 !=null && form.customerPhone2 !=''" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>-->
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <el-form-item label="手机号5创建:" prop="phone5" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.phone5CreateUserRoleMame}}</font>
+                                <font v-show="form.phone5CreateUser !=null && form.phone5CreateUser !=''">[{{form.phone5CreateUser}}]</font>
+                                <font >{{formatTimeFn(form.phone5CreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.customerPhone5UpdateUser !=null && form.customerPhone5UpdateUser !=''">
+                            <el-form-item label="手机号5修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.customerPhone5UpdateUserRoleMame}}</font>
+                                <font >[{{form.customerPhone5UpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.phone5UpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth120" >
+                            <div v-if="showPhone">
+                                <span>{{form.qq}}</span>
+                            </div>
+                            <div v-else>
+                                <span>{{(form.qq==null||form.qq=='')?'':'***'}}</span>
+                            </div>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth120">
+                            <div v-if="showPhone">
+                                <span>{{form.wechat}}</span>
+                                <span v-if="form.wechat2 || form.wechatUrl">
+                                    <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                                </span>
+                            </div>
+                            <div v-else>
+                                <span>{{(form.wechat==null||form.wechat=='')?'':'***'}}</span>
+                            </div>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth120">
+                            <div v-if="showPhone">
+                                <span>{{form.customerEmail}}</span>
+                            </div>
+                            <div v-else>
+                                <span>{{(form.customerEmail==null||form.customerEmail=='')?'':'***'}}</span>
+                            </div>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="性别：" :label-width="formLabelWidth120" >
+                            <span>
+                                {{form.customerSex==null?'':form.customerSex==1?'男':'女'}}
+                            </span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="年龄：" :label-width="formLabelWidth120" >
+                            <span>{{form.customerAge}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="职业：" :label-width="formLabelWidth120" >
+                            <span>{{form.customerJob}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="选址情况：" :label-width="formLabelWidth120">
+                            <span>{{form.address}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth120" >
+                            <span>{{form.experience}}</span>
+                            <el-button   v-show="form.experience!=''&&form.experience!='0'&&form.experience!='无'" type="text" disabled>{{form.cateringType}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="合伙人：" :label-width="formLabelWidth120" >
+                            <span>{{form.customerPartner}}</span>
+                            <span>{{form.customerPartnerDetail}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="决策人：" :label-width="formLabelWidth120">
+                            <span>
+                                {{form.decisionMaker==2?'他人 '+(form.decisionMakerOther==null?'':form.decisionMakerOther) :(form.decisionMaker==1?'自己本人 ':'')}}
+                            </span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="出资人：" :label-width="formLabelWidth120">
+                            <span>
+                                {{form.sponsor==2?'他人 '+(form.sponsorOther==null?'':form.sponsorOther) :(form.sponsor==1?'自己本人 ' :'')}}
+                            </span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">投资意向信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="投资金额：" :label-width="formLabelWidth120" >
+                            <span>{{form.money}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="店面大小：" :label-width="formLabelWidth120" >
+                            <span>{{form.area}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth120"  >
+                            <span>{{form.urgency}}</span>
+                            <span style="padding-left: 5px;" v-if="form.urgency">之前启动</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="意向品类：" :label-width="formLabelWidth120" >
+                            <span>{{form.intentionCategory}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="意向项目：" :label-width="formLabelWidth120" >
+                            <span>{{form.radioProject==1? form.insideProject:form.outsideProject}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="是否在考虑同行业：" :label-width="formLabelWidth" >
+                            <span>
+                                {{form.istrade == 1?'是':'否'}}
+                                {{form.tradeProject}}
+                            </span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth120">
+                            <span>{{form.province}}{{form.city}}{{form.district}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">跟进记录</div>
+            <el-table
+                ref="multipleTable"
+                :data="tableDataC2"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+             >
+                <el-table-column type="index" label="序号" header-align="center" align="center" width="55"></el-table-column>
+                <el-table-column prop="callTime" label="拨打时间" align="center" width="140"></el-table-column>
+                <el-table-column prop="customerStatusName" label="客户状态" align="center"></el-table-column>
+                <el-table-column prop="isCall" label="是否接通" align="center" width="100">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isCall === 0">未接通</div>
+                        <div v-else-if="scope.row.isCall ===1">已接通</div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="focusPoint" label="客户关注点" align="center"></el-table-column>
+                <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="140"></el-table-column>
+                <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
+            </el-table> 
+            <div class="marginB20 fs16 paddingT20">上传资料</div>
+            <el-row>
+                <el-table
+                        ref="multipleTable"
+                        :data="tableDataC1"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                >
+                    <el-table-column
+                            type="index" label="序号"
+                            header-align="center" align="center" width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="uploadUserName"
+                            label="上传人姓名"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="uploadTime"
+                            label="上传时间"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="fileName"
+                            label="文件名称"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            label="操作"
+                            align="center">
+                        <template slot-scope="scope">
+                            <el-button size="mini"type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                                <!-- {{scope.row.fileType =="mp3"? '下载录音':'查看图片'}} -->
+                                {{scope.row.fileType !=="jpg" && scope.row.fileType !=="png" && scope.row.fileType !=="jpeg" && scope.row.fileType !=="gif" && scope.row.fileType !=="bmp"? '下载录音':'查看图片'}}
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="delStatus"
+                            label="删除状态"
+                            align="center">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.delStatus === 0">
+                                未删除
+                            </div>
+                            <div v-else-if="scope.row.delStatus ===1">
+                                已删除
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>  
+            <div class="marginB20 fs16 paddingT20 callLogBox">    
+                通话记录
+                <!-- 播放器 -->
+                <audio id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
+            </div>
+            <el-table ref="multipleTable" :data="tableDataC3" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
+                <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+                <el-table-column prop="accountName" label="姓名" align="center"  width="120"></el-table-column>
+                <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+                <el-table-column prop="callType" label="通话类型" align="center"  width="150"></el-table-column>
+                <el-table-column prop="startTime" label="拨打时间" :formatter="getStartTimeText"  align="center" width="140"></el-table-column>
+                <el-table-column prop="callStatus" label="接通情况" align="center"  width="120"></el-table-column>
+                <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText"  align="center" width="140"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+                        <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+    				        <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
+                        </a>
+                        
+                        <a class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div class="marginB20 fs16 paddingT20">流转人员</div>
+            <el-table
+                ref="multipleTable"
+                :data="tableDataC4"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                @selection-change="handleSelectionChange"
+             >
+                <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+                <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+                <el-table-column prop="orgName" label="所属组(组名)" align="center"></el-table-column>
+                <!--<el-table-column prop="userName" label="服务人员姓名" align="center"></el-table-column>-->
+                <!--<el-table-column prop="telRuleValue" label="分配规则（名称）" align="center"></el-table-column>-->
+                <el-table-column prop="createTime" label="开始服务时间" align="center"></el-table-column>
+            </el-table>            
+        </el-form>
+    </el-row>
+
+    <!-- dialog -->
+    <el-dialog title="查看手机号" :visible.sync="dialogFormVisible">
+        <!--展示phone2  phone3  phone4 phone5-->
+        <el-form :model="form" :rules="rules" ref="form" class="padding20">
+            <el-row v-show="form.phone2!=null">
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="手机号2：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone2}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.customerPhone2CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.customerPhone2CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-show="form.phone3!=null">
+                <el-col :span="8">
+                    <el-form-item label="手机号3：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone3}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone3CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone3CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-show="form.phone4!=null">
+                <el-col :span="8">
+                    <el-form-item label="手机号3：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone4}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone4CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone4CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-show="form.phone3!=null">
+                <el-col :span="8">
+                    <el-form-item label="手机号3：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone5}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item  label="创建人：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone5CreateUser}}</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item v-show="form.phone2!=null" label="创建人角色：" :label-width="formLabelWidth"  >
+                        <el-button type="text" disabled>{{form.phone5CreateUserRoleMame}}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </el-form>
+    </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="二维码" :visible.sync="dialogFormImg">
+        <div class="padding20" style="text-align: center;">
+            <img :src="showwchatcode" alt="" style="width: 250px; height: 250px;">
+        </div>
+    </el-dialog>
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" style="width: 250px;height: 250px;">
+        </div>
+    </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="查看微信" :visible.sync="wechatVisible" width="540px">
+        <template>
+            <el-form :model="wechatForm" ref="wechatForm" >
+                <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                    <!--<el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>-->
+                    <el-button type="text" disabled>{{wechatForm.wechat2}}</el-button>
+                </el-form-item>
+                <el-form-item label="微信二维码" :label-width="formLabelWidth1" >
+                    <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                </el-form-item>
+            </el-form>
+        </template>
+    </el-dialog>
+    <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB10 dialogForm" v-for="item in repeatClueList" height="600">
+            <div class="fs16 redcolor marginB20">重复时间：{{formatTimeFn(item.discoverTime)}}</div>
+            <div class="borderbox padding10">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{item.clueDTO.clueCustomer.cusName}}</el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="手机号：" :label-width="formLabelWidth" class="phoneBox">{{getPhones(item.clueDTO.clueCustomer)}}</el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="微信：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.wechat}}<span @click="lookWechat(item.clueDTO.clueCustomer)" v-if="(item.clueDTO.clueCustomer.wechat2 !=null && item.clueDTO.clueCustomer.wechat2 !='')||(item.clueDTO.clueCustomer.wechatCode !=null && item.clueDTO.clueCustomer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.email}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.qq}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.typeName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            {{formatTimeFn(item.clueDTO.clueBasic.messageTime)}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.categoryName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.messagePoint}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueIntention.address}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.remark}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+    </el-dialog>
+    <el-dialog title="查看微信/二维码" :visible.sync="repeatWechatVisible">
+        <el-form :model="repeatWeDialogForm" ref="repeatWeDialogForm">
+            <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{repeatCustomer.wechat2}}</el-button>
+            </el-form-item>
+            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
+                <img v-show="repeatCustomer.wechatCode!=''"  :src="repeatCustomer.wechatCode">
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+    <!-- 在线聊天记录弹窗 -->
+    <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>  
+        <p class="marginB10">聊天内容：</p>
+        <div class="borderbox padding10">
+            <!-- <div class="listBox listScroll"> -->
+            <div :class="['listBox',{'listScroll':isActive}]">    
+                <ul>
+                    <li  v-for="(item,i) in onlineRecordData" :key="item.id">
+                        <!-- 发送类型 0-自己发送，1-对方发送 -->
+                        <p class="padding10 bluecolor" v-if="item.fromType==0">
+                            <span class="marginR10">在线客服</span>
+                            <span>{{item.messageTime}}</span>                    
+                        </p>
+                        <p class="padding10 yellowcolor" v-else>
+                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                            <span>{{item.messageTime}}</span>
+                        </p>
+                        <p style="padding:0 10px;">
+                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
+                            <span v-else>{{item.message}}</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>        
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+        </div>
+    </el-dialog>
+</div>
+
+<style type="text/css">
+    .lineFeed {
+        width: 230px;
+        word-break: break-all;
+        word-wrap: break-word;
+        color: #c0c4cc;
+        cursor: not-allowed;
+    }
+
+    .lineFeed2 {
+        width: 530px;
+    }
+
+    .paddingTB {
+        padding: 4px 0px;
+    }
+
+    .paddingL55 {
+        padding-left: 55px;
+    }
+
+    .el-form-item.lineInherit .el-form-item__content {
+        line-height: inherit !important;
+    }
+
+    .progress {
+        width: 100%!important;
+    }
+
+    @media screen and (width:1920px) {
+        .paddingL55 .el-date-editor.el-input {
+            width: 218px;
+        }
+        /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+        {
+            width: 202px;
+        }
+        .paddingL55 div.el-form-item:last-child {
+            width: 186px;
+            text-align: center;
+        }
+
+    }
+    .paddingL55 {
+        width: 1700px;
+    }
+    .paddingL55 .el-form-item__content {
+        line-height: 28px;
+    }
+    #ossfile {
+        text-align: right;
+    }
+    @media screen and (max-width: 1190px) {
+        .paddingL55 {
+            width: 1610px;
+            line-height: 28px;
+        }
+        /* .paddingL55 .el-date-editor.el-input {
+            width: 200px;
+        } */
+        /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+        {
+            width: 200px;
+        }
+        .el-form--inline .el-form-item {
+            margin-right: 8px !important;
+        }
+        .paddingL55 div.el-form-item:last-child {
+            width: 60px;
+            text-align: center;
+        }
+        .paddingL55 .el-form-item__content {
+            line-height: 29px;
+        }
+    }
+
+    @media screen and (max-width: 1700px) {
+        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+        {
+            width: 200px!important;
+        }
+        .paddingL55 div.el-form-item:last-child {
+            width: 60px!important;
+        }
+    }
+    @media screen and (min-width: 1709px) {
+        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+        {
+            width: 197px;
+        }
+        .paddingL55 div.el-form-item:last-child {
+            width: 100px;
+        }
+    }
+    @media screen and (max-width: 1738px) {
+        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+        {
+            width: 197px;
+        }
+        .paddingL55 div.el-form-item:last-child {
+            width: 100px;
+        }
+    }
+
+    @media screen and (width: 1744px) {
+        .paddingL55 {
+            line-height: 28px;
+        }
+        .paddingL55 .el-form-item__content { line-height: 28px; }
+
+        .paddingL55 .el-date-editor.el-input {
+            width: 184px;
+        }
+        /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+        .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+        {
+            width: 200px;
+        }
+        .paddingL55 .el-input--mini input.el-input__inner:nth-child(2)
+        {
+            width: 50px!important;
+        }
+        .el-form--inline .el-form-item {
+            margin-right: 8px !important;
+        }
+        .paddingL55 .el-input--mini .el-input {
+            top: -3px;
+        }
+        .paddingL55 div.el-form-item:last-child {
+            width: 90px;
+            text-align: center;
+        }
+    }
+
+    i.el-icon-phone-outline {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        font-size: 20px;
+        margin: 0 5px;
+    }
+
+    .telNumberIcon {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        position: absolute;
+        right: 0;
+        top: 13px;
+    }
+
+    .fa-play-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_play.png);
+        background-repeat: no-repeat;
+    }
+    .fa-stop-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_stop.png);
+        background-repeat: no-repeat;
+    }
+    .download_img {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_download.png);
+        background-repeat: no-repeat;
+    }
+</style>
+
+</body>
+<!-- import Vue before Element -->
+ <div th:include="_footer_include :: #jsLib"></div>
+<script src="/js/common/download.js"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+<script th:inline="javascript" >
+var clueId=[[${clueId}]];//资源ID
+var customer=[[${customer}]];//客户信息
+var base=[[${base}]];//资源基本信息
+var relate=[[${relate}]];//关联信息
+var intention=[[${intention}]];//资源投资意向信息
+var proSelect=[[${proSelect}]];//项目
+var circulationList=[[${circulationList}]];//资源流转记录
+var trackingList=[[${trackingList}]];//跟访记录
+var clueFileList=[[${clueFileList}]];//上传文件
+var commonPool=[[${commonPool}]];//共有池控制标识
+var repeatFlag=[[${repeatFlag}]];//重单审批控制标识
+var callRecord=[[${callRecord}]];//上传文件
+var loginUserId=[[${loginUserId}]];
+var showPhone = true;
+var ossUrl = [[${ossUrl}]];//上传文件地址
+
+if(commonPool==1){
+    showPhone = false;
+}
+
+var repeatShowFalg = false;
+if(repeatFlag==1){
+    repeatShowFalg = true;
+}
+
+var repeatClueList = [[${repeatClueList}]];
+var repeatClueStatus = [[${repeatClueStatus}]];
+var repeatStatus =false;
+if(repeatClueStatus == 1 ){
+  repeatStatus = true;
+}
+
+var teleReceiveSource = "";
+var teleReceiveTime ="";
+if(relate){
+    teleReceiveTime = relate.teleReceiveTime;
+    teleReceiveSource = transTeleReceiveSource(relate.teleReceiveSource);
+}
+
+function transTeleReceiveSource(source){
+    if(!source){
+        return "";
+    }
+    var reStr = "";
+    if(source==1){
+        reStr = "分配"
+    }else  if(source==2){
+        reStr = "分配"
+    }else  if(source==3){
+        reStr = "领取"
+    }else  if(source==4){
+        reStr = "自建"
+    }else  if(source==5){
+        reStr = "分发"
+    }
+    return reStr;
+}
+
+
+
+var isEdit=false;
+
+function crtTimeFtt(val, row) {
+    if (val != null) {
+        var date = new Date(val);
+
+        var month = (date.getMonth() + 1);
+        if(month<10){
+            month = "0"+month;
+        }
+        return date.getFullYear()+''+(month) + '月';
+    }
+}
+
+function crtTimeFtt1(val, row) {
+    if (val != null) {
+        var date = new Date(val);
+
+        var month = (date.getMonth() + 1);
+        if(month<10){
+            month = "0"+month;
+        }
+        var day = date.getDate();
+        if(day<10){
+            day = "0"+day;
+        }
+        var hour = date.getHours();
+        if(hour<10){
+            hour = "0"+hour;
+        }
+        var minu = date.getMinutes();
+        if(minu<10){
+            minu = "0"+minu;
+        }
+        var mill = date.getSeconds();
+        if(mill<10){
+            mill = "0"+mill;
+        }
+        return date.getFullYear()+''+(month) + ''+day+' '+hour+":"+minu+":"+mill;
+    }
+}
+
+var vform;
+var vxShow = false;
+var showwchatcode = "/images/errorIcon.jpg";
+if(customer==null){
+    vform= {
+            customerName:"",
+            cusNameCreateUserRoleName:"",
+            cusNameUpdateUserRoleName:"",
+            cusNameCreateUserName:"",
+            cusNameUpdateUserName:"",
+            cusNameCreateTime:"",
+            cusNameUpdateTime:"",
+            customerPhone:"",
+            phoneCreateTime:"",
+            customerPhoneCreateUser:"",
+            customerPhoneCreateUserRoleMame:"",
+            customerPhone2:"",
+            phone2CreateTime:"",
+            customerPhone2CreateUser:"",
+            customerPhone2CreateUserRoleMame:"",
+            phone2:"",
+            phone2CreateUserRoleMame:"",
+            phone2CreateUser:"",
+            phone3:"",
+            phone3CreateTime:"",
+            phone3CreateUser:"",
+            phone3CreateUserRoleMame:"",
+            phone4:"",
+            phone4CreateTime:"",
+            phone4CreateUser:"",
+            phone4CreateUserRoleMame:"",
+            phone5:"",
+            phone5CreateTime:"",
+            phone5CreateUser:"",
+            phone5CreateUserRoleMame:"",
+            customerSex:"",
+            wechat:'',
+            wechat2:'',
+            wechatUrl:'',
+            experience:"",
+            customerAge:"",
+            customerJob:"",
+            customerPartner:"",
+            address:"",
+            urgency:"",
+            customerLevel:"",
+            qq:"",
+            money:"",
+            area:"",
+            intentionCategory:"",
+            radioProject:"",
+            insideProject:"",
+            outsideProject:"",
+            province:"",
+            city:"",
+            district:"",
+            customerEmail:'', //邮箱
+            cateringType: '',//曾经从事餐饮类型
+            sponsor:'', //出资人
+            sponsorOther:'',//其它出资人的姓名及联系方式
+            decisionMaker: '',//决策人
+            decisionMakerOther: '',//其它决策人的姓名及联系方式
+            customerPartnerDetail: '',//合伙人姓名及联系方式
+            istrade: '',
+            tradeProject: ''
+    };
+}else{
+
+    for(var i = 0 ; i < proSelect.length ; i++){
+       if( proSelect[i].id == intention.purInProject){
+           intention.purInProject =  proSelect[i].projectName;
+       }
+    }
+    vform={
+        customerName:customer.cusName,
+        cusNameCreateUserRoleName:customer.cusNameCreateUserRoleName,
+        cusNameUpdateUserRoleName:customer.cusNameUpdateUserRoleName,
+        cusNameCreateUserName:customer.cusNameCreateUserName,
+        cusNameUpdateUserName:customer.cusNameUpdateUserName,
+        cusNameCreateTime:customer.cusNameCreateTime,
+        cusNameUpdateTime:customer.cusNameUpdateTime,
+        customerPhone:customer.phone,
+        phoneCreateTime:customer.phoneCreateTime,
+        customerPhoneCreateUser:customer.phoneCreateUserName,
+        customerPhoneCreateUserRoleMame:customer.phoneCreateUserRoleMame,
+        customerPhone2:customer.phone2,
+        phone2CreateTime:customer.phone2CreateTime,
+        customerPhone2CreateUser:customer.phone2CreateUserName,
+        customerPhone2CreateUserRoleMame:customer.phone2CreateUserRoleMame,
+        phone2:customer.phone2,
+        phone2CreateUser:customer.phone2CreateUserName,
+        phone2CreateUserRoleMame:customer.phone2CreateUserRoleMame,
+        phone3:customer.phone3,
+        phone3CreateTime:customer.phone3CreateTime,
+        phone3CreateUser:customer.phone3CreateUserName,
+        phone3CreateUserRoleMame:customer.phone3CreateUserRoleMame,
+        phone4:customer.phone4,
+        phone4CreateTime:customer.phone4CreateTime,
+        phone4CreateUser:customer.phone4CreateUserName,
+        phone4CreateUserRoleMame:customer.phone4CreateUserRoleMame,
+        phone5:customer.phone5,
+        phone5CreateTime:customer.phone5CreateTime,
+        phone5CreateUser:customer.phone5CreateUserName,
+        phone5CreateUserRoleMame:customer.phone5CreateUserRoleMame,
+        customerSex:customer.sex,
+        wechat:customer.wechat,
+        wechat2:customer.wechat2,
+        wechatUrl:customer.wechatCode,
+        experience:customer.hasExperience,
+        customerAge:customer.age,
+        customerJob:customer.profession,
+        customerPartner:customer.partnerType,
+        address:customer.hasAddress,
+        urgency:crtTimeFtt(customer.urgentDate),
+        customerLevel:customer.cusLevel,
+        qq:customer.qq,
+        money:intention.advanceAmount,
+        area:intention.area,
+        intentionCategory:intention.purType,
+        radioProject:intention.purProjectType,
+        insideProject:intention.purInProject,
+        outsideProject:intention.purOutProject,
+
+        istrade: intention.istrade,
+        tradeProject: intention.tradeProject,
+
+        province:intention.province,
+        city:intention.city,
+        district:intention.district,
+        customerEmail:customer.email, //邮箱
+        cateringType: customer.experience,//曾经从事餐饮类型
+        sponsor:customer.investors, //出资人
+        sponsorOther:customer.investorsNamePhone,//其它出资人的姓名及联系方式
+        decisionMaker: customer.decide,//决策人
+        decisionMakerOther: customer.decideNamePhone,//其它决策人的姓名及联系方式
+        customerPartnerDetail:customer.partnerNamePhone,//合伙人姓名及联系方式
+
+        phoneUpdateTime:customer.phoneUpdateTime,
+        customerPhoneUpdateUser:customer.phoneUpdateUser,
+        customerPhoneUpdateUserRoleMame:customer.phoneUpdateUserRoleMame,
+        customerPhoneUpdateUserName:customer.phoneUpdateUserName,
+
+        phone2UpdateTime:customer.phone2UpdateTime,
+        customerPhone2UpdateUser:customer.phone2UpdateUser,
+        customerPhone2UpdateUserRoleMame:customer.phone2UpdateUserRoleMame,
+        customerPhone2UpdateUserName:customer.phone2UpdateUserName,
+
+        phone3UpdateTime:customer.phone3UpdateTime,
+        customerPhone3UpdateUser:customer.phone3UpdateUser,
+        customerPhone3UpdateUserRoleMame:customer.phone3UpdateUserRoleMame,
+        customerPhone3UpdateUserName:customer.phone3UpdateUserName,
+
+        phone4UpdateTime:customer.phone4UpdateTime,
+        customerPhone4UpdateUser:customer.phone4UpdateUser,
+        customerPhone4UpdateUserRoleMame:customer.phone4UpdateUserRoleMame,
+        customerPhone4UpdateUserName:customer.phone4UpdateUserName,
+
+        phone5UpdateTime:customer.phone5UpdateTime,
+        customerPhone5UpdateUser:customer.phone5UpdateUser,
+        customerPhone5UpdateUserRoleMame:customer.phone5UpdateUserRoleMame,
+        customerPhone5UpdateUserName:customer.phone5UpdateUserName
+
+
+    }
+    if(customer.wechatCode !=null && customer.wechatCode!=''){
+        showwchatcode = customer.wechatCode;
+        vxShow = true;
+    }else{
+        showwchatcode = "/images/errorIcon.jpg";
+        vxShow = false;
+    }
+}
+
+// if(vform.ishasWx!=null&&vform.ishasWx!=''){
+// }
+
+if(base==null){
+    base={
+        typeName:"",
+        categoryName:"",
+        sourceTypeName:"",
+        sourceTypeName:"",
+        searchWord:"",
+        projectName:"",
+        messageTime:"",
+        messagePoint:""
+    }
+}else{
+    base.messageTime = crtTimeFtt1( base.messageTime)
+}
+
+ var addCustomerVM=   new Vue({
+        el: '#addCustomer',
+        data: function() {
+            return {
+                isActive:false,
+                isShowMoreBtn:false,
+                customerInfo:customer,
+                isShowOnlineRecordBtn:false,
+                onlineRecordData:[],
+                onlineRecordDialogVisible:false,
+
+                repeatWeDialogForm:{},
+                repeatCustomer:{},
+                repeatWechatVisible:false,
+                dialogFormVisible1: false,
+                repeatStatus:repeatStatus,
+                repeatShowFalg:repeatShowFalg,
+                teleReceiveSource:teleReceiveSource,
+                teleReceiveTime:teleReceiveTime,
+                repeatClueList:repeatClueList,
+                audioShow:false,//播放器默认不显示
+            	loginUserId:loginUserId,
+                showPhone:showPhone,
+                showwchatcode:showwchatcode,
+                isDisabled:true,//默认不可点击
+                wechatVisible: false,//查看微信号
+                dialogFormUploadImgSrc: '',
+                radioProject:'',
+                dialogFormVisible: false,
+                dialogFormImg:false,
+                deleteShow:false,//删除新增手机号输入框
+                dialogFormUploadImg:false,
+                form:vform,
+                clueBase:base,
+                intention:intention,
+                categoryArr:[],
+                typeArr:[],
+                mediumArry:[],
+                adsenseArr:[],
+                CateringExperienceArr:[],
+                occupationArr:[],
+                partnerArr:[],
+                optionAddressArr:[],
+                customerLevelArr:[],
+                IntentionalCategoryArr:[],
+                ussmArr:[],
+                StorefrontAreaArr:[],
+                provinceArr:[],
+                cityArr:[],
+                districtArr:[],
+                proSelect:proSelect,
+                wechatForm: {
+                    wechat2:'',
+                    wechatUrl:'',
+                    fileList:[]
+                },
+                formLabelWidth: '150px',
+                formLabelWidth1: '140px',
+                formLabelWidth120: '120px',
+                rules:{
+                    // customerName: [
+                    //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
+                    // ],
+                    // customerPhone: [
+                        /* { required: true, message: '手机号不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入数字"));
+                            }else{
+                               callback();
+                            } 
+                            callback();
+                        }, trigger: 'blur'} */
+                    // ]
+                },
+                statusOptions: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }],
+                optsex: [{
+                    value: '1',
+                    label: '男'
+                }, {
+                    value: '2',
+                    label: '女'
+                }],
+                options1: [{
+                    value: '0',
+                    label: '电销组'
+                }, {
+                    value: '1',
+                    label: '媒介'
+                }],
+                dialogForm: {
+                    phoneNum:''
+                },
+                dialogRules:{
+                    phoneNum: [
+                        { required: true, message: '请输入手机号码', trigger: 'blur' }
+                    ]
+                },
+                dynamicValidateForm: {//新增手机号弹窗数据
+                    domains: [{
+                        value: ''
+                    }]
+                },
+                multipleSelection:[],//上传资料
+                multipleTrackingSelection:[],
+                fileList: [],
+                tableDataC1: clueFileList,//文件记录
+                cusStatusArr:[],
+                dialingTime:'',//跟进记录
+                lineFormShow: false,
+                formInline: { 
+                	id:'',
+                	callTime: '',
+                	customerStatus: '',
+                	isCall:'',
+                	resourceStatus:'',
+                	focusPoint:'',
+                	visitStatus:'',
+                	nextVisitTime:'',
+                },
+              uploadOssHost:'',
+              uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'',
+                'x:params':'',
+                'realName':''
+              },
+              ossUrl:ossUrl,
+              limit:1,
+                tableDataC2: trackingList,//跟进记录
+                tableDataC3: callRecord,  //通话记录
+                tableDataC4:circulationList//流转记录
+            }             
+        },
+        methods: {
+            isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
+            showOnlineRecord(){
+                this.onlineRecordDialogVisible=true;                
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){
+                            addCustomerVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            if(dataList.length>0){
+                                addCustomerVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    addCustomerVM.isShowMoreBtn=true;
+                                }else{
+                                    addCustomerVM.isShowMoreBtn=false;
+                                }
+                            }
+                        }                        
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        addCustomerVM.isShowOnlineRecordBtn=false;
+                    }                       
+
+                });
+
+            },
+            isShowOnlineRecordFun(){
+                // var param = {};
+                // param.clueId = clueId;
+                // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
+                //     var data= response.data;                 
+                //     if(data){
+                //         addCustomerVM.isShowOnlineRecordBtn=true;
+                //     }else{
+                //         addCustomerVM.isShowOnlineRecordBtn=false;
+                //     }
+
+                // });
+            },
+          getPhones(cus){
+            var phones = '';
+            phones = cus.phone;
+            if(cus.phone2 != null && cus.phone2 != ''){
+              if(phones != ''){
+                phones = phones +","+cus.phone2;
+              }else {
+                phones = cus.phone2;
+              }
+            }
+            if(cus.phone3 != null && cus.phone3 != ''){
+              if(phones != ''){
+                phones = phones +","+cus.phone3;
+              }else {
+                phones = cus.phone3;
+              }
+            }
+            if(cus.phone4 != null && cus.phone4 != ''){
+              if(phones != ''){
+                phones = phones +","+cus.phone4;
+              }else {
+                phones = cus.phone4;
+              }
+            }
+            if(cus.phone4 != null && cus.phone5 != ''){
+              if(phones != ''){
+                phones = phones +","+cus.phone5;
+              }else {
+                phones = cus.phone5;
+              }
+            }
+            return phones;
+          },
+          formatTimeFn(date) {
+            if (null == date) {
+              return "";
+            }
+            var dateNew = new Date(date);
+            var year = dateNew.getFullYear()
+            var month = dateNew.getMonth() + 1
+            var day = dateNew.getDate()
+            var hour = dateNew.getHours()
+            var minute = dateNew.getMinutes()
+            var second = dateNew.getSeconds()
+            return year + "-" + this.formatNumberFn(month) + "-" + this.formatNumberFn(day) + " " + this.formatNumberFn(hour) + ":" + this.formatNumberFn(minute) + ":" + this.formatNumberFn(second);
+          },
+          formatNumberFn(n) {
+            n = n.toString()
+            return n[1] ? n : '0' + n
+          },
+          lookWechat(val){
+            addCustomerVM.repeatCustomer = {};
+            addCustomerVM.repeatWechatVisible =true;
+            addCustomerVM.repeatCustomer = val;
+          },
+          repeatClueCustomers(){
+            addCustomerVM.dialogFormVisible1 =true;
+          },
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              addCustomerVM.uploadParamData= new_multipart_params;
+              addCustomerVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
+             rebackClue(){
+            	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
+            },
+            submitDialogForm(dialogForm) {
+                this.$refs[dialogForm].validate((valid) => {
+                    if (valid) {
+                        console.log('submit!!');
+                        // 关闭弹窗
+                        this.dialogFormVisible = false; 
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            number(){
+    　　　                       this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+               this.form.customerPhone=this.form.customerPhone.replace('.','');
+                                 　　},
+            /*toggleSelection(rows) { 
+                if (rows) {
+                  rows.forEach(row => {
+                    this.$refs.multipleTable.toggleRowSelection(row);
+                  });
+                } else {
+                  this.$refs.multipleTable.clearSelection();
+                }
+            },*/
+            handleSelectionChange(val) {  //上传资料
+                this.multipleSelection = val;
+            },
+            handleTrackingSelection(val){
+               this.multipleTrackingSelection=val;
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+              console.log(file);
+            },
+            handleExceed(files, fileList) {
+              this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+              return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            beforeFormUpload(file) { //上传格式大小的限制
+                const isJPG = file.type === 'image/jpeg';
+                const isPNG = file.type === 'image/png';
+                const isMP3 = file.type === 'audio/mp3';
+                const isLt200 = file.size / 1024 < 200; //200k;
+                if( !isJPG || !isPNG || !isMP3 ){
+                    this.$message.error('上传文件只能是 JPG/PNG/mp3 格式!');
+                }
+                return (isJPG || isPNG || isMP3) && isLt200;           
+            },
+            switchSoundBtn(id,url,callSource){
+                // 播放器显示
+                // this.audioShow=true;
+                if(callSource=='2'){
+                    // switchSound(id,url);
+                    window.parent.open(url)
+                    return;
+                }
+                var newWindow = window.open();
+                var param = {};
+                param.id=id;
+                axios.post('/call/callRecord/getRecordFile',param)
+                    .then(function (response) {
+                        var data =  response.data
+                        if(data.code=='0'){
+                            var url = data.data;
+                            // switchSound(id,url);
+                            newWindow.location.href = url;
+                        }else{
+                            console.error(data);
+                            addCustomerVM.$message({message:data.msg,type:'error'});
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                });
+            },
+            getTalkTimeText(row, column, value, index){
+                var valText="";
+                if(value){
+                    valText =  this.formatSeconds(value);
+                }
+                return valText;
+            },
+            formatSeconds(s){
+                var t="";
+                var hour = Math.floor(s/3600);
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+                if(hour<10){
+                	t+="0";
+                }
+                t+=hour+":";
+                if(min < 10){
+                    t += "0";
+                }
+                t += min + ":";
+                if(sec < 10){
+                    t += "0";
+                }
+                t+=sec;
+                // t += sec.toFixed(2);
+                return t;
+            },
+            downloadAudio(id,url,callSource){
+                var param = {};
+                param.id=id;
+                axios.post('/call/callRecord/getRecordFile', param)
+                .then(function (response) {
+                    var data = response.data;
+                    if (data.code == '0') {
+                    var url = data.data;
+                    if (url) {
+                        var fileName = url.split('?')[0];
+                        var fileNameArr = fileName.split("/");
+//                                download(url, fileNameArr[fileNameArr.length - 1]);
+                        if(callSource=='3'){
+                        	var decodeUrl = encodeURI(url);
+                             url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                         }
+                      var x=new XMLHttpRequest();
+                      x.open("GET", url, true);
+                      x.responseType = 'blob';
+                      x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/\\*' ); }
+                      x.send();
+                    }
+
+                        }else{
+                            console.error(data);
+                            addCustomerVM.$message({message:data.msg,type:'error'});
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                });
+
+            },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item);
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+                if(itemLength==2){
+                    // 删除按钮不显示
+                    this.deleteShow=false;
+                }
+            },
+            addDomain(item) {
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (itemLength<4) {
+                    this.dynamicValidateForm.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }else{
+                    this.$message({
+                        message: '最多添加5个手机号',
+                        type: 'warning'
+                    });
+                }
+                if(itemLength>0){
+                    // 显示删除按钮
+                    this.deleteShow=true;
+                }
+            },
+            getStartTimeText(row, column, value, index){
+                var valText="";
+                if(value){
+                	valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                }
+                return valText;
+            },
+            currentProvince(selVal){
+               var  param={};
+                param.type="1";
+                param.name=selVal;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                  addCustomerVM.cityArr=response.data.data.data;
+                });  	
+             },
+             currentCity(selVal){
+            	 var param={};
+                 param.type="2";
+                 param.name=selVal;
+                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                   addCustomerVM.districtArr=response.data.data.data;
+                 });  	
+              },
+            clearDialog(){
+                console.log('清空')
+
+                // 1、数据清空
+                var domains=this.dynamicValidateForm.domains
+                for(var i=0;i<domains.length;i++){
+                    domains[i].value=""
+                }
+                // 2、重置表单
+                this.$refs['dynamicValidateForm'].resetFields()
+                // 3、关闭弹窗
+                this.dialogFormVisible = false;
+                // 4、按钮变化
+                this.buttonType='A';
+            },
+            handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
+              console.log(index, row);
+              console.log( row.filePath );
+              console.log( row.fileName );
+                // if( row.fileType == 'mp3' ){
+                if (row.fileType == 'mp3'|| row.fileType == 'mp4' || row.fileType == 'wav' || row.fileType == 'wma'|| row.fileType == '3gpp' || row.fileType == 'm4a' ||row.fileType == 'ape'|| row.fileType == 'midi' || row.fileType == 'amr'|| row.fileType == 'MP3'|| row.fileType == 'MP4' ||row.fileType == 'WAV' || row.fileType == 'WMA'|| row.fileType == '3GPP' || row.fileType == 'M4A' ||row.fileType == 'APE'|| row.fileType == 'MIDI' || row.fileType == 'AMR') {
+                  var x=new XMLHttpRequest();
+                  x.open("GET", row.filePath, true);
+                  x.responseType = 'blob';
+                  x.onload=function(e){
+                    download(x.response, row.fileName, "auido/mp3" );
+                  };
+                  x.send();
+//                    this.download1( row.filePath, row.fileName, 'auido/mp3' );
+                }else{
+                    this.dialogFormUploadImgSrc = row.filePath;
+                    this.dialogFormUploadImg =  true;
+                }
+            },
+            download1(data, strFileName, strMimeType) {
+                download(data, strFileName, strMimeType);
+            },
+            addRecord() { //添加记录
+                this.tableDataC2.push({
+                    dialingTime:`<el-form-item label="" size="mini">
+                                    <el-select v-model="formInline.region" placeholder="客户状态">
+                                      <el-option label="区域一" value="shanghai"></el-option>
+                                      <el-option label="区域二" value="beijing"></el-option>
+                                    </el-select>
+                                  </el-form-item>`,
+                    customerStatus: '',
+                    dialing:'',
+                    resourceAvailability:'',
+                    customerfocus:'',
+                    visited:'',
+                    visitedNextTime:'',
+                    creater:''
+                });
+            },
+            handlePlay(index, row) { //通话记录播放btn
+            	$("audio").hide();
+                console.log(index, row);
+                var show = $(".el-icon-pause-svg:eq("+index+")").css("display");
+                if( $(".el-icon-pause-svg:eq("+index+")").css("display") == 'none' ){
+                    $("button.playBtn:eq("+index+") i").remove();
+                    $(".el-icon-pause-svg:eq("+index+")").css("display","block");
+                    $("audio").get(index).play();
+                }else{
+                    $("button.playBtn:eq("+index+")").append('<i class="el-icon-caret-right"></i>');
+                    $(".el-icon-pause-svg:eq("+index+")").css("display","none");
+                    $("audio").get(index).pause();
+                }
+            },
+            handleDownload(index, row) { //通话记录下载btn
+                console.log(index, row);
+                $(".downloadMp3:eq("+index+") a").prop("download","true");
+                $(".downloadMp3:eq("+index+") a>p").trigger("click");
+            },
+          openWechat() {
+            this.wechatVisible = true
+            this.wechatForm.wechat2=this.form.wechat2;
+            this.wechatForm.wechatUrl=this.form.wechatUrl;
+          },
+        },
+        mounted(){
+            document.getElementById('addCustomer').style.display = 'block';
+        },
+        created(){
+            //初始资源类别数据
+          	var  param={};
+          	param.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+           	 addCustomerVM.categoryArr=response.data.data;
+
+
+            });
+          	 //初始化资源类型数据
+       	   param={};
+       	   param.groupCode="clueType";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+             addCustomerVM.typeArr=response.data.data;
+            });
+           
+          //初始化资源类型数据
+      	   param={};
+      	   param.groupCode="clueType";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            addCustomerVM.typeArr=response.data.data;
+           });
+          //初始化媒介
+    	   param={};
+    	   param.groupCode="medium";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+           addCustomerVM.mediumArry=response.data.data;
+         });
+          //广告位
+          param={};
+          param.groupCode="adsense"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.adsenseArr=response.data.data;
+           });
+          
+          //餐饮经验
+          param={};
+          param.groupCode="CateringExperience"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.CateringExperienceArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.CateringExperienceArr.length ; i++){
+                  if(addCustomerVM.CateringExperienceArr[i].value==vform.experience){
+                      vform.experience = addCustomerVM.CateringExperienceArr[i].name;
+                  }
+              }
+           });
+          //职业
+          param={};
+          param.groupCode="occupation"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.occupationArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.occupationArr.length ; i++){
+                  if(addCustomerVM.occupationArr[i].value==vform.customerJob){
+                      vform.customerJob = addCustomerVM.occupationArr[i].name;
+                  }
+              }
+           });
+          
+          //合伙人
+          param={};
+          param.groupCode="partner"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.partnerArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.partnerArr.length ; i++){
+                  if(addCustomerVM.partnerArr[i].value==vform.customerPartner){
+                      vform.customerPartner = addCustomerVM.partnerArr[i].name;
+                  }
+              }
+           });
+          
+          //选址情况
+          param={};
+          param.groupCode="optionAddress"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.optionAddressArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.optionAddressArr.length ; i++){
+                  if(addCustomerVM.optionAddressArr[i].value==vform.address){
+                      vform.address = addCustomerVM.optionAddressArr[i].name;
+                  }
+              }
+           });
+          param={};
+          param.groupCode="customerLevel"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.customerLevelArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.customerLevelArr.length ; i++){
+                  if(addCustomerVM.customerLevelArr[i].value==vform.customerLevel){
+                      vform.customerLevel = addCustomerVM.customerLevelArr[i].name;
+                  }
+              }
+           });
+          //意向品类
+          param={};
+          param.groupCode="project_category";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.IntentionalCategoryArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.IntentionalCategoryArr.length ; i++){
+                  if(addCustomerVM.IntentionalCategoryArr[i].value==vform.intentionCategory){
+                      vform.intentionCategory = addCustomerVM.IntentionalCategoryArr[i].name;
+                  }
+              }
+           });
+        //投资金额
+          param={};
+          param.groupCode="investmentAmount";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.ussmArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.ussmArr.length ; i++){
+                  if(addCustomerVM.ussmArr[i].value==vform.money){
+                      vform.money = addCustomerVM.ussmArr[i].name;
+                  }
+              }
+           });
+          //店面大小
+          param={};
+          param.groupCode="StorefrontArea"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.StorefrontAreaArr=response.data.data;
+              for(var i = 0 ; i < addCustomerVM.StorefrontAreaArr.length ; i++){
+                  if(addCustomerVM.StorefrontAreaArr[i].value==vform.area){
+                      vform.area = addCustomerVM.StorefrontAreaArr[i].name;
+                  }
+              }
+           });
+         //客户状态 
+          param={};
+          param.groupCode="customerStatus"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+        	  addCustomerVM.cusStatusArr=response.data.data;
+           });
+         //获取省
+          param={};
+          param.type="0";
+          axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+       	   addCustomerVM.provinceArr=response.data.data.data;
+          });
+
+          // 在线聊天记录data
+            this.initData();
+            this.isShowOnlineRecordFun();
+
+
+    	}
+    })
+</script>
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+<style>
+    .el-button.is-disabled, .el-button.is-disabled:focus, .el-button.is-disabled:hover{
+        color: #6f7180;
+    }
+</style>
+</html>

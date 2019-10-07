@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="projectManage" class="projectManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>项目管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row>
+      <el-col :span="12">
+    		<shiro:hasPermission name="aggregation:projectManager:add">
+		        <el-button type="primary" @click="toAddProject"><i class="el-icon-plus"></i>添加</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:projectManager:add">
+		        <el-button type="success" @click="toUpdateProject"><i class="el-icon-edit"></i>编辑</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:projectManager:add">
+		        <el-button type="danger" @click="deleteProject"><i class="el-icon-delete"></i>删除</el-button>
+		    </shiro:hasPermission>
+      </el-col>
+	  </el-row>
+	<div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="projectSearchForm" ref="projectSearchForm">
+                <el-form-item label="项目品类:">
+               <el-select v-model="projectSearchForm.category" filterable clearable placeholder="项目品类">
+                   <el-option
+                       v-for="item in categoryOptions"
+                       :key="item.value"
+                       :label="item.name"
+                       :value="item.value">
+                   </el-option>
+               </el-select>
+           </el-form-item>              
+           <el-form-item label="项目所属集团:">
+               <el-select v-model="projectSearchForm.groupId" filterable clearable placeholder="项目所属集团">
+                   <el-option
+                       v-for="item in companyOptions"
+                       :key="item.id"
+                       :label="item.groupName"
+                       :value="item.id">
+                   </el-option>
+               </el-select>
+           </el-form-item>
+           <el-form-item label="项目名称:">
+            	<el-input v-model="projectSearchForm.projectName" placeholder="项目名称" ></el-input>
+            </el-form-item>     
+           <el-form-item label=""> 
+                <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
+            </el-form-item> 
+           </el-form>
+        </div>
+        </div>
+    <div class="mainSearchBg"> 
+      <el-row>
+          <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+              style="width: 100%"  :data="dataTable" >
+              <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+              <el-table-column align="center" type="index" width="80" label="序号"></el-table-column>
+              <el-table-column align="center" prop="projectName" width="180" label="项目名称"></el-table-column>
+              <el-table-column align="center" prop="groupName" label="项目所属集团"></el-table-column>
+              <el-table-column align="center" prop="ratio" width="80" label="结算比例"></el-table-column>
+              <el-table-column align="center" prop="lowestCommission" width="100" label="保底服务费"></el-table-column>
+              <el-table-column align="center" prop="marketLeader" label="市场部负责人"></el-table-column>
+              <el-table-column align="center" prop="promotionLeader" label="推广部负责人"></el-table-column>
+              <el-table-column align="center" prop="investmentLeader" label="招商负责人"></el-table-column>
+              <el-table-column align="center" prop="shopType" label="店型" :formatter="transShopType"></el-table-column>              
+              <el-table-column align="center" prop="isNotSign" label="是否不可签约" :formatter="transformStatus" width="110px"></el-table-column>
+              <el-table-column align="center" prop="category" label="项目品类" :formatter="transCategory"></el-table-column>
+              <el-table-column align="center" prop="classification" label="行业类别" :formatter="transClassification"></el-table-column>
+             <el-table-column align="center" prop="createUserName" label="条目创建人" ></el-table-column>
+          </el-table>
+          <table-pagination :pager="pager" v-if="paginationShow" @change="searchTable"></table-pagination>
+      </el-row>
+    </div>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var classificationList=[[${classificationList}]];//行业类别集合
+var categoryList=[[${categoryList}]];//项目品类集合
+var shopTypeList=[[${shopTypeList}]];//店型集合
+var companyList=[[${companyList}]];//集团集合
+var projectVM = new Vue({
+        el: '#projectManage',
+        data: {
+            paginationShow: false,
+        	projectSearchForm: {
+       		    projectName: '',
+                category: '',
+                groupId: ''
+            },
+            dataTable:[],
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            multipleSelection:[],
+            formLabelWidth: '150px',
+            formLabelWidth1: '120px',
+            storeForm: {
+                projectName: '',
+                category: '',
+                groupId: ''
+            },
+            storeId: '',
+            companyOptions: companyList,
+            categoryOptions: categoryList,
+            scrollTop: 0,
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.projectName = this.projectSearchForm.projectName;
+                param.groupId = this.projectSearchForm.groupId;
+                param.category = this.projectSearchForm.category;
+                console.info(param);
+                axios.post('/aggregation/projectManager/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      projectVM.dataTable= table.data;
+                      projectVM.pager.total =  table.total;
+                      projectVM.pager.currentPage = table.currentPage;
+
+                      // 取出存储的id
+                      if(!projectVM.paginationShow){
+                         if(projectVM.storeId){
+                             projectVM.$nextTick(function(){
+                                var storage = [];
+                                projectVM.dataTable.forEach(function(item, index){
+                                    if(item.id === projectVM.storeId ){
+                                        storage.push(projectVM.dataTable[index]);
+                                    }
+                                })
+                                projectVM.toggleSelection(storage);
+                                projectVM.$el.querySelector('.el-table__body-wrapper').scrollTop = projectVM.scrollTop;
+                            })
+                        }
+                      }else{
+                        removeSessionStore ("projectManagerStoreForm");
+                        removeSessionStore ("projectManagerOtherVal");
+                      }
+                      projectVM.paginationShow = true;
+                      projectVM.storeForm = projectVM.projectSearchForm;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              toggleSelection(rows) { // table select 默认选中fn
+                  if (rows) {
+                      rows.forEach(row => {
+                          this.$refs.multipleTable.toggleRowSelection(row,true);
+                      });
+                  } else {
+                      this.$refs.multipleTable.clearSelection();
+                  }
+              },
+              //是否不可签约转换方法
+              transformStatus(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue==0){
+                	  text="否"
+                  }else if(cellValue==1){
+                	  text="是"
+                  }
+                  return text;
+              },
+              //类别转换方法
+              transClassification(row, column, cellValue, index) {
+            	  var text="";
+            	  if(classificationList){
+	                  for(var i=0;i<classificationList.length;i++){
+	                		if(cellValue==classificationList[i].value){
+	                			text=classificationList[i].name;
+	                		}
+	                	}
+            	  }
+                  return text;
+              },
+              //品类转换方法
+              transCategory(row, column, cellValue, index) {
+            	  var text="";
+            	  if(categoryList){
+            		  for(var i=0;i<categoryList.length;i++){
+                  		if(cellValue==categoryList[i].value){
+                  			text=categoryList[i].name;
+                  		}
+                  	}
+            	  }
+                  return text;
+              },
+              //店型转换方法
+              transShopType(row, column, cellValue, index) {
+            	  var text="";
+            	  if(cellValue&&shopTypeList){
+            		  var values=cellValue.split(",");
+	                  for(var i=0;i<values.length;i++){
+	                	  for(var j=0;j<shopTypeList.length;j++){
+	                  		if(values[i]==shopTypeList[j].value){
+	                  			if(i==0){
+		                  			text=text+shopTypeList[j].name;
+	                  			}else{
+		                  			text=text+","+shopTypeList[j].name;
+	                  			}
+	                  		}
+	                  	  }
+	                  }
+            	  }
+                  
+                  return text;
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              //跳转任务用户页
+              toAddProject() {
+            	  document.location.href='/aggregation/projectManager/initCreateProject';
+              },
+              //跳转修改任务页
+              toUpdateProject() {
+            	    var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+                  // 存储选中信息--start
+                  var clueId=rows[0].id;  
+                  setSessionStore("projectManagerStoreForm", this.storeForm);
+                  var otherVal = {
+                      "currentPage": this.pager.currentPage,
+                      "clueId": clueId,
+                      "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                  }
+                  setSessionStore("projectManagerOtherVal", otherVal);
+                  // 存储选中信息--end  
+            	    document.location.href='/aggregation/projectManager/initUpdateProject?id='+clueId;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+                 deleteProject() {
+              	   var rows = this.multipleSelection;
+                     if(rows.length==0){
+                         this.$message({
+                            message: '请选择删除数据',
+                            type: 'warning'
+                          });
+                         return;
+                     }
+                     var rowNames = [];
+                     var rowIds = [];
+                     for(var i=0;i<rows.length;i++){
+                  	   var curRow = rows[i];
+                         rowIds.push(curRow.id);
+                         rowNames.push("【"+curRow.projectName+"】");
+                     }
+                     
+                     var projectNames = rowNames.join(" ");
+                  this.$confirm('确定要删除 '+projectNames+' 项目？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+                  	  //删除
+                  	var param  = {idList:rowIds};
+                      axios.post('/aggregation/projectManager/deleteProject',param)
+                      .then(function (response) {
+                          var data =  response.data;
+                          if(data.code=='0'){
+                          	projectVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                          		projectVM.searchTable();
+                      	    }});
+                              
+                          }else{
+                          	projectVM.$message({
+                                  message: "接口调用失败",
+                                  type: 'error'
+                                }); 
+                          }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      })
+                      .then(function () {
+                      	
+                      });
+                  }).catch(() => {
+                         
+                  });
+              },//end
+        },
+        created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("projectManagerStoreForm");
+                var otherVal = getSessionStore("projectManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.projectSearchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+           document.getElementById('projectManage').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
