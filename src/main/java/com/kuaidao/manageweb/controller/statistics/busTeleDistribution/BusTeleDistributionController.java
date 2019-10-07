@@ -1,18 +1,29 @@
 package com.kuaidao.manageweb.controller.statistics.busTeleDistribution;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.statistics.busTeleDistribution.BusTeleDistributionFeignClient;
 import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
+import com.kuaidao.stastics.dto.base.BaseBusinessDto;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 商务报表 / 业绩报表 / 电销组织分布表
@@ -53,11 +64,28 @@ public class BusTeleDistributionController extends BaseStatisticsController {
      *
      * 一级页面查询（不分页）
      */
-    @RequestMapping("/getOneAllList")
-    public JSONResult<Map<String,Object>> getOneAllList(@RequestBody BaseBusQueryDto baseBusQueryDto){
+    @RequestMapping("/exportOneAllList")
+    public void exportOneAllList(HttpServletResponse response, @RequestBody BaseBusQueryDto baseBusQueryDto) throws IOException {
         initAuth(baseBusQueryDto);
-        JSONResult<Map<String, Object>> oneAllList = busTeleDistributionFeignClient.getOneAllList(baseBusQueryDto);
-        return oneAllList;
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getTitleList(1));
+        JSONResult<Map<String, Object>> result =   busTeleDistributionFeignClient.getOneAllList(baseBusQueryDto);
+        Map<String, Object> dataMap = result.getData();
+        String listTxt = JSONArray.toJSONString(dataMap.get("tableData"));
+        List<BaseBusinessDto> orderList = JSON.parseArray(listTxt, BaseBusinessDto.class);
+        String totalDataStr = JSON.toJSONString(dataMap.get("totalData"));
+        //合计
+        List<BaseBusinessDto>  sumReadd = JSON.parseArray(totalDataStr, BaseBusinessDto.class);
+        buildList(dataList, orderList,sumReadd,1);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        String name = "商务报表电销组织分布表" +baseBusQueryDto.getStartTime()+"-"+baseBusQueryDto.getEndTime() + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
     }
     /**
      *
@@ -75,11 +103,28 @@ public class BusTeleDistributionController extends BaseStatisticsController {
      *
      * 二级页面查询（不分页）
      */
-    @RequestMapping("/getTwoAllList")
-    public JSONResult<Map<String,Object>> getTwoAllList(@RequestBody BaseBusQueryDto baseBusQueryDto){
+    @RequestMapping("/exportTwoAllList")
+    public void exportTwoAllList(HttpServletResponse response, @RequestBody BaseBusQueryDto baseBusQueryDto) throws IOException {
         initAuth(baseBusQueryDto);
-        JSONResult<Map<String, Object>> twoAllList = busTeleDistributionFeignClient.getTwoAllList(baseBusQueryDto);
-        return twoAllList;
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getTitleList(2));
+        JSONResult<Map<String, Object>> result =  busTeleDistributionFeignClient.getTwoAllList(baseBusQueryDto);
+        Map<String, Object> dataMap = result.getData();
+        String listTxt = JSONArray.toJSONString(dataMap.get("tableData"));
+        List<BaseBusinessDto> orderList = JSON.parseArray(listTxt, BaseBusinessDto.class);
+        String totalDataStr = JSON.toJSONString(dataMap.get("totalData"));
+        //合计
+        List<BaseBusinessDto> sumReadd = JSON.parseArray(totalDataStr, BaseBusinessDto.class);
+        buildList(dataList, orderList,sumReadd,2);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        String name = "商务报表电销组织分布表" +baseBusQueryDto.getStartTime()+"-"+baseBusQueryDto.getEndTime() + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
     }
     /**
      *
@@ -91,5 +136,66 @@ public class BusTeleDistributionController extends BaseStatisticsController {
         initAuth(baseBusQueryDto);
         JSONResult<Map<String, Object>> twoPageList = busTeleDistributionFeignClient.getTwoPageList(baseBusQueryDto);
         return twoPageList;
+    }
+    private List<Object> getTitleList(Integer type) {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("餐饮集团");
+        headTitleList.add("电销事业部");
+        if(type == 2){
+            headTitleList.add("电销组");
+        }
+        headTitleList.add("首访数");
+        headTitleList.add("签约数");
+        headTitleList.add("签约率");
+        headTitleList.add("净业绩金额");
+        headTitleList.add("签约单笔");
+        return headTitleList;
+    }
+
+    private void addTotalExportData(BaseBusinessDto ra, List<List<Object>> dataList, Integer type) {
+        List<Object> curList = new ArrayList<>();
+        curList.add("");
+        curList.add("合计");
+        curList.add("");
+        if(type.equals(2)){
+            curList.add("");
+        }
+        curList.add(ra.getFirstVisitNum());
+        curList.add(ra.getSignNum());
+        curList.add(ra.getSignRate());
+        curList.add(ra.getAmount());
+        curList.add(ra.getSignSingle());
+        dataList.add(curList);
+    }
+
+    private void buildList(List<List<Object>> dataList, List<BaseBusinessDto> orderList,List<BaseBusinessDto> sumList, Integer type) {
+        Map<String, List<BaseBusinessDto>> collect = orderList.stream().collect(Collectors.groupingBy(BaseBusinessDto::getGroupId));
+        List<BaseBusinessDto> collect1 = sumList.stream().sorted(Comparator.comparing(BaseBusinessDto::getGroupId)).collect(Collectors.toList());
+        for(int i=0;i<collect1.size();i++){
+            BaseBusinessDto ra = collect1.get(i);
+            List<BaseBusinessDto> baseBusinessDtos = collect.get(ra.getGroupId());
+            addTotalExportData(ra,dataList,type);
+            buildData(dataList,baseBusinessDtos, type);
+        }
+    }
+
+    private void buildData(List<List<Object>> dataList,List<BaseBusinessDto> list,Integer type){
+        for(int j = 0; j<list.size(); j++){
+            List<Object> curList = new ArrayList<>();
+            BaseBusinessDto raInner = list.get(j);
+            curList.add(j + 1);
+            curList.add(raInner.getGroupName());
+            curList.add(raInner.getSellDepartName());
+            if(type == 2){
+                curList.add(raInner.getTeleGroupName());
+            }
+            curList.add(raInner.getFirstVisitNum());
+            curList.add(raInner.getSignNum());
+            curList.add(raInner.getSignRate());
+            curList.add(raInner.getAmount());
+            curList.add(raInner.getSignSingle());
+            dataList.add(curList);
+        }
     }
 }
