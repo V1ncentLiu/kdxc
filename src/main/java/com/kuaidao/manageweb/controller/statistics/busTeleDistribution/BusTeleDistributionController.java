@@ -28,25 +28,25 @@ public class BusTeleDistributionController extends BaseStatisticsController {
     /**
      * 一级页面跳转
      */
-    @RequestMapping("/toTeleOrganizationDistributed")
+    @RequestMapping("/toTeleOrganizeDistributed")
     public String toTeleOrganizationDistributed(HttpServletRequest request) {
         //商务组
         initOrgList(request);
         //商务大区
         initBugOrg(request);
-        return "reportBusPerformance/teleOrganizationDistributed";
+        return "reportBusPerformance/teleOrganizeDistributed";
     }
 
     /**
      * 二级页面跳转
      */
-    @RequestMapping("/toTeleOrganizationDistributedDetail")
+    @RequestMapping("/toTeleOrganizeDistributedDetail")
     public String toTeleOrganizationDistributedDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,BaseBusQueryDto baseBusQueryDto ,HttpServletRequest request) {
         //商务组
         initOrgList(request);
         //商务大区
         initBugOrg(request);
-        return "reportBusPerformance/teleOrganizationDistributedDetail";
+        return "reportBusPerformance/teleOrganizeDistributedDetail";
     }
 
     /**
