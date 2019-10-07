@@ -17,8 +17,8 @@ import java.util.Map;
 /**
  * 商务报表 / 业绩报表 / 电销组织分布表
  */
+@RequestMapping("/busTeleDistribution")
 @Controller
-@RequestMapping("/statistics/busTeleDistribution")
 public class BusTeleDistributionController extends BaseStatisticsController {
 
     @Autowired
@@ -56,17 +56,19 @@ public class BusTeleDistributionController extends BaseStatisticsController {
     @RequestMapping("/getOneAllList")
     public JSONResult<Map<String,Object>> getOneAllList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         initAuth(baseBusQueryDto);
-        return busTeleDistributionFeignClient.getOneAllList(baseBusQueryDto);
+        JSONResult<Map<String, Object>> oneAllList = busTeleDistributionFeignClient.getOneAllList(baseBusQueryDto);
+        return oneAllList;
     }
     /**
      *
      * 一级页面查询（分页）
      */
-    @ResponseBody
     @RequestMapping("/getOnePageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getOnePageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         initAuth(baseBusQueryDto);
-        return busTeleDistributionFeignClient.getOnePageList(baseBusQueryDto);
+        JSONResult<Map<String, Object>> onePageList = busTeleDistributionFeignClient.getOnePageList(baseBusQueryDto);
+        return onePageList;
     }
 
     /**
@@ -76,15 +78,18 @@ public class BusTeleDistributionController extends BaseStatisticsController {
     @RequestMapping("/getTwoAllList")
     public JSONResult<Map<String,Object>> getTwoAllList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         initAuth(baseBusQueryDto);
-        return busTeleDistributionFeignClient.getTwoAllList(baseBusQueryDto);
+        JSONResult<Map<String, Object>> twoAllList = busTeleDistributionFeignClient.getTwoAllList(baseBusQueryDto);
+        return twoAllList;
     }
     /**
      *
      * 二级页面查询（分页）
      */
     @RequestMapping("/getTwoPageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getTwoPageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         initAuth(baseBusQueryDto);
-        return busTeleDistributionFeignClient.getTwoPageList(baseBusQueryDto);
+        JSONResult<Map<String, Object>> twoPageList = busTeleDistributionFeignClient.getTwoPageList(baseBusQueryDto);
+        return twoPageList;
     }
 }
