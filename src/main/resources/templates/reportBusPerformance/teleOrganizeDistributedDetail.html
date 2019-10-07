@@ -119,15 +119,15 @@
                         <span :class="{'act':scope.row.total != ''}">{{scope.$index+1}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="sellDepartName" label="餐饮集团">
+                <el-table-column prop="groupName" label="餐饮集团">
                     <template slot-scope="scope">
                         <span :class="{'act':scope.row.total != ''}">{{scope.row.sellDepartName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="groupName" label="电销事业部">
+                <el-table-column prop="sellDepartName" label="电销事业部">
                     <template slot-scope="scope">
                         <el-button type="text" size="small" :class="{'act':scope.row.total != ''}" v-if="scope.row.total=='合计'" @click="gotoLink(scope.row)" >合计</el-button>
-                        <span v-else>{{scope.row.groupName}}</span>
+                        <span v-else>{{scope.row.sellDepartName}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="groupName" label="电销组">
@@ -470,11 +470,9 @@
                             for (var i = 0; i < resobjData.totalData.length; i++) {
                                 Vue.set(resobjData.totalData[i], 'total', '合计')
                             }
-                            console.log(resobjData.totalData)
                             for (var j = 0; j < tableData.data.length; j++) {
                                 Vue.set(tableData.data[j], 'total', '')
                             }
-                            console.log(tableData.data)
                             mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
@@ -519,7 +517,6 @@
             goback(){window.history.go(-1);},
             //根据id将合计插入对应id上边
             summaryFun(totalData, tableData) {
-                console.log(tableData)
                 var list = new List();
                 for (var i = 0; i < tableData.length; i++) {
                     list.append(tableData[i]);
@@ -536,7 +533,6 @@
                     arr.push(data)
                 });
                 mainDivVM.tableData = this.repeatArr(arr)
-                console.log(mainDivVM.tableData)
             },
             //去重
             repeatArr(arr) {

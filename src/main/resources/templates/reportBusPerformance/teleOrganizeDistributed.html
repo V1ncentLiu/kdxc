@@ -98,11 +98,11 @@
                         <span :class="{'act':scope.row.total != ''}">{{scope.$index+1}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="sellDepartName" label="餐饮集团"></el-table-column>
-                <el-table-column prop="groupName" label="电销事业部">
+                <el-table-column prop="groupName" label="餐饮集团"></el-table-column>
+                <el-table-column prop="sellDepartName" label="电销事业部">
                     <template slot-scope="scope">
                         <el-button type="text" size="small" :class="{'act':scope.row.total != ''}" v-if="scope.row.total=='合计'" @click="gotoLink(scope.row)" >合计</el-button>
-                        <span v-else>{{scope.row.groupName}}</span>
+                        <span v-else>{{scope.row.sellDepartName}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数">
@@ -293,25 +293,6 @@
                 this.form.businessManagerId = '';
                 this.getTelGroupSale(seleVal);
             },
-            formatTreeList(list) {
-                var b = list.reduce((r, x) => ((r[x.orgId] || (r[x.orgId] = [])).push(x), r), {});
-                var c = Object.keys(b).map(x => b[x]);
-                var newArray = []
-                for (var i = 0; i < c.length; i++) {
-                    for (var j = 0; j < c[i].length; j++) {
-                        for (var k = j + 1; k < c[i].length; k++) {
-                            if (c[i][j].resourceCategoryName == c[i][k].resourceCategoryName) {
-                                c[i][k].resourceCategoryName = ''
-                                if (c[i][j].resourceMediumName == c[i][k].resourceMediumName) {
-                                    c[i][k].resourceMediumName = ''
-                                }
-                            }
-                        }
-                        newArray.push(c[i][j])
-                    }
-                }
-                return newArray
-            },
             getTelGroupSale(seleVal){
                 param={};
                 param.parentId=seleVal;
@@ -337,6 +318,25 @@
                         type: "error"
                     });
                 });
+            },
+            formatTreeList(list) {
+                var b = list.reduce((r, x) => ((r[x.orgId] || (r[x.orgId] = [])).push(x), r), {});
+                var c = Object.keys(b).map(x => b[x]);
+                var newArray = []
+                for (var i = 0; i < c.length; i++) {
+                    for (var j = 0; j < c[i].length; j++) {
+                        for (var k = j + 1; k < c[i].length; k++) {
+                            if (c[i][j].resourceCategoryName == c[i][k].resourceCategoryName) {
+                                c[i][k].resourceCategoryName = ''
+                                if (c[i][j].resourceMediumName == c[i][k].resourceMediumName) {
+                                    c[i][k].resourceMediumName = ''
+                                }
+                            }
+                        }
+                        newArray.push(c[i][j])
+                    }
+                }
+                return newArray
             },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
@@ -443,7 +443,6 @@
             },
             //根据id将合计插入对应id上边
             summaryFun(totalData, tableData) {
-                console.log(tableData)
                 var list = new List();
                 for (var i = 0; i < tableData.length; i++) {
                     list.append(tableData[i]);
@@ -460,7 +459,6 @@
                     arr.push(data)
                 });
                 mainDivVM.tableData = this.repeatArr(arr)
-                console.log(mainDivVM.tableData)
             },
             //去重
             repeatArr(arr) {
@@ -483,8 +481,8 @@
                 }
             },
             gotoLink(row){
-                var groupId = row.groupId;
-                var busAreaId = row.sellDepartId;
+                var groupId = this.export.groupId;
+                var busAreaId = this.export.busAreaId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var businessGroupId = this.export.businessGroupId;
