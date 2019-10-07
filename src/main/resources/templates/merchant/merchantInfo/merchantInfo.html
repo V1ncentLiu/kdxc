@@ -58,7 +58,7 @@
                         :on-success="handleSuccess"
                         :on-error="handleError"
                         :before-upload="handleBefore"
-                        accept=".jpg,.png"
+                        accept=".jpg,.png,.jpeg"
                         multiple
                         :data="uploadParamData"
                         :limit='1'
@@ -72,11 +72,11 @@
                     </el-upload>
                 </el-form-item>
                 <el-form-item label="" label-width="auto" >
-                      <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                      <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="80px" height="80px">
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
+                <el-button type="primary" @click="wechatSumbit()">保存头像</el-button>
             </div>
         </template>
     </el-dialog> 
@@ -231,15 +231,15 @@
                 console.info(err);
             },
             handleBefore(file){
-                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg'|| file.type==='image/jpg';
                 if(!isTextComputer){
                    this.fileList=[];
-                   this.$message.error('文件格式错误');
+                   this.$message.error('请上传正确格式的图片');
                    return false;
                 }
                 if(file.size>2*1024*1024){
                    this.fileList=[];
-                   this.$message.error('图片最大为2MB');
+                   this.$message.error('请上传2MB以内的图片');
                    return false;
                 }
             },
@@ -303,7 +303,12 @@
                         
                         addClueVM.userName=result.data.username;
                         addClueVM.linkName=result.data.name;
-                        addClueVM.phone=result.data.phone;
+                        var phone=result.data.phone;
+                        tel = "" + phone;
+                        // replace()方法在字符串中用一些字符替换另一些字符，或替换一个与正则表达式匹配的子串。
+                        var tel1 =tel.replace(tel.substring(3,7), "****")
+                        addClueVM.phone=tel1;
+                        
                     }else{
                         addClueVM.$message.error(result.msg);
                     }
