@@ -17,8 +17,8 @@ import java.util.Map;
 /**
  * 商务报表 / 业绩报表 / 电销组织分布表
  */
+@RequestMapping("/busTeleDistribution")
 @Controller
-@RequestMapping("/statistics/busTeleDistribution")
 public class BusTeleDistributionController extends BaseStatisticsController {
 
     @Autowired
@@ -63,8 +63,8 @@ public class BusTeleDistributionController extends BaseStatisticsController {
      *
      * 一级页面查询（分页）
      */
-    @ResponseBody
     @RequestMapping("/getOnePageList")
+    @ResponseBody
     public JSONResult<Map<String,Object>> getOnePageList(@RequestBody BaseBusQueryDto baseBusQueryDto){
         initAuth(baseBusQueryDto);
         JSONResult<Map<String, Object>> onePageList = busTeleDistributionFeignClient.getOnePageList(baseBusQueryDto);
