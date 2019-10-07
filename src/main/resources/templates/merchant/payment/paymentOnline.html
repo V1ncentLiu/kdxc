@@ -16,6 +16,7 @@
         .paymentImg .f-fl{margin-right: 50px;}
         .paymentImg img{width: 250px;}
         .rechargeMoney .el-form-item__error{padding-left: 72px;}
+        .h73{height: 73px;}
     </style>
 </head>
 <body>
@@ -26,14 +27,14 @@
         <el-breadcrumb-item>在线充值</el-breadcrumb-item>
     </el-breadcrumb>
     <el-form :model="form" ref="form" label-width="73px" class="demo-dynamic" :rules="rules">
-        <el-row class="borderbox marginB20" style="padding: 20px 40px 30px;"> 
+        <el-row class="borderbox marginB20" style="padding: 20px 40px 20px;"> 
             <div class="marginB20" style="color: #333;font-size: 16px;">充值优惠</div>
-            <ul>                
+            <ul :class="{h73:isClass}">                
                 <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li>
             </ul>
-            <!-- <div class="f-tac marginB20">
+            <div class="f-tac" style="width: 1110px;padding-top: 10px;">
                 <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-            </div> -->
+            </div>
         </el-row>
         
         <el-row class="borderbox padding20 marginB20" v-if="paymentIsShow">
@@ -87,6 +88,7 @@
         el: '#paymentOnline',
         data: function() {
             return { 
+                isClass:true,
                 isShow:false,
                 paymentIsShow:true, 
                 codeIsShow:false,
@@ -133,8 +135,10 @@
             toogleClick(){
                 if(this.isShow){
                     this.isShow=false
+                    this.isClass=true
                 }else{
                     this.isShow=true
+                    this.isClass=false
                 }          
             },
             submitForm(form) {
