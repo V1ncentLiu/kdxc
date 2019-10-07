@@ -37,7 +37,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务大区:">  
+                <el-form-item label="商务大区：">  
                     <el-select v-model="form.busAreaId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in areaList"
@@ -47,7 +47,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务组:">  
+                <el-form-item label="商务组：">  
                     <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="curTelSale" :disabled="isDisabledOrgId">
                         <el-option
                             v-for="item in orgTeleArr"
@@ -57,7 +57,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务经理:">  
+                <el-form-item label="商务经理：">  
                     <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
                             v-for="item in busSaleArr"
@@ -93,19 +93,43 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="businessAreaName" label="商务大区"></el-table-column>
-                <el-table-column prop="groupName" label="餐饮集团">
+                <el-table-column type="index" label="序号" width="55">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.groupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.groupName}}</el-button>
-                        <span v-else>合计</span>
+                        <span :class="{'act':scope.row.total != ''}">{{scope.$index+1}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
-                <el-table-column prop="signNum" label="签约数"></el-table-column>
-                <el-table-column prop="signRate" label="签约率"></el-table-column>
-                <el-table-column prop="amount" label="净业绩金额" ></el-table-column>
-                <el-table-column prop="signSingle" label="签约单笔"></el-table-column>
+                <el-table-column prop="sellDepartName" label="餐饮集团"></el-table-column>
+                <el-table-column prop="groupName" label="电销事业部">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" :class="{'act':scope.row.total != ''}" v-if="scope.row.total=='合计'" @click="gotoLink(scope.row)" >合计</el-button>
+                        <span v-else>{{scope.row.groupName}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="firstVisitNum" label="首访数">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.firstVisitNum}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="signNum" label="签约数">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signNum}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="signRate" label="签约率">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signRate}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="amount" label="净业绩金额" >
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.amount|format_number}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="signSingle" label="签约单笔">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signSingle|format_number}}</span>
+                    </template>
+                </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -115,7 +139,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <style>
-    .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .act{font-weight: bold;}
 </style>
 <script th:inline="javascript">
     var companyList = [[${companyList}]]; // 餐饮集团
@@ -124,6 +148,61 @@
     var curDeptId=[[${busAreaId}]];// 当前商务大区
     var curOrgId =[[${businessGroupId}]];
     var curUserId = [[${businessManagerId}]];
+    function List() {
+        this.dataStore = [];
+        this.append = function (data) {
+            //根据当前数组的长度插入新的数据
+            this.dataStore[this.length()] = data;
+        }
+        this.length = function () {
+            //获得数组的长度
+            var length = this.dataStore.length;
+            return length;
+        }
+
+        //如果找到当前的数据，就返回当前数据的下标，如果没有找到数据就返回-1
+        this.find = function (data) {
+            //1,获得数组的长度
+            var length = this.length();
+            //2,设置返回数据的下标
+            var index = -1;
+            //3,遍历数据
+            for (var i = 0; i < length; i++) {
+                if (data == this.dataStore[i]) {
+                    index = i;
+                    return index;
+                }
+            }
+            return index;
+        }
+
+        this.forEach = function (call) {
+            //1,获得数组的长度
+            var length = this.length();
+            //2,遍历数据
+            for (var i = 0; i < length; i++) {
+                call(this.dataStore[i]);
+            }
+        }
+
+        //在before前面插入数据,如果before有数据，就插入在before前面，如果before没有数据，就把data插入到最前面的数据
+        this.insertBefore = function (data, before) {
+            //1，找到当前before数据的下标
+            var index = this.find(before);
+            var length = this.length();
+            if (index == -1) {
+                for (var i = length - 1; i >= 0; i--) {
+                    this.dataStore[i + 1] = this.dataStore[i]
+                }
+                this.dataStore[0] = data;
+            } else {
+                for (var i = length - 1; i >= index; i--) {
+                    this.dataStore[i + 1] = this.dataStore[i]
+                }
+                this.dataStore[index] = data;
+            }
+        }
+    }
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -163,9 +242,9 @@
                 busSaleArr: '', // 商务经理
             }             
         },
-        methods: {   
-            format_number(row, column){
-                var nStr = row[column.property];
+        filters:{
+            format_number(value){
+                var nStr = value;
                 if('--'==nStr){
                     return nStr;
                 }
@@ -182,6 +261,8 @@
                 }  
                 return x1 + x2;  
             },
+        },
+        methods: {
             centerStyle(){
                 return "text-align:center"
             },
@@ -211,6 +292,25 @@
                 this.form.businessGroupId = '';
                 this.form.businessManagerId = '';
                 this.getTelGroupSale(seleVal);
+            },
+            formatTreeList(list) {
+                var b = list.reduce((r, x) => ((r[x.orgId] || (r[x.orgId] = [])).push(x), r), {});
+                var c = Object.keys(b).map(x => b[x]);
+                var newArray = []
+                for (var i = 0; i < c.length; i++) {
+                    for (var j = 0; j < c[i].length; j++) {
+                        for (var k = j + 1; k < c[i].length; k++) {
+                            if (c[i][j].resourceCategoryName == c[i][k].resourceCategoryName) {
+                                c[i][k].resourceCategoryName = ''
+                                if (c[i][j].resourceMediumName == c[i][k].resourceMediumName) {
+                                    c[i][k].resourceMediumName = ''
+                                }
+                            }
+                        }
+                        newArray.push(c[i][j])
+                    }
+                }
+                return newArray
             },
             getTelGroupSale(seleVal){
                 param={};
@@ -291,7 +391,7 @@
                 //餐饮集团
                 param.groupId = this.form.groupId;
                 this.loading = true;
-                axios.post('/statistics/busTeleDistribution/getOnePageList',param).then(function (response) {
+                axios.post('/busTeleDistribution/getOnePageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -310,10 +410,14 @@
                     }else if(resobj.data && resobj.data.tableData){
                         var resobjData = resobj.data;
                         var tableData = resobjData.tableData;
-                        mainDivVM.tableData = tableData.data;
                         if( tableData.data.length && resobj.data.totalData ){
-                            var totalData = resobjData.totalData[0];
-                            mainDivVM.tableData.unshift(totalData);
+                            for (var i = 0; i < resobjData.totalData.length; i++) {
+                                Vue.set(resobjData.totalData[i], 'total', '合计')
+                            }
+                            for (var j = 0; j < tableData.data.length; j++) {
+                                Vue.set(tableData.data[j], 'total', '')
+                            }
+                            mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -337,6 +441,32 @@
                     });
                 });
             },
+            //根据id将合计插入对应id上边
+            summaryFun(totalData, tableData) {
+                console.log(tableData)
+                var list = new List();
+                for (var i = 0; i < tableData.length; i++) {
+                    list.append(tableData[i]);
+                }
+                for (var i = 0; i < totalData.length; i++) {
+                    for (var j = 0; j < tableData.length; j++) {
+                        if (totalData[i].groupId == tableData[j].groupId) {
+                            list.insertBefore(totalData[i], tableData[j])
+                        }
+                    }
+                }
+                var arr = []
+                list.forEach(function (data) {
+                    arr.push(data)
+                });
+                mainDivVM.tableData = this.repeatArr(arr)
+                console.log(mainDivVM.tableData)
+            },
+            //去重
+            repeatArr(arr) {
+                var x = new Set(arr);
+                return [...x];
+            },
             limitTime (start, end) {
                 var endTime = this.minuteFormat (end);
                 var startTime = this.minuteFormat (start);
@@ -354,7 +484,7 @@
             },
             gotoLink(row){
                 var groupId = row.groupId;
-                var busAreaId = row.businessAreaId;
+                var busAreaId = row.sellDepartId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var businessGroupId = this.export.businessGroupId;
@@ -362,35 +492,19 @@
                 var teleDeptId = this.export.teleDeptId;
                 window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&teleDeptId="+teleDeptId +"&startTime=" + startTime + "&endTime=" + endTime;
             },
-            // arraySpanMethod({
-            //     row,
-            //     column,
-            //     rowIndex,
-            //     columnIndex
-            // }) { // 合并第一行
-            //     if (row.area && row.area == '合计') {
-            //         if (columnIndex === 1) {
-            //             return [1, 2]
-            //         } else if (columnIndex === 2) {
-            //             return [0, 0]
-            //         } else if (columnIndex === 3) {
-            //             return [0, 0]
-            //         }
-            //     }
-            // },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [0, 0];
+            arraySpanMethod({
+                row,
+                column,
+                rowIndex,
+                columnIndex
+            }) { 
+                if (row.total && row.total == '合计') {
+                    if (columnIndex === 1) {
+                        return [0, 0]
                     } else if (columnIndex === 2) {
-                        return [1, 3];
+                        return [1, 2]
                     }
                 }
-            },
-            indexFun (index) { // 表格序号
-                return index;
             },
             percentFormat(row, column) {//百分比格式化
                 var percent = row[column.property];
