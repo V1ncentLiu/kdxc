@@ -38,10 +38,112 @@
     .invite-top {
       margin-top: 14px;
     }
-    .el-input__inner{
+
+    .el-input__inner {
       background: #F2F4F8;
-      border:none;
+      border: none;
       border-radius: 6px;
+    }
+
+    .mainSearchFormBox {
+      margin: 0;
+      max-width: 100%;
+      padding: 10px 0 20px;
+      align-items: center;
+      flex-direction: row;
+    }
+
+    .main-search-box {
+      width: calc(100% - 200px);
+    }
+
+    .mainSearchForm {
+      display: flex;
+      max-width: auto;
+      justify-content: space-between;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      width: auto;
+    }
+
+    .mainSearchBtnBox {
+      margin-bottom: 0;
+      padding: 10px 0 0;
+      display: flex;
+      width: 200px;
+      justify-content: flex-end;
+    }
+
+    .mainSearchBtnBox .el-button {
+      height: 36px;
+      border-radius: 6px;
+      padding: 0 15px;
+    }
+
+    .mainSearchBtnBox .el-button--default {
+      border: none;
+      background: none;
+      border-radius: 6px;
+      color: #4B80FF
+    }
+
+    .mainSearchBtnBox .searchBtn {
+      width: 100px;
+      background: linear-gradient(to left, #4B80FF, #769DF8);
+      /* box-shadow: 13px 21px 0.25 rgba(0,0,0,0.4); */
+      box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
+    }
+
+    .el-input--suffix .el-input__inner {
+      height: 36px;
+      line-height: 36px;
+    }
+
+    .el-form--inline .el-form-item {
+      margin-bottom: 0;
+      margin-top: 10px;
+      margin-right: 15px;
+    }
+
+    .el-icon-arrow-up:before {
+      content: "\E60C";
+      color: #294366;
+    }
+
+    .el-form--inline .el-form-item.search-box-margin {
+      margin-right: 0;
+    }
+
+    .mainSearchBg .el-form-item__label {
+      width: auto;
+    }
+
+    .el-table--border,
+    .el-table--group {
+      border-radius: 8px;
+      box-shadow: 0px 0px 41px 14px rgba(73, 127, 250, 0.1);
+    }
+
+    .el-table thead tr th {
+      background: #fff;
+      height: 58px;
+      line-height: 58px;
+      border: none;
+    }
+
+    .el-table td,
+    .el-table th.is-leaf {
+      border: none;
+    }
+
+    .el-table--enable-row-transition .el-table__body td {
+      height: 46px;
+      line-height: 46px;
+      border: none;
+    }
+
+    .el-table--enable-row-transition .el-table__body tr:nth-child(odd) td {
+      background-color: #DEE3ED;
     }
   </style>
 </head>
@@ -56,34 +158,37 @@
     <div class="mainSearchBg">
       <div class="mainSearchFormBox">
         <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-          <el-form-item label="客户姓名:">
-            <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
-          </el-form-item>
-          <el-form-item label="预约来访时间:">
-            <el-date-picker v-model="form.reserveStartTime" type="datetime" placeholder="选择日期时间">
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="—" class="widthauto">
-            <el-date-picker v-model="form.reserveEndTime" type="datetime" placeholder="选择日期时间">
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="考察项目:">
-            <el-select v-model="form.proSelect" clearable placeholder="请选择">
-              <el-option v-for="item in proSelect" :key="item.value" :label="item.projectName" :value="item.id">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="开店区域：">
-            <el-select filterable v-model="form.province" placeholder="省" class="invite-area"
-              @change="currentProvince" clearable>
-              <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <div class="main-search-box">
+            <el-form-item label="客户姓名:" prop="cusName">
+              <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
+            </el-form-item>
+            <el-form-item label="预约来访时间:" class="search-box-margin" prop="reserveStartTime">
+              <el-date-picker v-model="form.reserveStartTime" type="datetime" placeholder="选择日期时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="—" class="widthauto" prop="reserveEndTime">
+              <el-date-picker v-model="form.reserveEndTime" type="datetime" placeholder="选择日期时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="考察项目:" prop="proSelect">
+              <el-select v-model="form.proSelect" clearable placeholder="请选择考察项目">
+                <el-option v-for="item in proSelect" :key="item.value" :label="item.projectName" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="开店区域：" prop="province">
+              <el-select filterable v-model="form.province" placeholder="选择开店区域" class="invite-area"
+                @change="currentProvince" clearable>
+                <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </div>
           <div class="mainSearchBtnBox">
-              
-            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
+
+            <el-button type="primary" @click="searchTable('form')" class="searchBtn">
               搜索</el-button>
+            <el-button @click="resetForm('form')">重置</el-button>
           </div>
         </el-form>
       </div>
@@ -92,15 +197,15 @@
           <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
           <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
           <el-table-column align="center" prop="cusNum" label="客户人数"></el-table-column>
-            <el-table-column align="center" prop="province" label="开店区域"></el-table-column>
+          <el-table-column align="center" prop="province" label="开店区域"></el-table-column>
           <el-table-column align="center" prop="receiverName" label="接待人"></el-table-column>
-         <el-table-column align="center" prop="reserveTime" label="预约来访时间" :formatter="dateFormat" width="130">
+          <el-table-column align="center" prop="reserveTime" label="预约来访时间" :formatter="dateFormat" width="130">
           </el-table-column>
           <el-table-column align="center" prop="projectName" label="考察项目"></el-table-column>
           <el-table-column align="center" prop="remark" label="备注"></el-table-column>
-</el-table>
-                <table-pagination :pager=" pager" @change="searchTable">
-            </table-pagination>
+        </el-table>
+        <table-pagination :pager=" pager" @change="searchTable">
+        </table-pagination>
       </el-row>
     </div>
 
@@ -199,8 +304,8 @@
         param.projectId = this.form.proSelect;
         param.province = this.form.province;
         console.info(param);
-        this._initData();
-       /*  axios.post('/merchant/merchantAppiontment/queryPage', param)
+        // this._initData();
+        axios.post('/merchant/merchantAppiontment/queryPage', param)
           .then(function (response) {
             var result = response.data;
             if (result.code == '0') {
@@ -214,7 +319,7 @@
           })
           .catch(function (error) {
             console.log(error);
-          }); */
+          });
 
       },
       //日期数据格式化方法
@@ -225,7 +330,9 @@
         return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
       },
       resetForm(formName) {
-        this.$refs[formName].resetFields();
+        if (this.$refs[formName]) {
+          this.$refs[formName].resetFields();
+        }
       },
     },
     created() {
@@ -234,7 +341,6 @@
         this.pager.pageSize = localVal;
       }
       this.searchTable();
-      this._initData();
       var param = {};
       param.type = "0";
       axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
