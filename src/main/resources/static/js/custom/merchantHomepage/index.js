@@ -195,16 +195,16 @@ var homePageVM=new Vue({
             window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
 	   	},  
 	   	handleCommand(command) {//点击下拉菜单
-	        if(command=='modifyPwd'){//修改密码
+	        if(command=='modifyPwd'){//用户信息
 	        	this.modifyPwd();
 	        }else if(command=='logout'){//退出
 	        	this.logout();
 	        }
 	     },
-	     modifyPwd(){//修改密码
+	     modifyPwd(){//用户信息
 	    	 //重置表单
-	    	 this.dialogModifyPwdVisible=true;
-	    
+				//  this.dialogModifyPwdVisible=true;
+				document.location.href = '/merchant/userManager/userInfo';
 	     },
 	     logout(){
 	    	 this.dialogLogoutVisible=true;
@@ -270,7 +270,7 @@ var homePageVM=new Vue({
 		},
 		openMessageCenter(){
 	    	console.log("跳转消息中心")
-	    	var dataUrl = "/messagecenter/messageCenter";
+	    	var dataUrl = "/merchant/messcenter/topage";
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
 			});
