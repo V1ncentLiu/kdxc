@@ -266,12 +266,22 @@ public class MHomePageController {
     }
 
     // 数据排序
-    for(String str:xList){
-      Integer integer = map.get(str);
-      if(integer==null){
-        integer = 0 ;
+    if(DIMENSION.WEEK.equals(indexReqDTO.getDimension())){
+      for(String str:gainXNum(indexReqDTO)){
+        Integer integer = map.get(str);
+        if(integer==null){
+          integer = 0 ;
+        }
+        yList.add(integer);
       }
-      yList.add(integer);
+    }else{
+      for(String str:xList){
+        Integer integer = map.get(str);
+        if(integer==null){
+          integer = 0 ;
+        }
+        yList.add(integer);
+      }
     }
 
     IndexRespDTO indexRespDTO = new IndexRespDTO();
@@ -331,8 +341,9 @@ public class MHomePageController {
         Date date = DateUtil.addDays(stime, i);
         calendar.setTime(date);
         String s = DateUtil.convert2String(calendar.getTime(), DateUtil.ym);
-        String week = s+this.toWeek(calendar.get(Calendar.WEEK_OF_MONTH));
-        if(!xList.contains(week)){
+        String s2 = this.toWeek(calendar.get(Calendar.WEEK_OF_MONTH));
+        String week = s+s2;
+        if(!xList.contains(week)&&!"".equals(s2)){
           xList.add(week);
         }
       }
@@ -350,6 +361,29 @@ public class MHomePageController {
     return xList;
   }
 
+  private List<String> gainXNum(IndexReqDTO indexReqDTO){
+    Date etime = indexReqDTO.getEtime();
+    Date stime = indexReqDTO.getStime();
+    Calendar calendar1 = Calendar.getInstance();
+    Calendar calendar = Calendar.getInstance();
+    calendar1.setTime(etime);
+    String s1 = DateUtil.convert2String(etime, DateUtil.ym);
+    List<String> xList = new ArrayList<>();
+    int diffDay = DateUtil.diffDay(stime, etime);
+    for(int i = 0 ; i <= diffDay ; i++){
+      Date date = DateUtil.addDays(stime, i);
+      calendar.setTime(date);
+      String s = DateUtil.convert2String(calendar.getTime(), DateUtil.ym);
+      Integer s2 = calendar.get(Calendar.WEEK_OF_YEAR);
+      String week = s+"-"+s2;
+      if(!xList.contains(week)){
+        xList.add(week);
+      }
+    }
+    return xList;
+  }
+
+
   private String toWeek(int week){
     String restr = "";
      switch(week){
@@ -365,6 +399,9 @@ public class MHomePageController {
       case 4 :
        restr = " 4th星期";
        break; //可选
+      case 5 :
+         restr = " 5th星期";
+         break; //可选
       default : restr = "";
 
     }
