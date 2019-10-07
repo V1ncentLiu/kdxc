@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <style>
+        .paymentOnline ul{overflow: hidden;width: 1110px;background: #fafafa;}
+        .paymentOnline ul li{float: left;width: 50%;}
+        .paymentOnline ul li p{border-right: 1px solid #ecedf2;border-bottom: 1px solid #ecedf2;padding:10px;}
+        .paymentOnline ul li:nth-of-type(even) p{border-right: none;}
+        .paymentOnline ul li span{width: 30%;display: inline-block;}
+        .paymentOnline ul li span em{padding-left: 10px;}   
+        .paymentBtnType span{display:inline-block;width: 100px;height: 35px;line-height: 35px;text-align: center;background: #c3c5d4;color: #fff;}  
+        .paymentBtnType span a{color: #fff;}
+        .paymentBtnType span.current{background: #5c6be8;}
+        .paymentImg .f-fl{margin-right: 50px;}
+        .paymentImg img{width: 250px;}
+    </style>
+</head>
+<body>
+<div id="paymentOnline" class="paymentOnline mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>在线充值</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="borderbox marginB20" style="padding: 20px 40px 30px;"> 
+        <div class="marginB20" style="color: #333;font-size: 16px;">充值优惠</div>
+        <ul>                
+            <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{}}</em></span><span>送<em>{{}}</em></span><span>得<em>{{}}</em></span></p></li>
+        </ul>
+        <!-- <div class="f-tac marginB20">
+            <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+        </div> -->
+    </el-row>
+    <el-row class="borderbox padding20 marginB20">
+        <div style="text-align: center;margin:50px 0 80px;"><img src="images/step3.jpg" alt=""> </div>
+        <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
+            <p style="margin-bottom: 30px;">感谢你的支持，已支付成功</p>
+            <img src="images/successIco.jpg" alt="">
+            <p style="margin-bottom: 40px;font-size: 14px;">您可在“<a href="" style="color: #5c8de8;">充值记录</a>”中查看</p>
+        </div>
+    </el-row>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">  
+    var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息  
+    var ocmVM = new Vue({
+        el: '#paymentOnline',
+        data: function() {
+            return { 
+                isShow:false,
+                preferentialDTOList:preferentialDTOList,
+            }              
+        },
+        methods: {
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+        },
+        created(){
+            
+        },
+        mounted(){
+            document.getElementById('paymentOnline').style.display = 'block';
+        }
+  })
+</script>
+</html> 
