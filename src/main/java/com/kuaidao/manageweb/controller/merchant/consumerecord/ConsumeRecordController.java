@@ -27,6 +27,7 @@ import com.kuaidao.account.dto.consume.ConsumeRecordNumDTO;
 import com.kuaidao.account.dto.consume.CountConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordPageParam;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -36,6 +37,7 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantConsumeRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
@@ -52,6 +54,8 @@ public class ConsumeRecordController {
     private MerchantConsumeRecordFeignClient merchantConsumeRecordFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
     /***
      * 消费记录列表页(管理端)
@@ -174,20 +178,23 @@ public class ConsumeRecordController {
     }
 
     /***
-     * 消费记录列表页(管理端)
+     * 单个商家消费记录页(管理端)
      *
      * @return
      */
     @RequestMapping("/initSingleMerchant")
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initSingleMerchant(@RequestParam Long mainAccountId, HttpServletRequest request) {
-        UserInfoDTO user = getUser();
+        JSONResult<UserInfoDTO> jsonResult =
+                userInfoFeignClient.get(new IdEntityLong(mainAccountId));
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
-        userList.add(user);
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            userList.add(jsonResult.getData());
+        }
         // 商家账号(当前登录商家主账号加子账号)
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
-        userInfoDTO.setParentId(user.getId());
+        userInfoDTO.setParentId(mainAccountId);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         userList.addAll(merchantUserList.getData());
