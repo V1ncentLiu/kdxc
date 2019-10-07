@@ -192,7 +192,7 @@ public class ConsumeRecordController {
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         userList.addAll(merchantUserList.getData());
         request.setAttribute("userList", userList);
-        request.setAttribute("mainAccountId", mainAccountId);
+        request.setAttribute("mainAccountId", mainAccountId + "");
 
         return "merchant/consumeRecord/singleConsumeRecord";
     }
