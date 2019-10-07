@@ -94,54 +94,24 @@
     </div>
     <!-- 分配资源 -->
     <el-dialog title="申请开发票" :visible.sync="applyFormVisible" width="540px">
-        <el-form :model="formApply" ref="formApply">
+        <el-form :model="formApply" ref="formApply" :rules="rules">
             <el-form-item label="发票金额：" :label-width="formLabelWidth">
                 <span>{{formApply.invoiceAmount}}</span>
             </el-form-item>
-            <el-form-item 
-                label="发票抬头：" 
-                prop="invoiceHeader"
-                :rules="[
-                    { required: true, message: '发票抬头不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formApply.invoiceHeader" placeholder=""></el-input>
+            <el-form-item label="发票抬头：" prop="invoiceHeader" :label-width="formLabelWidth">
+                <el-input v-model="formApply.invoiceHeader" placeholder="" maxLength="30"></el-input>
             </el-form-item>
-            <el-form-item 
-                label="纳税人识别号：" 
-                prop="taxpayerIdentificationNum"
-                :rules="[
-                    { required: true, message: '纳税人识别号不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formApply.taxpayerIdentificationNum" placeholder=""></el-input>
+            <el-form-item label="纳税人识别号：" prop="taxpayerIdentificationNum" :label-width="formLabelWidth">
+                <el-input v-model="formApply.taxpayerIdentificationNum" placeholder="" maxLength="20"></el-input>
             </el-form-item>
-            <el-form-item 
-                label="邮寄地址：" 
-                prop="address"
-                :rules="[
-                    { required: true, message: '邮寄地址不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formApply.address" placeholder=""></el-input>
+            <el-form-item label="邮寄地址：" prop="address" :label-width="formLabelWidth">
+                <el-input v-model="formApply.address" placeholder="" maxLength="100"></el-input>
             </el-form-item>
-            <el-form-item 
-                label="联系电话：" 
-                prop="phone"
-                :rules="[
-                    { required: true, message: '联系电话不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formApply.phone" placeholder=""></el-input>
+            <el-form-item label="联系电话：" prop="phone" :label-width="formLabelWidth">
+                <el-input v-model="formApply.phone" placeholder="" maxLength="11" @keyup.native="number"></el-input>
             </el-form-item>
-            <el-form-item 
-                label="联系人姓名：" 
-                prop="name"
-                :rules="[
-                    { required: true, message: '联系人姓名不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formApply.name" placeholder=""></el-input>
+            <el-form-item label="联系人姓名：" prop="name" :label-width="formLabelWidth">
+                <el-input v-model="formApply.name" placeholder="" maxLength="8"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
@@ -219,10 +189,40 @@
                     phone:'',
                     name:'',
                     invoiceAmount:0,
-                }
+                },
+                rules:{
+                    invoiceHeader: [
+                        { required: true, message: '发票抬头不能为空', trigger: 'blur' }                  
+                    ],
+                    taxpayerIdentificationNum: [
+                        { required: true, message: '纳税人识别号不能为空', trigger: 'blur' }                     
+                    ],
+                    address: [
+                        { required: true, message: '邮寄地址不能为空', trigger: 'blur' }                      
+                    ],
+                    phone: [
+                        { required: true, message: '联系电话不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            var reg =  /^[0-9]+[0-9]*]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入整数的充值金额"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}                      
+                    ],
+                    name: [
+                        { required: true, message: '联系人姓名不能为空', trigger: 'blur' }
+                    ],
+                },
             }             
         },
         methods: {
+            number(){
+            　　this.formApply.phone=this.formApply.phone.replace(/[^\.\d]/g,'');
+                this.formApply.phone=this.formApply.phone.replace('.','');
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -282,7 +282,7 @@
                 var rows = this.multipleSelection;
                 if(rows.length <1){
                     this.$message({
-                        message: '请选择数据',
+                        message: '请选择开票的信息',
                         type: 'warning'
                     });
                     return;
@@ -301,7 +301,7 @@
                 var rows = this.multipleSelection;
                 if(rows.length <1){
                     this.$message({
-                        message: '请选择数据',
+                        message: '请选择开票的信息',
                         type: 'warning'
                     });
                     return;
