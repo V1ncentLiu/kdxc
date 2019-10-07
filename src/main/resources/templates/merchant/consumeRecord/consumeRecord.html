@@ -18,7 +18,8 @@
     </el-breadcrumb>
     <el-row class="marginB20">        
     <shiro:hasPermission name="merchant:consumeRecord:setting">
-        <el-button type="primary" @click="openRemindDig">设置余额不足提醒</el-button>
+        <el-button v-if="btnShow" type="primary" @click="openRemindDig">设置余额不足提醒</el-button>
+        <el-button v-else type="primary" @click="openRemindDig">编辑余额不足提醒</el-button>
     </shiro:hasPermission>
     <shiro:hasPermission name="merchant:consumeRecord:export">
         <el-button type="warning" @click="exportFun">导出消费记录</el-button>
@@ -101,8 +102,8 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formRemind')">提交</el-button>
-            <el-button @click="remindFormVisible= false">取 消</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formRemind')">保存</el-button>
+            <!-- <el-button @click="remindFormVisible= false">取 消</el-button> -->
         </div>
     </el-dialog>
 </div>
@@ -113,11 +114,11 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${userList}]];//商户集合
-    console.log(merchantUserList)
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                btnShow:true,
                 btnDisabled:false,
                 remindFormVisible:false,
                 pendingReviewNum:'',
@@ -159,7 +160,7 @@
                         }, trigger: 'blur'}
                     ],
                     title: [
-                        { required: true, message: '标题不能为空', trigger: 'blur' }
+                        { required: true, message: '提醒标题不能为空', trigger: 'blur' }
                     ],
                     content: [
                         { required: true, message: '提醒内容不能为空', trigger: 'blur' }
@@ -227,7 +228,9 @@
               return moment(cellValue).format("YYYY-MM-DD");
             },
             openRemindDig(){
-                this.remindFormVisible = true;
+                this.remindFormVisible = true;                
+            },
+            settingRemindDig(){
                 var param={};
                 axios.post('/merchant/balanceWarnSetting/getBalanceWarnSetting',param)
                 .then(function (response) {
@@ -236,6 +239,7 @@
                         ocmVM.formRemind.amount=data.data.amount;
                         ocmVM.formRemind.title=data.data.title;
                         ocmVM.formRemind.content=data.data.content;
+                        ocmVM.btnShow=false;
                     }else{
                         ocmVM.$message({
                             message: data.msg,
@@ -349,6 +353,7 @@
             // console.info("create method");
             this.searchTable();
             this.initList();
+            this.settingRemindDig();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
