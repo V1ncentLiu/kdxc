@@ -57,7 +57,7 @@ public class MerchantAppiontmentController {
         } else {
             request.setAttribute("proSelect", new ArrayList());
         }
-        return "???";
+        return "merchant/inviteRecord/inviteRecord";
     }
 
     /**
@@ -68,7 +68,7 @@ public class MerchantAppiontmentController {
      */
     @ResponseBody
     @PostMapping("/queryPage")
-    @RequiresPermissions("merchant:merchantAppiontment:view")
+    //@RequiresPermissions("merchant:merchantAppiontment:view")
     public JSONResult<PageBean<MerchantAppiontmentDTO>> queryPage(@RequestBody MerchantAppiontmentReq req) {
         UserInfoDTO userInfoDTO = getUser();
         req.setUserId(userInfoDTO.getId());
