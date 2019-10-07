@@ -31,9 +31,9 @@ public class MerchantSetMealController {
    * @param request
    * @return
    */
-  @RequestMapping("/mechantSetMealList")
+  @RequestMapping("/toPage")
   @RequiresPermissions("merchant:setMeal:view")
-  public String initCompanyList(HttpServletRequest request) {
+  public String toPage(HttpServletRequest request) {
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantUser(null,null);
     request.setAttribute("userList", userList);

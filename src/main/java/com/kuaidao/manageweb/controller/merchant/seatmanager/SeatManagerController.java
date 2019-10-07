@@ -38,9 +38,9 @@ public class SeatManagerController {
    * @param request
    * @return
    */
-  @RequestMapping("/seatManagerList")
+  @RequestMapping("/toPage")
   @RequiresPermissions("merchant:seatMagager:view")
-  public String seatManagerList(HttpServletRequest request, @RequestBody Long userId) {
+  public String toPage(HttpServletRequest request, @RequestBody Long userId) {
    // UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(userId,null);
