@@ -149,7 +149,6 @@ public class RepairMoneyController extends BaseStatisticsController {
             baseQueryDto.setTeleGroupId(null);
             baseQueryDto.setTeleDeptId(null);
         }
-        baseQueryDto.setTeleDeptId(null);
         return  tailOrderClient.queryByPageBySale(baseQueryDto);
     }
 
