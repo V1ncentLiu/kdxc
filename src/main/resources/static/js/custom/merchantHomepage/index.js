@@ -270,7 +270,7 @@ var homePageVM=new Vue({
 		},
 		openMessageCenter(){
 	    	console.log("跳转消息中心")
-	    	var dataUrl = "/messagecenter/messageCenter";
+	    	var dataUrl = "/merchant/messcenter/topage";
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
 			});

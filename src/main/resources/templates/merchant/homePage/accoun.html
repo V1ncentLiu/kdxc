@@ -88,7 +88,7 @@
                             <img th:src="@{/images/month.png}" alt="">
                             <span>本月获取资源</span>
                         </div>
-                        <p>{{countSources.monthCoun}}</p>
+                        <p>{{countSources.monthCount}}</p>
                     </div>
                 </el-col>
                 <el-col :span="8">
@@ -110,8 +110,12 @@
     <!-- import common js-->
     <div th:include="_footer_include :: #jsLib"></div>
     <script th:src="@{/js/common/echarts.min.js?v=1.0.0}"></script>
-
     <script th:inline="javascript">
+        var countBlance = [[${ countBlance }]];
+        var buyedFlag = [[${ buyedFlag }]];
+        var userType = [[${ userType }]];
+        var merchantName = [[${ merchantName }]];
+        var countSources = [[${ countSources }]];
         var merchantHomeDivVM = new Vue({
             el: '#merchantHome',
             data: {
@@ -121,15 +125,15 @@
                     selectValue: '',
                 },
                 myChart: '',
-                fatherShow: true,
-                merchantName: '',
-                countBlance: '',
-                buyedFlag: true,
+                fatherShow: userType,//userType
+                merchantName: merchantName,
+                countBlance: countBlance,
+                buyedFlag: buyedFlag,
                 showButton: 1,
                 options: '',
                 defaultValue: '',
                 // 今日获取资源
-                countSources: '',
+                countSources: countSources,
                 // 指定图表的配置项和数据
                 option: {
                     title: {
@@ -140,7 +144,7 @@
                     },
                     tooltip: {
                         formatter: function (param) {
-                            return '<div style=""> '+ param.value
+                            return '<div style=""> ' + param.value
                             '</div>';
                         },
                         backgroundColor: ['#fff'],
@@ -161,6 +165,13 @@
                                 fontSize: 15,
                             },
                         },
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: ['#294366'],
+                                fontSize: 15,
+                            }
+                        },
                     },
                     yAxis: {
                         type: 'value',
@@ -170,10 +181,18 @@
                                 color: ['#f4f3f3'],
                                 fontSize: 15,
                             },
-                        }
+                        },
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: ['#294366'],
+                                fontSize: 15,
+                            }
+                        },
                     },
                     series: [{
-                        data: [820, 932, 901, 934, 1290, 1330, 1320],
+                        data: [0, 1, 2, 3, 4, 5, 6],
+                        // data: [820, 932, 901, 934, 1290, 1330, 1320],
                         type: 'line',
                         areaStyle: {},
                         smooth: true,
@@ -203,8 +222,8 @@
                                     show: true,
                                     position: 'top',
                                     textStyle: {
-                                        color: '#000',
-                                        fontSize: 18
+                                        color: '#294366',
+                                        fontSize: 14
                                     }
                                 }
                             }
@@ -342,26 +361,6 @@
                     }]
                 },
 
-                // 页面基本数据请求
-                basicData() {
-                    var that = this
-                    axios.post('/mhomePage/index')
-                        .then(function (response) {
-                            that.fatherShow = true
-                            that.merchantName = '快道'
-                            that.countBlance = 2132
-                            that.buyedFlag = false
-                            that.countSources = {
-                                dayCount: '34234',
-                                monthCoun: '34234',
-                                allCount: '34234',
-                            }
-                        })
-                        .catch(function (error) {
-                            that.$message.error(error);
-                        });
-                },
-
                 //请求时间接口数据
                 axiosData() {
                     var that = this
@@ -378,7 +377,7 @@
                             param.qflag = '30'
                             break;
                         default:
-                            param.qflag = '7'
+                            param.qflag = ''
                     }
                     param.stime = this.from.startTime.getTime()
                     param.etime = this.from.endTime.getTime()
@@ -394,7 +393,10 @@
                     }
                     axios.post('/mhomePage/receiveStatics', param)
                         .then(function (response) {
-
+                            that.option.xAxis.data = response.data.data.xlist
+                            // that.option.series[0].data = [820, 932, 901, 934, 1290, 1330, 1320]
+                            that.option.series[0].data = response.data.data.ylist
+                            that.myChart.setOption(that.option, true)
                         })
                         .catch(function (error) {
                             that.$message.error(error);
@@ -405,7 +407,6 @@
                 this.daysAge(7)
                 this.axiosData()
                 this.isProhibit(false, false, false, true, true, '天')
-                this.basicData()
             },
             mounted() {
                 document.getElementById('merchantHome').style.display = 'block';
