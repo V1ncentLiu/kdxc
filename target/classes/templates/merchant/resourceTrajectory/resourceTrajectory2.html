@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+  <title>后台管理系统</title>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="css/element-ui.css">
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    .optimizeClueManagement {
+      font-size: 14px;
+      background: #f3f3f3;
+    }
+
+    button a {
+      color: #fff !important;
+    }
+
+    .formItem,
+    .formItem .el-form-item__content {
+      width: 100%
+    }
+
+    .fontColor {
+      color: #000;
+    }
+
+    .fontColor1 {
+      color: #57586C
+    }
+
+    .fontColor2 {
+      color: #3A84F4
+    }
+
+    .fontColor3 {
+      color: #FF5C5C
+    }
+
+    .fontSize18 {
+      font-size: 18px;
+    }
+
+    .marign30 {
+      margin-top: 30px;
+    }
+
+    .marign14 {
+      margin-top: 14px;
+    }
+
+    .title {
+      height: 36px;
+      line-height: 36px;
+    }
+
+    .grid-content {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      flex-grow: 1;
+    }
+
+    .grid-content ul {
+      margin-left: 10px;
+    }
+
+    .grid-content img.resourse-user-photo {
+      width: 58px;
+      height: 58px;
+      margin-right: 32px;
+    }
+
+    .resourse-user-info li {
+      height: 40px;
+      line-height: 40px;
+    }
+
+    .resourse-user-info li span {
+      float: left;
+      display: inline;
+    }
+
+    .resourse-user-info li span:first-child {
+      width: 70px;
+
+    }
+
+    .row-bg {
+      padding: 30px;
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 20px
+    }
+
+    .resourse-ad-box {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      border-left: 6px dotted #3A84F4;
+      margin-bottom: 30px;
+    }
+
+    .resourse-entry {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      background: #f3f3f3;
+      padding: 10px 0 30px 30px;
+      margin-bottom: 30px;
+
+    }
+
+    .resourse-online-log {
+      height: 56px;
+      line-height: 56px;
+      border-bottom: 1px solid #E2E2E2;
+      margin-bottom: 20px;
+    }
+
+    .resourse-user-name {
+      margin-left: 100px
+    }
+
+    .resorse-ad-time {}
+
+    .resourse-ad-main {
+      margin-left: 15px;
+      width: calc(100% - 60px)
+    }
+
+    .resourse-online-box {
+      background: #fff;
+      border-radius: 6px;
+      padding: 36px
+    }
+
+    .resourse-ad-main h3 {
+      height: 44px;
+      line-height: 44px;
+    }
+
+    .resourse-ad-link {
+      display: block;
+      margin-top: 26px;
+    }
+
+    .resorse-ad-time div {
+      width: 44px;
+      height: 70px;
+      background: #fff;
+      margin-left: -22px;
+    }
+
+    .resorse-ad-time div span {
+      display: block;
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      line-height: 44px;
+      text-align: center;
+      background: #3A84F4;
+    }
+
+    .resourse-online-more {
+      text-align: center;
+      font-size: 16px;
+      padding: 38px 0 16px 0;
+      cursor: pointer;
+    }
+
+    .arrow-down {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-top: 1px solid #656565;
+      border-right: 1px solid #656565;
+      transform: rotate(135deg);
+      -webkit-transform: rotate(135deg);
+      margin: 0 auto 30px;
+      cursor: pointer;
+      margin-left:60px;
+    }
+
+    .row-nopadding {
+      padding: 0
+    }
+
+    .el-dialog__title:before {}
+
+    .el-dialog__header {
+      background: #fff;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: #fff;
+      background: #3A84F4;
+      border-radius: 50%
+    }
+
+    .el-dialog__header:before {
+      width: 122px;
+      height: 86px;
+      background-size: 122px 86px;
+    }
+
+    .el-dialog__title {
+      color: #4C4E67
+    }
+
+    .dialog-center {
+      justify-content: center;
+    }
+
+    .dialog-center .resourse-user-info li span:first-child {
+      text-align: right;
+      padding-right: 20px;
+    }
+
+    .dialog-center .resourse-user-info {
+      margin-left: 0;
+    }
+
+    .code-width {
+      width: 100px;
+      height: 100px;
+    }
+
+    .resourse-phone-box {
+      overflow: hidden;
+      zoom: 1;
+      padding: 0 10%;
+    }
+
+    .resourse-phone-box li {
+      width: 50%;
+      float: left;
+      display: inline;
+    }
+
+    .resourse-phone-box li span:first-child {
+      text-align: right;
+      margin-right: 5px;
+    }
+    .maxWidth500{max-width: 500px; height: auto;}
+    .msg-more{margin: 0 auto;}
+    .online-msg li{padding:10px 0;}
+  </style>
+</head>
+
+<body>
+  <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding">
+    <el-breadcrumb separator="/" class="elBreadcrumb">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>费用设置</el-breadcrumb-item>
+      <el-breadcrumb-item>资源需求审批</el-breadcrumb-item>
+    </el-breadcrumb>
+    <h3 class="fontColor fontSize14 title marign14">
+      用户行为轨迹
+    </h3>
+    <div class="row-bg el-row--flex" justify="space-around">
+      <div class="grid-content">
+        <img th:src="@{/images/user_photo.png}" class="resourse-user-photo marign30" />
+        <ul class="resourse-user-info">
+          <li>
+            <span>地址：</span><span class="fontColor1"> {{initResourcesObj.area}} </span>
+          </li>
+          <li>
+            <span>终端：</span><span class="fontColor1"> {{initResourcesObj.terminal}} </span>
+          </li>
+          <li>
+            <span>手机：</span><span class="fontColor3"> {{initResourcesObj.phone}} <strong class="fontColor2"
+                @click="dialogFormVisible = true">/ 查看多个手机号</strong></span>
+          </li>
+        </ul>
+      </div>
+      <div class="grid-content bg-purple-light">
+        <ul class="resourse-user-info">
+          <li>
+            <span>客户姓名：</span><span class="fontColor1"> {{initResourcesObj.cusName}} </span>
+          </li>
+          <li>
+            <span>QQ：</span><span class="fontColor1"> {{initResourcesObj.qq}} </span>
+          </li>
+          <li>
+            <span>性别：</span><span class="fontColor1"> {{initResourcesObj.sex}} </span>
+          </li>
+        </ul>
+      </div>
+      <div class="grid-content bg-purple">
+        <ul class="resourse-user-info">
+          <li>
+            <span>微信：</span><span class="fontColor1"> {{initResourcesObj.wechat}} <strong class="fontColor2"
+                @click="openWechat">/ 二维码</strong></span>
+          </li>
+          <li>
+            <span>邮箱：</span><span class="fontColor1"> {{initResourcesObj.email}} </span>
+          </li>
+          <li>
+            <span>年龄：</span><span class="fontColor1"> {{initResourcesObj.age}} </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="row-bg">
+      <div class="resourse-ad-box">
+        <div class="resorse-ad-time">
+          <div><span>8.19</span></div>
+        </div>
+        <div class="resourse-ad-main">
+          <h3>广告投放落地页</h3>
+          <a class="resourse-ad-link" href="https://www.ele.me1122" target="_blank">
+            <img th:src="@{/images/ad_link.png}">
+          </a>
+        </div>
+      </div>
+      <div class="resourse-ad-box">
+        <div class="resorse-ad-time">
+          <div><span>8.19</span></div>
+        </div>
+        <div class="resourse-ad-main">
+          <h3>广告投放渠道</h3>
+          <div class="resourse-entry">
+            <ul class="resourse-user-info">
+              <li>
+                <span>媒介：</span><span class="fontColor1"> {{initResourcesObj.Aource}} </span>
+              </li>
+              <li>
+                <div>广告投放方式</div>
+              </li>
+              <li>
+                <span>资源类别：</span><span> {{initResourcesObj.category}} </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="resourse-ad-box">
+        <div class="resorse-ad-time">
+          <div><span>8.19</span></div>
+        </div>
+        <div class="resourse-ad-main">
+          <h3>客户咨询详情</h3>
+          <div class="resourse-entry">
+            <div class="resourse-online-log">在线聊天记录</div>
+            <ul class="resourse-user-info">
+              <li>
+                <span>客服名称：</span><span class="fontColor1">嘻嘻嘻</span>
+                <span class="resourse-user-name">客服名称：</span><span class="fontColor1">嘻嘻嘻</span>
+              </li>
+              <li>
+                <span>聊天内容:</span>
+              </li>
+            </ul>
+            <!-- 在线客服 -->
+            <!-- <div class="resourse-online-box">
+              <div :class="['listBox',{'listScroll':isActive}]">
+                <ul class="online-msg">
+                    <li v-for="(item,i) in initResourcesObj.cusName" :key="item.id">
+                      <p class="fontColor2" v-if="item.fromType==0">
+                        <span>在线客服</span>
+                        <span>{{item.messageTime}}</span>
+                      </p>
+                      <p class="fontColor3" v-else>
+                        <span><em  v-if="customerInfo">{{customerInfo.cusName}}</em></span>
+                        <span>{{item.messageTime}}</span>
+                      </p>
+                      <p style="padding:0 10px;">
+                        <span  v-if="item.messageType==3"><img :src="initResourcesObj.wechatCode" alt="" class="maxWidth500"></span>
+                        <span v-else>{{item.message}}</span>
+                      </p>
+                    </li>
+                  </ul>
+              </div>
+            </div> -->
+            <div class="msg-more" v-if="isShowMoreBtn" @click="isActiveFun">
+              <div class="resourse-online-more">
+                加载更多聊天记录
+              </div>
+              <div class="arrow-down"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="resourse-ad-box">
+        <div class="resorse-ad-time">
+          <div><span>8.19</span></div>
+        </div>
+        <div class="resourse-ad-main">
+          <h3>客户详情信息</h3>
+          <div class="resourse-entry">
+            <div class="resourse-online-log fontColor3">线索ID：55456661323243541</div>
+            <ul class="resourse-user-info">
+              <li>
+                <span>资源信息</span>
+              </li>
+            </ul>
+            <div class="resourse-online-box">
+              <div class="row-bg row-nopadding  el-row--flex">
+                <div class="grid-content bg-purple-light">
+                  <ul class="resourse-user-info">
+                    <li>
+                      <span>留言时间</span><span class="fontColor1"> {{initResourcesObj.messageTime}} </span>
+                    </li>
+                    <li>
+                      <span>搜索词</span><span class="fontColor1"> {{initResourcesObj.searchWord}} </span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="grid-content bg-purple-light">
+                  <ul class="resourse-user-info">
+                    <li>
+                      <span>留言重点</span><span class="fontColor1"> {{initResourcesObj.messagePoint}} </span>
+                    </li>
+                    <li>
+                      <span>资源项目</span><span class="fontColor1"> {{initResourcesObj.projectName}} </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <ul class="resourse-user-info">
+              <li>
+                <span>基本信息</span>
+              </li>
+            </ul>
+            <div class="resourse-online-box">
+              <div class="row-bg row-nopadding  el-row--flex">
+                <div class="grid-content bg-purple-light">
+                  <ul class="resourse-user-info">
+                    <li>
+                      <span>客户姓名：</span><span class="fontColor1"> {{initResourcesObj.cusName}} </span>
+                    </li>
+                    <li>
+                      <span>手机：</span><span class="fontColor3"> {{initResourcesObj.phone}} <strong class="fontColor2"
+                          @click="dialogFormVisible = true">/ 查看多个手机号</strong></span>
+                    </li>
+                    <li>
+                      <span>QQ：</span><span class="fontColor1"> {{initResourcesObj.qq}} </span>
+                    </li>
+                    <li>
+                      <span>性别：</span><span class="fontColor1"> {{initResourcesObj.sex}} </span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="grid-content bg-purple">
+                  <ul class="resourse-user-info">
+                    <li>
+                      <span>微信：</span><span class="fontColor1"> {{initResourcesObj.wechat}} <strong class="fontColor2"
+                          @click="openWechat">/
+                          二维码</strong></span>
+                    </li>
+                    <li>
+                      <span>邮箱：</span><span class="fontColor1"> {{initResourcesObj.email}} </span>
+                    </li>
+                    <li>
+                      <span>年龄：</span><span class="fontColor1"> {{initResourcesObj.age}} </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="resourse-ad-box">
+        <div class="resorse-ad-time">
+          <div><span>8.19</span></div>
+        </div>
+        <div class="resourse-ad-main">
+          <h3>资源分发到商家</h3>
+        </div>
+      </div>
+    </div>
+    <el-dialog title="查看微信" :visible.sync="wechatVisible" width="540px">
+      <template>
+        <div class="grid-content bg-purple-light dialog-center">
+          <ul class="resourse-user-info">
+            <li>
+              <span>微信</span><span class="fontColor1"> {{initResourcesObj.wechat}} </span>
+            </li>
+            <li>
+              <span>微信2</span><span class="fontColor1"> {{initResourcesObj.wechat2}} </span>
+            </li>
+            <li>
+              <span>微信二维码</span><span><img class="code-width" :src="initResourcesObj.wechatCode"> </span>
+            </li>
+            <!-- <li>
+              <span>微信1</span><span class="fontColor1"> {{initResourcesObj.wechat}} </span>
+            </li>
+            <li>
+              <span>微信二维码</span><span> {{initResourcesObj.category}} </span>
+            </li> -->
+          </ul>
+        </div>
+      </template>
+    </el-dialog>
+    <!-- 查看手机号 -->
+    <el-dialog title="客户手机号" :visible.sync="dialogFormVisible" width="540px">
+      <template>
+        <ul class="resourse-user-info resourse-phone-box">
+          <li>
+            <span>手机号1:</span><span class="fontColor1"> {{initResourcesObj.phone}} </span>
+          </li>
+          <li>
+            <span>手机号2:</span><span class="fontColor1"> {{initResourcesObj.phone2}} </span>
+          </li>
+          <li>
+            <span>手机号3:</span><span class="fontColor1"> {{initResourcesObj.phone3}} </span>
+          </li>
+          <li>
+            <span>手机号4:</span><span class="fontColor1"> {{initResourcesObj.phone4}} </span>
+          </li>
+          <li>
+            <span>手机号5:</span><span class="fontColor1"> {{initResourcesObj.phone5}} </span>
+          </li>
+        </ul>
+      </template>
+    </el-dialog>
+  </div>
+</body>
+
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+  var clueId = [[${clueId}]];//资源ID
+  var ocmVM = new Vue({
+    el: '#optimizeClueManagement',
+    data: function () {
+      return {
+        // area: '', // 地域
+        // terminal: '',// 终端
+        // phone: '',
+        // cusName: '',
+        // qq: '', // qq
+        // sex: '',  // 性别
+        // wechat: '', // 微信
+        // email: '', // 邮箱
+        // age: '',  // 年龄
+        // imageUrl: '',// 图片链接
+        // Aource: '',// 媒介
+        // category: '',// 资源类别
+        // messageTime: '',// 留言时间
+        // messagePoint: '',// 留言重点
+        // searchWord: '',// 搜索词
+        // projectName: '', // 资源项目
+        // chatList: [], // 聊天记录
+        initResourcesObj: {},
+        wechatVisible: false,//查看微信二维码
+        dialogFormVisible: false,
+        isShowMoreBtn:false,
+        isActive:false,
+        clueId: clueId,
+        isShowOnlineRecordBtn:false,
+        onlineRecordData:[]
+
+      }
+    },
+    methods: {
+      initResources() {
+        this.initResourcesObj = {
+          area: '北京', // 地域
+          terminal: '地移动端/pc端域',// 终端
+          phone: '17011323232',
+          phone2: '14011323232',
+          phone3: '13011323232',
+          phone4: '12011323232',
+          phone5: '16011323232',
+          cusName: '李先生',
+          qq: '565788909', // qq
+          sex: '男',  // 性别
+          wechat: 'dhehgk2343', // 微信
+          wechat2: 'dhe2hgk23432', // 微信
+          email: '1329393@qq.common', // 邮箱
+          age: '35岁',  // 年龄
+          imageUrl: 'http://localhost:8180/images/ad_link.png',// 图片链接
+          Aource: '百度',// 媒介
+          category: '百度',// 资源类别
+          messageTime: '20191202 18:00:00',// 留言时间
+          messagePoint: 'XXXX',// 留言重点
+          searchWord: '移动端/pc端',// 搜索词
+          projectName: '项目名称', // 资源项目
+          chatList: [], // 聊天记录
+          wechatCode: 'http://localhost:8180/images/ad_link.png'//微信二维码
+        }
+        const param = { id: '1111' };
+        // axios.post('/merchant/resourceTrajectory/data', param)
+        //   .then(function (response) {
+        //     var result = response.data;
+        //     if (result.code == '0') {
+        //       // this.initResourcesObj = result.data
+
+        //     }
+        //   })
+        //   .catch(function (error) {
+        //     console.log(error);
+        //   });
+
+      },
+      openWechat() {
+        this.wechatVisible = true
+      },
+      isActiveFun(){
+                this.isActive=true;
+                this.isShowMoreBtn=false;
+            },
+            initData(){
+                var param = {};
+                param.clueId = clueId;
+                param.pageNum = 1;
+                param.pageSize = 10;
+                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){
+                            ocmVM.onlineRecordData=dataList;
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].messageTime){
+                                    dataList[i].messageTime=ocmVM.formatTimeFn(dataList[i].messageTime);
+                                }
+                            }
+                            if(dataList.length>0){
+                                ocmVM.isShowOnlineRecordBtn=true;
+                                if(dataList.length>10){
+                                    ocmVM.isShowMoreBtn=true;
+                                }else{
+                                    ocmVM.isShowMoreBtn=false;
+                                }
+                            }
+                        }                        
+                    }else{
+                        ocmVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                        ocmVM.isShowOnlineRecordBtn=false;
+                    }                       
+
+                });
+
+            },
+    },
+    created() {
+      this.initResources();
+      // this.initData();
+    }
+  })
+</script>
+
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{::style})">
+	<title>添加模块</title>
+    <style>
+      .addModule .borderbox{
+      	/*width: 70%;*/
+        padding:30px 10% 30px 10% ;
+      }
+      .addModule .borderbox .el-input__inner{
+        width: 290px;
+      }
+      .addModule .borderbox .el-checkbox{
+        margin-left: 0;
+        margin-right: 30px!important;
+      }
+     /*去掉type为number的箭头*/
+     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    	-webkit-appearance: none;
+      }
+    </style>    
+</head>
+<body>
+<div id="addModule" v-loading="loading"  class="addModule mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item> 
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>菜单管理</el-breadcrumb-item>
+    </el-breadcrumb> 
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">添加菜单</div>
+        <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+            <div class="inforTitle1"><em class="redcolor">*</em>必填项</div>
+            <div class="borderbox marginB20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="菜单名称："    prop="name" :label-width="formLabelWidth">
+                            <el-input v-model="form.name"   maxlength="50"  autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="URL："  prop="url" :label-width="formLabelWidth">
+                            <el-input v-model="form.url" autocomplete="off"  maxlength="100"  placeholder="以#,/或者http开头"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="授权名称："   prop="authCode" :label-width="formLabelWidth">
+                            <el-input v-model="form.authCode" maxlength="50" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
+                            <el-input  v-model="form.sortNo"  maxlength="10" @keyup.native="number" label="描述文字"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="授权操作权限：" prop="type" :label-width="formLabelWidth" >
+                            <el-checkbox-group v-model="form.type" @change="handleCheckedChange">
+                                <el-checkbox v-for="item in items"  :label="item" :key="item">{{item}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="" :label-width="formLabelWidth">
+                            <el-button type="primary" size="small" @click="openOperationInfo">新增操作</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="inforTitle1">选填项</div>
+            <div class="borderbox">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="菜单类名：" prop="className"    :label-width="formLabelWidth">
+                            <el-input v-model="form.className"  maxlength="50"  autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="图标名称：" prop="iconName" :label-width="formLabelWidth">
+                            <el-input v-model="form.iconName" maxlength="50" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+               <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="图标地址：" prop="iconUrl"  :label-width="formLabelWidth">
+                            <el-input v-model="form.iconUrl" maxlength="100"  autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="描述："  prop="description" :label-width="formLabelWidth">
+                            <el-input type="textarea" :rows="3"   maxlength="200" placeholder="限制200字" v-model="form.description"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="padding20 f-tac">            
+                <el-button type="primary" @click="submitForm('form')" :disabled="confirmBtnDisabled"  >提交</el-button>
+                <el-button  @click="reBackModule" >取 消</el-button>
+            </div> 
+        </el-form>  
+    </el-row>
+    <!-- dialog -->
+    <el-dialog title="新增操作" :visible.sync="dialogFormVisible">
+        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
+            <el-form-item label="操作名称：" prop="handleName" :label-width="formLabelWidth">
+                <el-input v-model="dialogForm.handleName" maxlength="10"  autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="操作编码名称：" prop="handleCode" :label-width="formLabelWidth">
+                <el-input v-model="dialogForm.handleCode" maxlength="50"  autocomplete="off"></el-input>
+            </el-form-item>
+            <!--  
+            <el-form-item label="特殊条件：" :label-width="formLabelWidth">
+                <el-select v-model="value" placeholder="选择页面菜单">
+                    <el-option
+                        v-for="item in options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-select v-model="value1" placeholder="选择页面字段">
+                    <el-option
+                        v-for="item in options1"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-input v-model="form.fieldValue" placeholder="设置字段值 例：‘A’，‘B’" autocomplete="off"></el-input>
+                <div class="redcolor">用来满足某用户查看跨组织数据</div>
+            </el-form-item>
+            -->
+        </el-form>
+        <div slot="footer" class="f-tac">            
+            <el-button type="primary" @click="submitDialogForm('dialogForm')" >确 定</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>    
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var checkOptions = ['增(add)', '删(delete)', '改(edit)', '查(view)'];
+    var moduleId = [[${moduleId}]];
+    var level =parseInt([[${levle}]]);
+    var addModuleVM= new Vue({
+        el: '#addModule',
+        data: function() {
+            return {
+                items: checkOptions,
+                dialogFormVisible: false,
+                confirmBtnDisabled:false,//提交按钮 是否禁用
+                form: {
+                    name:'',
+                    url:'',
+                    authCode:'',
+                    sortNo:'',
+                    type: [],
+                    className:'',
+                    iconName:'',
+                    iconUrl:'',
+                    description:''
+                },
+                loading:false,
+                formLabelWidth: '150px',
+                rules:{
+                   	name: [
+                           { required: true, message: '请输入菜单名称', trigger: 'blur' },
+                           {validator:function(rule,value,callback){
+              			    var param = {'name':value};
+                              axios.post('/module/moduleManager/queryModuleByParam',param)
+                              .then(function (response) {
+                                  var data =  response.data;
+                                  if(data.code=='0'){
+                                      var resData = data.data;
+                                      if(resData.length>0){
+                                          callback(new Error("此菜单名称已存在，请修改后提交"));
+                                      }else{
+                                          callback();
+                                      }
+                                      
+                                  }else{
+                                       callback(new Error("查询菜单名称是否唯一报错"));
+                                  }
+                              })
+                              .catch(function (error) {
+                                console.log(error);
+                              })
+                              .then(function () {
+                                // always executed
+                              });
+              			  
+              		  },trigger:'blur'}
+                       ],
+                       url: [
+                           { required: true, message: '请输入URL', trigger: 'blur' }
+                       ],
+                       authCode: [
+                           { required: true, message: '请输入授权名称', trigger: 'blur' }
+                       ],
+                       sortNo: [
+                           { required: true,  message: '请输入优先级', trigger: 'blur' },
+                           { validator:function(rule,value,callback){                 
+                               if(/^[0-9]*$/.test(value) == false){
+                                  callback(new Error("请输正整数"));
+                               }else{
+                                  callback();
+                               } 
+                               callback();
+                           }, trigger: 'blur'}
+                       ],
+                       type: [
+                           { type: 'array', required: true, message: '请至少选择一个授权操作权限', trigger: 'change' }
+                       ],
+                },
+                options: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }],
+                options1: [{
+                    value: '0',
+                    label: '电销组'
+                }, {
+                    value: '1',
+                    label: '媒介'
+                }],
+                value:'',//特殊条件默认值
+                value1:'',//特殊条件默认值
+                dialogForm: {
+                    handleName:'',
+                    handleCode:''
+                },
+                dialogRules:{
+                    handleName: [
+                        { required: true, message: '请输入操作名称', trigger: 'blur' }
+                    ],
+                    handleCode: [
+                        { required: true, message: '请输入操作编码名称', trigger: 'blur' }
+                    ]
+                },
+            }             
+        },
+        methods: {
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var submitData=addModuleVM.form;
+                        submitData.parentId=moduleId;
+                        submitData.level=level+1;
+                        var operations=submitData.type;
+                        var  opeArr=[];
+                        var param={};
+                        for(var i=0;i<operations.length;i++){
+                           var ope=operations[i];
+                           var saveope={};
+                           var start=ope.lastIndexOf('(');
+                           var end=ope.lastIndexOf(')');
+                           var name=ope.substring(0,start) ;
+                           var code=ope.substring(start+1,end) ;
+                           saveope.name=name;
+                           saveope.code=code;
+                           opeArr.push(saveope);
+                        }
+                        submitData.operationInfos=opeArr;
+                     	addModuleVM.confirmBtnDisabled=true;//启用提交按钮
+                        axios.post('/module/moduleManager/saveModuleInfo',submitData)
+                            .then(function (response) {
+                                var data =  response.data
+                                if(data.code=='0'){
+                                	addModuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    addModuleVM.confirmBtnDisabled=false;
+                                    window.location.href="/module/moduleManager/initModuleInfo?moduleId="+moduleId; 
+                                 }});
+                                }else{
+                                    console.error(data);
+                                    addModuleVM.confirmBtnDisabled=false;
+                                }
+                               
+                            })
+                            .catch(function (error) {
+                               addModuleVM.confirmBtnDisabled=false;//启用提交按钮
+                               console.log(error);
+                            });  
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            //取消回退
+            reBackModule(){
+            	 window.location.href="/module/moduleManager/initModuleInfo?moduleId="+moduleId; 
+            },
+            openOperationInfo(){
+            	// debugger;
+            	addModuleVM.dialogFormVisible = true ;
+                if (this.$refs['dialogForm']) {
+             	   this.$refs['dialogForm'].resetFields();
+               }
+            },
+            submitDialogForm(dialogForm) {
+                this.$refs[dialogForm].validate((valid) => {
+                    if (valid) {
+                        console.log('submit!!');
+                        // 关闭弹窗
+                        this.dialogFormVisible = false;  
+                        this.items.push(this.dialogForm.handleName+'('+this.dialogForm.handleCode+')');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            handleCheckedChange(value) {
+                let checkedCount = value.length;
+                this.checkAll = checkedCount === this.items.length;
+                this.isIndeterminate = checkedCount > 0 && checkedCount < this.items.length;
+            },
+            number(){
+      　　　  this.form.sortNo=this.form.sortNo.replace(/[^\.\d]/g,'');
+              this.form.sortNo=this.form.sortNo.replace('.','');
+              this.form.sortNo=this.form.sortNo.replace(/\b(0+)/gi,"");//去掉前面的0
+        　　}
+        },
+        mounted(){ 
+          document.getElementById('addModule').style.display = 'block';
+        }
+    })
+</script>
+</html>

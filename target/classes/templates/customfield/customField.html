@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>页面自定义菜单</title>
+</head>
+<body>
+<div id="userManage" class="userManage mainPadding"  style="display:none">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>页面自定义字段</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-col :span="18">
+            <shiro:hasPermission name="customfield:add">
+                <el-button type="primary" @click="addFieldMenu"><i class="el-icon-plus"></i>添加菜单页面</el-button>
+            </shiro:hasPermission>
+            <shiro:hasPermission name="customfield:edit">
+                <el-button type="success" @click="modifyFiledMenu"><i class="el-icon-edit"></i>修改菜单页面</el-button>
+            </shiro:hasPermission>
+            <shiro:hasPermission name="customfield:delete">
+                <el-button type="danger" @click="deleteFieldMenu"><i class="el-icon-delete"></i>删除菜单页面</el-button>
+            </shiro:hasPermission>
+        </el-col>
+        <el-col :span="6">
+            <el-input placeholder="请输入菜单名称进行查询" class="input-with-select" v-model="searchForm.inputMenuName">
+            <el-button slot="append" icon="el-icon-search" @click="initCustomFiledMenu">搜索</el-button>
+            </el-input>
+        </el-col>
+    </el-row>
+    <div class="mainSearchBg">
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                 @selection-change="handleSelectionChange"
+                :data="dataTable"
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="menuCode" label="菜单代码"></el-table-column>
+                <el-table-column align="center" prop="menuName" label="菜单名称"></el-table-column>
+                <el-table-column align="center" prop="beanName" label="Bean名称"></el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" class="buttonText" style="color:#0072ff">页面字段设置</a>
+                    </template>
+                </el-table-column>
+                
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initCustomFiledMenu"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog">
+        <el-form :model="form" ref="customMenuForm" :rules="rules">
+            <el-form-item label="菜单代码：" :label-width="formLabelWidth" prop="menuCode">
+                <el-input v-model="form.menuCode" autocomplete="off" placeholder="输入菜单代码" maxlength="50" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="菜单名称：" :label-width="formLabelWidth" prop="menuName">
+                <el-input v-model="form.menuName" autocomplete="off" placeholder="输入菜单名称" maxlength="50" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="Bean名称：" :label-width="formLabelWidth" prop="beanName">
+                <el-input v-model="form.beanName" autocomplete="off" placeholder="输入Bean名称" maxlength="50" style="width:90%"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" @click="saveFieldMenu('customMenuForm')" ref="confirmBtn" :disabled="confirmBtnDisabled">确 定</el-button>
+            <el-button @click="cancelForm('customMenuForm')">取 消</el-button>            
+        </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!-- 当前页面的js -->
+<script th:src="@{/js/custom/customfield/customfield.js?v=1.0.1}"></script>
+</html>

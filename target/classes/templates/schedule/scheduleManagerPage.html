@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="userManage" class="userManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>任务管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB20">
+    		<shiro:hasPermission name="sys:scheduleManager:add">
+		        <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>增加任务</el-button>
+		    </shiro:hasPermission>
+	</el-row>
+  <div class="mainSearchBg">
+    <el-row>
+        <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable">
+            <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+            <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
+            <el-table-column align="center" prop="jobName" label="任务名称"></el-table-column>
+            <el-table-column align="center" prop="groupId" label="任务组ID"></el-table-column>
+            <el-table-column align="center" prop="cronExpression" label="时间格式"></el-table-column>
+            <el-table-column align="center" prop="url" label="地址URL" width="550px"></el-table-column>
+            <el-table-column align="center" prop="method" label="方法（GET/POST）" ></el-table-column>
+           <el-table-column align="center" prop="params" label="参数JSON格式" ></el-table-column>
+            <el-table-column align="center" prop="jobState" label="任务状态" :formatter="transformStatus" width="80px"></el-table-column>
+            <el-table-column align="center" label="操作" width="250">
+                <template slot-scope="scope">
+	                <div v-if="scope.row.jobState == 1  || scope.row.jobState == 0">
+		            	<shiro:hasPermission name="sys:scheduleManager:edit">
+	                    <el-button  @click="updateStatus(scope.row.jobId,scope.row.jobName,1,'停止')" type="warning"  size="small">
+	                     		   停止
+	                    </el-button>
+		                </shiro:hasPermission>
+					</div>
+	                <div v-else-if="scope.row.jobState == 2">
+            			<shiro:hasPermission name="sys:scheduleManager:edit">
+		                    <el-button @click="updateStatus(scope.row.jobId,scope.row.jobName,2,'启动')" type="primary"  size="small">
+		                     		   启动
+		                    </el-button>
+		                    <el-button @click="toUpdateUser(scope.row.jobId)" type="success"  size="small">
+		                     		   修改
+		                    </el-button>
+		                </shiro:hasPermission>
+		                <shiro:hasPermission name="sys:scheduleManager:delete">
+		                    <el-button @click="updateStatus(scope.row.jobId,scope.row.jobName,3,'删除')" type="danger"  size="small">
+		                     		   删除
+		                    </el-button>
+	                    </shiro:hasPermission>
+					</div>
+                </template>
+            </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+  </div>
+    <!-- dialog -->
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="40%">
+        <el-form :model="form" ref="form" :rules="rules">
+            <el-form-item label="任务名称：" :label-width="formLabelWidth2" prop="jobName">
+                <el-input v-model="form.jobName" maxlength="50" autocomplete="off" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="任务组ID：" :label-width="formLabelWidth2" prop="groupId">
+	            <el-input v-model="form.groupId" maxlength="50" autocomplete="off"  style="width:90%"></el-input>
+	        </el-form-item>
+            <el-form-item label="时间格式：" :label-width="formLabelWidth2" prop="cronExpression">
+                <el-input v-model="form.cronExpression" maxlength="50" autocomplete="off"  style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="地址URL：" :label-width="formLabelWidth2" prop="url" >
+                <el-input v-model="form.url" maxlength="100" autocomplete="off" :disabled="urlDisabled" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="参数JSON格式：" :label-width="formLabelWidth2" prop="params">
+                <el-input v-model="form.params" maxlength="50" autocomplete="off"  style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="方法：" :label-width="formLabelWidth2" prop="method">
+                <el-select v-model="form.method" placeholder="请选择"  style="width:90%">
+                    <el-option
+                        v-for="item in methodOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" :disabled="submitDisabled" @click="onSubmit('form')">提交</el-button>
+            <el-button @click="cancelForm('form')">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var userVM = new Vue({
+        el: '#userManage',
+        data: {
+	            dataTable:[],
+	            pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+	            multipleSelection:[],
+	            addOrModifyDialogTitle:'',
+	            dialogFormVisible: false,
+	            urlDisabled: false,
+	            submitDisabled: false,
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px',
+                formLabelWidth2: '130px',
+                form: {
+                    jobId: '',
+                    jobName: '',
+                    groupId: '',
+                    cronExpression: '',
+                    params:'',
+                    url: '',
+                    method: 'POST'
+                    
+                },
+                rules: {
+                	jobName: [
+                      { required: true, message: '任务名称不能为空', trigger: 'blur' },
+                      {  max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ],
+                    groupId: [
+                      { required: true, message: '任务组ID不能为空', trigger: 'blur' },
+                      {  max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ],
+                    cronExpression: [
+                      { required: true, message: '时间格式不能为空', trigger: 'blur' },
+                      {  max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ],
+                    url: [
+                      { required: true, message: '地址URL不能为空', trigger: 'blur' },
+                      {  max: 100, message: '最大100个字符', trigger: 'blur' }
+                    ],
+                    method: [
+                      { required: true, message: '方法不能为空', trigger: 'blur' },
+                    ],
+                    params: [
+                      { required: true, message: '参数不能为空', trigger: 'blur' },
+                      { max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ]
+                  },
+                  methodOptions: [{
+                      value: 'POST',
+                      label: 'POST'
+                  }, {
+                      value: 'GET',
+                      label: 'GET'
+                  }]
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/schedule/scheduleManager/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      userVM.dataTable= table.data;
+                      userVM.pager.total =  table.total;
+                      userVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              //添加任务弹窗
+              toAddUser() {
+                  	this.form.jobId='';
+                  	if (this.$refs['form']!==undefined) {
+	               		this.$refs['form'].resetFields();
+	               	}
+                  	this.dialogFormVisible = true;
+                  	this.urlDisabled = false;
+                  	this.addOrModifyDialogTitle="添加任务";
+              },
+              //跳转修改任务页
+              toUpdateUser(id) {
+                  this.addOrModifyDialogTitle="修改任务";
+                  this.urlDisabled = true;
+                  var param={id:id};
+                  //根据id获取数据
+                  axios.post('/schedule/scheduleManager/get',param)
+                  .then(function (response) {
+                      var data =  response.data;
+                      if(data.code=='0'){
+                    	  userVM.form= data.data;
+                      }else{
+                      	console.error(data);
+                      }
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  }); 
+                  this.dialogFormVisible = true;
+              	
+              },
+              //修改状态
+              updateStatus(id,name,status,msg) {
+            	  this.$confirm('确定要'+msg+'【'+name+'】任务吗？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+                	  var param = {};
+                	  param.jobId=id;
+                	  param.type=status;
+                	  var url='/schedule/scheduleManager/setStatusDisable';
+                	  if(status==2){
+                		  url='/schedule/scheduleManager/setStatusEnable';
+                	  }
+                	  if(status==3){
+                		  url='/schedule/scheduleManager/delete';
+                	  }
+                	  axios.post(url, param)
+                      .then(function (response) {
+                            var result =  response.data;
+                            if(result.code=="0"){
+                            	userVM.$message.success(msg+"成功");
+                            	userVM.searchTable();
+                            }else{
+                            	userVM.$message.error(msg+"失败");
+                            }
+                      })
+                      .catch(function (error) {
+                           console.log(error);
+                      });
+                   
+                  }).catch(() => {
+                      this.$message({
+                          type: 'info',
+                          message: '已取消'+msg
+                      });          
+                  });
+            	 
+              },
+              closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+	               	if (this.$refs['form']!==undefined) {
+	               		this.$refs['form'].resetFields();
+	               	}
+             },
+              //状态转换方法
+              transformStatus(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue=="1" ||cellValue=="0" ){
+                	  text="启动"
+                  }else if(cellValue=="2"){
+                	  text="停止"
+                  }
+                  return text;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+               cancelForm(formName) {
+            	   if (this.$refs[formName]!==undefined) {
+               		this.$refs[formName].resetFields();
+               		}
+               	   this.dialogFormVisible = false;
+               },
+               onSubmit(formName) {
+              	 this.$refs[formName].validate((valid) => {
+            	       if (valid) {
+            	    	 userVM.submitDisabled=true;
+         	             var formData = userVM.form;
+         	             var param=formData;
+         	             var dataMap={};
+         	          	 dataMap.params =JSON.parse(formData.params);
+         	      		 dataMap.url = formData.url;
+         	  			 dataMap.method = formData.method;
+         	             param.dataMap= dataMap;
+         	             var msg="新增";
+	                   	 var url="/schedule/scheduleManager/create";
+	  	       	         if(formData.jobId!=''){
+	         	            msg="修改";
+                   			url="/schedule/scheduleManager/update";
+	  	       	         }
+         	            // console.info(param);
+         	            axios.post(url, param)
+         	            .then(function (response) {
+                            //  console.info(response);
+         	            	var data =response.data;
+         	            	if(data.code!="0"){
+                                userVM.$message(data.msg);
+                                userVM.submitDisabled=false;
+         	            	}else{
+         	            		userVM.cancelForm(formName);
+         	            		userVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                                    userVM.submitDisabled=false;
+         	            			userVM.searchTable();
+                          	    }});
+         	            	}
+         	            })
+         	            .catch(function (error) {
+         	            	userVM.submitDisabled=false;
+                            console.log(error);
+         	            });
+         	             
+            	          } else {
+            	        	console.log('数据未通过校验！');
+            	            return false;
+            	          }
+            	        });
+              }
+        },
+        created(){
+            // console.info("create method");
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable(); 
+        },
+        mounted(){
+        //    console.info("mounted method");
+           document.getElementById('userManage').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
