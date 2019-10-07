@@ -358,6 +358,15 @@ public class BaseStatisticsController {
         request.setAttribute("busAreaId",busAreaId);
         request.setAttribute("businessGroupId",businessGroupId);
         request.setAttribute("businessManagerId",businessManagerId);
+
+
+        OrganizationQueryDTO busGroupReqDTO1 = new OrganizationQueryDTO();
+        busGroupReqDTO1.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO1.setOrgType(OrgTypeConstant.DZSYB);
+        busGroupReqDTO1.setBusinessLine(curLoginUser.getBusinessLine());
+        JSONResult<List<OrganizationRespDTO>> listJSONResult1 = organizationFeignClient.queryOrgByParam(busGroupReqDTO1);
+        request.setAttribute("deptList",listJSONResult1.getData());
+
     }
 
 }
