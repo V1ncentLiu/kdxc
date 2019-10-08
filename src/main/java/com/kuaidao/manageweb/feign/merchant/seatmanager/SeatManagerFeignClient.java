@@ -1,7 +1,5 @@
 package com.kuaidao.manageweb.feign.merchant.seatmanager;
 
-import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceDTO;
-import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceReq;
 import com.kuaidao.callcenter.dto.seatmanager.SeatInsertOrUpdateDTO;
 import com.kuaidao.callcenter.dto.seatmanager.SeatManagerReq;
 import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
@@ -10,14 +8,10 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import feign.hystrix.FallbackFactory;
-import java.util.List;
-import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -44,8 +38,7 @@ public interface SeatManagerFeignClient {
     public JSONResult<PageBean<SeatManagerResp>> queryList( @RequestBody SeatManagerReq seatManagerReq);
 
     @Component
-    static class HystrixClientFallback implements
-        SeatManagerFeignClient {
+    static class HystrixClientFallback implements SeatManagerFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(
             SeatManagerFeignClient.class);
