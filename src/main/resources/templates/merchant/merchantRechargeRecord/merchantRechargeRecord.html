@@ -68,7 +68,7 @@
                 :data="dataTable"
                 @selection-change="handleSelectionChange"
             >
-                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="selection" width="55" :selectable="checkSelectable"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="充值时间"  :formatter="dateFormat" width="200"></el-table-column>
                 <el-table-column align="center" prop="serialNumber" label="流水号"></el-table-column>
@@ -197,13 +197,40 @@
                 },
                 rules:{
                     invoiceHeader: [
-                        { required: true, message: '发票抬头不能为空', trigger: 'blur' }                  
+                        { required: true, message: '发票抬头不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            var reg =  /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}              
                     ],
                     taxpayerIdentificationNum: [
-                        { required: true, message: '纳税人识别号不能为空', trigger: 'blur' }                     
+                        { required: true, message: '纳税人识别号不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            var reg =  /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}                                   
                     ],
                     address: [
-                        { required: true, message: '邮寄地址不能为空', trigger: 'blur' }                      
+                        { required: true, message: '邮寄地址不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            var reg =  /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}                                    
                     ],
                     phone: [
                         { required: true, message: '联系电话不能为空', trigger: 'blur' },
@@ -212,18 +239,33 @@
                             if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入整数的充值金额"));
                                 return;
-                            }else{
-                                callback();
                             }
+                            if(value.length!=11){
+                                callback(new Error("请输入正确的手机号"));
+                                return;
+                            }
+                            callback();
                         }, trigger: 'blur'}                      
                     ],
                     name: [
-                        { required: true, message: '联系人姓名不能为空', trigger: 'blur' }
+                        { required: true, message: '联系人姓名不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            var reg =  /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}              
                     ],
                 },
             }             
         },
         methods: {
+            checkSelectable(row) {
+                return row.invoiceStatus == 0
+            },
             number(){
             　　this.formApply.phone=this.formApply.phone.replace(/[^\.\d]/g,'');
                 this.formApply.phone=this.formApply.phone.replace('.','');
