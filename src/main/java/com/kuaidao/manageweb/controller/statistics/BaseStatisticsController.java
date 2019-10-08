@@ -9,6 +9,7 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.controller.statistics.performance.PerformanceController;
+import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
@@ -18,6 +19,7 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.dwOrganizationQueryDTO.DwOrganizationQueryDTO;
+import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
@@ -47,7 +49,7 @@ import java.util.stream.Collectors;
 @Controller
 public class BaseStatisticsController {
 
-    private static Logger logger = LoggerFactory.getLogger(BaseStatisticsController.class);
+    protected Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
     @Autowired
@@ -60,6 +62,8 @@ public class BaseStatisticsController {
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
     private CompanyInfoFeignClient companyInfoFeignClient;
+    @Autowired
+    private SysRegionFeignClient sysRegionFeignClient;
     /**
      * 根据商务组id和角色查询 用户
      * @param userOrgRoleReq
@@ -367,6 +371,20 @@ public class BaseStatisticsController {
         JSONResult<List<OrganizationRespDTO>> listJSONResult1 = organizationFeignClient.queryOrgByParam(busGroupReqDTO1);
         request.setAttribute("deptList",listJSONResult1.getData());
 
+    }
+
+
+
+    /**
+     * 页面元素初始化
+     * @param type 0:country,1:province,2:city,3:district
+     */
+    public List<SysRegionDTO> queryProvince(Integer type){
+        //省市区域
+        SysRegionDTO queryDTO=new SysRegionDTO();
+        queryDTO.setType(type);//province 省级别
+        JSONResult<List<SysRegionDTO>> json= sysRegionFeignClient.queryOrgByParam(queryDTO);
+        return json.getData();
     }
 
 }
