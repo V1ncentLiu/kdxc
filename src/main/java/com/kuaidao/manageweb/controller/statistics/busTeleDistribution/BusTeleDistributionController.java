@@ -52,7 +52,10 @@ public class BusTeleDistributionController extends BaseStatisticsController {
      * 二级页面跳转
      */
     @RequestMapping("/toTeleOrganizeDistributedDetail")
-    public String toTeleOrganizationDistributedDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,BaseBusQueryDto baseBusQueryDto ,HttpServletRequest request) {
+    public String toTeleOrganizationDistributedDetail(Long busAreaId,Long businessGroupId,
+                                                      Long startTime,Long endTime,Long businessManagerId,Long groupId,Long teleDeptId,BaseBusQueryDto baseBusQueryDto ,HttpServletRequest request) {
+        initParam(busAreaId,businessGroupId,
+                startTime,endTime,businessManagerId,groupId,teleDeptId,request);
         //商务组
         initOrgList(request);
         //商务大区
@@ -197,5 +200,17 @@ public class BusTeleDistributionController extends BaseStatisticsController {
             curList.add(raInner.getSignSingle());
             dataList.add(curList);
         }
+    }
+    private void initParam(Long busAreaId,Long businessGroupId,
+                           Long startTime,Long endTime,Long businessManagerId,Long groupId,Long teleDeptId,HttpServletRequest request){
+        BaseBusQueryDto baseBusQueryDto = new BaseBusQueryDto();
+        baseBusQueryDto.setBusAreaId(busAreaId);
+        baseBusQueryDto.setBusinessGroupId(businessGroupId);
+        baseBusQueryDto.setStartTime(startTime);
+        baseBusQueryDto.setEndTime(endTime);
+        baseBusQueryDto.setBusinessManagerId(businessManagerId);
+        baseBusQueryDto.setGroupId(groupId);
+        baseBusQueryDto.setTeleDeptId(teleDeptId);
+        request.setAttribute("baseBusQueryDto",baseBusQueryDto);
     }
 }
