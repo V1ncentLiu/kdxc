@@ -29,25 +29,79 @@
         .input-width {
             width: 310px;
         }
-        .el-date-editor.el-input, .el-date-editor.el-input__inner{
+
+        .el-date-editor.el-input,
+        .el-date-editor.el-input__inner {
             width: 310px;
         }
-        .el-table .cell{display: flex; justify-content: center;}
-        .invite-top{margin-top: 14px;}
-        .el-dialog__header{background: none;}
-        .el-dialog__header:before{width: 122px; height: 86px; background-size: 122px 86px; right: 103px;}
-        .fontColor2 {
-      color: #3A84F4;
-    margin-right: 10px;
-    cursor: pointer;
-    }
-    .el-dialog__headerbtn .el-dialog__close{
-      background: #3A84F4;
-      border-radius: 50%;
-      color:#fff;
-    }
-    .merchant-submit{cursor: pointer;}
 
+        .el-table .cell {
+            display: flex;
+            justify-content: center;
+        }
+
+        .invite-top {
+            margin-top: 14px;
+        }
+
+        .el-dialog__header {
+            background: none;
+        }
+
+        .el-dialog__header:before {
+            width: 122px;
+            height: 86px;
+            background-size: 122px 86px;
+            right: 103px;
+        }
+
+        .fontColor2 {
+            color: #3A84F4;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .el-dialog__headerbtn .el-dialog__close {
+            background: #3A84F4;
+            border-radius: 50%;
+            color: #fff;
+        }
+
+        .merchant-submit {
+            cursor: pointer;
+        }
+
+        .el-dialog__title {
+            color: #4C4E67;
+        }
+        .r-dailog .el-button{
+            width: 190px;
+        }
+        .el-button--primary {
+            height: 43px;
+            line-height: 43px;
+            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+            box-shadow: 0px 9px 27px 2px rgba(75, 128, 255, 0.46);
+            border-radius: 4px;
+        }
+        .el-button--primary  span{
+            height: 26px;
+            line-height: 26px;
+            display: block;
+        }
+        .el-button--default {
+            height: 43px;
+            line-height: 43px;
+            background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
+            box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+            border-radius: 4px;
+        }
+        .el-button--default span{
+            height: 26px;
+            line-height: 26px;
+            display: block;
+        }
+        .invite-box{width: 470px; margin: 0 auto;}
     </style>
 </head>
 
@@ -155,7 +209,7 @@
                     <el-table-column align="center" prop="merchantIsInvite" label="操作" width="80">
                         <template slot-scope="scope">
                             <div v-if="scope.row.merchantIsInvite == '1'">已提交</div>
-                            <div v-else  @click="postInvite(scope.row.clueId)"  class="merchant-submit">提交邀约</div>
+                            <div v-else @click="postInvite(scope.row.clueId)" class="merchant-submit">提交邀约</div>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -184,7 +238,7 @@
 
         <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px">
             <template>
-                <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired">
+                <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired invite-box">
                     <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
                         <el-input v-model="inviteForm.cusName" placeholder="输入客户姓名" autocomplete="off" maxLength="10"
                             class="input-width"></el-input>
@@ -212,7 +266,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="选择接待人" :label-width="formLabelWidth" prop="receiver" class="xreuired">
+                    <el-form-item label="选择接待人:" :label-width="formLabelWidth" prop="receiver" class="xreuired">
                         <el-select v-model="inviteForm.receiver" placeholder="请选择" class="input-width">
                             <el-option v-for="item in merchantUserList" :key="item.value" :label="item.name"
                                 :value="item.id">
@@ -220,8 +274,8 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="预约来访时间：" :label-width="formLabelWidth" prop="reserveTime" class="xreuired">
-                        <el-date-picker v-model="inviteForm.reserveTime"  class="input-width" type="datetime" placeholder="输入客户方便联系的时间"
-                           ></el-date-picker>
+                        <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime"
+                            placeholder="输入客户方便联系的时间"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="proSelect" class="xreuired">
                         <el-select v-model="inviteForm.projectId" placeholder="请选择" class="input-width">
@@ -234,8 +288,9 @@
                         <el-input type="textarea" v-model="inviteForm.remark" class="input-with-select input-width"
                             maxlength="200" :rows="4" placeholder="输入分发备注"></el-input>
                     </el-form-item>
-                    <div class="padding20 f-tac">
-                        <el-button type="primary" :disabled="btnDisabled" @click="submitInviteForm('inviteForm')">提交</el-button>
+                    <div class="padding20 f-tac r-dailog ">
+                        <el-button type="primary" :disabled="btnDisabled" @click="submitInviteForm('inviteForm')">提交
+                        </el-button>
                         <el-button @click="resetForm('inviteForm');inviteVisible = false;">取 消</el-button>
                     </div>
                 </el-form>
@@ -274,7 +329,7 @@
                 paginationShow: false,
                 isShow: false,
                 allocateFormVisible: false,
-                inviteVisible: false,
+                inviteVisible: false,
                 multseleSelection: [],//选择行
                 userList: userList,
                 provinceArr: [],
@@ -282,7 +337,7 @@
                 districtArr: [],
                 merchantUserList: merchantUserList, //接待人
                 proSelect: proSelect,//考察项目
-                clueId:'',//资源id
+                clueId: '',//资源id
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -311,24 +366,26 @@
                     age: '',
                     receiver: '',
                     remark: '',
-                    reserveTime:'',
-                    proSelect:''
+                    reserveTime: '',
+                    proSelect: ''
                 },
                 formAllocat: {
                     userId: '',
                 },
-                rules:{
-                    age:[
-                    	 { validator:function(rule,value,callback){
-                              var reg =  /^[1-9]+[0-9]*]*$/ ;
-                             if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                 callback(new Error("请输入正整数"));
-                                 ocmVM.inviteForm.age =null;
-                             }else{
-                                 callback();
-                             } 
-                             
-                         }, trigger: 'change'}
+                rules: {
+                    age: [
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[1-9]+[0-9]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正整数"));
+                                    ocmVM.inviteForm.age = null;
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
                     ],
                     province: [
                         { required: true, message: '请选择开店区域', trigger: 'change' }
@@ -339,7 +396,7 @@
                     reserveTime: [
                         { required: true, message: '预约来访时间不能为空', trigger: 'change' }
                     ],
-                    
+
                     projectId: [
                         { required: true, message: '考察项目不能为空', trigger: 'change' }
                     ],
@@ -385,7 +442,7 @@
                             console.info(result);
                             var table = result.data;
                             ocmVM.dataTable = table.data;
-                            console.log(table.data,"data---");
+                            console.log(table.data, "data---");
                             ocmVM.pager.total = table.total;
                             ocmVM.pager.currentPage = table.currentPage;
                         }
@@ -415,7 +472,7 @@
                     });
 
             },
-            
+
             exportFun() {
                 var param = this.form;
                 param.pageNum = '';
@@ -434,9 +491,9 @@
                     });
 
             },
-            seeResource(id){
+            seeResource(id) {
                 console.log()
-                document.location.href='/merchant/resourceTrajectory/topage?clueId='+id;
+                document.location.href = '/merchant/resourceTrajectory/topage?clueId=' + id;
             },
             //日期数据格式化方法
             dateFormat(row, column, cellValue, index) {
@@ -502,17 +559,19 @@
                         var param = {};
                         param.clueIds = rowIds;
                         param.userId = this.formAllocat.userId;
-                        axios.post('/clue/management/clueAssign',param)
+                        axios.post('/clue/management/clueAssign', param)
                             .then(function (response) {
-                                var data =  response.data;
+                                var data = response.data;
                                 debugger;
-                                if(data.code=='0'){
-                                    ocmVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
+                                if (data.code == '0') {
+                                    ocmVM.$message({
+                                        message: '分配成功', type: 'success', duration: 2000, onClose: function () {
                                             ocmVM.allocateFormVisible = false;
                                             ocmVM.btnDisabled = false;
                                             ocmVM.searchTable();
-                                        }});
-                                }else{
+                                        }
+                                    });
+                                } else {
                                     clueVM.$message({
                                         message: "接口调用失败",
                                         type: 'error'
@@ -531,9 +590,9 @@
                     }
                 });
             },
-            postInvite(id){
-             this.clueId=id;
-             this.inviteVisible = true;
+            postInvite(id) {
+                this.clueId = id;
+                this.inviteVisible = true;
                 if (this.$refs['inviteForm']) {
                     this.$refs['inviteForm'].resetFields();
                 }
@@ -556,9 +615,9 @@
                         param.remark = this.inviteForm.remark;
                         axios.post('/merchant/merchantAppiontment/insertMerchantAppiontment', param)
                             .then(function (response) {
-                                console.log(response,"response")
+                                console.log(response, "response")
                                 var data = response.data;
-                                console.log(data,"data");
+                                console.log(data, "data");
                                 if (data.code == '0') {
                                     console.log(33333);
                                     ocmVM.$message({
