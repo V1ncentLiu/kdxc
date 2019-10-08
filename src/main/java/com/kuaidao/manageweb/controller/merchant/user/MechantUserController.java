@@ -275,7 +275,7 @@ public class MechantUserController {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         Long id = user.getId();
         request.setAttribute("ossUrl", ossUrl);
-        request.setAttribute("userId", id);
+        request.setAttribute("userId", String.valueOf(id));
         return "merchant/merchantInfo/merchantInfo";
     }
 
@@ -285,10 +285,13 @@ public class MechantUserController {
     @PostMapping("/updateIcon")
     @ResponseBody
     public JSONResult updateIcon(@RequestBody UserInfoReq userInfoReq) {
-        if (StringUtils.isBlank(userInfoReq.getMerchantIcon()) || null == userInfoReq.getId()) {
+        if (null == userInfoReq.getId()) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-
+        //如果提交头像为空，直接返回
+        if(StringUtils.isBlank(userInfoReq.getMerchantIcon())){
+            return new JSONResult().success(null);
+        }
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
         return jsonResult;
     }

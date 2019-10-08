@@ -17,6 +17,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class MerchantRechargeRecordManageController {
   private static Logger logger = LoggerFactory.getLogger(MerchantRechargeRecordManageController.class);
 
+  @Value("${oss.url.directUpload}")
+  private String ossUrl;
 
   @Autowired
   MerchantRechargeRecordManageFeignClient merchantRechargeRecordManageFeignClient;
@@ -61,7 +64,7 @@ public class MerchantRechargeRecordManageController {
     }catch (Exception e){
       logger.error("initRechargeRecordManage:{}",e);
     }
-    return "/merchant/rechargeRecord/rechargeRecord";
+    return "merchant/rechargeRecord/rechargeRecord";
   }
   /**
    * @Description 管理端充值记录列表查询
@@ -98,8 +101,9 @@ public class MerchantRechargeRecordManageController {
     // 商家账号
     List<UserInfoDTO> userList = getMerchantUser(null);
     request.setAttribute("merchantUserList",userList);
+    request.setAttribute("ossUrl",ossUrl);
 
-    return "/merchant/rechargeRecord/rechargePaymentOffline";
+    return "merchant/rechargeRecord/rechargePaymentOffline";
   }
 
   /**

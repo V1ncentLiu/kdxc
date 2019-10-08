@@ -68,11 +68,14 @@ public class MerchantOnlineRechargeController {
       if(merchantUserAccountDTO == null || merchantUserAccountDTO.getBalance() == null){
         merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
       }
+      if(merchantUserAccountDTO == null || merchantUserAccountDTO.getTotalAmounts() == null){
+        merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+      }
       request.setAttribute("merchantUserAccountDTO",merchantUserAccountDTO);
     }catch (Exception e){
       logger.error("加载在线充值页面initOnlineRecharge:{}",e);
     }
-    return "/merchant/payment/paymentOnline";
+    return "merchant/payment/paymentOnline";
   }
   /**
   * @Description 获取支付宝、微信支付URL
