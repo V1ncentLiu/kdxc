@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
+import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
+import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
 import com.kuaidao.common.constant.ComConstant.DIMENSION;
 import com.kuaidao.common.constant.ComConstant.QFLAG;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -10,6 +12,7 @@ import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
+import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
 import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -21,6 +24,7 @@ import com.kuaidao.merchant.dto.index.ResourceCountDTO;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,6 +76,9 @@ public class MHomePageController {
     @Autowired
     private PubcustomerFeignClient pubcustomerFeignClient;
 
+  @Autowired
+  private MerchantUserAccountFeignClient merchantUserAccountFeignClient;
+
     /**
      * 首页 跳转
      *
@@ -113,7 +120,7 @@ public class MHomePageController {
         Integer userType = curLoginUser.getUserType();
         if(Constants.USER_TYPE_TWO.equals(userType)){
             // 查询账户余额
-            request.setAttribute("countBlance","111.1"); // 代码合并后，补上代码
+          setCountBalance(request);
             // 查询是否购买套餐
             request.setAttribute("buyedFlag",1); // 当前无法进行。在第四批需求
         }else{
@@ -475,4 +482,30 @@ public class MHomePageController {
       logger.info(endSdf.format(c.getTime()));
     }
 
+  /**
+   * 账户余额
+   */
+
+  private void setCountBalance( HttpServletRequest request ){
+    //查询商家账号余额信息
+    UserInfoDTO user = CommUtil.getCurLoginUser();
+    MerchantUserAccountQueryDTO dto = new MerchantUserAccountQueryDTO();
+    dto.setUserId(user.getId());
+    JSONResult<MerchantUserAccountDTO> accountDTOJSONResult = merchantUserAccountFeignClient.getMerchantUserAccountInfo(dto);
+    MerchantUserAccountDTO merchantUserAccountDTO = new MerchantUserAccountDTO();
+    merchantUserAccountDTO = accountDTOJSONResult.getData();
+    if(merchantUserAccountDTO == null || merchantUserAccountDTO.getBalance() == null){
+      merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+    }
+    if(merchantUserAccountDTO == null || merchantUserAccountDTO.getTotalAmounts() == null){
+      merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+    }
+    BigDecimal totalAmounts = merchantUserAccountDTO.getTotalAmounts();
+    if(totalAmounts==null){
+      request.setAttribute("countBlance","0.00");
+    }else{
+      request.setAttribute("countBlance",totalAmounts.doubleValue());
+    }
+
+  }
 }
