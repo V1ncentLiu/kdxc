@@ -32,7 +32,7 @@ public class MerchantSetMealController {
    * @return
    */
   @RequestMapping("/toPage")
-  @RequiresPermissions("merchant:setMeal:view")
+  // @RequiresPermissions("merchant:setMeal:view")
   public String toPage(HttpServletRequest request) {
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantUser(null,null);
