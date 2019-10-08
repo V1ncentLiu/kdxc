@@ -63,9 +63,9 @@ public class InvitationController extends BaseStatisticsController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null,null,null);
-            return "reportInvitation/managerList";
+            return "reportResources/selfVisitFollowTableTeam";
         }
-        return "reportInvitation/groupList";
+        return "reportResources/selfVisitFollowTable";
     }
 
 
@@ -77,7 +77,7 @@ public class InvitationController extends BaseStatisticsController {
         ////初始化页面数据
         initModel(request);
         initBaseDto(request,deptId,teleGroupId,teleSaleId,category,cusLevel,areaId,startTime,endTime);
-        return "reportInvitation/groupList";
+        return "reportResources/selfVisitFollowTableTeam";
     }
 
 
