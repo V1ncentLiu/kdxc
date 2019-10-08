@@ -17,16 +17,18 @@
             <el-row type="flex" class="row-bg marginB20" justify="start">
                 <el-col :span="12">
                     <div class="name">
-                        <b>商家姓名,<span> 您好</span></b>
-                        <p>您已购买XX套餐</p>
-                        <p class="look"><span>查看已购买服务</span></p>
+                        <b>{{merchantName}},<span> 您好</span></b>
+                        <p v-if="buyedFlag">您已购买{{merchantName}}套餐</p>
+                        <p v-else>您还没有购买任何套餐</p>
+                        <p class="look" v-if="buyedFlag"><span>查看已购买服务</span></p>
+                        <p class="look" v-else><span>购买云服务</span></p>
                     </div>
                 </el-col>
                 <el-col :span="12">
                     <div class="name money">
                         <div class="difference">
                             <img th:src="@{/images/merchantmoney.png}" alt="">
-                            <span>12245.00</span>
+                            <span>{{countBlance}}</span>
                         </div>
                         <p class="balance">账户余额</p>
                         <p class="look"><span @click="immediateRecharge">立即充值</span></p>
@@ -37,27 +39,29 @@
         <!-- 根据日期筛选 -->
         <div class="homeTime">
             <el-row :gutter="20">
-                <el-col :span="6">
+                <el-col :span="7" style="width: 335px">
                     <span @click="timeClick(0)" class="time" :class="{active:showButton===0} ">昨天</span>
                     <span @click="timeClick(1)" class="time" :class="{active:showButton===1}">近7天</span>
                     <span @click="timeClick(2)" class="time" :class="{active:showButton===2}">近30天</span>
                 </el-col>
-                <el-col :span="12">
+                <el-col :span="9" style="width: 458px">
                     <div class="dateTime">
                         <b>日期</b>
-                        <el-date-picker v-model="from.startTime" type="datetime" placeholder=" 请选择时间">
+                        <el-date-picker v-model="from.startTime" type="datetime" placeholder=" 请选择时间"
+                            @change="inputBlur(1)">
                         </el-date-picker>
-                        <span>&nbsp;&nbsp;---&nbsp;&nbsp;</span>
-                        <el-date-picker v-model="from.endTime" type="datetime" placeholder=" 请选择时间">
+                        <span>&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                        <el-date-picker v-model="from.endTime" type="datetime" placeholder=" 请选择时间"
+                            @change="inputBlur(2)">
                         </el-date-picker>
                     </div>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="5" style="width: 240px">
                     <div class="grain">
                         <b>颗粒</b>
-                        <el-select v-model="from.selectValue" placeholder="请选择" style="width: 110px;">
+                        <el-select v-model="from.selectValue" placeholder="" style="width: 110px;">
                             <el-option v-for="item in options" :key="item.value" :label="item.label"
-                                :value="item.value">
+                                :disabled="item.disabled" :value="item.value">
                             </el-option>
                         </el-select>
                     </div>
@@ -84,7 +88,7 @@
                             <img th:src="@{/images/month.png}" alt="">
                             <span>本月获取资源</span>
                         </div>
-                        <p>{{countSources.monthCoun}}</p>
+                        <p>{{countSources.monthCount}}</p>
                     </div>
                 </el-col>
                 <el-col :span="8">
@@ -106,41 +110,94 @@
     <!-- import common js-->
     <div th:include="_footer_include :: #jsLib"></div>
     <script th:src="@{/js/common/echarts.min.js?v=1.0.0}"></script>
-
     <script th:inline="javascript">
+        var countBlance = [[${ countBlance }]];
+        var buyedFlag = [[${ buyedFlag }]];
+        var userType = [[${ userType }]];
+        var merchantName = [[${ merchantName }]];
+        var countSources = [[${ countSources }]];
         var merchantHomeDivVM = new Vue({
             el: '#merchantHome',
             data: {
                 from: {
                     startTime: '',
-                    endTime: '',
+                    endTime: new Date,
                     selectValue: '',
                 },
                 myChart: '',
-                fatherShow: true,
-                showButton: 0,
+                fatherShow: userType,//userType
+                merchantName: merchantName,
+                countBlance: countBlance,
+                buyedFlag: buyedFlag,
+                showButton: 1,
                 options: '',
+                defaultValue: '',
                 // 今日获取资源
-                countSources: '',
+                countSources: countSources,
                 // 指定图表的配置项和数据
                 option: {
                     title: {
                         text: '',
                     },
-                    tooltip: {},
+                    grid: {
+                        left: '70'
+                    },
+                    tooltip: {
+                        formatter: function (param) {
+                            return '<div style=""> ' + param.value
+                            '</div>';
+                        },
+                        backgroundColor: ['#fff'],
+                        borderRadius: 6,
+                        textStyle: {
+                            color: '#000'
+                        },
+                        extraCssText: 'width:149px;height:65px;text-align:center;line-height:65px;font-size:30px;box-shadow:9px 6px 29px 0px rgba(93,93,234,0.14);'
+                    },
                     xAxis: {
                         type: 'category',
                         boundaryGap: false,
                         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: ['#f4f3f3'],
+                                fontSize: 15,
+                            },
+                        },
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: ['#294366'],
+                                fontSize: 15,
+                            }
+                        },
                     },
                     yAxis: {
-                        type: 'value'
+                        type: 'value',
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: ['#f4f3f3'],
+                                fontSize: 15,
+                            },
+                        },
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: ['#294366'],
+                                fontSize: 15,
+                            }
+                        },
                     },
                     series: [{
-                        data: [820, 932, 901, 934, 1290, 1330, 1320],
+                        // symbol:'circle',
+                        data: [0, 1, 2, 3, 4, 5, 6],
+                        // data: [820, 932, 901, 934, 1290, 1330, 1320],
                         type: 'line',
                         areaStyle: {},
                         smooth: true,
+                        
                         itemStyle: {
                             normal: {
                                 areaStyle: {
@@ -159,6 +216,7 @@
                                         }]),
 
                                 },
+                                color:'#4B80FF',
                                 lineStyle: {
                                     color: '#3c85f4'
                                 },
@@ -166,8 +224,8 @@
                                     show: true,
                                     position: 'top',
                                     textStyle: {
-                                        color: '#000',
-                                        fontSize: 18
+                                        color: '#294366',
+                                        fontSize: 14
                                     }
                                 }
                             }
@@ -179,48 +237,178 @@
             methods: {
                 initEcharts(id) {
                     this.myChart = echarts.init(document.getElementById(id));
+
                     this.myChart.setOption(this.option);
                 },
+                // 时间选择联动
+                inputBlur(data) {
+                    var yesterday = 24 * 60 * 60 * 1000;
+                    var thanTwo = 24 * 2 * 60 * 60 * 1000;
+                    var thanThirty = 30 * 24 * 60 * 60 * 1000;
+                    var thanSeven = 7 * 24 * 60 * 60 * 1000;
+                    var timeDifference = this.from.endTime.getTime() - this.from.startTime.getTime()
+                    switch (data) {
+                        case 1:
+                            if (parseInt(this.from.startTime.getTime() / 1000) == parseInt(new Date().getTime() / 1000)) {
+                                this.showButton = null
+                                this.from.endTime = this.from.startTime
+                            } else if (this.from.startTime > new Date) {
+                                alert('请正确选择时间')
+                                this.from.startTime = new Date
+                                this.from.endTime = new Date
+                                this.showButton = null
+                            }
+                            break;
+                        case 2:
+                            if (this.from.endTime < this.from.startTime || this.from.endTime > new Date) {
+                                alert('请正确选择时间');
+                                this.from.endTime = new Date
+                                var newtimeDifference = this.from.endTime.getTime() - this.from.startTime.getTime()
+                                if (newtimeDifference < yesterday) {
+                                    this.showButton = null
+                                    this.isProhibit(false, false, true, true, true, '天')
+                                } else if (newtimeDifference >= yesterday && newtimeDifference < thanTwo) {
+                                    this.showButton = 0
+                                    this.isProhibit(false, false, true, true, true, '天')
+                                } else if (newtimeDifference >= thanTwo && newtimeDifference < thanSeven) {
+                                    this.showButton = 1
+                                    this.isProhibit(false, false, false, true, true, '天')
+                                } else if (newtimeDifference >= thanSeven && newtimeDifference <= thanThirty) {
+                                    this.showButton = 2
+                                    this.isProhibit(false, false, false, true, true, '天')
+                                } else if (newtimeDifference > thanThirty) {
+                                    this.showButton = null
+                                    this.isProhibit(true, true, false, false, false, '月')
+                                }
+                            }
+                            return
+                            break;
+                        default: return ''
+                    }
+                    if (timeDifference < yesterday) {
+                        this.showButton = null
+                        this.isProhibit(false, false, true, true, true, '天')
+                    } else if (timeDifference >= yesterday && timeDifference < thanTwo) {
+                        this.showButton = 0
+                        this.isProhibit(false, false, true, true, true, '天')
+                    } else if (timeDifference >= thanTwo && timeDifference < thanSeven) {
+                        this.showButton = 1
+                        this.isProhibit(false, false, false, true, true, '天')
+                    } else if (timeDifference >= thanSeven && timeDifference <= thanThirty) {
+                        this.showButton = 2
+                        this.isProhibit(false, false, false, true, true, '天')
+                    } else if (timeDifference > thanThirty) {
+                        this.showButton = null
+                        this.isProhibit(true, true, false, false, false, '月')
+                    }
+                },
+
+                // 立即充值
                 immediateRecharge() {
                     alert("跳转充值页面")
                 },
+
+                // 日期选择
                 timeClick(data) {
                     this.showButton = data
+                    if (data === 0) {
+                        this.isProhibit(false, false, true, true, true, '天')
+                        this.daysAge(1)
+                    } else if (data === 1) {
+                        this.isProhibit(false, false, false, true, true, '天')
+                        this.daysAge(7)
+                    } else if (data === 2) {
+                        this.isProhibit(false, false, false, true, true, '天')
+                        this.daysAge(30)
+                    }
+                    this.from.endTime = new Date
                 },
+
+                // 查询
                 submitQuery() {
-                    console.log(this.from)
+                    this.axiosData()
                 },
+
+                // 处理时间
+                daysAge(day) {
+                    var newDate = new Date().getTime()
+                    var Date7 = new Date(newDate - (24 * day) * 60 * 60 * 1000);
+                    this.from.startTime = Date7
+                    // 几天之前
+                },
+
+                // 判断选择框是否禁用
+                isProhibit(hour, day, week, month, year, defaultValue) {
+                    this.from.selectValue = defaultValue
+                    this.options = [{
+                        value: 'hour',
+                        label: '小时',
+                        disabled: hour
+                    }, {
+                        value: 'day',
+                        label: '天',
+                        disabled: day
+                    }, {
+                        value: 'week',
+                        label: '周',
+                        disabled: week
+                    }, {
+                        value: 'month',
+                        label: '月',
+                        disabled: month
+                    }, {
+                        value: 'year',
+                        label: '年',
+                        disabled: year
+                    }]
+                },
+
+                //请求时间接口数据
+                axiosData() {
+                    var that = this
+                    var param = {};
+                    // 按钮字段判断
+                    switch (this.showButton) {
+                        case 0:
+                            param.qflag = '1'
+                            break;
+                        case 1:
+                            param.qflag = '7'
+                            break;
+                        case 2:
+                            param.qflag = '30'
+                            break;
+                        default:
+                            param.qflag = ''
+                    }
+                    param.stime = this.from.startTime.getTime()
+                    param.etime = this.from.endTime.getTime()
+                    // 年月日判断
+                    if (!this.from.selectValue) {
+                        param.dimension = 'day'
+                    } else if (this.from.selectValue === '天') {
+                        param.dimension = 'day'
+                    } else if (this.from.selectValue === '月') {
+                        param.dimension = 'week'
+                    } else {
+                        param.dimension = this.from.selectValue
+                    }
+                    axios.post('/mhomePage/receiveStatics', param)
+                        .then(function (response) {
+                            that.option.xAxis.data = response.data.data.xlist
+                            // that.option.series[0].data = [820, 932, 901, 934, 1290, 1330, 1320]
+                            that.option.series[0].data = response.data.data.ylist
+                            that.myChart.setOption(that.option, true)
+                        })
+                        .catch(function (error) {
+                            that.$message.error(error);
+                        });
+                }
             },
             created() {
-                this.options = [{
-                    value: '黄金糕',
-                    label: '黄金糕'
-                }, {
-                    value: '双皮奶',
-                    label: '双皮奶'
-                }, {
-                    value: '蚵仔煎',
-                    label: '蚵仔煎'
-                }, {
-                    value: '龙须面',
-                    label: '龙须面'
-                }, {
-                    value: '北京烤鸭',
-                    label: '北京烤鸭'
-                }]
-                this.countSources = {
-                    dayCount :'34234',
-                    monthCoun:'34234',
-                    allCount:'34234',
-                }
-                axios.post('/annReceive/batchUpdate')
-                    .then(function (response) {
-
-                    })
-                    .catch(function (error) {
-                        merchantHomeDivVM.$message.error(error);
-                    });
-
+                this.daysAge(7)
+                this.axiosData()
+                this.isProhibit(false, false, false, true, true, '天')
             },
             mounted() {
                 document.getElementById('merchantHome').style.display = 'block';
