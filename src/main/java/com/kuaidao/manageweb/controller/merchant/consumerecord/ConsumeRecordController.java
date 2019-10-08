@@ -130,11 +130,11 @@ public class ConsumeRecordController {
         XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
         XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
         // 设置宽度
-        sheet.setColumnWidth(1, 3000);
-        sheet.setColumnWidth(2, 3000);
-        sheet.setColumnWidth(3, 3000);
-        sheet.setColumnWidth(4, 3000);
-        sheet.setColumnWidth(5, 3000);
+        sheet.setColumnWidth(1, 4000);
+        sheet.setColumnWidth(2, 4000);
+        sheet.setColumnWidth(3, 4000);
+        sheet.setColumnWidth(4, 4000);
+        sheet.setColumnWidth(5, 4000);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
         String name = "商家消费记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
@@ -260,10 +260,10 @@ public class ConsumeRecordController {
         XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
         XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
         // 设置宽度
-        sheet.setColumnWidth(1, 3000);
-        sheet.setColumnWidth(2, 3000);
-        sheet.setColumnWidth(3, 3000);
-        sheet.setColumnWidth(4, 3000);
+        sheet.setColumnWidth(1, 4000);
+        sheet.setColumnWidth(2, 4000);
+        sheet.setColumnWidth(3, 4000);
+        sheet.setColumnWidth(4, 4000);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
         String name = "商家消费记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
