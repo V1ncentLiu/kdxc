@@ -166,7 +166,15 @@
                         axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
                               console.log(response);
                             if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                                // window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                                if(index !== -1) {
+                                    addClueVM.dynamicValidateForm.domains.splice(index, 1)
+                                }
+                                if(addClueVM.dynamicValidateForm.domains.length==0){//如果编辑的删除没了，则新建按钮可点击,编辑按钮不可点击
+                                    addClueVM.addIsDisabled=false;
+                                    addClueVM.editIsDisabled=true;
+                                }
+
                             }else{
                                 addClueVM.$message({
                                      message: response.data.msg,
@@ -189,8 +197,13 @@
                         });          
                     });
                 }else{
+                    debugger
+                    console.log(item)
                     if(index !== -1) {
                         this.dynamicValidateForm.domains.splice(index, 1)
+                    }
+                    if(!this.dynamicValidateForm.domains[index].isShowDel){//如果新增的删除没了，则编辑按钮可点击
+                        this.editIsDisabled=false;
                     }
                 }
             },
