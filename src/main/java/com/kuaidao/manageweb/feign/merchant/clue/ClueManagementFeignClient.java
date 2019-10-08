@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.merchant.clue;
 
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -64,6 +65,9 @@ public interface ClueManagementFeignClient {
     @PostMapping("/getAssignResourceStatistics")
     JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdEntityLong reqDto);
 
+    @PostMapping("/countAssignResourceStatistics")
+    JSONResult<List<ResourceStatisticsDto>> countAssignResourceStatistics(@RequestBody ResourceStatisticsParamDTO paramDTO);
+
     @Component
     static class HystrixClientFallback implements ClueManagementFeignClient {
 
@@ -94,6 +98,12 @@ public interface ClueManagementFeignClient {
         @Override
         public JSONResult<ResourceStatisticsDto> getAssignResourceStatistics(@RequestBody IdEntityLong reqDto) {
             return fallBackError("根据子账号id获取分配的资源");
+        }
+
+        @Override
+        public JSONResult<List<ResourceStatisticsDto>> countAssignResourceStatistics(
+            ResourceStatisticsParamDTO paramDTO) {
+            return fallBackError("根据子账号id获取分配的资源-按照维度");
         }
     }
 

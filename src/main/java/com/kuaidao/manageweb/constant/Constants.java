@@ -118,4 +118,12 @@ public class Constants {
     public static Integer MERCHANT_PRIMARY_ACCOUNT = 2;
 
 
+    //慧聚
+    public  static  Integer USER_TYPE_ONE = 1;
+    //商家主账号
+    public  static  Integer USER_TYPE_TWO = 2;
+    //商家子账号
+    public  static  Integer USER_TYPE_THREE = 3;
+
+
 }

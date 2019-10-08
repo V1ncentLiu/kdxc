@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.merchant.rule;
 
+import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -31,6 +33,10 @@ public interface RuleAssignRecordFeignClient {
     @PostMapping("/countAssginNum")
     JSONResult<ResourceStatisticsDto> countAssginNum(@RequestBody IdEntityLong idEntity);
 
+
+    @PostMapping("/countAssginStatistic")
+    JSONResult<List<ResourceStatisticsDto>> countAssginStatistic(@RequestBody ResourceStatisticsParamDTO paramDTO);
+
     @Component
     static class HystrixClientFallback implements RuleAssignRecordFeignClient {
 
@@ -47,6 +53,12 @@ public interface RuleAssignRecordFeignClient {
         @Override
         public JSONResult<ResourceStatisticsDto> countAssginNum(IdEntityLong idEntity) {
             return fallBackError("查询商家查询分配数");
+        }
+
+        @Override
+        public JSONResult<List<ResourceStatisticsDto>> countAssginStatistic(
+            ResourceStatisticsParamDTO paramDTO) {
+            return fallBackError("查询商家查询分配数-维度分组");
         }
     }
 
