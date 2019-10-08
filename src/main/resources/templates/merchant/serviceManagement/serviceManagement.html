@@ -1,516 +1,440 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:th="http://www.thymeleaf.org">
-<head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>商家服务管理</title>
-    <style>
-    </style>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+  <title>后台管理系统</title>
+  <style>
+  </style>
 </head>
 <body>
-
-<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
-
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>商家服务管理</el-breadcrumb-item>
+  <div id="userManage" class="userManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>商家服务管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <!-- <el-row class="marginB20">
-        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>添加</el-button>
-            <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑</el-button>
-            <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
-        </el-col>
-    </el-row> -->
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-          	<el-form :inline="true" :model="form" ref="form">
-              <el-form-item label="商家:" label-width="auto">
-                    <el-select v-model="form.applyUserId" filterable  clearable placeholder="商家账户名">
+            <el-form :inline="true" :model="userSearchForm" class="demo-form-inline mainSearchForm" ref="userSearchForm">
+                <el-form-item label="商家：" prop="status" label-width="auto">
+                    <el-select clearable v-model="userSearchForm.status" placeholder="商家账户名">
                         <el-option
-                            v-for="item in merchantUserListOptions"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                          v-for="item in merchantUserListOptions"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-              <el-form-item label="套餐服务名称:" label-width="110px">
-        				<el-select filterable v-model="financeUsers" placeholder="套餐服务名称" clearable>
-        			    <el-option
-        			      v-for="item in cwList"
-        			      :key="item.id"
-                    :label="item.name"
-                    :value="item.id">
-        			    </el-option>
-        				</el-select>
-              </el-form-item>
-              <el-form-item label="">
-                <el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px;">搜索</el-button>
-              </el-form-item>
+                <el-form-item label="服务套餐名称：" >
+                    <el-input v-model="userSearchForm.userName"  class="input-with-select"  placeholder="服务套餐名称"></el-input>
+                </el-form-item>
+                <el-form-item label="坐席编号：" >
+                    <el-input v-model="userSearchForm.name"  class="input-with-select"  placeholder="坐席编号"></el-input>
+                </el-form-item>
+                <!-- <div class="mainSearchBtnBox">  -->
+                <el-form-item label=""> 
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>    
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                <!-- </div>  -->
             </el-form>
         </div>
         <el-row>
-            <el-table
-                ref="multipleTable"
-                tooltip-effect="dark"
-                empty-text="无数据"
-                style="width: 100%"
-                border
-                :data="dataTable"  @selection-change="handleSelectionChange">
-                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
-                 <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
-                <el-table-column align="center" prop="financeUsers" label="负责财务人员姓名"></el-table-column>
-                <el-table-column align="center" prop="signProjectNames" label="签约项目"></el-table-column>
-                <el-table-column align="center" prop="signProvinces" label="签约省份"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime"></el-table-column>
-            </el-table>
-             <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
-        </el-row>
+          <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable">
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
+            <el-table-column align="center" prop="name" label="商家名称"></el-table-column>
+            <el-table-column align="center" prop="username" label="所选服务套餐名称">
+                <template slot-scope="scope">
+                    <el-button type="text" @click="openInfo()">{{scope.row.username}}</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="balance" label="意向购买坐席数"></el-table-column>
+            <el-table-column align="center" prop="phone" label="供应商"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="服务开启时间"  :formatter="dateFormat" width="160"></el-table-column>
+            <el-table-column align="center" prop="num" label="商家坐席">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.num > 0">
+                        <a style="color: rgb(0, 114, 255);text-decoration:underline ;" :href="'/merchant/userManager/subaccountUserPage?parentId='+scope.row.id+'&name='+scope.row.name+'&orgId='+scope.row.orgId+''">坐席（{{scope.row.num}}）</a>
+                    </div>
+                    <div v-if="scope.row.num == 0">
+                        <a style="color: rgb(0, 114, 255);text-decoration:underline ;" @click="addAccountUser(scope.row)">添加绑定坐席</a>
+                    </div>
+                </template>
+            </el-table-column>
+
+          </el-table-column>
+          </el-table>
+          <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
     </div>
-    <!-- dialog -->
-    <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px" @close="closeAddCustomFieldDialog">
-        <!-- <el-form :model="form" ref="form" :rules="rules" class="width500"> -->
-        <el-form :model="form" ref="form" :rules="rules" >
-            <el-form-item label="商务小组：" :label-width="formLabelWidth" prop="busGroupId">
-                <el-select filterable v-model="form.busGroupId"   placeholder="选择电商务小组" @change="userChangeSelect"  style="width: 290px;">
-                    <el-option
-                        v-for="item in swList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
+      <!-- dialog -->
+      <el-dialog :title="subAccountFormTitle" :visible.sync="dialogsubAccountForm" @close="closeusersubAccountForm" width="540px">
+          <el-form :model="subAccountForm" ref="subAccountForm" :rules="subAccountRules">
+              <el-form-item label="" :label-width="formLabelWidth">
+                  {{merchatName}}增加子账户绑定坐席
+              </el-form-item>
+              <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="number">
+                  <el-input v-model="subAccountForm.number" autocomplete="off" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="company">
+                  <el-input v-model="subAccountForm.company" autocomplete="off" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="ownership">
+                  <el-input v-model="subAccountForm.ownership" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="userNumber">
+                  <el-input v-model="subAccountForm.userNumber" autocomplete="off" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="秘钥："  :label-width="formLabelWidth" prop="secretKey">
+                  <el-input v-model="subAccountForm.secretKey" autocomplete="off" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="proxyurl">
+                  <el-input v-model="subAccountForm.proxyurl" autocomplete="off" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subAccount">
+                <el-select v-model="subAccountForm.subAccount" placeholder="请选择" style="width: 290px;">
+                  <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                  </el-option>
                 </el-select>
-            </el-form-item>
-            <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
-                <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
-            </el-form-item>
-            <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjects">
-                <el-select   filterable v-model="form.signProjects" multiple  placeholder="选择签约项目" style="width: 290px;">
-                    <el-option
-                            v-for="item in projectList"
-                            :key="item.id"
-                            :label="item.projectName"
-                            :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvinces">
-                <el-select   filterable v-model="form.signProvinces" multiple  placeholder="选择签约省份" style="width: 290px;">
-                    <el-option
-                            v-for="item in provinceList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.name">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="负责财务：" :label-width="formLabelWidth" prop="financeUsers">
-                <el-select multiple-limit=10  filterable v-model="form.financeUsers" multiple  placeholder="选择财务" style="width: 290px;">
-                    <el-option
-                        v-for="item in cwList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
+              </el-form-item>
 
-        </el-form>
-
-        <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
-            <el-button @click="dialogFormVisible= false">取消</el-button>
-        </div>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align:center;">
+              <el-button type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
+              <el-button @click="accountcancelForm('subAccountForm')">取 消</el-button>
+          </div>
+      </el-dialog>
+      <el-dialog title="套餐详情" :visible.sync="infoDialog" width="1000px">
+        <el-table
+            ref="infoTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="infoTable"
+        >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="name" label="套餐名称"></el-table-column>
+            <el-table-column align="center" prop="cost" label="通话资费/分钟"></el-table-column>
+            <el-table-column align="center" prop="monthlyRent" label="月租费用" width="150"></el-table-column>
+            <el-table-column align="center" prop="number" label="支持最大数量" width="150"></el-table-column>
+            <el-table-column align="center" prop="seatCost" label="坐席费用" width="150"></el-table-column>
+        </el-table>
     </el-dialog>
-
-
 </div>
-<input id="addOrUpdate" type="hidden" >
-</body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
+</body>
 <script th:inline="javascript">
+var merchantUserList=[[${merchantUserList}]];//商户集合
+var userVM = new Vue({
+  el: '#userManage',
+  data: {
+      infoDialog:false,
+      merchantUserListOptions:merchantUserList,//商家账户
+      merchatName:"",
+      subAccountFormTitle:"添加坐席",
+      dialogsubAccountForm:false,
+      paginationShow: false,
+      isShow:false,
+      subaccountisShow:false,
+      loginDisabled:false,
+      accountExpandedKeys:[],
+      accountDataTree:[],
+      userSearchForm: {
+        status: '',
+        userName: '',
+        name: '',
+      },
+      subAccountForm:{ 
+          username:"",
+          name:"",
+          phone:"",
+          password:"",
+          orgName:"",
+          orgId:"",
+          id:"",
+          roleId:""
+      },
+      addOrModifyDialogTitle:'添加坐席',
+      subAccountRules:{
+          number: [
+            { required: true, message: '座席编号不能为空', trigger: 'blur' },
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+            {
+              validator: function (rule, value, callback) {
+                if (/^[0-9]+$/.test(value) == false) {
+                  callback(new Error("请输入数字"));
+                } else {
+                  callback();
+                }
+                callback();
 
-    var swList=[[${swList}]];
-	var cwList = [[${userList}]];
-	//项目列表
-	var projectList = [[${projectList}]];
-	//省份列表
-	var provinceList = [[${provinceList}]];
-   var orgVM =  new Vue({
-        el: '#organizationManage',
-        data: {
-            btnDisabled: false,
-        	showTitle:"",
-            businessLine:"",
-        	dialogBatchVisible:false,
-        	confirmBtnDisabled:false,
-        	formLabelWidth: '130px',
-        	dialogFormVisible: false,
-        	busGroupId:"",
-        	addOrModifyDialogTitle:"",
-        	dialogFormVisible:false,
-        	dataTable:[],
-        	multipleSelection: [],
-        	swList:swList,
-        	cwList:cwList,
-            projectList:projectList,
-            provinceList:provinceList,
-        	financeUsers:"",
-        	form:{
-        		busGroupId: '',
-        		financeUsers: [],
-            businessLine:''
-        	},
-        
-            pager:{
-                total: 0,
-                currentPage: 1,
-                pageSize: 20,
-            },
-            loading:false,
-            rules: {
-            	busGroupId: [
-                    { required: true, message: '请选择商务小组', trigger: 'change' }
-                ],
-                financeUsers: [
-                    { required: true, message: '请选择财务', trigger: 'change' }
-                ],
-               
+              }, trigger: 'change'
             }
-             
-        },
-        methods: {
-        	search(){
-        		this.pager.currentPage = 1;
-        		this.inviteAreaListPage();
-        	},
-            //根据商务小组查询
-            userChangeSelect(selVal) {
-                orgVM.cwList = cwList;
-                if (null != selVal) {
-                  var param = {};
-                  param.id = selVal;
-                  //根据商务小组id获取业务线
-                  axios.post('/organization/organization/queryOrgById', param).then(function (response) {
-                      if (null != response || response.data != null || response.data.code == '0') {
-                          var param = {};
-                          param.roleList = ["QDSJCW", "SJHZCW", "CYCW"];
-                          param.businessLine = response.data.data.businessLine;
-                          orgVM.form.businessLine = response.data.data.businessLine;
-                          orgVM.form.financeUsers =[];
-                          console.log(response.data.data.businessLine);
-                          //根据业务线获取财务集合
-                          axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
-                              // console.log(response.data.data);
-                              if (null != response || response.data != null || response.data.code == '0') {
-                                  orgVM.cwList = response.data.data;
+          ],
+          company: [
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+          ],
+          ownership: [
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+          ],
+          userNumber: [
+            { required: true, message: '账户编号不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          secretKey: [
+            { required: true, message: '秘钥不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          proxyurl: [
+            { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          subAccount: [
+            { required: true, message: '请选择商家子账号', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+      },
+      options: [
+        {
+          value: '选项1',
+          label: '黄金糕'
+        }, {
+          value: '选项2',
+          label: '双皮奶'
+        }, {
+          value: '选项3',
+          label: '蚵仔煎'
+        }, {
+          value: '选项4',
+          label: '龙须面'
+        }, {
+          value: '选项5',
+          label: '北京烤鸭'
+      }],
+      infoTable:[{
+          name:'套餐1',
+          cost:'0.3元',
+          monthlyRent:'30元/月',
+          number:'10',
+          seatCost:'150元/月',
+      }],
+      submitDisabled:false,
+      dataTable:[],
+      pager:{
+        total: 0,
+        currentPage: 1,
+        pageSize: 20,
+      },
+      multipleSelection:[],
+      multipleTreeSelection:[],
+      formLabelWidth: '150px',
+      formLabelWidth1: '120px',
+      storeForm: {
+        roleId: '',
+        status: '',
+        searchType: 2,
+        searchText: '',
+        orgId: '',
+        orgName:''
+      },
+      storeId: '',
+      scrollTop: 0,
+  },
+  methods: {
+      openInfo(){
+          // var param ={};
+          // param.clueId = row.clueId;
+          // console.info(param);
+          // axios.post('/aggregation/tracking/queryList', param)
+          // .then(function (response) {
+          //   var result =  response.data;
+          //   console.info(result);
+            // userVM.infoTable= result.data;
+            // userVM.infoDialog=true;
+          // })
+          // .catch(function (error) {
+          //   console.log(error);
+          // });
+          this.infoDialog=true;
+      },
+      saveAccountUser(formName){
+          this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  var formData = userVM.subAccountForm;
+                  var param={};
+                  param.name= formData.name;
+                  param.username= formData.username;
+                  param.password = formData.password;
+                  param.phone = formData.phone;
+                  param.orgId = formData.orgId;
+                  param.userType = 3;
+                  param.status = 1;
+                  param.parentId= formData.id;
+                  var roleList=new Array();
+                  roleList.push(formData.roleId);
+                  param.roleList=roleList;
+                  var url = "";
+                  url = "/merchant/userManager/saveUser";
+                  axios.post(url, param)
+                      .then(function (response) {
+                          console.info(response);
+                          var data =response.data;
+                          if(data.code!="0"){
+                              userVM.$message(data.msg);
+                              userVM.btnDisabled = false;
+                          }else{
+                              userVM.$message('新增成功');
+
+                              userVM.btnDisabled = false;
+                              document.location.href='/merchant/userManager/initUserList';
+                          }
+                      })
+                      .catch(function (error) {
+                          userVM.btnDisabled = false;
+                          console.log(error);
+                      });
+              }
+          })
+      },
+      addAccountUser(obj){
+          this.merchatName = obj.name;
+          this.dialogsubAccountForm = true;
+          this.subAccountForm.id = obj.id;
+          var param = {};
+          param.orgId = obj.orgId;
+          axios.post("/merchant/userManager/getAccountOrg", param)
+              .then(function (response) {
+                  console.info(response);
+                  var data =response.data;
+                  if(data !=null){
+                      var orgData =data.data;
+                      userVM.accountDataTree = orgData;
+                      for(var i=0;i<orgData.length;i++){
+                          var curNode = orgData[i];
+                          userVM.accountExpandedKeys.push(curNode.id);
+                          var childs = curNode.children;
+                          if(childs){
+                              for(var j=0;j<childs.length;j++){
+                                  var curChildNode = childs[j];
+                                  userVM.accountExpandedKeys.push(curChildNode.id);
                               }
-                          });
+                          }
+
                       }
-                  });
-                }
-            },
-        	inviteAreaListPage(){//查询按钮
-            	  var param = {}; 
-            	  var pageSize = this.pager.pageSize;
-                  var pageNum = this.pager.currentPage;
-                  param.pageNum = pageNum;
-                  param.pageSize = pageSize;
-                  param.financeUsers=this.financeUsers;
-                  param.busGroupId=this.busGroupId;
-                 
-                  axios.post('/financing/financelayout/getFinanceLayoutList',param).then(function (response) {
-                  	//   console.log(response);
-                      if(null===response||response.data==null||response.data.code!='0'){
-                    	  orgVM.$message({message: response.data.msg, type: 'warning'});
-	                  	  return ;
-                     }else{
-                    	 orgVM.dataTable =response.data.data.data; 
-                    	 orgVM.pager.currentPage= response.data.data.currentPage;
-                    	 orgVM.pager.total= response.data.data.total;
-                     } 
-                  })
-                  .catch(function (error) {
-                    console.log(error);
-                  })
-                  .then(function () {
-                  });  
-                  
-              } ,
-              updateButton(){
-            	  this.showTitle="修改布局"
-            	  if (this.$refs['form']!=undefined) {
-                 		this.$refs['form'].resetFields();
-                 	  }
-            	  $("#addOrUpdate").val(2);
-            	  //修改菜单数据	
-              	var rows = this.multipleSelection;
-                  if(rows.length!=1){
-                      this.$message({
-                         message: '请选择一条数据进行修改',
-                         type: 'warning'
-                       });
-                      return;
                   }
-                  this.dialogFormVisible = true;
-                  var param ={};
-                  var str = "";
-                  for ( var i = 0; i <rows.length; i++){
-                	  str = rows[i].id
-                  }
-                  param.id = str;
-                  axios.post('/financing/financelayout/findFinanceLayoutById',param).then(function (response) {
-                  	//   console.log(response);
-                      if(null !==response && response.data !=null && response.data.code=='0'){
-                    	  var financeLayout = response.data.data;
-                          orgVM.form.busGroupId = financeLayout.busGroupId;
-                    	  var financeUsers = financeLayout.financeUsers;
-                    	  var valueMultiple=[];
-                    	  var obj = financeUsers.split(',');
-                    	    if(null!=financeUsers && obj.length>0) {
-                         	   for(var i=0;i<obj.length;i++){
-                         	       valueMultiple.push(obj[i]+"");
-                         	     }
-                         	   }
-                    	    orgVM.form.financeUsers=valueMultiple;
-                          //签约项目
-                          var signProjects = financeLayout.signProjects;
-                          var signProjectsMultiple=[];
-                          var signProjectsObj = signProjects.split(',');
+              })
+      },
+      closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+          if (this.$refs['clueTemplateForm']!==undefined) {
+              this.$refs['clueTemplateForm'].resetFields();
+          }
+      },
+      closeusersubAccountForm(){//关闭添加自定义字段dialog
+          if (this.$refs['subAccountForm']!==undefined) {
+              this.$refs['subAccountForm'].resetFields();
+          }
+      },
+      accountcancelForm(formName) {
+          if (this.$refs[formName]!==undefined) {
+              this.$refs[formName].resetFields();
+          }
+          this.dialogsubAccountForm = false;
+      },
+      searchTable() {
+          var param ={};
 
-                          if (null != signProjects && signProjectsObj.length > 0) {
-                              for (var i = 0; i < signProjectsObj.length; i++) {
-                                  signProjectsMultiple.push(signProjectsObj[i] + "");
-                              }
-                              if (signProjectsMultiple != null && signProjectsMultiple != "") {
-                                  orgVM.form.signProjects = signProjectsMultiple;
-                              }
+          param.status = this.userSearchForm.status;
+          param.username = this.userSearchForm.userName;
+          param.name = this.userSearchForm.name;
+          param.pageSize = this.pager.pageSize;
+          param.pageNum = this.pager.currentPage;
+          param.userType = 2;
+          console.info(param);
+          axios.post('/merchant/userManager/merchantlist', param)
+          .then(function (response) {
+            var result =  response.data;
+            console.info(result);
+            var table=result.data;
+            userVM.dataTable= table.data;
+            userVM.pager.total =  table.total;
+            userVM.pager.currentPage = table.currentPage;
 
-                          } else {
-                              orgVM.form.signProjects = projectList;
+            // 取出存储的id
+            if(!userVM.paginationShow){
+               if(userVM.storeId){
+                   userVM.$nextTick(function(){
+                      var storage = [];
+                      userVM.dataTable.forEach(function(item, index){
+                          if(item.id === userVM.storeId ){
+                              storage.push(userVM.dataTable[index]);
                           }
-                          //签约省份
-                          var signProvinces = financeLayout.signProvinces;
-                          var signProvincesMultiple = [];
-                          var signProvincesObj = signProvinces.split(',');
-                          if (null != signProvinces && signProvincesObj.length > 0) {
-                              for (var i = 0; i < signProvincesObj.length; i++) {
-                                  signProvincesMultiple.push(signProvincesObj[i] + "");
-                              }
-                              if (signProvincesMultiple != null && signProvincesMultiple != "") {
-                                  orgVM.form.signProvinces = signProvincesMultiple;
-                              }
-                          }
-
-                     }else{
-                    	 orgVM.$message({message: response.data.msg, type: 'warning'});
-	                  	  	return ;
-                     } 
-                  }).catch(function (error) {
-                      console.log(error);
+                      })
+                      userVM.toggleSelection(storage);
+                      userVM.$el.querySelector('.el-table__body-wrapper').scrollTop = userVM.scrollTop;
                   })
-                  .then(function () {
-                    // always executed
-                  });  
-              },
-              deleButton(){
-            	  var rows = this.multipleSelection;
-                  if(rows.length <1){
-                      this.$message({
-                         message: '请选择删除数据',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-                  var moduleName="";
-    	           if(null!=rows){
-    	 		       for ( var i = 0; i <rows.length; i++){
-    	 		    	  moduleName+="【"+rows[i].busGroupName+"】";
-    	 		        }
-    	           }
-    	           this.$confirm("确定要删除"+moduleName+"财务布局?", '提示', {
-                       confirmButtonText: '确定',
-                       cancelButtonText: '取消',
-                       type: 'warning'
-                   }).then(() => {
-                      	// 查询 table 需要数据
-                       var param = {};
-                       var deleInfo=this.multipleSelection;
-     	        	    var ids="";
-     		            if(null!=deleInfo){
-     		             for ( var i = 0; i <deleInfo.length; i++){
-     		            	if("" == ids){
-     		            		ids = deleInfo[i].id
-     		            	}else{
-     		            		ids = ids+","+deleInfo[i].id
-     		            	}
-     		             }
-     		             var param={};
-     		             param.ids=ids;
-    	                 axios.post('/financing/financelayout/deleFinanceLayout',param).then(function (response) {
-    	                  	//   console.log(response);
-    	                      if(null !==response && response.data !=null && response.data.code=='0'){
-    	                    	  window.location.href="/financing/financelayout/financeLayoutPage"; 
-    	                     }else{
-    	                    	 orgVM.$message({message: response.data.msg, type: 'warning'});
-     	                  	  	return ;
-    	                     } 
-    	                  }).catch(function (error) {
-                              console.log(error);
-                          })
-                          .then(function () {
-                            // always executed
-                          });  
-     	              
-                     }
-                   }).catch(() => {
-                       this.$message({
-                           type: 'info',
-                           message: '已取消删除'
-                       });          
-                   });
-    	           
-    	     
-              },
-              
-              showExport(){//点击弹出新增dialog
-              	this.dialogFormVisible = true;
-              	this.addOrModifyDialogTitle="添加菜单页面";
-              },
-              closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
-            	  if (this.$refs['customMenuForm']!=undefined) {
-               		this.$refs['customMenuForm'].resetFields();
-               	  }
-              },
-              cancelForm(formName) {
-                  this.$refs[formName].resetFields();
-              	this.dialogFormVisible = false;
-              },
-              handleSelectionChange(val) {
-                  this.multipleSelection = val;
-              },
-              
-            //时间格式化
-              dateFormat(row, column){
-            	  var date = row[column.property]; 
-            	     if (date == undefined || date ==null || date =="") { 
-            	       return ""; 
-            	     } 
-            	     return moment(new Date(date)).format("YYYY-MM-DD"); 
-            	} ,
-                //时间格式化
-                dateFormatTime(row, column){
-              	  var date = row[column.property]; 
-              	     if (date == undefined) { 
-              	       return ""; 
-              	     } 
-              	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
-              	} ,
-             submitForm(formName) {
-                    this.$refs[formName].validate((valid) => {
-                    //   debugger;
-                        if (valid) {
-                          var formData = this.form;
-                          var param={};
-                          var strs ="";
-                            for (var i = 0; i < formData.financeUsers.length; i++) {
-                                var user = formData.financeUsers[i];
-                                if (strs != "") {
-                                    strs = strs + "," + user;
-                                } else {
-                                    strs = user;
-                                }
-                            }
-                            param.financeUsers = strs;
-                        var signProjectsStrs ="";
-                        for ( var i = 0; i <formData.signProjects.length; i++){
-                            if(signProjectsStrs !=""){
-                                signProjectsStrs = signProjectsStrs+","+formData.signProjects[i];
-                            }else{
-                                signProjectsStrs = formData.signProjects[i];
-                            }
-                        }
-                        param.signProjects = signProjectsStrs;
-                            var signProvincesStrs ="";
-                            for ( var i = 0; i <formData.signProvinces.length; i++){
-                                if(signProvincesStrs !=""){
-                                    signProvincesStrs = signProvincesStrs+","+formData.signProvinces[i];
-                                }else{
-                                    signProvincesStrs = formData.signProvinces[i];
-                                }
-                            }
-                            param.signProvinces = signProvincesStrs;
-                          param.busGroupId = formData.busGroupId;
-                          param.businessLine = formData.businessLine;
-                          var str = "";
+              }
+            }else{
+              removeSessionStore ("userManageStoreForm");
+              removeSessionStore ("userManageOtherVal");
+            }
+            userVM.paginationShow = true;
+            userVM.storeForm = userVM.userSearchForm;
 
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 
-                          var url = "/financing/financelayout/addFinanceLayout";
-                          if($("#addOrUpdate").val() ==2){
-                        	  var rows = this.multipleSelection;
-                              for ( var i = 0; i <rows.length; i++){
-                            	  str = rows[i].id
-                              }
-                              param.id = str;
-                        	  url = "/financing/financelayout/updateFinanceLayout"
-                          }
-                          this.btnDisabled = true;
-                       	  axios.post(url,param).then(function (response) {
-       	                  	//   console.log(response);
-       	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                                  orgVM.btnDisabled = false; 
-       	                    	  window.location.href="/financing/financelayout/financeLayoutPage"; 
-       	                     }else{
-                                   orgVM.$message({message: response.data.msg, type: 'warning'});
-                                   orgVM.btnDisabled = false; 
-        	                  	  	return ;
-       	                     } 
-       	                  }).catch(function (error) {
-                                 console.log(error);
-                                 orgVM.btnDisabled = false; 
-                             })
-                             .then(function () {
-                               // always executed
-                             });  
-                        } else {
-                            console.log('error submit!!');
-                            return false;
-                        }
-                    });
-                },
-                closeUploadFileDialog(){//关闭上传文件 dialog
-              	  this.$refs.upload.clearFiles();
-                },
-                handleChange(files,fileList){//只允许选择一个文件
-                    this.fileList = fileList.slice(-1);
-              },
-             
-                addbutton(){
-                	this.showTitle="添加布局"
-                	$("#addOrUpdate").val(1);
-                	this.dialogFormVisible=true;
-                	if (this.$refs['form']!=undefined) {
-                		this.form.busGroupId = "";
-                    	this.form.financeUsers = "";
-                   		this.$refs['form'].resetFields();
-                   	  }
-                }
-        },
-        created(){
-          // 取页数存储
-          var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-          if(localVal){this.pager.pageSize = localVal;}
+      },
+      toggleSelection(rows) { // table select 默认选中fn
+          if (rows) {
+              rows.forEach(row => {
+                  this.$refs.multipleTable.toggleRowSelection(row,true);
+              });
+          } else {
+              this.$refs.multipleTable.clearSelection();
+          }
+      },
+      resetForm(formName) {
+        console.info(this.$refs[formName]);
+        this.$refs[formName].resetFields();
+        this.$refs[formName].resetFields();
+      },
+      //选择行
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      //日期数据格式化方法
+      dateFormat(row, column, cellValue, index) {
+        if (cellValue == undefined) {
+           return "";
+        }
+        return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+      },
+  },
+  created(){
+      // 进入页面判断有是否有存储值
+      if(!this.paginationShow){
+          var storeVal = getSessionStore("userManageStoreForm");
+          var otherVal = getSessionStore("userManageOtherVal");
+          if(storeVal && otherVal){
+              this.userSearchForm = storeVal;
+              this.$set(this.pager,"currentPage",otherVal.currentPage);
+              this.storeId = otherVal.clueId;
+              this.scrollTop = otherVal.scrollTop;
+          }
+      };
+      // console.info("create method");
+      var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+      if(localVal){this.pager.pageSize = localVal;}
+      this.searchTable();
+  },
+  mounted(){
+    console.info("mounted method");
+    document.getElementById('userManage').style.display = 'block';
+  }
+})
 
-        	this.inviteAreaListPage();
-        	document.getElementById('organizationManage').style.display = 'block';
-        	
-        	
-        },//created方法 结束
-        mounted(){
-            document.getElementById('organizationManage').style.display = 'block';
-        }
-    })
 </script>
 </html>
