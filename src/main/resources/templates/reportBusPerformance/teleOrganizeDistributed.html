@@ -101,7 +101,7 @@
                 <el-table-column prop="groupName" label="餐饮集团"></el-table-column>
                 <el-table-column prop="sellDepartName" label="电销事业部">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.total=='合计'">
+                        <span v-if="scope.row.total =='合计'">
                             <el-button type="text" size="small" v-if="scope.row.groupId==99999" class="act" @click="gotoLink()">合计</el-button>
                             <span class="act" v-else >合计</span>
                         </span>
@@ -471,27 +471,41 @@
 
                
                 var resultTableData = []; // 新list
-                var usedData = [];// 已用过的元素
-                if(totalData[0].groupId == 99999){
-                    resultTableData.push(totalData[0]);
-                }
-                for(var k=0; k<tableData.length; k++){
-                    resultTableData.push(tableData[k]);
-                    for(var i=0; i<totalData.length; i++){
-                        if(totalData[i].groupId === tableData[k].groupId){
-                            var flag = true;
-                            for(var j=0; j<usedData.length; j++){
-                                if(totalData[i].groupId === usedData[j].groupId){
-                                    flag = false;
-                                }
-                            }
-                            if(flag){
-                                resultTableData.push(totalData[i]);
-                                usedData.push(totalData[i]);
-                            }
-                        }
+                // var usedData = [];// 已用过的元素
+                for(var k=0;k<totalData.length;k++){
+                    if(totalData[k].groupId == 99999){
+                        resultTableData.push(totalData[k]);
                     }
                 }
+                for(var i=0;i<totalData.length;i++){
+                    var ind = -1;
+                    for(var j=0;j<tableData.length;j++){
+                        if(totalData[i].groupId === tableData[j].groupId){
+                            ind = i;
+                            resultTableData.push(tableData[j]);
+                        }
+                    }
+                    if(ind != -1){
+                        resultTableData.push(totalData[ind]);
+                    }
+                }
+                // for(var k=0; k<tableData.length; k++){
+                //     for(var i=0; i<totalData.length; i++){
+                //         if(totalData[i].groupId === tableData[k].groupId){
+                //             var flag = true;
+                //             for(var j=0; j<usedData.length; j++){
+                //                 if(totalData[i].groupId === usedData[j].groupId){
+                //                     flag = false;
+                //                 }
+                //             }
+                //             if(flag){
+                //                 resultTableData.push(totalData[i]);
+                //                 usedData.push(totalData[i]);
+                //             }
+                //         }
+                //     }
+                //     resultTableData.push(tableData[k]);
+                // }
                 mainDivVM.tableData = resultTableData;
             },
             //去重
