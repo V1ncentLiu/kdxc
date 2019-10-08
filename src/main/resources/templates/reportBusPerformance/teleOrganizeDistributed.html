@@ -28,7 +28,7 @@
                     <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -93,15 +93,18 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" width="55">
+                <el-table-column type="index" label="序号" width="55" :index="indexFun">
                     <template slot-scope="scope">
-                        <span :class="{'act':scope.row.total != ''}">{{scope.$index+1}}</span>
+                        <span :class="{'act':scope.row.total != ''}">{{scope.$index?scope.$index:''}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="groupName" label="餐饮集团"></el-table-column>
                 <el-table-column prop="sellDepartName" label="电销事业部">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" :class="{'act':scope.row.total != ''}" v-if="scope.row.total=='合计'" @click="gotoLink(scope.row)" >合计</el-button>
+                        <span v-if="scope.row.total =='合计'">
+                            <el-button type="text" size="small" v-if="scope.row.groupId==99999" class="act" @click="gotoLink()">合计</el-button>
+                            <span class="act" v-else >合计</span>
+                        </span>
                         <span v-else>{{scope.row.sellDepartName}}</span>
                     </template>
                 </el-table-column>
@@ -148,61 +151,6 @@
     var curDeptId=[[${busAreaId}]];// 当前商务大区
     var curOrgId =[[${businessGroupId}]];
     var curUserId = [[${businessManagerId}]];
-    function List() {
-        this.dataStore = [];
-        this.append = function (data) {
-            //根据当前数组的长度插入新的数据
-            this.dataStore[this.length()] = data;
-        }
-        this.length = function () {
-            //获得数组的长度
-            var length = this.dataStore.length;
-            return length;
-        }
-
-        //如果找到当前的数据，就返回当前数据的下标，如果没有找到数据就返回-1
-        this.find = function (data) {
-            //1,获得数组的长度
-            var length = this.length();
-            //2,设置返回数据的下标
-            var index = -1;
-            //3,遍历数据
-            for (var i = 0; i < length; i++) {
-                if (data == this.dataStore[i]) {
-                    index = i;
-                    return index;
-                }
-            }
-            return index;
-        }
-
-        this.forEach = function (call) {
-            //1,获得数组的长度
-            var length = this.length();
-            //2,遍历数据
-            for (var i = 0; i < length; i++) {
-                call(this.dataStore[i]);
-            }
-        }
-
-        //在before前面插入数据,如果before有数据，就插入在before前面，如果before没有数据，就把data插入到最前面的数据
-        this.insertBefore = function (data, before) {
-            //1，找到当前before数据的下标
-            var index = this.find(before);
-            var length = this.length();
-            if (index == -1) {
-                for (var i = length - 1; i >= 0; i--) {
-                    this.dataStore[i + 1] = this.dataStore[i]
-                }
-                this.dataStore[0] = data;
-            } else {
-                for (var i = length - 1; i >= index; i--) {
-                    this.dataStore[i + 1] = this.dataStore[i]
-                }
-                this.dataStore[index] = data;
-            }
-        }
-    }
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -319,25 +267,6 @@
                     });
                 });
             },
-            formatTreeList(list) {
-                var b = list.reduce((r, x) => ((r[x.orgId] || (r[x.orgId] = [])).push(x), r), {});
-                var c = Object.keys(b).map(x => b[x]);
-                var newArray = []
-                for (var i = 0; i < c.length; i++) {
-                    for (var j = 0; j < c[i].length; j++) {
-                        for (var k = j + 1; k < c[i].length; k++) {
-                            if (c[i][j].resourceCategoryName == c[i][k].resourceCategoryName) {
-                                c[i][k].resourceCategoryName = ''
-                                if (c[i][j].resourceMediumName == c[i][k].resourceMediumName) {
-                                    c[i][k].resourceMediumName = ''
-                                }
-                            }
-                        }
-                        newArray.push(c[i][j])
-                    }
-                }
-                return newArray
-            },
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -417,7 +346,9 @@
                             for (var j = 0; j < tableData.data.length; j++) {
                                 Vue.set(tableData.data[j], 'total', '')
                             }
-                            mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
+                            mainDivVM.summaryFun(resobjData.totalData,tableData.data)
+                        }else{
+                            mainDivVM.tableData = tableData.data;
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -441,29 +372,26 @@
                     });
                 });
             },
-            //根据id将合计插入对应id上边
             summaryFun(totalData, tableData) {
-                var list = new List();
-                for (var i = 0; i < tableData.length; i++) {
-                    list.append(tableData[i]);
-                }
-                for (var i = 0; i < totalData.length; i++) {
-                    for (var j = 0; j < tableData.length; j++) {
-                        if (totalData[i].groupId == tableData[j].groupId) {
-                            list.insertBefore(totalData[i], tableData[j])
-                        }
+                var resultTableData = [] // 新list
+                for(var k=0;k<totalData.length;k++){
+                    if(totalData[k].groupId == 99999){
+                        resultTableData.push(totalData[k]);
                     }
                 }
-                var arr = []
-                list.forEach(function (data) {
-                    arr.push(data)
-                });
-                mainDivVM.tableData = this.repeatArr(arr)
-            },
-            //去重
-            repeatArr(arr) {
-                var x = new Set(arr);
-                return [...x];
+                for(var i=0;i<totalData.length;i++){
+                    var ind = -1;
+                    for(var j=0;j<tableData.length;j++){
+                        if(totalData[i].groupId === tableData[j].groupId){
+                            ind = i;
+                            resultTableData.push(tableData[j]);
+                        }
+                    }
+                    if(ind != -1){
+                        resultTableData.push(totalData[ind]);
+                    }
+                }
+                mainDivVM.tableData = resultTableData;
             },
             limitTime (start, end) {
                 var endTime = this.minuteFormat (end);
@@ -480,7 +408,7 @@
                     return this.form.endTime;      
                 }
             },
-            gotoLink(row){
+            gotoLink(){
                 var groupId = this.export.groupId;
                 var busAreaId = this.export.busAreaId;
                 var startTime = this.export.startTime;
@@ -496,6 +424,15 @@
                 rowIndex,
                 columnIndex
             }) { 
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [0, 0];
+                    } else if (columnIndex === 2) {
+                        return [1, 3];
+                    }
+                }
                 if (row.total && row.total == '合计') {
                     if (columnIndex === 1) {
                         return [0, 0]
@@ -503,6 +440,9 @@
                         return [1, 2]
                     }
                 }
+            },
+            indexFun (index) { // 表格序号
+                return index;
             },
             percentFormat(row, column) {//百分比格式化
                 var percent = row[column.property];
@@ -580,7 +520,7 @@
                 //餐饮集团
                 param.groupId = this.export.groupId;
                 param.teleDeptId = this.export.teleDeptId;
-                axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
+                axios.post('/busTeleDistribution/exportOneAllList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;

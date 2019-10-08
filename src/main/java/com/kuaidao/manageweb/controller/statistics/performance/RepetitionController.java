@@ -134,6 +134,8 @@ public class RepetitionController extends BaseStatisticsController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             baseQueryDto.setTeleSaleId(curLoginUser.getId());
+            baseQueryDto.setTeleDeptId(null);
+            baseQueryDto.setTeleGroupId(null);
             return  dupOrderClient.queryByPageBySale(baseQueryDto);
         }
         return  dupOrderClient.queryByPageByGroup(baseQueryDto);
