@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelSaleGroup">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -73,7 +73,7 @@
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
-                            :label="item.name"
+                            :label="item.username"
                             :value="item.id">
                         </el-option>
                     </el-select>
@@ -321,8 +321,8 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="SWJL";
-                axios.post('/base/getSaleList' ,param).then(function (response) {  
-                    mainDivVM.userBusinessArr=response.data.data;
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
                         message: "商务经理请求失败，请稍后重试",
@@ -367,7 +367,7 @@
             getTelSaleGroup(seleVal){
                 param={};
                 param.orgId=seleVal;
-                param.roleCode="SWJL";
+                param.roleCode="DXCYGW";
                 axios.post('/base/getSaleList' ,param).then(function (response) {  
                     mainDivVM.orgTeleArr=response.data.data;
                 }).catch(function (error) {
