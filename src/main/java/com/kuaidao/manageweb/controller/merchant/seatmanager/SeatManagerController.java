@@ -1,9 +1,17 @@
 package com.kuaidao.manageweb.controller.merchant.seatmanager;
 
+import com.kuaidao.callcenter.dto.seatmanager.SeatInsertOrUpdateDTO;
+import com.kuaidao.callcenter.dto.seatmanager.SeatManagerReq;
+import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
+import com.kuaidao.common.constant.ComConstant.USER_STATUS;
+import com.kuaidao.common.constant.ComConstant.UserStatus;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.component.merchant.MerchantComponent;
+import com.kuaidao.manageweb.feign.merchant.seatmanager.SeatManagerFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
@@ -31,6 +39,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class SeatManagerController {
   private static Logger logger = LoggerFactory.getLogger(SeatManagerController.class);
 
+
+  @Autowired
+  private SeatManagerFeignClient seatManagerFeignClient;
+
+
   @Autowired
   private MerchantComponent merchantComponent;
   /**
@@ -55,7 +68,10 @@ public class SeatManagerController {
   @PostMapping("/merchantUsers")
   public  List<UserInfoDTO> merchantUsers(HttpServletRequest request, IdEntityLong id) {
     UserInfoDTO merchantUser = merchantComponent.getMerchantById(id.getId());
-    List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(id.getId(),null);
+    List<Integer> statusList = new ArrayList<>();
+    statusList.add(USER_STATUS.ENABLE);
+    statusList.add(USER_STATUS.LOCK);
+    List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(id.getId(),statusList);
     userList.add(merchantUser);
     return userList;
   }
@@ -63,17 +79,52 @@ public class SeatManagerController {
   /**
    *  新增
    */
+  @ResponseBody
+  @PostMapping("/create")
+//  @RequiresPermissions("merchant:seatMagager:add")
+  public JSONResult<Boolean> create(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    insertOrUpdateDTO.setCreateUser(curLoginUser.getId());
+    return seatManagerFeignClient.create(insertOrUpdateDTO);
+  }
 
   /**
    * 更新
    */
+  @ResponseBody
+  @PostMapping("/update")
+//  @RequiresPermissions("merchant:seatMagager:update")
+  public JSONResult<Boolean> update(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    insertOrUpdateDTO.setUpdateUser(curLoginUser.getId());
+    return seatManagerFeignClient.update(insertOrUpdateDTO);
+  }
 
   /**
    * 删除
    */
-
+  @ResponseBody
+  @PostMapping("/delete")
+//  @RequiresPermissions("merchant:seatMagager:delete")
+  public JSONResult<Boolean> delete(@RequestBody IdListLongReq idList) {
+    return seatManagerFeignClient.delete(idList);
+  }
   /**
    * 查询
    */
+  @ResponseBody
+  @PostMapping("/queryList")
+  public JSONResult<PageBean<SeatManagerResp>> queryList(@RequestBody SeatManagerReq seatManagerReq) {
+    return seatManagerFeignClient.queryList(seatManagerReq);
+  }
+
+  /**
+   * 查询一条
+   */
+  @ResponseBody
+  @PostMapping("/findOne")
+  public JSONResult<SeatManagerResp> findOne(@RequestBody IdEntityLong idEntityLong) {
+    return seatManagerFeignClient.findOne(idEntityLong);
+  }
 
 }

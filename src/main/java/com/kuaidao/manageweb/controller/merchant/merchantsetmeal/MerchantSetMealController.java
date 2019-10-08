@@ -37,7 +37,7 @@ public class MerchantSetMealController {
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantUser(null,null);
     request.setAttribute("userList", userList);
-    return "merchant/mechantSetMeal/list";
+    return "merchant/serviceManagement/serviceManagement";
   }
   /**
    * 查询列表数据
