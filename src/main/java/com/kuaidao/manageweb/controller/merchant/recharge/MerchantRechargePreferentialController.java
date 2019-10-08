@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.merchant.recharge;
 
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.controller.merchant.charge.ClueChargeController;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
@@ -10,6 +11,7 @@ import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -71,6 +73,10 @@ public class MerchantRechargePreferentialController {
     @RequiresPermissions("merchant:merchantRechargePreferential:add")
     @ResponseBody
     public JSONResult saveBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list) {
+        //如果参数为空则直接返回
+        if (CollectionUtils.isEmpty(list)) {
+            return new JSONResult().success(null);
+        }
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         Long id = user.getId();
@@ -86,6 +92,10 @@ public class MerchantRechargePreferentialController {
     @RequiresPermissions("merchant:merchantRechargePreferential:edit")
     @ResponseBody
     public JSONResult updateBatchRechargePreferential(@RequestBody List<MerchantRechargePreferentialDTO> list) {
+        //如果参数为空则直接返回
+        if (CollectionUtils.isEmpty(list)) {
+            return new JSONResult().success(null);
+        }
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         Long id = user.getId();
