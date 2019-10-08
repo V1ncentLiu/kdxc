@@ -16,7 +16,7 @@
         .paymentImg .f-fl{margin-right: 50px;}
         .paymentImg img{width: 250px;}
         .rechargeMoney .el-form-item__error{padding-left: 72px;}
-        .h73{height: 73px;}
+        .h73{max-height: 73px;}
     </style>
 </head>
 <body>
@@ -32,7 +32,7 @@
             <ul :class="{h73:isClass}">                
                 <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li>
             </ul>
-            <div class="f-tac" style="width: 1110px;padding-top: 10px;">
+            <div class="f-tac" style="width: 1110px;padding-top: 10px;" v-show="isShowMore">
                 <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
             </div>
         </el-row>
@@ -82,12 +82,11 @@
     var rechargeAccountDTO=[[${rechargeAccountDTO}]];
     var merchantUserAccountDTO=[[${merchantUserAccountDTO}]];//账户余额
     var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息
-    console.log(merchantUserAccountDTO)
-    console.log(preferentialDTOList)
     var ocmVM = new Vue({
         el: '#paymentOnline',
         data: function() {
             return { 
+                isShowMore:false,
                 isClass:true,
                 isShow:false,
                 paymentIsShow:true, 
@@ -194,7 +193,12 @@
             }
         },
         created(){
-            
+            console.log(preferentialDTOList)
+            if(preferentialDTOList&&preferentialDTOList.length>4){
+                this.isShowMore=true;
+            }else{
+                this.isShowMore=false;
+            }
         },
         mounted(){
             document.getElementById('paymentOnline').style.display = 'block';
