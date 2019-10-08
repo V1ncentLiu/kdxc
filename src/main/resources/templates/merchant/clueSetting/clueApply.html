@@ -50,6 +50,12 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="24">
+                    <el-form-item label="每日需求资源上限：" label-width="173px" prop="dailyMaxNum">
+                        <el-input v-model="form.dailyMaxNum" autocomplete="off" maxLength="10" style="width: 100px;" :disabled="isDisabled" @keyup.native="number"></el-input>
+                        <!-- <span style="margin-left: 10px">条资源</span> -->
+                    </el-form-item>
+                </el-col>
+                <el-col :span="24">
                     <el-form-item label="地域：" :label-width="formLabelWidth" prop="radioProject">
                         <el-radio v-model="form.radioApplyArea" label="1" @change="projectChange"
                                   :disabled="isDisabled">不限
@@ -114,6 +120,7 @@
                     applyStartTime: '',
                     applyEndTime: '',
                     applyNum: '',
+                    dailyMaxNum: '',
                     radioApplyArea: '1',//单选默认选项
                     open: '1',//单选默认选项
                     applyArea: [],
@@ -130,6 +137,9 @@
                     ],
                     applyNum: [
                         {required: true, message: '资源数量不能为空', trigger: 'blur'}
+                    ],
+                    dailyMaxNum: [
+                        {required: true, message: '每日需求资源上限不能为空', trigger: 'blur'}
                     ],
                     applyArea: [
                         {required: true, message: '选择省份不能为空', trigger: 'blur'}
@@ -160,6 +170,7 @@
                 param.applyStartTime = this.form.applyStartTime;
                 param.applyEndTime = this.form.applyEndTime;
                 param.applyNum = this.form.applyNum;
+                param.dailyMaxNum = this.form.dailyMaxNum;
                 param.open = this.form.open;
                 param.remark = this.form.remark;
                 var applyAreaStrs = "";
@@ -186,7 +197,7 @@
                                     resourceApplyVm.$message({
                                         type: 'success', message: '申请保存成功!', duration: 2000, onClose: function () {
                                             resourceApplyVm.addApplyButtonAble = false;
-                                            window.location.href="/merchant/clue/setting//applyIndex";
+                                            window.location.href="/merchant/clue/setting/applyIndex";
                                         }
                                     });
                                 } else {
@@ -265,9 +276,9 @@
                 window.location.href="/merchant/clue/setting/applyIndex";
             },
             number(){
-    　　　      this.form.applyNum=this.form.applyNum.replace(/[^\.\d]/g,'');
+    　　　      			this.form.applyNum=this.form.applyNum.replace(/[^\.\d]/g,'');
                 this.form.applyNum=this.form.applyNum.replace('.','');
-        　　},
+        　　		},
         },
         created() {
             console.info("create method");
