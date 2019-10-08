@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * Created on: 2019-09-23-17:39
  */
 @FeignClient(name = "callcenter-service", path = "/callcenter/seatManager",
-    fallbackFactory = SeatManagerFeignClient.HystrixClientFallback.class)
+    fallback = SeatManagerFeignClient.HystrixClientFallback.class)
 public interface SeatManagerFeignClient {
 
     @PostMapping("/create")
