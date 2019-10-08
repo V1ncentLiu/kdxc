@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * Created on: 2019-10-03-20:06
  */
-@FeignClient(name = "merchant-service-lxh", path = "/merchant/clue/MerchantAppiontment", fallback = MerchantAppiontmentFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/clue/MerchantAppiontment", fallback = MerchantAppiontmentFeignClient.HystrixClientFallback.class)
 public interface MerchantAppiontmentFeignClient {
 
     /**
