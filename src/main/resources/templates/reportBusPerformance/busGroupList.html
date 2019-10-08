@@ -94,19 +94,50 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" width="55"></el-table-column>
-                <el-table-column prop="cateringGroup" label="餐饮集团">
+                <el-table-column type="index" label="序号" width="55" :index="indexFun">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.teleGroupId!='99999'" @click="gotoLink(scope.row)">{{scope.row.teleGroupName}}</span>
-                        <el-button type="text" size="small" v-else>{{scope.row.teleGroupName}}</el-button>
+                        <span :class="{'act':scope.row.total != ''}">{{scope.$index?scope.$index:''}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="province" label="省份"></el-table-column>
-                <el-table-column prop="firstVisitNum " label="首访数"></el-table-column>
-                <el-table-column prop="signNum" label="签约数"></el-table-column>
-                <el-table-column prop="visitRate" label="签约率"></el-table-column>
-                <el-table-column prop="culeNum" :formatter="format_number" label="净业绩金额"></el-table-column>
-                <el-table-column prop="achievement" label="签约单笔" :formatter="format_number"></el-table-column>
+                <el-table-column prop="cateringGroup" label="餐饮集团">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.total =='合计'">
+                            <el-button type="text" size="small" v-if="scope.row.groupId==99999" class="act" @click="gotoLink()">合计</el-button>
+                            <span class="act" v-else >合计</span>
+                        </span>
+                        <span v-else>{{scope.row.sellDepartName}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="province" label="省份">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.province}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="firstVisitNum" label="首访数">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.firstVisitNum}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="signNum" label="签约数">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signNum}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="signRate" label="签约率">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signRate}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="culeNum" label="净业绩金额">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.amount|format_number}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="signSingle" label="签约单笔">
+                    <template slot-scope="scope">
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signSingle|format_number}}</span>
+                    </template>
+                </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -116,7 +147,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <style>
-    .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
+    .act{font-weight: bold;}
 </style>
 <script th:inline="javascript">
     var cateringGroup = ''; // 餐饮集团
@@ -165,13 +196,12 @@
                 projectArr: '', // 来访项目
             }             
         },
-        methods: {   
-            format_number(row, column){
-                var nStr = row[column.property];
+        filters:{
+            format_number(value){
+                var nStr = value;
                 if('--'==nStr){
                     return nStr;
                 }
-                if(!nStr){return};
                 nStr += '';  
                 x = nStr.split('.');  
                 x1 = x[0];
@@ -185,6 +215,8 @@
                 }  
                 return x1 + x2;  
             },
+        },
+        methods: {
             centerStyle(){
                 return "text-align:center"
             },
@@ -287,10 +319,14 @@
                     }else if(resobj.data && resobj.data.tableData){
                         var resobjData = resobj.data;
                         var tableData = resobjData.tableData;
-                        mainDivVM.tableData = tableData.data;
                         if( tableData.data.length && resobj.data.totalData ){
-                            var totalData = resobjData.totalData[0];
-                            mainDivVM.tableData.unshift(totalData);
+                            for (var i = 0; i < resobjData.totalData.length; i++) {
+                                Vue.set(resobjData.totalData[i], 'total', '合计')
+                            }
+                            for (var j = 0; j < tableData.data.length; j++) {
+                                Vue.set(tableData.data[j], 'total', '')
+                            }
+                            mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
                         }
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -315,87 +351,25 @@
             },
             //根据id将合计插入对应id上边
             summaryFun(totalData, tableData) {
-                // var list = new List();
-                // for (var i = 0; i < tableData.length; i++) {
-                //     list.append(tableData[i]);
-                // }
-                // for (var i = 0; i < totalData.length; i++) {
-                //     for (var j = 0; j < tableData.length; j++) {
-                //         if (totalData[i].id == tableData[j].id) {
-                //             list.insertBefore(totalData[i], tableData[j])
-                //         }
-                //     }
-                // }
-                // var arr = []
-                // list.forEach(function (data) {
-                //     arr.push(data)
-                // });
-                // console.log(arr)
-                // var list = [];
-                // for (var j = 0; j < tableData.length; j++) {
-                //     for (var i = 0; i < totalData.length; i++) {
-                //         if (totalData[i].id !== tableData[j].id) {
-                //             list.push(totalData[i]);
-                //             list.push(tableData[j]);
-                //         }else{
-                //             list.push(tableData[j]);
-                //         }
-                //     }
-                // }
-                // console.log(list);
-                // this.tableData = this.repeatArr(list);
-                // console.log(this.tableData)
-
-                // 计算插入位置
-                    // funtion calculatePosition(tableData, totalData){
-                    // 新list
-                    // var resultTableData = new Array();
-                    // for(var i=0; i<tableData.length; i++){
-                    //     resultTableData.push(tableData[i]);
-                    // }
-                    // for(var i=0; i<totalData.length; i++){
-                    //     for(var j=0; j<tableData.length; j++){
-                    //         if(totalData[i].id == tableData[j].id){
-                    //             resultTableData.insertBefore(totalData[i], tableData[j]);
-                    //             break;
-                    //         }
-                    //     }
-                    // }
-
-                                    // 计算插入位置
-                // function calculatePosition(tableData, totalData){
-                // 新list
-                var resultTableData = new Array();
-                // 已用过的元素
-                var usedData = new Array();
-                
-                for(var k=0; k<tableData.length; k++){
-                    for(var i=0; i<totalData.length; i++){
-                        if(totalData[i].id === tableData[k].id){
-                            var flag = true;
-                            for(var j=0; j<usedData.length; j++){
-                                if(totalData[i].id === usedData[j].id){
-                                    flag = false;
-                                }
-                            }
-                            if(flag){
-                                resultTableData.push(totalData[i]);
-                                usedData.push(totalData[i]);
-                            }
+                var resultTableData = [] // 新list
+                for(var k=0;k<totalData.length;k++){
+                    if(totalData[k].groupId == 99999){
+                        resultTableData.push(totalData[k]);
+                    }
+                }
+                for(var i=0;i<totalData.length;i++){
+                    var ind = -1;
+                    for(var j=0;j<tableData.length;j++){
+                        if(totalData[i].groupId === tableData[j].groupId){
+                            ind = i;
+                            resultTableData.push(tableData[j]);
                         }
                     }
-                    resultTableData.push(tableData[k]);
-                } 
-                console.log(JSON.stringify(resultTableData))
-                // return resultTableData;
-                // }
-                    // return resultTableData;
-                console.log(resultTableData)
-                    // }
-            },
-            repeatArr(arr) {//去重
-                var x = new Set(arr);
-                return [...x];
+                    if(ind != -1){
+                        resultTableData.push(totalData[ind]);
+                    }
+                }
+                mainDivVM.tableData = resultTableData;
             },
             indexFun (index) { // 表格序号
                 return index;
@@ -405,14 +379,21 @@
                 column,
                 rowIndex,
                 columnIndex
-            }) { // 合并第一行
-                if (row.area && row.area == '合计') {
-                    if (columnIndex === 1) {
-                        return [1, 2]
+            }) { 
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [0, 0];
                     } else if (columnIndex === 2) {
+                        return [1, 3];
+                    }
+                }
+                if (row.total && row.total == '合计') {
+                    if (columnIndex === 1) {
                         return [0, 0]
-                    } else if (columnIndex === 3) {
-                        return [0, 0]
+                    } else if (columnIndex === 2) {
+                        return [1, 2]
                     }
                 }
             },

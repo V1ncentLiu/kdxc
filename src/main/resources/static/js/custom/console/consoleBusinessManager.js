@@ -548,18 +548,15 @@ var mainDivVM = new Vue({
               ]
         },
     },
-    computed: {
-
-        formSigningAmountPerformance(){
+    
+    methods: {
+    	formSigningAmountPerformance() {
             var aone = parseFloat(this.formSigning.amountReceived);
             var atwo = parseFloat(this.formSigning.firstToll);
-            if(isNaN(aone)) aone = 0
-            if(isNaN(atwo)) atwo = 0
-            return aone + atwo
-        }
-    },
-    methods: {
-
+            if (isNaN(aone)) aone = 0
+            if (isNaN(atwo)) atwo = 0
+            this.formSigning.performanceAmount = (aone + atwo) + ""
+        },
       updateFormSigningAmountPerformance(){
         var aone = parseFloat(this.updateFormSigning.amountReceived);
         var atwo = parseFloat(this.updateFormSigning.firstToll);
@@ -1595,9 +1592,9 @@ var mainDivVM = new Vue({
             if( this.formSigning.payTime){
                 this.formSigning.payTime = new Date( this.formSigning.payTime);
             }
+            this.formSigning.amountPerformance = this.formSigning.performanceAmount;
             this.formSigning.payMode = mainDivVM.tansPayModeNameToValue(this.formSigning.payModes);
             var param = this.formSigning;
-            param.amountPerformance = this.formSigningAmountPerformance;
             console.log(param)
             // 设置 clueid
             this.$refs[formName].validate((valid) => {

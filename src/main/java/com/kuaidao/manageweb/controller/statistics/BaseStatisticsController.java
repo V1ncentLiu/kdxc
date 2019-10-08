@@ -1,23 +1,32 @@
 package com.kuaidao.manageweb.controller.statistics;
 
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.controller.statistics.performance.PerformanceController;
+import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.dwOrganization.DwOrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.dwOrganizationQueryDTO.DwOrganizationQueryDTO;
+import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +36,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: guhuitao
  * @create: 2019-08-22 14:21
  **/
+@Slf4j
 @Controller
 public class BaseStatisticsController {
 
-    private static Logger logger = LoggerFactory.getLogger(BaseStatisticsController.class);
+    protected Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
     @Autowired
@@ -46,7 +58,12 @@ public class BaseStatisticsController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private DwOrganizationFeignClient dwOrganizationFeignClient;
-
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private CompanyInfoFeignClient companyInfoFeignClient;
+    @Autowired
+    private SysRegionFeignClient sysRegionFeignClient;
     /**
      * 根据商务组id和角色查询 用户
      * @param userOrgRoleReq
@@ -184,14 +201,46 @@ public class BaseStatisticsController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
 
-        //查询招商中心
+        //查询商务大区
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setOrgType(OrgTypeConstant.SWDQ);
-        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+//        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
+            queryDTO.setId(curLoginUser.getOrgId());
+            request.setAttribute("areaId",curLoginUser.getOrgId()+"");
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode) || RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+                request.setAttribute("managerId",curLoginUser.getId()+"");
+            }
+            OrganizationQueryDTO org = new OrganizationQueryDTO();
+            org.setId(curLoginUser.getOrgId());
+            request.setAttribute("busId",curLoginUser.getOrgId()+"");
+            JSONResult<List<OrganizationRespDTO>> json =
+                    organizationFeignClient.queryOrgByParam(org);
+            if("0".equals(json.getCode())){
+                Long parentId= json.getData().get(0).getParentId();
+                queryDTO.setId(parentId);
+
+                JSONResult<List<OrganizationRespDTO>> areajson=
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                if(areajson.getData().isEmpty()){
+                    request.setAttribute("areaList",json.getData());
+                    request.setAttribute("areaId",curLoginUser.getOrgId()+"");
+                }else{
+                    request.setAttribute("areaList",areajson.getData());
+                    request.setAttribute("areaId",parentId+"");
+                }
+            }
+          return ;
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            //管理员查询全部
+        }else{
+            //other
+            queryDTO.setId(curLoginUser.getOrgId());
+        }
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("areaList",queryOrgByParam.getData());
-        request.setAttribute("curUserId",curLoginUser.getId()+"");
         request.setAttribute("roleCode",roleCode);
     }
 
@@ -217,6 +266,125 @@ public class BaseStatisticsController {
         idEntity.setId(orgId.toString());
         JSONResult<OrganizationDTO> jsonResult= organizationFeignClient.queryOrgById(idEntity);
         return jsonResult;
+    }
+
+
+    /**
+     * 电销报表初始化权限
+     */
+    public void initAuth(BaseBusQueryDto baseBusQueryDto){
+        List<OrganizationDTO> teleGroupList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            teleGroupList = getCurOrgGroupByOrgId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            teleGroupList = getCurOrgGroupByOrgId(curLoginUser.getOrgId());
+        }else{
+//            teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.SWZ);
+        }
+        if(null != baseBusQueryDto && null != teleGroupList && teleGroupList.size() > 0){
+            List<Long> orgIdList = teleGroupList.parallelStream().map(OrganizationDTO::getId).collect(Collectors.toList());
+            baseBusQueryDto.setBusinessGroupIds(orgIdList);
+        }
+        //商务经理查询 考虑借调 删除组限制
+        if(null != baseBusQueryDto && RoleCodeEnum.SWJL.name().equals(roleCode)){
+            baseBusQueryDto.setBusinessGroupIds(null);
+            baseBusQueryDto.setBusinessGroupId(null);
+        }
+
+    }
+    /**
+     * 获取当前 orgId所在的组
+     */
+    private List<OrganizationDTO> getCurOrgGroupByOrgId(Long orgId) {
+        // 商务组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(String.valueOf(orgId));
+        List<OrganizationDTO> data = new ArrayList<>();
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        data.add(orgJr.getData());
+        return data;
+    }
+    private List<OrganizationDTO> getOrgGroupByOrgId(Long orgId,Integer orgType){
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(orgType);
+        busGroupReqDTO.setParentId(orgId);
+        JSONResult<List<OrganizationDTO>> listJSONResult = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        List<OrganizationDTO> data = listJSONResult.getData();
+        return data;
+    }
+
+    public void initOrgList(HttpServletRequest request){
+        String busAreaId="";// 当前商务大区
+        String businessGroupId ="";//商务组
+        String businessManagerId = "";//商务经理
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        //商务组
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
+            busAreaId = String.valueOf(curLoginUser.getOrgId());
+            busGroupReqDTO.setParentId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+            businessGroupId = String .valueOf(curLoginUser.getOrgId());
+            busGroupReqDTO.setId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            businessGroupId = String.valueOf(curLoginUser.getOrgId());
+            businessManagerId = String.valueOf(curLoginUser.getId());
+            busGroupReqDTO.setId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            //管理员可以查看全部
+            log.info("管理员登录");
+        }else{
+            //other 没权限
+            busGroupReqDTO.setId(-1l);
+        }
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+        JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        List<OrganizationRespDTO> data = listJSONResult.getData();
+
+        if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
+            busAreaId = String.valueOf(data.get(0).getParentId());
+        }
+        request.setAttribute("busGroupList",data);
+
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
+
+        //餐饮集团
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
+        request.setAttribute("companyList", listNoPage.getData());
+
+        request.setAttribute("busAreaId",busAreaId);
+        request.setAttribute("businessGroupId",businessGroupId);
+        request.setAttribute("businessManagerId",businessManagerId);
+
+
+        OrganizationQueryDTO busGroupReqDTO1 = new OrganizationQueryDTO();
+        busGroupReqDTO1.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO1.setOrgType(OrgTypeConstant.DZSYB);
+        busGroupReqDTO1.setBusinessLine(curLoginUser.getBusinessLine());
+        JSONResult<List<OrganizationRespDTO>> listJSONResult1 = organizationFeignClient.queryOrgByParam(busGroupReqDTO1);
+        request.setAttribute("deptList",listJSONResult1.getData());
+
+    }
+
+
+
+    /**
+     * 页面元素初始化
+     * @param type 0:country,1:province,2:city,3:district
+     */
+    public List<SysRegionDTO> queryProvince(Integer type){
+        //省市区域
+        SysRegionDTO queryDTO=new SysRegionDTO();
+        queryDTO.setType(type);//province 省级别
+        JSONResult<List<SysRegionDTO>> json= sysRegionFeignClient.queryOrgByParam(queryDTO);
+        return json.getData();
     }
 
 }
