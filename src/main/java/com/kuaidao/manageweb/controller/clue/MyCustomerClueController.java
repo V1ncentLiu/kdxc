@@ -1284,4 +1284,7 @@ public class MyCustomerClueController {
         return ftf.format(
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
     }
+
+	public static void main(String[] args) {
+	}
 }
