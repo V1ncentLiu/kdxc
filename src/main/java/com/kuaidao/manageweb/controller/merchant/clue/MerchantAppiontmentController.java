@@ -13,6 +13,7 @@ import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
 import com.kuaidao.merchant.dto.clue.MerchantAppiontmentDTO;
 import com.kuaidao.merchant.dto.clue.MerchantAppiontmentReq;
 import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,10 @@ public class MerchantAppiontmentController {
     public JSONResult<PageBean<MerchantAppiontmentDTO>> queryPage(@RequestBody MerchantAppiontmentReq req) {
         UserInfoDTO userInfoDTO = getUser();
         req.setUserId(userInfoDTO.getId());
+        List<RoleInfoDTO> roleList = userInfoDTO.getRoleList();
+        if (roleList != null) {
+            req.setRoleCode(roleList.get(0).getRoleCode());
+        }
         return merchantAppiontmentFeignClient.queryPage(req);
     }
 
