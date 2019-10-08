@@ -11,9 +11,11 @@
   <style>
     .optimizeClueManagement {
       font-size: 14px;
-      background: #f3f3f3;
+      background: #f3f7fe;
     }
-
+    .el-breadcrumb{
+      margin-bottom: 10px;
+    }
     button a {
       color: #fff !important;
     }
@@ -32,7 +34,8 @@
     }
 
     .fontColor2 {
-      color: #3A84F4
+      color: #3A84F4;
+      font-weight: normal;
     }
 
     .fontColor3 {
@@ -92,14 +95,16 @@
       padding: 30px;
       background: #fff;
       border-radius: 8px;
-      margin-bottom: 20px
+      margin-bottom: 20px;
+      box-shadow:0px 0px 29px 10px rgba(77,129,255,0.1);
+border-radius:8px;
     }
 
     .resourse-ad-box {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      border-left: 6px dotted #3A84F4;
+      border-left: 4px dotted #3A84F4;
       margin-bottom: 30px;
     }
 
@@ -107,9 +112,10 @@
       display: flex;
       flex-direction: column;
       flex-wrap: wrap;
-      background: #f3f3f3;
+      background:#ECEFF6;
       padding: 10px 0 30px 30px;
       margin-bottom: 30px;
+      border-radius: 6px;
 
     }
 
@@ -136,16 +142,19 @@
       border-radius: 6px;
       padding: 36px
     }
+  
 
     .resourse-ad-main h3 {
       height: 44px;
       line-height: 44px;
+      font-weight: normal;
     }
 
     .resourse-ad-link {
       display: block;
       margin-top: 26px;
     }
+    a.resourse-ad-link img{border-radius: 6px;}
 
     .resorse-ad-time div {
       width: 44px;
@@ -241,6 +250,10 @@
       float: left;
       display: inline;
     }
+    .no-phone{
+      text-align: center;
+      margin-top: 30px;
+    }
 
     .resourse-phone-box li span:first-child {
       text-align: right;
@@ -249,6 +262,10 @@
     .maxWidth500{max-width: 500px; height: auto;}
     .msg-more{margin: 0 auto;}
     .online-msg li{padding:10px 0;}
+    .resourse-online-box .row-bg
+    {
+      box-shadow:0px 0px 0px 0px rgba(77,129,255,0);
+    }
   </style>
 </head>
 
@@ -256,12 +273,12 @@
   <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding">
     <el-breadcrumb separator="/" class="elBreadcrumb">
       <el-breadcrumb-item>Home</el-breadcrumb-item>
-      <el-breadcrumb-item>费用设置</el-breadcrumb-item>
-      <el-breadcrumb-item>资源需求审批</el-breadcrumb-item>
+      <el-breadcrumb-item>资源列表</el-breadcrumb-item>
+      <el-breadcrumb-item>用户行为轨迹</el-breadcrumb-item>
     </el-breadcrumb>
-    <h3 class="fontColor fontSize14 title marign14">
+    <!-- <h3 class="fontColor fontSize14 title marign14">
       用户行为轨迹
-    </h3>
+    </h3> -->
     <div class="row-bg el-row--flex" justify="space-around">
       <div class="grid-content">
         <img th:src="@{/images/user_photo.png}" class="resourse-user-photo marign30" />
@@ -357,7 +374,7 @@
               </li>
             </ul>
             <!-- 在线客服 -->
-            <!-- <div class="resourse-online-box">
+            <div class="resourse-online-box">
               <div :class="['listBox',{'listScroll':isActive}]">
                 <ul class="online-msg">
                     <li v-for="(item,i) in initResourcesObj.cusName" :key="item.id">
@@ -376,7 +393,7 @@
                     </li>
                   </ul>
               </div>
-            </div> -->
+            </div>
             <div class="msg-more" v-if="isShowMoreBtn" @click="isActiveFun">
               <div class="resourse-online-more">
                 加载更多聊天记录
@@ -501,25 +518,26 @@
     </el-dialog>
     <!-- 查看手机号 -->
     <el-dialog title="客户手机号" :visible.sync="dialogFormVisible" width="540px">
-      <template>
-        <ul class="resourse-user-info resourse-phone-box">
-          <li>
-            <span>手机号1:</span><span class="fontColor1"> {{initResourcesObj.phone}} </span>
-          </li>
-          <li>
-            <span>手机号2:</span><span class="fontColor1"> {{initResourcesObj.phone2}} </span>
-          </li>
-          <li>
-            <span>手机号3:</span><span class="fontColor1"> {{initResourcesObj.phone3}} </span>
-          </li>
-          <li>
-            <span>手机号4:</span><span class="fontColor1"> {{initResourcesObj.phone4}} </span>
-          </li>
-          <li>
-            <span>手机号5:</span><span class="fontColor1"> {{initResourcesObj.phone5}} </span>
-          </li>
-        </ul>
-      </template>
+        <template>
+            <div class="no-phone" v-if="!initResourcesObj.phone">无数据</div>
+            <ul class="resourse-user-info resourse-phone-box">
+              <li>
+                <span v-if="initResourcesObj.phone">手机号1:</span><span class="fontColor1"> {{initResourcesObj.phone}} </span>
+              </li>
+              <li>
+                <span v-if="initResourcesObj.phone2">手机号2:</span><span class="fontColor1"> {{initResourcesObj.phone2}} </span>
+              </li>
+              <li>
+                <span v-if="initResourcesObj.phone3">手机号3:</span><span class="fontColor1"> {{initResourcesObj.phone3}} </span>
+              </li>
+              <li>
+                <span v-if="initResourcesObj.phone4">手机号4:</span><span class="fontColor1"> {{initResourcesObj.phone4}} </span>
+              </li>
+              <li>
+                <span v-if="initResourcesObj.phone5">手机号5:</span><span class="fontColor1"> {{initResourcesObj.phone4}} </span>
+              </li>
+            </ul>
+          </template>
     </el-dialog>
   </div>
 </body>
@@ -564,43 +582,43 @@
     },
     methods: {
       initResources() {
-        this.initResourcesObj = {
-          area: '北京', // 地域
-          terminal: '地移动端/pc端域',// 终端
-          phone: '17011323232',
-          phone2: '14011323232',
-          phone3: '13011323232',
-          phone4: '12011323232',
-          phone5: '16011323232',
-          cusName: '李先生',
-          qq: '565788909', // qq
-          sex: '男',  // 性别
-          wechat: 'dhehgk2343', // 微信
-          wechat2: 'dhe2hgk23432', // 微信
-          email: '1329393@qq.common', // 邮箱
-          age: '35岁',  // 年龄
-          imageUrl: 'http://localhost:8180/images/ad_link.png',// 图片链接
-          Aource: '百度',// 媒介
-          category: '百度',// 资源类别
-          messageTime: '20191202 18:00:00',// 留言时间
-          messagePoint: 'XXXX',// 留言重点
-          searchWord: '移动端/pc端',// 搜索词
-          projectName: '项目名称', // 资源项目
-          chatList: [], // 聊天记录
-          wechatCode: 'http://localhost:8180/images/ad_link.png'//微信二维码
-        }
+        // this.initResourcesObj = {
+        //   area: '北京', // 地域
+        //   terminal: '地移动端/pc端域',// 终端
+        //   phone: '17011323232',
+        //   phone2: '14011323232',
+        //   phone3: '13011323232',
+        //   phone4: '12011323232',
+        //   phone5: '16011323232',
+        //   cusName: '李先生',
+        //   qq: '565788909', // qq
+        //   sex: '男',  // 性别
+        //   wechat: 'dhehgk2343', // 微信
+        //   wechat2: 'dhe2hgk23432', // 微信
+        //   email: '1329393@qq.common', // 邮箱
+        //   age: '35岁',  // 年龄
+        //   imageUrl: 'http://localhost:8180/images/ad_link.png',// 图片链接
+        //   Aource: '百度',// 媒介
+        //   category: '百度',// 资源类别
+        //   messageTime: '20191202 18:00:00',// 留言时间
+        //   messagePoint: 'XXXX',// 留言重点
+        //   searchWord: '移动端/pc端',// 搜索词
+        //   projectName: '项目名称', // 资源项目
+        //   chatList: [], // 聊天记录
+        //   wechatCode: 'http://localhost:8180/images/ad_link.png'//微信二维码
+        // }
         const param = { id: '1111' };
-        // axios.post('/merchant/resourceTrajectory/data', param)
-        //   .then(function (response) {
-        //     var result = response.data;
-        //     if (result.code == '0') {
-        //       // this.initResourcesObj = result.data
+        axios.post('/merchant/resourceTrajectory/data', param)
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              this.initResourcesObj = result.data
 
-        //     }
-        //   })
-        //   .catch(function (error) {
-        //     console.log(error);
-        //   });
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
 
       },
       openWechat() {
