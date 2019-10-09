@@ -64,6 +64,7 @@ public interface OutboundPackageFeignClient {
      * @param idEntity
      * @return
      */
+    @PostMapping("/queryOutboundPackageById")
     JSONResult<OutboundPackageRespDTO> queryOutboundPackageById(IdEntityLong idEntity);
 
     @Component
