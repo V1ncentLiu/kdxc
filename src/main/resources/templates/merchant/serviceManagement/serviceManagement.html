@@ -40,6 +40,7 @@
           <!-- </div>  -->
         </el-form>
       </div>
+      <!-- 列表 -->
       <el-row>
         <el-table ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
           style="width: 100%" :data="dataTable">
@@ -72,9 +73,12 @@
 
           </el-table-column>
         </el-table>
+        <!-- 翻页 -->
         <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+      </el-row>
     </div>
-    <!-- dialog -->
+
+    <!-- 添加坐席弹框 -->
     <el-dialog :title="subAccountFormTitle" :visible.sync="dialogsubAccountForm" @close="closeusersubAccountForm"
       width="540px">
       <el-form :model="subAccountForm" ref="subAccountForm" :rules="subAccountRules">
@@ -112,6 +116,8 @@
         <el-button @click="accountcancelForm('subAccountForm')">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 套餐详情 -->
     <el-dialog title="套餐详情" :visible.sync="infoDialog" width="1000px">
       <el-table ref="infoTable" tooltip-effect="dark" style="width: 100%" border :data="infoTable">
         <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
@@ -153,7 +159,7 @@
       merchatName: "",
       subAccountFormTitle: "添加坐席",
       dialogsubAccountForm: false,
-      paginationShow: false,
+      paginationShow: true,
       isShow: false,
       subaccountisShow: false,
       loginDisabled: false,
@@ -240,7 +246,7 @@
       }],
       submitDisabled: false,
       dataTable: [{
-        userName: '1',
+        username: '1',
         name: '2',
         balance: '3',
         phone: '4',
@@ -268,6 +274,7 @@
       scrollTop: 0,
     },
     methods: {
+      // 套餐详情
       openInfo() {
         // var param ={};
         // param.clueId = row.clueId;
@@ -284,6 +291,8 @@
         // });
         this.infoDialog = true;
       },
+
+      // 添加坐席提交
       saveAccountUser(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
@@ -323,6 +332,8 @@
           }
         })
       },
+      
+      // 点击添加坐席出弹框
       addAccountUser(obj) {
         this.merchatName = obj.name;
         this.dialogsubAccountForm = true;
@@ -351,25 +362,31 @@
             }
           })
       },
+      
       closeAddCustomFieldDialog() {//关闭添加自定义字段dialog
         if (this.$refs['clueTemplateForm'] !== undefined) {
           this.$refs['clueTemplateForm'].resetFields();
         }
       },
+      
+      
       closeusersubAccountForm() {//关闭添加自定义字段dialog
         if (this.$refs['subAccountForm'] !== undefined) {
           this.$refs['subAccountForm'].resetFields();
         }
       },
+      
+      // 取消添加坐席提交
       accountcancelForm(formName) {
         if (this.$refs[formName] !== undefined) {
           this.$refs[formName].resetFields();
         }
         this.dialogsubAccountForm = false;
       },
+      
+      // 搜索 翻页
       searchTable() {
         var param = {};
-
         param.status = this.userSearchForm.status;
         param.username = this.userSearchForm.userName;
         param.name = this.userSearchForm.name;
@@ -413,6 +430,8 @@
           });
 
       },
+      
+      // 翻页调用
       toggleSelection(rows) { // table select 默认选中fn
         if (rows) {
           rows.forEach(row => {
@@ -422,15 +441,19 @@
           this.$refs.multipleTable.clearSelection();
         }
       },
+      
+      
       resetForm(formName) {
         console.info(this.$refs[formName]);
         this.$refs[formName].resetFields();
         this.$refs[formName].resetFields();
       },
+      
       //选择行
       handleSelectionChange(val) {
         this.multipleSelection = val;
       },
+      
       //日期数据格式化方法
       dateFormat(row, column, cellValue, index) {
         if (cellValue == undefined) {
