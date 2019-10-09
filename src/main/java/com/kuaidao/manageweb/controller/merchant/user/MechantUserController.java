@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -86,6 +87,9 @@ public class MechantUserController {
     private ChangeOrgFeignClient changeOrgFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient mechantUserInfoFeignClient;
+
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
 
     /***
      * 用户列表页
@@ -265,5 +269,37 @@ public class MechantUserController {
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(userInfoReq.getOrgId());
         return organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
+    }
+
+    /***
+     * 用户信息页
+     *
+     * @return
+     */
+    @RequestMapping("/userInfo")
+    public String userInfo(HttpServletRequest request) {
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        Long id = user.getId();
+        request.setAttribute("ossUrl", ossUrl);
+        request.setAttribute("userId", String.valueOf(id));
+        return "merchant/merchantInfo/merchantInfo";
+    }
+
+    /**
+     * 修改用户头像
+     */
+    @PostMapping("/updateIcon")
+    @ResponseBody
+    public JSONResult updateIcon(@RequestBody UserInfoReq userInfoReq) {
+        if (null == userInfoReq.getId()) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        //如果提交头像为空，直接返回
+        if(StringUtils.isBlank(userInfoReq.getMerchantIcon())){
+            return new JSONResult().success(null);
+        }
+        JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
+        return jsonResult;
     }
 }
