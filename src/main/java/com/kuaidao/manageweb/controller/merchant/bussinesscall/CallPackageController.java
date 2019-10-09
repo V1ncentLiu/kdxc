@@ -23,11 +23,9 @@ public class CallPackageController {
 
 
     /**
-     * @Description 商家通话费用页面初始化
+     * @Description 云外呼页面初始化
      * @param request
      * @Return java.lang.String
-     * @Author xuyunfeng
-     * @Date 2019/10/9 17:15
      **/
     @RequestMapping("/index")
     @RequiresPermissions("merchant:bussinessCallCost:view")
