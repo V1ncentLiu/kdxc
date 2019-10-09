@@ -36,7 +36,7 @@
                     { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }
                 ]"
                 >
-                    <el-input @input="formSigningAmountPerformance" v-model.number="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'送'"
@@ -46,7 +46,7 @@
                     { pattern: /^\+?[1-9][0-9]*$/, message: '赠送信息仅可输入正整数', trigger: 'blur,change' }
                 ]"
                 >
-                    <el-input @input="formSigningAmountPerformance" v-model.number="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'总得'"
@@ -94,6 +94,15 @@
             }      	  
         },
         methods: {
+            number(){
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
+                }
+            },
             formSigningAmountPerformance() {
                 var domains=this.dynamicValidateForm.domains;
                 for(var i=0;i<domains.length;i++){

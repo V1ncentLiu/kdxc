@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.merchant.recharge;
 
 import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialReq;
+import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.MerchantRechargeResp;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
@@ -117,9 +118,22 @@ public class MerchantOnlineRechargeController {
    * @Author xuyunfeng
    * @Date 2019/10/9 9:43
    **/
-  @RequestMapping("/toAlipayPage")
-  public String toWechatPage(@RequestBody MerchantRechargeReq req){
+  @RequestMapping("/toWechatPage")
+  public String toWechatPage(){
+      return "merchant/payment/paymentResult";
+  }
 
-    return "merchant/payment/paymentResult";
+  /**
+  * @Description 检查支付状态
+  * @param req
+  * @Return java.lang.String
+  * @Author xuyunfeng
+  * @Date 2019/10/9 19:35
+  **/
+  @RequestMapping("/checkPayStatus")
+  public JSONResult<Integer> checkPayStatus(@RequestBody MerchantRechargeReq req){
+    JSONResult<MerchantRechargeRecordDTO> list = merchantRechargeRecordBusinessFeignClient.getMerchantRechargeRecordInfo(req);
+    MerchantRechargeRecordDTO  merchantRechargeRecordDTO = list.getData();
+      return new JSONResult<Integer>().success(merchantRechargeRecordDTO.getRechargeStatus());
   }
 }
