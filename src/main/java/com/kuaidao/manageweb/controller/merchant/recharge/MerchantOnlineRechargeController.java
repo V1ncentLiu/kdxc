@@ -119,13 +119,21 @@ public class MerchantOnlineRechargeController {
    * @Date 2019/10/9 9:43
    **/
   @RequestMapping("/toWechatPage")
-  public String toWechatPage(@RequestBody MerchantRechargeReq req){
+  public String toWechatPage(){
+      return "merchant/payment/paymentResult";
+  }
+
+  /**
+  * @Description 检查支付状态
+  * @param req
+  * @Return java.lang.String
+  * @Author xuyunfeng
+  * @Date 2019/10/9 19:35
+  **/
+  @RequestMapping("/checkPayStatus")
+  public JSONResult<Integer> checkPayStatus(@RequestBody MerchantRechargeReq req){
     JSONResult<MerchantRechargeRecordDTO> list = merchantRechargeRecordBusinessFeignClient.getMerchantRechargeRecordInfo(req);
     MerchantRechargeRecordDTO  merchantRechargeRecordDTO = list.getData();
-    if(merchantRechargeRecordDTO.getRechargeStatus() == 1){
-      return "merchant/payment/paymentResult";
-    }else {
-      return null;
-    }
+      return new JSONResult<Integer>().success(merchantRechargeRecordDTO.getRechargeStatus());
   }
 }
