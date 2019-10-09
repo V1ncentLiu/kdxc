@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.merchant.outboundpackage;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageReqDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageRespDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageUpdateDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -10,19 +11,21 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.outboundpackage.OutboundPackageFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
@@ -41,6 +44,9 @@ public class OutboundPackageController {
     @Autowired
     OutboundPackageFeignClient outboundPackageFeignClient;
 
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
+
 
     /**
      * 页面跳转
@@ -48,7 +54,9 @@ public class OutboundPackageController {
      */
     @GetMapping("/index")
     @RequiresPermissions("merchant:outboundPackage:view")
-    public String index(){
+    public String index(HttpServletRequest request){
+        JSONResult<List<DictionaryItemRespDTO>>  dicJr= dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.SUPPLY_COMPANY.getCode());
+        request.setAttribute("supplyCompanyList",dicJr.getData());
         return "merchant/outboundPackage/outboundPackagePage";
     }
 
