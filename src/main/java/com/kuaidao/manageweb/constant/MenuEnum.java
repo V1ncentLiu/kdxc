@@ -51,7 +51,7 @@ public enum MenuEnum {
     /**
      * 商家端
      */
-    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"), CLUE_MANAGEMENT("资源管理列表"), CONSUME_RECORD("消费记录（管理端）"),
+    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"),CLUE_MANAGEMENT("资源管理列表"),
     /**
      * 报表（商务模块）
      */
