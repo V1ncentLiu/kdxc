@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,6 +81,7 @@ public class BusTeleDistributionController extends BaseStatisticsController {
         //合计
         List<BaseBusinessDto>  sumReadd = JSON.parseArray(totalDataStr, BaseBusinessDto.class);
         buildList(dataList, orderList,sumReadd,1);
+        addSerialNum(dataList);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "商务报表电销组织分布表" +baseBusQueryDto.getStartTime()+"-"+baseBusQueryDto.getEndTime() + ".xlsx";
         response.addHeader("Content-Disposition",
@@ -119,6 +121,7 @@ public class BusTeleDistributionController extends BaseStatisticsController {
         //合计
         List<BaseBusinessDto> sumReadd = JSON.parseArray(totalDataStr, BaseBusinessDto.class);
         buildList(dataList, orderList,sumReadd,2);
+        addSerialNum(dataList);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "商务报表电销组织分布表" +baseBusQueryDto.getStartTime()+"-"+baseBusQueryDto.getEndTime() + ".xlsx";
         response.addHeader("Content-Disposition",
@@ -158,7 +161,6 @@ public class BusTeleDistributionController extends BaseStatisticsController {
 
     private void addTotalExportData(BaseBusinessDto ra, List<List<Object>> dataList, Integer type) {
         List<Object> curList = new ArrayList<>();
-        curList.add("");
         curList.add("合计");
         curList.add("");
         if(type.equals(2)){
@@ -172,22 +174,24 @@ public class BusTeleDistributionController extends BaseStatisticsController {
         dataList.add(curList);
     }
 
-    private void buildList(List<List<Object>> dataList, List<BaseBusinessDto> orderList,List<BaseBusinessDto> sumList, Integer type) {
-        Map<String, List<BaseBusinessDto>> collect = orderList.stream().collect(Collectors.groupingBy(BaseBusinessDto::getGroupId));
-        List<BaseBusinessDto> collect1 = sumList.stream().sorted(Comparator.comparing(BaseBusinessDto::getGroupId)).collect(Collectors.toList());
-        for(int i=0;i<collect1.size();i++){
-            BaseBusinessDto ra = collect1.get(i);
-            List<BaseBusinessDto> baseBusinessDtos = collect.get(ra.getGroupId());
-            addTotalExportData(ra,dataList,type);
-            buildData(dataList,baseBusinessDtos, type);
-        }
+    private void buildList(List<List<Object>> dataList, List<BaseBusinessDto> sourceDataList,List<BaseBusinessDto> sumList, Integer type) {
+        Map<String, BaseBusinessDto> sumMap = sumList.stream().collect(Collectors.toMap(BaseBusinessDto::getGroupId, Function.identity()));
+        TreeMap<String, List<BaseBusinessDto>> sourceDataListTreeMap =
+                sourceDataList.stream().collect(Collectors.groupingBy(BaseBusinessDto::getGroupId, TreeMap::new, Collectors.toList()));
+        //添加总合计
+        addTotalExportData(sumMap.get("99999"),dataList,type);
+        sourceDataListTreeMap.forEach((key,value)->{
+            //封装数据
+            buildData(dataList,value,type);
+            //添加每组合计
+            addTotalExportData(sumMap.get(key),dataList,type);
+        });
     }
 
     private void buildData(List<List<Object>> dataList,List<BaseBusinessDto> list,Integer type){
         for(int j = 0; j<list.size(); j++){
             List<Object> curList = new ArrayList<>();
             BaseBusinessDto raInner = list.get(j);
-            curList.add(j + 1);
             curList.add(raInner.getGroupName());
             curList.add(raInner.getSellDepartName());
             if(type == 2){
@@ -199,6 +203,19 @@ public class BusTeleDistributionController extends BaseStatisticsController {
             curList.add(raInner.getAmount());
             curList.add(raInner.getSignSingle());
             dataList.add(curList);
+        }
+    }
+
+    private void addSerialNum(List<List<Object>> dataList){
+        int j = 0;
+        for(int i=0;i<dataList.size();i++){
+            List<Object> objects = dataList.get(i);
+            if(i == 1){
+                objects.add(0,"");
+            }else if(i > 1){
+                j++;
+                objects.add(0,j);
+            }
         }
     }
     private void initParam(Long busAreaId,Long businessGroupId,
