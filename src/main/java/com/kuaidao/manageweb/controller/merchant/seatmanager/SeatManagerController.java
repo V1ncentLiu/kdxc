@@ -18,10 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.*;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -35,8 +37,8 @@ public class SeatManagerController {
   private static Logger logger = LoggerFactory.getLogger(SeatManagerController.class);
 
 
-//  @Autowired
-//  private SeatManagerFeignClient seatManagerFeignClient;
+  @Autowired
+  private SeatManagerFeignClient seatManagerFeignClient;
 
 
   @Autowired
@@ -47,13 +49,13 @@ public class SeatManagerController {
    * @return
    */
   @RequestMapping("/toPage")
-  @RequiresPermissions("merchant:seatMagager:view")
-  public String toPage(HttpServletRequest request, @RequestBody Long userId) {
-   // UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
+//  @RequiresPermissions("merchant:seatMagager:view")
+  public String toPage(HttpServletRequest request, @RequestParam Long userId) {
+//    UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(userId,null);
     request.setAttribute("userList", userList);
-    return "merchant/mechantSetMeal/list";
+    return "merchant/serviceManagement/seatsManagement";
   }
 
   /**
@@ -74,52 +76,52 @@ public class SeatManagerController {
   /**
    *  新增
    */
-//  @ResponseBody
-//  @PostMapping("/create")
-////  @RequiresPermissions("merchant:seatMagager:add")
-//  public JSONResult<Boolean> create(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
-//    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-//    insertOrUpdateDTO.setCreateUser(curLoginUser.getId());
-//    return seatManagerFeignClient.create(insertOrUpdateDTO);
-//  }
+  @ResponseBody
+  @PostMapping("/create")
+//  @RequiresPermissions("merchant:seatMagager:add")
+  public JSONResult<Boolean> create(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    insertOrUpdateDTO.setCreateUser(curLoginUser.getId());
+    return seatManagerFeignClient.create(insertOrUpdateDTO);
+  }
 
   /**
    * 更新
    */
-//  @ResponseBody
-//  @PostMapping("/update")
-////  @RequiresPermissions("merchant:seatMagager:update")
-//  public JSONResult<Boolean> update(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
-//    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-//    insertOrUpdateDTO.setUpdateUser(curLoginUser.getId());
-//    return seatManagerFeignClient.update(insertOrUpdateDTO);
-//  }
+  @ResponseBody
+  @PostMapping("/update")
+//  @RequiresPermissions("merchant:seatMagager:update")
+  public JSONResult<Boolean> update(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    insertOrUpdateDTO.setUpdateUser(curLoginUser.getId());
+    return seatManagerFeignClient.update(insertOrUpdateDTO);
+  }
 
   /**
    * 删除
    */
-//  @ResponseBody
-//  @PostMapping("/delete")
-////  @RequiresPermissions("merchant:seatMagager:delete")
-//  public JSONResult<Boolean> delete(@RequestBody IdListLongReq idList) {
-//    return seatManagerFeignClient.delete(idList);
-//  }
+  @ResponseBody
+  @PostMapping("/delete")
+//  @RequiresPermissions("merchant:seatMagager:delete")
+  public JSONResult<Boolean> delete(@RequestBody IdListLongReq idList) {
+    return seatManagerFeignClient.delete(idList);
+  }
   /**
    * 查询
    */
-//  @ResponseBody
-//  @PostMapping("/queryList")
-//  public JSONResult<PageBean<SeatManagerResp>> queryList(@RequestBody SeatManagerReq seatManagerReq) {
-//    return seatManagerFeignClient.queryList(seatManagerReq);
-//  }
+  @ResponseBody
+  @PostMapping("/queryList")
+  public JSONResult<PageBean<SeatManagerResp>> queryList(@RequestBody SeatManagerReq seatManagerReq) {
+    return seatManagerFeignClient.queryList(seatManagerReq);
+  }
 
   /**
    * 查询一条
    */
-//  @ResponseBody
-//  @PostMapping("/findOne")
-//  public JSONResult<SeatManagerResp> findOne(@RequestBody IdEntityLong idEntityLong) {
-//    return seatManagerFeignClient.findOne(idEntityLong);
-//  }
+  @ResponseBody
+  @PostMapping("/findOne")
+  public JSONResult<SeatManagerResp> findOne(@RequestBody IdEntityLong idEntityLong) {
+    return seatManagerFeignClient.findOne(idEntityLong);
+  }
 
 }

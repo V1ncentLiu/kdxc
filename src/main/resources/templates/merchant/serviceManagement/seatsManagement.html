@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+  <title>后台管理系统</title>
+  <style>
+  </style>
+</head>
+<body>
+  <div id="app" class="app mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>商家坐席管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <!-- 按钮 -->
+    <el-row class="marginB20">        
+        <el-button type="primary" @click="seatOperation('add')">添加坐席</el-button>
+        <el-button type="success" @click="seatOperation('edit')">编辑坐席</el-button>
+        <el-button type="danger" @click="seatOperation('delete')">删除坐席</el-button>
+    </el-row>
+    <div class="mainSearchBg"> 
+      <div class="mainSearchFormBox">
+          <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
+                <el-form-item label="商家子账户：" label-width="auto">
+                    <el-select v-model="form.rechargeBusiness" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="坐席编号：">
+                    <el-input v-model="form.number" placeholder=""></el-input>
+                </el-form-item>
+                <el-form-item label="号码所属公司：">
+                    <el-input v-model="form.company" placeholder=""></el-input>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+      </div>
+      <!-- 列表展示 -->
+      <div class="seatOperation">
+        <el-table :data="tableData" tooltip-effect="dark" border style="width: 100%" @selection-change="handleSelectionChange">
+          <el-table-column align="center" type="selection" width="55">
+          </el-table-column>
+          <el-table-column align="center" prop="subAccount" label="所属子账号" width="120">
+            <!-- <template slot-scope="scope">{{ scope.row.date }}</template> -->
+          </el-table-column>
+          <el-table-column align="center" prop="number" label="坐席编号" width="120">
+          </el-table-column>
+          <el-table-column align="center" prop="company" label="号码所属公司">
+          </el-table-column>
+          <el-table-column align="center" prop="ownership" label="坐席归属地">
+          </el-table-column>
+          <el-table-column align="center" prop="userNumber" label="账户编号">
+          </el-table-column>
+          <el-table-column align="center" prop="secretKey" label="秘钥">
+          </el-table-column>
+          <el-table-column align="center" prop="proxyurl" label="proxyurl">
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+    <!-- 添加编辑坐席弹框 -->
+    <el-dialog :title="title" :visible.sync="centerDialogVisible" width="540px" center>
+      <p style="text-align: center">商家增加子账号绑定坐席</p>
+      <div style="margin: 20px;"></div>
+      <el-form ref="loginForm" :label-position="labelPosition" :rules="rules" label-width="110px" :model="loginForm">
+        <el-form-item prop="number" label="坐席编号：" :label-width="formLabelWidth">
+          <el-input v-model="loginForm.number" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item prop="company" label="号码所属公司：" :label-width="formLabelWidth">
+          <el-input v-model="loginForm.company" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item prop="ownership" label="坐席归属地：" :label-width="formLabelWidth">
+          <el-input v-model="loginForm.ownership" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item prop="userNumber" label="账户编号：" :label-width="formLabelWidth">
+          <el-input v-model="loginForm.userNumber" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item prop="secretKey" label="秘钥：" :label-width="formLabelWidth">
+          <el-input v-model="loginForm.secretKey" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item prop="proxyurl" label="proxyurl：" :label-width="formLabelWidth">
+          <el-input v-model="loginForm.proxyurl" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item prop="subAccount" label="商家子账号：" :label-width="formLabelWidth">
+          <el-select v-model="loginForm.subAccount" placeholder="请选择" style="width: 290px;">
+            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="text-align:center;">
+        <el-button type="primary" @click="submitForm('loginForm')">确 定</el-button>
+        <el-button @click="centerDialogVisible = false">取 消</el-button>        
+      </div>
+    </el-dialog>
+  </div>
+  <!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+</html>
+<script>
+// var merchantUserList=[[${merchantUserList}]];//商户集合
+var merchantUserList=[];//商户集合
+var app = new Vue({
+    el: '#app',
+    data() {
+      return {
+        merchantUserListOptions:merchantUserList,
+        pager:{
+            total: 0,
+            currentPage: 1,
+            pageSize: 20,
+        },
+        form:{
+            rechargeBusiness:'',
+            number:'',
+            company:'',
+        },
+        tableData: [
+          {
+            number: '1',
+            company: '2',
+            ownership: '3',
+            userNumber: '4',
+            secretKey: '5',
+            proxyurl: '6',
+            subAccount: '7'
+          }, {
+            number: '11',
+            company: '22',
+            ownership: '33',
+            userNumber: '44',
+            secretKey: '55',
+            proxyurl: '66',
+            subAccount: '77'
+          }],
+        multipleSelection: [],
+        options: [
+          {
+            value: '选项1',
+            label: '黄金糕'
+          }, {
+            value: '选项2',
+            label: '双皮奶'
+          }, {
+            value: '选项3',
+            label: '蚵仔煎'
+          }, {
+            value: '选项4',
+            label: '龙须面'
+          }, {
+            value: '选项5',
+            label: '北京烤鸭'
+          }],
+        centerDialogVisible: false,
+        title: '',
+        labelPosition: 'right',
+        loginForm: {
+          number: '',
+          company: '',
+          ownership: '',
+          userNumber: '',
+          secretKey: '',
+          proxyurl: '',
+          subAccount: ''
+        },
+        formLabelWidth: '150px',
+        rules: {
+          number: [
+            { required: true, message: '座席编号不能为空', trigger: 'blur' },
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+            {
+              validator: function (rule, value, callback) {
+                if (/^[0-9]+$/.test(value) == false) {
+                  callback(new Error("请输入数字"));
+                } else {
+                  callback();
+                }
+                callback();
+
+              }, trigger: 'change'
+            }
+          ],
+          company: [
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+          ],
+          userNumber: [
+            { required: true, message: '账户编号不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          secretKey: [
+            { required: true, message: '秘钥不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          proxyurl: [
+            { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          subAccount: [
+            { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+
+        },
+      }
+    },
+    methods: {
+      searchTable() {
+          // var param ={};
+          // param.pageSize = this.pager.pageSize;
+          // param.pageNum = this.pager.currentPage; 
+          // param.rechargeBusiness = this.form.rechargeBusiness;
+          // param.number = this.form.number; 
+          // param.company = this.form.company;
+          // axios.post('/merchant/merchantRechargeRecordManage/queryManagePageList', param)
+          // .then(function (response) {
+          //     console.log(response)
+          //     var result =  response.data;
+          //     if(result.code==0){
+                  // var table=result.data;
+                  // app.tableData= table.data;
+                  // app.pager.total =  table.total;
+                  // app.pager.currentPage = table.currentPage;
+          //     }else{
+          //         ocmVM.$message.error(result.msg);
+          //     }                    
+          // })
+          // .catch(function (error) {
+          //      console.log(error);
+          // });
+          
+      },
+      // 选择框选中
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+
+      // 添加 编辑 删除按钮
+      seatOperation(type) {
+        switch (type) {
+          case 'add':
+            this.title = '添加座席'
+            this.centerDialogVisible = true
+            var loginForm = {
+              number: '',
+              company: '',
+              ownership: '',
+              userNumber: '',
+              secretKey: '',
+              proxyurl: '',
+              subAccount: ''
+            }
+            this.$refs['loginForm']?this.$refs['loginForm'].resetFields():'' //移除表单验证
+            this.loginForm = loginForm  //将添加项置空
+            break;
+          case 'edit':
+            if (this.multipleSelection.length === 1) {
+              this.title = '编辑座席'
+              this.centerDialogVisible = true
+              this.loginForm = this.multipleSelection[0]
+              this.$refs['loginForm']?this.$refs['loginForm'].resetFields():''
+            } else {
+              this.$message('请选择坐席')
+            }
+            break;
+          case 'delete':
+            if (this.multipleSelection.length === 1) {
+              this.$message('请求接口');
+            } else {
+              this.$message('请选择坐席')
+            }
+            break;
+          default: return ''
+
+        }
+      },
+
+      // 提交
+      submitForm(formName) {
+        var valid = true;
+        this.$refs[formName].validateField(["number", "company", "userNumber", "secretKey", "proxyurl"], (error) => {
+          if (error) {
+            valid = false;
+          }
+        });
+        if (valid) {
+          alert('请求接口');
+        }
+      }
+    },
+    created(){
+        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+        if(localVal){this.pager.pageSize = localVal;}
+        // console.info("create method");
+        this.searchTable();
+    },
+    mounted(){
+      document.getElementById('app').style.display = 'block';
+    }
+})
+</script>
