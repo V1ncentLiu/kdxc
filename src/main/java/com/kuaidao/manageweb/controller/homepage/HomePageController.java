@@ -62,6 +62,7 @@ public class HomePageController {
         userInfoRespDTO.setId(user.getId());
         userInfoRespDTO.setName(user.getName());
         userInfoRespDTO.setOrgId(user.getOrgId());
+        userInfoRespDTO.setMerchantIcon(user.getMerchantIcon());
         request.setAttribute("user", userInfoRespDTO);
         
         List<IndexModuleDTO> menuList = user.getMenuList();
