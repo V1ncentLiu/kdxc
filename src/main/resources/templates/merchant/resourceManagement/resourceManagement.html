@@ -100,6 +100,7 @@
             display: block;
         }
         .invite-box{width: 470px; margin: 0 auto;}
+        .xreuired .el-form-item__label:before{content: ''}
     </style>
 </head>
 
@@ -180,7 +181,7 @@
                     <em>{{todayReceiveClueNum == null ? '0' : todayReceiveClueNum}}</em> 条 累计领取
                     <em>{{totalReceiveClueNum == null ? '0' : totalReceiveClueNum}}</em> 条</div>
                 <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="dataTable"
-                    @selection-chan="handleSelectionChange">
+                    @selection-change="handleSelectionChange">
                     <el-table-column align="center" type="selection" width="55"></el-table-column>
                     <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="clueId" label="主键" v-if="show"></el-table-column>
@@ -241,11 +242,11 @@
                         <el-input v-model="inviteForm.cusName" placeholder="输入客户姓名" autocomplete="off" maxLength="10"
                             class="input-width"></el-input>
                     </el-form-item>
-                    <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="age" class="xreuired">
+                    <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="cusNum" class="xreuired">
                         <el-input type="number" v-model="inviteForm.cusNum" autocomplete="off" maxLength="3"
                             class="input-width"></el-input>
                     </el-form-item>
-                    <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired">
+                    <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired" prop="province">
                         <el-select filterable v-model="inviteForm.province" placeholder="省" class="invite-area"
                             @change="currentProvince" clearable>
                             <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
@@ -264,8 +265,8 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="选择接待人：" :label-width="formLabelWidth" prop="receiver" class="xreuired">
-                        <el-select v-model="inviteForm.receiver" placeholder="请选择" class="input-width">
+                    <el-form-item label="选择接待人：" :label-width="formLabelWidth" prop="receiverId" class="xreuired">
+                        <el-select v-model="inviteForm.receiverId" placeholder="请选择" class="input-width">
                             <el-option v-for="item in merchantUserList" :key="item.value" :label="item.name"
                                 :value="item.id">
                             </el-option>
@@ -275,7 +276,7 @@
                         <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime"
                             placeholder="输入客户方便联系的时间"></el-date-picker>
                     </el-form-item>
-                    <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="proSelect" class="xreuired">
+                    <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="projectId" class="xreuired">
                         <el-select v-model="inviteForm.projectId" placeholder="请选择" class="input-width">
                             <el-option v-for="item in proSelect" :key="item.value" :label="item.projectName"
                                 :value="item.id">
@@ -358,35 +359,32 @@
                     city: '',
                     district: '',
                     cusName: '',
-                    age: '',
+                    cusNum: '',
                     receiver: '',
                     remark: '',
                     reserveTime: '',
-                    proSelect: ''
+                    proSelect: '',
+                    projectId:'',
+                    receiverId:''
                 },
                 formAllocat:{
                     userId:'',
                 },
                 rules: {
-                    age: [
+                    cusNum: [
                         {
-                            validator: function (rule, value, callback) {
-                                var reg = /^[1-9]+[0-9]*]*$/;
-                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
-                                    callback(new Error("请输入正整数"));
-                                    ocmVM.inviteForm.age = null;
-                                } else {
-                                    callback();
-                                }
+                            required: true, message: '年龄不能为空', trigger: 'change',
+                        },
 
-                            }, trigger: 'change'
-                        }
                     ],
                     province: [
                         { required: true, message: '请选择开店区域', trigger: 'change' }
                     ],
                     cusName: [
                         { required: true, message: '客户姓名不能为空', trigger: 'change' }
+                    ],
+                    receiverId: [
+                        { required: true, message: '接待人不能为空', trigger: 'change' }
                     ],
                     reserveTime: [
                         { required: true, message: '预约来访时间不能为空', trigger: 'change' }
@@ -602,7 +600,7 @@
                         param.province = this.inviteForm.province;;
                         param.city = this.inviteForm.city;
                         param.district = this.inviteForm.district;
-                        param.receiverId = this.inviteForm.receiver;
+                        param.receiverId = this.inviteForm.receiverId;
                         param.reserveTime = this.inviteForm.reserveTime;
                         param.projectId = this.inviteForm.projectId;
                         param.remark = this.inviteForm.remark;
