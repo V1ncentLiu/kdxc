@@ -273,19 +273,19 @@
                                 var newtimeDifference = this.from.endTime.getTime() - this.from.startTime.getTime()
                                 if (newtimeDifference < yesterday) {
                                     this.showButton = null
-                                    this.isProhibit(false, false, true, true, true, '天')
+                                    this.isProhibit(false, false, true, true, '天')
                                 } else if (newtimeDifference >= yesterday && newtimeDifference < thanTwo) {
                                     this.showButton = 0
-                                    this.isProhibit(false, true, true, true, true, '小时')
+                                    this.isProhibit(false, true, true, true, '小时')
                                 } else if (newtimeDifference >= thanTwo && newtimeDifference < thanSeven) {
                                     this.showButton = 1
-                                    this.isProhibit(false, false, false, true, true, '天')
+                                    this.isProhibit(true, false, false, true, '天')
                                 } else if (newtimeDifference >= thanSeven && newtimeDifference <= thanThirty) {
                                     this.showButton = 2
-                                    this.isProhibit(false, false, false, true, true, '天')
+                                    this.isProhibit(false, false, false, true, '天')
                                 } else if (newtimeDifference > thanThirty) {
                                     this.showButton = null
-                                    this.isProhibit(true, true, false, false, false, '月')
+                                    this.isProhibit(true, true, false, false, '月')
                                 }
                                 return
                             }
@@ -294,19 +294,19 @@
                     }
                     if (timeDifference < yesterday) {
                         this.showButton = null
-                        this.isProhibit(false, true, true, true, true, '小时')
+                        this.isProhibit(false, true, true, true, '小时')
                     } else if (timeDifference >= yesterday && timeDifference < thanTwo) {
                         this.showButton = 0
-                        this.isProhibit(false, true, true, true, true, '小时')
+                        this.isProhibit(false, true, true, true, '小时')
                     } else if (timeDifference >= thanTwo && timeDifference < thanSeven) {
                         this.showButton = 1
-                        this.isProhibit(false, false, false, true, true, '天')
+                        this.isProhibit(true, false, false, true, '天')
                     } else if (timeDifference >= thanSeven && timeDifference <= thanThirty) {
                         this.showButton = 2
-                        this.isProhibit(false, false, false, true, true, '天')
+                        this.isProhibit(false, false, false, true, '天')
                     } else if (timeDifference > thanThirty) {
                         this.showButton = null
-                        this.isProhibit(true, true, false, false, false, '月')
+                        this.isProhibit(true, true, false, false, '月')
                     }
                 },
 
@@ -319,7 +319,7 @@
                 timeClick(data) {
                     this.showButton = data
                     if (data === 0) {
-                        this.isProhibit(false, true, true, true, true, '小时')
+                        this.isProhibit(false, true, true, true, '小时')
 
                         var today = new Date();
                         today.setHours(0);
@@ -330,14 +330,14 @@
                         // 昨天
                         var yesterday = new Date(today - oneday);
                         this.from.startTime = yesterday
-                        this.from.endTime = today
+                        this.from.endTime = new Date(today - 1000)
                     } else if (data === 1) {
-                        this.isProhibit(false, false, false, true, true, '天')
+                        this.isProhibit(true, false, false, true, '天')
                         this.daysAge(6)
                         this.from.endTime = new Date
 
                     } else if (data === 2) {
-                        this.isProhibit(true, false, false, true, true, '天')
+                        this.isProhibit(true, false, false, true, '天')
                         this.daysAge(30)
                         this.from.endTime = new Date
 
@@ -358,7 +358,7 @@
                 },
 
                 // 判断选择框是否禁用
-                isProhibit(hour, day, week, month, year, defaultValue) {
+                isProhibit(hour, day, week, month, defaultValue) {
                     this.from.selectValue = defaultValue
                     this.options = [{
                         value: 'hour',
@@ -376,10 +376,6 @@
                         value: 'month',
                         label: '月',
                         disabled: month
-                    }, {
-                        value: 'year',
-                        label: '年',
-                        disabled: year
                     }]
                 },
 
@@ -418,7 +414,6 @@
                     axios.post('/mhomePage/receiveStatics', param)
                         .then(function (response) {
                             that.option.xAxis.data = response.data.data.xlist
-                            // that.option.series[0].data = [820, 932, 901, 934, 1290, 1330, 1320]
                             that.option.series[0].data = response.data.data.ylist
                             that.myChart.setOption(that.option, true)
                         })
@@ -430,7 +425,7 @@
             created() {
                 this.daysAge(6)
                 this.axiosData()
-                this.isProhibit(false, false, false, true, true, '天')
+                this.isProhibit(true, false, false, true, '天')
             },
             mounted() {
                 document.getElementById('merchantHome').style.display = 'block';
