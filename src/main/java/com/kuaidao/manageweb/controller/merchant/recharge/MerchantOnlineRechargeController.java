@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -69,7 +70,7 @@ public class MerchantOnlineRechargeController {
         merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
       }
       if(merchantUserAccountDTO == null || merchantUserAccountDTO.getTotalAmounts() == null){
-        merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+        merchantUserAccountDTO.setTotalAmounts(new BigDecimal("0.00"));
       }
       request.setAttribute("merchantUserAccountDTO",merchantUserAccountDTO);
     }catch (Exception e){
@@ -97,5 +98,28 @@ public class MerchantOnlineRechargeController {
       logger.error("加载在线充值页面getWeChatAndAlipayCode:{}",e);
       return new JSONResult<MerchantRechargeResp>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"getWeChatAndAlipayCode接口异常");
     }
+  }
+  /**
+  * @Description 支付宝跳转URL
+  * @param
+  * @Return java.lang.String
+  * @Author xuyunfeng
+  * @Date 2019/10/9 9:43
+  **/
+  @GetMapping("/toAlipayPage")
+  public String toAlipayPage(){
+    return "merchant/payment/paymentResult";
+  }
+  /**
+   * @Description 微信跳转URL
+   * @param
+   * @Return java.lang.String
+   * @Author xuyunfeng
+   * @Date 2019/10/9 9:43
+   **/
+  @RequestMapping("/toAlipayPage")
+  public String toWechatPage(@RequestBody MerchantRechargeReq req){
+
+    return "merchant/payment/paymentResult";
   }
 }

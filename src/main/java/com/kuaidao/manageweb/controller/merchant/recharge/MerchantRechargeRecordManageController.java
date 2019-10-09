@@ -11,6 +11,7 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -57,6 +58,12 @@ public class MerchantRechargeRecordManageController {
       queryDTO.setManageRechargeUser(user.getId());
       JSONResult<RechargeAccountDTO> rechargeAccountDTOJSONResult = merchantRechargeRecordManageFeignClient.getNowDayAndMonthRechargeMoney(queryDTO);
       RechargeAccountDTO rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
+      if(rechargeAccountDTO == null || rechargeAccountDTO.getDaySumMoney() == null){
+        rechargeAccountDTO.setDaySumMoney(new BigDecimal("0.00"));
+      }
+      if(rechargeAccountDTO == null || rechargeAccountDTO.getMonthSumMoney() == null){
+        rechargeAccountDTO.setMonthSumMoney(new BigDecimal("0.00"));
+      }
       request.setAttribute("rechargeAccountDTO",rechargeAccountDTO);
       // 商家账号
       List<UserInfoDTO> userList = getMerchantUser(null);
