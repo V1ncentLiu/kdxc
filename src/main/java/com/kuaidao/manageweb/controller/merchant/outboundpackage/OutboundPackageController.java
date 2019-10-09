@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.merchant.outboundpackage;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageReqDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageRespDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageUpdateDTO;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -15,6 +16,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
@@ -126,5 +128,20 @@ public class OutboundPackageController {
         }
         return outboundPackageFeignClient.delete(idListLongReq);
 
+    }
+
+    /**
+     * 根据ID查询 服务套餐信息
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/queryOutboundPackageById")
+    @ResponseBody
+    public JSONResult<OutboundPackageRespDTO> queryOutboundPackageById(IdEntityLong idEntity){
+        Long id = idEntity.getId();
+        if(id == null){
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        return outboundPackageFeignClient.queryOutboundPackageById(idEntity);
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageReqDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageRespDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageUpdateDTO;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,14 @@ public interface OutboundPackageFeignClient {
      */
     @PostMapping("/deleteOutboundPackage")
     public JSONResult delete(IdListLongReq idListLongReq);
-    
+
+    /**
+     * 根据ID 查询服务套餐
+     * @param idEntity
+     * @return
+     */
+    JSONResult<OutboundPackageRespDTO> queryOutboundPackageById(IdEntityLong idEntity);
+
     @Component
     static   class HystrixClientFallback implements OutboundPackageFeignClient {
 
@@ -82,6 +90,11 @@ public interface OutboundPackageFeignClient {
         @Override
         public JSONResult delete(IdListLongReq idListLongReq) {
             return fallBackError("删除服务套餐");
+        }
+
+        @Override
+        public JSONResult<OutboundPackageRespDTO> queryOutboundPackageById(IdEntityLong idEntity) {
+            return fallBackError("根据ID查询服务套餐");
         }
     }
 
