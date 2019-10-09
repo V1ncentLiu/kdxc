@@ -161,12 +161,10 @@
             cancel(){
                 window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
             },
-            removeDomain(item) {
-                if (this.$refs['dynamicValidateForm']!=undefined) {
-                    this.$refs['dynamicValidateForm'].resetFields();
-                }
+            removeDomain(item) {    
+                this.$refs['dynamicValidateForm'].clearValidate();            
                 var index = this.dynamicValidateForm.domains.indexOf(item)
-                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑
+                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
                     // 条件改为根据后台返回的标识判断是否可编辑
                     this.$confirm("确定要删除吗?", '提示', {
                         confirmButtonText: '确定',
@@ -187,7 +185,9 @@
                                     addClueVM.addIsDisabled=false;
                                     addClueVM.editIsDisabled=true;
                                 }
-
+                                if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
+                                    addClueVM.$refs['dynamicValidateForm'].resetFields();
+                                }
                             }else{
                                 addClueVM.$message({
                                      message: response.data.msg,
