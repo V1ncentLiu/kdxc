@@ -28,7 +28,6 @@ public class CallPackageController {
      * @Return java.lang.String
      **/
     @RequestMapping("/index")
-    @RequiresPermissions("merchant:bussinessCallCost:view")
     public String index(HttpServletRequest request) {
         return "merchant/cloudCall/cloudCall";
     }
