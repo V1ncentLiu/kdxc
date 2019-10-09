@@ -10,6 +10,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.math.BigDecimal;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -50,6 +51,15 @@ public class MerchantRechargeRecordBusinessController {
       queryDTO.setRechargeBusiness(user.getId());
       JSONResult<RechargeAccountDTO> rechargeAccountDTOJSONResult = merchantRechargeRecordBusinessFeignClient.getRechargeMoney(queryDTO);
       RechargeAccountDTO rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
+      if(rechargeAccountDTO == null || rechargeAccountDTO.getTotalRechargeMoney() == null){
+        rechargeAccountDTO.setTotalRechargeMoney(new BigDecimal("0"));
+      }
+      if(rechargeAccountDTO == null || rechargeAccountDTO.getTotalGivenMoney() == null){
+        rechargeAccountDTO.setTotalGivenMoney(new BigDecimal("0"));
+      }
+      if(rechargeAccountDTO == null || rechargeAccountDTO.getTotalAmounts() == null){
+        rechargeAccountDTO.setTotalAmounts(new BigDecimal("0"));
+      }
       request.setAttribute("rechargeAccountDTO",rechargeAccountDTO);
     }catch (Exception e){
       logger.error("initRechargeRecordBusiness:{}",e);
