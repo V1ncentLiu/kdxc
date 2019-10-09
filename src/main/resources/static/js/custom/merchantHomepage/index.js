@@ -202,9 +202,13 @@ var homePageVM=new Vue({
 	        }
 	     },
 	     modifyPwd(){//用户信息
-	    	 //重置表单
-				//  this.dialogModifyPwdVisible=true;
-				document.location.href = '/merchant/userManager/userInfo';
+	    	//重置表单
+			//  this.dialogModifyPwdVisible=true;
+			// document.location.href = '/merchant/userManager/userInfo';
+            var dataUrl = "/merchant/userManager/userInfo";
+            $("#iframeBox").attr({
+                "src":dataUrl //设置ifream地址
+            });
 	     },
 	     logout(){
 	    	 this.dialogLogoutVisible=true;
