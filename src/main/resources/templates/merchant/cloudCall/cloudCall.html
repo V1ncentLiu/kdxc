@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <style>
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>云呼叫</el-breadcrumb-item>
+    </el-breadcrumb>     
+    <el-row class="borderbox padding20">         
+        <el-row class="marginB10">
+            <span style="color: #333;font-size: 16px;margin-right: 20px;">云呼叫</span><el-button type="primary" style="width: 120px;height: 40px;">服务套餐项目</el-button>
+        </el-row>
+        <el-row class="marginB20">已购买套餐，再次变更套餐需要在第二个月生效</el-row>
+    </el-row> 
+    <el-row>
+        <el-table 
+            ref="tableData"
+            tooltip-effect="dark"
+            border
+            :data="tableData"
+            @selection-change="handleSelectionChange" 
+            >
+            <!-- <el-table-column align="center" type="index" label="序号"></el-table-column> -->
+            <el-table-column align="center" prop="name1" label="套餐"></el-table-column>
+            <el-table-column align="center" prop="name2" label="内容"></el-table-column>
+            <el-table-column align="center" prop="name3" label="支持坐席最大数量"></el-table-column>
+            <el-table-column align="center" prop="name4" label="月固定费用/个"></el-table-column>
+            <el-table-column align="center" label="选择费用">
+                <template scope="scope">
+                    <el-radio :label="scope.row.radioVal" v-model="templateRadio">&nbsp;</el-radio>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-row>
+    <el-row class="padding20" style="text-align: right;padding-right: 0;color: #666">提示：以上不包含通话时长费用，具体请咨询客服</el-row>
+    <div class="padding20 f-tac">
+        <el-button type="primary" style="width:200px;height: 50px;" @click="submitForm">购买</el-button>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script>    
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {                
+                multipleSelection: [],//选择行
+                formLabelWidth: '110px',
+                tableData: [
+                    {
+                        name1:'套餐1',
+                        name2:'坐席费：100元/坐席     固话月租费：30元/月     小号月租费：20元/月',
+                        name3:'10',
+                        name4:'150元/月',
+                        radioVal:'0'
+                    },{
+                        name1:'套餐2',
+                        name2:'坐席费：80元/坐席     固话月租费：30元/月     小号月租费：20元/月',
+                        name3:'10',
+                        name4:'130元/月',
+                        radioVal:'1'
+                    }
+                ],
+                templateRadio:'0'
+            }             
+        },
+        methods: {
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            }, 
+            submitForm(){
+                window.location.href="paymentOnline.html"
+            }
+        },
+        created(){            
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+</script>
+</html>
