@@ -34,7 +34,7 @@
                 :rules="{
                   required: true, message: '充值信息不能为空', trigger: 'blur'
                 }">
-                    <el-input v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                    <el-input @input="formSigningAmountPerformance" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'送'"
@@ -42,7 +42,7 @@
                 :rules="{
                   required: true, message: '赠送信息不能为空', trigger: 'blur'
                 }">
-                    <el-input v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                    <el-input @input="formSigningAmountPerformance" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'总得'"
@@ -90,6 +90,16 @@
             }      	  
         },
         methods: {
+            formSigningAmountPerformance() {
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                    var aone = parseFloat(domains[i].rechargeAmount);
+                    var atwo = parseFloat(domains[i].givenAmount);
+                    if (isNaN(aone)) aone = 0
+                    if (isNaN(atwo)) atwo = 0
+                    this.dynamicValidateForm.domains[i].totalAmount = (aone + atwo) + ""
+                }                
+            },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -197,8 +207,6 @@
                         });          
                     });
                 }else{
-                    debugger
-                    console.log(item)
                     if(index !== -1) {
                         this.dynamicValidateForm.domains.splice(index, 1)
                     }
