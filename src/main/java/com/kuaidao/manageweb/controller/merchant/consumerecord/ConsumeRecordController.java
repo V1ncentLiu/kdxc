@@ -134,7 +134,7 @@ public class ConsumeRecordController {
         sheet.setColumnWidth(2, 4000);
         sheet.setColumnWidth(3, 4000);
         sheet.setColumnWidth(4, 4000);
-        sheet.setColumnWidth(5, 4000);
+        sheet.setColumnWidth(5, 5500);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
         String name = "商家消费记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
