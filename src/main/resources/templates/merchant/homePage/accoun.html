@@ -39,7 +39,7 @@
         <!-- 根据日期筛选 -->
         <div class="homeTime">
             <el-row :gutter="20">
-                <el-col :span="7" style="width: 335px">
+                <el-col :span="7" style="width: 320px">
                     <span @click="timeClick(0)" class="time" :class="{active:showButton===0} ">昨天</span>
                     <span @click="timeClick(1)" class="time" :class="{active:showButton===1}">近7天</span>
                     <span @click="timeClick(2)" class="time" :class="{active:showButton===2}">近30天</span>
@@ -56,7 +56,7 @@
                         </el-date-picker>
                     </div>
                 </el-col>
-                <el-col :span="5" style="width: 240px">
+                <el-col :span="5" style="width: 215px">
                     <div class="grain">
                         <b>颗粒</b>
                         <el-select v-model="from.selectValue" placeholder="" style="width: 110px;">
@@ -246,13 +246,14 @@
                     var thanTwo = 24 * 2 * 60 * 60 * 1000;
                     var thanThirty = 30 * 24 * 60 * 60 * 1000;
                     var thanSeven = 7 * 24 * 60 * 60 * 1000;
+                    var yearTime = 365 * 24 * 60 * 60 * 1000;
                     var timeDifference = this.from.endTime.getTime() - this.from.startTime.getTime()
                     switch (data) {
                         case 1:
                             if (parseInt(this.from.startTime.getTime() / 1000) == parseInt(new Date().getTime() / 1000)) {
                                 this.showButton = null
                                 this.from.endTime = this.from.startTime
-                            } else if (this.from.startTime > new Date) {
+                            } else if (this.from.startTime > new Date || this.from.endTime - this.from.startTime >= yearTime) {
                                 this.$message({
                                     message: '请正确选择时间',
                                     type: 'warning'
@@ -263,7 +264,7 @@
                             }
                             break;
                         case 2:
-                            if (this.from.endTime < this.from.startTime || this.from.endTime > new Date) {
+                            if (this.from.endTime < this.from.startTime || this.from.endTime > new Date || this.from.endTime - this.from.startTime >= yearTime) {
                                 this.$message({
                                     message: '请正确选择时间',
                                     type: 'warning'
@@ -311,7 +312,7 @@
 
                 // 立即充值
                 immediateRecharge() {
-                    alert("跳转充值页面")
+                    document.location.href = '/merchant/merchantOnlineRecharge/initOnlineRecharge';
                 },
 
                 // 日期选择
@@ -319,15 +320,28 @@
                     this.showButton = data
                     if (data === 0) {
                         this.isProhibit(false, false, true, true, true, '天')
-                        this.daysAge(1)
+
+                        var today = new Date();
+                        today.setHours(0);
+                        today.setMinutes(0);
+                        today.setSeconds(0);
+                        today.setMilliseconds(0);
+                        var oneday = 1000 * 60 * 60 * 24;
+                        // 昨天
+                        var yesterday = new Date(today - oneday);
+                        this.from.startTime = yesterday
+                        this.from.endTime = today
                     } else if (data === 1) {
                         this.isProhibit(false, false, false, true, true, '天')
                         this.daysAge(7)
+                        this.from.endTime = new Date
+
                     } else if (data === 2) {
                         this.isProhibit(false, false, false, true, true, '天')
                         this.daysAge(30)
+                        this.from.endTime = new Date
+
                     }
-                    this.from.endTime = new Date
                 },
 
                 // 查询
