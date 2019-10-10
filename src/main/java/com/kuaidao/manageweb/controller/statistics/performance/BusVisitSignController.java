@@ -66,9 +66,10 @@ public class BusVisitSignController extends BaseStatisticsController {
      * @return
      */
     @RequestMapping("/groupList")
-    public String gruopList(HttpServletRequest request,Long busAreaId,Long businessGroupId,Long businessManagerId,Integer provinceId,Long startTime,Long endTime){
+    public String gruopList(HttpServletRequest request,Long busAreaId,Long businessGroupId,Long businessManagerId,
+                            String province,Long startTime,Long endTime){
         initBugOrg(request);
-        initBaseDto(request,busAreaId,businessGroupId,businessManagerId,null,provinceId,startTime,endTime);
+        initBaseDto(request,busAreaId,businessGroupId,businessManagerId,null,province,startTime,endTime);
         request.setAttribute("provinceList",queryProvince(RegionTypeEnum.省.getValue()));
         //签约集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
@@ -162,14 +163,14 @@ public class BusVisitSignController extends BaseStatisticsController {
 
 
     private void initBaseDto(HttpServletRequest request,Long areaId,Long groupId,Long saleId,
-                            Long companyId,Integer provinceId,Long startTime,Long endTime){
+                            Long companyId,String province,Long startTime,Long endTime){
         BaseBusQueryDto dto=new BaseBusQueryDto();
         dto.setBusAreaId(areaId);
         dto.setBusinessGroupId(groupId);
         dto.setBusinessManagerId(saleId);
         dto.setStartTime(startTime);
         dto.setEndTime(endTime);
-        dto.setProvinceId(provinceId);
+        dto.setProvince(province);
         dto.setCompanyId(companyId);
         request.setAttribute("busDto",dto);
     }
