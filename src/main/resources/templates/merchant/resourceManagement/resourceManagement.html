@@ -100,6 +100,7 @@
             display: block;
         }
         .invite-box{width: 470px; margin: 0 auto;}
+        .xreuired .el-form-item__label:before{content: ''}
     </style>
 </head>
 
@@ -206,8 +207,8 @@
                     <el-table-column align="center" prop="cluePrice" label="价格（元）/条" width="130"></el-table-column>
                     <el-table-column align="center" prop="merchantIsInvite" label="操作" width="80">
                         <template slot-scope="scope">
-                            <div v-if="scope.row.merchantIsInvite == '1'">已提交</div>
-                            <div v-else @click="postInvite(scope.row.clueId)" class="merchant-submit">提交邀约</div>
+                            <div v-if="scope.row.merchantIsInvite == '1'">已邀约</div>
+                            <div v-else @click="postInvite(scope.row.clueId,scope.row.cusName,scope.row.projectId)" class="merchant-submit">提交邀约</div>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -234,18 +235,18 @@
         </el-dialog>
         <!-- 查看手机号 -->
 
-        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px">
+        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" before-close="handleClose">
             <template>
                 <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired invite-box">
                     <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
-                        <el-input v-model="inviteForm.cusName" placeholder="输入客户姓名" autocomplete="off" maxLength="10"
+                        <el-input v-model="inviteForm.cusName"  autocomplete="off" maxLength="10"
                             class="input-width"></el-input>
                     </el-form-item>
-                    <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="age" class="xreuired">
-                        <el-input type="number" v-model="inviteForm.cusNum" autocomplete="off" maxLength="3"
+                    <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="cusNum" class="xreuired">
+                        <el-input  v-model="inviteForm.cusNum" maxlength="3" onkeyup="this.value=this.value.replace(/[^\d.]/g,'');"  autocomplete="off"
                             class="input-width"></el-input>
                     </el-form-item>
-                    <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired">
+                    <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired" prop="province">
                         <el-select filterable v-model="inviteForm.province" placeholder="省" class="invite-area"
                             @change="currentProvince" clearable>
                             <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
@@ -264,32 +265,34 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="选择接待人：" :label-width="formLabelWidth" prop="receiver" class="xreuired">
-                        <el-select v-model="inviteForm.receiver" placeholder="请选择" class="input-width">
+                    <el-form-item label="选择接待人：" :label-width="formLabelWidth" prop="receiverId" class="xreuired">
+                        <el-select v-model="inviteForm.receiverId" placeholder="请选择" class="input-width">
                             <el-option v-for="item in merchantUserList" :key="item.value" :label="item.name"
                                 :value="item.id">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="预约来访时间：" :label-width="formLabelWidth" prop="reserveTime" class="xreuired">
-                        <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime"
-                            placeholder="输入客户方便联系的时间"></el-date-picker>
+                        <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime"></el-date-picker>
                     </el-form-item>
-                    <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="proSelect" class="xreuired">
-                        <el-select v-model="inviteForm.projectId" placeholder="请选择" class="input-width">
-                            <el-option v-for="item in proSelect" :key="item.value" :label="item.projectName"
-                                :value="item.id">
-                            </el-option>
+                    <el-form-item label="考察项目："  :label-width="formLabelWidth" prop="projectId" class="xreuired" >
+                        <el-select v-model="inviteForm.projectId" placeholder=""  class="input-width" multiple filterable>
+                            <el-option
+                            v-for="item in  proSelect"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark" class="invite-top">
                         <el-input type="textarea" v-model="inviteForm.remark" class="input-with-select input-width"
-                            maxlength="200" :rows="4" placeholder="输入分发备注"></el-input>
+                            maxlength="200" :rows="4"></el-input>
                     </el-form-item>
                     <div class="padding20 f-tac r-dailog ">
                         <el-button type="primary" :disabled="btnDisabled" @click="submitInviteForm('inviteForm')">提交
                         </el-button>
-                        <el-button @click="resetForm('inviteForm');inviteVisible = false;">取 消</el-button>
+                        <el-button @click="resetForm('inviteForm')">取 消</el-button>
                     </div>
                 </el-form>
             </template>
@@ -335,7 +338,8 @@
                 districtArr: [],
                 merchantUserList: merchantUserList, //接待人
                 proSelect: proSelect,//考察项目
-                clueId: '',//资源id
+                clueId: '',//资源cusName
+                getCusName:'',
                 pager:{
                   total: 0,
                   currentPage: 1,
@@ -358,29 +362,23 @@
                     city: '',
                     district: '',
                     cusName: '',
-                    age: '',
+                    cusNum: '',
                     receiver: '',
                     remark: '',
                     reserveTime: '',
-                    proSelect: ''
+                    proSelect: '',
+                    projectId: [],
+                    receiverId:''
                 },
                 formAllocat:{
                     userId:'',
                 },
                 rules: {
-                    age: [
+                    cusNum: [
                         {
-                            validator: function (rule, value, callback) {
-                                var reg = /^[1-9]+[0-9]*]*$/;
-                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
-                                    callback(new Error("请输入正整数"));
-                                    ocmVM.inviteForm.age = null;
-                                } else {
-                                    callback();
-                                }
+                            required: true, message: '客户人数不能为空', trigger: 'change',
+                        },
 
-                            }, trigger: 'change'
-                        }
                     ],
                     province: [
                         { required: true, message: '请选择开店区域', trigger: 'change' }
@@ -388,12 +386,15 @@
                     cusName: [
                         { required: true, message: '客户姓名不能为空', trigger: 'change' }
                     ],
+                    receiverId: [
+                        { required: true, message: '接待人不能为空', trigger: 'change' }
+                    ],
                     reserveTime: [
                         { required: true, message: '预约来访时间不能为空', trigger: 'change' }
                     ],
 
                     projectId: [
-                        { required: true, message: '考察项目不能为空', trigger: 'change' }
+                        { required: true, message: '请选择考察项目', trigger: 'change' }
                     ],
                 },
                 formLabelWidth: '120px',
@@ -437,7 +438,6 @@
                             console.info(result);
                             var table = result.data;
                             ocmVM.dataTable = table.data;
-                            console.log(table.data, "data---");
                             ocmVM.pager.total = table.total;
                             ocmVM.pager.currentPage = table.currentPage;
                         }
@@ -538,7 +538,22 @@
                 }
             },
             resetForm(formName) {
-                this.$refs[formName].resetFields();
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.inviteForm.cusName = '';
+                    this.inviteForm.projectId = [];
+                }
+            },
+            handleClose(){
+                if (this.$refs['inviteForm']) {
+                    this.$refs['inviteForm'].resetFields();
+                    this.inviteForm.cusName = '';
+                    this.inviteForm.projectId = [];
+                    ocmVM.allocateFormVisible = false;
+                }
+                // this.inviteForm.cusName = '';
+                // this.inviteForm.projectId = [];
+                // ocmVM.allocateFormVisible = false;
             },
             submitAllocatForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -583,9 +598,14 @@
                     }
                 });
             },
-            postInvite(id) {
+            postInvite(id,name,projectId) {
                 this.clueId = id;
                 this.inviteVisible = true;
+                this.inviteForm.cusName = name;
+                this.inviteForm.projectId = [];
+                this.inviteForm.projectId.push(projectId);
+                console.log(this.inviteForm.projectId,"projectId");
+                
                 if (this.$refs['inviteForm']) {
                     this.$refs['inviteForm'].resetFields();
                 }
@@ -602,9 +622,9 @@
                         param.province = this.inviteForm.province;;
                         param.city = this.inviteForm.city;
                         param.district = this.inviteForm.district;
-                        param.receiverId = this.inviteForm.receiver;
+                        param.receiverId = this.inviteForm.receiverId;
                         param.reserveTime = this.inviteForm.reserveTime;
-                        param.projectId = this.inviteForm.projectId;
+                        param.projectId = this.inviteForm.projectId.join(',');
                         param.remark = this.inviteForm.remark;
                         axios.post('/merchant/merchantAppiontment/insertMerchantAppiontment', param)
                             .then(function (response) {

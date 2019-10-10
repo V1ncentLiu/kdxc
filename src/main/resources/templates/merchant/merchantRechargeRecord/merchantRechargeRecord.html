@@ -57,7 +57,7 @@
             </el-form>
         </div>
         <el-row class="greyTip">
-            <span style="margin-right: 10px;">累积充值：{{rechargeDTO.totalRechargeMoney}}元</span><span style="margin-right: 10px;">累积赠送：{{rechargeDTO.totalGivenMoney}}元</span><span style="margin-right: 10px;">剩余金额：{{rechargeDTO.totalAmounts}}元</span>
+            <span style="margin-right: 10px;">累积充值：{{this.numFormat(rechargeDTO.totalRechargeMoney)}}元</span><span style="margin-right: 10px;">累积赠送：{{this.numFormat(rechargeDTO.totalGivenMoney)}}元</span><span style="margin-right: 10px;">剩余金额：{{this.numFormat(rechargeDTO.totalAmounts)}}元</span>
         </el-row>
         <el-row>            
             <el-table
@@ -100,7 +100,7 @@
     <!-- 分配资源 -->
     <el-dialog title="申请开发票" :visible.sync="applyFormVisible" width="540px">
         <el-form :model="formApply" ref="formApply" :rules="rules">
-            <el-form-item label="发票金额：" :label-width="formLabelWidth">
+            <el-form-item label="发票金额（元）：" :label-width="formLabelWidth">
                 <span>{{formApply.invoiceAmount}}</span>
             </el-form-item>
             <el-form-item label="发票抬头：" prop="invoiceHeader" :label-width="formLabelWidth">
@@ -263,6 +263,10 @@
             }             
         },
         methods: {
+            numFormat(num) {
+                var c = (num.toString().indexOf ('.') !== -1) ? num.toLocaleString() : num.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
+                return c;
+            },
             checkSelectable(row) {
                 return row.invoiceStatus == 0
             },

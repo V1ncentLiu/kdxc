@@ -31,18 +31,22 @@
                 <el-form-item
                 :label="'充值'"
                 :prop="'domains.' + index + '.rechargeAmount'"
-                :rules="{
-                  required: true, message: '充值信息不能为空', trigger: 'blur'
-                }">
-                    <el-input @input="formSigningAmountPerformance" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                :rules="[
+                    { required: true, message: '充值信息不能为空', trigger: 'blur' },
+                    { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }
+                ]"
+                >
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'送'"
                 :prop="'domains.' + index + '.givenAmount'"
-                :rules="{
-                  required: true, message: '赠送信息不能为空', trigger: 'blur'
-                }">
-                    <el-input @input="formSigningAmountPerformance" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                :rules="[
+                    { required: true, message: '赠送信息不能为空', trigger: 'blur' },
+                    { pattern: /^\+?[1-9][0-9]*$/, message: '赠送信息仅可输入正整数', trigger: 'blur,change' }
+                ]"
+                >
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'总得'"
@@ -90,6 +94,15 @@
             }      	  
         },
         methods: {
+            number(){
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
+                }
+            },
             formSigningAmountPerformance() {
                 var domains=this.dynamicValidateForm.domains;
                 for(var i=0;i<domains.length;i++){
@@ -161,9 +174,10 @@
             cancel(){
                 window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
             },
-            removeDomain(item) {
+            removeDomain(item) {    
+                this.$refs['dynamicValidateForm'].clearValidate();            
                 var index = this.dynamicValidateForm.domains.indexOf(item)
-                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑
+                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
                     // 条件改为根据后台返回的标识判断是否可编辑
                     this.$confirm("确定要删除吗?", '提示', {
                         confirmButtonText: '确定',
@@ -184,7 +198,9 @@
                                     addClueVM.addIsDisabled=false;
                                     addClueVM.editIsDisabled=true;
                                 }
-
+                                // if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
+                                //     addClueVM.$refs['dynamicValidateForm'].resetFields();
+                                // }
                             }else{
                                 addClueVM.$message({
                                      message: response.data.msg,
