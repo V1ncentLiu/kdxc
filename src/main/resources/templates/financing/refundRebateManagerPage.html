@@ -1072,9 +1072,16 @@ var clueVM = new Vue({
            	       var rows = this.multipleSelection;
             	   if(rows.length!=1){
                        this.$message({
-                          message: '请选择一条数据进行退款申请',
+                          message: '一次只允许申请一个签约单的退款操作',
                           type: 'warning'
                         });
+                       return;
+                   }
+                   if(rows[0].isNotAllSubmit !=null && rows[0].isNotAllSubmit ==1){
+                       this.$message({
+                           message: '此签约单还有未提交对账的付款记录，请先提交对账，再申请退款！',
+                           type: 'warning'
+                       });
                        return;
                    }
             	 /*   if(rows[0].signStatus!=1){
