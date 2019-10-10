@@ -110,7 +110,7 @@ public class MHomePageController {
     @RequestMapping("/index")
     public String index(String type, HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String username = curLoginUser.getUsername();
+        String username = curLoginUser.getName();
         Integer userType = curLoginUser.getUserType();
         if(Constants.USER_TYPE_TWO.equals(userType)){
             // 查询账户余额
