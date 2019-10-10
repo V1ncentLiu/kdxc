@@ -33,7 +33,7 @@ public interface MserviceShowFeignClient {
 
 
   @PostMapping("/queryList")
-  public JSONResult<List<MerchantServiceDTO>> queryList(@RequestBody MerchantServiceReq merchantServiceReq);
+  public JSONResult<List<MerchantServiceDTO>> queryList(MerchantServiceReq merchantServiceReq);
 
     @Component
     static class HystrixClientFallback implements
