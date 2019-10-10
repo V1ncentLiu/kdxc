@@ -108,7 +108,12 @@ public class MerchantOnlineRechargeController {
   * @Date 2019/10/9 9:43
   **/
   @GetMapping("/toAlipayPage")
-  public String toAlipayPage(){
+  public String toAlipayPage(HttpServletRequest request){
+    //查询优惠信息
+    MerchantRechargePreferentialReq req = new MerchantRechargePreferentialReq();
+    JSONResult<List<MerchantRechargePreferentialDTO>> jsonResult = merchantRechargePreferentialFeignClient.findAllRechargePreferential(req);
+    List<MerchantRechargePreferentialDTO> preferentialDTOList = jsonResult.getData();
+    request.setAttribute("preferentialDTOList",preferentialDTOList);
     return "merchant/payment/paymentResult";
   }
   /**
@@ -119,7 +124,12 @@ public class MerchantOnlineRechargeController {
    * @Date 2019/10/9 9:43
    **/
   @GetMapping("/toWechatPage")
-  public String toWechatPage(){
+  public String toWechatPage(HttpServletRequest request){
+    //查询优惠信息
+    MerchantRechargePreferentialReq req = new MerchantRechargePreferentialReq();
+    JSONResult<List<MerchantRechargePreferentialDTO>> jsonResult = merchantRechargePreferentialFeignClient.findAllRechargePreferential(req);
+    List<MerchantRechargePreferentialDTO> preferentialDTOList = jsonResult.getData();
+    request.setAttribute("preferentialDTOList",preferentialDTOList);
       return "merchant/payment/paymentResult";
   }
 
