@@ -3,7 +3,9 @@ package com.kuaidao.manageweb.controller.merchant.tracking;
 import java.util.Date;
 import javax.validation.Valid;
 import com.kuaidao.manageweb.feign.merchant.tracking.TrackingFeignClient;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,20 @@ public class ClueTrackingController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
+        dto.setCreateUser(user.getId());
+        dto.setOrgId(user.getOrgId());
         return trackingFeignClient.saveTracking(dto);
     }
-
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 }
