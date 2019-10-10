@@ -118,7 +118,7 @@ public class MerchantOnlineRechargeController {
    * @Author xuyunfeng
    * @Date 2019/10/9 9:43
    **/
-  @RequestMapping("/toWechatPage")
+  @GetMapping("/toWechatPage")
   public String toWechatPage(){
       return "merchant/payment/paymentResult";
   }
@@ -130,6 +130,7 @@ public class MerchantOnlineRechargeController {
   * @Author xuyunfeng
   * @Date 2019/10/9 19:35
   **/
+  @ResponseBody
   @RequestMapping("/checkPayStatus")
   public JSONResult<Integer> checkPayStatus(@RequestBody MerchantRechargeReq req){
     JSONResult<MerchantRechargeRecordDTO> list = merchantRechargeRecordBusinessFeignClient.getMerchantRechargeRecordInfo(req);
