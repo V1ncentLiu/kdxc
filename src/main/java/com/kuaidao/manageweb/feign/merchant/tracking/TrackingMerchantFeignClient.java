@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author fanjd
  * @date: 2019/10/10 17:35
  */
-@FeignClient(name = "merchant-service", path = "/merchant/tracking", fallback = TrackingFeignClient.HystrixClientFallback.class)
-public interface TrackingFeignClient {
+@FeignClient(name = "merchant-service", path = "/merchant/tracking", fallback = TrackingMerchantFeignClient.HystrixClientFallback.class)
+public interface TrackingMerchantFeignClient {
 
     @RequestMapping("/insert")
     JSONResult<Boolean> saveTracking(@RequestBody TrackingInsertOrUpdateDTO dto);
@@ -38,7 +38,7 @@ public interface TrackingFeignClient {
     JSONResult<List<TrackingRespDTO>> findByClueId(@RequestParam("clueId") Long clueId);
 
     @Component
-    class HystrixClientFallback implements TrackingFeignClient {
+    class HystrixClientFallback implements TrackingMerchantFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
 

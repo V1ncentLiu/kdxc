@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.manageweb.feign.merchant.tracking.TrackingFeignClient;
+import com.kuaidao.manageweb.feign.merchant.tracking.TrackingMerchantFeignClient;
 import com.kuaidao.merchant.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.util.List;
 public class ClueTrackingController {
 
     @Autowired
-    private TrackingFeignClient trackingFeignClient;
+    private TrackingMerchantFeignClient trackingMerchantFeignClient;
     private JSONResult<List<TrackingRespDTO>> listJSONResult;
 
     /**
@@ -45,7 +45,7 @@ public class ClueTrackingController {
         UserInfoDTO user = getUser();
         dto.setCreateUser(user.getId());
         dto.setOrgId(user.getOrgId());
-        return trackingFeignClient.saveTracking(dto);
+        return trackingMerchantFeignClient.saveTracking(dto);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ClueTrackingController {
             return new JSONResult<List<TrackingRespDTO>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return trackingFeignClient.findByClueId(clueId);
+        return trackingMerchantFeignClient.findByClueId(clueId);
     }
 
     /**
