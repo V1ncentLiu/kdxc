@@ -1057,7 +1057,7 @@ var mainDivVM = new Vue({
             //关闭未到访原因弹窗
             this.notVisitdDialogVisible=false;
            // 打开编辑到访记录
-            this.resetForm('addVisitRecord')
+            this.('addVisitRecord')
             var param ={};
             if(row.clueId){
                 param.id = row.clueId;
