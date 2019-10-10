@@ -38,6 +38,10 @@ public interface TelemarketingLayoutFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/addTelemarketingLayoutList")
 	public JSONResult addTelemarketingLayoutList(@RequestBody List<TelemarketingLayoutDTO> queryDTO);
 
+	@RequestMapping(method = RequestMethod.POST, value = "/getTelemarketingLayoutByTeamId")
+	public JSONResult<TelemarketingLayoutDTO> getTelemarketingLayoutByTeamId(@RequestBody TelemarketingLayoutDTO queryDTO);
+
+
 	@Component
 	static class HystrixClientFallback implements TelemarketingLayoutFeignClient {
 
@@ -72,6 +76,11 @@ public interface TelemarketingLayoutFeignClient {
 		public JSONResult addTelemarketingLayoutList(List<TelemarketingLayoutDTO> queryDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("批量插入电销布局失败");
+		}
+
+		@Override
+		public JSONResult<TelemarketingLayoutDTO> getTelemarketingLayoutByTeamId(TelemarketingLayoutDTO queryDTO) {
+			return fallBackError("查询电销布局失败");
 		}
 
 		@Override
