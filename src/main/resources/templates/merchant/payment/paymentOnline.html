@@ -1,22 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
-    <style>
-        .paymentOnline ul{overflow: hidden;width: 1110px;background: #fafafa;}
-        .paymentOnline ul li{float: left;width: 50%;}
-        .paymentOnline ul li p{border-right: 1px solid #ecedf2;border-bottom: 1px solid #ecedf2;padding:10px;}
-        .paymentOnline ul li:nth-of-type(even) p{border-right: none;}
-        .paymentOnline ul li span{width: 30%;display: inline-block;}
-        .paymentOnline ul li span em{padding-left: 10px;}   
-        .paymentBtnType span{display:inline-block;width: 100px;height: 35px;line-height: 35px;text-align: center;background: #c3c5d4;color: #fff;}  
-        .paymentBtnType span a{color: #fff;}
-        .paymentBtnType span.current{background: #5c6be8;}
-        .paymentImg .f-fl{margin-right: 50px;}
-        .paymentImg img{width: 250px;}
-        .rechargeMoney .el-form-item__error{padding-left: 72px;}
-        .h73{max-height: 73px;}
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style>        
     </style>
 </head>
 <body>
@@ -27,17 +16,16 @@
         <el-breadcrumb-item>在线充值</el-breadcrumb-item>
     </el-breadcrumb>
     <el-form :model="form" ref="form" label-width="73px" class="demo-dynamic" :rules="rules">
-        <el-row class="borderbox marginB20" style="padding: 20px 40px 20px;"> 
-            <div class="marginB20" style="color: #333;font-size: 16px;">充值优惠</div>
-            <ul :class="{h73:isClass}">                
-                <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值<em>{{item.rechargeAmount}}</em></span><span>送<em>{{item.givenAmount}}</em></span><span>得<em>{{item.totalAmount}}</em></span></p></li>
+        <el-row class="merchantMainBox mgB20" style="padding: 20px 40px 50px;"> 
+            <div class="title18 mgB20">充值优惠</div>
+            <ul :class="{preferentialH:isClass}">                
+                <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值：<em class="w100 f-tac">{{item.rechargeAmount}}</em><em style="margin-right: 30px;">+</em></span><span>送：<em class="w100 f-tac">{{item.givenAmount}}</em><em style="margin-right: 40px;">=</em></span><span>得：<em class="w100 f-tac">{{item.totalAmount}}</em></span></p></li>
             </ul>
             <div class="f-tac" style="width: 1110px;padding-top: 10px;" v-show="isShowMore">
                 <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
             </div>
-        </el-row>
-        
-        <el-row class="borderbox padding20 marginB20" v-if="paymentIsShow">
+        </el-row>        
+        <el-row class="merchantMainBox padding20 marginB20" v-if="paymentIsShow">
             <div style="text-align: center;margin:50px 0 40px;"><img th:src="@{/images/step1.jpg}" alt=""> </div>
             <div style="width: 540px;margin:0 auto 40px">
                 <el-row class="marginB20"> 
