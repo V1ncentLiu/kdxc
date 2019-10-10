@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -33,6 +34,8 @@ public interface TrackingFeignClient {
     @RequestMapping("/queryList")
     JSONResult<List<TrackingRespDTO>> queryList(@RequestBody TrackingReqDTO dto);
 
+    @RequestMapping("/findByClueId")
+    JSONResult<List<TrackingRespDTO>> findByClueId(@RequestParam("clueId") Long clueId);
 
     @Component
     class HystrixClientFallback implements TrackingFeignClient {
@@ -61,6 +64,12 @@ public interface TrackingFeignClient {
         public JSONResult<List<TrackingRespDTO>> queryList(TrackingReqDTO dto) {
             return fallBackError("资源跟进记录-查询（不分页）");
         }
+
+        @Override
+        public JSONResult<List<TrackingRespDTO>> findByClueId(Long clueId) {
+            return fallBackError("根据线索id查询跟进记录-查询）");
+        }
+
     }
 
 }

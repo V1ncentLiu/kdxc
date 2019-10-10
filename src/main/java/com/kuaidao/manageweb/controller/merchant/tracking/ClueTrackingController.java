@@ -1,11 +1,14 @@
 package com.kuaidao.manageweb.controller.merchant.tracking;
 
 import javax.validation.Valid;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.merchant.dto.tracking.TrackingRespDTO;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
@@ -13,6 +16,7 @@ import com.kuaidao.manageweb.feign.merchant.tracking.TrackingFeignClient;
 import com.kuaidao.merchant.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
+import java.util.List;
 
 
 /**
@@ -27,6 +31,7 @@ public class ClueTrackingController {
 
     @Autowired
     private TrackingFeignClient trackingFeignClient;
+    private JSONResult<List<TrackingRespDTO>> listJSONResult;
 
     /**
      * 新增
@@ -41,6 +46,21 @@ public class ClueTrackingController {
         dto.setCreateUser(user.getId());
         dto.setOrgId(user.getOrgId());
         return trackingFeignClient.saveTracking(dto);
+    }
+
+    /**
+     * 根据资源id查询跟进记录
+     * 
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/findByClueId")
+    public JSONResult<List<TrackingRespDTO>> findByClueId(@RequestParam("clueId") Long clueId) {
+        if (null == clueId) {
+            return new JSONResult<List<TrackingRespDTO>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        return trackingFeignClient.findByClueId(clueId);
     }
 
     /**
