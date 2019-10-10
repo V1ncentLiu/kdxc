@@ -231,9 +231,24 @@
                     </el-col>
                 </el-row>
                 <el-row>
-                    <el-col :span="24">
+                    <el-col :span="8">
                         <el-form-item label="备注：" :label-width="formLabelWidth">
                             <span class="breakWord">{{clueBase.remark}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.projectShow ==1">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueProject.projectName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueBase.sourceName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                        <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueBase.ad}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -709,6 +724,9 @@
   var teleEndTime = [[${teleEndTime}]];
   var repeatClueList = [[${repeatClueList}]];
   var repeatClueStatus = [[${repeatClueStatus}]];
+  var telemarketingLayout = [[${telemarketingLayout}]];
+  var mediumList = [[${mediumList}]];
+  var clueProject = [[${clueProject}]];
   var repeatStatus =false;
   var editPhone = 0;
   for(var i = 0 ; i < proSelect.length ; i++){
@@ -723,6 +741,10 @@
     el: '#addCustomer',
     data: function () {
       return {
+          clueProject:clueProject,
+          mediumList:mediumList,
+          mediumName:"",
+          telemarketingLayout:telemarketingLayout,
         isActive:false,
         isShowMoreBtn:false,
         customerInfo:customer,
@@ -1921,6 +1943,13 @@
 
     },
     created() {
+        if(mediumList !=null && mediumList.size>0){
+            for(var i=0;i<mediumList.length;i++){
+                if(mediumList[i].value==base.source()){
+                    this.sourceName = mediumList[i].name;
+                }
+            }
+        }
       //初始资源类别数据
       this.getUploadParam();
       var param = {};

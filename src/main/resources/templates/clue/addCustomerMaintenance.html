@@ -67,13 +67,29 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row>
-                    <el-col :span="24">
+                <el-row >
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.projectShow ==1">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueProject.projectName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueBase.sourceName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                        <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueBase.ad}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
                         <el-form-item label="备注：" :label-width="formLabelWidth">
                             <span class="lineFeed">{{clueBase.remark}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
+
             </div>
             <div class="marginB20 fs16 paddingT20">基本信息</div>
             <div class="borderbox padding20 input75">
@@ -872,6 +888,9 @@
     var teleEndTime = [[${teleEndTime}]];
     var repeatClueList = [[${repeatClueList}]];
     var repeatClueStatus = [[${repeatClueStatus}]];
+    var telemarketingLayout = [[${telemarketingLayout}]];
+    var clueProject = [[${clueProject}]];
+    var mediumList = [[${mediumList}]]
     var repeatStatus =false;
     var editPhone = 1;
     if(repeatClueStatus == 1 ){
@@ -888,6 +907,10 @@
         el: '#addCustomer',
         data: function () {
             return {
+                mediumList:mediumList,
+                mediumName:"",
+                clueProject:clueProject,
+                telemarketingLayout:telemarketingLayout,
             	isDisabledCustomer:false,
                 isActive:false,
                 isShowMoreBtn:false,
@@ -2798,7 +2821,14 @@
 
 
         },
-        created() {            
+        created() {
+            if(mediumList !=null && mediumList.size>0){
+                for(var i=0;i<mediumList.length;i++){
+                    if(mediumList[i].value==base.source()){
+                        this.sourceName = mediumList[i].name;
+                    }
+                }
+            }
             //初始资源类别数据
             this.getUploadParam();
             var param = {};

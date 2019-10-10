@@ -167,9 +167,9 @@
                     </template>
                </el-table-column>
                <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="transformSignShopType" width="100px"></el-table-column>
-               <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+               <el-table-column align="center" prop="amountReceivable" label="合同应收金额"></el-table-column>
                <!--<el-table-column align="center" prop="firstToll" label="路费"></el-table-column>-->
-               <!--<el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>-->
+               <!--<el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额"></el-table-column>-->
                <!--<el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>-->
                <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
                <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
@@ -334,7 +334,7 @@
             <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
             <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
 
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+            <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
             <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
             <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
             <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
@@ -385,7 +385,7 @@
           <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
           <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
           <el-table-column align="center" prop="phone" label="客户手机号" width="150"></el-table-column>
-          <el-table-column align="center" prop="amountReceivable" label="应收金额" width="120"></el-table-column>
+          <el-table-column align="center" prop="amountReceivable" label="合同应收金额" width="120"></el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
           <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
@@ -1072,9 +1072,16 @@ var clueVM = new Vue({
            	       var rows = this.multipleSelection;
             	   if(rows.length!=1){
                        this.$message({
-                          message: '请选择一条数据进行退款申请',
+                          message: '一次只允许申请一个签约单的退款操作',
                           type: 'warning'
                         });
+                       return;
+                   }
+                   if(rows[0].isNotAllSubmit !=null && rows[0].isNotAllSubmit ==1){
+                       this.$message({
+                           message: '此签约单还有未提交对账的付款记录，请先提交对账，再申请退款！',
+                           type: 'warning'
+                       });
                        return;
                    }
             	 /*   if(rows[0].signStatus!=1){
