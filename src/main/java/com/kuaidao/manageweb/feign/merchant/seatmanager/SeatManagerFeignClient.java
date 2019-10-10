@@ -8,6 +8,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -36,6 +37,9 @@ public interface SeatManagerFeignClient {
 
     @PostMapping("/queryList")
     public JSONResult<PageBean<SeatManagerResp>> queryList( @RequestBody SeatManagerReq seatManagerReq);
+
+    @PostMapping("/queryListNoPage")
+    public JSONResult<List<SeatManagerResp>> queryListNoPage( @RequestBody SeatManagerReq seatManagerReq);
 
     @Component
     static class HystrixClientFallback implements SeatManagerFeignClient {
@@ -72,6 +76,11 @@ public interface SeatManagerFeignClient {
         @Override
         public JSONResult<PageBean<SeatManagerResp>> queryList(SeatManagerReq seatManagerReq) {
             return fallBackError("坐席管理-列表查询（分页）");
+        }
+
+        @Override
+        public JSONResult<List<SeatManagerResp>> queryListNoPage(SeatManagerReq seatManagerReq) {
+            return fallBackError("坐席管理-列表查询（不分页）");
         }
     }
 
