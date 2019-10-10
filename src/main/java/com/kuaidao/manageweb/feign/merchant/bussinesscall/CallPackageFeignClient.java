@@ -51,7 +51,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/user/account")
-    JSONResult<CallUserAccountRes> getUserAccount(@RequestParam Long userId);
+    JSONResult<CallUserAccountRes> getUserAccount(Long userId);
 
 
     /**
@@ -60,7 +60,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/list")
-    JSONResult<CallBuyPackageRes> list(@RequestParam Long userId);
+    JSONResult<CallBuyPackageRes> list( Long userId);
 
 
     @Component
