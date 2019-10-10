@@ -15,6 +15,7 @@ import com.kuaidao.stastics.dto.busPerformance.BusVisitSignDto;
 import com.kuaidao.sys.constant.RegionTypeEnum;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,7 @@ public class BusVisitSignController extends BaseStatisticsController {
      * 一级页面-按区域统计
      * @return
      */
+    @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/areaList")
     public String areaList(HttpServletRequest request){
         initBugOrg(request);
@@ -65,10 +67,12 @@ public class BusVisitSignController extends BaseStatisticsController {
      * 二级页面-按集团统计
      * @return
      */
+    @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/groupList")
-    public String gruopList(HttpServletRequest request,Long busAreaId,Long businessGroupId,Long businessManagerId,Integer provinceId,Long startTime,Long endTime){
+    public String gruopList(HttpServletRequest request,Long busAreaId,Long businessGroupId,Long businessManagerId,
+                            String province,Long startTime,Long endTime){
         initBugOrg(request);
-        initBaseDto(request,busAreaId,businessGroupId,businessManagerId,null,provinceId,startTime,endTime);
+        initBaseDto(request,busAreaId,businessGroupId,businessManagerId,null,province,startTime,endTime);
         request.setAttribute("provinceList",queryProvince(RegionTypeEnum.省.getValue()));
         //签约集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
@@ -81,6 +85,7 @@ public class BusVisitSignController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryPage(@RequestBody BaseBusQueryDto baseQueryDto){
         initParams(baseQueryDto);
@@ -92,6 +97,7 @@ public class BusVisitSignController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/queryBusPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryBusPage(@RequestBody BaseBusQueryDto baseQueryDto){
         initParams(baseQueryDto);
@@ -102,7 +108,12 @@ public class BusVisitSignController extends BaseStatisticsController {
         return busVisitSignFeignClient.queryBusPageForSale(baseQueryDto);
     }
 
-
+    /**
+     * 一级页面导出
+     * @param dto
+     * @param response
+     */
+    @RequiresPermissions("statistics:busVisitSign:export")
     @RequestMapping("/export")
     @ResponseBody
     public void export(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
@@ -129,6 +140,7 @@ public class BusVisitSignController extends BaseStatisticsController {
     }
 
 
+    @RequiresPermissions("statistics:busVisitSign:export")
     @RequestMapping("/exportCompany")
     @ResponseBody
     public void saleExport(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
@@ -162,14 +174,14 @@ public class BusVisitSignController extends BaseStatisticsController {
 
 
     private void initBaseDto(HttpServletRequest request,Long areaId,Long groupId,Long saleId,
-                            Long companyId,Integer provinceId,Long startTime,Long endTime){
+                            Long companyId,String province,Long startTime,Long endTime){
         BaseBusQueryDto dto=new BaseBusQueryDto();
         dto.setBusAreaId(areaId);
         dto.setBusinessGroupId(groupId);
         dto.setBusinessManagerId(saleId);
         dto.setStartTime(startTime);
         dto.setEndTime(endTime);
-        dto.setProvinceId(provinceId);
+        dto.setProvince(province);
         dto.setCompanyId(companyId);
         request.setAttribute("busDto",dto);
     }
