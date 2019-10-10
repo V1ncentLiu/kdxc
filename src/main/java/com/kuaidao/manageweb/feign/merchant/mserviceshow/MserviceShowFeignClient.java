@@ -6,6 +6,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient.HystrixClientFallback;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "account-service",path="/account/mservice",fallback = HystrixClientFallback.class)
+@FeignClient(name = "account-service",path="/account/mservice",fallback = MserviceShowFeignClient.HystrixClientFallback.class)
 public interface MserviceShowFeignClient {
 
 
