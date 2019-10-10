@@ -11,12 +11,14 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.component.merchant.MerchantComponent;
 import com.kuaidao.manageweb.feign.merchant.seatmanager.SeatManagerFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,11 +52,14 @@ public class SeatManagerController {
    */
   @RequestMapping("/toPage")
 //  @RequiresPermissions("merchant:seatMagager:view")
-  public String toPage(HttpServletRequest request, @RequestParam Long userId) {
+  public String toPage(HttpServletRequest request, @RequestParam Long userId,@RequestParam Long buyPackageId,@RequestParam Long packageId) {
 //    UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(userId,null);
     request.setAttribute("userList", userList);
+    request.setAttribute("userId",userId); // 商家ID
+    request.setAttribute("buyPackageId",buyPackageId); // 当前购买服务记录ID
+    request.setAttribute("packageId",buyPackageId); // 服务ID
     return "merchant/serviceManagement/seatsManagement";
   }
 
@@ -82,6 +87,7 @@ public class SeatManagerController {
   public JSONResult<Boolean> create(@RequestBody SeatInsertOrUpdateDTO insertOrUpdateDTO) {
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
     insertOrUpdateDTO.setCreateUser(curLoginUser.getId());
+    insertOrUpdateDTO.setId(IdUtil.getUUID());
     return seatManagerFeignClient.create(insertOrUpdateDTO);
   }
 

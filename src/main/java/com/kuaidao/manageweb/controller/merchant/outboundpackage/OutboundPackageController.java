@@ -145,7 +145,7 @@ public class OutboundPackageController {
      */
     @PostMapping("/queryOutboundPackageById")
     @ResponseBody
-    public JSONResult<OutboundPackageRespDTO> queryOutboundPackageById(IdEntityLong idEntity){
+    public JSONResult<OutboundPackageRespDTO> queryOutboundPackageById(@RequestBody  IdEntityLong idEntity){
         Long id = idEntity.getId();
         if(id == null){
             return CommonUtil.getParamIllegalJSONResult();

@@ -1,14 +1,26 @@
 package com.kuaidao.manageweb.controller.merchant.merchantsetmeal;
 
+import com.kuaidao.account.dto.mservice.MerchantServiceDTO;
+import com.kuaidao.account.dto.mservice.MerchantServiceReq;
+import com.kuaidao.callcenter.dto.seatmanager.SeatManagerReq;
+import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.component.merchant.MerchantComponent;
+import com.kuaidao.manageweb.feign.merchant.mserviceshow.MserviceShowFeignClient;
+import com.kuaidao.manageweb.feign.merchant.seatmanager.SeatManagerFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -25,6 +37,11 @@ public class MerchantSetMealController {
   @Autowired
   private MerchantComponent merchantComponent;
 
+  @Autowired
+  private MserviceShowFeignClient mserviceShowFeignClient;
+
+  @Autowired
+  private SeatManagerFeignClient seatManagerFeignClient;
 
   /**
    * 跳转商家服务列表
@@ -43,6 +60,28 @@ public class MerchantSetMealController {
   /**
    * 查询列表数据
    */
+
+  public JSONResult<List<MerchantServiceDTO>> queryList(@RequestBody MerchantServiceReq merchantServiceReq){
+    // 查询坐席
+    if(StringUtils.isNotEmpty(merchantServiceReq.getSeatNo())){
+      SeatManagerReq seatManagerReq = new SeatManagerReq();
+      seatManagerReq.setSeatNo(merchantServiceReq.getSeatNo());
+      JSONResult<List<SeatManagerResp>> result = seatManagerFeignClient
+          .queryListNoPage(seatManagerReq);
+      if(CommonUtil.resultCheck(result)){
+        List<SeatManagerResp> data = result.getData();
+        List<Long> pacList = new ArrayList<>();
+        List<Long> idList = new ArrayList<>();
+        for(SeatManagerResp seatManager : data){
+          pacList.add(seatManager.getPackageId());
+          idList.add(seatManager.getBuyPackageId());
+        }
+        merchantServiceReq.setIdList(idList);
+        merchantServiceReq.setPacIdList(pacList);
+      }
+    }
+    return mserviceShowFeignClient.queryList(merchantServiceReq);
+  }
 
 
 
