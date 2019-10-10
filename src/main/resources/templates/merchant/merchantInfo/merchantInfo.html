@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
-    <style>
-        html,body{background: #eff3f6}
-        .titleLine{border-bottom: 1px solid #ecedf2;font-size: 16px;padding-bottom: 10px;padding-left: 10px;margin-bottom: 10px;}
-        .headerBox{width: 150px;height: 150px;border-radius: 50%;overflow: hidden;margin-bottom: 10px;border:1px solid #ecedf2;}
-        .headerBox img{width: 150px;height: 150px;border-radius: 50%;}
-        .changeHeaderImg{width: 150px;}
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style>        
     </style>
 </head>
 <body>
@@ -20,28 +14,28 @@
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>用户信息</el-breadcrumb-item>
     </el-breadcrumb>     
-    <el-row class="borderbox padding20 mainSearchBg">
-        <div class="titleLine">用户信息</div>         
-        <el-col :span="24" class="marginB20">
+    <el-row class="merchantMainBox padding20 merchantInfo" style="padding-left: 60px;">
+        <div class="title18 mgB20" style="padding-top: 30px;">用户信息</div>         
+        <el-col :span="24" class="marginB50">
             <div class="headerBox">
                 <img v-if="merchantIconShow" th:src="@{/images/header.jpg}" alt="">
                 <img else :src="merchantIcon" alt="">
             </div>
             <el-button type="text" class="changeHeaderImg" @click="openWechat">更改头像</el-button>
         </el-col>
-        <el-col :span="24" class="marginB20">
-            <span>账号：</span><span>{{userName}}</span>            
+        <el-col :span="24" class="marginB50">
+            <span class="labelWidth">账号</span><span class="rightContent">{{userName}}</span>            
         </el-col>
-        <el-col :span="24" class="marginB20">
-            <span>密码：</span>
-            <span class="marginR10">******</span><span class="bluecolor cursorP" @click="changePassword">更改密码</span>            
+        <el-col :span="24" class="marginB50">
+            <span class="labelWidth">密码</span>
+            <span class="marginR10 rightContent">******</span><span class="fs16 bluecolor cursorP" @click="changePassword">更改密码</span>            
         </el-col>
-        <el-col :span="24" class="marginB20">
-            <span>联系人：</span><span>{{linkName}}</span>            
+        <el-col :span="24" class="marginB50">
+            <span class="labelWidth">联系人</span><span class="rightContent">{{linkName}}</span>            
         </el-col>
-        <div class="titleLine">绑定信息</div>
-        <el-col :span="24">
-            <span>手机号：</span><span>{{phone}}</span>            
+        <div class="title18" style="margin-bottom: 35px;">绑定信息</div>
+        <el-col :span="24" style="margin-bottom: 200px;">
+            <span class="labelWidth">手机号</span><span class="rightContent">{{phone}}</span>            
         </el-col>
     </el-row> 
     <el-dialog title="设置头像" :visible.sync="wechatVisible" width="540px">
@@ -274,7 +268,8 @@
                         addClueVM.wechatVisible = false;
                         addClueVM.merchantIcon=formData.wechatUrl;
                         addClueVM.merchantIconShow=false;
-                        window.location.href="/merchant/userManager/userInfo"
+                        // window.parent.document.getElementsByClassName('headIco').src=formData.wechatUrl;//给头部赋值
+                        window.location.href="/merchant/userManager/userInfo"                        
                     }else{
                         addClueVM.$message.error(result.msg+',修改头像失败');
                         addClueVM.wechatVisible = false;
