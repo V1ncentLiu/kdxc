@@ -110,7 +110,7 @@ public class MHomePageController {
     @RequestMapping("/index")
     public String index(String type, HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String username = curLoginUser.getUsername();
+        String username = curLoginUser.getName();
         Integer userType = curLoginUser.getUserType();
         if(Constants.USER_TYPE_TWO.equals(userType)){
             // 查询账户余额
@@ -229,13 +229,6 @@ public class MHomePageController {
           .countAssginStatistic(paramDTO);
       subIds = merchantUserList(curLoginUser);
     }
-
-    Map<String,Integer> map = new HashMap<>();
-    if(CommonUtil.resultCheck(assignDto)){
-      List<ResourceStatisticsDto> data = assignDto.getData();
-      map = data.stream().collect(Collectors.toMap(ResourceStatisticsDto::getDimension,ResourceStatisticsDto::getReceiveNum));
-    }
-
     // 查询子账号信息
     if (SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())) {
       paramDTO.setUserId(curLoginUser.getId());
@@ -244,6 +237,13 @@ public class MHomePageController {
       // 子账号id
       subIds.add(curLoginUser.getId());
     }
+
+    Map<String,Integer> map = new HashMap<>();
+    if(CommonUtil.resultCheck(assignDto)){
+      List<ResourceStatisticsDto> data = assignDto.getData();
+      map = data.stream().collect(Collectors.toMap(ResourceStatisticsDto::getDimension,ResourceStatisticsDto::getReceiveNum));
+    }
+
     // 获取领取相关
     if (CollectionUtils.isNotEmpty(subIds)) {
       paramDTO.setIdList(subIds);

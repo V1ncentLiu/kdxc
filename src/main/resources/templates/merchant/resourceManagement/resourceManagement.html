@@ -101,6 +101,7 @@
         }
         .invite-box{width: 470px; margin: 0 auto;}
         .xreuired .el-form-item__label:before{content: ''}
+        .form-margin{margin-top:14px;}
     </style>
 </head>
 
@@ -275,7 +276,7 @@
                     <el-form-item label="预约来访时间：" :label-width="formLabelWidth" prop="reserveTime" class="xreuired">
                         <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime"></el-date-picker>
                     </el-form-item>
-                    <el-form-item label="考察项目："  :label-width="formLabelWidth" prop="projectId" class="xreuired" >
+                    <el-form-item label="考察项目："  :label-width="formLabelWidth" prop="projectId" class="xreuired form-margin" >
                         <el-select v-model="inviteForm.projectId" placeholder=""  class="input-width" multiple filterable>
                             <el-option
                             v-for="item in  proSelect"
@@ -381,7 +382,7 @@
 
                     ],
                     province: [
-                        { required: true, message: '请选择开店区域', trigger: 'change' }
+                        { required: true, message: '请选择开店区域', trigger: 'blur' }
                     ],
                     cusName: [
                         { required: true, message: '客户姓名不能为空', trigger: 'change' }
@@ -542,14 +543,27 @@
                     this.$refs[formName].resetFields();
                     this.inviteForm.cusName = '';
                     this.inviteForm.projectId = [];
+                    // if(this.inviteForm.province == ''){
+                    //     this.inviteForm.district = '';
+                    //     this.inviteForm.city = '';
+                    // }
+                    this.currentProvince();
+                    this.currentCity();
+                    
                 }
             },
             handleClose(){
                 if (this.$refs['inviteForm']) {
                     this.$refs['inviteForm'].resetFields();
-                    this.inviteForm.cusName = '';
-                    this.inviteForm.projectId = [];
+                    this.$set(this.inviteForm,'cusName','')//此处为重点
+                    this.$set(this.inviteForm,'city','')//此处为重点
+                    this.$set(this.inviteForm,'district','')//此处为重点
+                    ocmVM.inviteForm.projectId = [];
+                    // ocmVM.currentProvince();
+                    // ocmVM.currentCity();
+
                     ocmVM.allocateFormVisible = false;
+                    
                 }
                 // this.inviteForm.cusName = '';
                 // this.inviteForm.projectId = [];
@@ -601,13 +615,17 @@
             postInvite(id,name,projectId) {
                 this.clueId = id;
                 this.inviteVisible = true;
-                this.inviteForm.cusName = name;
-                this.inviteForm.projectId = [];
-                this.inviteForm.projectId.push(projectId);
-                console.log(this.inviteForm.projectId,"projectId");
-                
+                this.$set(this.inviteForm,'cusName',name)//此处为重点
+                ocmVM.inviteForm.projectId = [];
+                ocmVM.inviteForm.projectId.push(projectId);
                 if (this.$refs['inviteForm']) {
                     this.$refs['inviteForm'].resetFields();
+                    ocmVM.currentProvince();
+                    ocmVM.currentCity();
+                    this.$set(this.inviteForm,'cusName',name)//此处为重点
+                    ocmVM.inviteForm.projectId = [];
+                ocmVM.inviteForm.projectId.push(projectId);
+                   
                 }
             },
             //提交邀约
@@ -670,6 +688,7 @@
                         ocmVM.cityArr = response.data.data.data;
                     });
                 } else {
+                    console.log(9999999,"aaaa");
                     this.inviteForm.district = null;
                     this.inviteForm.city = null;
                     this.districtArr = null;
