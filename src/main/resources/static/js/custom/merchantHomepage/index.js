@@ -52,7 +52,7 @@ var homePageVM = new Vue({
 			isTrClient: false,//天润坐席是否登录
 			isQimoClient: false,//七陌坐席是否登录
 			isHeliClient: false,//合力坐席是否登录
-			callTitle: '呼叫中心',
+			callTitle: '',
 			dialogLoginClientVisible: false,//登录坐席dialog 
 			dialogLogoutClientVisible: false,
 			loginClientForm: {
@@ -978,6 +978,8 @@ var homePageVM = new Vue({
 	created() {
 		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
+		// this.loginQimoClient();
+		
 		if (isUpdatePassword == "1") {
 			this.dialogModifyPwdVisible = true;
 		}
