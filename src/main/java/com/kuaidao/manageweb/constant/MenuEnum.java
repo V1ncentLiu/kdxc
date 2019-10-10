@@ -53,7 +53,7 @@ public enum MenuEnum {
      */
     AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"),CLUE_MANAGEMENT("资源管理列表"),
 
-    OUTBOUND_PACKAGE("服务费用设置"),
+    OUTBOUND_PACKAGE("服务费用设置"),MERCHANT_CLIENT_LOGIN("坐席自动登录"),
     /**
      * 报表（商务模块）
      */
