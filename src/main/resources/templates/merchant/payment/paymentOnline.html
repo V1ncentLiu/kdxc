@@ -209,12 +209,13 @@
                     console.log('5秒钟执行一次'+serialNumber)
                     var param={}
                     param.serialNumber=serialNumber
-                    axios.post('/merchant/merchantRechargeRecordBusiness/checkPayStatus', param)
+                    axios.post('/merchant/merchantOnlineRecharge/checkPayStatus', param)
                     .then(function (response) {
                         console.log(response)
-                        var result =  response.data;
-                        if(result.code=="0"){
-                            window.location.href="/merchant/merchantRechargeRecordBusiness/toWechatPage"
+                        var result =  response.data.data;
+                        console.log("支付状态: "+result);
+                        if(result== 1){
+                            window.location.href="/merchant/merchantOnlineRecharge/toWechatPage"
                         }else{
                             ocmVM.$message.error(result.msg);
                         }                            
@@ -227,7 +228,7 @@
             testFun(serialNumber){                
                 this.timeName= setInterval(()=>{
                     console.log('5秒钟执行一次'+serialNumber)
-                    window.location.href="/merchant/merchantRechargeRecordBusiness/toWechatPage"
+                    window.location.href="/merchant/merchantOnlineRecharge/toWechatPage"
                 },5000)
             },
         },
