@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/element-ui.css">
     <link rel="stylesheet" href="css/base.css">
     <style>
+    .el-date-picker__time-header{display: none;}
     </style>
 </head>
 <body>
@@ -17,9 +18,16 @@
         <el-breadcrumb-item>商家消费记录</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">        
-        <el-button type="primary" @click="openRemindDig">设置余额不足提醒</el-button>
-        <el-button type="warning" @click="">导出消费记录</el-button>
+    <shiro:hasPermission name="merchant:consumeRecord:setting">
+        <el-button v-if="btnShow" type="primary" @click="openRemindDig">设置余额不足提醒</el-button>
+        <el-button v-else type="primary" @click="openRemindDig">编辑余额不足提醒</el-button>
+    </shiro:hasPermission>
+    <shiro:hasPermission name="merchant:consumeRecord:export">
+        <el-button type="warning" @click="exportFun">导出消费记录</el-button>
+    </shiro:hasPermission>
+    <shiro:hasPermission name="merchant:consumeRecord:view">
         <el-button type="success" @click="gotoInfo">商家消费明细</el-button>
+    </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -34,8 +42,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item> 
-                <el-form-item label="消费时间:">
+                <el-form-item label="消费日期:">
                     <el-date-picker
+                        format="yyyy-MM-dd"  
+                        value-format="yyyy-MM-dd"
                         v-model="form.createDateStart"
                         type="datetime"
                         placeholder="选择日期时间">
@@ -43,6 +53,8 @@
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
+                        format="yyyy-MM-dd"  
+                        value-format="yyyy-MM-dd"
                         v-model="form.createDateEnd"
                         type="datetime"
                         placeholder="选择日期时间">
@@ -54,7 +66,7 @@
             </el-form>
         </div>
         <el-row class="greyTip">
-            <span style="margin-right: 10px;">今日消费：{{todayNum}}元</span><span style="margin-right: 10px;">共计：{{todayAmount}}元</span><span style="margin-right: 10px;">昨日消费：{{yesterdayNum}}元</span><span style="margin-right: 10px;">共计：{{yesterdayAmount}}元</span>
+            <span style="margin-right: 10px;">今日消费：{{todayNum}}条</span><span style="margin-right: 10px;">共计：{{this.numFormat(todayAmount)}}元</span><span style="margin-right: 10px;">昨日消费：{{yesterdayNum}}条</span><span style="margin-right: 10px;">共计：{{this.numFormat(yesterdayAmount)}}元</span>
         </el-row>
         <el-row>            
             <el-table
@@ -83,38 +95,20 @@
     </div>
     <!-- 分配资源 -->
     <el-dialog title="余额不足提醒" :visible.sync="remindFormVisible" width="540px">
-        <el-form :model="formRemind" ref="formRemind">
-            <el-form-item 
-                label="账户余额低于：" 
-                prop="amount"
-                :rules="[
-                    { required: true, message: '账户余额低于不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formRemind.amount" placeholder="" style="width: 290px;"></el-input>元
+        <el-form :model="formRemind" ref="formRemind" :rules="rules">
+            <el-form-item label="账户余额低于：" prop="amount" :label-width="formLabelWidth">
+                <el-input v-model="formRemind.amount" placeholder="" style="width: 290px;" maxLength="9" @keyup.native="number"></el-input>元
             </el-form-item>
-            <el-form-item 
-                label="提醒标题：" 
-                prop="title"
-                :rules="[
-                    { required: true, message: '提醒标题不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input v-model="formRemind.title" placeholder="" style="width: 290px;"></el-input>
+            <el-form-item label="提醒标题：" prop="title" :label-width="formLabelWidth">
+                <el-input v-model="formRemind.title" placeholder="" style="width: 290px;" maxLength="20"></el-input>
             </el-form-item>
-            <el-form-item 
-                label="提醒内容：" 
-                prop="content"
-                :rules="[
-                    { required: true, message: '提醒内容不能为空', trigger: 'blur' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;"></el-input>
+            <el-form-item label="提醒内容：" prop="content" :label-width="formLabelWidth">
+                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;" maxLength="50"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formRemind')">提交</el-button>
-            <el-button @click="remindFormVisible= false">取 消</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formRemind')">保存</el-button>
+            <!-- <el-button @click="remindFormVisible= false">取 消</el-button> -->
         </div>
     </el-dialog>
 </div>
@@ -125,11 +119,11 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${userList}]];//商户集合
-    console.log(merchantUserList)
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                btnShow:true,
                 btnDisabled:false,
                 remindFormVisible:false,
                 pendingReviewNum:'',
@@ -156,9 +150,38 @@
                 todayAmount:'',
                 yesterdayNum:'',
                 yesterdayAmount:'',
+                rules:{                    
+                    amount: [
+                        { required: true, message: '账户余额低于不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            // var reg =  /^[0-9]+[0-9]*]*$/ ;
+                            var reg =  /^\+?[1-9][0-9]*$/ ;
+                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正确格式，仅支持正整数"));
+                                return;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'blur'}
+                    ],
+                    title: [
+                        { required: true, message: '提醒标题不能为空', trigger: 'blur' }
+                    ],
+                    content: [
+                        { required: true, message: '提醒内容不能为空', trigger: 'blur' }
+                    ],
+                },
             }        	  
         },
         methods: {
+            numFormat(num) {
+                var c = (num.toString().indexOf ('.') !== -1) ? num.toLocaleString() : num.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
+                return c;
+            },
+            number(){
+            　　this.formRemind.amount=this.formRemind.amount.replace(/[^\.\d]/g,'');
+                this.formRemind.amount=this.formRemind.amount.replace('.','');
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -214,16 +237,18 @@
               return moment(cellValue).format("YYYY-MM-DD");
             },
             openRemindDig(){
-                this.remindFormVisible = true;
+                this.remindFormVisible = true;                
+            },
+            settingRemindDig(){
                 var param={};
                 axios.post('/merchant/balanceWarnSetting/getBalanceWarnSetting',param)
                 .then(function (response) {
                     var data =  response.data;
-                    debugger;
                     if(data.code=='0'){
                         ocmVM.formRemind.amount=data.data.amount;
                         ocmVM.formRemind.title=data.data.title;
                         ocmVM.formRemind.content=data.data.content;
+                        ocmVM.btnShow=false;
                     }else{
                         ocmVM.$message({
                             message: data.msg,
@@ -305,6 +330,31 @@
             gotoInfo(){
                 window.location.href='/merchant/consumeRecord/initInfoList';
             },
+            exportFun(){
+                var rows = this.multipleSelection;
+                if(rows.length <1){
+                    this.$message({
+                        message: '请选择导出的数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param = rows;
+                console.log(param)
+                axios.post('/merchant/consumeRecord/countListExport',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                    ocmVM.loading=false;
+                });
+
+            },
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
@@ -312,6 +362,7 @@
             // console.info("create method");
             this.searchTable();
             this.initList();
+            this.settingRemindDig();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';

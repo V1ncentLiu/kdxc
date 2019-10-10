@@ -18,6 +18,7 @@
 <div id="resourceApply" class="resourceApply mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
         <el-breadcrumb-item>充值优惠设置</el-breadcrumb-item>
     </el-breadcrumb>     
     <el-row class="borderbox padding20">         
@@ -30,18 +31,22 @@
                 <el-form-item
                 :label="'充值'"
                 :prop="'domains.' + index + '.rechargeAmount'"
-                :rules="{
-                  required: true, message: '充值信息不能为空', trigger: 'blur'
-                }">
-                    <el-input v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                :rules="[
+                    { required: true, message: '充值信息不能为空', trigger: 'blur' },
+                    { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }
+                ]"
+                >
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'送'"
                 :prop="'domains.' + index + '.givenAmount'"
-                :rules="{
-                  required: true, message: '不能为空', trigger: 'blur'
-                }">
-                    <el-input v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                :rules="[
+                    { required: true, message: '赠送信息不能为空', trigger: 'blur' },
+                    { pattern: /^\+?[1-9][0-9]*$/, message: '赠送信息仅可输入正整数', trigger: 'blur,change' }
+                ]"
+                >
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
                 </el-form-item>
                 <el-form-item
                 :label="'总得'"
@@ -73,7 +78,7 @@
         data: function() {
             return {
                 addIsDisabled:false,
-                editIsDisabled:false,
+                editIsDisabled:true,//默认不可点击
                 dynamicValidateForm: {
                     domains: [
                         // {
@@ -89,6 +94,25 @@
             }      	  
         },
         methods: {
+            number(){
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
+                }
+            },
+            formSigningAmountPerformance() {
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                    var aone = parseFloat(domains[i].rechargeAmount);
+                    var atwo = parseFloat(domains[i].givenAmount);
+                    if (isNaN(aone)) aone = 0
+                    if (isNaN(atwo)) atwo = 0
+                    this.dynamicValidateForm.domains[i].totalAmount = (aone + atwo) + ""
+                }                
+            },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -150,9 +174,10 @@
             cancel(){
                 window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
             },
-            removeDomain(item) {
+            removeDomain(item) {    
+                this.$refs['dynamicValidateForm'].clearValidate();            
                 var index = this.dynamicValidateForm.domains.indexOf(item)
-                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑
+                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
                     // 条件改为根据后台返回的标识判断是否可编辑
                     this.$confirm("确定要删除吗?", '提示', {
                         confirmButtonText: '确定',
@@ -165,7 +190,17 @@
                         axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
                               console.log(response);
                             if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                                // window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                                if(index !== -1) {
+                                    addClueVM.dynamicValidateForm.domains.splice(index, 1)
+                                }
+                                if(addClueVM.dynamicValidateForm.domains.length==0){//如果编辑的删除没了，则新建按钮可点击,编辑按钮不可点击
+                                    addClueVM.addIsDisabled=false;
+                                    addClueVM.editIsDisabled=true;
+                                }
+                                // if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
+                                //     addClueVM.$refs['dynamicValidateForm'].resetFields();
+                                // }
                             }else{
                                 addClueVM.$message({
                                      message: response.data.msg,
@@ -190,6 +225,9 @@
                 }else{
                     if(index !== -1) {
                         this.dynamicValidateForm.domains.splice(index, 1)
+                    }
+                    if(!this.dynamicValidateForm.domains[index].isShowDel){//如果新增的删除没了，则编辑按钮可点击
+                        this.editIsDisabled=false;
                     }
                 }
             },
@@ -237,6 +275,10 @@
                         for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
                             addClueVM.dynamicValidateForm.domains[i].isDisabled=true;
                         }
+                        console.log(result.data)
+                        if(result.data&&result.data.length>0){
+                            addClueVM.editIsDisabled=false;
+                        }
                     }else{
                         addClueVM.$message.error(result.msg);
                     }
@@ -247,8 +289,8 @@
             },
         },
         created(){
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
+            //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            //if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
         },
