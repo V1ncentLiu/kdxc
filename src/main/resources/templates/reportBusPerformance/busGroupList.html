@@ -23,15 +23,15 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="统计日期：">
-                    <el-date-picker format="yyyy-MM-dd 00:00" v-model="form.startTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.startTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd 23:59" v-model="form.endTime" type="date" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="餐饮集团：">  
-                    <el-select v-model="form.cateringGroup" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                    <el-select v-model="form.groupId" placeholder="全部" style="width: 100%;" clearable filterable multiple>
                         <el-option
-                            v-for="item in cateringGroup"
+                            v-for="item in companyList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.value">
@@ -39,9 +39,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务大区:">  
-                    <el-select v-model="form.businessRegion" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.busAreaId" placeholder="全部" style="width: 100%;" clearable filterable  @change="curBusinessGroup" :disabled="isDisabled">
                         <el-option
-                            v-for="item in businessRegionArr"
+                            v-for="item in areaList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -49,9 +49,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="商务组:">  
-                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="currentTelSale" :disabled="isDisabled">
+                    <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="curBusiness" :disabled="isDisabled">
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in orgBusinessArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -61,7 +61,7 @@
                 <el-form-item label="商务经理:">  
                     <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
-                            v-for="item in busSaleArr"
+                            v-for="item in userBusinessArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -69,7 +69,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="区域：">  
-                    <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable multiple>
+                    <el-select v-model="form.province" placeholder="全部" style="width: 100%;" clearable filterable multiple>
                         <el-option
                             v-for="item in areaList"
                             :key="item.id"
@@ -99,23 +99,23 @@
                         <span :class="{'act':scope.row.total != ''}">{{scope.$index?scope.$index:''}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="cateringGroup" label="餐饮集团">
+                <el-table-column prop="companyName" label="餐饮集团">
                     <template slot-scope="scope">
                         <span v-if="scope.row.total =='合计'">
-                            <el-button type="text" size="small" v-if="scope.row.groupId==99999" class="act" @click="gotoLink()">合计</el-button>
+                            <el-button type="text" size="small" v-if="scope.row.companyId==99999" class="act" @click="gotoLink()">合计</el-button>
                             <span class="act" v-else >合计</span>
                         </span>
                         <span v-else>{{scope.row.sellDepartName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="province" label="省份">
+                <el-table-column prop="regionName" label="省份">
                     <template slot-scope="scope">
-                        <span :class="{'act':scope.row.total != ''}">{{scope.row.province}}</span>
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.regionName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="firstVisitNum" label="首访数">
+                <el-table-column prop="firstVisit" label="首访数">
                     <template slot-scope="scope">
-                        <span :class="{'act':scope.row.total != ''}">{{scope.row.firstVisitNum}}</span>
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.firstVisit}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="signNum" label="签约数">
@@ -133,9 +133,9 @@
                         <span :class="{'act':scope.row.total != ''}">{{scope.row.amount|format_number}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="signSingle" label="签约单笔">
+                <el-table-column prop="sigleAmount" label="签约单笔">
                     <template slot-scope="scope">
-                        <span :class="{'act':scope.row.total != ''}">{{scope.row.signSingle|format_number}}</span>
+                        <span :class="{'act':scope.row.total != ''}">{{scope.row.sigleAmount|format_number}}</span>
                     </template>
                 </el-table-column>
             </el-table>
@@ -150,12 +150,13 @@
     .act{font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var cateringGroup = ''; // 餐饮集团
-    var businessRegionArr = ''; // 商务大区
-    var areaList=[[${areaList}]];// 区域
-    areaList = '';
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
+    var parentParam = [[${busDto}]];
+    var areaList = [[${areaList}]]; // 商务大区
+    var provinceList=[[${provinceList}]];// 区域
+    var companyList = [[${companyList}]];
+    var curDeptId=[[${areaId}]];// 当前用户所在大区
+    var curOrgId = [[${busId}]]; // 当前用户所在组
+    var curUserId = [[${managerId}]]; // 当前用户
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -172,28 +173,27 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessRegion: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
-                    area: ''
+                    province: '',
+                    groupId:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessRegion: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
-                    cateringGroup:'',
-                    area: ''
+                    province: '',
+                    groupId:''
                 },
                 tableData: [],
                 areaList: areaList,
-                businessRegionArr: businessRegionArr,
-                cateringGroup: cateringGroup,
-                orgTeleArr: '', // 商务组
-                busSaleArr: '', // 商务经理
-                projectArr: '', // 来访项目
+                provinceList: provinceList,
+                companyList: companyList,
+                orgBusinessArr: '', // 商务组
+                userBusinessArr: '', // 商务经理
             }             
         },
         filters:{
@@ -220,32 +220,55 @@
             centerStyle(){
                 return "text-align:center"
             },
-            firstCurTelGroupSale(seleVal){
+            firstCurBusiness(seleVal){ // 商务组搜索商务经理
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.getTelGroupSale(seleVal);
+                this.getBusiness(seleVal);
             },
-            curTelGroupSale(seleVal){
+            curBusiness(seleVal){
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
-                this.form.teleGroupId = '';
-                this.getTelGroupSale(seleVal);
+                this.form.businessManagerId = '';
+                this.getBusiness(seleVal);
             },
-            currentTelSale(){
-
-            },
-            getTelGroupSale(seleVal){
-                if(!seleVal){return;}
+            getBusiness(seleVal){
                 param={};
-                param.parentId=seleVal;
-                param.orgType=1;
-                axios.post('/base/getGroupList',param).then(function (response) {
-                    mainDivVM.orgTeleArr=response.data.data;
+                param.orgId=seleVal;
+                param.roleCode="SWJL";
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    mainDivVM.userBusinessArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
-                        message: "电销组请求失败，请稍后重试",
+                        message: "商务经理请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            firstCurBusinessGroup(seleVal){ // 商务大区搜索商务组
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getBusinessGroup(seleVal);
+            },
+            curBusinessGroup(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.businessGroupId = '';
+                this.form.businessManagerId = '';
+                this.getBusinessGroup(seleVal);
+            },
+            getBusinessGroup(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=2;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgBusinessArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "商务组请求失败，请稍后重试",
                         type: "error"
                     });
                 });
@@ -264,7 +287,7 @@
                         return;
                     }
                     var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    var currentDate = moment(date).format("YYYY-MM-DD");
                     var currentDateRes = new Date(currentDate);
                     if(endTime > currentDateRes){
                         this.$message({
@@ -293,14 +316,13 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.shopType = this.form.shopType;
-                param.payType = this.form.payType;
-                param.businessRegion = this.form.businessRegion;
+                param.busAreaId = this.form.busAreaId;
                 param.businessGroupId = this.form.businessGroupId;
                 param.businessManagerId = this.form.businessManagerId;
-                param.category = this.form.category;
+                param.province = this.form.province;
+                param.groupId = this.form.groupId;
                 this.loading = true;
-                axios.post('/performance/queryPage',param).then(function (response) {
+                axios.post('/busVisitSign/queryBusPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -333,10 +355,11 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
-                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
-                        mainDivVM.export.category = mainDivVM.form.category;
-                        mainDivVM.export.searchText = mainDivVM.form.area;
+                        mainDivVM.export.busAreaId = mainDivVM.form.busAreaId;
+                        mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
+                        mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
+                        mainDivVM.export.province = mainDivVM.form.province;
+                        mainDivVM.export.groupId = mainDivVM.form.groupId;
         
                     }else{
                         mainDivVM.loading = false;
@@ -397,7 +420,6 @@
                     }
                 }
             },
-            goback(){window.history.go(-1);},
             limitTime (start, end) {
                 var endTime = this.minuteFormat (end);
                 var startTime = this.minuteFormat (start);
@@ -405,14 +427,15 @@
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
                 if(startTime){
-                    this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                    this.form.startTime = moment(start).format("YYYY-MM-DD");
                     return this.form.startTime;
                 }
                 if(endTime){
-                    this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                    this.form.endTime = moment(end).format("YYYY-MM-DD");
                     return this.form.endTime;      
                 }
             },
+            goback(){window.history.go(-1);},
             percentFormat(row, column) {//百分比格式化
                 var percent = row[column.property];
                 if (!percent) { // 如果没有值或值为0
@@ -428,12 +451,8 @@
                 var monthRea = timeStr.getMonth()+1;
                 monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
                 var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
-                var hoursRes = timeStr.getHours();
-                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
-                var minRes = timeStr.getMinutes();
-                minRes = minRes < 10 ?  "0" + minRes : minRes;                
-                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;               
+                var timeRes = "" + yearRes + monthRea + dateRes;
                 return timeRes;
             },
             dateTimeFormat (dt) {
@@ -451,26 +470,26 @@
                 switch (month) {
                     case 1 : 
                     case 2 : 
-                    case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";break;
+                    case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01;break;
                     case 4 : 
                     case 5 : 
-                    case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01+" 00:00"; break;
+                    case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01; break;
                     case 7 : 
                     case 8 : 
-                    case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01+" 00:00";break;
+                    case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01;break;
                     case 10 :
                     case 11 :
-                    case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01+" 00:00";break;
+                    case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01;break;
                 }
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable(1);
             },
             searchYear(){ // 年
                var today = new Date();
-               var startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               var startTime = today.getFullYear()+"-" + 01 + "-" + 01;
+               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable(1);
@@ -484,20 +503,20 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
+                this.form.endTime=year+"-"+(month+1)+"-"+date;
                 this.searchTable(1);
             },
             exportRs(){
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.businessRegion = this.export.businessRegion;
+                param.busAreaId = this.export.busAreaId;
                 param.businessGroupId = this.export.businessGroupId;
                 param.businessManagerId = this.export.businessManagerId;
-                param.cateringGroup = this.export.cateringGroup;
-                param.area = this.export.area;
-                axios.post('/performance/export',param,{responseType:'blob'})
+                param.province = this.export.province;
+                param.groupId = this.export.groupId;
+                axios.post('/busVisitSign/exportCompany',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -513,8 +532,8 @@
         },
         created(){     
             var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
+            var startTime = moment(today).format("YYYY-MM-DD");
+            var endTime = moment(today).format("YYYY-MM-DD");
             if(curDeptId){
                 this.isDisabled = true;
                 this.form.busAreaId = curDeptId;
@@ -524,13 +543,17 @@
                     if(curUserId){
                         this.isDisabledUserId = true;
                         this.form.businessManagerId = curUserId;
+                    }else{
+                        this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
                     }
                 }else{
-                    this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
+                    this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
+                    this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
                 }
             }else{
                 this.form.busAreaId = parentParam&&parentParam.busAreaId ? parentParam.busAreaId:'';
                 this.form.businessGroupId = parentParam&&parentParam.businessGroupId ? parentParam.businessGroupId:'';
+                this.form.businessManagerId = parentParam&&parentParam.businessManagerId ? parentParam.businessManagerId:'';
             }
             if(parentParam && parentParam.startTime){
                 this.form.startTime = this.dateTimeFormat(parentParam.startTime);
@@ -545,44 +568,24 @@
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
 
-            this.form.groupId = parentParam&&parentParam.groupId ? parentParam.groupId:'';
-            this.export.groupId = this.form.groupId;
+            this.form.province = parentParam&&parentParam.province ? parentParam.province:'';
+            this.export.province = this.form.province;
+            this.export.busAreaId = this.form.busAreaId;
+            this.export.businessGroupId = this.form.businessGroupId;
+            this.export.businessManagerId = this.form.businessManagerId;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             if(this.form.busAreaId){
-                this.firstCurTelGroupSale(this.form.busAreaId);
+                this.firstCurBusinessGroup(this.form.busAreaId);
             }
             if(this.form.businessGroupId){
-                this.firstCurTelSale(this.form.businessGroupId);
+                this.firstCurBusiness(this.form.businessGroupId);
             }
             this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
-            var tableData = [ // page2
-                {id: 1, area: 'a'},
-                {id: 1, area: 'a'},
-                // 把totalData中id 为2的数据 放到这里
-                {id: 2, area: 'b'},
-                {id: 2, area: 'b'},
-                {id: 2, area: 'b'},
-                 // 把totalData中id 为3的数据 放到这里
-                {id: 3, area: 'c'},
-            ]
-            var totalData = [
-                // {id: 1, area: '合计'}, 
-                {id: 2, area: '合计'},
-                {id: 3, area: '合计'},
-            ]
-
-
-            var totalData = [
-                // {id: 1, area: '合计',teleGroupId: 99999},
-                {id: 2, area: '合计',teleGroupId: 99999},
-                {id: 3, area: '合计',teleGroupId: 99999},
-            ]
-            this.summaryFun(totalData, tableData);
         }
     })
     
