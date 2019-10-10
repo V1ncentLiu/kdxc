@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.merchant.clue;
 
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.util.SortUtils;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,6 +71,8 @@ public class ClueManagementController {
     private PubcustomerFeignClient pubcustomerFeignClient;
     @Autowired
     private RuleAssignRecordFeignClient ruleAssignRecordFeignClient;
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
 
     /**
      * 资源管理页面初始化
@@ -90,8 +95,27 @@ public class ClueManagementController {
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
         }
+        //查询用户集合（邀约使用）
+        UserInfoDTO userInfoInvite = new UserInfoDTO();
+        if(SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+            userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getId());
+        } else if(SysConstant.USER_TYPE_THREE.equals(user.getUserType())){
+            userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getParentId());
+        }
+        JSONResult<List<UserInfoDTO>> merchantAppiontUserList = merchantUserInfoFeignClient.merchantUserList(userInfoInvite);
+        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("merchantAppiontUserList", merchantAppiontUserList.getData());
+        }
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList", getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
+        // 项目
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            List<ProjectInfoDTO> result = SortUtils.sortList(proJson.getData(), "projectName");
+            request.setAttribute("proSelect", result);
+        } else {
+            request.setAttribute("proSelect", new ArrayList());
+        }
         return "merchant/resourceManagement/resourceManagement";
     }
 
@@ -159,6 +183,7 @@ public class ClueManagementController {
                 }
             }
         }
+
         // 查询子账号信息
         if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
             IdEntityLong reqDto = new IdEntityLong();
@@ -175,6 +200,7 @@ public class ClueManagementController {
             // 累计分发
             dto.setTotalAssignClueNum(assignDto.getData().getTotalAssignClueNum());
         }
+
         // 获取领取相关
         if (CollectionUtils.isNotEmpty(subIds)) {
             IdListLongReq ids = new IdListLongReq();

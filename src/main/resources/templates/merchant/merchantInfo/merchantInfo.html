@@ -24,8 +24,8 @@
         <div class="titleLine">用户信息</div>         
         <el-col :span="24" class="marginB20">
             <div class="headerBox">
-
-                <!-- <img :src="wechatForm.wechatUrl" alt=""> -->
+                <img v-if="merchantIconShow" th:src="@{/images/header.jpg}" alt="">
+                <img else :src="merchantIcon" alt="">
             </div>
             <el-button type="text" class="changeHeaderImg" @click="openWechat">更改头像</el-button>
         </el-col>
@@ -58,7 +58,7 @@
                         :on-success="handleSuccess"
                         :on-error="handleError"
                         :before-upload="handleBefore"
-                        accept=".jpg,.png"
+                        accept=".jpg,.png,.jpeg"
                         multiple
                         :data="uploadParamData"
                         :limit='1'
@@ -72,14 +72,32 @@
                     </el-upload>
                 </el-form-item>
                 <el-form-item label="" label-width="auto" >
-                      <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                      <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="80px" height="80px">
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
+                <el-button type="primary" @click="wechatSumbit()">保存头像</el-button>
             </div>
         </template>
     </el-dialog> 
+    <!-- 修改密码 dialog start -->
+     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog" width="540px">
+        <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
+            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
+                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
+                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
+                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" center="true">
+            <el-button type="primary" @click="saveModifyForm('modifyForm')">保存</el-button>
+            <el-button @click="cancelModifyForm('modifyForm')">取 消</el-button>
+        </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -89,11 +107,43 @@
 <script th:inline="javascript">
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var userId = [[${userId}]];//用户信息
-    console.log(userId)
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function() {
+            var validatePass = (rule, value, callback) => {
+                if (value !== this.modifyForm.newPassword) {
+                    callback(new Error('确认密码与新密码不一致，请重新输入'));
+                } else {
+                    callback();
+                }
+            };
             return {
+                dialogModifyPwdVisible:false,//修改密码dialog 是否显示
+                modifyForm:{
+                    oldPassword:'',
+                    newPassword:'',
+                    confirmPwd:''
+                },
+                modifyFormRules:{
+                    oldPassword:[
+                        { required: true, message: '当前密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符' },
+                        {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}  
+                      ],
+                    newPassword:[
+                        { required: true, message: '新密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+                        {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}  
+                     ],
+                     confirmPwd:[
+                        { required: true, message: '确认密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+                        { validator: validatePass, trigger: 'blur' }
+                     ]
+                    
+                },
+                merchantIconShow:true,
+                merchantIcon:'',
                 userName:'',//账号
                 linkName:'',
                 phone:'',
@@ -181,15 +231,15 @@
                 console.info(err);
             },
             handleBefore(file){
-                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg'|| file.type==='image/jpg';
                 if(!isTextComputer){
                    this.fileList=[];
-                   this.$message.error('文件格式错误');
+                   this.$message.error('请上传正确格式的图片');
                    return false;
                 }
                 if(file.size>2*1024*1024){
                    this.fileList=[];
-                   this.$message.error('图片最大为2MB');
+                   this.$message.error('请上传2MB以内的图片');
                    return false;
                 }
             },
@@ -215,13 +265,16 @@
                 var formData = this.wechatForm;
                 var param={};
                 param.merchantIcon = formData.wechatUrl;//url地址
-                // param.id=userId;
-                param.id='1153604277760090112';
+                param.id=userId;
+                // param.id='1153604277760090112';
                 axios.post('/merchant/userManager/updateIcon',param).then(function (response) {
                     console.log(response);
                     var result =  response.data;
                     if(result.code=="0"){
                         addClueVM.wechatVisible = false;
+                        addClueVM.merchantIcon=formData.wechatUrl;
+                        addClueVM.merchantIconShow=false;
+                        window.location.href="/merchant/userManager/userInfo"
                     }else{
                         addClueVM.$message.error(result.msg+',修改头像失败');
                         addClueVM.wechatVisible = false;
@@ -236,17 +289,29 @@
             },
             getInfo(){
                 var param={};
-                // param.id=userId;
-                param.id='1153604277760090112';
+                param.id=userId;
+                // param.id='1153604277760090112';
                 axios.post('/user/userManager/getUser',param).then(function (response) {
                     console.log(response);
                     var result =  response.data;
                     if(result.code=="0"){
+                        if(result.data.merchantIcon){
+                            addClueVM.merchantIcon=result.data.merchantIcon;
+                            addClueVM.merchantIconShow=false;
+                        }else{
+                            addClueVM.merchantIconShow=true;//显示默认头像
+                        }
+                        
                         addClueVM.userName=result.data.username;
                         addClueVM.linkName=result.data.name;
-                        addClueVM.phone=result.data.phone;
-                    }else{
+                        var phone=result.data.phone;
+                        tel = "" + phone;
+                        // replace()方法在字符串中用一些字符替换另一些字符，或替换一个与正则表达式匹配的子串。
+                        var tel1 =tel.replace(tel.substring(3,7), "****")
+                        addClueVM.phone=tel1;
                         
+                    }else{
+                        addClueVM.$message.error(result.msg);
                     }
                     
                 }).catch(function (error) {
@@ -257,8 +322,53 @@
                 });  
             },
             changePassword(){
-
-            }
+                this.dialogModifyPwdVisible=true;
+            },
+            cancelModifyForm(formName){//取消修改密码
+                this.$refs[formName].resetFields();
+                 this.dialogModifyPwdVisible = false;
+             },
+             saveModifyForm(formName){//保存
+                 this.$refs[formName].validate((valid) => {
+                     if (valid) {
+                        var param={};
+                        param.id=userId;
+                        // param.id="1153604277760090112";
+                        param.oldPassword=this.modifyForm.oldPassword;
+                        param.newPassword=this.modifyForm.newPassword;
+                        param.confirmPwd=this.modifyForm.confirmPwd;                        
+                        axios.post('/user/userManager/updatePassword', param)
+                        .then(function (response) {
+                           var resData = response.data;
+                           if(resData.code=='0'){
+                               addClueVM.$message({message:'请使用新密码重新登录',type:'success'});
+                               addClueVM.cancelModifyForm(formName);
+                               
+                               setTimeout(function(){//去登录页
+                                   window.location.href="/login";
+                               },2000);
+                           }else{
+                               addClueVM.$message(resData.msg);
+                               console.error(resData);
+                           }
+                       
+                       })
+                       .catch(function (error) {
+                            console.log(error);
+                            addClueVM.$message({
+                                message: "系统出错",
+                                type: 'error'
+                            }); 
+                       });
+                        
+                     } else {
+                       return false;
+                     }
+                   });
+            },
+            closeModifyPwdDialog(){
+                this.$refs.modifyForm.resetFields();
+            },
         },
         created(){
             this.getUploadParam();
