@@ -82,8 +82,8 @@ public class MerchantClientController {
 //                else if(seatManagerResp.getType() == 2){ }
 //                else if(seatManagerResp.getType() == 3){ }
 //                else { }
-                //第一阶段开发只考虑七陌，七陌商家版默认为手机外显（小号）登录，bindType = 2
-                String bindType = Constants.BIND_TYPE_TWO;
+                //第一阶段开发只考虑七陌，七陌商家版默认为普通外呼登录，bindType = 1
+                String bindType = Constants.BIND_TYPE_ONE;
                 //服务商家1天润2七陌3合力，目前默认七陌，后续补充后可直接使用seatManagerResp.getType值
                 reqDTO.setClientType(2);
                 Session session = SecurityUtils.getSubject().getSession();
