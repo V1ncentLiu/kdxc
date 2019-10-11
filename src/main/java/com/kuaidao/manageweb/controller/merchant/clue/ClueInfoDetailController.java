@@ -74,31 +74,9 @@ public class ClueInfoDetailController {
     private ClueInfoDetailFeignClient clueInfoDetailFeignClient;
 
     @Autowired
-    private SysSettingFeignClient sysSettingFeignClient;
-
-    @Autowired
-    private UserInfoFeignClient userInfoFeignClient;
-
-    @Autowired
     private CallRecordFeign callRecordFeign;
 
-    @Autowired
-    private TrackingMerchantFeignClient trackingMerchantFeignClient;
 
-    @Autowired
-    private CirculationFeignClient circulationFeignClient;
-
-    @Autowired
-    private OrganizationFeignClient organizationFeignClient;
-
-    @Autowired
-    private CustomFieldFeignClient customFieldFeignClient;
-
-    @Autowired
-    private ClueBasicFeignClient clueBasicFeignClient;
-
-    @Autowired
-    private RepeatClueRecordFeignClient repeatClueRecordFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
 
@@ -111,7 +89,7 @@ public class ClueInfoDetailController {
      * @param clueId
      * @return
      */
-    @RequestMapping("/detail")
+    @RequestMapping("/init")
     public String detail(HttpServletRequest request, @RequestParam String clueId) {
         log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
