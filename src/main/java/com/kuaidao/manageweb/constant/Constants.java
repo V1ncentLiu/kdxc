@@ -125,5 +125,8 @@ public class Constants {
     //商家子账号
     public  static  Integer USER_TYPE_THREE = 3;
 
-
+    //支付宝
+    public  static  Integer RECHARGE_WAY_ALI_PAY = 1;
+    //微信
+    public  static  Integer RECHARGE_WAY_WEXIN_PAY = 2;
 }
