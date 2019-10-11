@@ -166,9 +166,9 @@
       accountExpandedKeys: [],
       accountDataTree: [],
       userSearchForm: {
-        status: 'sdsdsd',
-        userName: '2',
-        name: '22sdadsad',
+        status: '',
+        userName: '',
+        name: '',
       },
       subAccountForm: {
         username: "",
@@ -220,23 +220,25 @@
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
       },
-      options: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        }, {
-          value: '选项2',
-          label: '双皮奶'
-        }, {
-          value: '选项3',
-          label: '蚵仔煎'
-        }, {
-          value: '选项4',
-          label: '龙须面'
-        }, {
-          value: '选项5',
-          label: '北京烤鸭'
-        }],
+      // 添加坐席里面的选择框
+      options: [],
+      // [
+      //   {
+      //     value: '选项1',
+      //     label: '黄金糕'
+      //   }, {
+      //     value: '选项2',
+      //     label: '双皮奶'
+      //   }, {
+      //     value: '选项3',
+      //     label: '蚵仔煎'
+      //   }, {
+      //     value: '选项4',
+      //     label: '龙须面'
+      //   }, {
+      //     value: '选项5',
+      //     label: '北京烤鸭'
+      //   }],
       infoTable: [{
         name: '套餐1',
         cost: '0.3元',
@@ -245,21 +247,22 @@
         seatCost: '150元/月',
       }],
       submitDisabled: false,
-      dataTable: [{
-        userName: '1',
-        packageName: '2',
-        sheetCount: '3',
-        supplyCompany: '4',
-        beginTime: '5',
-        id: '0',
-      }, {
-        userName: '1',
-        packageName: '2',
-        sheetCount: '3',
-        supplyCompany: '4',
-        beginTime: '5',
-        id: '4',
-      }],
+      dataTable: [],
+      // [{
+      //   userName: '1',
+      //   packageName: '2',
+      //   sheetCount: '3',
+      //   supplyCompany: '4',
+      //   beginTime: '5',
+      //   id: '0',
+      // }, {
+      //   userName: '1',
+      //   packageName: '2',
+      //   sheetCount: '3',
+      //   supplyCompany: '4',
+      //   beginTime: '5',
+      //   id: '4',
+      // }],
       pager: {
         total: 0,
         currentPage: 1,
@@ -305,35 +308,21 @@
           if (valid) {
             var formData = userVM.subAccountForm;
             var param = {};
-            param.name = formData.name;
-            param.username = formData.username;
-            param.password = formData.password;
-            param.phone = formData.phone;
-            param.orgId = formData.orgId;
-            param.userType = 3;
-            param.status = 1;
-            param.parentId = formData.id;
-            var roleList = new Array();
-            roleList.push(formData.roleId);
-            param.roleList = roleList;
-            var url = "";
-            url = "/merchant/userManager/saveUser";
-            axios.post(url, param)
+            param.buyPackageId = ''
+            param.packageId = ''
+            param.type = ''
+            param.seatNo = ''
+            param.company = ''
+            param.address = ''
+            param.accountNo = ''
+            param.secretKey = ''
+            param.proxyurl = ''
+            param.subMerchant = ''
+            axios.post('/merchant/seatManager/create', param)
               .then(function (response) {
                 console.info(response);
-                var data = response.data;
-                if (data.code != "0") {
-                  userVM.$message(data.msg);
-                  userVM.btnDisabled = false;
-                } else {
-                  userVM.$message('新增成功');
-
-                  userVM.btnDisabled = false;
-                  document.location.href = '/merchant/userManager/initUserList';
-                }
               })
               .catch(function (error) {
-                userVM.btnDisabled = false;
                 console.log(error);
               });
           }
@@ -342,32 +331,34 @@
 
       // 点击添加坐席出弹框
       addAccountUser(obj) {
-        this.merchatName = obj.name;
+        var that = this
         this.dialogsubAccountForm = true;
-        this.subAccountForm.id = obj.id;
         var param = {};
-        param.orgId = obj.orgId;
-        axios.post("/merchant/userManager/getAccountOrg", param)
+        axios.post("/merchant/seatManager/merchantUsers", param)
           .then(function (response) {
-            console.info(response);
-            var data = response.data;
-            if (data != null) {
-              var orgData = data.data;
-              userVM.accountDataTree = orgData;
-              for (var i = 0; i < orgData.length; i++) {
-                var curNode = orgData[i];
-                userVM.accountExpandedKeys.push(curNode.id);
-                var childs = curNode.children;
-                if (childs) {
-                  for (var j = 0; j < childs.length; j++) {
-                    var curChildNode = childs[j];
-                    userVM.accountExpandedKeys.push(curChildNode.id);
-                  }
-                }
+            console.log(response);
 
-              }
-            }
-          })
+          }).catch(function (error) {
+            console.log(error);
+          });
+        var selectData = [
+          {
+            value: '选项1',
+            label: '黄金糕'
+          }, {
+            value: '选项2',
+            label: '双皮奶'
+          }, {
+            value: '选项3',
+            label: '蚵仔煎'
+          }, {
+            value: '选项4',
+            label: '龙须面'
+          }, {
+            value: '选项5',
+            label: '北京烤鸭'
+          }]
+        that.options = selectData
       },
 
       closeAddCustomFieldDialog() {//关闭添加自定义字段dialog
@@ -393,6 +384,7 @@
 
       // 搜索 翻页
       searchTable() {
+        var that = this
         var param = {};
         param.status = this.userSearchForm.status;
         param.username = this.userSearchForm.userName;
@@ -433,6 +425,28 @@
 
           })
           .catch(function (error) {
+            var dataValue = [
+              {
+                userId: '1',
+                id: '0',
+                userName: '3',
+                packageId: '4',
+                packageName: '5',
+                sheetCount: '6',
+                supplyCompany: '7',
+                beginTime: '8',
+              },
+              {
+                userId: '11',
+                id: '22',
+                userName: '33',
+                packageId: '44',
+                packageName: '55',
+                sheetCount: '66',
+                supplyCompany: '77',
+                beginTime: '88',
+              }]
+            that.dataTable = dataValue
             console.log(error);
           });
 
