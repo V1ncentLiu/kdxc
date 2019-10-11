@@ -9,6 +9,7 @@ import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
@@ -114,6 +115,7 @@ public class MerchantOnlineRechargeController {
     JSONResult<List<MerchantRechargePreferentialDTO>> jsonResult = merchantRechargePreferentialFeignClient.findAllRechargePreferential(req);
     List<MerchantRechargePreferentialDTO> preferentialDTOList = jsonResult.getData();
     request.setAttribute("preferentialDTOList",preferentialDTOList);
+    request.setAttribute("rechargeWay", Constants.RECHARGE_WAY_ALI_PAY);
     return "merchant/payment/paymentResult";
   }
   /**
@@ -130,6 +132,7 @@ public class MerchantOnlineRechargeController {
     JSONResult<List<MerchantRechargePreferentialDTO>> jsonResult = merchantRechargePreferentialFeignClient.findAllRechargePreferential(req);
     List<MerchantRechargePreferentialDTO> preferentialDTOList = jsonResult.getData();
     request.setAttribute("preferentialDTOList",preferentialDTOList);
+    request.setAttribute("rechargeWay", Constants.RECHARGE_WAY_WEXIN_PAY);
       return "merchant/payment/paymentResult";
   }
 
