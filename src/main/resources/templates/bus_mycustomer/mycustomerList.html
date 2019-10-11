@@ -2011,11 +2011,11 @@
                             var reg = /^[0-9]+[0-9]*]*$/;
                             if (value == null || value == "null" || value == "") {
                                 callback(new Error("请填写到访人数"));
-                                mainDivVM.addVisitRecord.visitPeopleNum = null;
+                                mainDivVM.addVisitRecord.visitPeopleNum = "";
 
                             } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.addVisitRecord.visitPeopleNum = null;
+                                mainDivVM.addVisitRecord.visitPeopleNum = "";
                             } else {
                                 callback();
                             }
@@ -2392,7 +2392,9 @@
                 param.id = mainDivVM.formSigning.clueId;
                 axios.post('/businesssign/visitEcho', param).then(function (response) {
                     var echoData = response.data.data;
-                    mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                    if(echoData.arrVisitCity){
+                        mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                    }
                     if (echoData.visitNum > 0) {
                         mainDivVM.formSigning.visitNum = echoData.visitNum;
                     }
@@ -2405,11 +2407,23 @@
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
                 //清空补充到访记录数据
-                this.formSigning.arrVisitCity = '';
-                this.formSigning.visitNum = '';
-                this.formSigning.visitShopType = '';
-                this.formSigning.visitTime = '';
-                this.formSigning.visitType = '';
+                if(this.formSigning.arrVisitCity){
+                    this.formSigning.arrVisitCity = '';
+                }
+                if(this.formSigning.visitNum){
+                    this.formSigning.visitNum = '';
+                }
+
+                if(this.formSigning.visitShopType){
+                    this.formSigning.visitShopType = '';
+                }
+                if(  this.formSigning.visitTime ){
+                    this.formSigning.visitTime = '';
+                }
+                if( this.formSigning.visitType){
+                    this.formSigning.visitType = '';
+                }
+
             },
 
             suppUpdateShow() { //补充到访记录展开
@@ -3135,6 +3149,8 @@
                 // this.dialogFormSigningVisible = true;
                 this.resetForm('formSigning')
                 this.isAllMoney = false;
+                this.suppWrap = false;
+                this.shouAddVisitButton = true;
                 //ainDivVM.formSigning.payModes = [];
                 var param = {};
                 param.id = row.clueId;

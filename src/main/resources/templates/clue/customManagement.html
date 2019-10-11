@@ -959,7 +959,22 @@
       }
     },
     methods: {
-      gettelNumberIcon(tel,clueId) {
+    	async gettelNumberIcon(tel,clueId) {
+    	  var isReturn =false;
+      	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+          .then(function (response) {
+          	if(response.data !=""){
+          		customerManVM.$message({
+                      message: response.data,
+                      type: 'warning'
+                  });
+          		isReturn = true; ;
+          	}
+             ;
+          });
+      	if(isReturn){
+      		return;
+      	}
           this.phoneDisabled = true;
           var sessionStorage =window.sessionStorage;
           if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000){

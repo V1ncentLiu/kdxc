@@ -8,7 +8,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>业绩表</el-breadcrumb-item>
+        <el-breadcrumb-item>电销业绩排名</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="searchMonth">月累计排名</el-button>
@@ -21,8 +21,8 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                <el-form-item label="地区；">  
-                    <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable>
+                <el-form-item label="地区：">
+                    <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable @change="curDepart">
                         <el-option
                             v-for="item in areaArr"
                             :key="item.id"
@@ -42,7 +42,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组：">  
-                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -72,46 +72,46 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" width="55"></el-table-column>
-                <el-table-column prop="allCountryPer" label="全国业绩排名">
+                <el-table-column prop="businessLineRank" label="全国业绩排名">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.allCountryPer == 1||scope.row.allCountryPer == 2||scope.row.allCountryPer == 3">
+                        <div v-if="scope.row.businessLineRank == 1||scope.row.businessLineRank == 2||scope.row.businessLineRank == 3">
                             <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
-                           {{scope.row.allCountryPer}}
+                           {{scope.row.businessLineRank}}
                         </div>
-                        <span v-else>{{scope.row.allCountryPer}}</span>
+                        <span v-else>{{scope.row.businessLineRank}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="areaPer" label="区内业绩排名">
+                <el-table-column prop="centerRank" label="区内业绩排名">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.areaPer == 1||scope.row.areaPer == 2||scope.row.areaPer == 3">
+                        <div v-if="scope.row.centerRank == 1||scope.row.centerRank == 2||scope.row.centerRank == 3">
                             <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
-                            {{scope.row.areaPer}}
+                            {{scope.row.centerRank}}
                         </div>
-                        <span v-else>{{scope.row.areaPer}}</span>
+                        <span v-else>{{scope.row.centerRank}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allCountryAverage" label="全国人均产出排名">
+                <el-table-column prop="businessLineAvgRank" label="全国人均产出排名">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.allCountryAverage == 1||scope.row.allCountryAverage == 2||scope.row.allCountryAverage == 3">
+                        <div v-if="scope.row.businessLineAvgRank == 1||scope.row.businessLineAvgRank == 2||scope.row.businessLineAvgRank == 3">
                             <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
-                            {{scope.row.allCountryAverage}}
+                            {{scope.row.businessLineAvgRank}}
                         </div>
-                        <span v-else>{{scope.row.allCountryAverage}}</span>
+                        <span v-else>{{scope.row.businessLineAvgRank}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="areaAverage" label="区内人均产出排名">
+                <el-table-column prop="centerAvgRank" label="区内人均产出排名">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.areaAverage == 1||scope.row.areaAverage == 2||scope.row.areaAverage == 3">
+                        <div v-if="scope.row.centerAvgRank == 1||scope.row.centerAvgRank == 2||scope.row.centerAvgRank == 3">
                             <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
-                            {{scope.row.areaAverage}}
+                            {{scope.row.centerAvgRank}}
                         </div>
-                        <span v-else>{{scope.row.areaAverage}}</span>
+                        <span v-else>{{scope.row.centerAvgRank}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="teleGroupName" label="电销组"></el-table-column>
-                <el-table-column prop="deptName" label="事业部"></el-table-column>
-                <el-table-column prop="branch" label="分公司"></el-table-column>
-                <el-table-column prop="area" label="地区"></el-table-column>
+                <el-table-column prop="groupName" label="电销组"></el-table-column>
+                <el-table-column prop="departName" label="事业部"></el-table-column>
+                <el-table-column prop="companyName" label="分公司"></el-table-column>
+                <el-table-column prop="centerName" label="地区"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -121,19 +121,16 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var areaList=[[${projectList}]];// 地区
+    var areaList=[[${areaList}]];// 地区
     var deptList=[[${deptList}]];// 事业部
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
-    var curOrgId = [[${curOrgId}]];
-    var rolecode="DXZJ";//DXZJL,DXFZ,  DXZJ,DXCYGW
+    var teleGroupList = [[${teleGroupList}]];// 电销组
+    var rolecode=[[${roleCode}]];//DXZJL,DXFZ,  DXZJ,DXCYGW
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 activeName: 'second',
                 loading: false,
-                // isDisabled: false,
-                // isDisabledUserId: false,
                 isShowDept: false,
                 pager:{
                     total: 0,
@@ -144,58 +141,18 @@
                     area:'',
                     teleDeptId: '',
                     teleGroupId: '',
+                    type: 1
                 },
                 export: {
                     area:'',
                     teleDeptId: '',
                     teleGroupId: '',
+                    type: 1
                 },
-                tableData: [
-                    {
-                        allCountryPer: 1,
-                        areaPer: 1,
-                        allCountryAverage: 1,
-                        areaAverage: 1,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-1',
-                        branch: '分公司1-1',
-                        area: '秦皇岛'
-                    },
-                    {
-                        allCountryPer: 2,
-                        areaPer: 3,
-                        allCountryAverage: 2,
-                        areaAverage: 2,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-2',
-                        branch: '分公司1-2',
-                        area: '秦皇岛2'
-                    },
-                    {
-                        allCountryPer: 3,
-                        areaPer: 2,
-                        allCountryAverage: 2,
-                        areaAverage: 2,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-3',
-                        branch: '分公司1-3',
-                        area: '秦皇岛3'
-                    },
-                    {
-                        allCountryPer: 5,
-                        areaPer: 5,
-                        allCountryAverage: 5,
-                        areaAverage: 5,
-                        teleGroupName: '电销组1',
-                        deptName: '事业部1-5',
-                        branch: '分公司1-5',
-                        area: '秦皇岛5'
-                    }
-
-                ],
+                tableData: [],
                 areaArr: areaList,
-                deptList: deptList,
-                orgTeleArr: '', // 电销组
+                deptList: "",
+                orgTeleArr: "", // 电销组
             }             
         },
         methods: {    
@@ -211,19 +168,41 @@
             centerStyle(){
                 return "text-align:center"
             },
+
+            curDepart(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleDeptId = '';
+                this.form.teleGroupId = '';
+                this.getDepart(seleVal);
+            },
+            getDepart(seleVal){
+                param={};
+                param.id=seleVal;
+                param.selectCode='SYB';
+                axios.post('/base/getDwOrgList',param).then(function (response) {
+                    mainDivVM.deptList=response.data.data;
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "查询事业部请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+
             curTelGroupSale(seleVal){
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
                 this.form.teleGroupId = '';
-                this.form.teleSaleId = '';
                 this.getTelGroupSale(seleVal);
             },
             getTelGroupSale(seleVal){
                 param={};
-                param.parentId=seleVal;
-                param.orgType=1;
-                axios.post('/base/getGroupList',param).then(function (response) {
+                param.id=seleVal;
+                param.selectCode='DXZ';
+                axios.post('/base/getDwOrgList',param).then(function (response) {
                     mainDivVM.orgTeleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
@@ -232,45 +211,8 @@
                     });
                 });
             },
-            searchTable(firstPage) { 
-                // var startTime = this.form.startTime;
-                // var endTime = this.form.endTime;
-                // if(endTime && startTime){
-                //     startTime = new Date(this.form.startTime);
-                //     endTime = new Date(this.form.endTime);
-                //     if(startTime>endTime){
-                //         this.$message({
-                //             message: '开始时间不能大于结束时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     var date = new Date();
-                //     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                //     // date.setMonth(date.getMonth()-6);
-                //     // var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                //     var currentDateRes = new Date(currentDate);
-                //     // var beforeSixMonthRes = new Date(beforeSixMonth);
-                //     if(endTime > currentDateRes){
-                //         this.$message({
-                //             message: '请选择当前日期前的时间',
-                //             type: 'warning'
-                //         });
-                //         return;
-                //     }
-                //     startTime = this.limitTime(startTime, null);
-                //     endTime = this.limitTime(null, endTime);
-                // }else{
-                //     this.$message({
-                //         message: '请选择起止时间',
-                //         type: 'warning'
-                //     });
-                //     return;
-                // }   
-    
+            searchTable(firstPage) {
                 var param = {};
-                // param.startTime = this.minuteFormat(startTime);
-                // param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
     
                 if(firstPage){
@@ -278,11 +220,14 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.area = this.form.area;
-                param.teleDeptId = this.form.teleDeptId;
-                param.teleGroupId = this.form.teleGroupId;
+                param.centerId = this.form.area;
+                param.departId = this.form.teleDeptId;
+                param.groupId = this.form.teleGroupId;
+                param.type = this.form.type;
+                //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
+                param.selectType = "2";
                 this.loading = true; 
-                axios.post('/customerVisitSign/queryByPage',param).then(function (response) {
+                axios.post('/ranking/getPerformanceRankPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -298,9 +243,8 @@
                             type: 'error'
                         });
                         return ;
-                    }else if(resobj.data && resobj.data.tableData){
-                        var resobjData = resobj.data;    
-                        var tableData = resobjData.tableData;
+                    }else if(resobj.data){   
+                        var tableData = resobj.data;
                         mainDivVM.tableData = tableData.data;
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
@@ -308,6 +252,7 @@
                         mainDivVM.export.area = mainDivVM.form.area;
                         mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
+                        mainDivVM.export.type = mainDivVM.form.type;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -365,56 +310,27 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            searchMonthAverage(){ // 年累计月均排名
-                var today = new Date();
-                var month = today.getMonth()+1;
-                var startTime = '';
-                switch (month) {
-                    case 1 : 
-                    case 2 : 
-                    case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";break;
-                    case 4 : 
-                    case 5 : 
-                    case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01+" 00:00"; break;
-                    case 7 : 
-                    case 8 : 
-                    case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01+" 00:00";break;
-                    case 10 :
-                    case 11 :
-                    case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01+" 00:00";break;
-                }
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
+            searchMonth(){ // 月
+                this.form.type = 1
+                this.searchTable(1,1);
             },
             searchYear(){ // 年
-               var today = new Date();
-               var startTime = today.getFullYear()+"-" + 01 + "-" + 01+" 00:00";
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
+                this.form.type = 2
+               this.searchTable(1,2);
             },
-            searchMonth(){ // 本月 
-                var a = new Date();
-                var year = a.getFullYear();
-                var month = a.getMonth();
-                var date = a.getDate();
-                var b = new Date(year,month,date);
-                var f= new Date(year,month,01);
-                var c = f.valueOf();
-                var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable(1);
+            searchMonthAverage(){ // 年累计月均排名
+               this.form.type = 3
+               this.searchTable(1,3);
             },
             exportRs(){
                 var param = {};
-                param.area = this.export.area;
-                param.teleDeptId = this.export.teleDeptId;
-                param.teleGroupId = this.export.teleGroupId;
-                axios.post('/customerVisitSign/exportExcel',param,{responseType:'blob'})
+                param.centerId = this.form.area;
+                param.departId = this.form.teleDeptId;
+                param.groupId = this.export.teleGroupId;
+                param.type = this.export.type;
+                //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
+                param.selectType = "2";
+                axios.post('/ranking/exportPerformanceRankList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -429,14 +345,14 @@
             }
         },
         created(){
-            if(rolecode=='DXZJL'|| rolecode=='DXFZ'){
-                this.isShowDept = true;
-            }else{
+            if(rolecode=='DXCYGW' || rolecode=='DXZJ'){
                 this.isShowDept = false;
+            }else{
+                this.isShowDept = true;
             }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

@@ -1115,7 +1115,22 @@
         addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
             addCustomerVM.uploadParamData.realName= file.name
       },
-      gettelNumberIcon(tel) {
+      async gettelNumberIcon(tel) {
+    	  var isReturn =false;
+      	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+          .then(function (response) {
+          	if(response.data !=""){
+          		addCustomerVM.$message({
+                      message: response.data,
+                      type: 'warning'
+                  });
+          		isReturn = true; ;
+          	}
+             ;
+          });
+      	if(isReturn){
+      		return;
+      	}
         //外呼手机
         var param = {};
         param.clueId = clueId;

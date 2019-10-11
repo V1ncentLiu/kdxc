@@ -1384,7 +1384,22 @@
                 //this.formInline.callTime =new Date(teleEndTime);
                 this.formInline.callTime =new Date();
             },
-            gettelNumberIcon(tel) {
+            async gettelNumberIcon(tel) {
+            	var isReturn =false;
+            	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+                .then(function (response) {
+                	if(response.data !=""){
+                		addCustomerVM.$message({
+                            message: response.data,
+                            type: 'warning'
+                        });
+                		isReturn = true; ;
+                	}
+                   ;
+                });
+            	if(isReturn){
+            		return;
+            	}
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;

@@ -110,7 +110,7 @@ public class PerformanceController extends BaseStatisticsController {
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>>  queryByPage(@RequestBody BaseQueryDto baseQueryDto){
         initParams(baseQueryDto);
-        baseQueryDto.setTeleDeptId(null);
+//        baseQueryDto.setTeleDeptId(null);
         return performanceClient.queryByPage(baseQueryDto);
     }
 
@@ -122,14 +122,14 @@ public class PerformanceController extends BaseStatisticsController {
     @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        String roleCode=getRoleCode();
         //去掉事业部参数-保留电销组参数
-        baseQueryDto.setTeleDeptId(null);
+//        baseQueryDto.setTeleDeptId(null);
         //根据角色不同，使用查询方法不同
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             return performanceClient.querySalePageAndUser(baseQueryDto);
         }else{
+//            JSONResult<List<PerformanceDto>> json= performanceClient.queryListByParams(baseQueryDto);
             return performanceClient.querySalePage(baseQueryDto);
         }
     }

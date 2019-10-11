@@ -873,6 +873,7 @@
                             </el-form-item>
                         </el-col>
                     </el-row>
+
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
@@ -1535,16 +1536,16 @@
                             var reg =  /^[0-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请填写到访人数"));
-                                mainDivVM.formSigning.visitNum =null;
+                               // mainDivVM.formSigning.visitNum ='';
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.formSigning.visitNum =null;
+                               // mainDivVM.formSigning.visitNum ='';
                             }else{
                                 callback();
                             }
 
-                        }, trigger: 'change'}
+                        }, trigger: 'blur'}
                 ],
 
             },
@@ -1745,6 +1746,8 @@
                 }
             },
             editSign(){
+              this.suppWrap = true;
+              this.shouAddVisitButton = false;
                 mainDivVM.resetForm('formSigning');
                 var param = {};
                 param.id = vclueId;
@@ -1807,7 +1810,9 @@
                 param.id = vclueId;
                 axios.post('/businesssign/visitEcho',param).then(function (response) {
                     var echoData = response.data.data;
-                    mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                    if(echoData.arrVisitCity){
+                      mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                    }
                     if(echoData.visitNum>0){
                         mainDivVM.formSigning.visitNum=echoData.visitNum;
                     }
@@ -1818,11 +1823,21 @@
             suppHide(){
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
-                this.formSigning.arrVisitCity = '';
-                this.formSigning.visitNum='';
-                this.formSigning.visitShopType='';
-                this.formSigning.visitTime='';
-                this.formSigning.visitType='';
+                if(this.formSigning.arrVisitCity){
+                  this.formSigning.arrVisitCity = '';
+                }
+                if(this.formSigning.visitNum){
+                  this.formSigning.visitNum='';
+                }
+                if(this.formSigning.visitShopType){
+                  this.formSigning.visitShopType='';
+                }
+                if(this.formSigning.visitTime){
+                  this.formSigning.visitTime='';
+                }
+                if(this.formSigning.visitType){
+                  this.formSigning.visitType='';
+                }
             },
 
             suppDetailShow(){ //补充到访记录展开
@@ -1833,22 +1848,34 @@
                 param.id = vclueId;
                 axios.post('/businesssign/visitEcho',param).then(function (response) {
                     var echoData = response.data.data;
-                    mainDivVM.formMoneyDetail.arrVisitCity = echoData.arrVisitCity;
-                    if(echoData.visitNum>0){
-                        mainDivVM.formMoneyDetail.visitNum=echoData.visitNum;
+                    if(echoData.arrVisitCity){
+                        mainDivVM.updateFormSigning.arrVisitCity = echoData.arrVisitCity;
                     }
-                    mainDivVM.formMoneyDetail.visitType= 1;
-                    mainDivVM.formMoneyDetail.visitTime=new Date();
+                    if(echoData.visitNum>0){
+                        mainDivVM.updateFormSigning.visitNum=echoData.visitNum;
+                    }
+                    mainDivVM.updateFormSigning.visitType= 1;
+                    mainDivVM.updateFormSigning.visitTime=new Date();
                 });
             },
             suppDetailHide(){
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
-                this.formMoneyDetail.arrVisitCity = '';
-                this.formMoneyDetail.visitNum='';
-                this.formMoneyDetail.visitShopType='';
-                this.formMoneyDetail.visitTime='';
-                this.formMoneyDetail.visitType='';
+                if(this.updateFormSigning.arrVisitCity){
+                    this.updateFormSigning.arrVisitCity = '';
+                }
+                if( this.updateFormSigning.visitNum){
+                    this.updateFormSigning.visitNum='';
+                }
+                if( this.updateFormSigning.visitShopType){
+                    this.updateFormSigning.visitShopType='';
+                }
+                if( this.updateFormSigning.visitTime){
+                    this.updateFormSigning.visitTime='';
+                }
+               if( this.updateFormSigning.visitType){
+                   this.updateFormSigning.visitType='';
+               }
             },
 
             submitForm(formName) {
@@ -2008,6 +2035,8 @@
                          if(response.data.data.payName == null || response.data.data.payName == ''){
                             mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                         } 
+                         mainDivVM.currentCity(sign.signCity);
+                         mainDivVM.currentProvince(sign.signProvince);
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                     }
                 })
@@ -2116,7 +2145,7 @@
             axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
                 mainDivVM.provinceArr=response.data.data.data;
             });
-
+            
             // 考察公司
             param={};
             axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
