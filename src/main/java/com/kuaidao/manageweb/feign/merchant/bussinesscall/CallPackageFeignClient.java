@@ -25,7 +25,7 @@ import java.util.List;
  * @author: zxy
  * @date: 2019年1月4日
  */
-@FeignClient(name = "account-service", path = "/call/package",
+@FeignClient(name = "account-service-ff", path = "/account/call/package",
         fallbackFactory = CallPackageFeignClient.HystrixClientFallback.class)
 public interface CallPackageFeignClient {
 
@@ -51,7 +51,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/user/account")
-    JSONResult<CallUserAccountRes> getUserAccount(Long userId);
+    JSONResult<CallUserAccountRes> getUserAccount(@RequestParam("userId") Long userId);
 
 
     /**
@@ -66,7 +66,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/list")
-    JSONResult<CallBuyPackageRes> list( Long userId);
+    JSONResult<CallBuyPackageRes> list( @RequestParam("userId") Long userId);
 
 
     @Component
