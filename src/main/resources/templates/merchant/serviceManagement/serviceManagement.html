@@ -46,25 +46,25 @@
           style="width: 100%" :data="dataTable">
           <el-table-column align="center" type="selection" width="55"></el-table-column>
           <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
-          <el-table-column align="center" prop="name" label="商家名称"></el-table-column>
-          <el-table-column align="center" prop="username" label="所选服务套餐名称">
+          <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
+          <el-table-column align="center" prop="packageName" label="所选服务套餐名称">
             <template slot-scope="scope">
-              <el-button type="text" @click="openInfo()">{{scope.row.username}}</el-button>
+              <el-button type="text" @click="openInfo()">{{scope.row.packageName}}</el-button>
             </template>
           </el-table-column>
-          <el-table-column align="center" prop="balance" label="意向购买坐席数"></el-table-column>
-          <el-table-column align="center" prop="phone" label="供应商"></el-table-column>
-          <el-table-column align="center" prop="createTime" label="服务开启时间" :formatter="dateFormat" width="160">
+          <el-table-column align="center" prop="sheetCount" label="意向购买坐席数"></el-table-column>
+          <el-table-column align="center" prop="supplyCompany" label="供应商"></el-table-column>
+          <el-table-column align="center" prop="beginTime" label="服务开启时间" :formatter="dateFormat" width="160">
           </el-table-column>
-          <el-table-column align="center" prop="num" label="商家坐席">
+          <el-table-column align="center" prop="id" label="商家坐席">
             <template slot-scope="scope">
-              <div v-if="scope.row.num > 0">
+              <div v-if="scope.row.id > 0">
                 <!-- <a style="color: rgb(0, 114, 255);text-decoration:underline ;" :href="'/merchant/userManager/subaccountUserPage?parentId='+scope.row.id+'&name='+scope.row.name+'&orgId='+scope.row.orgId+''">坐席（{{scope.row.num}}）</a> -->
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
-                  :href="/merchant/seatManager/toPage?userId=111&buyPackageId=3434&packageId=3423">坐席（{{scope.row.num}}）</a>
+                  :href="'/merchant/seatManager/toPage?userId=111&buyPackageId=3434&packageId=3423'">坐席（{{scope.row.num}}）</a>
                 <!-- 注 后端说暂时没定传什么参数先这样访问-->
               </div>
-              <div v-if="scope.row.num == 0">
+              <div v-if="scope.row.id == 0">
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
                   @click="addAccountUser(scope.row)">添加绑定坐席</a>
               </div>
@@ -134,7 +134,7 @@
 </body>
 <script th:inline="javascript">
   // var merchantUserList = [[${ merchantUserList }]];//商户集合
-  var merchantUserList = [
+  var userList = [
     {
       value: '选项1',
       label: '黄金糕'
@@ -155,7 +155,7 @@
     el: '#userManage',
     data: {
       infoDialog: false,
-      merchantUserListOptions: merchantUserList,//商家账户
+      merchantUserListOptions: userList,//商家账户
       merchatName: "",
       subAccountFormTitle: "添加坐席",
       dialogsubAccountForm: false,
@@ -246,19 +246,19 @@
       }],
       submitDisabled: false,
       dataTable: [{
-        username: '1',
-        name: '2',
-        balance: '3',
-        phone: '4',
-        createTime: '5',
-        num: '0',
+        userName: '1',
+        packageName: '2',
+        sheetCount: '3',
+        supplyCompany: '4',
+        beginTime: '5',
+        id: '0',
       }, {
-        username: '1',
-        name: '2',
-        balance: '3',
-        phone: '4',
-        createTime: '5',
-        num: '2',
+        userName: '1',
+        packageName: '2',
+        sheetCount: '3',
+        supplyCompany: '4',
+        beginTime: '5',
+        id: '4',
       }],
       pager: {
         total: 0,
@@ -401,7 +401,7 @@
         param.pageNum = this.pager.currentPage;
         param.userType = 2;
         console.info(param);
-        axios.post('/merchant/userManager/merchantlist', param)
+        axios.post('/merchant/mechantSetMeal/queryList', param)
           .then(function (response) {
             var result = response.data;
             console.info(result);
@@ -411,25 +411,25 @@
             userVM.pager.currentPage = table.currentPage;
 
             // 取出存储的id
-            if (!userVM.paginationShow) {
-              if (userVM.storeId) {
-                userVM.$nextTick(function () {
-                  var storage = [];
-                  userVM.dataTable.forEach(function (item, index) {
-                    if (item.id === userVM.storeId) {
-                      storage.push(userVM.dataTable[index]);
-                    }
-                  })
-                  userVM.toggleSelection(storage);
-                  userVM.$el.querySelector('.el-table__body-wrapper').scrollTop = userVM.scrollTop;
-                })
-              }
-            } else {
-              removeSessionStore("userManageStoreForm");
-              removeSessionStore("userManageOtherVal");
-            }
-            userVM.paginationShow = true;
-            userVM.storeForm = userVM.userSearchForm;
+            // if (!userVM.paginationShow) {
+            //   if (userVM.storeId) {
+            //     userVM.$nextTick(function () {
+            //       var storage = [];
+            //       userVM.dataTable.forEach(function (item, index) {
+            //         if (item.id === userVM.storeId) {
+            //           storage.push(userVM.dataTable[index]);
+            //         }
+            //       })
+            //       userVM.toggleSelection(storage);
+            //       userVM.$el.querySelector('.el-table__body-wrapper').scrollTop = userVM.scrollTop;
+            //     })
+            //   }
+            // } else {
+            //   removeSessionStore("userManageStoreForm");
+            //   removeSessionStore("userManageOtherVal");
+            // }
+            // userVM.paginationShow = true;
+            // userVM.storeForm = userVM.userSearchForm;
 
           })
           .catch(function (error) {
@@ -470,7 +470,7 @@
       },
     },
     created() {
-      // 进入页面判断有是否有存储值
+      // 进入页面判断有是否有存储值进入页面判断有是否有存储值
       // if(!this.paginationShow){
       //     var storeVal = getSessionStore("userManageStoreForm");
       //     var otherVal = getSessionStore("userManageOtherVal");
@@ -484,7 +484,7 @@
       // // console.info("create method");
       // var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
       // if(localVal){this.pager.pageSize = localVal;}
-      // this.searchTable();
+      this.searchTable();
     },
     mounted() {
       console.info("mounted method");
