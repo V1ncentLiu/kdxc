@@ -28,7 +28,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -146,7 +146,7 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     category:'',
                     cusLevel: '',
@@ -155,7 +155,7 @@
                 export: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     category:'',
                     cusLevel: '',
@@ -273,7 +273,7 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.deptId = this.form.deptId;
+                param.teleDeptId = this.form.teleDeptId;
                 param.teleGroupId = this.form.teleGroupId;
                 param.category = this.form.category;
                 param.cusLevel = this.form.cusLevel;
@@ -308,7 +308,7 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.deptId = mainDivVM.form.deptId;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                         mainDivVM.export.category = mainDivVM.form.category;
                         mainDivVM.export.cusLevel = mainDivVM.form.cusLevel;
@@ -350,14 +350,14 @@
             },
             gotoTeam(row){
                 var teleGroupId = row.teleGroupId;
-                var deptId = this.export.deptId;
+                var teleDeptId = this.export.teleDeptId;
                 var category = this.export.category;
                 var cusLevel = this.export.cusLevel;
                 var areaId = this.export.areaId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(teleGroupId){
-                    window.location.href="/freedReport/groupList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&cusLevel="+ cusLevel +"&areaId="+ areaId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/freedReport/groupList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&cusLevel="+ cusLevel +"&areaId="+ areaId +"&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -427,7 +427,7 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.deptId = this.export.deptId;
+                param.teleDeptId = this.export.teleDeptId;
                 param.teleGroupId = this.export.teleGroupId;
                 param.category = this.export.category;
                 param.cusLevel = this.export.cusLevel;
@@ -454,8 +454,8 @@
             this.form.endTime=endTime; 
             if(curDeptId){
                 this.isDisabled = true;
-                this.form.deptId = curDeptId;
-                this.export.deptId = this.form.deptId;
+                this.form.teleDeptId = curDeptId;
+                this.export.teleDeptId = this.form.teleDeptId;
                 this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.isDisabledOrgId = true;
