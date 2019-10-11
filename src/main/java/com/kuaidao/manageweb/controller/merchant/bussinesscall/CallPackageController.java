@@ -55,7 +55,7 @@ public class CallPackageController {
      * @return
      */
     @ResponseBody
-    @PostMapping("/user/account")
+    @GetMapping("/user/account")
     public JSONResult<CallUserAccountRes> getUserAccount(@RequestParam Long userId) {
         log.info("CallPackageBuyController.getUserAccount,userId={}", userId);
         return callPackageFeignClient.getUserAccount(userId);
@@ -68,7 +68,7 @@ public class CallPackageController {
      * @return
      */
     @ResponseBody
-    @PostMapping("/list")
+    @GetMapping("/list")
     public JSONResult<CallBuyPackageRes> list(@RequestParam Long userId) {
         log.info("CallPackageBuyController,list,userId={}", userId);
         return callPackageFeignClient.list(userId);
