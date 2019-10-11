@@ -43,6 +43,10 @@ public interface SeatManagerFeignClient {
 
     @PostMapping("/queryListBySubMerchant")
     public JSONResult<SeatManagerResp> queryListBySubMerchant( @RequestBody SeatManagerReq seatManagerReq);
+
+    @PostMapping("/countSeatNumOnMerchent")
+    public JSONResult<List<SeatManagerResp>> countSeatNumOnMerchent();
+
     @Component
     static class HystrixClientFallback implements SeatManagerFeignClient {
 
@@ -88,6 +92,11 @@ public interface SeatManagerFeignClient {
         @Override
         public JSONResult<SeatManagerResp> queryListBySubMerchant(SeatManagerReq seatManagerReq) {
             return fallBackError("通过绑定商家子账号查询");
+        }
+
+        @Override
+        public JSONResult<List<SeatManagerResp>> countSeatNumOnMerchent() {
+            return fallBackError("绑定坐席数量");
         }
     }
 

@@ -50,7 +50,13 @@ public class BussinessCallCostController {
     userInfoDTO.setParentId(user.getId());
     List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
     request.setAttribute("userInfoList",userInfoList);
-
+    //获取商家累计消费
+    MerchantCallCostReq req = new MerchantCallCostReq();
+    req.setBusinessAccount(user.getId());
+    JSONResult<String> costJson = merchantCallCostFeign.getTotalMerchantCost(req);
+    if(costJson.getCode().equals("0")){
+      request.setAttribute("totalMerchantCost",costJson.getData());
+    }
     return "merchant/bussinessCall/chargeRecord";
   }
 

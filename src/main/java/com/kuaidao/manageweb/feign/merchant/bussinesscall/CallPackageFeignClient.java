@@ -25,7 +25,7 @@ import java.util.List;
  * @author: zxy
  * @date: 2019年1月4日
  */
-@FeignClient(name = "account-service", path = "/call/package",
+@FeignClient(name = "account-service-ff", path = "/account/call/package",
         fallbackFactory = CallPackageFeignClient.HystrixClientFallback.class)
 public interface CallPackageFeignClient {
 
@@ -51,16 +51,22 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/user/account")
-    JSONResult<CallUserAccountRes> getUserAccount(Long userId);
+    JSONResult<CallUserAccountRes> getUserAccount(@RequestParam("userId") Long userId);
 
 
+    /**
+     * @param userId
+     * @return
+     */
+    @PostMapping("/hasBuyPackage")
+    public JSONResult<Boolean> hasBuyPackage(@RequestParam("userId") Long userId);
     /**
      * 套餐列表
      *
      * @return
      */
     @PostMapping("/list")
-    JSONResult<CallBuyPackageRes> list( Long userId);
+    JSONResult<CallBuyPackageRes> list( @RequestParam("userId") Long userId);
 
 
     @Component
@@ -84,6 +90,11 @@ public interface CallPackageFeignClient {
                 @Override
                 public JSONResult<CallUserAccountRes> getUserAccount(Long userId) {
                     return fallBackError("账户余额");
+                }
+
+                @Override
+                public JSONResult<Boolean> hasBuyPackage(Long userId) {
+                    return fallBackError("是否已经购买套餐");
                 }
 
                 @Override

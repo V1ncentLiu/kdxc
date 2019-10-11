@@ -14,8 +14,7 @@
     </el-breadcrumb>     
     <el-row class="padding20" style="padding-left: 0;">         
         <el-row class="marginB10">
-            <p style="color: #333;font-size: 16px;margin-bottom: 10px;">云呼叫</p>
-            <el-button type="primary" style="width: 120px;height: 40px;">服务套餐项目</el-button>
+            <p style="color: #333;font-size: 16px;margin-bottom: 10px;">服务套餐项目</p>
         </el-row>
         <el-row class="marginB20 fs14">已购买套餐，再次变更套餐需要在第二个月生效</el-row>
     </el-row> 
@@ -38,14 +37,18 @@
             </el-table-column>
             <el-table-column align="center" prop="maxSheetNum" label="支持坐席最大数量"></el-table-column>
             <el-table-column align="center" prop="totalCost" label="月固定费用/个"></el-table-column>
-            <el-table-column align="center" label="选择费用" type="selection">
-                <!-- <template scope="scope">
-                    <el-radio :label="scope.row.radioVal" v-model="templateRadio">&nbsp;</el-radio>
-                </template> -->
+            <el-table-column align="center" type="selection" label="选择费用">
+                <!-- <template scope="scope"> -->
+                    <!-- <el-radio :label="scope.row.radioVal" v-model="templateRadio">&nbsp;</el-radio> -->
+                    <!-- <div v-if="scope.row.status==1"> -->
+                        <!-- <p>已购买服务</p> -->
+                        <!-- <el-button type="primary" @click="showChangeBtn">变更</el-button> -->
+                    <!-- </div>              -->
+                <!-- </template> -->
             </el-table-column>
         </el-table>
     </el-row>
-    <el-row class="padding20" style="text-align: right;padding-right: 0;color: #666">提示：以上不包含通话时长费用，具体请咨询客服</el-row>
+    <el-row class="padding20" style="text-align: right;padding-right: 0;color: #666;font-size: 14px;">提示：以上不包含通话时长费用，具体请咨询客服</el-row>
     <div class="padding20 f-tac">
         <el-button v-if="isBuyBtn" type="primary" style="width:200px;height: 50px;" @click="buyClick">购买</el-button>
         <el-button v-else type="primary" style="width:200px;height: 50px;" @click="changeClick">变更</el-button>
@@ -57,15 +60,15 @@
                 <span>{{formBuy.balance}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
-                <el-input v-model="formBuy.buyCount" placeholder="" maxLength="20" style="width: 260px;" maxLength="5"></el-input>
+                <el-input v-model="formBuy.buyCount" placeholder="" maxLength="5" style="width: 260px;" @keyup.native="number" @input="formBuyCount"></el-input>
             </el-form-item>
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formBuy.cost}}
             </el-form-item>
-            <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
+            <p style="padding-left: 40px;font-size: 14px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p> 
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formApply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formBuy')">提交</el-button>
             <el-button @click="buyFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
@@ -79,7 +82,7 @@
                 <span>{{formChange.newName}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
-                <el-input v-model="formChange.buyCount" placeholder="" maxLength="20" style="width: 260px;" maxLength="5"></el-input>
+                <el-input v-model="formChange.buyCount" placeholder="" maxLength="5" style="width: 260px;" @keyup.native="number" @input="formChangeCount"></el-input>
             </el-form-item>
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formChange.cost}}
@@ -87,7 +90,7 @@
             <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formApply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formChange')">提交</el-button>
             <el-button @click="changeFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
@@ -99,6 +102,7 @@
 <!-- import common js-->
 <script>  
     var userId = '[[${userId}]]';
+    console.log(userId)
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -109,7 +113,18 @@
                 changeFormVisible:false,             
                 multipleSelection: [],//选择行
                 formLabelWidth: '200px',
-                dataTable: [],
+                dataTable: [
+                    // {
+                    //     fixCost: "32104371",
+                    //     maxSheetNum: 55623242,
+                    //     packageId: "1181441839882960896",
+                    //     packageName: "222333",
+                    //     sheetCost: "59027428",
+                    //     status: 0,
+                    //     subAccountCost: "2222",
+                    //     totalCost: "91134021",
+                    // }
+                ],
                 templateRadio:'0',
                 formBuy:{
                     balance:'',
@@ -139,38 +154,87 @@
             }             
         },
         methods: {
+            formBuyCount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(this.formBuy.buyCount);
+                var atwo = parseFloat(this.rows.totalCost);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.formBuy.cost = (aone + atwo) + ""
+            },
+            formChangeCount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(this.formChange.buyCount);
+                var atwo = parseFloat(this.rows.totalCost);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.formChange.cost = (aone + atwo) + ""
+            },
+            number(){
+                this.formBuy.buyCount=this.formBuy.buyCount.replace(/[^\.\d]/g,'');
+                this.formBuy.buyCount=this.formBuy.buyCount.replace('.','');
+                this.formChange.buyCount=this.formChange.buyCount.replace(/[^\.\d]/g,'');
+                this.formChange.buyCount=this.formChange.buyCount.replace('.','');
+            },
+            showChangeBtn(){
+                this.isBuyBtn=false;
+            },
             handleSelectionChange(val) {//选择节点的事件
                 console.log(val)
                 this.multipleSelection = val;
             }, 
             buyClick(){
+                var rows = this.multipleSelection;
+                if(rows.length <1){
+                    this.$message({
+                        message: '请选购买的套餐',
+                        type: 'warning'
+                    });
+                    return;
+                }
                 this.buyFormVisible=true;
             },
             changeClick(){
                 this.changeFormVisible=true;
             },
-            submitBuyForm(){
-                var param ={};
-                var packageId="";
-                param.userId = userId;
-                param.packageId = packageId;//套餐id
-                param.buyCount = this.formBuy.buyCount;
+            submitBuyForm(formName ){
+                var rows = this.multipleSelection;
+                if(rows.length <1){
+                    this.$message({
+                        message: '请选购买的套餐',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.$refs[formName].validate((valid) => {
+                    var rows=this.multipleSelection;
+                    if (valid) {
+                        var param ={};
+                        var packageId="";
+                        param.userId = userId;
+                        param.packageId = rows.packageId;//套餐id
+                        param.buyCount = this.formBuy.buyCount;
 
-                console.info(param);
-                axios.post('/merchant/call/package/buy', param)
-                .then(function (response) {
-                    console.log(response)
-                    var result =  response.data;
-                    if(result.code==0){
-                        var table=result.data;
-                        mainDivVM.searchTable()                       
-                    }else{
-                        ocmVM.$message.error(result.msg);
-                    }                    
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });    
+                        console.info(param);
+                        axios.post('/merchant/call/package/buy', param)
+                        .then(function (response) {
+                            console.log(response)
+                            var result =  response.data;
+                            if(result.code==0){
+                                var table=result.data;
+                                mainDivVM.searchTable()                       
+                            }else{
+                                mainDivVM.$message.error(result.msg);
+                            }                    
+                        })
+                        .catch(function (error) {
+                             console.log(error);
+                        }); 
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });   
             },
             submitChangeForm(){
                 var param ={};
@@ -190,7 +254,7 @@
                         var table=result.data;
                         window.location.href="/merchant/call/package/index";                       
                     }else{
-                        ocmVM.$message.error(result.msg);
+                        mainDivVM.$message.error(result.msg);
                     }                    
                 })
                 .catch(function (error) {
@@ -198,15 +262,15 @@
                 });    
             },
             searchTable() {                 
-                axios.get('/merchant/call/package/list?'+userId)
+                axios.get('/merchant/call/package/list?userId='+userId)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
                     if(result.code==0){
                         var table=result.data;
-                        window.location.href="/merchant/call/package/index";                       
+                        mainDivVM.dataTable= table.callBuyPackageDTOList;
                     }else{
-                        ocmVM.$message.error(result.msg);
+                        mainDivVM.$message.error(result.msg);
                     }                    
                 })
                 .catch(function (error) {
@@ -216,15 +280,15 @@
             },
             // 账户余额接口
             init() {                 
-                axios.get('/merchant/call/package/user/account?'+userId)
+                axios.get('/merchant/call/package/user/account?userId='+userId)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
                     if(result.code==0){
                         var table=result.data;
-                        mainDivVM.formBuy.balance = table.data;                        
+                        mainDivVM.formBuy.balance = table.totalAmounts;                        
                     }else{
-                        ocmVM.$message.error(result.msg);
+                        mainDivVM.$message.error(result.msg);
                     }                    
                 })
                 .catch(function (error) {

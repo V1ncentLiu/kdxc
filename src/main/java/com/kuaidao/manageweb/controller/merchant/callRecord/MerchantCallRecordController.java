@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * Created on: 2019-10-11-11:02
  */
 @Controller
-@RequestMapping("/merchantCallRecord")
+@RequestMapping("/merchant/merchantCallRecord")
 public class MerchantCallRecordController {
 
     private static Logger logger = LoggerFactory.getLogger(MerchantCallRecordController.class);
@@ -71,7 +71,7 @@ public class MerchantCallRecordController {
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());
         request.setAttribute("userType", userType.toString());
-        return "???";
+        return "merchant/bussinessCall/callRecord";
     }
 
     /**
