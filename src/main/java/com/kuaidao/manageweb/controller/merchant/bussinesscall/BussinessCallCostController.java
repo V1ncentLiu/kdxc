@@ -1,9 +1,22 @@
 package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 
+import com.kuaidao.account.dto.call.MerchantCallCostDTO;
+import com.kuaidao.account.dto.call.MerchantCallCostReq;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.merchant.bussinesscall.MerchantCallCostFeign;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @description: BussinessCallCostController
@@ -15,6 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/merchant/bussinessCallCost")
 public class BussinessCallCostController {
 
+  @Autowired
+  private MerchantCallCostFeign merchantCallCostFeign;
+  @Autowired
+  private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
   /**
   * @Description 商家通话费用页面初始化
   * @param request
@@ -25,7 +42,47 @@ public class BussinessCallCostController {
   @RequestMapping("/initBussinessCallCost")
   @RequiresPermissions("merchant:bussinessCallCost:view")
   public String initBussinessCallCost(HttpServletRequest request) {
+    UserInfoDTO user = CommUtil.getCurLoginUser();
+    //获取商家绑定字账号
+    UserInfoDTO userInfoDTO = new UserInfoDTO();
+    userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+    userInfoDTO.setStatusList(null);
+    userInfoDTO.setParentId(user.getId());
+    List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
+    request.setAttribute("userInfoList",userInfoList);
 
     return "merchant/bussinessCall/chargeRecord";
+  }
+
+  /**
+   * @Description 商家端商家通话费用列表查询
+   * @param req
+   * @Return com.kuaidao.common.entity.JSONResult<com.kuaidao.common.entity.PageBean<com.kuaidao.account.dto.call.MerchantCallCostDTO>>
+   * @Author xuyunfeng
+   * @Date 2019/10/10 17:08
+   **/
+  @RequestMapping("/getBussinessCallCostList")
+  @ResponseBody
+  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(MerchantCallCostReq req){
+    try {
+      UserInfoDTO user = CommUtil.getCurLoginUser();
+      req.setBusinessAccount(user.getId());
+      JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
+      return jsonResult;
+    }catch (Exception e){
+      return new JSONResult<PageBean<MerchantCallCostDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"获取商家端商家通话费用异常");
+    }
+  }
+
+  /**
+   * 查询商家账号
+   *
+   * @param userInfoDTO
+   * @return
+   */
+  private List<UserInfoDTO> getMerchantUser(UserInfoDTO userInfoDTO) {
+    JSONResult<List<UserInfoDTO>> merchantUserList =
+        merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+    return merchantUserList.getData();
   }
 }
