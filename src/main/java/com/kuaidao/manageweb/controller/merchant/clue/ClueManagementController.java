@@ -103,7 +103,7 @@ public class ClueManagementController {
             userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getParentId());
         }
         JSONResult<List<UserInfoDTO>> merchantAppiontUserList = merchantUserInfoFeignClient.merchantUserList(userInfoInvite);
-        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+        if (merchantAppiontUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantAppiontUserList", merchantAppiontUserList.getData());
         }
         // 查询字典行业类别集合
