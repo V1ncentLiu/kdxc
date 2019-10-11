@@ -25,7 +25,7 @@ import java.util.List;
  * @author: zxy
  * @date: 2019年1月4日
  */
-@FeignClient(name = "account-service", path = "/account/call/package",
+@FeignClient(name = "account-service-ff", path = "/account/call/package",
         fallbackFactory = CallPackageFeignClient.HystrixClientFallback.class)
 public interface CallPackageFeignClient {
 
