@@ -60,7 +60,7 @@
                 <span>{{formBuy.balance}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
-                <el-input v-model="formBuy.buyCount" placeholder="" maxLength="5" style="width: 260px;"></el-input>
+                <el-input v-model="formBuy.buyCount" placeholder="" maxLength="5" style="width: 260px;" @keyup.native="number" @input="formBuyCount"></el-input>
             </el-form-item>
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formBuy.cost}}
@@ -82,7 +82,7 @@
                 <span>{{formChange.newName}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
-                <el-input v-model="formChange.buyCount" placeholder="" maxLength="5" style="width: 260px;"></el-input>
+                <el-input v-model="formChange.buyCount" placeholder="" maxLength="5" style="width: 260px;" @keyup.native="number" @input="formChangeCount"></el-input>
             </el-form-item>
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formChange.cost}}
@@ -102,6 +102,7 @@
 <!-- import common js-->
 <script>  
     var userId = '[[${userId}]]';
+    console.log(userId)
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -112,7 +113,18 @@
                 changeFormVisible:false,             
                 multipleSelection: [],//选择行
                 formLabelWidth: '200px',
-                dataTable: [],
+                dataTable: [
+                    // {
+                    //     fixCost: "32104371",
+                    //     maxSheetNum: 55623242,
+                    //     packageId: "1181441839882960896",
+                    //     packageName: "222333",
+                    //     sheetCost: "59027428",
+                    //     status: 0,
+                    //     subAccountCost: "2222",
+                    //     totalCost: "91134021",
+                    // }
+                ],
                 templateRadio:'0',
                 formBuy:{
                     balance:'',
@@ -142,6 +154,28 @@
             }             
         },
         methods: {
+            formBuyCount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(this.formBuy.buyCount);
+                var atwo = parseFloat(this.rows.totalCost);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.formBuy.cost = (aone + atwo) + ""
+            },
+            formChangeCount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(this.formChange.buyCount);
+                var atwo = parseFloat(this.rows.totalCost);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.formChange.cost = (aone + atwo) + ""
+            },
+            number(){
+                this.formBuy.buyCount=this.formBuy.buyCount.replace(/[^\.\d]/g,'');
+                this.formBuy.buyCount=this.formBuy.buyCount.replace('.','');
+                this.formChange.buyCount=this.formChange.buyCount.replace(/[^\.\d]/g,'');
+                this.formChange.buyCount=this.formChange.buyCount.replace('.','');
+            },
             showChangeBtn(){
                 this.isBuyBtn=false;
             },
@@ -173,11 +207,12 @@
                     return;
                 }
                 this.$refs[formName].validate((valid) => {
+                    var rows=this.multipleSelection;
                     if (valid) {
                         var param ={};
                         var packageId="";
                         param.userId = userId;
-                        param.packageId = packageId;//套餐id
+                        param.packageId = rows.packageId;//套餐id
                         param.buyCount = this.formBuy.buyCount;
 
                         console.info(param);
