@@ -65,7 +65,7 @@
             <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p> 
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formApply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formBuy')">提交</el-button>
             <el-button @click="buyFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
@@ -87,7 +87,7 @@
             <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formApply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formChange')">提交</el-button>
             <el-button @click="changeFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
@@ -149,28 +149,35 @@
             changeClick(){
                 this.changeFormVisible=true;
             },
-            submitBuyForm(){
-                var param ={};
-                var packageId="";
-                param.userId = userId;
-                param.packageId = packageId;//套餐id
-                param.buyCount = this.formBuy.buyCount;
+            submitBuyForm(formName ){
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param ={};
+                        var packageId="";
+                        param.userId = userId;
+                        param.packageId = packageId;//套餐id
+                        param.buyCount = this.formBuy.buyCount;
 
-                console.info(param);
-                axios.post('/merchant/call/package/buy', param)
-                .then(function (response) {
-                    console.log(response)
-                    var result =  response.data;
-                    if(result.code==0){
-                        var table=result.data;
-                        mainDivVM.searchTable()                       
-                    }else{
-                        ocmVM.$message.error(result.msg);
-                    }                    
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });    
+                        console.info(param);
+                        axios.post('/merchant/call/package/buy', param)
+                        .then(function (response) {
+                            console.log(response)
+                            var result =  response.data;
+                            if(result.code==0){
+                                var table=result.data;
+                                mainDivVM.searchTable()                       
+                            }else{
+                                mainDivVM.$message.error(result.msg);
+                            }                    
+                        })
+                        .catch(function (error) {
+                             console.log(error);
+                        }); 
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });   
             },
             submitChangeForm(){
                 var param ={};
@@ -190,7 +197,7 @@
                         var table=result.data;
                         window.location.href="/merchant/call/package/index";                       
                     }else{
-                        ocmVM.$message.error(result.msg);
+                        mainDivVM.$message.error(result.msg);
                     }                    
                 })
                 .catch(function (error) {
@@ -198,7 +205,7 @@
                 });    
             },
             searchTable() {                 
-                axios.get('/merchant/call/package/list?'+userId)
+                axios.get('/merchant/call/package/list?userId='+userId)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
@@ -206,7 +213,7 @@
                         var table=result.data;
                         window.location.href="/merchant/call/package/index";                       
                     }else{
-                        ocmVM.$message.error(result.msg);
+                        mainDivVM.$message.error(result.msg);
                     }                    
                 })
                 .catch(function (error) {
@@ -216,7 +223,7 @@
             },
             // 账户余额接口
             init() {                 
-                axios.get('/merchant/call/package/user/account?'+userId)
+                axios.get('/merchant/call/package/user/account?userId='+userId)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
@@ -224,7 +231,7 @@
                         var table=result.data;
                         mainDivVM.formBuy.balance = table.data;                        
                     }else{
-                        ocmVM.$message.error(result.msg);
+                        mainDivVM.$message.error(result.msg);
                     }                    
                 })
                 .catch(function (error) {
