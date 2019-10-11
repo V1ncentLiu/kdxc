@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * Created on: 2019-10-10-22:39
  */
-@FeignClient(name = "callcenter-service", path = "/callcenter/merchantClient", fallback = MerchantClientFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "callcenter-service-hou", path = "/callcenter/merchantClient", fallback = MerchantClientFeignClient.HystrixClientFallback.class)
 public interface MerchantClientFeignClient {
 
     @PostMapping("/merchantOutboundCall")
