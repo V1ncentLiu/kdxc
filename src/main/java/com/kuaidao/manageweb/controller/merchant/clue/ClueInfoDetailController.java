@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import com.kuaidao.merchant.dto.clue.ClueDTO;
-import com.kuaidao.merchant.dto.clue.ClueQueryDTO;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
@@ -24,6 +23,8 @@ import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueInfoDetailFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.merchant.dto.clue.ClueDTO;
+import com.kuaidao.merchant.dto.clue.ClueQueryDTO;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -116,6 +117,42 @@ public class ClueInfoDetailController {
             }
         }
         return clueInfo;
+    }
+
+    /**
+     * 维护资源提交
+     *
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/updateCustomerClue")
+    @ResponseBody
+    @LogRecord(description = "维护客户资源提交", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.CUSTOMER_INFO)
+    public JSONResult<String> updateCustomerClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
+
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (null != user) {
+            dto.setUpdateUser(user.getId());
+            dto.setOrg(user.getOrgId());
+            if (dto.getClueCustomer().getPhoneCreateTime() != null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())) {
+                dto.getClueCustomer().setPhoneCreateUser(user.getId());
+            }
+            if (dto.getClueCustomer().getPhone2CreateTime() != null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())) {
+                dto.getClueCustomer().setPhone2CreateUser(user.getId());
+            }
+            if (dto.getClueCustomer().getPhone3CreateTime() != null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())) {
+                dto.getClueCustomer().setPhone3CreateUser(user.getId());
+            }
+            if (dto.getClueCustomer().getPhone4CreateTime() != null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())) {
+                dto.getClueCustomer().setPhone4CreateUser(user.getId());
+            }
+            if (dto.getClueCustomer().getPhone5CreateTime() != null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
+                dto.getClueCustomer().setPhone5CreateUser(user.getId());
+            }
+        }
+        return clueInfoDetailFeignClient.updateCustomerClue(dto);
     }
 
     /**
