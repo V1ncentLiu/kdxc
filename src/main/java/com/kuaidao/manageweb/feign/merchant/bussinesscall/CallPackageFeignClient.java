@@ -59,7 +59,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/hasBuyPackage")
-    public JSONResult<Boolean> hasBuyPackage(@RequestParam Long userId);
+    public JSONResult<Boolean> hasBuyPackage(@RequestParam("userId") Long userId);
     /**
      * 套餐列表
      *
