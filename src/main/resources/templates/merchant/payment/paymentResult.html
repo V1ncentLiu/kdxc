@@ -28,7 +28,7 @@
         <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 14px;">
             <p style="margin-bottom: 20px;">感谢你的支持，已支付成功</p>
             <img th:src="@{/images/successIco.jpg}" alt="">
-            <p style="margin-bottom: 40px;">您可在“<a href="/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness" style="color: #5c8de8;">充值记录</a>”中查看</p>
+            <p v-show="isShowTip" style="margin-bottom: 40px;">您可在“<a href="/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness" style="color: #5c8de8;">充值记录</a>”中查看</p>
         </div>
     </el-row>
 </div>
@@ -39,6 +39,7 @@
 <!-- import common js-->
 <script th:inline="javascript">  
     var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息  
+    var rechargeWay=[[${rechargeWay}]];//优惠 信息  
     var ocmVM = new Vue({
         el: '#paymentOnline',
         data: function() {
@@ -47,6 +48,7 @@
                 isClass:true,
                 isShow:false,
                 preferentialDTOList:preferentialDTOList,
+                isShowTip:true,
             }              
         },
         methods: {
@@ -59,9 +61,14 @@
                     this.isClass=false
                 }          
             },
+            isShowTip(){
+                if(rechargeWay&&rechargeWay==1){
+                    this.isShowTip=false;
+                }
+            }
         },
         created(){
-            
+            this.isShowTip();
         },
         mounted(){
             document.getElementById('paymentOnline').style.display = 'block';
