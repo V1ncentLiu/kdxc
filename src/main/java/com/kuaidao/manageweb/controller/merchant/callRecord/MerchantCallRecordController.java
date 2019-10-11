@@ -71,7 +71,7 @@ public class MerchantCallRecordController {
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());
         request.setAttribute("userType", userType.toString());
-        return "???";
+        return "merchant/bussinessCall/callRecord";
     }
 
     /**
