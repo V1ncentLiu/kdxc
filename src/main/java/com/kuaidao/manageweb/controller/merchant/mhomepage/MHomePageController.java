@@ -2,6 +2,8 @@ package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
 import com.kuaidao.common.constant.ComConstant.DIMENSION;
 import com.kuaidao.common.constant.ComConstant.QFLAG;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -20,6 +22,7 @@ import com.kuaidao.merchant.dto.index.IndexRespDTO;
 import com.kuaidao.merchant.dto.index.ResourceCountDTO;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -97,6 +100,17 @@ public class MHomePageController {
         request.setAttribute("mqUserName", mqUserName);
         request.setAttribute("mqPassword", mqPassword);
         request.setAttribute("userId", user.getId());
+        RoleInfoDTO roleInfoDTO1 = user.getRoleList().get(0);
+        if(roleInfoDTO1!=null){
+            if(roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.XXLY.name())
+                ||RoleCodeEnum.HWZG.name().equals(roleInfoDTO1.getRoleCode())||RoleCodeEnum.HWJL.name().equals(roleInfoDTO1.getRoleCode())){
+                request.setAttribute("accountType", StageContant.STAGE_PHONE_TRAFFIC);
+            }else if(Constants.USER_TYPE_TWO.equals(user.getUserType()) || Constants.USER_TYPE_THREE.equals(user.getUserType())){
+                request.setAttribute("accountType", StageContant.STAGE_MERCHANT);
+            }else {
+                request.setAttribute("accountType", StageContant.STAGE_TELE);
+            }
+        }
         // 判断显示主/子账户首页
         Integer userType = user.getUserType();
         request.setAttribute("isShowConsoleBtn", userType); // 主账户==2  子账户==3

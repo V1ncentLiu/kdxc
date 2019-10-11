@@ -116,6 +116,10 @@ public class Constants {
      * 商家主账号
      */
     public static Integer MERCHANT_PRIMARY_ACCOUNT = 2;
+    /**
+     * 七陌呼叫类型：手机外显（小号）
+     */
+    public static final String BIND_TYPE_TWO = "2";
 
 
     //慧聚

@@ -41,6 +41,8 @@ public interface SeatManagerFeignClient {
     @PostMapping("/queryListNoPage")
     public JSONResult<List<SeatManagerResp>> queryListNoPage( @RequestBody SeatManagerReq seatManagerReq);
 
+    @PostMapping("/queryListBySubMerchant")
+    public JSONResult<SeatManagerResp> queryListBySubMerchant( @RequestBody SeatManagerReq seatManagerReq);
     @Component
     static class HystrixClientFallback implements SeatManagerFeignClient {
 
@@ -81,6 +83,11 @@ public interface SeatManagerFeignClient {
         @Override
         public JSONResult<List<SeatManagerResp>> queryListNoPage(SeatManagerReq seatManagerReq) {
             return fallBackError("坐席管理-列表查询（不分页）");
+        }
+
+        @Override
+        public JSONResult<SeatManagerResp> queryListBySubMerchant(SeatManagerReq seatManagerReq) {
+            return fallBackError("通过绑定商家子账号查询");
         }
     }
 
