@@ -1,14 +1,15 @@
 package com.kuaidao.manageweb.feign.merchant.clue;
 
 import java.util.List;
+
+import com.kuaidao.merchant.dto.clue.ClueFileDTO;
+import com.kuaidao.merchant.dto.clue.ClueQueryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
