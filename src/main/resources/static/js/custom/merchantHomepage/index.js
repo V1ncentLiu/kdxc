@@ -424,11 +424,12 @@ var homePageVM = new Vue({
 				return;
 			}*/
 			var param = {};
-			param.bindType = bindType + "";
-			param.loginName = loginClient;
-			param.accountType = homePageVM.accountType;
-			param.clientType = homePageVM.loginClientForm.clientType;
-			axios.post('/client/client/qimoLogin', param)
+			// param.bindType = bindType + "";
+			// param.loginName = loginClient;
+			// param.accountType = homePageVM.accountType;
+			param.accountType = '3';
+			// param.clientType = homePageVM.loginClientForm.clientType;
+			axios.post('/merchant/merchantClient/clientLogin', param)
 				.then(function (response) {
 					var data = response.data;
 
@@ -976,9 +977,9 @@ var homePageVM = new Vue({
 
 	},
 	created() {
+		this.loginQimoClient();
 		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
-		// this.loginQimoClient();
 		
 		if (isUpdatePassword == "1") {
 			this.dialogModifyPwdVisible = true;

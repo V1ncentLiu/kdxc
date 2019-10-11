@@ -74,11 +74,12 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  		if(clueId){
  			param.clueId = clueId;
  		}
- 		param.userId= homePageVM.accountId;
- 		param.accountType = homePageVM.accountType;
- 		param.bindType = homePageVM.loginClientForm.bindPhoneType;
+ 		// param.userId= homePageVM.accountId;
+ 		// param.accountType = homePageVM.accountType;
+ 		param.accountType =3;
+ 		// param.bindType = homePageVM.loginClientForm.bindPhoneType;
  		homePageVM.$message({message:"外呼中",type:'success'});
- 		 axios.post('/client/client/qimoOutboundCall',param)
+ 		 axios.post('/merchant/merchantClient/merchantOutboundCall',param)
           .then(function (response) {
               var data =  response.data;
               if(data.code=='0'){
