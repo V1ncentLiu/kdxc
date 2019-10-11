@@ -47,7 +47,8 @@
     </el-row>
     <el-row class="padding20" style="text-align: right;padding-right: 0;color: #666">提示：以上不包含通话时长费用，具体请咨询客服</el-row>
     <div class="padding20 f-tac">
-        <el-button type="primary" style="width:200px;height: 50px;" @click="submitForm">购买</el-button>
+        <el-button v-if="isBuyBtn" type="primary" style="width:200px;height: 50px;" @click="buyClick">购买</el-button>
+        <el-button v-else type="primary" style="width:200px;height: 50px;" @click="changeClick">变更</el-button>
     </div>
     <!-- 购买服务套餐 -->
     <el-dialog title="购买服务套餐" :visible.sync="buyFormVisible" width="540px">
@@ -102,6 +103,7 @@
         el: '#maindiv',
         data: function() {
             return {  
+                isBuyBtn:true,
                 btnDisabled:false,
                 buyFormVisible:false,
                 changeFormVisible:false,             
@@ -141,8 +143,11 @@
                 console.log(val)
                 this.multipleSelection = val;
             }, 
-            submitForm(){
-
+            buyClick(){
+                this.buyFormVisible=true;
+            },
+            changeClick(){
+                this.changeFormVisible=true;
             },
             submitBuyForm(){
 
@@ -187,7 +192,8 @@
             },
         },
         created(){ 
-            this.searchTable();           
+            this.init(); 
+            this.searchTable();  
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
