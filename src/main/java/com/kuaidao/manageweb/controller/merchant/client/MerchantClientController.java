@@ -148,7 +148,7 @@ public class MerchantClientController {
                 Session session = SecurityUtils.getSubject().getSession();
                 callDTO.setBindType((String) session.getAttribute("bindType"));
                 callDTO.setCno((String) session.getAttribute("seatNo"));
-                callDTO.setClientType((String) session.getAttribute("clientType"));
+                callDTO.setClientType(String.valueOf(session.getAttribute("clientType")));
                 callDTO.setSubMerchant(String.valueOf(accountId));
                 callDTO.setAccountNo(seatManagerResp.getAccountNo());
                 callDTO.setCno(seatManagerResp.getSeatNo());
