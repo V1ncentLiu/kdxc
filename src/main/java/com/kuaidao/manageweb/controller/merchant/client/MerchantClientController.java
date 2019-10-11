@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * Created on: 2019-10-10-15:45
  */
 @Controller
-@RequestMapping("/merchantClient")
+@RequestMapping("/merchant/merchantClient")
 public class MerchantClientController {
 
     private static Logger logger = LoggerFactory.getLogger(MerchantClientController.class);
