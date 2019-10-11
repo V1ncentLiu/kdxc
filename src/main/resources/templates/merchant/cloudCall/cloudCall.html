@@ -49,7 +49,26 @@
     <div class="padding20 f-tac">
         <el-button type="primary" style="width:200px;height: 50px;" @click="submitForm">购买</el-button>
     </div>
-    <!-- 弹窗 -->
+    <!-- 购买服务套餐 -->
+    <el-dialog title="购买服务套餐" :visible.sync="buyFormVisible" width="540px">
+        <el-form :model="formBuy" ref="formBuy" :rules="rules">
+            <el-form-item label="当前账户余额（元）：" :label-width="formLabelWidth">
+                <span>{{formBuy.balance}}</span>
+            </el-form-item>
+            <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
+                <el-input v-model="formBuy.buyCount" placeholder="" maxLength="20" style="width: 260px;"></el-input>
+            </el-form-item>
+            <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
+                {{formBuy.cost}}
+            </el-form-item>
+            <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formApply')">提交</el-button>
+            <el-button @click="buyFormVisible = false;">取 消</el-button>
+        </div>
+    </el-dialog>
+    <!-- 变更服务套餐 -->
     <el-dialog title="变更服务套餐" :visible.sync="changeFormVisible" width="540px">
         <el-form :model="formChange" ref="formChange" :rules="rules">
             <el-form-item label="原服务套餐：" :label-width="formLabelWidth">
@@ -59,15 +78,15 @@
                 <span>{{formChange.newName}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
-                <el-input v-model="formChange.buyCount" placeholder="" maxLength="20"></el-input>
+                <el-input v-model="formChange.buyCount" placeholder="" maxLength="20" style="width: 260px;"></el-input>
             </el-form-item>
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formChange.cost}}
             </el-form-item>
-            <p>账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
+            <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formApply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formApply')">提交</el-button>
             <el-button @click="changeFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
@@ -84,11 +103,17 @@
         data: function() {
             return {  
                 btnDisabled:false,
+                buyFormVisible:false,
                 changeFormVisible:false,             
                 multipleSelection: [],//选择行
-                formLabelWidth: '170px',
+                formLabelWidth: '200px',
                 dataTable: [],
                 templateRadio:'0',
+                formBuy:{
+                    balance:'',
+                    buyCount:'',                    
+                    cost:'',
+                },
                 formChange:{
                     name:'',
                     newName:'',
@@ -119,17 +144,38 @@
             submitForm(){
 
             },
-            searchTable() { 
-                var param ={};                
-                param.userId=userId;
-                console.info(param);
-                axios.post('/merchant/call/package/list', param)
+            submitBuyForm(){
+
+            },
+            submitChangeForm(){
+
+            },
+            searchTable() {                 
+                axios.get('/merchant/call/package/list?'+userId)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
                     if(result.code==0){
                         var table=result.data;
                         mainDivVM.dataTable= table.data;                        
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }                    
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            // 账户余额接口
+            init() {                 
+                axios.get('/merchant/call/package/user/account?'+userId)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.formBuy.balance = table.data;                        
                     }else{
                         ocmVM.$message.error(result.msg);
                     }                    
