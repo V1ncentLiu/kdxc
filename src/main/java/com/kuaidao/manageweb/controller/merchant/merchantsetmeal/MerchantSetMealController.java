@@ -20,8 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Auther: admin
@@ -60,7 +62,8 @@ public class MerchantSetMealController {
   /**
    * 查询列表数据
    */
-
+  @PostMapping("/queryList")
+  @ResponseBody
   public JSONResult<List<MerchantServiceDTO>> queryList(@RequestBody MerchantServiceReq merchantServiceReq){
     // 查询坐席
     if(StringUtils.isNotEmpty(merchantServiceReq.getSeatNo())){

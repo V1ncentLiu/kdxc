@@ -4,6 +4,7 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -40,6 +41,11 @@ public class PubcustomerController {
     private PubcustomerFeignClient pubcustomerFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+
+    @Autowired
+    private CallPackageFeignClient callPackageFeignClient;
+
+
     /**
      * 分页查询
      */
@@ -55,7 +61,19 @@ public class PubcustomerController {
   @ResponseBody
   public JSONResult<ClueReceiveRecordsDTO> receiveClue(
       @RequestBody ClueReceiveRecordsDTO dto) {
+
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    JSONResult<Boolean> hasBuyPackage = callPackageFeignClient
+        .hasBuyPackage(curLoginUser.getId());
+    if(JSONResult.SUCCESS.equals(hasBuyPackage.getCode())){
+      if(!hasBuyPackage.getData()){
+        ClueReceiveRecordsDTO receiveRecordsDTO = new ClueReceiveRecordsDTO();
+        receiveRecordsDTO.setBackStatus(3);
+        receiveRecordsDTO.setBackResult("您未购买云呼叫服务，不可进行公海资源的领取");
+        return new JSONResult<ClueReceiveRecordsDTO>().success(receiveRecordsDTO);
+      }
+    }
+
     if(curLoginUser.getUserType() != null && curLoginUser.getUserType() ==2){
       dto.setSetBusiness(curLoginUser.getId());
       dto.setBusinessLine(curLoginUser.getBusinessLine());

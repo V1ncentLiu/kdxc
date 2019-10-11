@@ -55,6 +55,12 @@ public interface CallPackageFeignClient {
 
 
     /**
+     * @param userId
+     * @return
+     */
+    @PostMapping("/hasBuyPackage")
+    public JSONResult<Boolean> hasBuyPackage(@RequestParam Long userId);
+    /**
      * 套餐列表
      *
      * @return
@@ -84,6 +90,11 @@ public interface CallPackageFeignClient {
                 @Override
                 public JSONResult<CallUserAccountRes> getUserAccount(Long userId) {
                     return fallBackError("账户余额");
+                }
+
+                @Override
+                public JSONResult<Boolean> hasBuyPackage(Long userId) {
+                    return fallBackError("是否已经购买套餐");
                 }
 
                 @Override
