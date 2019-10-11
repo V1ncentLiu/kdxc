@@ -32,7 +32,7 @@ import javax.validation.Valid;
  * @date 2019-10-07 10:39:01
  * @version V1.0
  */
-@FeignClient(name = "account-service-chen", path = "/account/outboundPackage", fallback = OutboundPackageFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "account-service", path = "/account/outboundPackage", fallback = OutboundPackageFeignClient.HystrixClientFallback.class)
 public interface OutboundPackageFeignClient {
 
     /**
