@@ -96,7 +96,7 @@
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
 <!-- import common js-->
 <script th:inline="javascript">
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
@@ -268,8 +268,11 @@
                         addClueVM.wechatVisible = false;
                         addClueVM.merchantIcon=formData.wechatUrl;
                         addClueVM.merchantIconShow=false;
-                        // window.parent.document.getElementsByClassName('headIco').src=formData.wechatUrl;//给头部赋值
-                        window.location.href="/merchant/userManager/userInfo"                        
+                        if(formData.wechatUrl){
+                            var str=`<img src=`+formData.wechatUrl+` alt="" class="headIco">`
+                            window.parent.$('.headPortrait').html(str)
+                            window.location.href="/merchant/userManager/userInfo"                        
+                        }
                     }else{
                         addClueVM.$message.error(result.msg+',修改头像失败');
                         addClueVM.wechatVisible = false;
