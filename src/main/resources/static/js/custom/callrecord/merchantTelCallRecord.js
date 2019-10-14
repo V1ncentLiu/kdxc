@@ -43,6 +43,7 @@ var myCallRecordVm = new Vue({
       callType: '',
       startTime: '',
       endTime: '',
+      accountIdList: []
     },
     merchantUserList: merchantUserList,//外呼账户
     isActive1:true,
@@ -114,21 +115,21 @@ var myCallRecordVm = new Vue({
       	 this.searchForm.callType='';
        }
        var param = this.searchForm;
-       var accountId =this.searchForm.accountId;
-       if(accountId){
-      	 var accountIdArr = new Array();
-      	 accountIdArr.push(accountId);
-      	 param.accountIdList=accountIdArr;
-       }else{
-      	 param.accountIdList=[];
-       }
+      //  var accountId =this.searchForm.accountId;
+      //  if(accountId){
+      // 	 var accountIdArr = new Array();
+      // 	 accountIdArr.push(accountId);
+      // 	 param.accountIdList=accountIdArr;
+      //  }else{
+      // 	 param.accountIdList=[];
+      //  }
       	 param.pageNum=this.pager.currentPage;
       	 param.pageSize=this.pager.pageSize;
       	 axios.post('/merchant/merchantCallRecord/listMerchantCallRecord',param)
            .then(function (response) {
           	 var data =  response.data;
                if(data.code=='0'){
-                myCallRecordVm.totalTalkTime = data.totalTalkTime;
+                myCallRecordVm.totalTalkTime = response.totalTalkTime;
               	 //获取通话总时长
 
                	var resData = data.data;
