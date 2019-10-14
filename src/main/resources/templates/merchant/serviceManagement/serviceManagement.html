@@ -2,9 +2,30 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
   xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<!-- <head th:replace="_header_include::frag(~{::title},~{::style},~{})"> -->
+
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
   <title>后台管理系统</title>
+  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
   <style>
+    .el-dialog__header {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
+    }
+
+    .el-button--primary {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+    }
+
+    /* #sittingFrame .el-input__inner {
+      border: 1px solid #dcdde2;
+    }
+
+    .el-form-item.is-success .el-input__inner,
+    .el-form-item.is-success .el-input__inner:focus,
+    .el-form-item.is-success .el-textarea__inner,
+    .el-form-item.is-success .el-textarea__inner:focus{
+      border: 1px solid #5c6be8;
+    } */
   </style>
 </head>
 
@@ -49,7 +70,7 @@
           <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
           <el-table-column align="center" prop="packageName" label="所选服务套餐名称">
             <template slot-scope="scope">
-              <el-button type="text" @click="openInfo()">{{scope.row.packageName}}</el-button>
+              <el-button type="text" @click="openInfo(scope.row.id)">{{scope.row.packageName}}</el-button>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="sheetCount" label="意向购买坐席数"></el-table-column>
@@ -59,10 +80,13 @@
           <el-table-column align="center" prop="id" label="商家坐席">
             <template slot-scope="scope">
               <div v-if="scope.row.id > 0">
+                <a href=""></a>
                 <!-- <a style="color: rgb(0, 114, 255);text-decoration:underline ;" :href="'/merchant/userManager/subaccountUserPage?parentId='+scope.row.id+'&name='+scope.row.name+'&orgId='+scope.row.orgId+''">坐席（{{scope.row.num}}）</a> -->
-                <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
-                  :href="'/merchant/seatManager/toPage?userId=111&buyPackageId=3434&packageId=3423'">坐席（{{scope.row.num}}）</a>
+                <a style="color: rgb(0, 114, 255);text-decoration:underline ;" @click="goHref(scope.row)"
+                  href="javascript:;">坐席（{{scope.row.num}}）</a>
                 <!-- 注 后端说暂时没定传什么参数先这样访问-->
+                <!-- :href="''">坐席（{{scope.row.num}}）</a> -->
+
               </div>
               <div v-if="scope.row.id == 0">
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
@@ -74,28 +98,28 @@
           </el-table-column>
         </el-table>
         <!-- 翻页 -->
-        <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        <!-- <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination> -->
       </el-row>
     </div>
 
     <!-- 添加坐席弹框 -->
-    <el-dialog :title="subAccountFormTitle" :visible.sync="dialogsubAccountForm" @close="closeusersubAccountForm"
-      width="540px">
+    <el-dialog id="sittingFrame" :title="subAccountFormTitle" :visible.sync="dialogsubAccountForm"
+      @close="closeusersubAccountForm" width="540px">
       <el-form :model="subAccountForm" ref="subAccountForm" :rules="subAccountRules">
         <el-form-item label="" :label-width="formLabelWidth">
-          {{merchatName}}增加子账户绑定坐席
+          {{merchatData.userName}}增加子账户绑定坐席
         </el-form-item>
-        <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="number">
-          <el-input v-model="subAccountForm.number" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="seatNo">
+          <el-input v-model="subAccountForm.seatNo" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="company">
           <el-input v-model="subAccountForm.company" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="ownership">
-          <el-input v-model="subAccountForm.ownership" style="width: 290px;"></el-input>
+        <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="address">
+          <el-input v-model="subAccountForm.address" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="userNumber">
-          <el-input v-model="subAccountForm.userNumber" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="accountNo">
+          <el-input v-model="subAccountForm.accountNo" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="secretKey">
           <el-input v-model="subAccountForm.secretKey" autocomplete="off" style="width: 290px;"></el-input>
@@ -103,8 +127,8 @@
         <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="proxyurl">
           <el-input v-model="subAccountForm.proxyurl" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subAccount">
-          <el-select v-model="subAccountForm.subAccount" placeholder="请选择" style="width: 290px;">
+        <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subMerchant">
+          <el-select v-model="subAccountForm.subMerchant" placeholder="请选择" style="width: 290px;">
             <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
@@ -121,11 +145,11 @@
     <el-dialog title="套餐详情" :visible.sync="infoDialog" width="1000px">
       <el-table ref="infoTable" tooltip-effect="dark" style="width: 100%" border :data="infoTable">
         <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="name" label="套餐名称"></el-table-column>
-        <el-table-column align="center" prop="cost" label="通话资费/分钟"></el-table-column>
-        <el-table-column align="center" prop="monthlyRent" label="月租费用" width="150"></el-table-column>
-        <el-table-column align="center" prop="number" label="支持最大数量" width="150"></el-table-column>
-        <el-table-column align="center" prop="seatCost" label="坐席费用" width="150"></el-table-column>
+        <el-table-column align="center" prop="packageName" label="套餐名称"></el-table-column>
+        <el-table-column align="center" prop="callCharge" label="通话资费/分钟"></el-table-column>
+        <el-table-column align="center" prop="fixedPhoneMonthlyRent" label="月租费用" width="150"></el-table-column>
+        <el-table-column align="center" prop="maxClientNum" label="支持最大数量" width="150"></el-table-column>
+        <el-table-column align="center" prop="clientCost" label="坐席费用" width="150"></el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -133,30 +157,30 @@
   <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-  // var merchantUserList = [[${ merchantUserList }]];//商户集合
-  var userList = [
-    {
-      value: '选项1',
-      label: '黄金糕'
-    }, {
-      value: '选项2',
-      label: '双皮奶'
-    }, {
-      value: '选项3',
-      label: '蚵仔煎'
-    }, {
-      value: '选项4',
-      label: '龙须面'
-    }, {
-      value: '选项5',
-      label: '北京烤鸭'
-    }]
+  var userList = [[${ userList }]];//商户集合
+  // var userList = [
+  //   {
+  //     value: '选项1',
+  //     label: '黄金糕'
+  //   }, {
+  //     value: '选项2',
+  //     label: '双皮奶'
+  //   }, {
+  //     value: '选项3',
+  //     label: '蚵仔煎'
+  //   }, {
+  //     value: '选项4',
+  //     label: '龙须面'
+  //   }, {
+  //     value: '选项5',
+  //     label: '北京烤鸭'
+  //   }]
   var userVM = new Vue({
     el: '#userManage',
     data: {
       infoDialog: false,
       merchantUserListOptions: userList,//商家账户
-      merchatName: "",
+      merchatData: "",
       subAccountFormTitle: "添加坐席",
       dialogsubAccountForm: false,
       paginationShow: true,
@@ -165,24 +189,25 @@
       loginDisabled: false,
       accountExpandedKeys: [],
       accountDataTree: [],
+      // 添加坐席的套餐详情
+      packageDetailsId: '',
       userSearchForm: {
-        status: 'sdsdsd',
-        userName: '2',
-        name: '22sdadsad',
+        status: '',
+        userName: '',
+        name: '',
       },
       subAccountForm: {
-        username: "",
-        name: "",
-        phone: "",
-        password: "",
-        orgName: "",
-        orgId: "",
-        id: "",
-        roleId: ""
+        seatNo: "",
+        company: "",
+        address: "",
+        accountNo: "",
+        secretKey: "",
+        proxyurl: "",
+        subMerchant: "",
       },
       addOrModifyDialogTitle: '添加坐席',
       subAccountRules: {
-        number: [
+        seatNo: [
           { required: true, message: '座席编号不能为空', trigger: 'blur' },
           { max: 10, message: '最大10个字符', trigger: 'blur' },
           {
@@ -194,16 +219,16 @@
               }
               callback();
 
-            }, trigger: 'change'
+            }, trigger: 'blur'
           }
         ],
         company: [
           { max: 10, message: '最大10个字符', trigger: 'blur' },
         ],
-        ownership: [
+        address: [
           { max: 10, message: '最大10个字符', trigger: 'blur' },
         ],
-        userNumber: [
+        accountNo: [
           { required: true, message: '账户编号不能为空', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
@@ -215,51 +240,54 @@
           { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
-        subAccount: [
+        subMerchant: [
           { required: true, message: '请选择商家子账号', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
       },
-      options: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        }, {
-          value: '选项2',
-          label: '双皮奶'
-        }, {
-          value: '选项3',
-          label: '蚵仔煎'
-        }, {
-          value: '选项4',
-          label: '龙须面'
-        }, {
-          value: '选项5',
-          label: '北京烤鸭'
-        }],
+      // 添加坐席里面的选择框
+      options: [],
+      // [
+      //   {
+      //     value: '选项1',
+      //     label: '黄金糕'
+      //   }, {
+      //     value: '选项2',
+      //     label: '双皮奶'
+      //   }, {
+      //     value: '选项3',
+      //     label: '蚵仔煎'
+      //   }, {
+      //     value: '选项4',
+      //     label: '龙须面'
+      //   }, {
+      //     value: '选项5',
+      //     label: '北京烤鸭'
+      //   }],
       infoTable: [{
-        name: '套餐1',
-        cost: '0.3元',
-        monthlyRent: '30元/月',
-        number: '10',
-        seatCost: '150元/月',
+        packageName: '套餐1',
+        callCharge: '0.3元',
+        fixedPhoneMonthlyRent: '30元/月',
+        maxClientNum: '10',
+        clientCost: '150元/月',
       }],
       submitDisabled: false,
-      dataTable: [{
-        userName: '1',
-        packageName: '2',
-        sheetCount: '3',
-        supplyCompany: '4',
-        beginTime: '5',
-        id: '0',
-      }, {
-        userName: '1',
-        packageName: '2',
-        sheetCount: '3',
-        supplyCompany: '4',
-        beginTime: '5',
-        id: '4',
-      }],
+      dataTable: [],
+      // [{
+      //   userName: '1',
+      //   packageName: '2',
+      //   sheetCount: '3',
+      //   supplyCompany: '4',
+      //   beginTime: '5',
+      //   id: '0',
+      // }, {
+      //   userName: '1',
+      //   packageName: '2',
+      //   sheetCount: '3',
+      //   supplyCompany: '4',
+      //   beginTime: '5',
+      //   id: '4',
+      // }],
       pager: {
         total: 0,
         currentPage: 1,
@@ -282,92 +310,97 @@
     },
     methods: {
       // 套餐详情
-      openInfo() {
-        // var param ={};
-        // param.clueId = row.clueId;
+      openInfo(clueId) {
+        var param = {};
+        param.id = clueId
         // console.info(param);
-        // axios.post('/aggregation/tracking/queryList', param)
-        // .then(function (response) {
-        //   var result =  response.data;
-        //   console.info(result);
-        // userVM.infoTable= result.data;
-        // userVM.infoDialog=true;
-        // })
-        // .catch(function (error) {
-        //   console.log(error);
-        // });
-        this.infoDialog = true;
+        axios.post('/merchant//outboundPackage/queryOutboundPackageById', param)
+          .then(function (response) {
+            var result = response.data;
+            console.info(result);
+            userVM.infoTable= result.data;
+            var alldata = {
+              "id": "1181461060948008960",
+              "packageName": "222",
+              "supplyCompany": "2",
+              "maxClientNum": 55623242,
+              "clientCost": 10,
+              "fixedPhoneMonthlyRent": 20,
+              "smallMonthlyRent": 10,
+              "callCharge": 3,
+              "isDel": 1
+            }
+            // userVM.infoTable[0] = alldata;
+            userVM.infoDialog = true;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       },
 
       // 添加坐席提交
       saveAccountUser(formName) {
+        var that = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
             var formData = userVM.subAccountForm;
-            var param = {};
-            param.name = formData.name;
-            param.username = formData.username;
-            param.password = formData.password;
-            param.phone = formData.phone;
-            param.orgId = formData.orgId;
-            param.userType = 3;
-            param.status = 1;
-            param.parentId = formData.id;
-            var roleList = new Array();
-            roleList.push(formData.roleId);
-            param.roleList = roleList;
-            var url = "";
-            url = "/merchant/userManager/saveUser";
-            axios.post(url, param)
+            // param.seatNo = formData.seatNo
+            // param.company = formData.company
+            // param.address = formData.address
+            // param.accountNo = formData.accountNo
+            // param.secretKey = formData.secretKey
+            // param.proxyurl = formData.proxyurl
+            // param.subMerchant = formData.subMerchant
+            console.log(formData);
+            var param = formData;
+
+            param.buyPackageId = this.merchatData.id
+            param.packageId = this.merchatData.packageId
+            param.type = ''
+            axios.post('/merchant/seatManager/create', param)
               .then(function (response) {
                 console.info(response);
-                var data = response.data;
-                if (data.code != "0") {
-                  userVM.$message(data.msg);
-                  userVM.btnDisabled = false;
-                } else {
-                  userVM.$message('新增成功');
-
-                  userVM.btnDisabled = false;
-                  document.location.href = '/merchant/userManager/initUserList';
-                }
+                that.searchTable();
+                that.dialogsubAccountForm = false;
               })
               .catch(function (error) {
-                userVM.btnDisabled = false;
                 console.log(error);
               });
+
           }
         })
       },
 
       // 点击添加坐席出弹框
-      addAccountUser(obj) {
-        this.merchatName = obj.name;
+      addAccountUser(data) {
+        this.merchatData = data
+        var that = this
         this.dialogsubAccountForm = true;
-        this.subAccountForm.id = obj.id;
-        var param = {};
-        param.orgId = obj.orgId;
-        axios.post("/merchant/userManager/getAccountOrg", param)
+        axios.post("/merchant/seatManager/merchantUsers")
           .then(function (response) {
-            console.info(response);
-            var data = response.data;
-            if (data != null) {
-              var orgData = data.data;
-              userVM.accountDataTree = orgData;
-              for (var i = 0; i < orgData.length; i++) {
-                var curNode = orgData[i];
-                userVM.accountExpandedKeys.push(curNode.id);
-                var childs = curNode.children;
-                if (childs) {
-                  for (var j = 0; j < childs.length; j++) {
-                    var curChildNode = childs[j];
-                    userVM.accountExpandedKeys.push(curChildNode.id);
-                  }
-                }
+            console.log(response);
 
-              }
-            }
-          })
+          }).catch(function (error) {
+            console.log(error);
+          });
+        var selectData = [
+          {
+            value: '选项1',
+            label: '黄金糕'
+          }, {
+            value: '选项2',
+            label: '双皮奶'
+          }, {
+            value: '选项3',
+            label: '蚵仔煎'
+          }, {
+            value: '选项4',
+            label: '龙须面'
+          }, {
+            value: '选项5',
+            label: '北京烤鸭'
+          }]
+        that.options = selectData
       },
 
       closeAddCustomFieldDialog() {//关闭添加自定义字段dialog
@@ -383,6 +416,12 @@
         }
       },
 
+      // 坐席跳转
+      goHref(value) {
+        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId
+        document.location.href = url
+      },
+
       // 取消添加坐席提交
       accountcancelForm(formName) {
         if (this.$refs[formName] !== undefined) {
@@ -391,15 +430,16 @@
         this.dialogsubAccountForm = false;
       },
 
-      // 搜索 翻页
+      // 搜索 
       searchTable() {
+        var that = this
         var param = {};
-        param.status = this.userSearchForm.status;
-        param.username = this.userSearchForm.userName;
-        param.name = this.userSearchForm.name;
-        param.pageSize = this.pager.pageSize;
-        param.pageNum = this.pager.currentPage;
-        param.userType = 2;
+        param.userId = this.userSearchForm.status;
+        param.serviceName = this.userSearchForm.userName;
+        param.seatNo = this.userSearchForm.name;
+        // param.pageSize = this.pager.pageSize;
+        // param.pageNum = this.pager.currentPage;
+        // param.userType = 2;
         console.info(param);
         axios.post('/merchant/mechantSetMeal/queryList', param)
           .then(function (response) {
@@ -407,32 +447,30 @@
             console.info(result);
             var table = result.data;
             userVM.dataTable = table.data;
-            userVM.pager.total = table.total;
-            userVM.pager.currentPage = table.currentPage;
-
-            // 取出存储的id
-            // if (!userVM.paginationShow) {
-            //   if (userVM.storeId) {
-            //     userVM.$nextTick(function () {
-            //       var storage = [];
-            //       userVM.dataTable.forEach(function (item, index) {
-            //         if (item.id === userVM.storeId) {
-            //           storage.push(userVM.dataTable[index]);
-            //         }
-            //       })
-            //       userVM.toggleSelection(storage);
-            //       userVM.$el.querySelector('.el-table__body-wrapper').scrollTop = userVM.scrollTop;
-            //     })
-            //   }
-            // } else {
-            //   removeSessionStore("userManageStoreForm");
-            //   removeSessionStore("userManageOtherVal");
-            // }
-            // userVM.paginationShow = true;
-            // userVM.storeForm = userVM.userSearchForm;
-
           })
           .catch(function (error) {
+            var dataValue = [
+              {
+                userId: '1',
+                id: '0',
+                userName: '3',
+                packageId: '4',
+                packageName: '5',
+                sheetCount: '6',
+                supplyCompany: '7',
+                beginTime: '8',
+              },
+              {
+                userId: '11',
+                id: '22',
+                userName: '33',
+                packageId: '44',
+                packageName: '55',
+                sheetCount: '66',
+                supplyCompany: '77',
+                beginTime: '88',
+              }]
+            that.dataTable = dataValue
             console.log(error);
           });
 
@@ -485,6 +523,26 @@
       // var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
       // if(localVal){this.pager.pageSize = localVal;}
       this.searchTable();
+      // var param = {
+      //   "buyPackageId": -14131657.92707023,
+      //   "packageId": -68361105.76434144,
+      //   "type": "cillum magna",
+      //   "seatNo": "cillum incididunt Lorem nos",
+      //   "company": "in ad laborum eu",
+      //   "address": "quis do",
+      //   "accountNo": "sint velit in ea",
+      //   "secretKey": "nostrud anim consectetur",
+      //   "proxyUrl": "non culpa quis mollit",
+      //   "subMerchant": 10074283.192574501
+      // }
+      // axios.post('/merchant/seatManager/create',param)
+      //   .then(function (response) {
+      //     console.info(response);
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+
     },
     mounted() {
       console.info("mounted method");
