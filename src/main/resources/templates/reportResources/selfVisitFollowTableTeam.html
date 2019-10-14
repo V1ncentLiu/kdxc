@@ -17,6 +17,7 @@
         <!-- <shiro:hasPermission name="statistics:businessVisitReceptionTable:export"> -->
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
         <!-- </shiro:hasPermission> -->
+        <el-button type="primary" style="float: right;" @click="goback()" v-if="!isDisabledUserId">返回</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -106,7 +107,7 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="saleName" label="电销顾问">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.saleId!='99999'">{{scope.row.saleName}}</el-button>
+                        <span v-if="scope.row.saleId!='99999'">{{scope.row.saleName}}</span>
                         <span v-else>合计</span>
                     </template>
                 </el-table-column>
@@ -387,6 +388,19 @@
             indexFun (index) { // 表格序号
                 return index;
             },
+            goback () {
+                window.history.go(-1);
+            },
+            dateTimeFormat (dt) {
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            },
             minuteFormat (m) {
                 if (!m) {return "";}
                 var timeStr = new Date(m);
@@ -464,8 +478,8 @@
         },
         created(){ 
             var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD");
-            var endTime = moment(today).format("YYYY-MM-DD");
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curDeptId){
                 this.isDisabled = true;
                 this.form.teleDeptId = curDeptId;
