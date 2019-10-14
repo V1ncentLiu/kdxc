@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -62,8 +63,7 @@ public interface MerchantCallCostFeign {
       return new MerchantCallCostFeign() {
 
         @Override
-        public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(
-            MerchantCallCostReq req) {
+        public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody MerchantCallCostReq req) {
           return fallBackError("商家端商家通话费用列表查询");
         }
 
@@ -74,7 +74,7 @@ public interface MerchantCallCostFeign {
         }
 
         @Override
-        public JSONResult<String> getTotalMerchantCost(MerchantCallCostReq req) {
+        public JSONResult<String> getTotalMerchantCost(@RequestBody MerchantCallCostReq req) {
           return fallBackError("获取商家累计消费");
         }
 

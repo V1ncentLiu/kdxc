@@ -11,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,7 +22,7 @@ import java.util.List;
  * @author: zxy
  * @date: 2019年1月4日
  */
-@FeignClient(name = "account-service-ff", path = "/account/call/package",
+@FeignClient(name = "account-service", path = "/account/call/package",
         fallbackFactory = CallPackageFeignClient.HystrixClientFallback.class)
 public interface CallPackageFeignClient {
 
@@ -59,7 +56,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @PostMapping("/hasBuyPackage")
-    public JSONResult<Boolean> hasBuyPackage(@RequestParam("userId") Long userId);
+    JSONResult<Boolean> hasBuyPackage(@RequestParam("userId") Long userId);
     /**
      * 套餐列表
      *
@@ -67,6 +64,15 @@ public interface CallPackageFeignClient {
      */
     @PostMapping("/list")
     JSONResult<CallBuyPackageRes> list( @RequestParam("userId") Long userId);
+
+
+    /**
+     * 用户购买套餐
+     * @param userId
+     * @return
+     */
+    @GetMapping("/user/callBuyPackage")
+    JSONResult<CallBuyPackageModel> getCallBuyPackage(@RequestParam("userId") Long userId);
 
 
     @Component
@@ -100,6 +106,11 @@ public interface CallPackageFeignClient {
                 @Override
                 public JSONResult<CallBuyPackageRes> list(Long userId) {
                     return fallBackError("套餐列表");
+                }
+
+                @Override
+                public JSONResult<CallBuyPackageModel> getCallBuyPackage(Long userId) {
+                    return fallBackError("用户购买套餐");
                 }
 
                 @SuppressWarnings("rawtypes")

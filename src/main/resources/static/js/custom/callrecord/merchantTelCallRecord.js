@@ -43,6 +43,7 @@ var myCallRecordVm = new Vue({
       callType: '',
       startTime: '',
       endTime: '',
+      accountIdList: []
     },
     merchantUserList: merchantUserList,//外呼账户
     isActive1:true,
@@ -60,60 +61,60 @@ var myCallRecordVm = new Vue({
       return text;
     },
 
-    _initData() {
-      this.callRecordData = [{
-        customerName: "客户姓名",
-        customerPhone: "客户电话",
-        phoneLocale: "电话归属地",
-        hotLine: "热线号码",
-        accountName: "拨打账户",
-        bindPhone: "坐席电话",
-        serviceTime: "开始服务时间",
-        callType: "1",
-        startTime: "1563343043",
-        callStatus: "1",
-        talkTime: 12,
-      },
-      {
-        customerName: "客户姓名",
-        customerPhone: "客户电话",
-        phoneLocale: "电话归属地",
-        hotLine: "热线号码",
-        accountName: "拨打账户",
-        bindPhone: "坐席电话",
-        serviceTime: "开始服务时间",
-        callType: "1",
-        startTime: "1563343043",
-        callStatus: "1",
-        talkTime: 30,
-      }]
+    // _initData() {
+    //   this.callRecordData = [{
+    //     customerName: "客户姓名",
+    //     customerPhone: "客户电话",
+    //     phoneLocale: "电话归属地",
+    //     hotLine: "热线号码",
+    //     accountName: "拨打账户",
+    //     bindPhone: "坐席电话",
+    //     serviceTime: "开始服务时间",
+    //     callType: "1",
+    //     startTime: "1563343043",
+    //     callStatus: "1",
+    //     talkTime: 12,
+    //   },
+    //   {
+    //     customerName: "客户姓名",
+    //     customerPhone: "客户电话",
+    //     phoneLocale: "电话归属地",
+    //     hotLine: "热线号码",
+    //     accountName: "拨打账户",
+    //     bindPhone: "坐席电话",
+    //     serviceTime: "开始服务时间",
+    //     callType: "1",
+    //     startTime: "1563343043",
+    //     callStatus: "1",
+    //     talkTime: 30,
+    //   }]
 
-    },
+    // },
     initCallRecordData() {
-      this._initData();
-      //  var startTime = this.searchForm.startTime;
-      //  var endTime = this.searchForm.endTime;
-      //  var startTimestamp = Date.parse(new Date(startTime));
-      //  if(endTime){
-      // 	 var endTimestamp = new Date(endTime);
-      // 		 if(startTimestamp> endTimestamp){
-      // 			 this.$message({
-      //                  message: '开始时间必须小于结束时间',
-      //                  type: 'warning'
-      //                });
-      //              return;
-      //          }
+      // this._initData();
+       var startTime = this.searchForm.startTime;
+       var endTime = this.searchForm.endTime;
+       var startTimestamp = Date.parse(new Date(startTime));
+       if(endTime){
+      	 var endTimestamp = new Date(endTime);
+      		 if(startTimestamp> endTimestamp){
+      			 this.$message({
+                       message: '开始时间必须小于结束时间',
+                       type: 'warning'
+                     });
+                   return;
+               }
 
-      //  }
-      //  var callStatus = this.searchForm.callStatus;
-      //  if(callStatus=='-1'){
-      // 	 this.searchForm.callStatus='';
-      //  }
-      //  var callType = this.searchForm.callType;
-      //  if(callType=='-1'){
-      // 	 this.searchForm.callType='';
-      //  }
-      //  var param = this.searchForm;
+       }
+       var callStatus = this.searchForm.callStatus;
+       if(callStatus=='-1'){
+      	 this.searchForm.callStatus='';
+       }
+       var callType = this.searchForm.callType;
+       if(callType=='-1'){
+      	 this.searchForm.callType='';
+       }
+       var param = this.searchForm;
       //  var accountId =this.searchForm.accountId;
       //  if(accountId){
       // 	 var accountIdArr = new Array();
@@ -122,54 +123,38 @@ var myCallRecordVm = new Vue({
       //  }else{
       // 	 param.accountIdList=[];
       //  }
-      // 	 param.pageNum=this.pager.currentPage;
-      // 	 param.pageSize=this.pager.pageSize;
-      // 	 axios.post('/call/callRecord/listAllTmCallRecord',param)
-      //      .then(function (response) {
-      //     	 var data =  response.data;
-      //          if(data.code=='0'){
-      //         	 //获取通话总时长
-      //         /*	 axios.post('/call/callRecord/countAllTeleCallRecordTalkTime',param)
-      //              .then(function (response) {
-      //             	 console.info(response);
-      //             	 var data =  response.data;
-      //                  if(data.code=='0'){
-      //                 	 myCallRecordVm.totalTalkTime = data.data;
+      	 param.pageNum=this.pager.currentPage;
+      	 param.pageSize=this.pager.pageSize;
+      	 axios.post('/merchant/merchantCallRecord/listMerchantCallRecord',param)
+           .then(function (response) {
+          	 var data =  response.data;
+               if(data.code=='0'){
+                myCallRecordVm.totalTalkTime = response.totalTalkTime;
+              	 //获取通话总时长
 
-      //                  }else{
-      //                 	 myCallRecordVm.$message({message:data.msg,type:'error'});
-      //                  	 console.error(data);
-      //                  }
+               	var resData = data.data;
+               	var callRecordData = resData.data;
+               	var callRecordDataData = callRecordData.data;
+                 for(var i=0;i<callRecordDataData.length;i++){
+                   callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
+                 }
+               	myCallRecordVm.callRecordData= callRecordData.data;
+               	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
+                //3.分页组件
+               	myCallRecordVm.pager.total= callRecordData.total;
+               	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
+               	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
 
-      //              })
-      //              .catch(function (error) {
-      //                   console.log(error);
-      //              }).then(function(){
-      //              });*/
+               }else{
+              	 myCallRecordVm.$message({message:data.msg,type:'error'});
+               	 console.error(data);
+               }
 
-      //          	var resData = data.data;
-      //          	var callRecordData = resData.data;
-      //          	var callRecordDataData = callRecordData.data;
-      //            for(var i=0;i<callRecordDataData.length;i++){
-      //              callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
-      //            }
-      //          	myCallRecordVm.callRecordData= callRecordData.data;
-      //          	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
-      //           //3.分页组件
-      //          	myCallRecordVm.pager.total= callRecordData.total;
-      //          	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
-      //          	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
-
-      //          }else{
-      //         	 myCallRecordVm.$message({message:data.msg,type:'error'});
-      //          	 console.error(data);
-      //          }
-
-      //      })
-      //      .catch(function (error) {
-      //           console.log(error);
-      //      }).then(function(){
-      //      });
+           })
+           .catch(function (error) {
+                console.log(error);
+           }).then(function(){
+           });
     },
     resetForm(formName) {
       if (this.$refs[formName]) {
@@ -299,48 +284,41 @@ var myCallRecordVm = new Vue({
       this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
       this.initCallRecordData();
     },
-    downloadAudio(id, url, callSource) {
-      if (roleCode == 'ZCBWY') {
-        this.$message({
-          message: '您没有下载权限',
-          type: 'warning'
-        });
-        return;
-      }
+    downloadAudio(id,url,callSource){
       var param = {};
-      param.id = id;
-      axios.post('/call/callRecord/getRecordFile', param)
-        .then(function (response) {
-          var data = response.data;
-          if (data.code == '0') {
-            var url = data.data;
-            if (url) {
-              var fileName = url.split('?')[0];
-              var fileNameArr = fileName.split("/");
-              if (callSource == '3') {
-                var decodeUrl = encodeURI(url);
-                url = "/client/heliClient/downloadHeliClientAudio?url=" + decodeUrl;
+      param.id=id;
+         axios.post('/call/callRecord/getRecordFile',param)
+          .then(function (response) {
+            var data =  response.data;
+              if(data.code=='0'){
+                var url = data.data;
+                if(url){
+                  var fileName = url.split('?')[0];
+                  var fileNameArr= fileName.split("/");
+                  if(callSource=='3'){
+                    var decodeUrl = encodeURI(url);
+                    url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                  }
+                var x=new XMLHttpRequest();
+                x.open("GET", url, true);
+                x.responseType = 'blob';
+                x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+                x.send(); 
+                  
+                }
+                  
+              }else{
+                console.error(data);
+                myCallRecordVm.$message({message:data.msg,type:'error'});
               }
-              var x = new XMLHttpRequest();
-              x.open("GET", url, true);
-              x.responseType = 'blob';
-              x.onload = function (e) { download(x.response, fileNameArr[fileNameArr.length - 1], 'audio/*'); }
-              x.send();
-
-            }
-
-          } else {
-            myCallRecordVm.$message({ message: data.msg, type: 'error' });
-            console.error(data);
-          }
-
-        })
-        .catch(function (error) {
-          console.log(error);
-        }).then(function () {
-        });
-
-    },
+          
+          })
+          .catch(function (error) {
+               console.log(error);
+          }).then(function(){
+          });
+     
+   },
     switchSoundBtn(id, url, callSource) {
       // debugger
       // this.audioShow=true;
