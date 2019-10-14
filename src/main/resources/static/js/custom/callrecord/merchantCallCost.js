@@ -60,90 +60,90 @@ var myCallRecordVm = new Vue({
       return text;
     },
 
-    _initData() {
-      this.callRecordData = [{
-        costMonth: "客户姓名",
-        bindAccountName: "客户电话",
-        seatNumber: "电话归属地",
-        seatPhone: "热线号码",
-        monthRent: "拨打账户",
-        cost: "坐席电话",
-        callNumber: "开始服务时间",
-      },
-      {
-        costMonth: "客户姓名",
-        bindAccountName: "客户电话",
-        seatNumber: "电话归属地",
-        seatPhone: "热线号码",
-        monthRent: "拨打账户",
-        cost: "坐席电话",
-        callNumber: "开始服务时间",
-      }]
+    // _initData() {
+    //   this.callRecordData = [{
+    //     costMonth: "客户姓名",
+    //     bindAccountName: "客户电话",
+    //     seatNumber: "电话归属地",
+    //     seatPhone: "热线号码",
+    //     monthRent: "拨打账户",
+    //     cost: "坐席电话",
+    //     callNumber: "开始服务时间",
+    //   },
+    //   {
+    //     costMonth: "客户姓名",
+    //     bindAccountName: "客户电话",
+    //     seatNumber: "电话归属地",
+    //     seatPhone: "热线号码",
+    //     monthRent: "拨打账户",
+    //     cost: "坐席电话",
+    //     callNumber: "开始服务时间",
+    //   }]
 
-    },
+    // },
     initCallRecordData() {
-      this._initData();
-      //  var startTime = this.searchForm.startTime;
-      //  var endTime = this.searchForm.endTime;
-      //  var startTimestamp = Date.parse(new Date(startTime));
-      //  if(endTime){
-      // 	 var endTimestamp = new Date(endTime);
-      // 		 if(startTimestamp> endTimestamp){
-      // 			 this.$message({
-      //                  message: '开始时间必须小于结束时间',
-      //                  type: 'warning'
-      //                });
-      //              return;
-      //          }
+      // this._initData();
+       var startTime = this.searchForm.startTime;
+       var endTime = this.searchForm.endTime;
+       var startTimestamp = Date.parse(new Date(startTime));
+       if(endTime){
+      	 var endTimestamp = new Date(endTime);
+      		 if(startTimestamp> endTimestamp){
+      			 this.$message({
+                       message: '开始时间必须小于结束时间',
+                       type: 'warning'
+                     });
+                   return;
+               }
 
-      //  }
-      //  var callStatus = this.searchForm.callStatus;
-      //  if(callStatus=='-1'){
-      // 	 this.searchForm.callStatus='';
-      //  }
-      //  var callType = this.searchForm.callType;
-      //  if(callType=='-1'){
-      // 	 this.searchForm.callType='';
-      //  }
-      //  var param = this.searchForm;
-      //  var accountId =this.searchForm.accountId;
-      //  if(accountId){
-      // 	 var accountIdArr = new Array();
-      // 	 accountIdArr.push(accountId);
-      // 	 param.accountIdList=accountIdArr;
-      //  }else{
-      // 	 param.accountIdList=[];
-      //  }
-      // 	 param.beginCostTime=this.searchForm.startTime;
-      // 	 param.endCostTime=this.searchForm.endTime;
-      // 	 param.pageNum=this.pager.currentPage;
-      // 	 param.pageSize=this.pager.pageSize;
-      // 	 axios.post('/merchant/bussinessCallCost/getBussinessCallCostList',param)
-      //      .then(function (response) {
-      //     	 var data =  response.data;
-      //          if(data.code=='0'){
-      //          	var resData = data.data;
-      //          	var callRecordData = resData.data;
-      //          	var callRecordDataData = callRecordData.data;
-      //           //  for(var i=0;i<callRecordDataData.length;i++){
-      //           //    callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
-      //           //  }
-      //          	myCallRecordVm.callRecordData= callRecordData.data;
-      //           //3.分页组件
-      //          	myCallRecordVm.pager.total= callRecordData.total;
-      //          	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
-      //          	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
+       }
+       var callStatus = this.searchForm.callStatus;
+       if(callStatus=='-1'){
+      	 this.searchForm.callStatus='';
+       }
+       var callType = this.searchForm.callType;
+       if(callType=='-1'){
+      	 this.searchForm.callType='';
+       }
+       var param = this.searchForm;
+       var accountId =this.searchForm.accountId;
+       if(accountId){
+      	 var accountIdArr = new Array();
+      	 accountIdArr.push(accountId);
+      	 param.accountIdList=accountIdArr;
+       }else{
+      	 param.accountIdList=[];
+       }
+      	 param.beginCostTime=this.searchForm.startTime;
+      	 param.endCostTime=this.searchForm.endTime;
+      	 param.pageNum=this.pager.currentPage;
+      	 param.pageSize=this.pager.pageSize;
+      	 axios.post('/merchant/bussinessCallCost/getBussinessCallCostList',param)
+           .then(function (response) {
+          	 var data =  response.data;
+               if(data.code=='0'){
+               	var resData = data.data;
+               	var callRecordData = resData.data;
+               	var callRecordDataData = callRecordData.data;
+                //  for(var i=0;i<callRecordDataData.length;i++){
+                //    callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
+                //  }
+               	myCallRecordVm.callRecordData= callRecordData.data;
+                //3.分页组件
+               	myCallRecordVm.pager.total= callRecordData.total;
+               	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
+               	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
 
-      //          }else{
-      //         	 myCallRecordVm.$message({message:data.msg,type:'error'});
-      //          	 console.error(data);
-      //          }
+               }else{
+              	 myCallRecordVm.$message({message:data.msg,type:'error'});
+               	 console.error(data);
+               }
 
-      //      })
-      //      .catch(function (error) {
-      //           console.log(error);
-      //      }).then(function(){
-      //      });
+           })
+           .catch(function (error) {
+                console.log(error);
+           }).then(function(){
+           });
     },
     resetForm(formName) {
       if (this.$refs[formName]) {
