@@ -41,6 +41,15 @@ public interface MerchantCallCostFeign {
   @RequestMapping("/getManageCallCostList")
   public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(MerchantCallCostReq req);
 
+  /**
+   * @Description 获取商家累计消费
+   * @param req
+   * @Return com.kuaidao.common.entity.JSONResult<java.lang.String>
+   * @Author xuyunfeng
+   * @Date 2019/10/11 14:57
+   **/
+  @RequestMapping("/getTotalMerchantCost")
+  public JSONResult<String> getTotalMerchantCost(MerchantCallCostReq req);
 
   @Component
   class HystrixClientFallback implements FallbackFactory<MerchantCallCostFeign> {
@@ -62,6 +71,11 @@ public interface MerchantCallCostFeign {
         public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(
             MerchantCallCostReq req) {
           return fallBackError("管理端商家通话费用查询");
+        }
+
+        @Override
+        public JSONResult<String> getTotalMerchantCost(MerchantCallCostReq req) {
+          return fallBackError("获取商家累计消费");
         }
 
         @SuppressWarnings("rawtypes")

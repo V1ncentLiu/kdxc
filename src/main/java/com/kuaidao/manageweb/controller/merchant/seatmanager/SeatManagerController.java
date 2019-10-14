@@ -14,6 +14,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,9 @@ public class SeatManagerController {
   @PostMapping("/delete")
 //  @RequiresPermissions("merchant:seatMagager:delete")
   public JSONResult<Boolean> delete(@RequestBody IdListLongReq idList) {
+    if(CollectionUtils.isEmpty(idList.getIdList())){
+      return new JSONResult<Boolean>().fail("1","idList不能为空");
+    }
     return seatManagerFeignClient.delete(idList);
   }
   /**
@@ -127,6 +131,7 @@ public class SeatManagerController {
   @ResponseBody
   @PostMapping("/findOne")
   public JSONResult<SeatManagerResp> findOne(@RequestBody IdEntityLong idEntityLong) {
+    
     return seatManagerFeignClient.findOne(idEntityLong);
   }
 
