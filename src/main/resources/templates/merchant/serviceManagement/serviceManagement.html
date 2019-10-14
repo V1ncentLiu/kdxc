@@ -49,7 +49,7 @@
           <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
           <el-table-column align="center" prop="packageName" label="所选服务套餐名称">
             <template slot-scope="scope">
-              <el-button type="text" @click="openInfo()">{{scope.row.packageName}}</el-button>
+              <el-button type="text" @click="openInfo(scope.row.id)">{{scope.row.packageName}}</el-button>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="sheetCount" label="意向购买坐席数"></el-table-column>
@@ -66,7 +66,7 @@
               </div>
               <div v-if="scope.row.id == 0">
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
-                  @click="addAccountUser(scope.row)">添加绑定坐席</a>
+                  @click="addAccountUser(scope.row.userName,scope.row.id)">添加绑定坐席</a>
               </div>
             </template>
           </el-table-column>
@@ -74,7 +74,7 @@
           </el-table-column>
         </el-table>
         <!-- 翻页 -->
-        <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        <!-- <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination> -->
       </el-row>
     </div>
 
@@ -85,17 +85,17 @@
         <el-form-item label="" :label-width="formLabelWidth">
           {{merchatName}}增加子账户绑定坐席
         </el-form-item>
-        <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="number">
-          <el-input v-model="subAccountForm.number" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="seatNo">
+          <el-input v-model="subAccountForm.seatNo" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="company">
           <el-input v-model="subAccountForm.company" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="ownership">
-          <el-input v-model="subAccountForm.ownership" style="width: 290px;"></el-input>
+        <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="address">
+          <el-input v-model="subAccountForm.address" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="userNumber">
-          <el-input v-model="subAccountForm.userNumber" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="accountNo">
+          <el-input v-model="subAccountForm.accountNo" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="secretKey">
           <el-input v-model="subAccountForm.secretKey" autocomplete="off" style="width: 290px;"></el-input>
@@ -103,8 +103,8 @@
         <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="proxyurl">
           <el-input v-model="subAccountForm.proxyurl" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subAccount">
-          <el-select v-model="subAccountForm.subAccount" placeholder="请选择" style="width: 290px;">
+        <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subMerchant">
+          <el-select v-model="subAccountForm.subMerchant" placeholder="请选择" style="width: 290px;">
             <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
           </el-select>
@@ -121,11 +121,11 @@
     <el-dialog title="套餐详情" :visible.sync="infoDialog" width="1000px">
       <el-table ref="infoTable" tooltip-effect="dark" style="width: 100%" border :data="infoTable">
         <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" prop="name" label="套餐名称"></el-table-column>
-        <el-table-column align="center" prop="cost" label="通话资费/分钟"></el-table-column>
-        <el-table-column align="center" prop="monthlyRent" label="月租费用" width="150"></el-table-column>
-        <el-table-column align="center" prop="number" label="支持最大数量" width="150"></el-table-column>
-        <el-table-column align="center" prop="seatCost" label="坐席费用" width="150"></el-table-column>
+        <el-table-column align="center" prop="packageName" label="套餐名称"></el-table-column>
+        <el-table-column align="center" prop="callCharge" label="通话资费/分钟"></el-table-column>
+        <el-table-column align="center" prop="fixedPhoneMonthlyRent" label="月租费用" width="150"></el-table-column>
+        <el-table-column align="center" prop="maxClientNum" label="支持最大数量" width="150"></el-table-column>
+        <el-table-column align="center" prop="clientCost" label="坐席费用" width="150"></el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -165,24 +165,25 @@
       loginDisabled: false,
       accountExpandedKeys: [],
       accountDataTree: [],
+      // 添加坐席的套餐详情
+      packageDetailsId: '',
       userSearchForm: {
         status: '',
         userName: '',
         name: '',
       },
       subAccountForm: {
-        username: "",
-        name: "",
-        phone: "",
-        password: "",
-        orgName: "",
-        orgId: "",
-        id: "",
-        roleId: ""
+        seatNo: "",
+        company: "",
+        address: "",
+        accountNo: "",
+        secretKey: "",
+        proxyurl: "",
+        subMerchant: "",
       },
       addOrModifyDialogTitle: '添加坐席',
       subAccountRules: {
-        number: [
+        seatNo: [
           { required: true, message: '座席编号不能为空', trigger: 'blur' },
           { max: 10, message: '最大10个字符', trigger: 'blur' },
           {
@@ -194,16 +195,16 @@
               }
               callback();
 
-            }, trigger: 'change'
+            }, trigger: 'blur'
           }
         ],
         company: [
           { max: 10, message: '最大10个字符', trigger: 'blur' },
         ],
-        ownership: [
+        address: [
           { max: 10, message: '最大10个字符', trigger: 'blur' },
         ],
-        userNumber: [
+        accountNo: [
           { required: true, message: '账户编号不能为空', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
@@ -215,7 +216,7 @@
           { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
-        subAccount: [
+        subMerchant: [
           { required: true, message: '请选择商家子账号', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
@@ -240,11 +241,11 @@
       //     label: '北京烤鸭'
       //   }],
       infoTable: [{
-        name: '套餐1',
-        cost: '0.3元',
-        monthlyRent: '30元/月',
-        number: '10',
-        seatCost: '150元/月',
+        packageName: '套餐1',
+        callCharge: '0.3元',
+        fixedPhoneMonthlyRent: '30元/月',
+        maxClientNum: '10',
+        clientCost: '150元/月',
       }],
       submitDisabled: false,
       dataTable: [],
@@ -285,42 +286,68 @@
     },
     methods: {
       // 套餐详情
-      openInfo() {
-        // var param ={};
-        // param.clueId = row.clueId;
+      openInfo(clueId) {
+        var param = {};
+        param.id = clueId
         // console.info(param);
-        // axios.post('/aggregation/tracking/queryList', param)
-        // .then(function (response) {
-        //   var result =  response.data;
-        //   console.info(result);
-        // userVM.infoTable= result.data;
-        // userVM.infoDialog=true;
-        // })
-        // .catch(function (error) {
-        //   console.log(error);
-        // });
-        this.infoDialog = true;
+        axios.post('/merchant//outboundPackage/queryOutboundPackageById', param)
+          .then(function (response) {
+            var result = response.data;
+            console.info(result);
+            // userVM.infoTable= result.data;
+            var alldata = {
+              "id": "1181461060948008960",
+              "packageName": "222",
+              "supplyCompany": "2",
+              "maxClientNum": 55623242,
+              "clientCost": 10,
+              "fixedPhoneMonthlyRent": 20,
+              "smallMonthlyRent": 10,
+              "callCharge": 3,
+              "isDel": 1
+            }
+            userVM.infoTable[0] = alldata;
+            userVM.infoDialog = true;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        // this.infoDialog = true;
       },
 
       // 添加坐席提交
       saveAccountUser(formName) {
+        var that=this
         this.$refs[formName].validate((valid) => {
           if (valid) {
             var formData = userVM.subAccountForm;
-            var param = {};
-            param.buyPackageId = ''
-            param.packageId = ''
-            param.type = ''
-            param.seatNo = ''
-            param.company = ''
-            param.address = ''
-            param.accountNo = ''
-            param.secretKey = ''
-            param.proxyurl = ''
-            param.subMerchant = ''
-            axios.post('/merchant/seatManager/create', param)
+            // param.seatNo = formData.seatNo
+            // param.company = formData.company
+            // param.address = formData.address
+            // param.accountNo = formData.accountNo
+            // param.secretKey = formData.secretKey
+            // param.proxyurl = formData.proxyurl
+            // param.subMerchant = formData.subMerchant
+            console.log(formData);
+            var param = formData;
+
+            // 先拿到当前数据所查到的套餐详情
+            axios.post('/merchant//outboundPackage/queryOutboundPackageById', { id: this.packageDetailsId })
               .then(function (response) {
                 console.info(response);
+                // 在提交数据
+                param.buyPackageId = ''
+                param.packageId = ''
+                param.type = ''
+                axios.post('/merchant/seatManager/create', param)
+                  .then(function (response) {
+                    console.info(response);
+                    that.searchTable();
+                    that.dialogsubAccountForm = false;
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  });
               })
               .catch(function (error) {
                 console.log(error);
@@ -330,7 +357,9 @@
       },
 
       // 点击添加坐席出弹框
-      addAccountUser(obj) {
+      addAccountUser(name, id) {
+        this.merchatName = name
+        this.packageDetailsId = id
         var that = this
         this.dialogsubAccountForm = true;
         var param = {};
@@ -386,12 +415,12 @@
       searchTable() {
         var that = this
         var param = {};
-        param.status = this.userSearchForm.status;
-        param.username = this.userSearchForm.userName;
-        param.name = this.userSearchForm.name;
-        param.pageSize = this.pager.pageSize;
-        param.pageNum = this.pager.currentPage;
-        param.userType = 2;
+        param.userId = this.userSearchForm.status;
+        param.serviceName = this.userSearchForm.userName;
+        param.seatNo = this.userSearchForm.name;
+        // param.pageSize = this.pager.pageSize;
+        // param.pageNum = this.pager.currentPage;
+        // param.userType = 2;
         console.info(param);
         axios.post('/merchant/mechantSetMeal/queryList', param)
           .then(function (response) {
