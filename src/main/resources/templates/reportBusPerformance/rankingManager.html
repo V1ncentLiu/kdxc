@@ -59,7 +59,7 @@
             <el-row>
                 <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
                     <el-tab-pane label="商务组排名" name="first" v-if="isShowDept"></el-tab-pane>
-                    <el-tab-pane label="商务经理排名" name="second" v-if="isShowOrg"></el-tab-pane>
+                    <el-tab-pane label="商务经理排名" name="second"></el-tab-pane>
                 </el-tabs>
                 <el-table 
                     ref="tableData"
@@ -120,10 +120,8 @@
 <script  th:inline="javascript">
 
     var curUserId=[[${curUserId}]];
-    var rolecode=[[${roleCode}]];//DXZJL,DXFZ,  DXZJ,DXCYGW
     var areaList=[[${areaList}]];// 地区
     var deptList=[[${deptList}]];// 事业部
-    var teleGroupList = [[${teleGroupList}]];// 电销组
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -369,15 +367,10 @@
             }
         },
 	created(){
-        if(rolecode=='DXCYGW' || rolecode=='DXZJ'){
+        if(curUserId){
             this.isShowDept = false;
         }else{
             this.isShowDept = true;
-        }
-        if(rolecode=='DXCYGW'){
-            this.isShowOrg = false;
-        }else{
-            this.isShowOrg = true;
         }
 		this.searchTable();
 	},
