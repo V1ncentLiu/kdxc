@@ -284,48 +284,41 @@ var myCallRecordVm = new Vue({
       this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
       this.initCallRecordData();
     },
-    downloadAudio(id, url, callSource) {
-      if (roleCode == 'ZCBWY') {
-        this.$message({
-          message: '您没有下载权限',
-          type: 'warning'
-        });
-        return;
-      }
+    downloadAudio(id,url,callSource){
       var param = {};
-      param.id = id;
-      axios.post('/call/callRecord/getRecordFile', param)
-        .then(function (response) {
-          var data = response.data;
-          if (data.code == '0') {
-            var url = data.data;
-            if (url) {
-              var fileName = url.split('?')[0];
-              var fileNameArr = fileName.split("/");
-              if (callSource == '3') {
-                var decodeUrl = encodeURI(url);
-                url = "/client/heliClient/downloadHeliClientAudio?url=" + decodeUrl;
+      param.id=id;
+         axios.post('/call/callRecord/getRecordFile',param)
+          .then(function (response) {
+            var data =  response.data;
+              if(data.code=='0'){
+                var url = data.data;
+                if(url){
+                  var fileName = url.split('?')[0];
+                  var fileNameArr= fileName.split("/");
+                  if(callSource=='3'){
+                    var decodeUrl = encodeURI(url);
+                    url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                  }
+                var x=new XMLHttpRequest();
+                x.open("GET", url, true);
+                x.responseType = 'blob';
+                x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+                x.send(); 
+                  
+                }
+                  
+              }else{
+                console.error(data);
+                myCallRecordVm.$message({message:data.msg,type:'error'});
               }
-              var x = new XMLHttpRequest();
-              x.open("GET", url, true);
-              x.responseType = 'blob';
-              x.onload = function (e) { download(x.response, fileNameArr[fileNameArr.length - 1], 'audio/*'); }
-              x.send();
-
-            }
-
-          } else {
-            myCallRecordVm.$message({ message: data.msg, type: 'error' });
-            console.error(data);
-          }
-
-        })
-        .catch(function (error) {
-          console.log(error);
-        }).then(function () {
-        });
-
-    },
+          
+          })
+          .catch(function (error) {
+               console.log(error);
+          }).then(function(){
+          });
+     
+   },
     switchSoundBtn(id, url, callSource) {
       // debugger
       // this.audioShow=true;
