@@ -228,6 +228,12 @@
                                     alt=""></span>
                         </template>
                     </el-table-column>
+                    <el-table-column align="center" prop="" label="跟进记录">
+                        <template slot-scope="scope">
+                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog">查看</el-button>
+                            <el-button v-else type="text" @click="openAddTracking">添加</el-button>
+                        </template>
+                    </el-table-column>
                     <el-table-column align="center" prop="isAssignSubAccount" label="用户行为">
                         <template slot-scope="scope">
                             <div class="fontColor2" @click="seeResource(scope.row.clueId)">查看</div>
@@ -332,6 +338,9 @@
                 </el-form>
             </template>
         </el-dialog>
+
+        <!-- 跟进记录 -->
+        <dialog-tracking :param="trackingParam"></dialog-tracking>
     </div>
 </body>
 <!-- import Vue before Element -->
@@ -356,6 +365,10 @@
         el: '#optimizeClueManagement',
         data: function () {
             return {
+                trackingParam:{
+                    trackingDialogVisible:false,
+                    tableData:[]
+                },
                 todayAssignClueNum: '',//今日分发资源
                 totalAssignClueNum: '',//累计分发资源
                 todayReceiveClueNum: '',//今日领取资源
@@ -440,6 +453,25 @@
             }
         },
         methods: {
+            openAddTracking(cid){//打开跟进记录
+                
+            },
+            openTrackingDialog(cid){//打开跟进记录
+                var param = {};
+                param.clueId = cid;
+                axios.post('/merchant/tracking/findByClueId', param)
+                    .then(function (response) {
+                        console.log(response.data)
+                        if (response.data.code == 0) {
+                            ocmVM.trackingParam.tableData = response.data.data
+                            ocmVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                            ocmVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            },
             // 呼叫
             callIphone(tel,clueId) {
                 window.parent.outboundCallPhone(tel, 2, clueId, null);
