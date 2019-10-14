@@ -72,7 +72,7 @@ public interface CallPackageFeignClient {
      * @return
      */
     @GetMapping("/user/callBuyPackage")
-    JSONResult<CallBuyPackageModel> getCallBuyPackage(@RequestParam Long userId);
+    JSONResult<CallBuyPackageModel> getCallBuyPackage(@RequestParam("userId") Long userId);
 
 
     @Component
