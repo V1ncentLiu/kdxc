@@ -91,7 +91,6 @@
 </body>
 <script th:inline="javascript">
     var areaList=[[${areaList}]];// 地区
-    var deptList=[[${deptList}]];// 事业部
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -138,13 +137,13 @@
             },
             getTelGroupSale(seleVal){
                 param={};
-                param.id=seleVal;
-                param.selectCode='SYB';
-                axios.post('/base/getDwOrgList',param).then(function (response) {
+                param.parentId=seleVal;
+                param.orgType=2;
+                axios.post('/base/getGroupList',param).then(function (response) {
                     mainDivVM.deptList=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
-                        message: "电销组请求失败，请稍后重试",
+                        message: "商务组请求失败，请稍后重试",
                         type: "error"
                     });
                 });
