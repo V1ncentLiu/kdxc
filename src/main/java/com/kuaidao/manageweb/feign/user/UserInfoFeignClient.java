@@ -24,7 +24,7 @@ import com.kuaidao.sys.dto.user.*;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service-sjy", path = "/sys/userInfo",
+@FeignClient(name = "sys-service", path = "/sys/userInfo",
         fallback = UserInfoFeignClient.HystrixClientFallback.class)
 public interface UserInfoFeignClient {
     /**

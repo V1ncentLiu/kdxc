@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "merchant-service-sjy",path="/merchant/pubcustomer",fallback = PubcustomerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service",path="/merchant/pubcustomer",fallback = PubcustomerFeignClient.HystrixClientFallback.class)
 public interface PubcustomerFeignClient {
 
 

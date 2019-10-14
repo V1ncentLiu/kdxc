@@ -62,8 +62,6 @@ public class MerchantCallRecordController {
             userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getId());
         } else if(SysConstant.USER_TYPE_THREE.equals(user.getUserType())){
             userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getParentId());
-        } else {
-            userInfo = buildQueryReqDto(SysConstant.USER_TYPE_ONE, user.getId());
         }
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfo);
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
