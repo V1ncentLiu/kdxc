@@ -70,25 +70,25 @@
           <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
           <el-table-column align="center" prop="packageName" label="所选服务套餐名称">
             <template slot-scope="scope">
-              <el-button type="text" @click="openInfo(scope.row.id)">{{scope.row.packageName}}</el-button>
+              <el-button type="text" @click="openInfo(scope.row.packageId)">{{scope.row.packageName}}</el-button>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="sheetCount" label="意向购买坐席数"></el-table-column>
           <el-table-column align="center" prop="supplyCompany" label="供应商"></el-table-column>
           <el-table-column align="center" prop="beginTime" label="服务开启时间" :formatter="dateFormat" width="160">
           </el-table-column>
-          <el-table-column align="center" prop="id" label="商家坐席">
+          <el-table-column align="center" prop="sheetCount" label="商家坐席">
             <template slot-scope="scope">
-              <div v-if="scope.row.id > 0">
+              <div v-if="scope.row.sheetCount">
                 <a href=""></a>
                 <!-- <a style="color: rgb(0, 114, 255);text-decoration:underline ;" :href="'/merchant/userManager/subaccountUserPage?parentId='+scope.row.id+'&name='+scope.row.name+'&orgId='+scope.row.orgId+''">坐席（{{scope.row.num}}）</a> -->
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;" @click="goHref(scope.row)"
-                  href="javascript:;">坐席（{{scope.row.num}}）</a>
+                  href="javascript:;">坐席（{{scope.row.sheetCount}}）</a>
                 <!-- 注 后端说暂时没定传什么参数先这样访问-->
                 <!-- :href="''">坐席（{{scope.row.num}}）</a> -->
 
               </div>
-              <div v-if="scope.row.id == 0">
+              <div v-else>
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
                   @click="addAccountUser(scope.row)">添加绑定坐席</a>
               </div>
@@ -318,7 +318,7 @@
           .then(function (response) {
             var result = response.data;
             console.info(result);
-            userVM.infoTable= result.data;
+            userVM.infoTable[0]= result.data;
             var alldata = {
               "id": "1181461060948008960",
               "packageName": "222",
@@ -446,32 +446,32 @@
             var result = response.data;
             console.info(result);
             var table = result.data;
-            userVM.dataTable = table.data;
+            userVM.dataTable = table;
           })
           .catch(function (error) {
-            var dataValue = [
-              {
-                userId: '1',
-                id: '0',
-                userName: '3',
-                packageId: '4',
-                packageName: '5',
-                sheetCount: '6',
-                supplyCompany: '7',
-                beginTime: '8',
-              },
-              {
-                userId: '11',
-                id: '22',
-                userName: '33',
-                packageId: '44',
-                packageName: '55',
-                sheetCount: '66',
-                supplyCompany: '77',
-                beginTime: '88',
-              }]
-            that.dataTable = dataValue
-            console.log(error);
+            // var dataValue = [
+            //   {
+            //     userId: '1',
+            //     id: '0',
+            //     userName: '3',
+            //     packageId: '4',
+            //     packageName: '5',
+            //     sheetCount: '6',
+            //     supplyCompany: '7',
+            //     beginTime: '8',
+            //   },
+            //   {
+            //     userId: '11',
+            //     id: '22',
+            //     userName: '33',
+            //     packageId: '44',
+            //     packageName: '55',
+            //     sheetCount: '66',
+            //     supplyCompany: '77',
+            //     beginTime: '88',
+            //   }]
+            // that.dataTable = dataValue
+            // console.log(error);
           });
 
       },
