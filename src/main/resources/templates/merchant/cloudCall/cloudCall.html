@@ -57,7 +57,7 @@
     <el-dialog title="购买服务套餐" :visible.sync="buyFormVisible" width="540px">
         <el-form :model="formBuy" ref="formBuy" :rules="rules">
             <el-form-item label="当前账户余额（元）：" :label-width="formLabelWidth">
-                <span>{{formBuy.balance}}</span>
+                <span>{{balance}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
                 <el-input v-model="formBuy.buyCount" placeholder="" maxLength="5" style="width: 260px;" @keyup.native="number" @input="formBuyCount"></el-input>
@@ -65,16 +65,19 @@
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formBuy.cost}}
             </el-form-item>
-            <p style="padding-left: 40px;font-size: 14px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p> 
+            <p v-show="isShowTipBuy" style="padding-left: 40px;font-size: 14px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p> 
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formBuy')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formBuy')">确定</el-button>
             <el-button @click="buyFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
     <!-- 变更服务套餐 -->
     <el-dialog title="变更服务套餐" :visible.sync="changeFormVisible" width="540px">
         <el-form :model="formChange" ref="formChange" :rules="rules">
+            <el-form-item label="当前账户余额（元）：" :label-width="formLabelWidth">
+                <span>{{balance}}</span>
+            </el-form-item>
             <el-form-item label="原服务套餐：" :label-width="formLabelWidth">
                 <span>{{formChange.name}}</span>
             </el-form-item>
@@ -87,10 +90,10 @@
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formChange.cost}}
             </el-form-item>
-            <p style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
+            <p v-show="isShowTipChange" style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formChange')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formChange')">申请变更</el-button>
             <el-button @click="changeFormVisible = false;">取 消</el-button>
         </div>
     </el-dialog>
@@ -107,6 +110,8 @@
         el: '#maindiv',
         data: function() {
             return {  
+                isShowTipBuy:false,
+                isShowTipChange:false,
                 isBuyBtn:true,
                 btnDisabled:false,
                 buyFormVisible:false,
@@ -126,8 +131,8 @@
                     // }
                 ],
                 templateRadio:'0',
-                formBuy:{
-                    balance:'',
+                balance:'',//当前账户余额
+                formBuy:{                    
                     buyCount:'',                    
                     cost:'',
                 },
@@ -158,17 +163,35 @@
                 var rows = this.multipleSelection;
                 var aone = parseFloat(this.formBuy.buyCount);
                 var atwo = parseFloat(rows[0].totalCost);
-                if (isNaN(aone)) aone = 0
-                if (isNaN(atwo)) atwo = 0
-                this.formBuy.cost = (aone * atwo) + ""
+                var balance=parseFloat(this.balance);
+                if (isNaN(aone)) aone = 0;
+                if (isNaN(atwo)) atwo = 0;
+                var totalNum=(aone * atwo) + "";
+                this.formBuy.cost = totalNum;
+                if(totalNum>balance){
+                    this.isShowTipBuy=true;//显示余额不足提醒
+                    // this.btnDisabled=true;//提交按钮不可点击
+                }else{
+                    this.isShowTipBuy=false;
+                    this.btnDisabled=false;
+                }
             },
             formChangeCount(){
                 var rows = this.multipleSelection;
                 var aone = parseFloat(this.formChange.buyCount);
                 var atwo = parseFloat(rows[0].totalCost);
-                if (isNaN(aone)) aone = 0
-                if (isNaN(atwo)) atwo = 0
-                this.formChange.cost = (aone * atwo) + ""
+                var balance=parseFloat(this.balance);
+                if (isNaN(aone)) aone = 0;
+                if (isNaN(atwo)) atwo = 0;
+                var totalNum=(aone * atwo) + "";
+                this.formChange.cost = totalNum;
+                if(totalNum>balance){
+                    this.isShowTipChange=true;//显示余额不足提醒
+                    this.btnDisabled=true;//提交按钮不可点击
+                }else{
+                    this.isShowTipChange=false;
+                    this.btnDisabled=false;
+                }
             },
             number(){
                 this.formBuy.buyCount=this.formBuy.buyCount.replace(/[^\.\d]/g,'');
@@ -206,16 +229,15 @@
                     });
                     return;
                 }
-                
+
                 this.$refs[formName].validate((valid) => {
                     var rows=this.multipleSelection;
                     if (valid) {
                         var param ={};
                         var packageId="";
                         param.userId = userId;
-                        param.packageId = rows.packageId;//套餐id
+                        param.packageId = rows[0].packageId;//套餐id
                         param.buyCount = this.formBuy.buyCount;
-
                         console.info(param);
                         axios.post('/merchant/call/package/buy', param)
                         .then(function (response) {
@@ -223,7 +245,7 @@
                             var result =  response.data;
                             if(result.code==0){
                                 var table=result.data;
-                                mainDivVM.searchTable()                       
+                                window.location.href="/merchant/call/package/index";                 
                             }else{
                                 mainDivVM.$message.error(result.msg);
                             }                    
@@ -238,12 +260,13 @@
                 });   
             },
             submitChangeForm(){
+                var rows=this.multipleSelection;
                 var param ={};
                 var fromPackageId="";
                 var toPackageId="";
                 param.userId = userId;
                 param.fromPackageId = fromPackageId;//变更前套餐ID
-                param.toPackageId = toPackageId;//变更前套餐ID
+                param.toPackageId = rows[0].toPackageId;//变更后套餐ID
                 param.buyCount = this.formChange.buyCount;
 
                 console.info(param);
@@ -287,7 +310,7 @@
                     var result =  response.data;
                     if(result.code==0){
                         var table=result.data;
-                        mainDivVM.formBuy.balance = table.totalAmounts;                        
+                        mainDivVM.balance = table.totalAmounts;                        
                     }else{
                         mainDivVM.$message.error(result.msg);
                     }                    
