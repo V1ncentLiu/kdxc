@@ -61,35 +61,34 @@ var myCallRecordVm = new Vue({
       return text;
     },
 
-    // _initData() {
-    //   this.callRecordData = [{
-    //     customerName: "客户姓名",
-    //     customerPhone: "客户电话",
-    //     phoneLocale: "电话归属地",
-    //     hotLine: "热线号码",
-    //     accountName: "拨打账户",
-    //     bindPhone: "坐席电话",
-    //     serviceTime: "开始服务时间",
-    //     callType: "1",
-    //     startTime: "1563343043",
-    //     callStatus: "1",
-    //     talkTime: 12,
-    //   },
-    //   {
-    //     customerName: "客户姓名",
-    //     customerPhone: "客户电话",
-    //     phoneLocale: "电话归属地",
-    //     hotLine: "热线号码",
-    //     accountName: "拨打账户",
-    //     bindPhone: "坐席电话",
-    //     serviceTime: "开始服务时间",
-    //     callType: "1",
-    //     startTime: "1563343043",
-    //     callStatus: "1",
-    //     talkTime: 30,
-    //   }]
+    _initData() {
+      // this.callRecordData = [{
+      //   accountName:"1部电销顾问1组1",
+      //   bindPhone:"17310167390",
+      //   bridgeTime:"1562811129",
+      //   callSource:"1",
+      //   callStatus:"33",
+      //   callType:"3",
+      //   category:2,
+      //   categoryText:"竞价",
+      //   cno:"11101",
+      //   customerName:"测试通话2",
+      //   customerNumberType:"2",
+      //   customerPhone:"13161412317",
+      //   endTime:"1562811143",
+      //   id:"5d269b08406b6b00017c315b",
+      //   phase:7,
+      //   phoneLocale:"北京,北京",
+      //   recordFile:"7000425-20190711101150-13161412317-17310167390--record-sip-13-1562811110.33560",
+      //   searchWord:"测试新字段",
+      //   serviceTime:"2019-07-08 15:54:29",
+      //   startTime:"1562811110",
+      //   talkTime:14,
+      //   teleGorupId:"1143890861935955968",
+      //   teleGorupName:"尹测1-1-1"
+      // }]
 
-    // },
+    },
     initCallRecordData() {
       // this._initData();
        var startTime = this.searchForm.startTime;
