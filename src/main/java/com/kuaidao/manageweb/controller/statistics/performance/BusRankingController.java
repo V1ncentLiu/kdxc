@@ -53,9 +53,9 @@ public class BusRankingController extends BaseStatisticsController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
             request.setAttribute("curUserId",curLoginUser.getId()+"");
-            return "reportBusPerformance/rankingGroup";
-        }else{
             return "reportBusPerformance/rankingManager";
+        }else{
+            return "reportBusPerformance/rankingGroup";
         }
     }
 
