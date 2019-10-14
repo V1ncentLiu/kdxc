@@ -270,7 +270,7 @@
                     });
                 });
             },
-            searchTable(firstPage) { 
+            searchTable(firstPage) {
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime && startTime){
@@ -301,13 +301,13 @@
                         type: 'warning'
                     });
                     return;
-                }   
-    
+                }
+
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-    
+
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
@@ -359,7 +359,7 @@
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.province = mainDivVM.form.province;
                         mainDivVM.export.groupId = mainDivVM.form.groupId;
-        
+
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -379,16 +379,24 @@
                         resultTableData.push(totalData[k]);
                     }
                 }
-                for(var i=0;i<totalData.length;i++){
-                    var ind = -1;
-                    for(var j=0;j<tableData.length;j++){
-                        if(totalData[i].companyId === tableData[j].companyId){
-                            ind = i;
-                            resultTableData.push(tableData[j]);
-                        }
+                console.log(resultTableData)
+                if(curOrgId){
+                    for(var n=0;n<tableData.length;n++){
+                        resultTableData.push(tableData[n]);
                     }
-                    if(ind != -1){
-                        resultTableData.push(totalData[ind]);
+
+                }else{
+                    for(var i=0;i<totalData.length;i++){
+                        var ind = -1;
+                        for(var j=0;j<tableData.length;j++){
+                            if(totalData[i].companyId === tableData[j].companyId){
+                                ind = i;
+                                resultTableData.push(tableData[j]);
+                            }
+                        }
+                        if(ind != -1){
+                            resultTableData.push(totalData[ind]);
+                        }
                     }
                 }
                 mainDivVM.tableData = resultTableData;
