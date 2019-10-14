@@ -134,10 +134,6 @@ var myCallRecordVm = new Vue({
 
                	var resData = data.data;
                	var callRecordData = resData.data;
-               	var callRecordDataData = callRecordData.data;
-                 for(var i=0;i<callRecordDataData.length;i++){
-                   callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
-                 }
                	myCallRecordVm.callRecordData= callRecordData.data;
                	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
                 //3.分页组件

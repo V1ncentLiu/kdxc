@@ -124,13 +124,9 @@ var myCallRecordVm = new Vue({
            .then(function (response) {
           	 var data =  response.data;
                if(data.code=='0'){
-               	var resData = data.data;
-               	var callRecordData = resData.data;
-               	var callRecordDataData = callRecordData.data;
-                //  for(var i=0;i<callRecordDataData.length;i++){
-                //    callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
-                //  }
-               	myCallRecordVm.callRecordData= callRecordData.data;
+                 var resData = data.data;
+                 var callRecordData = resData.data;
+               	myCallRecordVm.callRecordData = resData.data;
                 //3.分页组件
                	myCallRecordVm.pager.total= callRecordData.total;
                	myCallRecordVm.pager.currentPage = callRecordData.currentPage;

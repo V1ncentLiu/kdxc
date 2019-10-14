@@ -10,13 +10,16 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: BussinessCallCostController
@@ -27,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/merchant/manageCallCost")
 public class ManageCallCostController {
-
+  private static Logger logger = LoggerFactory.getLogger(ManageCallCostController.class);
   @Autowired
   private MerchantCallCostFeign merchantCallCostFeign;
   @Autowired
@@ -71,6 +74,7 @@ public class ManageCallCostController {
   @RequestMapping("/getManageCallCostList")
   @ResponseBody
   public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(MerchantCallCostReq req){
+    logger.info("getManageCallCostList参数{{}}",req);
     try {
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getManageCallCostList(req);
       return jsonResult;
