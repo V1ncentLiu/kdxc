@@ -46,8 +46,6 @@ public class MerchantCallRecordController {
 
     /**
      * 跳转通话记录页
-     *
-     * @return
      */
     @RequiresPermissions("merchant:callRecord:view")
     @RequestMapping("/init")
@@ -58,28 +56,29 @@ public class MerchantCallRecordController {
         Integer userType = user.getUserType();
         //查询用户集合（邀约使用）
         UserInfoDTO userInfo = new UserInfoDTO();
-        if(SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+        if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getId());
-        } else if(SysConstant.USER_TYPE_THREE.equals(user.getUserType())){
+        } else if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getParentId());
         } else {
             userInfo = buildQueryReqDto(SysConstant.USER_TYPE_ONE, user.getId());
         }
-        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfo);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient
+            .merchantUserList(userInfo);
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
         }
         request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());
-        request.setAttribute("userType", userType.toString());
+        if (null != userType) {
+            request.setAttribute("userType", userType.toString());
+        }
         return "merchant/bussinessCall/callRecord";
     }
 
     /**
      * 商家通话记录 分页展示 ，参数模糊匹配
-     *
-     * @return
      */
     @RequiresPermissions("merchant:callRecord:view")
     @PostMapping("/listMerchantCallRecord")
@@ -89,22 +88,25 @@ public class MerchantCallRecordController {
         // 根据角色查询
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Integer userType = curLoginUser.getUserType();
-        if(null == userType){
+        if (null == userType) {
             return new JSONResult<Map<String, Object>>().success(null);
         }
         // 商家子账号
         List<Long> accountIdList = callRecordReqDTO.getAccountIdList();
         UserInfoDTO userInfo = new UserInfoDTO();
         if (CollectionUtils.isEmpty(accountIdList)) {
-            if(SysConstant.USER_TYPE_THREE.equals(userType)){
+            if (SysConstant.USER_TYPE_THREE.equals(userType)) {
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 callRecordReqDTO.setAccountIdList(idList);
-            } else if(SysConstant.USER_TYPE_TWO.equals(userType)){
+            } else if (SysConstant.USER_TYPE_TWO.equals(userType)) {
                 userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, curLoginUser.getId());
-                JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfo);
-                if (merchantUserList.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(merchantUserList.getData())) {
-                    List<Long> userIdList = merchantUserList.getData().parallelStream().map(UserInfoDTO::getId).collect(Collectors.toList());
+                JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient
+                    .merchantUserList(userInfo);
+                if (merchantUserList.getCode().equals(JSONResult.SUCCESS) && CollectionUtils
+                    .isNotEmpty(merchantUserList.getData())) {
+                    List<Long> userIdList = merchantUserList.getData().parallelStream()
+                        .map(UserInfoDTO::getId).collect(Collectors.toList());
                     callRecordReqDTO.setAccountIdList(userIdList);
                 }
             }
@@ -116,8 +118,6 @@ public class MerchantCallRecordController {
 
     /**
      * 构建商家子账户查询实体
-     *
-     * @return
      */
     private UserInfoDTO buildQueryReqDto(Integer userType, Long id) {
         // 获取商家主账号下的子账号列表
