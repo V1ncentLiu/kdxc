@@ -53,6 +53,12 @@ public class InvitationController extends BaseStatisticsController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
 
+    /**
+     * 一级页面
+     * @param request
+     * @return
+     */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/groupList")
     public String groupList(HttpServletRequest request){
         //初始化页面部门
@@ -68,15 +74,28 @@ public class InvitationController extends BaseStatisticsController {
         return "reportResources/selfVisitFollowTable";
     }
 
-
+    /**
+     * 二级页面
+     * @param request
+     * @param deptId
+     * @param teleGroupId
+     * @param teleSaleId
+     * @param category
+     * @param cusLevel
+     * @param province
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request,Long deptId,Long teleGroupId,Long teleSaleId,
-                              Integer category,Integer cusLevel,Integer areaId,Long startTime,Long endTime){
+                              Integer category,Integer cusLevel,String province,Long startTime,Long endTime){
         //初始化页面部门
         initSaleDept(request);
         ////初始化页面数据
         initModel(request);
-        initBaseDto(request,deptId,teleGroupId,teleSaleId,category,cusLevel,areaId,startTime,endTime);
+        initBaseDto(request,deptId,teleGroupId,teleSaleId,category,cusLevel,province,startTime,endTime);
         return "reportResources/selfVisitFollowTableTeam";
     }
 
@@ -86,6 +105,7 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/queryPage")
     public @ResponseBody
     JSONResult<Map<String,Object>> queryByPage(@RequestBody BaseQueryDto baseQueryDto){
@@ -98,6 +118,7 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
         String roleCode=getRoleCode();
@@ -115,6 +136,7 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:invitation:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -145,6 +167,7 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:invitation:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -180,7 +203,7 @@ public class InvitationController extends BaseStatisticsController {
 
 
     public void initBaseDto(HttpServletRequest request,Long deptId,Long groupId,Long saleId,
-                            Integer category,Integer cusLevel,Integer areaId,Long startTime,Long endTime){
+                            Integer category,Integer cusLevel,String province,Long startTime,Long endTime){
         BaseQueryDto dto=new BaseQueryDto();
         dto.setTeleDeptId(deptId);
         dto.setTeleGroupId(groupId);
@@ -189,7 +212,7 @@ public class InvitationController extends BaseStatisticsController {
         dto.setEndTime(endTime);
         dto.setCategory(category);
         dto.setCusLevel(cusLevel);
-        dto.setAreaId(areaId);
+        dto.setProvince(province);
         request.setAttribute("baseQueryDto",dto);
     }
 
