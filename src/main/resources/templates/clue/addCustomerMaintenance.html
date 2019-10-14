@@ -67,13 +67,29 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row>
-                    <el-col :span="24">
+                <el-row >
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.projectShow ==1">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueProject.projectName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueBase.sourceName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                        <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueBase.ad}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
                         <el-form-item label="备注：" :label-width="formLabelWidth">
                             <span class="lineFeed">{{clueBase.remark}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
+
             </div>
             <div class="marginB20 fs16 paddingT20">基本信息</div>
             <div class="borderbox padding20 input75">
@@ -299,22 +315,22 @@
                             <div style="float: left; width: 48px;">&nbsp;</div>
                             <!-- :picker-options="expireTimeOption" -->
                             <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
-                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
+                                <el-date-picker v-model="formInline.callTime" :disabled="isDisabledCustomer" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
                             </el-form-item>
                             <div style="width: 24%;float: left;text-align: center;">
                                 <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
-                                    <el-select v-model="formInline.customerStatus" @change="customerStatusChange" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                    <el-select v-model="formInline.customerStatus" @change="customerStatusChange" :disabled="isDisabledCustomer" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
                                         <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 160px;">
-                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="substatus" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
+                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="isDisabledCustomer" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
                             </div>
                             <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通" style="width: 70%;display: block;margin:0 auto;" clearable>
+                                <el-select v-model="formInline.isCall" placeholder="是否接通" :disabled="isDisabledCustomer" style="width: 70%;display: block;margin:0 auto;" clearable>
                                     <el-option label="是" value="1"></el-option>
                                     <el-option label="否" value="0"></el-option>
                                 </el-select>
@@ -872,6 +888,9 @@
     var teleEndTime = [[${teleEndTime}]];
     var repeatClueList = [[${repeatClueList}]];
     var repeatClueStatus = [[${repeatClueStatus}]];
+    var telemarketingLayout = [[${telemarketingLayout}]];
+    var clueProject = [[${clueProject}]];
+    var mediumList = [[${mediumList}]]
     var repeatStatus =false;
     var editPhone = 1;
     if(repeatClueStatus == 1 ){
@@ -888,6 +907,11 @@
         el: '#addCustomer',
         data: function () {
             return {
+                mediumList:mediumList,
+                mediumName:"",
+                clueProject:clueProject,
+                telemarketingLayout:telemarketingLayout,
+            	isDisabledCustomer:false,
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
@@ -1347,6 +1371,7 @@
                     addCustomerVM.uploadParamData.realName= file.name
             },
             lineFormShowFun() {
+            	this.isDisabledCustomer = false;
                 if(this.lineFormShow){
                     this.lineFormShow = false
                 }else{
@@ -1899,6 +1924,7 @@
                         return;
                     }
                 }
+                this.isDisabledCustomer = true;
                 this.lineFormShow = true;
                 this.formInline.id = rows[0].id;
                 this.formInline.callTime = rows[0].callTime;
@@ -2810,7 +2836,14 @@
 
 
         },
-        created() {            
+        created() {
+            if(mediumList !=null && mediumList.size>0){
+                for(var i=0;i<mediumList.length;i++){
+                    if(mediumList[i].value==base.source()){
+                        this.sourceName = mediumList[i].name;
+                    }
+                }
+            }
             //初始资源类别数据
             this.getUploadParam();
             var param = {};

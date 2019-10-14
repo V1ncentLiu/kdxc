@@ -19,7 +19,8 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>我的客户（商务）</el-breadcrumb-item>
+        <el-breadcrumb-item v-if="type ==2">客户管理（商务）</el-breadcrumb-item>
+        <el-breadcrumb-item v-else >我的客户（商务）</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="mainSearchBg">
         <div class="marginB10">
@@ -60,7 +61,7 @@
                     <span>签约店型：</span><span>{{signOrderBaseInfo[0].signShopTypeName}}</span>
                 </el-col>
                 <el-col>
-                    <span>应收金额：</span><span>{{signOrderBaseInfo[0].amountReceivable}}</span>
+                    <span>合同应收金额：</span><span>{{signOrderBaseInfo[0].amountReceivable}}</span>
                 </el-col>
                 <!--<el-col>-->
                     <!--<span>路费：</span><span>{{signOrderBaseInfo[0].firstToll}}</span>-->
@@ -99,7 +100,7 @@
                 <el-table-column align="center" prop="payTime" label="付款时间" width="150"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
 
-                <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
@@ -136,7 +137,7 @@
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
@@ -174,7 +175,7 @@
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
@@ -212,7 +213,7 @@
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" width="150"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
-                <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
@@ -344,7 +345,7 @@
                     </el-row>
                     <el-row>
                         <el-col :span="12">
-                            <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
+                            <el-form-item label="合同应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
                                 <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.amountReceivable"
                                           type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"
                                           onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
@@ -465,7 +466,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
+                    <el-form-item label="招商政策优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
                         <el-input v-model="updateFormSigning.preferentialAmount"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
@@ -646,7 +647,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
+                    <el-form-item label="招商政策优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
                         <el-input v-model="formMoneyDetail.preferentialAmount"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
@@ -814,7 +815,7 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
+                            <el-form-item label="合同应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
                                 <el-input v-model="formSigning.amountReceivable"  type="number"
                                           oninput="if(value.length>10)value=value.slice(0,10)"   min="0" onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
                                           autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
@@ -993,7 +994,7 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
+                            <el-form-item label="招商政策优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
                                 <el-input v-model="formSigning.preferentialAmount"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -1032,7 +1033,9 @@
             </div>
         </template>
     </el-dialog>
-
+    <div  class="padding20 f-tac">
+        <el-button type="primary" @click="goback()">返回</el-button>
+    </div>
 </div>
 
 <!-- import common js-->
@@ -1271,7 +1274,7 @@
                     { required: true,validator:function(rule,value,callback){
                             var reg =  /^[0-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
-                                callback(new Error("请输入优惠金额"));
+                                callback(new Error("请输入招商政策优惠金额"));
                                 mainDivVM.formMoneyDetail.preferentialAmount =null;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
@@ -1374,7 +1377,7 @@
                     { required: true, message: '请选择签约店型', trigger: 'change' }
                 ],
                 amountReceivable: [
-                    {required: true, message: '请输入应收金额', trigger: 'blur'},
+                    {required: true, message: '请输入合同应收金额', trigger: 'blur'},
                     {
                         validator: function (rule, value, callback) {
                             if (value === 0) {
@@ -1382,7 +1385,7 @@
                             }
                             var reg = /^[0-9]+[0-9]*]*$/;
                             if (value == null || value == "null" || value == "") {
-                                callback(new Error("请输入应收金额"));
+                                callback(new Error("请输入合同应收金额"));
                                 mainDivVM.formSigning.amountReceivable = null;
 
                             } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
@@ -1417,7 +1420,7 @@
                     { required: true,validator:function(rule,value,callback){
                             var reg =  /^[0-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
-                                callback(new Error("请输入优惠金额"));
+                                callback(new Error("请输入招商政策优惠金额"));
                                 mainDivVM.formSigning.preferentialAmount =null;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
@@ -2119,6 +2122,7 @@
                     }
                 });
             },
+            goback(){window.history.go(-1);},
         },
         created(){
             // this.initList();
