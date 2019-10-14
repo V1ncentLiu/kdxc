@@ -25,14 +25,19 @@ public class CallPackageController {
 
 
     /**
-     * @Description 云外呼页面初始化
      * @param request
+     * @Description 云外呼页面初始化
      * @Return java.lang.String
      **/
     @RequestMapping("/index")
     public String index(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         request.setAttribute("userId", user.getId());
+        JSONResult<CallBuyPackageModel> jsonResult = callPackageFeignClient.getCallBuyPackage(user.getId());
+        if (jsonResult.getCode().equals(JSONResult.SUCCESS)
+                && jsonResult.getData() != null) {
+            request.setAttribute("originPackageId", jsonResult.getData().getPackageId());
+        }
         return "merchant/cloudCall/cloudCall";
     }
 
@@ -42,6 +47,7 @@ public class CallPackageController {
         log.info("CallPackageController,buy,callBuyPackageReq={}", callBuyPackageReq);
         return callPackageFeignClient.buy(callBuyPackageReq);
     }
+
     @ResponseBody
     @RequestMapping("/change")
     public JSONResult<CallBuyPackageChangeRes> change(@RequestBody CallChangePackageReq callChangePackageReq) {
