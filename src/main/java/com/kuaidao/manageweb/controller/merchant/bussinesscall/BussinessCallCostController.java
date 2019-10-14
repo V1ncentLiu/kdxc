@@ -11,6 +11,8 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +31,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/merchant/bussinessCallCost")
 public class BussinessCallCostController {
-
+  private static Logger logger = LoggerFactory.getLogger(BussinessCallCostController.class);
   @Autowired
   private MerchantCallCostFeign merchantCallCostFeign;
   @Autowired
@@ -73,6 +75,7 @@ public class BussinessCallCostController {
   @ResponseBody
   public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody  MerchantCallCostReq req){
     try {
+      logger.info("getBussinessCallCostList参数{{}}",req);
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setBusinessAccount(user.getId());
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
