@@ -116,8 +116,8 @@ var myCallRecordVm = new Vue({
        }else{
       	 param.accountIdList=[];
        }
-      	 param.beginCostTime=this.searchForm.startTime;
-      	 param.endCostTime=this.searchForm.endTime;
+      	 param.beginCostTime=new Date(this.searchForm.startTime);
+      	 param.endCostTime=new Date(this.searchForm.endTime);
       	 param.pageNum=this.pager.currentPage;
       	 param.pageSize=this.pager.pageSize;
       	 axios.post('/merchant/manageCallCost/getManageCallCostList',param)

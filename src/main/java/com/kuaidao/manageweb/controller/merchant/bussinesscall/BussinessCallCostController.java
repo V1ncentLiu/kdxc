@@ -10,13 +10,15 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: BussinessCallCostController
@@ -69,7 +71,7 @@ public class BussinessCallCostController {
    **/
   @RequestMapping("/getBussinessCallCostList")
   @ResponseBody
-  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(MerchantCallCostReq req){
+  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody  MerchantCallCostReq req){
     try {
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setBusinessAccount(user.getId());
