@@ -82,7 +82,6 @@ var myCallRecordVm = new Vue({
 
     // },
     initCallRecordData() {
-      console.log(999);
       // this._initData();
        var startTime = this.searchForm.startTime;
        var endTime = this.searchForm.endTime;
@@ -118,12 +117,14 @@ var myCallRecordVm = new Vue({
       	 param.beginCostTime=new Date(this.searchForm.startTime);
       	 param.endCostTime=new Date(this.searchForm.endTime);
       	 param.pageNum=this.pager.currentPage;
-      	 param.pageSize=this.pager.pageSize;
-      	 axios.post('/merchant/bussinessCallCost/getBussinessCallCostList',param)
+         param.pageSize=this.pager.pageSize;
+      
+         axios.post('/merchant/bussinessCallCost/getBussinessCallCostList',param)
            .then(function (response) {
           	 var data =  response.data;
                if(data.code=='0'){
-               	var resData = data.data;
+                 var resData = data.data;
+                 var callRecordData = resData.data;
                  myCallRecordVm.callRecordData = resData.data;
                 //3.分页组件
                	myCallRecordVm.pager.total= callRecordData.total;

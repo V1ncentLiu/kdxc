@@ -122,8 +122,8 @@
 
 </html>
 <script>
-  // var merchantUserList=[[${userList}]];//商户集合
-  var merchantUserList = [];//商户集合
+  var merchantUserList = [[${ userList }]];//商户集合
+  // var merchantUserList = [];//商户集合
   var app = new Vue({
     el: '#app',
     data() {
@@ -142,32 +142,33 @@
         merchatName: '',
         submitDisabled: false,
 
-        tableData: [
-          {
-            id: '1',
-            buyPackageId: '2',
-            packageId: '3',
-            seatNo: '4',
-            company: '5',
-            address: '6',
-            accountNo: '7',
-            secretKey: '8',
-            proxyUrl: '9',
-            subMerchant: '0',
-          },
-          {
-            id: '11',
-            buyPackageId: '22',
-            packageId: '33',
-            seatNo: '44',
-            company: '55',
-            address: '66',
-            accountNo: '77',
-            secretKey: '88',
-            proxyUrl: '99',
-            subMerchant: '00',
-          },
-        ],
+        tableData: [],
+        // [
+        //   {
+        //     id: '1',
+        //     buyPackageId: '2',
+        //     packageId: '3',
+        //     seatNo: '4',
+        //     company: '5',
+        //     address: '6',
+        //     accountNo: '7',
+        //     secretKey: '8',
+        //     proxyUrl: '9',
+        //     subMerchant: '0',
+        //   },
+        //   {
+        //     id: '11',
+        //     buyPackageId: '22',
+        //     packageId: '33',
+        //     seatNo: '44',
+        //     company: '55',
+        //     address: '66',
+        //     accountNo: '77',
+        //     secretKey: '88',
+        //     proxyUrl: '99',
+        //     subMerchant: '00',
+        //   },
+        // ],
         multipleSelection: [],
         options: [],
         //  [
@@ -244,13 +245,15 @@
     },
     methods: {
       searchTable() {
-        var that=this
+        var that = this
         var param = {};
         param.subMerchant = this.form.rechargeBusiness
         param.seatNo = this.form.number
         param.company = this.form.company
         param.pageSize = this.pager.pageSize
         param.pageNum = this.pager.currentPage;
+        param.buyPackageId = that.getQueryString('buyPackageId')
+        param.packageId = that.getQueryString('packageId')
         axios.post('/merchant/seatManager/queryList', param)
           .then(function (response) {
             console.log(response)
@@ -259,6 +262,9 @@
               var table = result.data;
               that.pager.total = table.total;
               that.pager.currentPage = table.currentPage;
+              console.log(table);
+
+              that.tableData = table.data
             } else {
               ocmVM.$message.error(result.msg);
             }
@@ -386,7 +392,7 @@
               url = '/merchant/seatManager/create'
             } else if (this.title === '编辑座席') {
               url = '/merchant/seatManager/update'
-              param.id = ''
+              param.id = this.multipleSelection[0].id
             }
             axios.post(url, param)
               .then(function (response) {
