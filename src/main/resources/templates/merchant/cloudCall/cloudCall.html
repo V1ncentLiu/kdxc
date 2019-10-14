@@ -24,7 +24,6 @@
             tooltip-effect="dark"
             border
             :data="dataTable"
-            @selection-change="handleSelectionChange" 
             >
             <el-table-column align="center" type="index" label="序号"></el-table-column>
             <el-table-column align="center" prop="packageName" label="套餐"></el-table-column>
@@ -49,8 +48,10 @@
             <el-table-column label="选择服务" width="auto" align="center">
                 <template scope="scope">
                     <!-- 是否已购买1是，0否 -->
-                    <el-radio v-if="scope.row.status==0" @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
-                    <p v-else>已购买，<el-button type="primary" @click="showChangeBtn">变更</el-button></p>
+                    <!-- <el-radio v-if="scope.row.status==1" @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
+                    <p v-else>已购买，<el-button type="primary" @click="showChangeBtn">变更</el-button></p> -->
+                    <el-radio @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
+                    <p v-if="scope.row.status==1">已购买<span v-if="isChangeBtnShow">,<el-button type="primary" @click="showChangeBtn">变更</el-button></span></p>
                </template>
             </el-table-column>
         </el-table>
@@ -72,7 +73,7 @@
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formBuy.cost}}
             </el-form-item>
-            <p v-show="isShowTipBuy" style="padding-left: 40px;font-size: 14px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p> 
+            <p v-if="isShowTipBuy" style="padding-left: 40px;font-size: 14px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p> 
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="btnDisabled" @click="submitBuyForm('formBuy')">确定</el-button>
@@ -97,7 +98,7 @@
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formChange.cost}}
             </el-form-item>
-            <p v-show="isShowTipChange" style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
+            <p v-if="isShowTipChange" style="padding-left: 40px;">账户余额不足，<a href="/merchant/merchantOnlineRecharge/initOnlineRecharge" style="color: #5c6be8;">去充值</a></p>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="btnDisabled" @click="submitChangeForm('formChange')">申请变更</el-button>
@@ -119,11 +120,12 @@
         el: '#maindiv',
         data: function() {
             return {  
+                isChangeBtnShow:false,
                 radio:'',
                 isShowTipBuy:false,
                 isShowTipChange:false,
-                isBuyBtn:false,
-                isChangeBtn:false,
+                isBuyBtn:false,//默认不展示购买按钮
+                isChangeBtn:false,//默认不展示变更按钮
                 btnDisabled:false,
                 buyFormVisible:false,
                 changeFormVisible:false,             
@@ -188,7 +190,6 @@
                 }
             },
             formChangeCount(){
-                debugger
                 var rows = this.multipleSelection;
                 var aone = parseFloat(this.formChange.buyCount);
                 var atwo = parseFloat(rows.totalCost);
@@ -214,6 +215,8 @@
             showChangeBtn(){
                 this.isBuyBtn=false;
                 this.isChangeBtn=true;
+                var rows = this.multipleSelection;
+
             },
             showRow(val){
                 console.log(val)
@@ -236,9 +239,23 @@
                     return;
                 }
                 this.buyFormVisible=true;
+                // 设置需支付首月固定费用为空
+                this.formBuy.cost="";
+                // 账号余额不足去充值默认不显示
+                this.formBuy.isShowTipBuy=false;
+                if (this.$refs['formBuy']!=undefined) {
+                    this.$refs['formBuy'].resetFields();
+                }                
             },
             changeClick(){
                 this.changeFormVisible=true;
+                // 设置需支付首月固定费用为空
+                this.formChange.cost="";
+                // 账号余额不足去充值默认不显示
+                this.formChange.isShowTipChange=false;
+                if (this.$refs['formChange']!=undefined) {
+                    this.$refs['formChange'].resetFields();
+                }                
             },
             submitBuyForm(formName ){
                 var rows = this.multipleSelection;
@@ -282,12 +299,10 @@
             submitChangeForm(){
                 var rows=this.multipleSelection;
                 var param ={};
-                var toPackageId="";
                 param.userId = userId;
                 param.fromPackageId = originPackageId;//变更前套餐ID
                 param.toPackageId = rows.packageId;//变更后套餐ID
                 param.buyCount = this.formChange.buyCount;
-
                 console.info(param);
                 axios.post('/merchant/call/package/change', param)
                 .then(function (response) {
@@ -313,6 +328,24 @@
                         var table=result.data;
                         if(table){
                             mainDivVM.dataTable= table.callBuyPackageDTOList;
+                            for(var i=0;i<table.callBuyPackageDTOList.length;i++){
+                                if(table.callBuyPackageDTOList[i].status==1){
+                                    mainDivVM.radio=i;//给选中的单选按钮赋值
+                                    mainDivVM.multipleSelection=table.callBuyPackageDTOList[i];//给选中的行赋值
+                                }
+                            }
+                            // 是否显示购买按钮
+                            if(table.isPurchased){//是否已购买 true 购买，false 未购买
+                                mainDivVM.isBuyBtn=false;//已购买则不显示购买按钮
+                            }else{
+                                mainDivVM.isBuyBtn=true;//未购买则显示购买按钮
+                            }
+                            // 是否显示变更按钮
+                            if(table.isPackageChanged){//是否变更过套餐
+                                mainDivVM.isChangeBtnShow=false;//变更过套餐不显示变更按钮
+                            }else{
+                                mainDivVM.isChangeBtnShow=true;//未变更过套餐显示变更按钮
+                            }
                         }                        
                     }else{
                         mainDivVM.$message.error(result.msg);
