@@ -2,9 +2,30 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
   xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<!-- <head th:replace="_header_include::frag(~{::title},~{::style},~{})"> -->
+
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
   <title>后台管理系统</title>
+  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
   <style>
+    .el-dialog__header {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
+    }
+
+    .el-button--primary {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+    }
+
+    /* #sittingFrame .el-input__inner {
+      border: 1px solid #dcdde2;
+    }
+
+    .el-form-item.is-success .el-input__inner,
+    .el-form-item.is-success .el-input__inner:focus,
+    .el-form-item.is-success .el-textarea__inner,
+    .el-form-item.is-success .el-textarea__inner:focus{
+      border: 1px solid #5c6be8;
+    } */
   </style>
 </head>
 
@@ -59,14 +80,17 @@
           <el-table-column align="center" prop="id" label="商家坐席">
             <template slot-scope="scope">
               <div v-if="scope.row.id > 0">
+                <a href=""></a>
                 <!-- <a style="color: rgb(0, 114, 255);text-decoration:underline ;" :href="'/merchant/userManager/subaccountUserPage?parentId='+scope.row.id+'&name='+scope.row.name+'&orgId='+scope.row.orgId+''">坐席（{{scope.row.num}}）</a> -->
-                <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
-                  :href="'/merchant/seatManager/toPage?userId=111&buyPackageId=3434&packageId=3423'">坐席（{{scope.row.num}}）</a>
+                <a style="color: rgb(0, 114, 255);text-decoration:underline ;" @click="goHref(scope.row)"
+                  href="javascript:;">坐席（{{scope.row.num}}）</a>
                 <!-- 注 后端说暂时没定传什么参数先这样访问-->
+                <!-- :href="''">坐席（{{scope.row.num}}）</a> -->
+
               </div>
               <div v-if="scope.row.id == 0">
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;"
-                  @click="addAccountUser(scope.row.userName,scope.row.id)">添加绑定坐席</a>
+                  @click="addAccountUser(scope.row)">添加绑定坐席</a>
               </div>
             </template>
           </el-table-column>
@@ -79,11 +103,11 @@
     </div>
 
     <!-- 添加坐席弹框 -->
-    <el-dialog :title="subAccountFormTitle" :visible.sync="dialogsubAccountForm" @close="closeusersubAccountForm"
-      width="540px">
+    <el-dialog id="sittingFrame" :title="subAccountFormTitle" :visible.sync="dialogsubAccountForm"
+      @close="closeusersubAccountForm" width="540px">
       <el-form :model="subAccountForm" ref="subAccountForm" :rules="subAccountRules">
         <el-form-item label="" :label-width="formLabelWidth">
-          {{merchatName}}增加子账户绑定坐席
+          {{merchatData.userName}}增加子账户绑定坐席
         </el-form-item>
         <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="seatNo">
           <el-input v-model="subAccountForm.seatNo" autocomplete="off" style="width: 290px;"></el-input>
@@ -133,30 +157,30 @@
   <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-  // var merchantUserList = [[${ merchantUserList }]];//商户集合
-  var userList = [
-    {
-      value: '选项1',
-      label: '黄金糕'
-    }, {
-      value: '选项2',
-      label: '双皮奶'
-    }, {
-      value: '选项3',
-      label: '蚵仔煎'
-    }, {
-      value: '选项4',
-      label: '龙须面'
-    }, {
-      value: '选项5',
-      label: '北京烤鸭'
-    }]
+  var userList = [[${ userList }]];//商户集合
+  // var userList = [
+  //   {
+  //     value: '选项1',
+  //     label: '黄金糕'
+  //   }, {
+  //     value: '选项2',
+  //     label: '双皮奶'
+  //   }, {
+  //     value: '选项3',
+  //     label: '蚵仔煎'
+  //   }, {
+  //     value: '选项4',
+  //     label: '龙须面'
+  //   }, {
+  //     value: '选项5',
+  //     label: '北京烤鸭'
+  //   }]
   var userVM = new Vue({
     el: '#userManage',
     data: {
       infoDialog: false,
       merchantUserListOptions: userList,//商家账户
-      merchatName: "",
+      merchatData: "",
       subAccountFormTitle: "添加坐席",
       dialogsubAccountForm: false,
       paginationShow: true,
@@ -294,7 +318,7 @@
           .then(function (response) {
             var result = response.data;
             console.info(result);
-            // userVM.infoTable= result.data;
+            userVM.infoTable= result.data;
             var alldata = {
               "id": "1181461060948008960",
               "packageName": "222",
@@ -306,18 +330,17 @@
               "callCharge": 3,
               "isDel": 1
             }
-            userVM.infoTable[0] = alldata;
+            // userVM.infoTable[0] = alldata;
             userVM.infoDialog = true;
           })
           .catch(function (error) {
             console.log(error);
           });
-        // this.infoDialog = true;
       },
 
       // 添加坐席提交
       saveAccountUser(formName) {
-        var that=this
+        var that = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
             var formData = userVM.subAccountForm;
@@ -331,39 +354,29 @@
             console.log(formData);
             var param = formData;
 
-            // 先拿到当前数据所查到的套餐详情
-            axios.post('/merchant//outboundPackage/queryOutboundPackageById', { id: this.packageDetailsId })
+            param.buyPackageId = this.merchatData.id
+            param.packageId = this.merchatData.packageId
+            param.type = ''
+            axios.post('/merchant/seatManager/create', param)
               .then(function (response) {
                 console.info(response);
-                // 在提交数据
-                param.buyPackageId = ''
-                param.packageId = ''
-                param.type = ''
-                axios.post('/merchant/seatManager/create', param)
-                  .then(function (response) {
-                    console.info(response);
-                    that.searchTable();
-                    that.dialogsubAccountForm = false;
-                  })
-                  .catch(function (error) {
-                    console.log(error);
-                  });
+                that.searchTable();
+                that.dialogsubAccountForm = false;
               })
               .catch(function (error) {
                 console.log(error);
               });
+
           }
         })
       },
 
       // 点击添加坐席出弹框
-      addAccountUser(name, id) {
-        this.merchatName = name
-        this.packageDetailsId = id
+      addAccountUser(data) {
+        this.merchatData = data
         var that = this
         this.dialogsubAccountForm = true;
-        var param = {};
-        axios.post("/merchant/seatManager/merchantUsers", param)
+        axios.post("/merchant/seatManager/merchantUsers")
           .then(function (response) {
             console.log(response);
 
@@ -403,6 +416,12 @@
         }
       },
 
+      // 坐席跳转
+      goHref(value) {
+        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId
+        document.location.href = url
+      },
+
       // 取消添加坐席提交
       accountcancelForm(formName) {
         if (this.$refs[formName] !== undefined) {
@@ -411,7 +430,7 @@
         this.dialogsubAccountForm = false;
       },
 
-      // 搜索 翻页
+      // 搜索 
       searchTable() {
         var that = this
         var param = {};
@@ -428,30 +447,6 @@
             console.info(result);
             var table = result.data;
             userVM.dataTable = table.data;
-            userVM.pager.total = table.total;
-            userVM.pager.currentPage = table.currentPage;
-
-            // 取出存储的id
-            // if (!userVM.paginationShow) {
-            //   if (userVM.storeId) {
-            //     userVM.$nextTick(function () {
-            //       var storage = [];
-            //       userVM.dataTable.forEach(function (item, index) {
-            //         if (item.id === userVM.storeId) {
-            //           storage.push(userVM.dataTable[index]);
-            //         }
-            //       })
-            //       userVM.toggleSelection(storage);
-            //       userVM.$el.querySelector('.el-table__body-wrapper').scrollTop = userVM.scrollTop;
-            //     })
-            //   }
-            // } else {
-            //   removeSessionStore("userManageStoreForm");
-            //   removeSessionStore("userManageOtherVal");
-            // }
-            // userVM.paginationShow = true;
-            // userVM.storeForm = userVM.userSearchForm;
-
           })
           .catch(function (error) {
             var dataValue = [
@@ -528,6 +523,26 @@
       // var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
       // if(localVal){this.pager.pageSize = localVal;}
       this.searchTable();
+      // var param = {
+      //   "buyPackageId": -14131657.92707023,
+      //   "packageId": -68361105.76434144,
+      //   "type": "cillum magna",
+      //   "seatNo": "cillum incididunt Lorem nos",
+      //   "company": "in ad laborum eu",
+      //   "address": "quis do",
+      //   "accountNo": "sint velit in ea",
+      //   "secretKey": "nostrud anim consectetur",
+      //   "proxyUrl": "non culpa quis mollit",
+      //   "subMerchant": 10074283.192574501
+      // }
+      // axios.post('/merchant/seatManager/create',param)
+      //   .then(function (response) {
+      //     console.info(response);
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+
     },
     mounted() {
       console.info("mounted method");
