@@ -82,11 +82,11 @@
                     </el-table-column>
                     <el-table-column prop="groupRank" label="大区排名">
                         <template slot-scope="scope">
-                            <div v-if="scope.row.groupRank == 1||scope.row.groupRank == 2||scope.row.groupRank == 3">
+                            <div v-if="scope.row.centerRank == 1||scope.row.centerRank == 2||scope.row.centerRank == 3">
                                 <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
-                                {{scope.row.groupRank}}
+                                {{scope.row.centerRank}}
                             </div>
-                            <span v-else>{{scope.row.groupRank}}</span>
+                            <span v-else>{{scope.row.centerRank}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column prop="groupRank" label="商务组内排名">
@@ -101,15 +101,15 @@
                     <el-table-column prop="teleName" label="商务经理">
                         <template slot-scope="scope">
                             <el-button type="text" size="small" v-if="scope.row.id == curUserId">
-                                {{scope.row.teleName}}
+                                {{scope.row.businessName}}
                             </el-button>
-                            <span v-else>{{scope.row.teleName}}</span>
+                            <span v-else>{{scope.row.businessName}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column prop="groupName" label="商务组"></el-table-column>
-                    <el-table-column prop="departName" label="商务大区"></el-table-column>
+                    <el-table-column prop="centerName" label="商务大区"></el-table-column>
                 </el-table>
-                <!--<table-pagination :pager="pager" @change="searchTable()"></table-pagination>-->
+                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
             </el-row>
         </div>
     </div>
@@ -162,9 +162,9 @@
         methods: {    
             handleClick(tab, event) {
                 if(tab.name=='first'){
-                	window.location.href="/busperformance/groupList";
+                    window.location.href="/busRanking/busRankingList";
                 }else if (tab.name == 'second'){
-                	window.location.href="/busperformance/managerList";
+                    window.location.href="/busRanking/busManageRankingList";
                 }
             },  
             centerStyle(){
@@ -247,10 +247,10 @@
                 param.groupId = this.form.teleGroupId;
                 param.userId = this.form.teleSaleId;
                 param.type = this.form.type;
-                //查询参数 1 事业部排名  2 电销组排名 3 电销顾问排名
-                param.selectType = "3";
+                //查询参数 4 商务组  5 商务经理
+                param.selectType = "5";
                 this.loading = true; 
-                axios.post('/ranking/getPerformanceRankPage',param).then(function (response) {
+                axios.post('/busRanking/getBusPerformanceRankPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -336,15 +336,15 @@
             },
             searchMonth(){ // 月
                 this.form.type = 1
-                this.searchTable(1,1);
+                this.searchTable(1);
             },
             searchYear(){ // 年
                 this.form.type = 2
-               this.searchTable(1,2);
+               this.searchTable(1);
             },
             searchMonthAverage(){ // 年累计月均排名
                this.form.type = 3
-               this.searchTable(1,3);
+               this.searchTable(1);
             },
             exportRs(){
                 var param = {};
@@ -353,8 +353,8 @@
                 param.groupId = this.form.teleGroupId;
                 param.userId = this.export.teleSaleId;
                 param.type = this.export.type;
-                param.selectType = "3";
-                axios.post('/ranking/exportPerformanceRankList',param,{responseType:'blob'})
+                param.selectType = "5";
+                axios.post('/busRanking/exportBusPerformanceRankList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -379,7 +379,7 @@
         }else{
             this.isShowOrg = true;
         }
-		// this.searchTable();
+		this.searchTable();
 	},
 	mounted(){
         document.getElementById('maindiv').style.display = 'block';
