@@ -1,11 +1,10 @@
 package com.kuaidao.manageweb.controller.merchant.clue;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.constant.MenuEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -17,8 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.SortUtils;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueInfoDetailFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
@@ -153,6 +156,47 @@ public class ClueInfoDetailController {
             }
         }
         return clueInfoDetailFeignClient.updateCustomerClue(dto);
+    }
+
+    /**
+     * 获取最后一次拨打时间
+     * 
+     * @author: Fanjd
+     * @param idEntityLong clueId 线索id
+     * @return: com.kuaidao.common.entity.JSONResult<java.lang.String>
+     * @Date: 2019/10/14 20:05
+     * @since: 1.0.0
+     **/
+    @RequestMapping("/getLastCallTime")
+    public JSONResult<String> getLastCallTime(@RequestBody IdEntityLong idEntityLong) {
+        UserInfoDTO user = getUser();
+        List<Long> userList = new ArrayList<>();
+        // 商家主账户能看商家子账号所有的记录
+        if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+            getSubAccountIds(userList, user.getId());
+        }
+        // 商家子账号看自己的记录
+        if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
+            userList.add(user.getId());
+        }
+        CallRecordReqDTO call = new CallRecordReqDTO();
+        call.setClueId(String.valueOf(idEntityLong.getId()));
+        if (CollectionUtils.isNotEmpty(userList)) {
+            call.setAccountIdList(userList);
+        }
+        // 当前时间
+        String now = DateUtil.getCurrentDate(DateUtil.ymdhms);
+        JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
+        // 资源通话记录
+        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+            List<CallRecordRespDTO> list = callRecord.getData();
+            // 按照拨打时间倒序
+            Comparator<CallRecordRespDTO> comparator = Comparator.nullsLast(Comparator.comparing(CallRecordRespDTO::getStartTime));
+            list.sort(comparator.reversed());
+            CallRecordRespDTO callRecordRespDTO = list.get(0);
+            now = callRecordRespDTO.getStartTime();
+        }
+        return new JSONResult<String>().success(now);
     }
 
     /**
