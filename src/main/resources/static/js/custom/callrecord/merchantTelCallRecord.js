@@ -115,21 +115,14 @@ var myCallRecordVm = new Vue({
       	 this.searchForm.callType='';
        }
        var param = this.searchForm;
-      //  var accountId =this.searchForm.accountId;
-      //  if(accountId){
-      // 	 var accountIdArr = new Array();
-      // 	 accountIdArr.push(accountId);
-      // 	 param.accountIdList=accountIdArr;
-      //  }else{
-      // 	 param.accountIdList=[];
-      //  }
+
       	 param.pageNum=this.pager.currentPage;
       	 param.pageSize=this.pager.pageSize;
       	 axios.post('/merchant/merchantCallRecord/listMerchantCallRecord',param)
            .then(function (response) {
           	 var data =  response.data;
                if(data.code=='0'){
-                myCallRecordVm.totalTalkTime = response.totalTalkTime;
+                myCallRecordVm.totalTalkTime = data.totalTalkTime;
               	 //获取通话总时长
 
                	var resData = data.data;
