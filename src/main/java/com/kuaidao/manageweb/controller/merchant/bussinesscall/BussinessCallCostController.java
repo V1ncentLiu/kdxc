@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 
+import com.alibaba.fastjson.JSON;
 import com.kuaidao.account.dto.call.MerchantCallCostDTO;
 import com.kuaidao.account.dto.call.MerchantCallCostReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -73,6 +74,7 @@ public class BussinessCallCostController {
   @ResponseBody
   public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody  MerchantCallCostReq req){
     try {
+     System.out.println("请求参数："+JSON.toJSONString(req));
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setBusinessAccount(user.getId());
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
