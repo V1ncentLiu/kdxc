@@ -33,10 +33,14 @@ public class CallPackageController {
     public String index(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         request.setAttribute("userId", user.getId());
-        JSONResult<CallBuyPackageModel> jsonResult = callPackageFeignClient.getCallBuyPackage(user.getId());
-        if (jsonResult.getCode().equals(JSONResult.SUCCESS)
-                && jsonResult.getData() != null) {
-            request.setAttribute("originPackageId", jsonResult.getData().getPackageId());
+        try {
+            JSONResult<CallBuyPackageModel> jsonResult = callPackageFeignClient.getCallBuyPackage(user.getId());
+            if (jsonResult.getCode().equals(JSONResult.SUCCESS)
+                    && jsonResult.getData() != null) {
+                request.setAttribute("originPackageId", jsonResult.getData().getPackageId());
+            }
+        } catch (Exception e) {
+            log.error("CallPackageController.index error,user={}", e,user);
         }
         return "merchant/cloudCall/cloudCall";
     }
