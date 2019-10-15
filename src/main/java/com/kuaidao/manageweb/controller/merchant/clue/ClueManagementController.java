@@ -128,9 +128,6 @@ public class ClueManagementController {
     @PostMapping("/queryPage")
     public JSONResult<PageBean<ClueManagementDto>> queryPage(@RequestBody ClueManagementParamDto pageParam) {
         UserInfoDTO userInfoDTO = getUser();
-        if (!SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType()) && !SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
-            return new JSONResult().fail(SysErrorCodeEnum.ACCOUNT_NOT_AUTHORIZED.getCode(), SysErrorCodeEnum.ACCOUNT_NOT_AUTHORIZED.getMessage());
-        }
         // 用户类型
         pageParam.setUserType(userInfoDTO.getUserType());
         // 用户id
