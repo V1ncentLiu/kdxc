@@ -62,11 +62,10 @@ public class ClueInfoDetailController {
      * 进入详情页面
      *
      * @param request
-     * @param idEntityLong
      * @return
      */
     @RequestMapping("/init")
-    public String init(HttpServletRequest request) {
+    public String init(HttpServletRequest request, @RequestParam("clueId") Long clueId) {
         UserInfoDTO user = getUser();
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -77,6 +76,7 @@ public class ClueInfoDetailController {
             request.setAttribute("proSelect", new ArrayList());
         }
         request.setAttribute("loginUserId", user.getId());
+        request.setAttribute("clueId", clueId);
         return "merchant/resourceManagement/resourceManagementInfo";
     }
 
@@ -131,7 +131,7 @@ public class ClueInfoDetailController {
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.CUSTOMER_INFO)
-    public JSONResult<String> updateCustomerClue( @RequestBody ClueDTO dto) {
+    public JSONResult<String> updateCustomerClue(@RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
