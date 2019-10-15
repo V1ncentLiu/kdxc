@@ -167,6 +167,7 @@ public class ClueInfoDetailController {
     @RequestMapping("/inviteCustomer")
     public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, @RequestParam String cusName, @RequestParam String cusPhone,
             Model model) {
+        UserInfoDTO userInfoDTO = getUser();
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
@@ -178,6 +179,17 @@ public class ClueInfoDetailController {
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
+        }
+        // 查询用户集合（邀约使用）
+        UserInfoDTO userInfoInvite = new UserInfoDTO();
+        if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
+            userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, userInfoDTO.getId());
+        } else if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
+            userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, userInfoDTO.getParentId());
+        }
+        JSONResult<List<UserInfoDTO>> merchantAppiontUserList = merchantUserInfoFeignClient.merchantUserList(userInfoInvite);
+        if (merchantAppiontUserList.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("merchantAppiontUserList", merchantAppiontUserList.getData());
         }
         return "merchant/resourceManagement/resourceInvite";
     }
