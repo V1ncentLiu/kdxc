@@ -62,12 +62,12 @@ public class ClueInfoDetailController {
      * 进入详情页面
      *
      * @param request
-     * @param clueId
+     * @param idEntityLong
      * @return
      */
     @RequestMapping("/init")
-    public String init(HttpServletRequest request, @RequestParam String clueId) {
-        log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
+    public String init(HttpServletRequest request, @RequestBody IdEntityLong idEntityLong) {
+        log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", idEntityLong.getId());
         UserInfoDTO user = getUser();
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -84,12 +84,12 @@ public class ClueInfoDetailController {
     /**
      * 进入详情页面
      *
-     * @param request
-     * @param clueId
+     * @param idEntityLong
      * @return
      */
     @GetMapping("/detail")
-    public JSONResult<ClueDTO> detail(HttpServletRequest request, @RequestParam String clueId) {
+    public JSONResult<ClueDTO> detail(@RequestBody IdEntityLong idEntityLong) {
+        Long clueId = idEntityLong.getId();
         log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
         List<Long> userList = new ArrayList<>();
@@ -102,11 +102,11 @@ public class ClueInfoDetailController {
             userList.add(user.getId());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
-        queryDTO.setClueId(Long.parseLong(clueId));
+        queryDTO.setClueId(clueId);
         // 获取已上传的文件数据
         ClueQueryDTO fileDto = new ClueQueryDTO();
         CallRecordReqDTO call = new CallRecordReqDTO();
-        call.setClueId(clueId);
+        call.setClueId(clueId + "");
         if (CollectionUtils.isNotEmpty(userList)) {
             call.setAccountIdList(userList);
             fileDto.setIdList(userList);
@@ -132,7 +132,7 @@ public class ClueInfoDetailController {
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.CUSTOMER_INFO)
-    public JSONResult<String> updateCustomerClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
+    public JSONResult<String> updateCustomerClue( @RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
