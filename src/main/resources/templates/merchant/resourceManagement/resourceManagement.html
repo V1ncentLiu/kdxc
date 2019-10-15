@@ -249,7 +249,7 @@
                     </el-table-column>
                     <el-table-column align="center" prop="" label="跟进记录">
                         <template slot-scope="scope">
-                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog">查看</el-button>
+                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog(scope.row.clueId)">查看</el-button>
                             <el-button v-else type="text" @click="openAddTracking(scope.row.clueId)">添加</el-button>
                         </template>
                     </el-table-column>
@@ -554,6 +554,18 @@
             }
         },
         methods: {
+            // 获取时间
+            getTime(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/clueInfo/getLastCallTime', param)
+                    .then(function (response) {
+                        console.log(response)
+                        
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            },
             submitTrackingForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -572,7 +584,7 @@
                         param.focusPoint = this.trackingForm.focusPoint;
                         param.nextVisitTime = this.trackingForm.nextVisitTime;
                         console.log(param)
-                        axios.post('/merchant/tracking/insert', param)
+                        axios.post('/tracking/insert', param)
                             .then(function (response) {
                                 var data = response.data;
                                 console.log(data)
@@ -584,14 +596,17 @@
                                         type: 'error'
                                     });
                                 }
+                                ocmVM.btnDisabled = false;
                             })
                             .catch(function (error) {
+                                ocmVM.btnDisabled = false;
                                 console.log(error);
                             })
                             .then(function () {
 
                             });
                     } else {
+                        this.btnDisabled = false;
                         console.log('数据未通过校验！');
                         return false;
                     }
@@ -605,14 +620,19 @@
                 }
             },
             openAddTracking(cid){//新增跟进记录
+                this.btnDisabled = false;
+                if (this.$refs['trackingForm']) {
+                    this.$refs['trackingForm'].resetFields();
+                }
                 this.trackingVisible=true;
                 console.log(cid);
                 this.clueId=cid;
+                this.getTime(cid);//获取时间
             },
             openTrackingDialog(cid){//查看跟进记录
                 var param = {};
                 param.clueId = cid;
-                axios.post('/merchant/tracking/findByClueId', param)
+                axios.post('/tracking/findByClueId', param)
                     .then(function (response) {
                         console.log(response.data)
                         if (response.data.code == 0) {
