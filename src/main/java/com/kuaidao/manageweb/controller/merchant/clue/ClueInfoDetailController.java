@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
 import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.merchant.dto.clue.ClueFileDTO;
 import org.apache.commons.collections.CollectionUtils;
@@ -16,6 +16,7 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -61,7 +62,8 @@ public class ClueInfoDetailController {
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
-
+    /** 不可签约 **/
+    private static final Integer IS_NOT_SIGN_NO = -1;
 
     /**
      * 进入详情页面
@@ -147,14 +149,37 @@ public class ClueInfoDetailController {
 
         }
         fileDto.setClueId(clueId);
-        //上传文件
+        // 上传文件
         JSONResult<List<ClueFileDTO>> clueFileList = clueInfoDetailFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
-                && clueFileList.getData() != null) {
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
 
         return "merchant/resourceManagement/resourceManagementInfo";
+    }
+
+    /**
+     * 邀约来访页面跳转
+     *
+     * @param request
+     * @return
+     */
+    @RequestMapping("/inviteCustomer")
+    public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, @RequestParam String cusName, @RequestParam String cusPhone,
+            Model model) {
+        request.setAttribute("clueId", clueId);
+        request.setAttribute("cusName", cusName);
+        request.setAttribute("cusPhone", cusPhone);
+
+        // 查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(IS_NOT_SIGN_NO);
+        // 项目
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            model.addAttribute("proSelect", proJson.getData());
+        }
+        return "merchant/resourceManagement/resourceInvite";
     }
 
     /**
