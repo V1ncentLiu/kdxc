@@ -62,12 +62,10 @@ public class ClueInfoDetailController {
      * 进入详情页面
      *
      * @param request
-     * @param idEntityLong
      * @return
      */
     @RequestMapping("/init")
-    public String init(HttpServletRequest request, @RequestBody IdEntityLong idEntityLong) {
-        log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", idEntityLong.getId());
+    public String init(HttpServletRequest request, @RequestParam("clueId") Long clueId) {
         UserInfoDTO user = getUser();
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -78,6 +76,7 @@ public class ClueInfoDetailController {
             request.setAttribute("proSelect", new ArrayList());
         }
         request.setAttribute("loginUserId", user.getId());
+        request.setAttribute("clueId", clueId);
         return "merchant/resourceManagement/resourceManagementInfo";
     }
 
@@ -87,7 +86,8 @@ public class ClueInfoDetailController {
      * @param idEntityLong
      * @return
      */
-    @GetMapping("/detail")
+    @ResponseBody
+    @PostMapping("/detail")
     public JSONResult<ClueDTO> detail(@RequestBody IdEntityLong idEntityLong) {
         Long clueId = idEntityLong.getId();
         log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
@@ -131,7 +131,7 @@ public class ClueInfoDetailController {
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.CUSTOMER_INFO)
-    public JSONResult<String> updateCustomerClue( @RequestBody ClueDTO dto) {
+    public JSONResult<String> updateCustomerClue(@RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -166,7 +166,8 @@ public class ClueInfoDetailController {
      * @Date: 2019/10/14 20:05
      * @since: 1.0.0
      **/
-    @RequestMapping("/getLastCallTime")
+    @ResponseBody
+    @PostMapping("/getLastCallTime")
     public JSONResult<String> getLastCallTime(@RequestBody IdEntityLong idEntityLong) {
         UserInfoDTO user = getUser();
         List<Long> userList = new ArrayList<>();
