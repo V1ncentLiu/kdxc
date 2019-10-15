@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 
+import com.alibaba.fastjson.JSON;
 import com.kuaidao.account.dto.call.MerchantCallCostDTO;
 import com.kuaidao.account.dto.call.MerchantCallCostReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -10,13 +11,17 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: BussinessCallCostController
@@ -27,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/merchant/bussinessCallCost")
 public class BussinessCallCostController {
-
+  private static Logger logger = LoggerFactory.getLogger(BussinessCallCostController.class);
   @Autowired
   private MerchantCallCostFeign merchantCallCostFeign;
   @Autowired
@@ -69,8 +74,9 @@ public class BussinessCallCostController {
    **/
   @RequestMapping("/getBussinessCallCostList")
   @ResponseBody
-  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(MerchantCallCostReq req){
+  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody  MerchantCallCostReq req){
     try {
+      logger.info("getBussinessCallCostList参数{{}}",req);
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setBusinessAccount(user.getId());
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
