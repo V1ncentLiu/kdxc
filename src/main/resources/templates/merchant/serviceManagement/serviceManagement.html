@@ -125,7 +125,7 @@
           <el-input v-model="subAccountForm.proxyUrl" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subMerchant">
-          <el-select v-model="subAccountForm.subMerchant" placeholder="请选择" style="width: 290px;">
+          <el-select v-model="subAccountForm.subMerchant" :placeholder="selectValue" style="width: 290px;">
             <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
@@ -188,6 +188,7 @@
       loginDisabled: false,
       accountExpandedKeys: [],
       accountDataTree: [],
+      selectValue:'请选择',
       // 添加坐席的套餐详情
       packageDetailsId: '',
       userSearchForm: {
@@ -375,6 +376,7 @@
         this.merchatData = data
         var that = this
         this.dialogsubAccountForm = true;
+        this.selectValue=data.userName
         axios.post("/merchant/seatManager/merchantUsers", { id: data.id })
           .then(function (response) {
             that.options = response.data
