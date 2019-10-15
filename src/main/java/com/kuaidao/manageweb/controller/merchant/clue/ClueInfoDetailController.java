@@ -5,6 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.merchant.dto.clue.ClueFileDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -55,7 +59,8 @@ public class ClueInfoDetailController {
 
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
-
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
 
 
     /**
@@ -65,7 +70,7 @@ public class ClueInfoDetailController {
      * @return
      */
     @RequestMapping("/init/{clueId}")
-    public String init(HttpServletRequest request,@PathVariable Long clueId) {
+    public String init(HttpServletRequest request, @PathVariable Long clueId) {
         log.info("ClueInfoDetailController_init_clueId {}", clueId);
         UserInfoDTO user = getUser();
         // 项目
@@ -79,6 +84,75 @@ public class ClueInfoDetailController {
         request.setAttribute("loginUserId", user.getId());
         request.setAttribute("clueId", clueId);
         request.setAttribute("ossUrl", ossUrl);
+
+        List<Long> userList = new ArrayList<>();
+        // 商家主账户能看商家子账号所有的记录
+        if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+            getSubAccountIds(userList, user.getId());
+        }
+        // 商家子账号看自己的记录
+        if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
+            userList.add(user.getId());
+        }
+        ClueQueryDTO queryDTO = new ClueQueryDTO();
+        queryDTO.setClueId(clueId);
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        CallRecordReqDTO call = new CallRecordReqDTO();
+        call.setClueId(clueId + "");
+        if (CollectionUtils.isNotEmpty(userList)) {
+            call.setAccountIdList(userList);
+            fileDto.setIdList(userList);
+        }
+        JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
+        // 资源通话记录
+        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+            request.setAttribute("callRecord", callRecord.getData());
+        } else {
+            request.setAttribute("callRecord", new ArrayList());
+        }
+        JSONResult<ClueDTO> clueInfo = clueInfoDetailFeignClient.findClueInfo(queryDTO);
+        if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode())) {
+            // 客户基本信息
+            if (null != clueInfo.getData().getClueCustomer()) {
+                ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
+                clueCustomerDTO.setPhoneCreateTime(null);
+                clueCustomerDTO.setPhone2CreateTime(null);
+                clueCustomerDTO.setPhone3CreateTime(null);
+                clueCustomerDTO.setPhone4CreateTime(null);
+                clueCustomerDTO.setPhone5CreateTime(null);
+                request.setAttribute("customer", clueCustomerDTO);
+            } else {
+                request.setAttribute("customer", new ArrayList());
+            }
+            // 基本信息
+            if (null != clueInfo.getData().getClueBasic()) {
+                request.setAttribute("base", clueInfo.getData().getClueBasic());
+            } else {
+                request.setAttribute("base", new ArrayList());
+            }
+            // 意向信息
+            if (null != clueInfo.getData().getClueIntention()) {
+                request.setAttribute("intention", clueInfo.getData().getClueIntention());
+            } else {
+                request.setAttribute("intention", new ArrayList());
+            }
+            // 跟进记录
+            // 意向信息
+            if (CollectionUtils.isNotEmpty(clueInfo.getData().getTrackList())) {
+                request.setAttribute("trackingList", clueInfo.getData().getTrackList());
+            } else {
+                request.setAttribute("trackingList", new ArrayList());
+            }
+
+        }
+        //上传文件
+        JSONResult<List<ClueFileDTO>> clueFileList = clueInfoDetailFeignClient.findClueFile(fileDto);
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
+                && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
+
         return "merchant/resourceManagement/resourceManagementInfo";
     }
 
