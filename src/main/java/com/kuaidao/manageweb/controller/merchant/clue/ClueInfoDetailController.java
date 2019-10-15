@@ -146,6 +146,7 @@ public class ClueInfoDetailController {
             }
 
         }
+        fileDto.setClueId(clueId);
         //上传文件
         JSONResult<List<ClueFileDTO>> clueFileList = clueInfoDetailFeignClient.findClueFile(fileDto);
         if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
@@ -296,7 +297,7 @@ public class ClueInfoDetailController {
      * @since: 1.0.0
      **/
     private void getSubAccountIds(List<Long> subIds, Long userId) {
-
+        subIds.add(userId);
         // 获取商家主账号下的子账号列表
         UserInfoDTO userReqDto = buildQueryReqDto(SysConstant.USER_TYPE_THREE, userId);
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userReqDto);
