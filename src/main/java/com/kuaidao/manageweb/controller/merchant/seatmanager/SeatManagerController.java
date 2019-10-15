@@ -57,6 +57,7 @@ public class SeatManagerController {
 //    UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
     // 商家主账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(userId,null);
+
     request.setAttribute("userList", userList);
     request.setAttribute("userId",userId); // 商家ID
     request.setAttribute("buyPackageId",buyPackageId); // 当前购买服务记录ID
