@@ -48,7 +48,7 @@ public class BusRankingController extends BaseStatisticsController {
      */
     @RequestMapping("/busRankingList")
     public String  busTeamList(HttpServletRequest request){
-        initBugOrg(request);
+        initSWDQByBusiness(request);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
@@ -66,7 +66,12 @@ public class BusRankingController extends BaseStatisticsController {
      */
     @RequestMapping("/busManageRankingList")
     public String busSaleList(HttpServletRequest request){
-        initBugOrg(request);
+        initSWDQByBusiness(request);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            request.setAttribute("curUserId",curLoginUser.getId()+"");
+        }
         return "reportBusPerformance/rankingManager";
     }
 
