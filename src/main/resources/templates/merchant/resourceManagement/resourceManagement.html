@@ -229,7 +229,7 @@
                     <em>{{todayReceiveClueNum == null ? '0' : todayReceiveClueNum}}</em> 条 累计领取
                     <em>{{totalReceiveClueNum == null ? '0' : totalReceiveClueNum}}</em> 条</div>
                 <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="dataTable"
-                    @selection-change="handleSelectionChange">
+                    @selection-change="handleSelectionChange" @row-dblclick="customerEidt">
                     <el-table-column align="center" type="selection" width="55"></el-table-column>
                     <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="clueId" label="主键" v-if="show"></el-table-column>
@@ -554,14 +554,18 @@
             }
         },
         methods: {
+            customerEidt(row){
+                var clueId=row.clueId;
+                window.location.href="/clueInfo/init="+clueId;
+            },
             // 获取时间
             getTime(cid){
                 var param = {};
-                param.clueId = cid;
+                param.id = cid;
                 axios.post('/clueInfo/getLastCallTime', param)
                     .then(function (response) {
                         console.log(response)
-                        
+                        ocmVM.trackingForm.callTime=response.data;
                     }).catch(function (error) {
                     console.log(error);
                 });
@@ -631,7 +635,7 @@
             },
             openTrackingDialog(cid){//查看跟进记录
                 var param = {};
-                param.clueId = cid;
+                param.id = cid;
                 axios.post('/tracking/findByClueId', param)
                     .then(function (response) {
                         console.log(response.data)
