@@ -35,7 +35,7 @@ public interface BusVisitSignFeignClient {
     @PostMapping("/queryPageForSale")
     public JSONResult<Map<String,Object>> queryBusPageForSale(BaseBusQueryDto dto);
 
-    @PostMapping("/queryListSale")
+    @PostMapping("/queryListForSale")
     public JSONResult<List<BusVisitSignDto>> queryBusListSale(BaseBusQueryDto dto);
 
     @Component
