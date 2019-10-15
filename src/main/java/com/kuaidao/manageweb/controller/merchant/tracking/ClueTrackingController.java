@@ -1,22 +1,26 @@
 package com.kuaidao.manageweb.controller.merchant.tracking;
 
+import java.util.List;
+
 import javax.validation.Valid;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.merchant.dto.tracking.TrackingRespDTO;
+
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.merchant.tracking.TrackingMerchantFeignClient;
 import com.kuaidao.merchant.dto.tracking.TrackingInsertOrUpdateDTO;
+import com.kuaidao.merchant.dto.tracking.TrackingRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+
 import lombok.extern.slf4j.Slf4j;
-import java.util.List;
 
 
 /**
@@ -51,16 +55,16 @@ public class ClueTrackingController {
     /**
      * 根据资源id查询跟进记录
      * 
-     * @param clueId
+     * @param idEntity
      * @return
      */
     @RequestMapping("/findByClueId")
-    public JSONResult<List<TrackingRespDTO>> findByClueId(@RequestParam("clueId") Long clueId) {
-        if (null == clueId) {
+    public JSONResult<List<TrackingRespDTO>> findByClueId(@RequestBody IdEntityLong idEntity) {
+        if (null == idEntity.getId()) {
             return new JSONResult<List<TrackingRespDTO>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return trackingMerchantFeignClient.findByClueId(clueId);
+        return trackingMerchantFeignClient.findByClueId(idEntity.getId());
     }
 
     /**
