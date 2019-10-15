@@ -15,12 +15,25 @@
     .el-dialog__header {
       background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
     }
+
+    .el-input--suffix .el-input__inner {
+      height: 28px;
+    }
+
+    .el-pagination.is-background .el-pager li:not(.disabled).active {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+    }
+
+    body {
+      background-color: #f0f5fe;
+      height: 100%;
+    }
   </style>
 </head>
 
 <body>
-  <div id="app" class="app mainPadding" style="display: none;">
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+  <div id="app" class="app mainPadding" style="display: none;padding-left: 25px;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" style="font-size: 12px;">
       <el-breadcrumb-item>Home</el-breadcrumb-item>
       <el-breadcrumb-item>系统管理</el-breadcrumb-item>
       <el-breadcrumb-item>商家坐席管理</el-breadcrumb-item>
@@ -58,7 +71,7 @@
           @selection-change="handleSelectionChange">
           <el-table-column align="center" type="selection" width="55">
           </el-table-column>
-          <el-table-column align="center" prop="subMerchant" label="所属子账号" width="120">
+          <el-table-column align="center" prop="subMerchant" label="所属子账号" width="140">
             <!-- <template slot-scope="scope">{{ scope.row.date }}</template> -->
           </el-table-column>
           <el-table-column align="center" prop="seatNo" label="坐席编号" width="120">
@@ -75,7 +88,9 @@
           </el-table-column>
         </el-table>
       </div>
-      <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      <div style="text-align: center">
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      </div>
 
     </div>
     <!-- 添加编辑坐席弹框 -->
@@ -104,7 +119,7 @@
         </el-form-item>
         <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="iframesubMerchant">
           <el-select v-model="subAccountForm.iframesubMerchant" placeholder="请选择" style="width: 290px;">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+            <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
@@ -124,6 +139,8 @@
 <script th:inline="javascript">
   var merchantUserList = [[${ userList }]];//商户集合
   // var merchantUserList = [];//商户集合
+  console.log(merchantUserList, 11111);
+
   var app = new Vue({
     el: '#app',
     data() {
@@ -285,19 +302,10 @@
         var that = this
         switch (type) {
           case 'add':
+            this.subAccountForm = {}
             this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : '' //移除表单验证
             this.title = '添加座席'
             this.subAccount()
-            // var subAccountForm = {
-            //   iframeseatNo: "",
-            //   iframecompany: "",
-            //   iframeaddress: "",
-            //   iframeaccountNo: "",
-            //   iframesecretKey: "",
-            //   iframeproxyUrl: "",
-            //   iframesubMerchant: "",
-            // }
-            // this.subAccountForm = subAccountForm  //将添加项置空
             break;
           case 'edit':
             if (this.multipleSelection.length === 1) {
@@ -320,11 +328,18 @@
             break;
           case 'delete':
             if (this.multipleSelection.length >= 1) {
-              console.log(that.multipleSelection);
-              // this.$message('请求接口');
-              axios.post('/merchant/seatManager/delete', { idList: '' })
+              var idList = []
+              for (var i = 0; i < that.multipleSelection.length; i++) {
+                if (that.multipleSelection[i].id) {
+                  idList.push(that.multipleSelection[i].id)
+                }
+              }
+              axios.post('/merchant/seatManager/delete', { idList })
                 .then(function (response) {
-                  console.log(response)
+                  that.$message({
+                    message: '删除成功',
+                    type: 'success'
+                  });
                   that.searchTable()
                 })
                 .catch(function (error) {
@@ -340,31 +355,12 @@
 
       // 彈框商家子賬戶請求接口 
       subAccount() {
-        axios.post("/merchant/seatManager/merchantUsers")
+        axios.post("/merchant/seatManager/merchantUsers", { id: this.getQueryString('userId') })
           .then(function (response) {
-            console.log(response);
-
+            app.options = response.data
           }).catch(function (error) {
             console.log(error);
           });
-        var selectData = [
-          {
-            value: '选项1',
-            label: '黄金糕'
-          }, {
-            value: '选项2',
-            label: '双皮奶'
-          }, {
-            value: '选项3',
-            label: '蚵仔煎'
-          }, {
-            value: '选项4',
-            label: '龙须面'
-          }, {
-            value: '选项5',
-            label: '北京烤鸭'
-          }]
-        this.options = selectData
         this.centerDialogVisible = true
 
       },
@@ -374,7 +370,6 @@
         var that = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            console.log(this.subAccountForm);
             const { iframeseatNo, iframecompany, iframeaddress, iframeaccountNo, iframesecretKey, iframeproxyUrl, iframesubMerchant, } = this.subAccountForm
             var param = {};
             param.buyPackageId = that.getQueryString('buyPackageId')
@@ -396,14 +391,17 @@
             }
             axios.post(url, param)
               .then(function (response) {
-                console.log(response);
                 that.centerDialogVisible = false
                 that.searchTable();
+                that.$message({
+                  message: '操作成功',
+                  type: 'success'
+                });
               }).catch(function (error) {
                 console.log(error);
               });
           } else {
-            alert('错误');
+            // alert('错误');
           }
         })
       },

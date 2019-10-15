@@ -97,11 +97,11 @@ public class MerchantSetMealController {
     if(CommonUtil.resultCheck(result)&&CommonUtil.resultCheck(result1)){
       // 设置对应坐席数量
       Map<String, Integer> collect = result1.getData().stream().collect(Collectors
-          .toMap(a -> a.getSubMerchant() + "-" + a.getBuyPackageId() + "-" + a.getPackageId(),
+          .toMap(a -> a.getBuyPackageId() + "-" + a.getPackageId(),
               b -> b.getSeatNum()));
       for(MerchantServiceDTO service:result.getData()){
-        service.setSeatNum(collect.get(service.getUserId() + "-" + service.getId() + "-" + service.getPackageId()));
-        }
+        service.setSeatNum(collect.get(service.getId() + "-" + service.getPackageId()));
+      }
     }
     return result;
   }
