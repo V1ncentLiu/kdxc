@@ -387,4 +387,17 @@ public class BaseStatisticsController {
         return json.getData();
     }
 
+    public void initSWDQByBusiness(HttpServletRequest request){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        //查询商务大区
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        request.setAttribute("areaList",queryOrgByParam.getData());
+        request.setAttribute("roleCode",roleCode);
+    }
+
 }
