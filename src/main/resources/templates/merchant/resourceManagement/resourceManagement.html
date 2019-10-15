@@ -189,23 +189,16 @@
                         <el-form-item label="客户姓名:">
                             <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
                         </el-form-item>
-                        <el-form-item label="客户状态:">
-                            <el-select v-model="form.customerStatus" clearable placeholder="资源类型">
-                                <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name"
+                        <el-form-item label="客户状态:" >
+                            <el-select v-model="form.customerStatus" placeholder="客户状态" clearable>
+                                <el-option
+                                    v-for="item in cusStatusArr"
+                                    :key="item.value"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
-                            </el-select>                        
+                            </el-select>
                         </el-form-item>
-                        <el-form-item label="客户状态:" >
-                        <el-select v-model="form.cusStatus" placeholder="客户状态" clearable>
-                            <el-option
-                                v-for="item in cusStatusArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
                         <el-form-item label="资源是否有效:">
                             <el-select v-model="form.status" placeholder="资源是否有效" clearable >
                                 <el-option
@@ -256,7 +249,7 @@
                     </el-table-column>
                     <el-table-column align="center" prop="" label="跟进记录">
                         <template slot-scope="scope">
-                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog">查看</el-button>
+                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog(scope.row.clueId)">查看</el-button>
                             <el-button v-else type="text" @click="openAddTracking(scope.row.clueId)">添加</el-button>
                         </template>
                     </el-table-column>
@@ -273,7 +266,7 @@
                     <el-table-column align="center" prop="cluePrice" label="价格（元）/条" width="130"></el-table-column>
                     <el-table-column align="center" prop="" label="客户状态" width="120">
                         <template slot-scope="scope">
-                            <span>{{scope.row.customerStatusName}}</span><span v-if="scope.row.customerStatusSub">-{{scope.row.customerStatusSub}}</span>
+                            <span>{{scope.row.customerStatusName}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="merchantIsInvite" label="操作" width="80">
@@ -561,6 +554,18 @@
             }
         },
         methods: {
+            // 获取时间
+            getTime(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/clueInfo/getLastCallTime', param)
+                    .then(function (response) {
+                        console.log(response)
+                        
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            },
             submitTrackingForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -579,7 +584,7 @@
                         param.focusPoint = this.trackingForm.focusPoint;
                         param.nextVisitTime = this.trackingForm.nextVisitTime;
                         console.log(param)
-                        axios.post('/merchant/tracking/insert', param)
+                        axios.post('/tracking/insert', param)
                             .then(function (response) {
                                 var data = response.data;
                                 console.log(data)
@@ -591,14 +596,17 @@
                                         type: 'error'
                                     });
                                 }
+                                ocmVM.btnDisabled = false;
                             })
                             .catch(function (error) {
+                                ocmVM.btnDisabled = false;
                                 console.log(error);
                             })
                             .then(function () {
 
                             });
                     } else {
+                        this.btnDisabled = false;
                         console.log('数据未通过校验！');
                         return false;
                     }
@@ -612,14 +620,19 @@
                 }
             },
             openAddTracking(cid){//新增跟进记录
+                this.btnDisabled = false;
+                if (this.$refs['trackingForm']) {
+                    this.$refs['trackingForm'].resetFields();
+                }
                 this.trackingVisible=true;
                 console.log(cid);
                 this.clueId=cid;
+                this.getTime(cid);//获取时间
             },
             openTrackingDialog(cid){//查看跟进记录
                 var param = {};
                 param.clueId = cid;
-                axios.post('/merchant/tracking/findByClueId', param)
+                axios.post('/tracking/findByClueId', param)
                     .then(function (response) {
                         console.log(response.data)
                         if (response.data.code == 0) {
