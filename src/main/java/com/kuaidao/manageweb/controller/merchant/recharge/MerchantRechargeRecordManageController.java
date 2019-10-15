@@ -57,7 +57,10 @@ public class MerchantRechargeRecordManageController {
       MerchantRechargeRecordQueryDTO queryDTO = new MerchantRechargeRecordQueryDTO();
       queryDTO.setManageRechargeUser(user.getId());
       JSONResult<RechargeAccountDTO> rechargeAccountDTOJSONResult = merchantRechargeRecordManageFeignClient.getNowDayAndMonthRechargeMoney(queryDTO);
-      RechargeAccountDTO rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
+      RechargeAccountDTO rechargeAccountDTO = new RechargeAccountDTO();
+      if(rechargeAccountDTOJSONResult.getCode().equals(JSONResult.SUCCESS)){
+        rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
+      }
       if(rechargeAccountDTO == null || rechargeAccountDTO.getDaySumMoney() == null){
         rechargeAccountDTO.setDaySumMoney(new BigDecimal("0.00"));
       }
