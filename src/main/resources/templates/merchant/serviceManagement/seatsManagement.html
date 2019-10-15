@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<!-- <head th:replace="_header_include::frag(~{::title},~{::style},~{})"> -->
+
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
+  <title>后台管理系统</title>
+  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+  <style>
+    .el-button--primary {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+    }
+
+    .el-dialog__header {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
+    }
+
+    .el-input--suffix .el-input__inner {
+      height: 28px;
+    }
+
+    .el-pagination.is-background .el-pager li:not(.disabled).active {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+    }
+
+    body {
+      background-color: #f0f5fe;
+      height: 100%;
+    }
+
+    .el-pagination .el-select .el-input .el-input__inner {
+      background-color: #fff;
+    }
+
+    .el-pagination.is-background .btn-next.disabled,
+    .el-pagination.is-background .btn-next:disabled,
+    .el-pagination.is-background .btn-prev.disabled,
+    .el-pagination.is-background .btn-prev:disabled,
+    .el-pagination.is-background .el-pager li.disabled {
+      background-color: #fff;
+    }
+
+    .el-pagination__editor.el-input .el-input__inner {
+      background-color: #fff;
+    }
+
+    .el-checkbox__input.is-checked .el-checkbox__inner,
+    .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+      background-color: #4B80FF;
+      border-color: #4B80FF;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="app mainPadding" style="display: none;padding-left: 25px;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" style="font-size: 12px;">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>商家坐席管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <!-- 按钮 -->
+    <el-row class="marginB20">
+      <el-button type="primary" @click="seatOperation('add')">添加坐席</el-button>
+      <el-button type="success" @click="seatOperation('edit')">编辑坐席</el-button>
+      <el-button type="danger" @click="seatOperation('delete')">删除坐席</el-button>
+    </el-row>
+    <div class="mainSearchBg">
+      <div class="mainSearchFormBox">
+        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+          <el-form-item label="商家子账户：" label-width="auto">
+            <el-select v-model="form.rechargeBusiness" filterable clearable placeholder="商家账户名">
+              <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="坐席编号：">
+            <el-input v-model="form.number" placeholder=""></el-input>
+          </el-form-item>
+          <el-form-item label="号码所属公司：">
+            <el-input v-model="form.company" placeholder=""></el-input>
+          </el-form-item>
+          <el-form-item label="">
+            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
+              style="margin-left: 10px;">搜索</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <!-- 列表展示 -->
+      <div class="seatOperation">
+        <el-table :data="tableData" tooltip-effect="dark" border style="width: 100%"
+          @selection-change="handleSelectionChange">
+          <el-table-column align="center" type="selection" width="55">
+          </el-table-column>
+          <el-table-column align="center" prop="subMerchant" label="所属子账号" width="140">
+            <!-- <template slot-scope="scope">{{ scope.row.date }}</template> -->
+          </el-table-column>
+          <el-table-column align="center" prop="seatNo" label="坐席编号" width="120">
+          </el-table-column>
+          <el-table-column align="center" prop="company" label="号码所属公司">
+          </el-table-column>
+          <el-table-column align="center" prop="address" label="坐席归属地">
+          </el-table-column>
+          <el-table-column align="center" prop="accountNo" label="账户编号">
+          </el-table-column>
+          <el-table-column align="center" prop="secretKey" label="秘钥">
+          </el-table-column>
+          <el-table-column align="center" prop="proxyUrl" label="proxyUrl">
+          </el-table-column>
+        </el-table>
+      </div>
+      <div style="text-align: center">
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      </div>
+
+    </div>
+    <!-- 添加编辑坐席弹框 -->
+    <el-dialog id="sittingFrame" :title="title" :visible.sync="centerDialogVisible" width="540px">
+      <el-form :model="subAccountForm" ref="subAccountForm" :rules="rules">
+        <el-form-item label="" :label-width="formLabelWidth">
+          {{merchatName}}增加子账户绑定坐席
+        </el-form-item>
+        <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="iframeseatNo">
+          <el-input v-model="subAccountForm.iframeseatNo" autocomplete="off" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="iframecompany">
+          <el-input v-model="subAccountForm.iframecompany" autocomplete="off" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="iframeaddress">
+          <el-input v-model="subAccountForm.iframeaddress" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="iframeaccountNo">
+          <el-input v-model="subAccountForm.iframeaccountNo" autocomplete="off" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="iframesecretKey">
+          <el-input v-model="subAccountForm.iframesecretKey" autocomplete="off" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="iframeproxyUrl">
+          <el-input v-model="subAccountForm.iframeproxyUrl" autocomplete="off" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="iframesubMerchant">
+          <el-select v-model="subAccountForm.iframesubMerchant" placeholder="请选择" style="width: 290px;">
+            <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer" style="text-align:center;">
+        <el-button type="primary" :disabled="submitDisabled" @click="submitForm('subAccountForm')">提交</el-button>
+        <el-button type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
+      </div>
+    </el-dialog>
+  </div>
+  <!-- import common js-->
+  <div th:include="_footer_include :: #jsLib"></div>
+</body>
+
+</html>
+<script th:inline="javascript">
+  var merchantUserList = [[${ userList }]];//商户集合
+  // var merchantUserList = [];//商户集合
+  console.log(merchantUserList, 11111);
+
+  var app = new Vue({
+    el: '#app',
+    data() {
+      return {
+        merchantUserListOptions: merchantUserList,
+        pager: {
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
+        },
+        form: {
+          rechargeBusiness: '',
+          number: '',
+          company: '',
+        },
+        merchatName: '',
+        submitDisabled: false,
+
+        tableData: [],
+        // [
+        //   {
+        //     id: '1',
+        //     buyPackageId: '2',
+        //     packageId: '3',
+        //     seatNo: '4',
+        //     company: '5',
+        //     address: '6',
+        //     accountNo: '7',
+        //     secretKey: '8',
+        //     proxyUrl: '9',
+        //     subMerchant: '0',
+        //   },
+        //   {
+        //     id: '11',
+        //     buyPackageId: '22',
+        //     packageId: '33',
+        //     seatNo: '44',
+        //     company: '55',
+        //     address: '66',
+        //     accountNo: '77',
+        //     secretKey: '88',
+        //     proxyUrl: '99',
+        //     subMerchant: '00',
+        //   },
+        // ],
+        multipleSelection: [],
+        options: [],
+        //  [
+        //   {
+        //     value: '选项1',
+        //     label: '黄金糕'
+        //   }, {
+        //     value: '选项2',
+        //     label: '双皮奶'
+        //   }, {
+        //     value: '选项3',
+        //     label: '蚵仔煎'
+        //   }, {
+        //     value: '选项4',
+        //     label: '龙须面'
+        //   }, {
+        //     value: '选项5',
+        //     label: '北京烤鸭'
+        //   }],
+        centerDialogVisible: false,
+        title: '',
+        labelPosition: 'right',
+        subAccountForm: {
+          iframeseatNo: "",
+          iframecompany: "",
+          iframeaddress: "",
+          iframeaccountNo: "",
+          iframesecretKey: "",
+          iframeproxyUrl: "",
+          iframesubMerchant: "",
+        },
+        formLabelWidth: '150px',
+        rules: {
+          iframeseatNo: [
+            { required: true, message: '座席编号不能为空', trigger: 'blur' },
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+            {
+              validator: function (rule, value, callback) {
+                if (/^[0-9]+$/.test(value) == false) {
+                  callback(new Error("请输入数字"));
+                } else {
+                  callback();
+                }
+                callback();
+
+              }, trigger: 'blur'
+            }
+          ],
+          iframecompany: [
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+          ],
+          iframeaddress: [
+            { max: 10, message: '最大10个字符', trigger: 'blur' },
+          ],
+          iframeaccountNo: [
+            { required: true, message: '账户编号不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          iframesecretKey: [
+            { required: true, message: '秘钥不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          iframeproxyUrl: [
+            { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+          iframesubMerchant: [
+            { required: true, message: '请选择商家子账号', trigger: 'change' },
+            { max: 50, message: '最大50个字符', trigger: 'blur' },
+          ],
+        },
+
+      }
+    },
+    methods: {
+      searchTable() {
+        var that = this
+        var param = {};
+        param.subMerchant = this.form.rechargeBusiness
+        param.seatNo = this.form.number
+        param.company = this.form.company
+        param.pageSize = this.pager.pageSize
+        param.pageNum = this.pager.currentPage;
+        param.buyPackageId = that.getQueryString('buyPackageId')
+        param.packageId = that.getQueryString('packageId')
+        axios.post('/merchant/seatManager/queryList', param)
+          .then(function (response) {
+            console.log(response)
+            var result = response.data;
+            if (result.code == 0) {
+              var table = result.data;
+              that.pager.total = table.total;
+              that.pager.currentPage = table.currentPage;
+              console.log(table);
+
+              that.tableData = table.data
+            } else {
+              ocmVM.$message.error(result.msg);
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      // 选择框选中
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+        console.log(val);
+      },
+
+      // 添加 编辑 删除按钮
+      seatOperation(type) {
+        var that = this
+        switch (type) {
+          case 'add':
+            this.subAccountForm = {}
+            this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : '' //移除表单验证
+            this.title = '添加座席'
+            this.subAccount()
+            break;
+          case 'edit':
+            if (this.multipleSelection.length === 1) {
+              this.title = '编辑座席'
+              this.subAccount()
+              var data = {}
+              const { seatNo, company, address, accountNo, subMerchant, secretKey, proxyUrl } = this.multipleSelection[0]
+              data.iframeseatNo = seatNo
+              data.iframecompany = company
+              data.iframeaddress = address
+              data.iframeaccountNo = accountNo
+              data.iframesecretKey = secretKey
+              data.iframeproxyUrl = proxyUrl
+              data.iframesubMerchant = subMerchant
+              this.subAccountForm = data
+              this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : ''
+            } else {
+              this.$message('请选择坐席')
+            }
+            break;
+          case 'delete':
+            if (this.multipleSelection.length >= 1) {
+              var idList = []
+              for (var i = 0; i < that.multipleSelection.length; i++) {
+                if (that.multipleSelection[i].id) {
+                  idList.push(that.multipleSelection[i].id)
+                }
+              }
+              axios.post('/merchant/seatManager/delete', { idList })
+                .then(function (response) {
+                  that.$message({
+                    message: '删除成功',
+                    type: 'success'
+                  });
+                  that.searchTable()
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+            } else {
+              this.$message('请选择坐席')
+            }
+            break;
+          default: return ''
+        }
+      },
+
+      // 彈框商家子賬戶請求接口 
+      subAccount() {
+        axios.post("/merchant/seatManager/merchantUsers", { id: this.getQueryString('userId') })
+          .then(function (response) {
+            app.options = response.data
+          }).catch(function (error) {
+            console.log(error);
+          });
+        this.centerDialogVisible = true
+
+      },
+
+      // 提交
+      submitForm(formName) {
+        var that = this
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            const { iframeseatNo, iframecompany, iframeaddress, iframeaccountNo, iframesecretKey, iframeproxyUrl, iframesubMerchant, } = this.subAccountForm
+            var param = {};
+            param.buyPackageId = that.getQueryString('buyPackageId')
+            param.packageId = that.getQueryString('packageId')
+            param.type = ''
+            param.seatNo = iframeseatNo
+            param.company = iframecompany
+            param.address = iframeaddress
+            param.accountNo = iframeaccountNo
+            param.secretKey = iframesecretKey
+            param.proxyUrl = iframeproxyUrl
+            param.subMerchant = iframesubMerchant
+            var url = ''
+            if (this.title === '添加座席') {
+              url = '/merchant/seatManager/create'
+            } else if (this.title === '编辑座席') {
+              url = '/merchant/seatManager/update'
+              param.id = this.multipleSelection[0].id
+            }
+            axios.post(url, param)
+              .then(function (response) {
+                that.centerDialogVisible = false
+                that.searchTable();
+                that.$message({
+                  message: '操作成功',
+                  type: 'success'
+                });
+              }).catch(function (error) {
+                console.log(error);
+              });
+          } else {
+            // alert('错误');
+          }
+        })
+      },
+
+      // 取消添加坐席提交
+      cancelClick(formName) {
+        if (this.$refs[formName] !== undefined) {
+          this.$refs[formName].resetFields();
+        }
+        this.centerDialogVisible = false;
+      },
+
+      //获取url地址栏参数的方法
+      getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+      },
+    },
+
+    created() {
+      var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+      if (localVal) { this.pager.pageSize = localVal; }
+      // console.info("create method");
+      this.searchTable();
+      // console.log(that.getQueryString('buyPackageId'));
+    },
+    mounted() {
+      document.getElementById('app').style.display = 'block';
+    }
+  })
+</script>

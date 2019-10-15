@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Slf4j
 @Controller
-@RequestMapping("merchant/merchantAppiontment")
+@RequestMapping("/merchant/merchantAppiontment")
 public class MerchantAppiontmentController {
 
     @Autowired

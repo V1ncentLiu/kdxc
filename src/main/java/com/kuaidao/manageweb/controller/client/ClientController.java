@@ -780,7 +780,6 @@ public class ClientController {
                 if("2".equals(bindType)) {
                     session.setAttribute("bindType", bindType);
                 }
-             
                 ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
                 clientLoginRecord.setAccountId(curLoginUser.getId());
                 clientLoginRecord.setAccountType(reqDTO.getAccountType());

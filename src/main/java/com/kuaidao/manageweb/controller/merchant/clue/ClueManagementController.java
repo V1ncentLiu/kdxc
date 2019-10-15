@@ -1,36 +1,34 @@
 package com.kuaidao.manageweb.controller.merchant.clue;
 
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.common.util.SortUtils;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.omg.CORBA.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.common.util.SortUtils;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -39,6 +37,7 @@ import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.merchant.constant.MerchantConstant;
 import com.kuaidao.merchant.dto.clue.ClueAssignReqDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementDto;
@@ -47,7 +46,6 @@ import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -95,15 +93,15 @@ public class ClueManagementController {
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
         }
-        //查询用户集合（邀约使用）
+        // 查询用户集合（邀约使用）
         UserInfoDTO userInfoInvite = new UserInfoDTO();
-        if(SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+        if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getId());
-        } else if(SysConstant.USER_TYPE_THREE.equals(user.getUserType())){
+        } else if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userInfoInvite = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getParentId());
         }
         JSONResult<List<UserInfoDTO>> merchantAppiontUserList = merchantUserInfoFeignClient.merchantUserList(userInfoInvite);
-        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+        if (merchantAppiontUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantAppiontUserList", merchantAppiontUserList.getData());
         }
         // 查询字典行业类别集合
@@ -205,7 +203,7 @@ public class ClueManagementController {
         if (CollectionUtils.isNotEmpty(subIds)) {
             IdListLongReq ids = new IdListLongReq();
             ids.setIdList(subIds);
-            //主账号也需要将自己领取的查出来
+            // 主账号也需要将自己领取的查出来
             if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
                 subIds.add(userInfoDTO.getId());
             }
@@ -272,7 +270,7 @@ public class ClueManagementController {
                 curList.add(dto.getCluePrice());
                 // 是否分发
                 String str = MerchantConstant.ASSIGN_SUB_ACCOUNT_YES.equals(dto.getIsAssignSubAccount()) ? "是" : "否";
-                //公有池领取 此字段为空
+                // 公有池领取 此字段为空
                 if (MerchantConstant.CPOOLRECEIVE_FLAG_YES.equals(dto.getCpoolReceiveFlag())) {
                     str = "";
                 }
@@ -375,6 +373,7 @@ public class ClueManagementController {
         }
         return null;
     }
+
     /**
      * 构建商家子账户查询实体
      *
