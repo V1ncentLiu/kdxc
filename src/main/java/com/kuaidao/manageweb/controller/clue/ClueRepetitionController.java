@@ -357,8 +357,12 @@ public class ClueRepetitionController {
     public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,
             @RequestBody BusinessSignDTO businessSignDTO) {
         UserInfoDTO user = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
         if (user.getBusinessLine() != null) {
             businessSignDTO.setBusinessLine(user.getBusinessLine());
+        }
+        if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZY.name())){
+            businessSignDTO.setPdUser(user.getId());
         }
         JSONResult<PageBean<BusinessSignDTO>> list =
                 businessSignFeignClient.businessSignDealList(businessSignDTO);
