@@ -189,6 +189,26 @@
                         <el-form-item label="客户姓名:">
                             <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
                         </el-form-item>
+                        <el-form-item label="客户状态:" >
+                            <el-select v-model="form.customerStatus" placeholder="客户状态" clearable>
+                                <el-option
+                                    v-for="item in cusStatusArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="资源是否有效:">
+                            <el-select v-model="form.status" placeholder="资源是否有效" clearable >
+                                <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
                     </el-row>
                     <div class="mainSearchBtnBox">
                         <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
@@ -224,14 +244,13 @@
                     <el-table-column align="center" prop="phone" label="联系电话">
                         <template slot-scope="scope">
                             <span>{{scope.row.phone}}</span>
-                            <span class="callIphone" @click="callIphone(scope.row.phone,scope.row.clueId)"><img th:src="@{/images/icon_call2.png}"
-                                    alt=""></span>
+                            <span v-if="scope.row.showPhoneFlag=='1'" class="callIphone" @click="callIphone(scope.row.phone,scope.row.clueId)"><img th:src="@{/images/icon_call2.png}" alt=""></span>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="" label="跟进记录">
                         <template slot-scope="scope">
-                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog">查看</el-button>
-                            <el-button v-else type="text" @click="openAddTracking">添加</el-button>
+                            <el-button v-if="scope.row.showAddTrack==1" type="text" @click="openTrackingDialog(scope.row.clueId)">查看</el-button>
+                            <el-button v-else type="text" @click="openAddTracking(scope.row.clueId)">添加</el-button>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="isAssignSubAccount" label="用户行为">
@@ -245,6 +264,11 @@
                     <el-table-column align="center" prop="receiveTime" label="获取时间" :formatter="dateFormat" width="130">
                     </el-table-column>
                     <el-table-column align="center" prop="cluePrice" label="价格（元）/条" width="130"></el-table-column>
+                    <el-table-column align="center" prop="" label="客户状态" width="120">
+                        <template slot-scope="scope">
+                            <span>{{scope.row.customerStatusName}}</span>
+                        </template>
+                    </el-table-column>
                     <el-table-column align="center" prop="merchantIsInvite" label="操作" width="80">
                         <template slot-scope="scope">
                             <div v-if="scope.row.merchantIsInvite == '1'">已邀约</div>
@@ -345,8 +369,8 @@
         <el-dialog title="添加跟进记录" :visible.sync="trackingVisible" width="540px">
             <template>
                 <el-form :model="trackingForm" :rules="trackingRules" ref="trackingForm">
-                    <el-form-item label="拨打时间：" :label-width="formLabelWidth" prop="callTime" class="xreuired">
-                        <el-date-picker v-model="trackingForm.callTime" class="input-width" type="datetime">
+                    <el-form-item label="拨打时间：" :label-width="formLabelWidth" prop="callTime">
+                        <el-date-picker v-model="trackingForm.callTime" class="input-width" type="datetime" style="width: 325px;">
                         </el-date-picker>
                     </el-form-item>
                     <!-- 客户状态一级 -->
@@ -362,13 +386,16 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否接通：" :label-width="formLabelWidth" prop="isCall">
-                        <el-select v-model="trackingForm.isCall" clearable>
+                        <el-select v-model="trackingForm.isCall" clearable style="width: 325px;">
                             <el-option v-for="item in isCallArr" :key="item.value" :label="item.label" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="客户关注点：" :label-width="formLabelWidth" prop="focusPoint" class="invite-top">
-                        <el-input type="textarea" v-model="trackingForm.focusPoint" class="input-with-select input-width"
-                            maxlength="200" :rows="4"></el-input>
+                    <el-form-item label="下次回访时间：" :label-width="formLabelWidth" prop="nextVisitTime">
+                        <el-date-picker v-model="trackingForm.nextVisitTime" type="datetime" style="width: 325px;">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="客户关注点：" :label-width="formLabelWidth" prop="focusPoint">
+                        <el-input type="textarea" v-model="trackingForm.focusPoint" maxlength="200" :rows="4" style="width: 325px;"></el-input>
                     </el-form-item>
                     <div class="padding20 f-tac r-dailog ">
                         <el-button type="primary" :disabled="btnDisabled" @click="submitTrackingForm('trackingForm')">提交
@@ -431,16 +458,16 @@
                     pageSize: 20,
                 },
                 form: {
-                    type: '',
-                    category: '',
-                    industryCategory: '',
-                    status: '',
-                    phone: '',
-                    searchStartTime: '',
-                    searchEndTime: '',
-                    searchWord: '',
-                    updateTimeBegin: '',
-                    updateTimeEnd: ''
+                    category:'',
+                    type:'',
+                    industryCategory:'',
+                    searchStartTime:'',
+                    searchEndTime:'',
+                    searchWord:'',
+                    phone:'',
+                    cusName:'',
+                    customerStatus:'',//客户状态
+                    status:'',//资源是否有效                
                 },
                 inviteForm: {
                     province: '',
@@ -493,15 +520,18 @@
                 customerStatusSubArr: [],//客户状态二级list
                 trackingForm: {
                     callTime:'',
-                    isCall:'',
-                    focusPoint:'',
+                    customerStatus:'1',//默认未联系
+                    customerStatusSub:'',
+                    isCall:'1',//默认已接通
+                    nextVisitTime:'',
+                    focusPoint:''
                 },
                 isCallArr: [{
-                    value: '0',
-                    label: '未接通'
-                }, {
                     value: '1',
-                    label: '已接通'
+                    label: '是'
+                }, {
+                    value: '0',
+                    label: '否'
                 }],
                 trackingRules: {
                     callTime: [
@@ -514,12 +544,73 @@
                         { required: true, message: '请选择是否接通', trigger: 'change' }
                     ],
                 },
+                clueId:'',//点击添加记录存储资源id
+                comArr:[
+                    {value:"",name:"全部"},
+                    {value:"1",name:"是"},
+                    {value:"0",name:"否"}
+                ],
                 
             }
         },
         methods: {
-            submitTrackingForm(){
+            // 获取时间
+            getTime(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/clueInfo/getLastCallTime', param)
+                    .then(function (response) {
+                        console.log(response)
+                        
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            submitTrackingForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        //提交跟进记录
+                        var param = {};
+                        param.clueId = this.clueId;
+                        param.callTime = this.trackingForm.callTime;
+                        param.customerStatus = this.trackingForm.customerStatus;
+                        if(this.trackingForm.customerStatus=="3"){
+                            param.customerStatusSub = this.trackingForm.customerStatusSub;
+                        }else{
+                            param.customerStatusSub = "";
+                        }                        
+                        param.isCall = this.trackingForm.isCall;
+                        param.focusPoint = this.trackingForm.focusPoint;
+                        param.nextVisitTime = this.trackingForm.nextVisitTime;
+                        console.log(param)
+                        axios.post('/tracking/insert', param)
+                            .then(function (response) {
+                                var data = response.data;
+                                console.log(data)
+                                if (data.code == '0') {
+                                    window.location.href="/clue/management/init"
+                                } else {
+                                    ocmVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                                ocmVM.btnDisabled = false;
+                            })
+                            .catch(function (error) {
+                                ocmVM.btnDisabled = false;
+                                console.log(error);
+                            })
+                            .then(function () {
 
+                            });
+                    } else {
+                        this.btnDisabled = false;
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
             },
             customerStatusChange(selVal) {
                 if (selVal == '3') {
@@ -528,13 +619,20 @@
                     this.substatus = true;
                 }
             },
-            openAddTracking(cid){//打开跟进记录
-                
+            openAddTracking(cid){//新增跟进记录
+                this.btnDisabled = false;
+                if (this.$refs['trackingForm']) {
+                    this.$refs['trackingForm'].resetFields();
+                }
+                this.trackingVisible=true;
+                console.log(cid);
+                this.clueId=cid;
+                this.getTime(cid);//获取时间
             },
-            openTrackingDialog(cid){//打开跟进记录
+            openTrackingDialog(cid){//查看跟进记录
                 var param = {};
                 param.clueId = cid;
-                axios.post('/merchant/tracking/findByClueId', param)
+                axios.post('/tracking/findByClueId', param)
                     .then(function (response) {
                         console.log(response.data)
                         if (response.data.code == 0) {
@@ -576,12 +674,12 @@
                 param.endTime = endTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                console.info(param);
+                // console.info(param);
                 axios.post('/clue/management/queryPage', param)
                     .then(function (response) {
                         var result = response.data;
                         if (result.code == '0') {
-                            console.info(result);
+                            // console.info(result);
                             var table = result.data;
                             ocmVM.dataTable = table.data;
                             ocmVM.pager.total = table.total;
@@ -600,7 +698,7 @@
                 axios.post('/clue/management/getResourceStatistics', param)
                     .then(function (response) {
                         var result = response.data;
-                        console.info("getResourceStatistics:" + result);
+                        // console.info("getResourceStatistics:" + result);
                         if (result.code == '0') {
                             var data = result.data;
                             ocmVM.todayAssignClueNum = data.todayAssignClueNum;
@@ -862,9 +960,9 @@
                     // if(data[i].name != "未联系"){
                         arr.push(data[i]);
                     // };
-                }
-
+                }                
                 ocmVM.cusStatusArr =arr ;
+                console.log(ocmVM.cusStatusArr)
             });
 
             //客户状态二级
@@ -872,8 +970,6 @@
             param.groupCode = "customerStatusSub";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 ocmVM.customerStatusSubArr = response.data.data;
-                debugger
-                console.log(ocmVM.customerStatusSubArr)
             });
         },
         mounted() {

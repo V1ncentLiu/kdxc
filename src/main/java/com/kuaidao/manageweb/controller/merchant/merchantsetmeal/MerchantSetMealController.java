@@ -10,6 +10,7 @@ import com.kuaidao.manageweb.component.merchant.MerchantComponent;
 import com.kuaidao.manageweb.feign.merchant.mserviceshow.MserviceShowFeignClient;
 import com.kuaidao.manageweb.feign.merchant.seatmanager.SeatManagerFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +58,12 @@ public class MerchantSetMealController {
   // @RequiresPermissions("merchant:setMeal:view")
   public String toPage(HttpServletRequest request) {
     // 商家主账号
-    List<UserInfoDTO> userList = merchantComponent.getMerchantUser(null,null);
-    request.setAttribute("userList", userList);
+    List<UserInfoDTO> merchantUser = merchantComponent
+        .getMerchantUser(SysConstant.USER_TYPE_TWO, null);
+    // 商家子账户
+    List<UserInfoDTO> userList = merchantComponent.getMerchantUser(SysConstant.USER_TYPE_THREE,null);
+    merchantUser.addAll(merchantUser);
+    request.setAttribute("userList", merchantUser);
     return "merchant/serviceManagement/serviceManagement";
   }
 
@@ -92,10 +97,10 @@ public class MerchantSetMealController {
     if(CommonUtil.resultCheck(result)&&CommonUtil.resultCheck(result1)){
       // 设置对应坐席数量
       Map<String, Integer> collect = result1.getData().stream().collect(Collectors
-          .toMap(a -> a.getSubMerchant() + "-" + a.getBuyPackageId() + "" + a.getPackageId(),
+          .toMap(a -> a.getSubMerchant() + "-" + a.getBuyPackageId() + "-" + a.getPackageId(),
               b -> b.getSeatNum()));
       for(MerchantServiceDTO service:result.getData()){
-        service.setSeatNum(collect.get(service.getUserId() + "-" + service.getId() + "" + service.getPackageId()));
+        service.setSeatNum(collect.get(service.getUserId() + "-" + service.getId() + "-" + service.getPackageId()));
         }
     }
     return result;

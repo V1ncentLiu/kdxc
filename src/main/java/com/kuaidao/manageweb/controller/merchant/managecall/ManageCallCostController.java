@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -73,7 +74,7 @@ public class ManageCallCostController {
   **/
   @RequestMapping("/getManageCallCostList")
   @ResponseBody
-  public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(MerchantCallCostReq req){
+  public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(@RequestBody MerchantCallCostReq req){
     logger.info("getManageCallCostList参数{{}}",req);
     try {
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getManageCallCostList(req);
