@@ -8,6 +8,12 @@
   <title>后台管理系统</title>
   <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
   <style>
+    body {
+      background-color: #f0f5fe;
+      padding: 0 0px 0 5px;
+      height: 100%;
+    }
+
     .el-dialog__header {
       background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
     }
@@ -41,8 +47,7 @@
         <el-form :inline="true" :model="userSearchForm" class="demo-form-inline mainSearchForm" ref="userSearchForm">
           <el-form-item label="商家：" prop="status" label-width="auto">
             <el-select clearable v-model="userSearchForm.status" placeholder="商家账户名">
-              <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.label"
-                :value="item.name">
+              <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name" :value="item.id">
               </el-option>
             </el-select>
           </el-form-item>
@@ -79,11 +84,10 @@
           </el-table-column>
           <el-table-column align="center" prop="sheetCount" label="商家坐席">
             <template slot-scope="scope">
-              <div v-if="scope.row.seatNum">
-                <a href=""></a>
+              <div v-if="!scope.row.sheetCount">
                 <!-- <a style="color: rgb(0, 114, 255);text-decoration:underline ;" :href="'/merchant/userManager/subaccountUserPage?parentId='+scope.row.id+'&name='+scope.row.name+'&orgId='+scope.row.orgId+''">坐席（{{scope.row.num}}）</a> -->
                 <a style="color: rgb(0, 114, 255);text-decoration:underline ;" @click="goHref(scope.row)"
-                  href="javascript:;">坐席（{{scope.row.seatNum}}）</a>
+                  href="javascript:;">坐席（{{scope.row.sheetCount}}）</a>
                 <!-- 注 后端说暂时没定传什么参数先这样访问-->
                 <!-- :href="''">坐席（{{scope.row.num}}）</a> -->
 
@@ -124,12 +128,12 @@
         <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="secretKey">
           <el-input v-model="subAccountForm.secretKey" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="proxyurl">
-          <el-input v-model="subAccountForm.proxyurl" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="proxyUrl">
+          <el-input v-model="subAccountForm.proxyUrl" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subMerchant">
           <el-select v-model="subAccountForm.subMerchant" placeholder="请选择" style="width: 290px;">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+            <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
@@ -158,6 +162,8 @@
 </body>
 <script th:inline="javascript">
   var userList = [[${ userList }]];//商户集合
+  console.log(userList, 111111);
+
   // var userList = [
   //   {
   //     value: '选项1',
@@ -202,7 +208,7 @@
         address: "",
         accountNo: "",
         secretKey: "",
-        proxyurl: "",
+        proxyUrl: "",
         subMerchant: "",
       },
       addOrModifyDialogTitle: '添加坐席',
@@ -236,7 +242,7 @@
           { required: true, message: '秘钥不能为空', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
-        proxyurl: [
+        proxyUrl: [
           { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
@@ -318,7 +324,7 @@
           .then(function (response) {
             var result = response.data;
             console.info(result);
-            userVM.infoTable[0]= result.data;
+            userVM.infoTable[0] = result.data;
             var alldata = {
               "id": "1181461060948008960",
               "packageName": "222",
@@ -349,7 +355,7 @@
             // param.address = formData.address
             // param.accountNo = formData.accountNo
             // param.secretKey = formData.secretKey
-            // param.proxyurl = formData.proxyurl
+            // param.proxyUrl = formData.proxyUrl
             // param.subMerchant = formData.subMerchant
             console.log(formData);
             var param = formData;
@@ -376,31 +382,32 @@
         this.merchatData = data
         var that = this
         this.dialogsubAccountForm = true;
-        axios.post("/merchant/seatManager/merchantUsers")
+        axios.post("/merchant/seatManager/merchantUsers", { id: data.id })
           .then(function (response) {
-            console.log(response);
+            that.options = response.data
+            console.log(that.options);
 
           }).catch(function (error) {
             console.log(error);
           });
-        var selectData = [
-          {
-            value: '选项1',
-            label: '黄金糕'
-          }, {
-            value: '选项2',
-            label: '双皮奶'
-          }, {
-            value: '选项3',
-            label: '蚵仔煎'
-          }, {
-            value: '选项4',
-            label: '龙须面'
-          }, {
-            value: '选项5',
-            label: '北京烤鸭'
-          }]
-        that.options = selectData
+        // var selectData = [
+        //   {
+        //     value: '选项1',
+        //     label: '黄金糕'
+        //   }, {
+        //     value: '选项2',
+        //     label: '双皮奶'
+        //   }, {
+        //     value: '选项3',
+        //     label: '蚵仔煎'
+        //   }, {
+        //     value: '选项4',
+        //     label: '龙须面'
+        //   }, {
+        //     value: '选项5',
+        //     label: '北京烤鸭'
+        //   }]
+        // that.options = selectData
       },
 
       closeAddCustomFieldDialog() {//关闭添加自定义字段dialog

@@ -468,7 +468,7 @@ var homePageVM = new Vue({
 
 					} else {
 						console.error(data);
-						homePageVM.$message({ message: "登录失败:" + data.msg, type: 'error' });
+						homePageVM.$message({ message: "坐席自动登录失败:" + data.msg, type: 'error' });
 					}
 				})
 				.catch(function (error) {
