@@ -218,6 +218,12 @@ var homePageVM = new Vue({
 				"src": dataUrl //设置ifream地址
 			});
 		},
+		gotoCloudCall() {//云呼叫
+			var dataUrl = "/merchant/call/package/index";
+			$("#iframeBox").attr({
+				"src": dataUrl //设置ifream地址
+			});
+		},
 		logout() {
 			this.dialogLogoutVisible = true;
 			this.$refs.loginClientForm.resetFields();
