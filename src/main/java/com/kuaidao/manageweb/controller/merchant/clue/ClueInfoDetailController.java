@@ -78,7 +78,7 @@ public class ClueInfoDetailController {
             request.setAttribute("proSelect", new ArrayList());
         }
         request.setAttribute("loginUserId", user.getId());
-        return "/resourceManagement/resourceManagementInfo";
+        return "merchant/resourceManagement/resourceManagementInfo";
     }
 
     /**
