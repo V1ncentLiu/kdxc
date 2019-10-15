@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 商务报表-业绩报表-业绩排名
  */
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/busPerformanceRank",
+@FeignClient(name = "statstics-service", path = "/statstics/busPerformanceRank",
         fallback = BusPerformanceRankFeignClinet.HystrixClientFallback.class)
 public interface BusPerformanceRankFeignClinet {
 

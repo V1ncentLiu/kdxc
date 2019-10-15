@@ -3,12 +3,15 @@ package com.kuaidao.manageweb.controller.statistics.busTeleDistribution;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.statistics.busTeleDistribution.BusTeleDistributionFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.base.BaseBusinessDto;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -174,17 +177,23 @@ public class BusTeleDistributionController extends BaseStatisticsController {
         dataList.add(curList);
     }
 
-    private void buildList(List<List<Object>> dataList, List<BaseBusinessDto> sourceDataList,List<BaseBusinessDto> sumList, Integer type) {
+    private void buildList(List<List<Object>> dataList, List<BaseBusinessDto> sourceDataList,List<BaseBusinessDto> sumList,
+                           Integer type) {
         Map<String, BaseBusinessDto> sumMap = sumList.stream().collect(Collectors.toMap(BaseBusinessDto::getGroupId, Function.identity()));
         TreeMap<String, List<BaseBusinessDto>> sourceDataListTreeMap =
                 sourceDataList.stream().collect(Collectors.groupingBy(BaseBusinessDto::getGroupId, TreeMap::new, Collectors.toList()));
         //添加总合计
         addTotalExportData(sumMap.get("99999"),dataList,type);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
         sourceDataListTreeMap.forEach((key,value)->{
             //封装数据
             buildData(dataList,value,type);
-            //添加每组合计
-            addTotalExportData(sumMap.get(key),dataList,type);
+            if(!RoleCodeEnum.SWJL.name().equals(roleCode)
+                    && !RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+                //添加每组合计
+                addTotalExportData(sumMap.get(key), dataList, type);
+            }
         });
     }
 
