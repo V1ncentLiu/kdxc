@@ -64,8 +64,9 @@ public class ClueInfoDetailController {
      * @param request
      * @return
      */
-    @RequestMapping("/init")
-    public String init(HttpServletRequest request, @RequestParam("clueId") Long clueId) {
+    @RequestMapping("/init/{clueId}")
+    public String init(HttpServletRequest request,@PathVariable Long clueId) {
+        log.info("ClueInfoDetailController_init_clueId {}", clueId);
         UserInfoDTO user = getUser();
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -77,6 +78,7 @@ public class ClueInfoDetailController {
         }
         request.setAttribute("loginUserId", user.getId());
         request.setAttribute("clueId", clueId);
+        request.setAttribute("ossUrl", ossUrl);
         return "merchant/resourceManagement/resourceManagementInfo";
     }
 
