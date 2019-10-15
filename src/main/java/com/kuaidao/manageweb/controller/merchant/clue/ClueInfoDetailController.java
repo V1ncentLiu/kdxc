@@ -66,8 +66,7 @@ public class ClueInfoDetailController {
      * @return
      */
     @RequestMapping("/init")
-    public String init(HttpServletRequest request, @RequestBody IdEntityLong idEntityLong) {
-        log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", idEntityLong.getId());
+    public String init(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -87,7 +86,8 @@ public class ClueInfoDetailController {
      * @param idEntityLong
      * @return
      */
-    @GetMapping("/detail")
+    @ResponseBody
+    @PostMapping("/detail")
     public JSONResult<ClueDTO> detail(@RequestBody IdEntityLong idEntityLong) {
         Long clueId = idEntityLong.getId();
         log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
@@ -166,7 +166,8 @@ public class ClueInfoDetailController {
      * @Date: 2019/10/14 20:05
      * @since: 1.0.0
      **/
-    @RequestMapping("/getLastCallTime")
+    @ResponseBody
+    @PostMapping("/getLastCallTime")
     public JSONResult<String> getLastCallTime(@RequestBody IdEntityLong idEntityLong) {
         UserInfoDTO user = getUser();
         List<Long> userList = new ArrayList<>();
