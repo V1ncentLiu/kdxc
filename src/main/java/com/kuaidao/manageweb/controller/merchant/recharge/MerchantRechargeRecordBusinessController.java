@@ -10,8 +10,6 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusinessFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.math.BigDecimal;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * @description: MerchantRechargeRecordBusinessController
@@ -50,7 +51,8 @@ public class MerchantRechargeRecordBusinessController {
       MerchantRechargeRecordQueryDTO queryDTO = new MerchantRechargeRecordQueryDTO();
       queryDTO.setRechargeBusiness(user.getId());
       JSONResult<RechargeAccountDTO> rechargeAccountDTOJSONResult = merchantRechargeRecordBusinessFeignClient.getRechargeMoney(queryDTO);
-      RechargeAccountDTO rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
+      RechargeAccountDTO rechargeAccountDTO = new RechargeAccountDTO();
+      rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
       if(rechargeAccountDTO == null || rechargeAccountDTO.getTotalRechargeMoney() == null){
         rechargeAccountDTO.setTotalRechargeMoney(new BigDecimal("0"));
       }

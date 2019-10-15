@@ -11,9 +11,6 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.math.BigDecimal;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +20,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @description: MerchantRechargeRecordBusinessController
@@ -57,7 +58,8 @@ public class MerchantRechargeRecordManageController {
       MerchantRechargeRecordQueryDTO queryDTO = new MerchantRechargeRecordQueryDTO();
       queryDTO.setManageRechargeUser(user.getId());
       JSONResult<RechargeAccountDTO> rechargeAccountDTOJSONResult = merchantRechargeRecordManageFeignClient.getNowDayAndMonthRechargeMoney(queryDTO);
-      RechargeAccountDTO rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
+      RechargeAccountDTO rechargeAccountDTO = new RechargeAccountDTO();
+      rechargeAccountDTO = rechargeAccountDTOJSONResult.getData();
       if(rechargeAccountDTO == null || rechargeAccountDTO.getDaySumMoney() == null){
         rechargeAccountDTO.setDaySumMoney(new BigDecimal("0.00"));
       }
