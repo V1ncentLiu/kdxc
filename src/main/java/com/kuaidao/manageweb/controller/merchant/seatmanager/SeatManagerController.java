@@ -75,7 +75,9 @@ public class SeatManagerController {
     statusList.add(USER_STATUS.ENABLE);
     statusList.add(USER_STATUS.LOCK);
     List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(id.getId(),statusList);
-    userList.add(merchantUser);
+    if(merchantUser!=null){
+      userList.add(merchantUser);
+    }
     return userList;
   }
 
