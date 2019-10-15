@@ -78,7 +78,7 @@ public class ClueInfoDetailController {
             request.setAttribute("proSelect", new ArrayList());
         }
         request.setAttribute("loginUserId", user.getId());
-        return "";
+        return "/resourceManagement/resourceManagementInfo";
     }
 
     /**
@@ -125,7 +125,6 @@ public class ClueInfoDetailController {
     /**
      * 维护资源提交
      *
-     * @param request
      * @param dto
      * @return
      */
