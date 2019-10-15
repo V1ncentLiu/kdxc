@@ -85,11 +85,12 @@ public class ManageCallCostController {
   }
 
   /**
-   * 查询商家账号
-   *
-   * @param userInfoDTO
-   * @return
-   */
+  * @Description 查询商家账号
+  * @param userInfoDTO
+  * @Return java.util.List<com.kuaidao.sys.dto.user.UserInfoDTO>
+  * @Author xuyunfeng
+  * @Date 2019/10/15 17:19
+  **/
   private List<UserInfoDTO> getMerchantUser(UserInfoDTO userInfoDTO) {
     JSONResult<List<UserInfoDTO>> merchantUserList =
         merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
