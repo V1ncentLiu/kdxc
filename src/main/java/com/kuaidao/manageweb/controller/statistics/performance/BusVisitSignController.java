@@ -158,7 +158,7 @@ public class BusVisitSignController extends BaseStatisticsController {
                 String[] keys = {"companyName","regionName","firstVisit","signNum","signRate","amount","sigleAmount"};
                 String[] hader = {"餐饮集团","省份","首访数","签约数","签约率","净业绩金额","签约单笔"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
-                String name = MessageFormat.format("集团来访区域表_{0}_{1}.xlsx", "" + dto.getStartTime(), dto.getEndTime() + "");
+                String name = MessageFormat.format("集团来访签约区域表_{0}_{1}.xlsx", "" + dto.getStartTime(), dto.getEndTime() + "");
                 response.addHeader("Content-Disposition",
                         "attachment;filename=\"" + name + "\"");
                 response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
