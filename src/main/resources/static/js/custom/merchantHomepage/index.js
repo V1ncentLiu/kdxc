@@ -21,6 +21,7 @@ var homePageVM = new Vue({
 				'newPassword': '',
 				'confirmPwd': ''
 			},
+			hasBuyPackage:hasBuyPackage,
 			items: menuList
 			/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
 			{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
@@ -983,7 +984,9 @@ var homePageVM = new Vue({
 
 	},
 	created() {
-		this.loginQimoClient();
+		if(this.hasBuyPackage){
+			this.loginQimoClient();
+		}
 		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
 		

@@ -80,6 +80,8 @@ public class ManageCallCostController {
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getManageCallCostList(req);
       return jsonResult;
     }catch (Exception e){
+      e.printStackTrace();
+      logger.error("获取管理端商家通话费用接口异常",e.getMessage());
       return new JSONResult<PageBean<MerchantCallCostDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"获取管理端商家通话费用异常");
     }
   }

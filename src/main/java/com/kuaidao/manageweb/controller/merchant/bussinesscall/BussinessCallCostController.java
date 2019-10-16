@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 
-import com.alibaba.fastjson.JSON;
 import com.kuaidao.account.dto.call.MerchantCallCostDTO;
 import com.kuaidao.account.dto.call.MerchantCallCostReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -82,6 +81,8 @@ public class BussinessCallCostController {
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
       return jsonResult;
     }catch (Exception e){
+      e.printStackTrace();
+      logger.error("获取商家端端商家通话费用接口异常",e.getMessage());
       return new JSONResult<PageBean<MerchantCallCostDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"获取商家端商家通话费用异常");
     }
   }
