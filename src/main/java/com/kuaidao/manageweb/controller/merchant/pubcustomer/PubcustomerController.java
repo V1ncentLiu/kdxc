@@ -67,9 +67,9 @@ public class PubcustomerController {
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
     Long userId = null;
     if(SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())){
-      userId = curLoginUser.getId();
-    }else{
       userId = curLoginUser.getParentId();
+    }else{
+      userId = curLoginUser.getId();
     }
 
     JSONResult<Boolean> hasBuyPackage = callPackageFeignClient
