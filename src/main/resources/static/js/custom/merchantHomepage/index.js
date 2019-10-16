@@ -200,6 +200,7 @@ var homePageVM = new Vue({
 			}
 		},
 		menuClick: function (ifreamUrl) {
+			$(".menu.is-active").removeClass("is-active")
 			this.$refs.iframeBox.src = ifreamUrl //给ifream的src赋值
 			window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
 		},
