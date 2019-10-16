@@ -133,6 +133,11 @@ public class BusPerformanceController extends BaseStatisticsController {
     @RequestMapping("/queryBusPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryList(@RequestBody BaseBusQueryDto dto){
         initParams(dto);
+        String roleCode=super.getRoleCode();
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            dto.setBusinessGroupId(null);
+            dto.setBusAreaId(null);
+        }
         return  busPerformanceClient.queryBusPage(dto);
     }
 
@@ -180,6 +185,11 @@ public class BusPerformanceController extends BaseStatisticsController {
     public void exportBus(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
         try{
             initParams(dto);
+            String roleCode=super.getRoleCode();
+            if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+                dto.setBusinessGroupId(null);
+                dto.setBusAreaId(null);
+            }
             JSONResult<List<BusPerformanceDto>> json=busPerformanceClient.queryBusList(dto);
             if(null!=json && "0".equals(json.getCode())){
                 BusPerformanceDto[] dtos = json.getData().isEmpty()?new BusPerformanceDto[]{}:json.getData().toArray(new BusPerformanceDto[0]);
