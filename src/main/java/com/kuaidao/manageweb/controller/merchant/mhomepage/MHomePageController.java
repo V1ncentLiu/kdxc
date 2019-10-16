@@ -117,9 +117,15 @@ public class MHomePageController {
                 request.setAttribute("accountType", StageContant.STAGE_TELE);
             }
         }
-        //是否购买云呼叫套餐
+        //查询主账号是否购买云呼叫套餐
         boolean hasBuyPackage = false;
-        JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(user.getId());
+        Long accountId = user.getId();
+        if(Constants.USER_TYPE_TWO.equals(user.getUserType())){
+            accountId = user.getId();
+        }else if(Constants.USER_TYPE_THREE.equals(user.getUserType())){
+            accountId = user.getParentId();
+        }
+        JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(accountId);
         if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
             hasBuyPackage = hasBuyPackageResult.getData();
         }
