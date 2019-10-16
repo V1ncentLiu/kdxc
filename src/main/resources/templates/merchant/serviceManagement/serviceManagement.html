@@ -142,7 +142,8 @@
 
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button class="allBtnHover" type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
+        <el-button class="allBtnHover" type="primary" :disabled="submitDisabled"
+          @click="saveAccountUser('subAccountForm')">提交</el-button>
         <el-button class="allBtnHover" @click="accountcancelForm('subAccountForm')">取 消</el-button>
       </div>
     </el-dialog>
@@ -150,12 +151,24 @@
     <!-- 套餐详情 -->
     <el-dialog title="套餐详情" :visible.sync="infoDialog" width="1000px">
       <el-table ref="infoTable" tooltip-effect="dark" style="width: 100%" border :data="infoTable">
-        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+        <!-- <el-table-column align="center" type="index" width="55" label="序号"></el-table-column> -->
         <el-table-column align="center" prop="packageName" label="套餐名称"></el-table-column>
-        <el-table-column align="center" prop="callCharge" label="通话资费/分钟"></el-table-column>
-        <el-table-column align="center" prop="fixedPhoneMonthlyRent" label="月租费用" width="150"></el-table-column>
-        <el-table-column align="center" prop="maxClientNum" label="支持最大数量" width="150"></el-table-column>
-        <el-table-column align="center" prop="clientCost" label="坐席费用" width="150"></el-table-column>
+        <el-table-column align="center" prop="callCharge" label="通话资费/分钟">
+          <template slot-scope="scope">
+            {{scope.row.callCharge}}元
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="fixedPhoneMonthlyRent" label="月租费用" width="150">
+          <template slot-scope="scope">
+            {{scope.row.fixedPhoneMonthlyRent}}元/月
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="maxClientNum" label="支持坐席最大数量" width="150"></el-table-column>
+        <el-table-column align="center" prop="clientCost" label="坐席费用" width="150">
+          <template slot-scope="scope">
+            {{scope.row.clientCost}}元/月
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -281,22 +294,22 @@
         clientCost: '150元/月',
       }],
       submitDisabled: false,
-      dataTable: [],
-      // [{
-      //   userName: '1',
-      //   packageName: '2',
-      //   sheetCount: '3',
-      //   supplyCompany: '4',
-      //   beginTime: '5',
-      //   id: '0',
-      // }, {
-      //   userName: '1',
-      //   packageName: '2',
-      //   sheetCount: '3',
-      //   supplyCompany: '4',
-      //   beginTime: '5',
-      //   id: '4',
-      // }],
+      dataTable:
+        [{
+          userName: '1',
+          packageName: '2',
+          sheetCount: '3',
+          supplyCompany: '4',
+          beginTime: '5',
+          id: '0',
+        }, {
+          userName: '1',
+          packageName: '2',
+          sheetCount: '3',
+          supplyCompany: '4',
+          beginTime: '5',
+          id: '4',
+        }],
       pager: {
         total: 0,
         currentPage: 1,
@@ -328,23 +341,24 @@
             var result = response.data;
             console.info(result);
             userVM.infoTable[0] = result.data;
-            var alldata = {
-              "id": "1181461060948008960",
-              "packageName": "222",
-              "supplyCompany": "2",
-              "maxClientNum": 55623242,
-              "clientCost": 10,
-              "fixedPhoneMonthlyRent": 20,
-              "smallMonthlyRent": 10,
-              "callCharge": 3,
-              "isDel": 1
-            }
-            // userVM.infoTable[0] = alldata;
+
             userVM.infoDialog = true;
           })
           .catch(function (error) {
             console.log(error);
           });
+        // var alldata = {
+        //   "id": "1181461060948008960",
+        //   "packageName": "222",
+        //   "supplyCompany": "2",
+        //   "maxClientNum": 55623242,
+        //   "clientCost": 10,
+        //   "fixedPhoneMonthlyRent": 20,
+        //   "smallMonthlyRent": 10,
+        //   "callCharge": 3,
+        //   "isDel": 1
+        // }
+        // userVM.infoTable[0] = alldata;
       },
 
       // 添加坐席提交
@@ -429,7 +443,7 @@
 
       // 坐席跳转
       goHref(value) {
-        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId
+        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId+'&userName'+value.userName
         document.location.href = url
       },
 
@@ -460,30 +474,31 @@
             userVM.dataTable = table;
           })
           .catch(function (error) {
-            // var dataValue = [
-            //   {
-            //     userId: '1',
-            //     id: '0',
-            //     userName: '3',
-            //     packageId: '4',
-            //     packageName: '5',
-            //     sheetCount: '6',
-            //     supplyCompany: '7',
-            //     beginTime: '8',
-            //   },
-            //   {
-            //     userId: '11',
-            //     id: '22',
-            //     userName: '33',
-            //     packageId: '44',
-            //     packageName: '55',
-            //     sheetCount: '66',
-            //     supplyCompany: '77',
-            //     beginTime: '88',
-            //   }]
-            // that.dataTable = dataValue
-            // console.log(error);
+            console.log(error);
           });
+        // var dataValue = [
+        //   {
+        //     userId: '1',
+        //     id: '0',
+        //     userName: '3',
+        //     packageId: '4',
+        //     packageName: '5',
+        //     sheetCount: '6',
+        //     supplyCompany: '7',
+        //     beginTime: '8',
+        //   },
+        //   {
+        //     userId: '11',
+        //     id: '22',
+        //     userName: '33',
+        //     packageId: '44',
+        //     packageName: '55',
+        //     sheetCount: '66',
+        //     supplyCompany: '77',
+        //     beginTime: '88',
+        //   }]
+        // this.dataTable = dataValue
+        // console.log(this.dataTable);
 
       },
 
