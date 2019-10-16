@@ -13,17 +13,25 @@
       height: 100%;
     }
 
-    .el-dialog__header {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
-    }
-
     .el-button--primary {
       background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
     }
+
     .el-checkbox__input.is-checked .el-checkbox__inner,
     .el-checkbox__input.is-indeterminate .el-checkbox__inner {
       background-color: #4B80FF;
       border-color: #4B80FF;
+    }
+
+    .searchBtn:hover {
+      opacity: 0.9 !important;
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+
+    }
+
+    .allBtnHover:hover {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1));
+      opacity: 0.9;
     }
   </style>
 </head>
@@ -52,7 +60,8 @@
           </el-form-item>
           <!-- <div class="mainSearchBtnBox">  -->
           <el-form-item label="">
-            <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索
+            <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable()"
+              style="margin-left: 10px;width: 100px;">搜索
             </el-button>
           </el-form-item>
           <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -133,8 +142,8 @@
 
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
-        <el-button @click="accountcancelForm('subAccountForm')">取 消</el-button>
+        <el-button class="allBtnHover" type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
+        <el-button class="allBtnHover" @click="accountcancelForm('subAccountForm')">取 消</el-button>
       </div>
     </el-dialog>
 
@@ -188,7 +197,7 @@
       loginDisabled: false,
       accountExpandedKeys: [],
       accountDataTree: [],
-      selectValue:'请选择',
+      selectValue: '请选择',
       // 添加坐席的套餐详情
       packageDetailsId: '',
       userSearchForm: {
@@ -376,7 +385,7 @@
         this.merchatData = data
         var that = this
         this.dialogsubAccountForm = true;
-        this.selectValue=data.userName
+        this.selectValue = data.userName
         axios.post("/merchant/seatManager/merchantUsers", { id: data.id })
           .then(function (response) {
             that.options = response.data
