@@ -53,7 +53,6 @@ public class ManageCallCostController {
     UserInfoDTO userInfoDTO = new UserInfoDTO();
     userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
     userInfoDTO.setStatusList(null);
-    userInfoDTO.setParentId(user.getId());
     List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
     request.setAttribute("userInfoList",userInfoList);
     //获取商家累计消费
