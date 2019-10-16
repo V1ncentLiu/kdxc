@@ -391,7 +391,6 @@ public class MyCustomerClueController {
             } else {
                 request.setAttribute("customer", new ArrayList());
             }
-            request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
             if (null != clueInfo.getData().getClueBasic()) {
                 ClueBasicDTO clueBasicDTO = clueInfo.getData().getClueBasic();
                 if(telemarketingLayoutDTO !=null && telemarketingLayoutDTO.getId() !=null){
