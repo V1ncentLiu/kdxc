@@ -70,7 +70,7 @@ public class SeatManagerController {
    */
   @ResponseBody
   @PostMapping("/merchantUsers")
-  public  List<UserInfoDTO> merchantUsers(HttpServletRequest request, IdEntityLong id) {
+  public  List<UserInfoDTO> merchantUsers(HttpServletRequest request,@RequestBody IdEntityLong id) {
     UserInfoDTO merchantUser = merchantComponent.getMerchantById(id.getId());
     List<Integer> statusList = new ArrayList<>();
     statusList.add(USER_STATUS.ENABLE);
