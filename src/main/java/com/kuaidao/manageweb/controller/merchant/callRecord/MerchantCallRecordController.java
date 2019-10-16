@@ -56,17 +56,19 @@ public class MerchantCallRecordController {
         Integer userType = user.getUserType();
         //查询用户集合（邀约使用）
         UserInfoDTO userInfo = new UserInfoDTO();
+        List<UserInfoDTO> list = new ArrayList<>();
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getId());
+            JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient
+                .merchantUserList(userInfo);
+            if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+                request.setAttribute("merchantUserList", merchantUserList.getData());
+            }
         } else if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
-            userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, user.getParentId());
+            list.add(user);
+            request.setAttribute("merchantUserList", list);
         } else {
-            userInfo = buildQueryReqDto(SysConstant.USER_TYPE_ONE, user.getId());
-        }
-        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient
-            .merchantUserList(userInfo);
-        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("merchantUserList", merchantUserList.getData());
+
         }
         request.setAttribute("user", user);
         request.setAttribute("userId", user.getId().toString());
