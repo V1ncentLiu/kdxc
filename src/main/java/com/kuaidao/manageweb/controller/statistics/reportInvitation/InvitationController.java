@@ -147,7 +147,7 @@ public class InvitationController extends BaseStatisticsController {
             JSONResult<List<InvitationDto>> json=invitationFeignClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 InvitationDto[] dtos = json.getData().isEmpty()?new InvitationDto[]{}:json.getData().toArray(new InvitationDto[0]);
-                String[] keys = {"teleGroupName","invite; ","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
+                String[] keys = {"teleGroupName","invite","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
                 String[] hader = {"电销组","正常邀约数","取消邀约数","删除邀约数","来访客户数","未来访客户数","来访次数","签约客户数","签约单数","邀约来访率","邀约签约率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("自邀约跟踪表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
@@ -177,7 +177,6 @@ public class InvitationController extends BaseStatisticsController {
             JSONResult<List<InvitationDto>> json= null;
             //根据角色不同，使用查询方法不同
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-            baseQueryDto.setTeleDeptId(null);
             String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
                 //顾问查询去掉部门参数
@@ -189,7 +188,7 @@ public class InvitationController extends BaseStatisticsController {
             }
             if(null!=json && "0".equals(json.getCode())){
                 InvitationDto[] dtos = json.getData().isEmpty()?new InvitationDto[]{}:json.getData().toArray(new InvitationDto[0]);
-                String[] keys = {"saleName","invite; ","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
+                String[] keys = {"saleName","invite","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
                 String[] hader = {"电销顾问","正常邀约数","取消邀约数","删除邀约数","来访客户数","未来访客户数","来访次数","签约客户数","签约单数","邀约来访率","邀约签约率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("顾问自邀约跟踪表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
