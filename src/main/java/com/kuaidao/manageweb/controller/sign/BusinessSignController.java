@@ -905,6 +905,10 @@ public class BusinessSignController {
    */
   private List<UserInfoDTO> getUserList(Long orgId, String roleCode,Integer businessLise) {
     UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+    List<Integer> statusList = new ArrayList<>();
+    statusList.add(1);
+    statusList.add(3);
+    userOrgRoleReq.setStatusList(statusList);
     userOrgRoleReq.setOrgId(orgId);
     userOrgRoleReq.setRoleCode(roleCode);
     userOrgRoleReq.setBusinessLine(businessLise);
