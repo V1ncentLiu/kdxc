@@ -68,6 +68,7 @@ public class MerchantCallRecordController {
         if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("merchantUserList", merchantUserList.getData());
         }
+        request.setAttribute("user", user);
         request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());
