@@ -124,6 +124,9 @@ public class InvitationController extends BaseStatisticsController {
         String roleCode=getRoleCode();
         //根据角色不同，使用查询方法不同
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            //顾问查询去掉部门参数
+            baseQueryDto.setTeleDeptId(null);
+            baseQueryDto.setTeleGroupId(null);
             return invitationFeignClient.querySalePage(baseQueryDto);
         }else{
             return invitationFeignClient.queryManagerPage(baseQueryDto);
@@ -177,6 +180,9 @@ public class InvitationController extends BaseStatisticsController {
             baseQueryDto.setTeleDeptId(null);
             String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+                //顾问查询去掉部门参数
+                baseQueryDto.setTeleDeptId(null);
+                baseQueryDto.setTeleGroupId(null);
                 json= invitationFeignClient.querySaleList(baseQueryDto);
             }else{
                 json= invitationFeignClient.queryManagerList(baseQueryDto);
