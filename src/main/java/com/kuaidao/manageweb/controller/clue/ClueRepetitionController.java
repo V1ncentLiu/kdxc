@@ -183,9 +183,13 @@ public class ClueRepetitionController {
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode,Integer businessLise) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(1);
+        statusList.add(3);
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setBusinessLine(businessLise);
+        userOrgRoleReq.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
