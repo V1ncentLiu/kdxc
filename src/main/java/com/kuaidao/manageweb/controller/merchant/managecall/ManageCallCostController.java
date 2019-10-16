@@ -53,7 +53,6 @@ public class ManageCallCostController {
     UserInfoDTO userInfoDTO = new UserInfoDTO();
     userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
     userInfoDTO.setStatusList(null);
-    userInfoDTO.setParentId(user.getId());
     List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
     request.setAttribute("userInfoList",userInfoList);
     //获取商家累计消费
@@ -80,6 +79,8 @@ public class ManageCallCostController {
       JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getManageCallCostList(req);
       return jsonResult;
     }catch (Exception e){
+      e.printStackTrace();
+      logger.error("获取管理端商家通话费用接口异常",e.getMessage());
       return new JSONResult<PageBean<MerchantCallCostDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"获取管理端商家通话费用异常");
     }
   }

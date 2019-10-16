@@ -1,15 +1,18 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
+import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
 import com.kuaidao.common.constant.ComConstant.DIMENSION;
 import com.kuaidao.common.constant.ComConstant.QFLAG;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
 import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
@@ -75,6 +78,9 @@ public class MHomePageController {
     @Autowired
     private PubcustomerFeignClient pubcustomerFeignClient;
 
+    @Autowired
+    private CallPackageFeignClient callPackageFeignClient;
+
     /**
      * 首页 跳转
      *
@@ -100,10 +106,10 @@ public class MHomePageController {
         request.setAttribute("mqUserName", mqUserName);
         request.setAttribute("mqPassword", mqPassword);
         request.setAttribute("userId", user.getId());
-        RoleInfoDTO roleInfoDTO1 = user.getRoleList().get(0);
-        if(roleInfoDTO1!=null){
-            if(roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.XXLY.name())
-                ||RoleCodeEnum.HWZG.name().equals(roleInfoDTO1.getRoleCode())||RoleCodeEnum.HWJL.name().equals(roleInfoDTO1.getRoleCode())){
+        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        if(roleInfoDTO!=null){
+            if(roleInfoDTO.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO.getRoleCode().equals(RoleCodeEnum.XXLY.name())
+                ||RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())||RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())){
                 request.setAttribute("accountType", StageContant.STAGE_PHONE_TRAFFIC);
             }else if(Constants.USER_TYPE_TWO.equals(user.getUserType()) || Constants.USER_TYPE_THREE.equals(user.getUserType())){
                 request.setAttribute("accountType", StageContant.STAGE_MERCHANT);
@@ -111,6 +117,19 @@ public class MHomePageController {
                 request.setAttribute("accountType", StageContant.STAGE_TELE);
             }
         }
+        //查询主账号是否购买云呼叫套餐
+        boolean hasBuyPackage = false;
+        Long accountId = user.getId();
+        if(Constants.USER_TYPE_TWO.equals(user.getUserType())){
+            accountId = user.getId();
+        }else if(Constants.USER_TYPE_THREE.equals(user.getUserType())){
+            accountId = user.getParentId();
+        }
+        JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(accountId);
+        if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+            hasBuyPackage = hasBuyPackageResult.getData();
+        }
+        request.setAttribute("hasBuyPackage", hasBuyPackage);
         // 判断显示主/子账户首页
         Integer userType = user.getUserType();
         request.setAttribute("isShowConsoleBtn", userType); // 主账户==2  子账户==3

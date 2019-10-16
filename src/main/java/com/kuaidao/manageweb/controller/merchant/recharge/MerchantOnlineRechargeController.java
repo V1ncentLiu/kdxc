@@ -1,12 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.recharge;
 
-import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialDTO;
-import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialReq;
-import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
-import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
-import com.kuaidao.account.dto.recharge.MerchantRechargeResp;
-import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
-import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
+import com.kuaidao.account.dto.recharge.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.constant.Constants;
@@ -15,9 +9,6 @@ import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordBusin
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.math.BigDecimal;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +18,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @description: MerchantOnlineRechargeController在线充值类
@@ -116,7 +111,7 @@ public class MerchantOnlineRechargeController {
     List<MerchantRechargePreferentialDTO> preferentialDTOList = jsonResult.getData();
     request.setAttribute("preferentialDTOList",preferentialDTOList);
     request.setAttribute("rechargeWay", Constants.RECHARGE_WAY_ALI_PAY);
-    return "merchant/payment/paymentResult";
+    return "merchant/payment/paymentOnlineCutdown";
   }
   /**
    * @Description 微信跳转URL

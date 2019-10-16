@@ -12,9 +12,7 @@
       background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
     }
 
-    .el-dialog__header {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1)) !important;
-    }
+
 
     .el-input--suffix .el-input__inner {
       height: 28px;
@@ -50,6 +48,62 @@
       background-color: #4B80FF;
       border-color: #4B80FF;
     }
+
+    .btnadd {
+      width: 100px;
+      height: 30px;
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+      box-shadow: 0px 10px 28px 4px rgba(72, 125, 247, 0.47);
+      border-radius: 4px;
+    }
+
+    .btnadd:hover {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+      opacity: 0.9;
+    }
+
+    .btnedit {
+      width: 100px;
+      height: 30px;
+      background: linear-gradient(-90deg, rgba(40, 183, 117, 1), rgba(35, 214, 115, 1));
+      box-shadow: 0px 5px 15px 3px rgba(59, 186, 110, 0.48);
+      border-radius: 4px;
+    }
+
+    .btnedit:hover {
+      background: linear-gradient(-90deg, rgba(40, 183, 117, 1), rgba(35, 214, 115, 1));
+      opacity: 0.9;
+    }
+
+    .btnremove {
+      width: 100px;
+      height: 30px;
+      background: linear-gradient(90deg, rgba(253, 93, 119, 1), rgba(251, 59, 80, 1));
+      box-shadow: 0px 5px 15px 3px rgba(251, 60, 81, 0.48);
+      border-radius: 4px;
+    }
+
+    .btnremove:hover {
+      background: linear-gradient(90deg, rgba(253, 93, 119, 1), rgba(251, 59, 80, 1));
+      opacity: 0.9;
+    }
+
+    .mainSearchBg .searchBtn {
+      width: 100px;
+      height: 30px;
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+      box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
+      border-radius: 6px;
+    }
+
+    .mainSearchBg .searchBtn:hover {
+      opacity: 0.9;
+    }
+
+    .allBtnHover:hover {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1));
+      opacity: 0.9;
+    }
   </style>
 </head>
 
@@ -58,14 +112,8 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" style="font-size: 12px;">
       <el-breadcrumb-item>Home</el-breadcrumb-item>
       <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-      <el-breadcrumb-item>商家坐席管理</el-breadcrumb-item>
+      <el-breadcrumb-item>{{merchatName}}商家坐席管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <!-- 按钮 -->
-    <el-row class="marginB20">
-      <el-button type="primary" @click="seatOperation('add')">添加坐席</el-button>
-      <el-button type="success" @click="seatOperation('edit')">编辑坐席</el-button>
-      <el-button type="danger" @click="seatOperation('delete')">删除坐席</el-button>
-    </el-row>
     <div class="mainSearchBg">
       <div class="mainSearchFormBox">
         <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
@@ -76,10 +124,10 @@
             </el-select>
           </el-form-item>
           <el-form-item label="坐席编号：">
-            <el-input v-model="form.number" placeholder=""></el-input>
+            <el-input v-model="form.number" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="号码所属公司：">
-            <el-input v-model="form.company" placeholder=""></el-input>
+            <el-input v-model="form.company" placeholder="请输入"></el-input>
           </el-form-item>
           <el-form-item label="">
             <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
@@ -87,6 +135,12 @@
           </el-form-item>
         </el-form>
       </div>
+      <!-- 按钮 -->
+      <el-row class="marginB20" style="margin: 27px 0 15px 0">
+        <el-button class="btnadd" type="primary" @click="seatOperation('add')">添加坐席</el-button>
+        <el-button class="btnedit" type="success" @click="seatOperation('edit')">编辑坐席</el-button>
+        <el-button class="btnremove" type="danger" @click="seatOperation('delete')">删除坐席</el-button>
+      </el-row>
       <!-- 列表展示 -->
       <div class="seatOperation">
         <el-table :data="tableData" tooltip-effect="dark" border style="width: 100%"
@@ -110,6 +164,7 @@
           </el-table-column>
         </el-table>
       </div>
+
       <div style="text-align: center">
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
       </div>
@@ -119,7 +174,9 @@
     <el-dialog id="sittingFrame" :title="title" :visible.sync="centerDialogVisible" width="540px">
       <el-form :model="subAccountForm" ref="subAccountForm" :rules="rules">
         <el-form-item label="" :label-width="formLabelWidth">
-          {{merchatName}}增加子账户绑定坐席
+          <span style="font-size: 16px">
+            {{merchatName}}增加子账户绑定坐席
+          </span>
         </el-form-item>
         <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="iframeseatNo">
           <el-input v-model="subAccountForm.iframeseatNo" autocomplete="off" style="width: 290px;"></el-input>
@@ -148,8 +205,9 @@
 
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" :disabled="submitDisabled" @click="submitForm('subAccountForm')">提交</el-button>
-        <el-button type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
+        <el-button class="allBtnHover" type="primary" :disabled="submitDisabled" @click="submitForm('subAccountForm')">
+          提交</el-button>
+        <el-button class="allBtnHover" type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
       </div>
     </el-dialog>
   </div>
@@ -178,9 +236,8 @@
           number: '',
           company: '',
         },
-        merchatName: '',
+        merchatName: this.getQueryString('userName'),
         submitDisabled: false,
-
         tableData: [],
         // [
         //   {
