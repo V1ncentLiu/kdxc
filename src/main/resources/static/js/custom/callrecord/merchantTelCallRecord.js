@@ -46,7 +46,7 @@ var myCallRecordVm = new Vue({
       accountIdList: []
     },
     merchantUserList: merchantUserList,//外呼账户
-    isActive1:true,
+    isActive1:false,
     isActive2:false,
     isActive3:false,
   },
