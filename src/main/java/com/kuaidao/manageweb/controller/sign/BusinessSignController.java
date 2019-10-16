@@ -682,7 +682,7 @@ public class BusinessSignController {
    */
   @RequestMapping("/visitRecordPage")
   public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
+      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton,int type) throws Exception {
 
     IdEntityLong idEntityLong = new IdEntityLong();
     idEntityLong.setId(Long.valueOf(signId));
@@ -782,6 +782,7 @@ public class BusinessSignController {
     request.setAttribute("signId", signId);
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
     request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+    request.setAttribute("type", type);
     return "bus_mycustomer/showSignAndPayDetail";
   }
   /**
