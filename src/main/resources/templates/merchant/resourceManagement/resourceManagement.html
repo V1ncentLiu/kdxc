@@ -253,7 +253,7 @@
                         <template slot-scope="scope">
                             <span>{{scope.row.phone}}</span>
                             <span v-if="scope.row.showPhoneFlag=='1'" class="callIphone"
-                                @click="callIphone(scope.row.phone,scope.row.clueId)"><img
+                                @click="callIphone(scope.row.callPhone,scope.row.clueId)"><img
                                     th:src="@{/images/icon_call2.png}" alt=""></span>
                         </template>
                     </el-table-column>
@@ -601,7 +601,12 @@
                         //提交跟进记录
                         var param = {};
                         param.clueId = this.addClueId;
-                        param.callTime = this.trackingForm.callTime;
+                        var callTime = this.trackingForm.callTime;
+                        if (typeof(callTime) == 'string') {
+                            callTime = new Date(Date.parse(callTime.replace(/-/g, "/")));
+                        }
+                        param.callTime = callTime;
+
                         param.customerStatus = this.trackingForm.customerStatus;
                         if (this.trackingForm.customerStatus == "3") {
                             param.customerStatusSub = this.trackingForm.customerStatusSub;
@@ -610,7 +615,11 @@
                         }
                         param.isCall = this.trackingForm.isCall;
                         param.focusPoint = this.trackingForm.focusPoint;
-                        param.nextVisitTime = this.trackingForm.nextVisitTime;
+                        var  nextVisitTime =  this.trackingForm.nextVisitTime;
+                        if (typeof(nextVisitTime) == 'string') {
+                            nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                        }
+                        param.nextVisitTime = nextVisitTime;
                         console.log(param)
                         axios.post('/tracking/insert', param)
                             .then(function (response) {
