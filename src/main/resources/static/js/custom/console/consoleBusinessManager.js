@@ -550,6 +550,14 @@ var mainDivVM = new Vue({
     },
     
     methods: {
+    	number3() {//添加签约单业绩金额
+            this.formSigning.performanceAmount = this.formSigning.performanceAmount.replace(/[^\.\d]/g, '');
+            this.formSigning.performanceAmount = this.formSigning.performanceAmount.replace('.', '');
+        },
+        number4() {//编辑签约单业绩金额
+            this.updateFormSigning.performanceAmount = this.updateFormSigning.performanceAmount.replace(/[^\.\d]/g, '');
+            this.updateFormSigning.performanceAmount = this.updateFormSigning.performanceAmount.replace('.', '');
+        },
     	formSigningAmountPerformance() {
             var aone = parseFloat(this.formSigning.amountReceived);
             var atwo = parseFloat(this.formSigning.firstToll);
