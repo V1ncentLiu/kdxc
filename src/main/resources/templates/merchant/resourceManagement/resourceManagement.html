@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
@@ -148,7 +146,6 @@
         .button-menu{margin-top:10px;}
     </style>
 </head>
-
 <body>
     <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
@@ -257,8 +254,8 @@
                         <template slot-scope="scope">
                             <span>{{scope.row.phone}}</span>
                             <span v-if="scope.row.showPhoneFlag=='1'" class="callIphone"
-                                @click="callIphone(scope.row.phone,scope.row.clueId)"><img
-                                    th:src="@{/images/icon_call2.png}" alt=""></span>
+                                @click="callIphone(scope.row.callPhone,scope.row.clueId)"><img
+                                    th:src="@{/images/icon_call2.png}" alt="" style="width: 22px;height: 22px;"></span>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="" label="跟进记录">
@@ -568,8 +565,8 @@
                 addClueId: '',//点击添加记录存储资源id
                 comArr: [
                     { value: "", name: "全部" },
-                    { value: "1", name: "是" },
-                    { value: "0", name: "否" }
+                    { value: "1", name: "有效" },
+                    { value: "0", name: "无效" }
                 ],
 
             }
@@ -605,7 +602,12 @@
                         //提交跟进记录
                         var param = {};
                         param.clueId = this.addClueId;
-                        param.callTime = this.trackingForm.callTime;
+                        var callTime = this.trackingForm.callTime;
+                        if (typeof(callTime) == 'string') {
+                            callTime = new Date(Date.parse(callTime.replace(/-/g, "/")));
+                        }
+                        param.callTime = callTime;
+
                         param.customerStatus = this.trackingForm.customerStatus;
                         if (this.trackingForm.customerStatus == "3") {
                             param.customerStatusSub = this.trackingForm.customerStatusSub;
@@ -614,7 +616,11 @@
                         }
                         param.isCall = this.trackingForm.isCall;
                         param.focusPoint = this.trackingForm.focusPoint;
-                        param.nextVisitTime = this.trackingForm.nextVisitTime;
+                        var  nextVisitTime =  this.trackingForm.nextVisitTime;
+                        if (typeof(nextVisitTime) == 'string') {
+                            nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                        }
+                        param.nextVisitTime = nextVisitTime;
                         console.log(param)
                         axios.post('/tracking/insert', param)
                             .then(function (response) {
