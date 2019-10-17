@@ -312,6 +312,9 @@ public class ClueInfoDetailController {
             list.sort(comparator.reversed());
             CallRecordRespDTO callRecordRespDTO = list.get(0);
             now = callRecordRespDTO.getStartTime();
+            if (StringUtils.isNotBlank(now)) {
+                now = DateUtil.timeStamp2Str(now, DateUtil.ymdhms);
+            }
         }
         return new JSONResult<String>().success(now);
     }
