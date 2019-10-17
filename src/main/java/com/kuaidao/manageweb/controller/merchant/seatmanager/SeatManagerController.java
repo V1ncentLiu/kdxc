@@ -8,6 +8,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.component.merchant.MerchantComponent;
 import com.kuaidao.manageweb.feign.merchant.seatmanager.SeatManagerFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -136,6 +137,19 @@ public class SeatManagerController {
   public JSONResult<SeatManagerResp> findOne(@RequestBody IdEntityLong idEntityLong) {
     
     return seatManagerFeignClient.findOne(idEntityLong);
+  }
+
+  /**
+   * 查询用户是否绑定坐席
+   */
+  @ResponseBody
+  @PostMapping("/queryListBySubMerchant")
+  public JSONResult<SeatManagerResp> queryListBySubMerchant(@RequestBody SeatManagerReq seatManagerReq) {
+    if(null == seatManagerReq || null == seatManagerReq.getSubMerchant()){
+      return CommonUtil.getParamIllegalJSONResult();
+    }
+    return seatManagerFeignClient
+        .queryListBySubMerchant(seatManagerReq);
   }
 
 }

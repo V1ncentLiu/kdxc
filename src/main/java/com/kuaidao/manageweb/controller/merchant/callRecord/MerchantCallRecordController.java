@@ -62,7 +62,9 @@ public class MerchantCallRecordController {
             JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient
                 .merchantUserList(userInfo);
             if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
-                request.setAttribute("merchantUserList", merchantUserList.getData());
+                list.addAll(merchantUserList.getData());
+                list.add(user);
+                request.setAttribute("merchantUserList", list);
             }
         } else if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             list.add(user);
