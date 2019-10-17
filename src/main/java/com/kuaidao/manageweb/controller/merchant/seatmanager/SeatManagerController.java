@@ -140,14 +140,14 @@ public class SeatManagerController {
   }
 
   /**
-   * 查询用户是否绑定坐席
+   * 查询当前用户是否绑定坐席
    */
   @ResponseBody
   @PostMapping("/queryListBySubMerchant")
   public JSONResult<SeatManagerResp> queryListBySubMerchant(@RequestBody SeatManagerReq seatManagerReq) {
-    if(null == seatManagerReq || null == seatManagerReq.getSubMerchant()){
-      return CommonUtil.getParamIllegalJSONResult();
-    }
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    Long accountId = curLoginUser.getId();
+    seatManagerReq.setSubMerchant(accountId);
     return seatManagerFeignClient
         .queryListBySubMerchant(seatManagerReq);
   }
