@@ -44,7 +44,7 @@ var myCallRecordVm = new Vue({
     },
     userInfoList: userInfoList,//绑定账户
     totalMerchantCost:totalMerchantCost,
-    isActive1:false,
+    isActive1:true,
     isActive2:false,
     isActive3:false,
     isActive4:false,
@@ -346,6 +346,7 @@ var myCallRecordVm = new Vue({
     this.searchForm.startTime = year + "-" + (month + 1) + "-" + date + " 00:00:00";
     this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
     this.initCallRecordData();
+    this.searchYesterday();
   },
   mounted() {
     document.getElementById('myCallRecordVm').style.display = 'block';
