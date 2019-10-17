@@ -97,7 +97,7 @@ public class MerchantClientController {
                 String cnoPrefix = "";
                 String suffix = "";
                 cnoPrefix = "merchant";
-                suffix = seatManagerResp.getSeatNo() + "_" + seatManagerResp.getSeatNo();
+                suffix = seatManagerResp.getSeatNo() + "_" + seatManagerResp.getAccountNo();
 
                 Map<String, Object> paramMap = new HashMap<>();
                 //paramMap.put("bindPhone", bindPhone);
