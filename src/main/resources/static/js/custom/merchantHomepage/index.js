@@ -200,6 +200,7 @@ var homePageVM = new Vue({
 			}
 		},
 		menuClick: function (ifreamUrl) {
+			$(".menu.is-active").removeClass("is-active")
 			this.$refs.iframeBox.src = ifreamUrl //给ifream的src赋值
 			window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
 		},
@@ -923,6 +924,21 @@ var homePageVM = new Vue({
 				"src": dataUrl //设置ifream地址
 			});
 
+		},
+		openCostList() {//打开充值记录页面
+			$(".menu.is-active").removeClass("is-active")
+			console.log($(".menu .name").html())
+			var a=$(".menu");
+			a.each(function(){
+				console.log($(this).text())
+				if($(this).text()=="充值记录"){
+					$(this).addClass("is-active")
+				}
+		    });	
+			var dataUrl = "/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness";
+			$("#iframeBox").attr({
+				"src": dataUrl //设置ifream地址
+			});
 		},
 		validClientNo(cno) {//验证坐席是否属于自己
 			var isPass = false;

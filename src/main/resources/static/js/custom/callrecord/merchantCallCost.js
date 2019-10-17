@@ -44,7 +44,7 @@ var myCallRecordVm = new Vue({
     },
     userInfoList: userInfoList,//绑定账户
     totalMerchantCost:totalMerchantCost,
-    isActive1:true,
+    isActive1:false,
     isActive2:false,
     isActive3:false,
     isActive4:false,
