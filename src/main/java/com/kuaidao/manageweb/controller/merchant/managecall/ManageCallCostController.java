@@ -51,7 +51,7 @@ public class ManageCallCostController {
     UserInfoDTO user = CommUtil.getCurLoginUser();
     //获取商家绑定字账号
     UserInfoDTO userInfoDTO = new UserInfoDTO();
-    userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+    userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
     userInfoDTO.setStatusList(null);
     List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
     request.setAttribute("userInfoList",userInfoList);
