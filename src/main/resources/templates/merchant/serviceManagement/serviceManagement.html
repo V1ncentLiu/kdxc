@@ -37,6 +37,17 @@
     .mainSearchForm {
       justify-content: center;
     }
+
+    .cancel {
+      background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1)) !important;
+      box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+    }
+
+    .cancel:hover {
+      background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1)) !important;
+      opacity: 0.9;
+      box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+    }
   </style>
 </head>
 
@@ -147,7 +158,7 @@
           <el-input v-model="subAccountForm.proxyUrl" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subMerchant">
-          <el-select v-model="subAccountForm.subMerchant" :placeholder="selectValue" style="width: 290px;">
+          <el-select v-model="selectValue" style="width: 290px;" @change="selectChange">
             <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
@@ -157,7 +168,7 @@
       <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button class="allBtnHover" type="primary" :disabled="submitDisabled"
           @click="saveAccountUser('subAccountForm')">提交</el-button>
-        <el-button class="allBtnHover" @click="accountcancelForm('subAccountForm')">取消</el-button>
+        <el-button class="cancel" @click="accountcancelForm('subAccountForm')">取消</el-button>
       </div>
     </el-dialog>
 
@@ -238,7 +249,7 @@
         accountNo: "",
         secretKey: "",
         proxyUrl: "",
-        subMerchant: "",
+        // subMerchant: "",
       },
       addOrModifyDialogTitle: '添加坐席',
       subAccountRules: {
@@ -254,7 +265,7 @@
               }
               callback();
 
-            }, trigger: 'blur'
+            }, trigger: 'change'
           }
         ],
         company: [
@@ -276,8 +287,8 @@
           { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
         subMerchant: [
-          { required: true, message: '请选择商家子账号', trigger: 'blur' },
-          { max: 50, message: '最大50个字符', trigger: 'blur' },
+          // { required: true, message: '请选择商家子账号', trigger: 'blur' },
+          // { max: 50, message: '最大50个字符', trigger: 'blur' },
         ],
       },
       // 添加坐席里面的选择框
@@ -389,7 +400,7 @@
             // param.subMerchant = formData.subMerchant
             console.log(formData);
             var param = formData;
-
+            formData.subMerchant=this.selectValue
             param.buyPackageId = this.merchatData.id
             param.packageId = this.merchatData.packageId
             param.type = ''
@@ -412,8 +423,10 @@
         this.merchatData = data
         var that = this
         this.dialogsubAccountForm = true;
-        this.selectValue = data.userName
-        axios.post("/merchant/seatManager/merchantUsers", { id: data.id })
+        // this.selectValue = data.userName
+        this.selectValue = data.userId
+        
+        axios.post("/merchant/seatManager/merchantUsers", { id: data.userId })
           .then(function (response) {
             that.options = response.data
             console.log(that.options);
@@ -456,7 +469,7 @@
 
       // 坐席跳转
       goHref(value) {
-        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId + '&userName' + value.userName
+        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId
         document.location.href = url
       },
 

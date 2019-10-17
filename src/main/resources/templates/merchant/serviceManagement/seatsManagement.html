@@ -8,6 +8,14 @@
   <title>后台管理系统</title>
   <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
   <style>
+    .el-message-box__header {
+      display: none;
+    }
+
+    .el-message-box__message {
+      text-align: center;
+    }
+
     .el-button--primary {
       background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
     }
@@ -96,21 +104,15 @@
       border-radius: 6px;
     }
 
-    .mainSearchBg .searchBtn:hover {
-      opacity: 0.9;
-    }
-
-    .cancel{
+    .cancel {
       background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1)) !important;
       box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
     }
-    .cancel:hover{
+
+    .cancel:hover {
       background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1)) !important;
       opacity: 0.9;
-    }
-    .allBtnHover:hover {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-      opacity: 0.9;
+      box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
     }
 
     .mainSearchForm {
@@ -176,7 +178,7 @@
           </el-table-column>
           <el-table-column align="center" prop="secretKey" label="秘钥">
           </el-table-column>
-          <el-table-column align="center" prop="proxyUrl" label="proxyUrl">
+          <el-table-column align="center" prop="proxyUrl" label="proxyurl">
           </el-table-column>
         </el-table>
       </div>
@@ -212,8 +214,8 @@
         <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="iframeproxyUrl">
           <el-input v-model="subAccountForm.iframeproxyUrl" autocomplete="off" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="iframesubMerchant">
-          <el-select v-model="subAccountForm.iframesubMerchant" placeholder="请选择" style="width: 290px;">
+        <el-form-item label="商家子账号" :label-width="formLabelWidth">
+          <el-select v-model="merchatSelectName" style="width: 290px;">
             <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
             </el-option>
           </el-select>
@@ -234,9 +236,8 @@
 </html>
 <script th:inline="javascript">
   var merchantUserList = [[${ userList }]];//商户集合
+  var merchatName = [[${ userName }]];//商户集合
   // var merchantUserList = [];//商户集合
-  console.log(merchantUserList, 11111);
-
   var app = new Vue({
     el: '#app',
     data() {
@@ -252,9 +253,10 @@
           number: '',
           company: '',
         },
-        merchatName: this.getQueryString('userName'),
+        merchatName: merchatName,
         submitDisabled: false,
         tableData: [],
+        merchatSelectName:'',
         // [
         //   {
         //     id: '1',
@@ -309,8 +311,6 @@
           iframeaddress: "",
           iframeaccountNo: "",
           iframesecretKey: "",
-          iframeproxyUrl: "",
-          iframesubMerchant: "",
         },
         formLabelWidth: '150px',
         rules: {
@@ -347,10 +347,10 @@
             { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
             { max: 50, message: '最大50个字符', trigger: 'blur' },
           ],
-          iframesubMerchant: [
-            { required: true, message: '请选择商家子账号', trigger: 'change' },
-            { max: 50, message: '最大50个字符', trigger: 'blur' },
-          ],
+          // iframesubMerchant: [
+          //   { required: true, message: '请选择商家子账号', trigger: 'change' },
+          //   { max: 50, message: '最大50个字符', trigger: 'blur' },
+          // ],
         },
 
       }
@@ -409,12 +409,12 @@
             this.subAccountForm = {}
             this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : '' //移除表单验证
             this.title = '添加座席'
-            this.subAccount()
+            this.subAccount('1')
             break;
           case 'edit':
             if (this.multipleSelection.length === 1) {
               this.title = '编辑座席'
-              this.subAccount()
+              this.subAccount('2')
               var data = {}
               const { seatNo, company, address, accountNo, subMerchant, secretKey, proxyUrl } = this.multipleSelection[0]
               data.iframeseatNo = seatNo
@@ -423,7 +423,6 @@
               data.iframeaccountNo = accountNo
               data.iframesecretKey = secretKey
               data.iframeproxyUrl = proxyUrl
-              data.iframesubMerchant = subMerchant
               this.subAccountForm = data
               this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : ''
             } else {
@@ -431,36 +430,76 @@
             }
             break;
           case 'delete':
-            if (this.multipleSelection.length >= 1) {
-              var idList = []
-              for (var i = 0; i < that.multipleSelection.length; i++) {
-                if (that.multipleSelection[i].id) {
-                  idList.push(that.multipleSelection[i].id)
-                }
-              }
-              axios.post('/merchant/seatManager/delete', { idList })
-                .then(function (response) {
-                  that.$message({
-                    message: '删除成功',
-                    type: 'success'
-                  });
-                  that.searchTable()
-                })
-                .catch(function (error) {
-                  console.log(error);
-                });
-            } else {
-              this.$message('请选择坐席')
-            }
+            that.open()
+            // if (this.multipleSelection.length >= 1) {
+            //   var idList = []
+            //   for (var i = 0; i < that.multipleSelection.length; i++) {
+            //     if (that.multipleSelection[i].id) {
+            //       idList.push(that.multipleSelection[i].id)
+            //     }
+            //   }
+            //   axios.post('/merchant/seatManager/delete', { idList })
+            //     .then(function (response) {
+            //       that.$message({
+            //         message: '删除成功',
+            //         type: 'success'
+            //       });
+            //       that.searchTable()
+            //     })
+            //     .catch(function (error) {
+            //       console.log(error);
+            //     });
+            // } else {
+            //   this.$message('请选择坐席')
+            // }
             break;
           default: return ''
         }
       },
 
+      open() {
+        var that = this
+        if (this.multipleSelection.length >= 1) {
+          this.$confirm('是否确认删除坐席?').then(() => {
+            var idList = []
+            for (var i = 0; i < that.multipleSelection.length; i++) {
+              if (that.multipleSelection[i].id) {
+                idList.push(that.multipleSelection[i].id)
+              }
+            }
+            axios.post('/merchant/seatManager/delete', { idList })
+              .then(function (response) {
+                that.$message({
+                  message: '删除成功',
+                  type: 'success'
+                });
+                that.searchTable()
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
+        } else {
+          this.$message('请选择坐席')
+        }
+      },
+
       // 彈框商家子賬戶請求接口 
-      subAccount() {
+      subAccount(type) {
+        var that=this
         axios.post("/merchant/seatManager/merchantUsers", { id: this.getQueryString('userId') })
           .then(function (response) {
+            if(type==1){
+              that.merchatSelectName=that.getQueryString('userId')
+            }else if(type==2){
+              that.merchatSelectName=that.multipleSelection[0].subMerchant
+            }
             app.options = response.data
           }).catch(function (error) {
             console.log(error);
@@ -474,7 +513,7 @@
         var that = this
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            const { iframeseatNo, iframecompany, iframeaddress, iframeaccountNo, iframesecretKey, iframeproxyUrl, iframesubMerchant, } = this.subAccountForm
+            const { iframeseatNo, iframecompany, iframeaddress, iframeaccountNo, iframesecretKey, iframeproxyUrl, } = this.subAccountForm
             var param = {};
             param.buyPackageId = that.getQueryString('buyPackageId')
             param.packageId = that.getQueryString('packageId')
@@ -485,7 +524,7 @@
             param.accountNo = iframeaccountNo
             param.secretKey = iframesecretKey
             param.proxyUrl = iframeproxyUrl
-            param.subMerchant = iframesubMerchant
+            param.subMerchant = that.merchatSelectName
             var url = ''
             if (this.title === '添加座席') {
               url = '/merchant/seatManager/create'
@@ -532,6 +571,7 @@
       // console.info("create method");
       this.searchTable();
       // console.log(that.getQueryString('buyPackageId'));
+
     },
     mounted() {
       document.getElementById('app').style.display = 'block';
