@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author: xuyunfeng
  * @version: 1.0
  */
-@FeignClient(name = "account-service-ff", path = "/account/merchantRechargeBusinessRecord",
+@FeignClient(name = "account-service", path = "/account/merchantRechargeBusinessRecord",
     fallback = MerchantRechargeRecordBusinessFeignClient.HystrixClientFallbackBusiness.class)
 public interface MerchantRechargeRecordBusinessFeignClient {
 
