@@ -20,6 +20,7 @@
     border-radius:6px;
   }
   .el-button--primary:hover{opacity: 0.9;}
+  .button-menu{padding-top:10px;}
     </style>
 </head>
 
@@ -30,24 +31,21 @@
             <el-breadcrumb-item>费用管理</el-breadcrumb-item>
             <el-breadcrumb-item>充值记录</el-breadcrumb-item>
         </el-breadcrumb>
-        <el-row class="marginB20">
-            <el-button type="primary" @click="openassignrDig">申请开发票</el-button>
-        </el-row>
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                     <div class="main-search-box">
-                        <el-form-item label="充值时间:" label-width="auto" class="call-time">
+                        <el-form-item label="充值时间:" label-width="auto" class="call-time" prop="rechargeBeginTime">
                             <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
                                 v-model="form.rechargeBeginTime" type="datetime" placeholder="选择日期时间">
                             </el-date-picker>
                         </el-form-item>
-                        <el-form-item label="—" class="widthauto">
+                        <el-form-item label="—" class="widthauto" prop="rechargeEndTime">
                             <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.rechargeEndTime"
                                 type="datetime" placeholder="选择日期时间">
                             </el-date-picker>
                         </el-form-item>
-                        <el-form-item label="发票状态:">
+                        <el-form-item label="发票状态:" prop="invoiceStatus">
                             <el-select v-model="form.invoiceStatus" clearable placeholder="全部">
                                 <el-option v-for="item in statusOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
@@ -56,14 +54,16 @@
                         </el-form-item>
                     </div>
                     <div class="mainSearchBtnBox">
-                        <el-form-item label="">
                             <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"
                                 class="searchBtn" style="margin-left: 10px;">搜索</el-button>
-                        </el-form-item>
+                            <el-button @click="resetFormResource('form')">重置</el-button>
                     </div>
                     
                 </el-form>
             </div>
+            <el-row class="marginB20  button-menu">
+                <el-button type="primary" @click="openassignrDig">申请开发票</el-button>
+            </el-row>
             <el-row class="greyTip">
                 <span style="margin-right: 10px;">累积充值：{{this.numFormat(rechargeDTO.totalRechargeMoney)}}元</span><span
                     style="margin-right: 10px;">累积赠送：{{this.numFormat(rechargeDTO.totalGivenMoney)}}元</span><span
@@ -279,6 +279,13 @@
             }
         },
         methods: {
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form,'rechargeBeginTime','');
+                    this.$set(this.form,'rechargeEndTime','');
+                }
+            },
             numFormat(num) {
                 var c = (num.toString().indexOf('.') !== -1) ? num.toLocaleString() : num.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
                 return c;
