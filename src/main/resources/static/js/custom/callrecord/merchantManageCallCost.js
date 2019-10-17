@@ -395,6 +395,7 @@ var myCallRecordVm = new Vue({
     // });
     //电销总监电销组筛选按钮不可点击
     this.initCallRecordData();
+    this.searchYesterday();
   },
   mounted() {
     document.getElementById('myCallRecordVm').style.display = 'block';
