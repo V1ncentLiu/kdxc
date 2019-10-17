@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
-    <style>
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style> 
     </style>
 </head>
 <body>
@@ -27,11 +29,11 @@
             >
             <el-table-column align="center" type="index" label="序号"></el-table-column>
             <el-table-column align="center" prop="packageName" label="套餐"></el-table-column>
-            <el-table-column align="center" prop="" label="内容">
+            <el-table-column align="center" prop="" label="内容" width="500">
                 <template scope="scope">
-                    <p>坐席费：{{scope.row.sheetCost}}</p>
-                    <p>月固定费：{{scope.row.fixCost}}</p>
-                    <p>小号月租费用：{{scope.row.subAccountCost}}</p>
+                    <p style="margin-right: 10px;">坐席费：<em style="width: 100px;">{{scope.row.sheetCost}}元/坐席</em></p>
+                    <p style="margin-right: 10px;">固话月租费：<em style="width: 100px;">{{scope.row.fixCost}}/月</em></p>
+                    <p>小号月租费：{{scope.row.subAccountCost}}/月</p>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="maxSheetNum" label="支持坐席最大数量"></el-table-column>
@@ -50,8 +52,8 @@
                     <!-- 是否已购买1是，0否 -->
                     <!-- <el-radio v-if="scope.row.status==1" @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
                     <p v-else>已购买，<el-button type="primary" @click="showChangeBtn">变更</el-button></p> -->
-                    <el-radio @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
-                    <p v-if="scope.row.status==1">已购买<span v-if="isChangeBtnShow">,<el-button type="primary" @click="showChangeBtn">变更</el-button></span></p>
+                    <p v-if="scope.row.status==1">已购买<span v-if="isChangeBtnShow">,&nbsp;&nbsp;<el-button type="primary" @click="showChangeBtn(scope.row)">变更</el-button></span></p>
+                    <el-radio v-else @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
                </template>
             </el-table-column>
         </el-table>
@@ -93,7 +95,7 @@
                 <span>{{formChange.newName}}</span>
             </el-form-item>
             <el-form-item label="意向购买坐席数量（个）：" prop="buyCount" :label-width="formLabelWidth">
-                <el-input v-model="formChange.buyCount" placeholder="" maxLength="5" style="width: 260px;" @keyup.native="number" @input="formChangeCount"></el-input>
+                <el-input v-model="formChange.buyCount" placeholder="" maxLength="10" style="width: 260px;" @keyup.native="number" @input="formChangeCount"></el-input>
             </el-form-item>
             <el-form-item label="需支付首月固定费用（元）：" :label-width="formLabelWidth">
                 {{formChange.cost}}
@@ -212,11 +214,11 @@
                 this.formChange.buyCount=this.formChange.buyCount.replace(/[^\.\d]/g,'');
                 this.formChange.buyCount=this.formChange.buyCount.replace('.','');
             },
-            showChangeBtn(){
+            showChangeBtn(val){
+                console.log(val)
                 this.isBuyBtn=false;
                 this.isChangeBtn=true;
-                var rows = this.multipleSelection;
-
+                val.status=0;
             },
             showRow(val){
                 console.log(val)
@@ -229,7 +231,7 @@
                 console.log(val)
                 this.multipleSelection = val;
             }, 
-            buyClick(){
+            buyClick(){                
                 var rows = this.multipleSelection;
                 if(rows.length <1){
                     this.$message({
@@ -239,10 +241,10 @@
                     return;
                 }
                 this.buyFormVisible=true;
-                // 设置需支付首月固定费用为空
-                this.formBuy.cost="";
                 // 账号余额不足去充值默认不显示
-                this.formBuy.isShowTipBuy=false;
+                this.isShowTipBuy=false;
+                // 设置需支付首月固定费用为空
+                this.formBuy.cost="";                
                 if (this.$refs['formBuy']!=undefined) {
                     this.$refs['formBuy'].resetFields();
                 }                
@@ -266,7 +268,12 @@
                     });
                     return;
                 }
-
+                // 超过最大坐席数量提示
+                var maxNum=rows.maxSheetNum;
+                if(this.formBuy.buyCount>maxNum){
+                    this.$message.error("本套餐暂不支持如此大的坐席数量，请联系管理人员。");
+                    return;
+                }
                 this.$refs[formName].validate((valid) => {
                     var rows=this.multipleSelection;
                     if (valid) {
@@ -282,7 +289,11 @@
                             var result =  response.data;
                             if(result.code==0){
                                 var table=result.data;
-                                window.location.href="/merchant/call/package/index";                 
+                                mainDivVM.$message({
+                                    message: '购买服务套餐申请成功。管理人员给您绑定坐席后可直接拨打电话。', type: 'success', duration: 2000, onClose: function () {
+                                        window.location.href="/merchant/call/package/index";
+                                    }
+                                });
                             }else{
                                 mainDivVM.$message.error(result.msg);
                             }                    
@@ -298,6 +309,12 @@
             },
             submitChangeForm(){
                 var rows=this.multipleSelection;
+                // 超过最大坐席数量提示
+                var maxNum=rows.maxSheetNum;
+                if(this.formChange.buyCount>maxNum){
+                    this.$message.error("本套餐暂不支持如此大的坐席数量，请联系管理人员。");
+                    return;
+                }
                 var param ={};
                 param.userId = userId;
                 param.fromPackageId = originPackageId;//变更前套餐ID
@@ -345,7 +362,7 @@
                                 mainDivVM.isChangeBtnShow=false;//变更过套餐不显示变更按钮
                             }else{
                                 mainDivVM.isChangeBtnShow=true;//未变更过套餐显示变更按钮
-                            }
+                            }                           
                         }                        
                     }else{
                         mainDivVM.$message.error(result.msg);
