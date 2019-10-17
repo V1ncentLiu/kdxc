@@ -88,7 +88,6 @@ public class MerchantAppiontmentController {
      */
     @ResponseBody
     @PostMapping("/insertMerchantAppiontment")
-    @RequiresPermissions("merchant:merchantAppiontment:add")
     public JSONResult<Boolean> insertMerchantAppiontment(@RequestBody MerchantAppiontmentDTO dto) {
         UserInfoDTO userInfoDTO = getUser();
         dto.setCreateUserId(userInfoDTO.getId());
