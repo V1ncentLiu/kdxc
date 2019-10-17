@@ -21,7 +21,7 @@ var homePageVM = new Vue({
 				'newPassword': '',
 				'confirmPwd': ''
 			},
-			hasBuyPackage:hasBuyPackage,
+			hasBuyPackage: hasBuyPackage,
 			items: menuList
 			/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
 			{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
@@ -200,6 +200,7 @@ var homePageVM = new Vue({
 			}
 		},
 		menuClick: function (ifreamUrl) {
+			$(".menu.is-active").removeClass("is-active")
 			this.$refs.iframeBox.src = ifreamUrl //给ifream的src赋值
 			window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
 		},
@@ -298,8 +299,8 @@ var homePageVM = new Vue({
 			this.$refs.modifyForm.resetFields();
 		},
 		openLoginClientDialog() {//打开登录坐席dialog
-			console.log(this.isQimoClient,this.isTrClient,this.isTrClient);
-			
+			console.log(this.isQimoClient, this.isTrClient, this.isTrClient);
+
 			if (this.isQimoClient) {
 				this.loginClientForm.clientType = 2;
 				this.dialogLogoutClientVisible = true;
@@ -821,7 +822,17 @@ var homePageVM = new Vue({
 			this.outboundDialogMin = true;
 		},
 		outboundCall(outboundInputPhone, callSource, clueId) {//外呼
-			outboundCallPhone(outboundInputPhone, callSource, clueId, null);
+			axios.post('/merchant/seatManager/queryListBySubMerchant')
+				.then(function (response) {
+					if (response.data.data) {
+						outboundCallPhone(outboundInputPhone, callSource, clueId, null);
+					} else {
+						homePageVM.$message({ message: '此账户未绑定坐席', type: 'warning' });
+					}
+				})
+				.catch(function (error) {
+					console.log(error);
+				})
 			//stopSound();//停止播放录音
 			/*clearTimer();//清除定时器
 			if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
@@ -924,6 +935,21 @@ var homePageVM = new Vue({
 			});
 
 		},
+		openCostList() {//打开充值记录页面
+			$(".menu.is-active").removeClass("is-active")
+			console.log($(".menu .name").html())
+			var a = $(".menu");
+			a.each(function () {
+				console.log($(this).text())
+				if ($(this).text() == "充值记录") {
+					$(this).addClass("is-active")
+				}
+			});
+			var dataUrl = "/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness";
+			$("#iframeBox").attr({
+				"src": dataUrl //设置ifream地址
+			});
+		},
 		validClientNo(cno) {//验证坐席是否属于自己
 			var isPass = false;
 			$.ajax({
@@ -984,12 +1010,12 @@ var homePageVM = new Vue({
 
 	},
 	created() {
-		if(this.hasBuyPackage){
+		if (this.hasBuyPackage) {
 			this.loginQimoClient();
 		}
 		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
-		
+
 		if (isUpdatePassword == "1") {
 			this.dialogModifyPwdVisible = true;
 		}

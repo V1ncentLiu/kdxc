@@ -44,7 +44,7 @@ var myCallRecordVm = new Vue({
     },
     userInfoList: userInfoList,//绑定账户
     totalMerchantCost:totalMerchantCost,
-    isActive1:true,
+    isActive1:false,
     isActive2:false,
     isActive3:false,
     isActive4:false,
@@ -395,6 +395,7 @@ var myCallRecordVm = new Vue({
     // });
     //电销总监电销组筛选按钮不可点击
     this.initCallRecordData();
+    this.searchYesterday();
   },
   mounted() {
     document.getElementById('myCallRecordVm').style.display = 'block';

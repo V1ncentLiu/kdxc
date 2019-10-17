@@ -8,6 +8,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.component.merchant.MerchantComponent;
 import com.kuaidao.manageweb.feign.merchant.seatmanager.SeatManagerFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -70,7 +71,7 @@ public class SeatManagerController {
    */
   @ResponseBody
   @PostMapping("/merchantUsers")
-  public  List<UserInfoDTO> merchantUsers(HttpServletRequest request, IdEntityLong id) {
+  public  List<UserInfoDTO> merchantUsers(HttpServletRequest request,@RequestBody IdEntityLong id) {
     UserInfoDTO merchantUser = merchantComponent.getMerchantById(id.getId());
     List<Integer> statusList = new ArrayList<>();
     statusList.add(USER_STATUS.ENABLE);
@@ -136,6 +137,20 @@ public class SeatManagerController {
   public JSONResult<SeatManagerResp> findOne(@RequestBody IdEntityLong idEntityLong) {
     
     return seatManagerFeignClient.findOne(idEntityLong);
+  }
+
+  /**
+   * 查询当前用户是否绑定坐席
+   */
+  @ResponseBody
+  @PostMapping("/queryListBySubMerchant")
+  public JSONResult<SeatManagerResp> queryListBySubMerchant(HttpServletRequest request) {
+    UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    Long accountId = curLoginUser.getId();
+    SeatManagerReq seatManagerReq = new SeatManagerReq();
+    seatManagerReq.setSubMerchant(accountId);
+    return seatManagerFeignClient
+        .queryListBySubMerchant(seatManagerReq);
   }
 
 }

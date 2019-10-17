@@ -17,3 +17,6 @@ function removeSessionStore (name) {//移除sessionStorage
     if (!name) return
     return window.sessionStorage.removeItem(name)
 }
+function openCostList(){
+    homePageVM.openCostList()
+}

@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.pubcustomer;
 
+import com.kuaidao.common.constant.ComConstant.USER_STATUS;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -11,6 +12,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.pubcusres.PublicCustomerResourcesRespDTO;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoReq;
 import javax.servlet.http.HttpServletRequest;
@@ -63,8 +65,15 @@ public class PubcustomerController {
       @RequestBody ClueReceiveRecordsDTO dto) {
 
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    Long userId = null;
+    if(SysConstant.USER_TYPE_THREE.equals(curLoginUser.getUserType())){
+      userId = curLoginUser.getParentId();
+    }else{
+      userId = curLoginUser.getId();
+    }
+
     JSONResult<Boolean> hasBuyPackage = callPackageFeignClient
-        .hasBuyPackage(curLoginUser.getId());
+        .hasBuyPackage(userId);
     if(JSONResult.SUCCESS.equals(hasBuyPackage.getCode())){
       if(!hasBuyPackage.getData()){
         ClueReceiveRecordsDTO receiveRecordsDTO = new ClueReceiveRecordsDTO();
