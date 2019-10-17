@@ -257,7 +257,10 @@
                 this.formChange.isShowTipChange=false;
                 if (this.$refs['formChange']!=undefined) {
                     this.$refs['formChange'].resetFields();
-                }                
+                }   
+                var rows = this.multipleSelection;
+                // 给新套餐名称赋值
+                this.formChange.newName=rows.packageName;
             },
             submitBuyForm(formName ){
                 var rows = this.multipleSelection;
@@ -362,7 +365,14 @@
                                 mainDivVM.isChangeBtnShow=false;//变更过套餐不显示变更按钮
                             }else{
                                 mainDivVM.isChangeBtnShow=true;//未变更过套餐显示变更按钮
-                            }                           
+                            }        
+                            // 如果已购买未变更时候，给旧的套餐名称和已购买个数赋值
+                            var list=table.callBuyPackageDTOList
+                            for(var i=0;i<list.length;i++){
+                                if(list[i].status==1){
+                                    mainDivVM.formChange.name=list[i].packageName;
+                                }
+                            }
                         }                        
                     }else{
                         mainDivVM.$message.error(result.msg);
