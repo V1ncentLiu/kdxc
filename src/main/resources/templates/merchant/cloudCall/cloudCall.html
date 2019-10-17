@@ -53,7 +53,7 @@
                     <!-- <el-radio v-if="scope.row.status==1" @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
                     <p v-else>已购买，<el-button type="primary" @click="showChangeBtn">变更</el-button></p> -->
                     <p v-if="scope.row.status==1">已购买<span v-if="isChangeBtnShow">,&nbsp;&nbsp;<el-button type="primary" @click="showChangeBtn(scope.row)">变更</el-button></span></p>
-                    <el-radio v-else @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
+                    <el-radio v-else @change="showRow(scope.row)" v-model="radio" :label="scope.$index" style="margin-right: -20px;">&nbsp;</el-radio>
                </template>
             </el-table-column>
         </el-table>
@@ -328,7 +328,7 @@
                     }
                 });   
             },
-            submitChangeForm(){
+            submitChangeForm(formName){
                 var rows=this.multipleSelection;
                 // 超过最大坐席数量提示
                 var maxNum=rows.maxSheetNum;
@@ -336,26 +336,37 @@
                     this.$message.error("本套餐暂不支持如此大的坐席数量，请联系管理人员。");
                     return;
                 }
-                var param ={};
-                param.userId = userId;
-                param.fromPackageId = originPackageId;//变更前套餐ID
-                param.toPackageId = rows.packageId;//变更后套餐ID
-                param.buyCount = this.formChange.buyCount;
-                console.info(param);
-                axios.post('/merchant/call/package/change', param)
-                .then(function (response) {
-                    console.log(response)
-                    var result =  response.data;
-                    if(result.code==0){
-                        var table=result.data;
-                        window.location.href="/merchant/call/package/index";                       
-                    }else{
-                        mainDivVM.$message.error(result.msg);
-                    }                    
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });    
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param ={};
+                        param.userId = userId;
+                        param.fromPackageId = originPackageId;//变更前套餐ID
+                        param.toPackageId = rows.packageId;//变更后套餐ID
+                        param.buyCount = this.formChange.buyCount;
+                        console.info(param);
+                        axios.post('/merchant/call/package/change', param)
+                        .then(function (response) {
+                            console.log(response)
+                            var result =  response.data;
+                            if(result.code==0){
+                                var table=result.data;
+                                mainDivVM.$message({
+                                    message: '购买服务套餐申请成功。管理人员给您绑定坐席后可直接拨打电话。', type:'success', duration: 2000, onClose: function () {
+                                        window.location.href="/merchant/call/package/index";   
+                                    }
+                                });                                                    
+                            }else{
+                                mainDivVM.$message.error(result.msg);
+                            }                    
+                        })
+                        .catch(function (error) {
+                             console.log(error);
+                        }); 
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    } 
+                });   
             },
             searchTable() {                 
                 axios.get('/merchant/call/package/list?userId='+userId)
