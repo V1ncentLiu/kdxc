@@ -33,6 +33,10 @@
       background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1));
       opacity: 0.9;
     }
+
+    .mainSearchForm {
+      justify-content: center;
+    }
   </style>
 </head>
 
@@ -64,6 +68,11 @@
               style="margin-left: 10px;width: 100px;">搜索
             </el-button>
           </el-form-item>
+          <el-form-item label="">
+            <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchEdit()"
+              style="margin-left: 10px;width: 100px;">重置
+            </el-button>
+          </el-form-item>
           <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
           <!-- </div>  -->
         </el-form>
@@ -81,7 +90,11 @@
             </template>
           </el-table-column>
           <el-table-column align="center" prop="sheetCount" label="意向购买坐席数"></el-table-column>
-          <el-table-column align="center" prop="supplyCompany" label="供应商"></el-table-column>
+          <el-table-column align="center" prop="supplyCompany" label="供应商">
+            <template slot-scope="scope">
+              <span v-if="scope.row.supplyCompany==1">七陌</span>
+            </template>
+          </el-table-column>
           <el-table-column align="center" prop="beginTime" label="服务开启时间" :formatter="dateFormat" width="160">
           </el-table-column>
           <el-table-column align="center" prop="sheetCount" label="商家坐席">
@@ -144,7 +157,7 @@
       <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button class="allBtnHover" type="primary" :disabled="submitDisabled"
           @click="saveAccountUser('subAccountForm')">提交</el-button>
-        <el-button class="allBtnHover" @click="accountcancelForm('subAccountForm')">取 消</el-button>
+        <el-button class="allBtnHover" @click="accountcancelForm('subAccountForm')">取消</el-button>
       </div>
     </el-dialog>
 
@@ -294,22 +307,22 @@
         clientCost: '150元/月',
       }],
       submitDisabled: false,
-      dataTable:
-        [{
-          userName: '1',
-          packageName: '2',
-          sheetCount: '3',
-          supplyCompany: '4',
-          beginTime: '5',
-          id: '0',
-        }, {
-          userName: '1',
-          packageName: '2',
-          sheetCount: '3',
-          supplyCompany: '4',
-          beginTime: '5',
-          id: '4',
-        }],
+      dataTable: [],
+      // [{
+      //   userName: '1',
+      //   packageName: '2',
+      //   sheetCount: '3',
+      //   supplyCompany: '1',
+      //   beginTime: '5',
+      //   id: '0',
+      // }, {
+      //   userName: '1',
+      //   packageName: '2',
+      //   sheetCount: '3',
+      //   supplyCompany: '1',
+      //   beginTime: '5',
+      //   id: '4',
+      // }],
       pager: {
         total: 0,
         currentPage: 1,
@@ -443,7 +456,7 @@
 
       // 坐席跳转
       goHref(value) {
-        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId+'&userName'+value.userName
+        var url = '/merchant/seatManager/toPage?userId=' + value.userId + '&buyPackageId=' + value.id + '&packageId=' + value.packageId + '&userName' + value.userName
         document.location.href = url
       },
 
@@ -453,6 +466,14 @@
           this.$refs[formName].resetFields();
         }
         this.dialogsubAccountForm = false;
+      },
+
+      // 重置
+      searchEdit() {
+        this.userSearchForm.status = ''
+        this.userSearchForm.userName = ''
+        this.userSearchForm.name = ''
+        this.searchTable()
       },
 
       // 搜索 

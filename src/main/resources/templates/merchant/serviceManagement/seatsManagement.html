@@ -100,9 +100,21 @@
       opacity: 0.9;
     }
 
-    .allBtnHover:hover {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1));
+    .cancel{
+      background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1)) !important;
+      box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+    }
+    .cancel:hover{
+      background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1)) !important;
       opacity: 0.9;
+    }
+    .allBtnHover:hover {
+      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+      opacity: 0.9;
+    }
+
+    .mainSearchForm {
+      justify-content: center;
     }
   </style>
 </head>
@@ -132,6 +144,10 @@
           <el-form-item label="">
             <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
               style="margin-left: 10px;">搜索</el-button>
+          </el-form-item>
+          <el-form-item label="">
+            <el-button icon="el-icon-search" type="primary" @click="searchEdit()" class="searchBtn"
+              style="margin-left: 10px;">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -207,7 +223,7 @@
       <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button class="allBtnHover" type="primary" :disabled="submitDisabled" @click="submitForm('subAccountForm')">
           提交</el-button>
-        <el-button class="allBtnHover" type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
+        <el-button class="cancel" type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
       </div>
     </el-dialog>
   </div>
@@ -310,7 +326,7 @@
                 }
                 callback();
 
-              }, trigger: 'blur'
+              }, trigger: 'change'
             }
           ],
           iframecompany: [
@@ -374,6 +390,15 @@
       handleSelectionChange(val) {
         this.multipleSelection = val;
         console.log(val);
+      },
+
+      // 重置？
+      // 重置
+      searchEdit() {
+        this.form.rechargeBusiness = ''
+        this.form.number = ''
+        this.form.company = ''
+        this.searchTable()
       },
 
       // 添加 编辑 删除按钮
