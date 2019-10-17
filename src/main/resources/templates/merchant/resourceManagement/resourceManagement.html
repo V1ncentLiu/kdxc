@@ -166,53 +166,53 @@
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                     <div class="main-search-box">
-                        <el-form-item label="资源类别:">
+                        <el-form-item label="资源类别:" prop="category">
                             <el-select v-model="form.category" clearable placeholder="资源类别">
                                 <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="资源类型:">
+                        <el-form-item label="获取时间:" class="search-box-margin" prop="searchStartTime">
+                            <el-date-picker v-model="form.searchStartTime" type="datetime" placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="—" class="widthauto" prop="searchEndTime">
+                            <el-date-picker v-model="form.searchEndTime" type="datetime" placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="资源类型:" prop="type">
                             <el-select v-model="form.type" filterable clearable placeholder="资源类型">
                                 <el-option v-for="item in clueTypeOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="行业类别:">
+                        <el-form-item label="行业类别:" prop="industryCategory">
                             <el-select v-model="form.industryCategory" clearable placeholder="行业类别">
                                 <el-option v-for="item in industryCategoryOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="获取时间:" class="search-box-margin">
-                            <el-date-picker v-model="form.searchStartTime" type="datetime" placeholder="选择日期时间">
-                            </el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="—" class="widthauto">
-                            <el-date-picker v-model="form.searchEndTime" type="datetime" placeholder="选择日期时间">
-                            </el-date-picker>
-                        </el-form-item>
-                        <el-row v-show="isShow">
-                            <el-form-item label="搜索词:">
+                        
+                            <el-form-item label="搜索词:" prop="searchWord">
                                 <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
                             </el-form-item>
-                            <el-form-item label="电话:">
+                            <el-form-item label="电话:" prop="phone">
                                 <el-input v-model="form.phone" placeholder="电话"></el-input>
                             </el-form-item>
-                            <el-form-item label="客户姓名:">
+                            <el-form-item label="客户姓名:" prop="cusName">
                                 <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
                             </el-form-item>
-                            <el-form-item label="客户状态:">
+                            <el-form-item label="客户状态:" prop="customerStatus">
                                 <el-select v-model="form.customerStatus" placeholder="客户状态" clearable>
                                     <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name"
                                         :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="资源是否有效:">
+                            <el-form-item label="资源是否有效:" prop="status">
                                 <el-select v-model="form.status" placeholder="资源是否有效" clearable>
                                     <el-option v-for="item in comArr" :key="item.value" :label="item.name"
                                         :value="item.value">
@@ -220,14 +220,11 @@
                                 </el-select>
                             </el-form-item>
                     </div>
-                    </el-row>
                     <div class="mainSearchBtnBox">
                         <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
                             搜索</el-button>
                         <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                        <span style="color: #5c6be8;cursor: pointer;margin:0 10px; padding-top:10px;"
-                            @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i
-                                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                        <el-button @click="resetFormResource('form')">重置</el-button> 
                     </div>
                 </el-form>
             </div>
@@ -251,7 +248,7 @@
                     <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
                     <el-table-column align="center" prop="messageTime" label="留言时间" :formatter="dateFormat" width="130">
                     </el-table-column>
-                    <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+                    <el-table-column align="center" prop="messagePoint" label="留内容"></el-table-column>
                     <el-table-column align="center" prop="phone" label="联系电话">
                         <template slot-scope="scope">
                             <span>{{scope.row.phone}}</span>
@@ -314,7 +311,7 @@
         </el-dialog>
         <!-- 查看手机号 -->
 
-        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" before-close="handleClose">
+        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" @close="handleClose">
             <template>
                 <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired invite-box">
                     <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
@@ -577,6 +574,13 @@
             customerEidt(row) {
                 var clueId = row.clueId;
                 window.location.href = "/clueInfo/init/" + clueId;
+            },
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form,'searchStartTime','');
+                    this.$set(this.form,'searchEndTime','');
+                }
             },
             // 获取时间
             getTime(cid) {
