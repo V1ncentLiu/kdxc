@@ -144,9 +144,10 @@ public class SeatManagerController {
    */
   @ResponseBody
   @PostMapping("/queryListBySubMerchant")
-  public JSONResult<SeatManagerResp> queryListBySubMerchant(@RequestBody SeatManagerReq seatManagerReq) {
+  public JSONResult<SeatManagerResp> queryListBySubMerchant(HttpServletRequest request) {
     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
     Long accountId = curLoginUser.getId();
+    SeatManagerReq seatManagerReq = new SeatManagerReq();
     seatManagerReq.setSubMerchant(accountId);
     return seatManagerFeignClient
         .queryListBySubMerchant(seatManagerReq);
