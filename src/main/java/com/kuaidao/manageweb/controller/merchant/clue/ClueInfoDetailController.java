@@ -291,9 +291,10 @@ public class ClueInfoDetailController {
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
         }
-        // 商家子账号看自己的记录
+        // 商家子账号看自己和主账号的记录
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userList.add(user.getId());
+            userList.add(user.getParentId());
         }
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(String.valueOf(idEntityLong.getId()));
