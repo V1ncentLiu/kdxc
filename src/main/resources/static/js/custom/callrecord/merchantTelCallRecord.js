@@ -89,7 +89,12 @@ var myCallRecordVm = new Vue({
       // }]
 
     },
-    initCallRecordData() {
+    initCallRecordData(val) {
+      if(val&&val=="1"){
+        this.isActive1=false;
+        this.isActive2=false;
+        this.isActive3=false;
+      }
       // this._initData();
        var startTime = this.searchForm.startTime;
        var endTime = this.searchForm.endTime;
