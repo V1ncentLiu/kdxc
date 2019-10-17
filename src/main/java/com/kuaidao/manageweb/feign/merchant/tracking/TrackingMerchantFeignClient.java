@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.merchant.tracking;
 
 import java.util.List;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.merchant.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.merchant.dto.tracking.TrackingReqDTO;
 import com.kuaidao.merchant.dto.tracking.TrackingRespDTO;
@@ -35,7 +36,7 @@ public interface TrackingMerchantFeignClient {
     JSONResult<List<TrackingRespDTO>> queryList(@RequestBody TrackingReqDTO dto);
 
     @RequestMapping("/findByClueId")
-    JSONResult<List<TrackingRespDTO>> findByClueId(@RequestParam("clueId") Long clueId);
+    JSONResult<List<TrackingRespDTO>> findByClueId(@RequestBody IdListLongReq reqDto);
 
     @Component
     class HystrixClientFallback implements TrackingMerchantFeignClient {
@@ -66,7 +67,7 @@ public interface TrackingMerchantFeignClient {
         }
 
         @Override
-        public JSONResult<List<TrackingRespDTO>> findByClueId(Long clueId) {
+        public JSONResult<List<TrackingRespDTO>> findByClueId( IdListLongReq reqDto) {
             return fallBackError("根据线索id查询跟进记录-查询）");
         }
 
