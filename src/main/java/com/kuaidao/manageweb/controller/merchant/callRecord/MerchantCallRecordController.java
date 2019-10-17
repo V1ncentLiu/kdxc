@@ -104,7 +104,7 @@ public class MerchantCallRecordController {
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 callRecordReqDTO.setAccountIdList(idList);
-            } else if (SysConstant.USER_TYPE_TWO.equals(userType)) {
+            } else if (SysConstant.USER_TYPE_TWO.equals(userType)) {//商家主账号
                 userInfo = buildQueryReqDto(SysConstant.USER_TYPE_THREE, curLoginUser.getId());
                 JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient
                     .merchantUserList(userInfo);
@@ -112,6 +112,7 @@ public class MerchantCallRecordController {
                     .isNotEmpty(merchantUserList.getData())) {
                     List<Long> userIdList = merchantUserList.getData().parallelStream()
                         .map(UserInfoDTO::getId).collect(Collectors.toList());
+                    userIdList.add(curLoginUser.getId());
                     callRecordReqDTO.setAccountIdList(userIdList);
                 }
             }

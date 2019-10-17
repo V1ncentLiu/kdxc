@@ -17,6 +17,11 @@
     .call-money{margin-left:30px; height: 30px; line-height: 30px; float: left; display: inline;color: #000000;  font-size: 14px;}
     .call-money span{color: #4D81FF;}
     .el-form--inline .el-form-item.call-time{margin-right: 0;}
+    .call-menu{border-radius: 4px 4px 0px 0px; margin-top:2px;}
+    .call-menu .el-button:first-child{border-radius: 4px 0px 0px 0px;}
+    .call-menu .el-button:last-child{border-radius: 0px 4px 0px 0px;}
+    .call-menu .el-button:first-child.call-button-active{border-radius: 4px 0px 0px 0px;}
+    .call-menu .el-button:last-child.call-button-active{border-radius: 0px 4px 0px 0px;}
   </style>
 <body>
 <div id="myCallRecordVm" class="optimizeClueManagement mainPadding" style="display:none">  
@@ -41,7 +46,7 @@
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="searchForm" ref="searchForm">
               <div class="main-search-box">
                 <el-form-item label="商家账户:" prop="bindAccount">
-                    <el-select v-model="searchForm.bindAccount" placeholder="绑定账户" value-key="id">
+                    <el-select v-model="searchForm.bindAccount" placeholder="绑定账户" value-key="id" clearable>
                        <el-option
                            v-for="item in userInfoList"
                            :key="item.id"
@@ -50,18 +55,19 @@
                        </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="坐席编号:" prop="seatNumber">
-                        <el-input placeholder="坐席编号"  v-model="searchForm.seatNumber"></el-input>
-                    </el-form-item>
-                <el-form-item label="坐席电话:" prop="seatPhone">
-                        <el-input placeholder="坐席电话"  v-model="searchForm.seatPhone"></el-input>
-                    </el-form-item>
                 <el-form-item label="消费时间段:" prop="startTime" class="call-time">
                     <el-date-picker v-model="searchForm.startTime" type="datetime" placeholder="选择开始日期"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto"  prop="endTime">
                     <el-date-picker v-model="searchForm.endTime" type="datetime" placeholder="选择结束日期" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
                 </el-form-item>
+                <el-form-item label="坐席编号:" prop="seatNumber">
+                        <el-input placeholder="坐席编号"  v-model="searchForm.seatNumber"></el-input>
+                    </el-form-item>
+                <el-form-item label="坐席电话:" prop="seatPhone">
+                        <el-input placeholder="坐席电话"  v-model="searchForm.seatPhone"></el-input>
+                    </el-form-item>
+               
               </div>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initCallRecordData" class="searchBtn">搜索</el-button>      
@@ -97,6 +103,7 @@
 <script th:inline="javascript">
   var userInfoList = [[${ userInfoList }]];
   var totalMerchantCost = [[${ totalMerchantCost }]];
+  //userInfoList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
 </script>
 <!-- 当前页面的js -->
 <script th:src="@{/js/custom/callrecord/merchantManageCallCost.js}"></script>
