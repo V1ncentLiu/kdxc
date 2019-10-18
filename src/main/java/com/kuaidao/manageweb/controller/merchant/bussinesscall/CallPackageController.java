@@ -91,7 +91,7 @@ public class CallPackageController {
     @PostMapping("/schedule/deduct/call")
     @ResponseBody
     public JSONResult<String> scheduleDeductCall() {
-        log.info("CallPackageBuyController,list,endTime={}");
+        log.info("CallPackageBuyController,list");
         return callPackageJobFeignClient.scheduleUpdatePackage();
     }
 
