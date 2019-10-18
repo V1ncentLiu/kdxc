@@ -456,7 +456,7 @@ var homePageVM = new Vue({
 						clientInfo.loginClient = homePageVM.loginClientForm.loginClient
 						clientInfo.clientType = homePageVM.loginClientForm.clientType;
 						clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
-						localStorage.setItem("clientInfo", JSON.stringify(clientInfo));
+						// localStorage.setItem("clientInfo", JSON.stringify(clientInfo));
 
 						/* var recordParam = {};
 						 recordParam.clientType=homePageVM.loginClientForm.clientType;
