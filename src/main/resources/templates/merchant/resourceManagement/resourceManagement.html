@@ -249,7 +249,8 @@
                     <el-table-column align="center" prop="messagePoint" label="留内容"></el-table-column>
                     <el-table-column align="center" prop="phone" label="联系电话">
                         <template slot-scope="scope">
-                            <span style="max-width: 125px;">{{scope.row.phone}}</span>
+                            <!-- <span style="max-width: 125px;">{{scope.row.phone}}</span> -->
+                            <span style="max-width: 125px;">{{scope.row.phone == null ? '' : scope.row.phone}}</span>
                             <span v-if="scope.row.showPhoneFlag=='1'" class="callIphone"
                                 @click="callIphone(scope.row.callPhone,scope.row.clueId)"><img
                                     th:src="@{/images/icon_call2.png}" alt="" style="width: 22px;height: 22px;"></span>
@@ -311,7 +312,7 @@
 
         <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" @close="handleClose">
             <template>
-                <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired invite-box">
+                <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="invite-box">
                     <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
                         <el-input v-model="inviteForm.cusName" autocomplete="off" maxLength="10" class="input-width">
                         </el-input>
@@ -387,7 +388,7 @@
                     <el-form-item label="客户状态：" :label-width="formLabelWidth" prop="customerStatus">
                         <el-select v-model="trackingForm.customerStatus" @change="customerStatusChange"
                             placeholder="客户状态" clearable>
-                            <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name"
+                            <el-option v-for="item in cusStatusArrTracking" :key="item.value" :label="item.name"
                                 :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
@@ -531,6 +532,7 @@
                 industryCategoryOptions: industryCategoryList,
                 trackingVisible: false,//跟进记录弹窗
                 cusStatusArr: [],//客户状态list
+                cusStatusArrTracking: [],//跟进记录客户状态list
                 substatus: true,//客户状态二级是否显示
                 customerStatusSubArr: [],//客户状态二级list
                 trackingForm: {
@@ -1012,7 +1014,7 @@
             axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                 ocmVM.provinceArr = response.data.data.data;
             });
-            //客户状态一级
+            //搜索栏客户状态
             param = {};
             param.groupCode = "customerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
@@ -1028,7 +1030,19 @@
                 ocmVM.cusStatusArr = arr;
                 console.log(ocmVM.cusStatusArr)
             });
-
+            //跟进记录客户状态一级
+            param = {};
+            param.groupCode = "customerStatus";
+            axios.post('/dictionary/DictionaryItem/queryTeleMyCusCustomerStatus', param).then(function (response) {
+                var data = response.data.data;
+                var  arr = new Array();
+                for(let i = 0, len = data.length; i < len; i++) {
+                    if(data[i].name != "未联系"){
+                        arr.push(data[i]);
+                    };
+                }
+                ocmVM.cusStatusArrTracking =arr ;
+            });
             //客户状态二级
             param = {};
             param.groupCode = "customerStatusSub";
