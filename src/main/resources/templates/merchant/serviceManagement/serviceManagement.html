@@ -48,8 +48,14 @@
       opacity: 0.9;
       box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
     }
-    .el-form--inline .el-form-item.call-time{margin-right: 0;}
-    .mainSearchBtnBox .el-form-item{margin-right: 0;}
+
+    .el-form--inline .el-form-item.call-time {
+      margin-right: 0;
+    }
+
+    .mainSearchBtnBox .el-form-item {
+      margin-right: 0;
+    }
   </style>
 </head>
 
@@ -64,26 +70,27 @@
       <div class="mainSearchFormBox">
         <el-form :inline="true" :model="userSearchForm" class="demo-form-inline mainSearchForm" ref="userSearchForm">
           <div class="main-search-box">
-          <el-form-item label="商家：" prop="status" label-width="auto">
-            <el-select clearable v-model="userSearchForm.status" placeholder="商家账户名">
-              <el-option v-for="item in merchantUserListOptions" :key="item.userId" :label="item.name" :value="item.id">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="服务套餐名称：">
-            <el-input v-model="userSearchForm.userName" class="input-with-select" placeholder="服务套餐名称"></el-input>
-          </el-form-item>
-          <el-form-item label="坐席编号：">
-            <el-input v-model="userSearchForm.name" class="input-with-select" placeholder="坐席编号"></el-input>
-          </el-form-item>
-          <!-- <div class="mainSearchBtnBox">  -->
-            </div>
-            <div class="mainSearchBtnBox">
-          <el-form-item label="">
-              <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>      
-              <el-button @click="searchEdit()">重置</el-button> 
-          </el-form-item>
-        </div>
+            <el-form-item label="商家：" prop="status" label-width="auto">
+              <el-select clearable v-model="userSearchForm.status" placeholder="商家账户名">
+                <el-option v-for="item in merchantUserListOptions" :key="item.userId" :label="item.name"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="服务套餐名称：">
+              <el-input v-model="userSearchForm.userName" class="input-with-select" placeholder="服务套餐名称"></el-input>
+            </el-form-item>
+            <el-form-item label="坐席编号：">
+              <el-input v-model="userSearchForm.name" class="input-with-select" placeholder="坐席编号"></el-input>
+            </el-form-item>
+            <!-- <div class="mainSearchBtnBox">  -->
+          </div>
+          <div class="mainSearchBtnBox">
+            <el-form-item label="">
+              <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+              <el-button @click="searchEdit()">重置</el-button>
+            </el-form-item>
+          </div>
           <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
           <!-- </div>  -->
         </el-form>
@@ -140,7 +147,9 @@
           {{merchatData.userName}}商家增加子账户绑定坐席
         </el-form-item>
         <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="seatNo">
-          <el-input v-model="subAccountForm.seatNo" autocomplete="off" style="width: 290px;"></el-input>
+          <el-input maxlength="10" @keyup.native="number" v-model="subAccountForm.seatNo" autocomplete="off"
+            style="width: 290px;">
+          </el-input>
         </el-form-item>
         <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="company">
           <el-input v-model="subAccountForm.company" autocomplete="off" style="width: 290px;"></el-input>
@@ -201,25 +210,7 @@
 </body>
 <script th:inline="javascript">
   var userList = [[${ userList }]];//商户集合
-  console.log(userList, 111111);
 
-  // var userList = [
-  //   {
-  //     value: '选项1',
-  //     label: '黄金糕'
-  //   }, {
-  //     value: '选项2',
-  //     label: '双皮奶'
-  //   }, {
-  //     value: '选项3',
-  //     label: '蚵仔煎'
-  //   }, {
-  //     value: '选项4',
-  //     label: '龙须面'
-  //   }, {
-  //     value: '选项5',
-  //     label: '北京烤鸭'
-  //   }]
   var userVM = new Vue({
     el: '#userManage',
     data: {
@@ -286,30 +277,9 @@
           { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
           { max: 200, message: '最大200个字符', trigger: 'blur' },
         ],
-        subMerchant: [
-          // { required: true, message: '请选择商家子账号', trigger: 'blur' },
-          // { max: 50, message: '最大50个字符', trigger: 'blur' },
-        ],
       },
       // 添加坐席里面的选择框
       options: [],
-      // [
-      //   {
-      //     value: '选项1',
-      //     label: '黄金糕'
-      //   }, {
-      //     value: '选项2',
-      //     label: '双皮奶'
-      //   }, {
-      //     value: '选项3',
-      //     label: '蚵仔煎'
-      //   }, {
-      //     value: '选项4',
-      //     label: '龙须面'
-      //   }, {
-      //     value: '选项5',
-      //     label: '北京烤鸭'
-      //   }],
       infoTable: [{
         packageName: '套餐1',
         callCharge: '0.3元',
@@ -319,21 +289,6 @@
       }],
       submitDisabled: false,
       dataTable: [],
-      // [{
-      //   userName: '1',
-      //   packageName: '2',
-      //   sheetCount: '3',
-      //   supplyCompany: '1',
-      //   beginTime: '5',
-      //   id: '0',
-      // }, {
-      //   userName: '1',
-      //   packageName: '2',
-      //   sheetCount: '3',
-      //   supplyCompany: '1',
-      //   beginTime: '5',
-      //   id: '4',
-      // }],
       pager: {
         total: 0,
         currentPage: 1,
@@ -355,6 +310,10 @@
       scrollTop: 0,
     },
     methods: {
+      number() {
+        this.subAccountForm.seatNo = this.subAccountForm.seatNo.replace(/[^\.\d]/g, '');
+        this.subAccountForm.seatNo = this.subAccountForm.seatNo.replace('.', '');
+      },
       // 套餐详情
       openInfo(clueId) {
         var param = {};
@@ -371,18 +330,6 @@
           .catch(function (error) {
             console.log(error);
           });
-        // var alldata = {
-        //   "id": "1181461060948008960",
-        //   "packageName": "222",
-        //   "supplyCompany": "2",
-        //   "maxClientNum": 55623242,
-        //   "clientCost": 10,
-        //   "fixedPhoneMonthlyRent": 20,
-        //   "smallMonthlyRent": 10,
-        //   "callCharge": 3,
-        //   "isDel": 1
-        // }
-        // userVM.infoTable[0] = alldata;
       },
 
       // 添加坐席提交
@@ -391,16 +338,8 @@
         this.$refs[formName].validate((valid) => {
           if (valid) {
             var formData = userVM.subAccountForm;
-            // param.seatNo = formData.seatNo
-            // param.company = formData.company
-            // param.address = formData.address
-            // param.accountNo = formData.accountNo
-            // param.secretKey = formData.secretKey
-            // param.proxyUrl = formData.proxyUrl
-            // param.subMerchant = formData.subMerchant
-            console.log(formData);
             var param = formData;
-            formData.subMerchant=this.selectValue
+            formData.subMerchant = this.selectValue
             param.buyPackageId = this.merchatData.id
             param.packageId = this.merchatData.packageId
             param.type = ''
@@ -425,7 +364,7 @@
         this.dialogsubAccountForm = true;
         // this.selectValue = data.userName
         this.selectValue = data.userId
-        
+
         axios.post("/merchant/seatManager/merchantUsers", { id: data.userId })
           .then(function (response) {
             that.options = response.data
@@ -434,24 +373,6 @@
           }).catch(function (error) {
             console.log(error);
           });
-        // var selectData = [
-        //   {
-        //     value: '选项1',
-        //     label: '黄金糕'
-        //   }, {
-        //     value: '选项2',
-        //     label: '双皮奶'
-        //   }, {
-        //     value: '选项3',
-        //     label: '蚵仔煎'
-        //   }, {
-        //     value: '选项4',
-        //     label: '龙须面'
-        //   }, {
-        //     value: '选项5',
-        //     label: '北京烤鸭'
-        //   }]
-        // that.options = selectData
       },
 
       closeAddCustomFieldDialog() {//关闭添加自定义字段dialog
@@ -510,30 +431,6 @@
           .catch(function (error) {
             console.log(error);
           });
-        // var dataValue = [
-        //   {
-        //     userId: '1',
-        //     id: '0',
-        //     userName: '3',
-        //     packageId: '4',
-        //     packageName: '5',
-        //     sheetCount: '6',
-        //     supplyCompany: '7',
-        //     beginTime: '8',
-        //   },
-        //   {
-        //     userId: '11',
-        //     id: '22',
-        //     userName: '33',
-        //     packageId: '44',
-        //     packageName: '55',
-        //     sheetCount: '66',
-        //     supplyCompany: '77',
-        //     beginTime: '88',
-        //   }]
-        // this.dataTable = dataValue
-        // console.log(this.dataTable);
-
       },
 
       // 翻页调用
@@ -568,41 +465,7 @@
       },
     },
     created() {
-      // 进入页面判断有是否有存储值进入页面判断有是否有存储值
-      // if(!this.paginationShow){
-      //     var storeVal = getSessionStore("userManageStoreForm");
-      //     var otherVal = getSessionStore("userManageOtherVal");
-      //     if(storeVal && otherVal){
-      //         this.userSearchForm = storeVal;
-      //         this.$set(this.pager,"currentPage",otherVal.currentPage);
-      //         this.storeId = otherVal.clueId;
-      //         this.scrollTop = otherVal.scrollTop;
-      //     }
-      // };
-      // // console.info("create method");
-      // var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-      // if(localVal){this.pager.pageSize = localVal;}
       this.searchTable();
-      // var param = {
-      //   "buyPackageId": -14131657.92707023,
-      //   "packageId": -68361105.76434144,
-      //   "type": "cillum magna",
-      //   "seatNo": "cillum incididunt Lorem nos",
-      //   "company": "in ad laborum eu",
-      //   "address": "quis do",
-      //   "accountNo": "sint velit in ea",
-      //   "secretKey": "nostrud anim consectetur",
-      //   "proxyUrl": "non culpa quis mollit",
-      //   "subMerchant": 10074283.192574501
-      // }
-      // axios.post('/merchant/seatManager/create',param)
-      //   .then(function (response) {
-      //     console.info(response);
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error);
-      //   });
-
     },
     mounted() {
       console.info("mounted method");

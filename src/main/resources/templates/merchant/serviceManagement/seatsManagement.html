@@ -147,17 +147,10 @@
             </el-form-item>
           </div>
           <div class="mainSearchBtnBox">
-            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">搜索</el-button>
+            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">搜索
+            </el-button>
             <el-button @click="searchEdit()">重置</el-button>
           </div>
-          <!-- <el-form-item label="">
-            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
-              style="margin-left: 10px;">搜索</el-button>
-          </el-form-item>
-          <el-form-item label="">
-            <el-button icon="el-icon-search" type="primary" @click="searchEdit()" class="searchBtn"
-              style="margin-left: 10px;">重置</el-button>
-          </el-form-item> -->
         </el-form>
       </div>
       <!-- 按钮 -->
@@ -204,7 +197,8 @@
           </span>
         </el-form-item>
         <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="iframeseatNo">
-          <el-input v-model="subAccountForm.iframeseatNo" autocomplete="off" style="width: 290px;"></el-input>
+          <el-input maxlength="10" @keyup.native="number" v-model="subAccountForm.iframeseatNo" autocomplete="off"
+            style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="iframecompany">
           <el-input v-model="subAccountForm.iframecompany" autocomplete="off" style="width: 290px;"></el-input>
@@ -264,51 +258,8 @@
         submitDisabled: false,
         tableData: [],
         merchatSelectName: '',
-        // [
-        //   {
-        //     id: '1',
-        //     buyPackageId: '2',
-        //     packageId: '3',
-        //     seatNo: '4',
-        //     company: '5',
-        //     address: '6',
-        //     accountNo: '7',
-        //     secretKey: '8',
-        //     proxyUrl: '9',
-        //     subMerchant: '0',
-        //   },
-        //   {
-        //     id: '11',
-        //     buyPackageId: '22',
-        //     packageId: '33',
-        //     seatNo: '44',
-        //     company: '55',
-        //     address: '66',
-        //     accountNo: '77',
-        //     secretKey: '88',
-        //     proxyUrl: '99',
-        //     subMerchant: '00',
-        //   },
-        // ],
         multipleSelection: [],
         options: [],
-        //  [
-        //   {
-        //     value: '选项1',
-        //     label: '黄金糕'
-        //   }, {
-        //     value: '选项2',
-        //     label: '双皮奶'
-        //   }, {
-        //     value: '选项3',
-        //     label: '蚵仔煎'
-        //   }, {
-        //     value: '选项4',
-        //     label: '龙须面'
-        //   }, {
-        //     value: '选项5',
-        //     label: '北京烤鸭'
-        //   }],
         centerDialogVisible: false,
         title: '',
         labelPosition: 'right',
@@ -354,15 +305,15 @@
             { required: true, message: 'proxyurl不能为空', trigger: 'blur' },
             { max: 200, message: '最大200个字符', trigger: 'blur' },
           ],
-          // iframesubMerchant: [
-          //   { required: true, message: '请选择商家子账号', trigger: 'change' },
-          //   { max: 50, message: '最大50个字符', trigger: 'blur' },
-          // ],
         },
 
       }
     },
     methods: {
+      number() {
+        this.subAccountForm.iframeseatNo = this.subAccountForm.iframeseatNo.replace(/[^\.\d]/g, '');
+        this.subAccountForm.iframeseatNo = this.subAccountForm.iframeseatNo.replace('.', '');
+      },
       searchTable() {
         var that = this
         var param = {};
@@ -438,27 +389,6 @@
             break;
           case 'delete':
             that.open()
-            // if (this.multipleSelection.length >= 1) {
-            //   var idList = []
-            //   for (var i = 0; i < that.multipleSelection.length; i++) {
-            //     if (that.multipleSelection[i].id) {
-            //       idList.push(that.multipleSelection[i].id)
-            //     }
-            //   }
-            //   axios.post('/merchant/seatManager/delete', { idList })
-            //     .then(function (response) {
-            //       that.$message({
-            //         message: '删除成功',
-            //         type: 'success'
-            //       });
-            //       that.searchTable()
-            //     })
-            //     .catch(function (error) {
-            //       console.log(error);
-            //     });
-            // } else {
-            //   this.$message('请选择坐席')
-            // }
             break;
           default: return ''
         }
