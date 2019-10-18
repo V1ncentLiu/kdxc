@@ -92,7 +92,7 @@ public class CallPackageController {
     @ResponseBody
     public JSONResult<String> scheduleDeductCall() {
         log.info("CallPackageBuyController,list");
-        return callPackageJobFeignClient.scheduleUpdatePackage();
+        return callPackageJobFeignClient.scheduleDeductCall();
     }
 
     /**
