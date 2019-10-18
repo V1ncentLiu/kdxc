@@ -53,6 +53,12 @@ public class InvitationController extends BaseStatisticsController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
 
+    /**
+     * 一级页面
+     * @param request
+     * @return
+     */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/groupList")
     public String groupList(HttpServletRequest request){
         //初始化页面部门
@@ -68,15 +74,28 @@ public class InvitationController extends BaseStatisticsController {
         return "reportResources/selfVisitFollowTable";
     }
 
-
+    /**
+     * 二级页面
+     * @param request
+     * @param deptId
+     * @param teleGroupId
+     * @param teleSaleId
+     * @param category
+     * @param cusLevel
+     * @param province
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request,Long deptId,Long teleGroupId,Long teleSaleId,
-                              Integer category,Integer cusLevel,Integer areaId,Long startTime,Long endTime){
+                              Integer category,Integer cusLevel,String province,Long startTime,Long endTime){
         //初始化页面部门
         initSaleDept(request);
         ////初始化页面数据
         initModel(request);
-        initBaseDto(request,deptId,teleGroupId,teleSaleId,category,cusLevel,areaId,startTime,endTime);
+        initBaseDto(request,deptId,teleGroupId,teleSaleId,category,cusLevel,province,startTime,endTime);
         return "reportResources/selfVisitFollowTableTeam";
     }
 
@@ -86,6 +105,7 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/queryPage")
     public @ResponseBody
     JSONResult<Map<String,Object>> queryByPage(@RequestBody BaseQueryDto baseQueryDto){
@@ -98,11 +118,15 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:invitation:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
         String roleCode=getRoleCode();
         //根据角色不同，使用查询方法不同
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            //顾问查询去掉部门参数
+            baseQueryDto.setTeleDeptId(null);
+            baseQueryDto.setTeleGroupId(null);
             return invitationFeignClient.querySalePage(baseQueryDto);
         }else{
             return invitationFeignClient.queryManagerPage(baseQueryDto);
@@ -115,6 +139,7 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:invitation:export")
     @RequestMapping("/export")
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -122,7 +147,7 @@ public class InvitationController extends BaseStatisticsController {
             JSONResult<List<InvitationDto>> json=invitationFeignClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 InvitationDto[] dtos = json.getData().isEmpty()?new InvitationDto[]{}:json.getData().toArray(new InvitationDto[0]);
-                String[] keys = {"teleGroupName","invite; ","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
+                String[] keys = {"teleGroupName","invite","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
                 String[] hader = {"电销组","正常邀约数","取消邀约数","删除邀约数","来访客户数","未来访客户数","来访次数","签约客户数","签约单数","邀约来访率","邀约签约率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("自邀约跟踪表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
@@ -145,22 +170,25 @@ public class InvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:invitation:export")
     @RequestMapping("/saleExport")
     public @ResponseBody void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             JSONResult<List<InvitationDto>> json= null;
             //根据角色不同，使用查询方法不同
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-            baseQueryDto.setTeleDeptId(null);
             String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+                //顾问查询去掉部门参数
+                baseQueryDto.setTeleDeptId(null);
+                baseQueryDto.setTeleGroupId(null);
                 json= invitationFeignClient.querySaleList(baseQueryDto);
             }else{
                 json= invitationFeignClient.queryManagerList(baseQueryDto);
             }
             if(null!=json && "0".equals(json.getCode())){
                 InvitationDto[] dtos = json.getData().isEmpty()?new InvitationDto[]{}:json.getData().toArray(new InvitationDto[0]);
-                String[] keys = {"saleName","invite; ","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
+                String[] keys = {"saleName","invite","cancelInvite","delInvite","visitCus","noVisitCus","visit","signCus","signOrder","visitRate","signRate"};
                 String[] hader = {"电销顾问","正常邀约数","取消邀约数","删除邀约数","来访客户数","未来访客户数","来访次数","签约客户数","签约单数","邀约来访率","邀约签约率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("顾问自邀约跟踪表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
@@ -180,7 +208,7 @@ public class InvitationController extends BaseStatisticsController {
 
 
     public void initBaseDto(HttpServletRequest request,Long deptId,Long groupId,Long saleId,
-                            Integer category,Integer cusLevel,Integer areaId,Long startTime,Long endTime){
+                            Integer category,Integer cusLevel,String province,Long startTime,Long endTime){
         BaseQueryDto dto=new BaseQueryDto();
         dto.setTeleDeptId(deptId);
         dto.setTeleGroupId(groupId);
@@ -189,7 +217,7 @@ public class InvitationController extends BaseStatisticsController {
         dto.setEndTime(endTime);
         dto.setCategory(category);
         dto.setCusLevel(cusLevel);
-        dto.setAreaId(areaId);
+        dto.setProvince(province);
         request.setAttribute("baseQueryDto",dto);
     }
 

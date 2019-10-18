@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +57,9 @@ public class TelemarketingController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
 
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+
     /**
      * 电销布局列表
      * 
@@ -70,6 +76,8 @@ public class TelemarketingController {
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> dzList =
                 organizationFeignClient.queryOrgByParam(orgDto);
+        List<DictionaryItemRespDTO> categoryList = getDictionaryByCode("clueCategory");
+        request.setAttribute("categoryList", categoryList);
         request.setAttribute("dzList", dzList.getData());
         request.setAttribute("projectList", allProject.getData());
         return "telemarketing/telemarketingLayoutList";
@@ -150,7 +158,7 @@ public class TelemarketingController {
     /**
      * 预览
      * 
-     * @param result
+     * @param
      * @return
      */
     // @RequiresPermissions("customfield:batchSaveField")
@@ -313,5 +321,20 @@ public class TelemarketingController {
             }
         }
         return new JSONResult<>().success(illegalDataList);
+    }
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
     }
 }

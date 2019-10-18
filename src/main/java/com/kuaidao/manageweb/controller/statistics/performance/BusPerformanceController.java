@@ -133,6 +133,11 @@ public class BusPerformanceController extends BaseStatisticsController {
     @RequestMapping("/queryBusPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryList(@RequestBody BaseBusQueryDto dto){
         initParams(dto);
+        String roleCode=super.getRoleCode();
+        if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            dto.setBusinessGroupId(null);
+            dto.setBusAreaId(null);
+        }
         return  busPerformanceClient.queryBusPage(dto);
     }
 
@@ -180,6 +185,11 @@ public class BusPerformanceController extends BaseStatisticsController {
     public void exportBus(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
         try{
             initParams(dto);
+            String roleCode=super.getRoleCode();
+            if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+                dto.setBusinessGroupId(null);
+                dto.setBusAreaId(null);
+            }
             JSONResult<List<BusPerformanceDto>> json=busPerformanceClient.queryBusList(dto);
             if(null!=json && "0".equals(json.getCode())){
                 BusPerformanceDto[] dtos = json.getData().isEmpty()?new BusPerformanceDto[]{}:json.getData().toArray(new BusPerformanceDto[0]);
@@ -242,20 +252,15 @@ public class BusPerformanceController extends BaseStatisticsController {
     public void proType(HttpServletRequest request){
         List<Map<String,Object>> prolist=new ArrayList<>();
         //品类字典
-        List<DictionaryItemRespDTO> list= getDictionaryByCode(Constants.PROJECT_CATEGORY);
-        for(DictionaryItemRespDTO dt:list){
-            if(dt.getName().indexOf("饮品")==0){
-                Map<String,Object> par=new HashMap<>();
-                par.put("name","饮品");
-                par.put("value",dt.getValue());
-                prolist.add(par);
-                break;
-            }
-        }
         Map<String,Object> par=new HashMap<>();
-        par.put("name","非饮品");
-        par.put("value",0);
+        par.put("name","饮品");
+        par.put("value",1);
         prolist.add(par);
+
+        Map<String,Object> par1=new HashMap<>();
+        par1.put("name","非饮品");
+        par1.put("value",0);
+        prolist.add(par1);
         request.setAttribute("prolist",prolist);
     }
 
