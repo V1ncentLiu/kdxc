@@ -270,6 +270,7 @@ public class ClueInfoDetailController {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
         }
+        dto.setUserList(getUserList());
         return clueInfoDetailFeignClient.updateCustomerClue(dto);
     }
 
@@ -318,7 +319,30 @@ public class ClueInfoDetailController {
         }
         return new JSONResult<String>().success(now);
     }
+    /**
+     * 获取登录人集合 如果登录人为主账号 则集合为所有子账号和主账号本身 如果登录人为子账号 则集合为主账号和子账号本身
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2019/10/18 14:46
+     * @since: 1.0.0
+     **/
+    private List<Long> getUserList() {
+        UserInfoDTO user = getUser();
+        List<Long> userList = new ArrayList<>();
+        // 商家主账户能看商家子账号所有的记录
+        if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+            getSubAccountIds(userList, user.getId());
+        }
+        // 商家子账号看自己和主账号的记录
+        if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
+            userList.add(user.getId());
+            userList.add(user.getParentId());
+        }
+        return userList;
 
+    }
     /**
      * 获取当前登录账号
      * 
