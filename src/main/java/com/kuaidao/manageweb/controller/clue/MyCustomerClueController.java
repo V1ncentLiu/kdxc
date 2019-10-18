@@ -229,7 +229,7 @@ public class MyCustomerClueController {
                 }
             }
         }
-
+        dto.setOrgId(user.getOrgId());
         JSONResult<PageBean<CustomerClueDTO>> jsonResult =
                 myCustomerFeignClient.findTeleClueInfo(dto);
         long time2 = System.currentTimeMillis();
@@ -543,6 +543,7 @@ public class MyCustomerClueController {
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
         queryDTO.setClueId(new Long(clueId));
+        queryDTO.setOrgId(user.getOrgId());
 
         request.setAttribute("clueId", clueId);
 
