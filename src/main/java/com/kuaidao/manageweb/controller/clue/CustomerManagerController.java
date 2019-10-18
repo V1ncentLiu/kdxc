@@ -189,7 +189,7 @@ public class CustomerManagerController {
                 }
             }
         }
-
+        dto.setOrgId(user.getOrgId());
         JSONResult<PageBean<CustomerManagerDTO>> jsonResult =
                 customerManagerFeignClient.findcustomerPage(dto);
         return jsonResult;

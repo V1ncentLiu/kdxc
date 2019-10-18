@@ -369,7 +369,7 @@ public class MyCustomerClueController {
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
         queryDTO.setClueId(new Long(clueId));
-
+        queryDTO.setOrgId(user.getOrgId());
         request.setAttribute("clueId", clueId);
 
         request.setAttribute("ossUrl", ossUrl);
