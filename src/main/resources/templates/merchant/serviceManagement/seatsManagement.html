@@ -131,26 +131,33 @@
     <div class="mainSearchBg">
       <div class="mainSearchFormBox">
         <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-          <el-form-item label="商家子账户：" label-width="auto">
-            <el-select v-model="form.rechargeBusiness" filterable clearable placeholder="商家账户名">
-              <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name" :value="item.id">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="坐席编号：">
-            <el-input v-model="form.number" placeholder="请输入"></el-input>
-          </el-form-item>
-          <el-form-item label="号码所属公司：">
-            <el-input v-model="form.company" placeholder="请输入"></el-input>
-          </el-form-item>
-          <el-form-item label="">
+          <div class="main-search-box">
+
+            <el-form-item label="商家子账户：" label-width="auto">
+              <el-select v-model="form.rechargeBusiness" filterable clearable placeholder="商家账户名">
+                <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="坐席编号：">
+              <el-input v-model="form.number" placeholder="坐席编号"></el-input>
+            </el-form-item>
+            <el-form-item label="号码所属公司：">
+              <el-input v-model="form.company" placeholder="号码所属公司"></el-input>
+            </el-form-item>
+          </div>
+          <div class="mainSearchBtnBox">
+            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">搜索</el-button>
+            <el-button @click="searchEdit()">重置</el-button>
+          </div>
+          <!-- <el-form-item label="">
             <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
               style="margin-left: 10px;">搜索</el-button>
           </el-form-item>
           <el-form-item label="">
             <el-button icon="el-icon-search" type="primary" @click="searchEdit()" class="searchBtn"
               style="margin-left: 10px;">重置</el-button>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
       </div>
       <!-- 按钮 -->
@@ -256,7 +263,7 @@
         merchatName: merchatName,
         submitDisabled: false,
         tableData: [],
-        merchatSelectName:'',
+        merchatSelectName: '',
         // [
         //   {
         //     id: '1',
@@ -492,13 +499,13 @@
 
       // 彈框商家子賬戶請求接口 
       subAccount(type) {
-        var that=this
+        var that = this
         axios.post("/merchant/seatManager/merchantUsers", { id: this.getQueryString('userId') })
           .then(function (response) {
-            if(type==1){
-              that.merchatSelectName=that.getQueryString('userId')
-            }else if(type==2){
-              that.merchatSelectName=that.multipleSelection[0].subMerchant
+            if (type == 1) {
+              that.merchatSelectName = that.getQueryString('userId')
+            } else if (type == 2) {
+              that.merchatSelectName = that.multipleSelection[0].subMerchant
             }
             app.options = response.data
           }).catch(function (error) {
