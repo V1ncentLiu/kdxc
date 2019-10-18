@@ -89,6 +89,10 @@ public class BusVisitSignController extends BaseStatisticsController {
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryPage(@RequestBody BaseBusQueryDto baseQueryDto){
         initParams(baseQueryDto);
+        if(RoleCodeEnum.SWJL.name().equals(getRoleCode())){
+            baseQueryDto.setBusinessGroupId(null);
+            baseQueryDto.setBusAreaId(null);
+        }
         return busVisitSignFeignClient.queryByPage(baseQueryDto);
     }
 
@@ -104,6 +108,9 @@ public class BusVisitSignController extends BaseStatisticsController {
         String roleCode=super.getRoleCode();
         if(RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.GLY.name().equals(roleCode)){
             return busVisitSignFeignClient.queryBusPage(baseQueryDto);
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            baseQueryDto.setBusinessGroupId(null);
+            baseQueryDto.setBusAreaId(null);
         }
         return busVisitSignFeignClient.queryBusPageForSale(baseQueryDto);
     }
