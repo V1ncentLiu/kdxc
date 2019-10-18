@@ -36,18 +36,20 @@ var myCallRecordVm = new Vue({
         label: '外呼'
       }],
     searchForm: {
-      bindAccount: '',
+      businessAccount: '',
       seatNumber: '',
       seatPhone: '',
       startTime: '',
       endTime: '',
+      searchType:"1"
     },
     userInfoList: userInfoList,//绑定账户
-    totalMerchantCost:totalMerchantCost,
     isActive1:false,
     isActive2:false,
     isActive3:false,
     isActive4:false,
+    totalCost:0
+    
   },
   methods: {
     transCusPhone(row) {
@@ -89,6 +91,7 @@ var myCallRecordVm = new Vue({
         this.isActive2=false;
         this.isActive3=false;
         this.isActive4=false;
+        this.$set(this.searchForm,'searchType',"1");
       }
       // this._initData();
        var startTime = this.searchForm.startTime;
@@ -122,8 +125,8 @@ var myCallRecordVm = new Vue({
        }else{
       	 param.accountIdList=[];
        }
-      	 param.beginCostTime=new Date(this.searchForm.startTime);
-      	 param.endCostTime=new Date(this.searchForm.endTime);
+      	 param.beginCostTime=new Date(this.searchForm.startTime)&&this.searchForm.startTime!=null?new Date(this.searchForm.startTime):'';
+      	 param.endCostTime=new Date(this.searchForm.endTime)&&this.searchForm.endTime!=null?new Date(this.searchForm.endTime):'';
       	 param.pageNum=this.pager.currentPage;
       	 param.pageSize=this.pager.pageSize;
       	 axios.post('/merchant/manageCallCost/getManageCallCostList',param)
@@ -131,11 +134,16 @@ var myCallRecordVm = new Vue({
           	 var data =  response.data;
                if(data.code=='0'){
                  var resData = data.data;
-               	myCallRecordVm.callRecordData = resData.data;
+                 var callRecordData = resData.data;
+                 myCallRecordVm.callRecordData = callRecordData.data;
+                 console.log(myCallRecordVm.callRecordData,"myCallRecordVm.callRecordData")
                 //3.分页组件
-               	myCallRecordVm.pager.total= resData.total;
-               	myCallRecordVm.pager.currentPage = resData.currentPage;
-               	myCallRecordVm.pager.pageSize = resData.pageSize;
+
+                console.log(resData.total,"resData.total");
+                myCallRecordVm.totalCost=resData.totalCost;
+               	myCallRecordVm.pager.total= callRecordData.total;
+               	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
+               	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
 
                }else{
               	 myCallRecordVm.$message({message:data.msg,type:'error'});
@@ -234,6 +242,7 @@ var myCallRecordVm = new Vue({
       this.isActive2=false;
       this.isActive3=false;
       this.isActive4=false;
+      this.$set(this.searchForm,'searchType',"1");
       var today = new Date();
       today.setTime(today.getTime() - 24 * 60 * 60 * 1000);
       var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + " 00:00:00";
@@ -247,6 +256,7 @@ var myCallRecordVm = new Vue({
       this.isActive1=false;
       this.isActive3=false;
       this.isActive4=false;
+      this.$set(this.searchForm,'searchType',"1");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -265,6 +275,7 @@ var myCallRecordVm = new Vue({
       this.isActive1=false;
       this.isActive2=false;
       this.isActive4=false;
+      this.$set(this.searchForm,'searchType',"1");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -284,6 +295,7 @@ var myCallRecordVm = new Vue({
       this.isActive1=false;
       this.isActive2=false;
       this.isActive3=false;
+      this.$set(this.searchForm,'searchType',"2");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();

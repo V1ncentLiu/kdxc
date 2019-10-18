@@ -1,10 +1,8 @@
 package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 
-import com.kuaidao.account.dto.call.MerchantCallCostDTO;
 import com.kuaidao.account.dto.call.MerchantCallCostReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.merchant.bussinesscall.MerchantCallCostFeign;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description: BussinessCallCostController
@@ -74,17 +73,17 @@ public class BussinessCallCostController {
    **/
   @RequestMapping("/getBussinessCallCostList")
   @ResponseBody
-  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody  MerchantCallCostReq req){
+  public JSONResult<Map<String, Object>> getBussinessCallCostList(@RequestBody  MerchantCallCostReq req){
     try {
       logger.info("getBussinessCallCostList参数{{}}",req);
       UserInfoDTO user = CommUtil.getCurLoginUser();
       req.setBusinessAccount(user.getId());
-      JSONResult<PageBean<MerchantCallCostDTO>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
+      JSONResult<Map<String, Object>> jsonResult = merchantCallCostFeign.getBussinessCallCostList(req);
       return jsonResult;
     }catch (Exception e){
       e.printStackTrace();
       logger.error("获取商家端端商家通话费用接口异常",e.getMessage());
-      return new JSONResult<PageBean<MerchantCallCostDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"获取商家端商家通话费用异常");
+      return new JSONResult<Map<String, Object>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"获取商家端商家通话费用异常");
     }
   }
 
