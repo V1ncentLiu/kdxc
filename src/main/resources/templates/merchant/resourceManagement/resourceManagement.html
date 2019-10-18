@@ -1,15 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="/css/common/merchant_base.css">
-
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
     <style>
         .dialogForm .el-form-item {
             margin-bottom: 5px;
@@ -144,9 +139,10 @@
             width: 100%;
             height: 100%;
         }
+        
+        .button-menu{margin-top:10px;}
     </style>
 </head>
-
 <body>
     <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
@@ -154,65 +150,58 @@
             <el-breadcrumb-item>资源管理</el-breadcrumb-item>
             <el-breadcrumb-item>资源列表（商家端）</el-breadcrumb-item>
         </el-breadcrumb>
-        <el-row class="marginB20">
-            <shiro:hasPermission name="clue:management:export">
-                <el-button type="success" @click="exportFun"><i></i>批量导出</el-button>
-            </shiro:hasPermission>
-            <shiro:hasPermission name="clue:management:allocation">
-                <el-button type="primary" @click="openassignrDig"><i></i>分配资源</el-button>
-            </shiro:hasPermission>
-        </el-row>
+        
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                     <div class="main-search-box">
-                        <el-form-item label="资源类别:">
+                        <el-form-item label="资源类别:" prop="category">
                             <el-select v-model="form.category" clearable placeholder="资源类别">
                                 <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="资源类型:">
+                        <el-form-item label="获取时间:" class="search-box-margin" prop="searchStartTime">
+                            <el-date-picker v-model="form.searchStartTime" type="datetime" placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="—" class="widthauto" prop="searchEndTime">
+                            <el-date-picker v-model="form.searchEndTime" type="datetime" placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="资源类型:" prop="type">
                             <el-select v-model="form.type" filterable clearable placeholder="资源类型">
                                 <el-option v-for="item in clueTypeOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="行业类别:">
+                        <el-form-item label="行业类别:" prop="industryCategory">
                             <el-select v-model="form.industryCategory" clearable placeholder="行业类别">
                                 <el-option v-for="item in industryCategoryOptions" :key="item.value" :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="获取时间:" class="search-box-margin">
-                            <el-date-picker v-model="form.searchStartTime" type="datetime" placeholder="选择日期时间">
-                            </el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="—" class="widthauto">
-                            <el-date-picker v-model="form.searchEndTime" type="datetime" placeholder="选择日期时间">
-                            </el-date-picker>
-                        </el-form-item>
-                        <el-row v-show="isShow">
-                            <el-form-item label="搜索词:">
+                        
+                            <el-form-item label="搜索词:" prop="searchWord">
                                 <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
                             </el-form-item>
-                            <el-form-item label="电话:">
+                            <el-form-item label="电话:" prop="phone">
                                 <el-input v-model="form.phone" placeholder="电话"></el-input>
                             </el-form-item>
-                            <el-form-item label="客户姓名:">
+                            <el-form-item label="客户姓名:" prop="cusName">
                                 <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
                             </el-form-item>
-                            <el-form-item label="客户状态:">
+                            <el-form-item label="客户状态:" prop="customerStatus">
                                 <el-select v-model="form.customerStatus" placeholder="客户状态" clearable>
                                     <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name"
                                         :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="资源是否有效:">
+                            <el-form-item label="资源是否有效:" prop="status">
                                 <el-select v-model="form.status" placeholder="资源是否有效" clearable>
                                     <el-option v-for="item in comArr" :key="item.value" :label="item.name"
                                         :value="item.value">
@@ -220,21 +209,27 @@
                                 </el-select>
                             </el-form-item>
                     </div>
-                    </el-row>
                     <div class="mainSearchBtnBox">
                         <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
                             搜索</el-button>
                         <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                        <span style="color: #5c6be8;cursor: pointer;margin:0 10px; padding-top:10px;"
-                            @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i
-                                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                        <el-button @click="resetFormResource('form')">重置</el-button> 
                     </div>
                 </el-form>
             </div>
+            
             <el-row>
                 <!--
             <div class="greyTip">今日分发 <span v-if="todayAssignClueNum != null && todayAssignClueNum">{{todayAssignClueNum}}</span><span else>0</span> 条 累计分发 <span v-if="totalAssignClueNum != null && totalAssignClueNum >0">{{totalAssignClueNum}}</span><span else>0</span> 条  今日领取  <span v-if="todayReceiveClueNum != null && todayReceiveClueNum >0">{{todayReceiveClueNum}}</span><span else>0</span>  条  累计领取 <span v-if="totalReceiveClueNum != null && totalReceiveClueNum >0"> {{totalReceiveClueNum}}</span><span else>0</span> 条</div>
 -->
+<el-row class="marginB20 button-menu">
+    <shiro:hasPermission name="clue:management:export">
+        <el-button type="success" @click="exportFun"><i></i>批量导出</el-button>
+    </shiro:hasPermission>
+    <shiro:hasPermission name="clue:management:allocation">
+        <el-button type="primary" @click="openassignrDig"><i></i>分配资源</el-button>
+    </shiro:hasPermission>
+</el-row>
                 <div class="greyTip"> 今日分发 <em>{{todayAssignClueNum == null ? '0' : todayAssignClueNum}}</em> 条 累计分发
                     <em>{{totalAssignClueNum == null ? '0' : totalAssignClueNum}}</em> 条 今日领取
                     <em>{{todayReceiveClueNum == null ? '0' : todayReceiveClueNum}}</em> 条 累计领取
@@ -251,20 +246,20 @@
                     <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
                     <el-table-column align="center" prop="messageTime" label="留言时间" :formatter="dateFormat" width="130">
                     </el-table-column>
-                    <el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
+                    <el-table-column align="center" prop="messagePoint" label="留内容"></el-table-column>
                     <el-table-column align="center" prop="phone" label="联系电话">
                         <template slot-scope="scope">
-                            <span>{{scope.row.phone}}</span>
+                            <span style="max-width: 125px;">{{scope.row.phone}}</span>
                             <span v-if="scope.row.showPhoneFlag=='1'" class="callIphone"
-                                @click="callIphone(scope.row.phone,scope.row.clueId)"><img
-                                    th:src="@{/images/icon_call2.png}" alt=""></span>
+                                @click="callIphone(scope.row.callPhone,scope.row.clueId)"><img
+                                    th:src="@{/images/icon_call2.png}" alt="" style="width: 22px;height: 22px;"></span>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="" label="跟进记录">
                         <template slot-scope="scope">
-                            <el-button v-if="scope.row.showAddTrack==1" type="text"
+                            <el-button class="fontColor2" v-if="scope.row.showAddTrack==1" type="text"
                                 @click="openTrackingDialog(scope.row.clueId)">查看</el-button>
-                            <el-button v-else type="text" @click="openAddTracking(scope.row.clueId)">添加</el-button>
+                            <el-button class="fontColor2" v-else type="text" @click="openAddTracking(scope.row.clueId)">添加</el-button>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="isAssignSubAccount" label="用户行为">
@@ -314,7 +309,7 @@
         </el-dialog>
         <!-- 查看手机号 -->
 
-        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" before-close="handleClose">
+        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" @close="handleClose">
             <template>
                 <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired invite-box">
                     <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
@@ -567,8 +562,8 @@
                 addClueId: '',//点击添加记录存储资源id
                 comArr: [
                     { value: "", name: "全部" },
-                    { value: "1", name: "是" },
-                    { value: "0", name: "否" }
+                    { value: "1", name: "有效" },
+                    { value: "0", name: "无效" }
                 ],
 
             }
@@ -577,6 +572,13 @@
             customerEidt(row) {
                 var clueId = row.clueId;
                 window.location.href = "/clueInfo/init/" + clueId;
+            },
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form,'searchStartTime','');
+                    this.$set(this.form,'searchEndTime','');
+                }
             },
             // 获取时间
             getTime(cid) {
@@ -597,7 +599,12 @@
                         //提交跟进记录
                         var param = {};
                         param.clueId = this.addClueId;
-                        param.callTime = this.trackingForm.callTime;
+                        var callTime = this.trackingForm.callTime;
+                        if (typeof(callTime) == 'string') {
+                            callTime = new Date(Date.parse(callTime.replace(/-/g, "/")));
+                        }
+                        param.callTime = callTime;
+
                         param.customerStatus = this.trackingForm.customerStatus;
                         if (this.trackingForm.customerStatus == "3") {
                             param.customerStatusSub = this.trackingForm.customerStatusSub;
@@ -606,7 +613,11 @@
                         }
                         param.isCall = this.trackingForm.isCall;
                         param.focusPoint = this.trackingForm.focusPoint;
-                        param.nextVisitTime = this.trackingForm.nextVisitTime;
+                        var  nextVisitTime =  this.trackingForm.nextVisitTime;
+                        if (typeof(nextVisitTime) == 'string') {
+                            nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                        }
+                        param.nextVisitTime = nextVisitTime;
                         console.log(param)
                         axios.post('/tracking/insert', param)
                             .then(function (response) {
@@ -864,7 +875,7 @@
                         axios.post('/clue/management/clueAssign', param)
                             .then(function (response) {
                                 var data = response.data;
-                                debugger;
+                                // debugger;
                                 if (data.code == '0') {
                                     ocmVM.$message({
                                         message: '分配成功', type: 'success', duration: 2000, onClose: function () {
@@ -1004,14 +1015,16 @@
             //客户状态一级
             param = {};
             param.groupCode = "customerStatus";
-            axios.post('/dictionary/DictionaryItem/queryTeleMyCusCustomerStatus', param).then(function (response) {
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 var data = response.data.data;
                 var arr = new Array();
                 for (let i = 0, len = data.length; i < len; i++) {
-                    // if(data[i].name != "未联系"){
-                    arr.push(data[i]);
-                    // };
+                    if(data[i].name != "未到访"&&data[i].name != "到访未签约"&&data[i].name != "已签约"){
+                        arr.push(data[i]);
+                    };
                 }
+                var allArr={ value: "", name: "全部" }
+                arr.unshift(allArr) 
                 ocmVM.cusStatusArr = arr;
                 console.log(ocmVM.cusStatusArr)
             });

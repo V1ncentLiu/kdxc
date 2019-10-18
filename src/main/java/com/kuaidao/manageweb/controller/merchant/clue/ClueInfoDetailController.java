@@ -113,6 +113,7 @@ public class ClueInfoDetailController {
         } else {
             request.setAttribute("callRecord", new ArrayList());
         }
+        queryDTO.setIdList(userList);
         JSONResult<ClueDTO> clueInfo = clueInfoDetailFeignClient.findClueInfo(queryDTO);
         if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode())) {
             // 客户基本信息
@@ -211,9 +212,10 @@ public class ClueInfoDetailController {
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
         }
-        // 商家子账号看自己的记录
+        // 商家子账号看自己和主账号的记录
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userList.add(user.getId());
+            userList.add(user.getParentId());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
         queryDTO.setClueId(clueId);
@@ -289,9 +291,10 @@ public class ClueInfoDetailController {
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
         }
-        // 商家子账号看自己的记录
+        // 商家子账号看自己和主账号的记录
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userList.add(user.getId());
+            userList.add(user.getParentId());
         }
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(String.valueOf(idEntityLong.getId()));
@@ -309,6 +312,9 @@ public class ClueInfoDetailController {
             list.sort(comparator.reversed());
             CallRecordRespDTO callRecordRespDTO = list.get(0);
             now = callRecordRespDTO.getStartTime();
+            if (StringUtils.isNotBlank(now)) {
+                now = DateUtil.timeStamp2Str(now, DateUtil.ymdhms);
+            }
         }
         return new JSONResult<String>().success(now);
     }

@@ -1,134 +1,13 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
-    <style>
-        .dialogForm .el-form-item {
-            margin-bottom: 5px;
-        }
-
-        .invite-area {
-            width: 94px;
-        }
-
-        .invite-margin {
-            margin: 0 10px;
-        }
-
-        .xreuired .el-form-item__label:before {
-            content: '* ';
-            color: red;
-        }
-
-        .input-width {
-            width: 310px;
-        }
-
-        .el-date-editor.el-input,
-        .el-date-editor.el-input__inner {
-            width: 310px;
-        }
-
-        .el-table .cell {
-            display: flex;
-            justify-content: center;
-        }
-
-        .invite-top {
-            margin-top: 14px;
-        }
-
-        .el-dialog__header {
-            background: none;
-        }
-
-        .el-dialog__header:before {
-            width: 122px;
-            height: 86px;
-            background-size: 122px 86px;
-            right: 103px;
-        }
-
-        .fontColor2 {
-            color: #3A84F4;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        .el-dialog__headerbtn .el-dialog__close {
-            background: #3A84F4;
-            border-radius: 50%;
-            color: #fff;
-        }
-
-        .merchant-submit {
-            cursor: pointer;
-        }
-
-        .el-dialog__title {
-            color: #4C4E67;
-        }
-
-        .r-dailog .el-button {
-            width: 190px;
-        }
-
-        .r-dailog .el-button--primary {
-            height: 43px;
-            line-height: 43px;
-            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-            box-shadow: 0px 9px 27px 2px rgba(75, 128, 255, 0.46);
-            border-radius: 4px;
-        }
-
-        .r-dailog .el-button--primary span {
-            height: 26px;
-            line-height: 26px;
-            display: block;
-        }
-
-        .r-dailog .el-button--default {
-            height: 43px;
-            line-height: 43px;
-            background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
-            box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
-            border-radius: 4px;
-        }
-
-        .r-dailog .el-button--default span {
-            height: 26px;
-            line-height: 26px;
-            display: block;
-        }
-
-        .invite-box {
-            width: 470px;
-            margin: 0 auto;
-        }
-
-        .xreuired .el-form-item__label:before {
-            content: ''
-        }
-
-        .callIphone {
-            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-left: 10px;
-            cursor: pointer;
-        }
-
-        .callIphone img {
-            width: 100%;
-            height: 100%;
-        }
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style> 
     </style>
 </head>
-
 <body>
     <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
@@ -136,7 +15,7 @@
             <el-breadcrumb-item>资源管理</el-breadcrumb-item>
             <el-breadcrumb-item>资源列表（商家端）</el-breadcrumb-item>
         </el-breadcrumb>
-        <div class="mainSearchBg">
+        <div class="mainSearchFormBox" style="padding:30px 0;">
             <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="xreuired invite-box">
                 <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
                     <el-input v-model="inviteForm.cusName" autocomplete="off" maxLength="10" class="input-width">
@@ -185,7 +64,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark" class="invite-top">
+                <el-form-item label="备注：" :label-width="formLabelWidth" class="invite-top">
                     <el-input type="textarea" v-model="inviteForm.remark" class="input-with-select input-width"
                         maxlength="200" :rows="4"></el-input>
                 </el-form-item>
@@ -275,7 +154,7 @@
                     if (valid) {
                         this.btnDisabled = true;
                         var param = {};
-                        param.clueId = this.clueId;
+                        param.clueId = clueId;
                         param.cusName = this.inviteForm.cusName;
                         param.cusNum = this.inviteForm.cusNum;
                         param.province = this.inviteForm.province;;
@@ -294,9 +173,7 @@
                                     console.log(33333);
                                     ocmVM.$message({
                                         message: '邀约成功', type: 'success', duration: 2000, onClose: function () {
-                                            ocmVM.inviteVisible = false;
-                                            ocmVM.btnDisabled = false;
-                                            ocmVM.searchTable();
+                                            window.location.href="/clue/management/init"
                                         }
                                     });
                                 } else {

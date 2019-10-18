@@ -41,6 +41,7 @@ public class CallPackageController {
             if (jsonResult.getCode().equals(JSONResult.SUCCESS)
                     && jsonResult.getData() != null) {
                 request.setAttribute("originPackageId", jsonResult.getData().getPackageId());
+                request.setAttribute("buyCount",jsonResult.getData().getSheetCount());
             }
         } catch (Exception e) {
             log.error("CallPackageController.index error,user={}", e,user);
