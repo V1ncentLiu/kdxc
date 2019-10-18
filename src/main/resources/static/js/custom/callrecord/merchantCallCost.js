@@ -87,6 +87,7 @@ var myCallRecordVm = new Vue({
         this.isActive2=false;
         this.isActive3=false;
         this.isActive4=false;
+        this.$set(this.searchForm,'searchType',"1");
       }
       // this._initData();
        var startTime = this.searchForm.startTime;
@@ -120,8 +121,8 @@ var myCallRecordVm = new Vue({
        }else{
       	 param.accountIdList=[];
        }
-      	 param.beginCostTime=new Date(this.searchForm.startTime);
-      	 param.endCostTime=new Date(this.searchForm.endTime);
+       param.beginCostTime=new Date(this.searchForm.startTime)&&this.searchForm.startTime!=null?new Date(this.searchForm.startTime):'';
+       param.endCostTime=new Date(this.searchForm.endTime)&&this.searchForm.endTime!=null?new Date(this.searchForm.endTime):'';
       	 param.pageNum=this.pager.currentPage;
          param.pageSize=this.pager.pageSize;
       
