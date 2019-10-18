@@ -166,13 +166,13 @@ public class ClueInfoDetailController {
      * @return
      */
     @RequestMapping("/inviteCustomer")
-    public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, @RequestParam String cusName, @RequestParam String cusPhone,
+    public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId,@RequestParam String projectId, @RequestParam String cusName, @RequestParam String cusPhone,
             Model model) {
         UserInfoDTO userInfoDTO = getUser();
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
-
+        request.setAttribute("projectId", projectId);
         // 查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(IS_NOT_SIGN_NO);
