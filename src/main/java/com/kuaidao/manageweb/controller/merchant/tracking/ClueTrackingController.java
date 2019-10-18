@@ -52,6 +52,8 @@ public class ClueTrackingController {
         UserInfoDTO user = getUser();
         dto.setCreateUser(user.getId());
         dto.setOrgId(user.getOrgId());
+        // 用户集合
+        dto.setUserList(getUserList());
         return trackingMerchantFeignClient.saveTracking(dto);
     }
 
@@ -69,6 +71,21 @@ public class ClueTrackingController {
         }
         IdListLongReq reqDto = new IdListLongReq();
         reqDto.setClueId(idEntity.getId());
+        List<Long> userList = getUserList();
+        reqDto.setIdList(userList);
+        return trackingMerchantFeignClient.findByClueId(reqDto);
+    }
+
+    /**
+     * 获取登录人集合 如果登录人为主账号 则集合为所有子账号和主账号本身 如果登录人为子账号 则集合为主账号和子账号本身
+     * 
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2019/10/18 14:46
+     * @since: 1.0.0
+     **/
+    private List<Long> getUserList() {
         UserInfoDTO user = getUser();
         List<Long> userList = new ArrayList<>();
         // 商家主账户能看商家子账号所有的记录
@@ -80,8 +97,8 @@ public class ClueTrackingController {
             userList.add(user.getId());
             userList.add(user.getParentId());
         }
-        reqDto.setIdList(userList);
-        return trackingMerchantFeignClient.findByClueId(reqDto);
+        return userList;
+
     }
 
     /**
@@ -129,7 +146,6 @@ public class ClueTrackingController {
      * @since: 1.0.0
      **/
     private UserInfoDTO buildQueryReqDto(Integer userType, Long id) {
-
         // 获取商家主账号下的子账号列表
         UserInfoDTO userReqDto = new UserInfoDTO();
         // 商家主账户
