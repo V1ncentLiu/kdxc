@@ -36,7 +36,7 @@ var myCallRecordVm = new Vue({
         label: '外呼'
       }],
     searchForm: {
-      bindAccount: '',
+      businessAccount: '',
       seatNumber: '',
       seatPhone: '',
       startTime: '',
