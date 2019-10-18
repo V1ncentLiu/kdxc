@@ -81,7 +81,13 @@ var myCallRecordVm = new Vue({
     //   }]
 
     // },
-    initCallRecordData() {
+    initCallRecordData(val) {
+      if(val&&val=="1"){
+        this.isActive1=false;
+        this.isActive2=false;
+        this.isActive3=false;
+        this.isActive4=false;
+      }
       // this._initData();
        var startTime = this.searchForm.startTime;
        var endTime = this.searchForm.endTime;
@@ -124,12 +130,12 @@ var myCallRecordVm = new Vue({
           	 var data =  response.data;
                if(data.code=='0'){
                  var resData = data.data;
-                 var callRecordData = resData.data;
                  myCallRecordVm.callRecordData = resData.data;
                 //3.分页组件
-               	myCallRecordVm.pager.total= callRecordData.total;
-               	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
-               	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
+                console.log(resData.total,"resData.total");
+               	myCallRecordVm.pager.total= resData.total;
+               	myCallRecordVm.pager.currentPage = resData.currentPage;
+               	myCallRecordVm.pager.pageSize = resData.pageSize;
 
                }else{
               	 myCallRecordVm.$message({message:data.msg,type:'error'});
@@ -345,7 +351,6 @@ var myCallRecordVm = new Vue({
     var date = a.getDate();
     this.searchForm.startTime = year + "-" + (month + 1) + "-" + date + " 00:00:00";
     this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
-    this.initCallRecordData();
     this.searchYesterday();
   },
   mounted() {
