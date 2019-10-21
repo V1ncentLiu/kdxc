@@ -131,8 +131,6 @@ public class ClueInfoDetailController {
             // 基本信息
             if (null != clueInfo.getData().getClueBasic()) {
                 request.setAttribute("base", clueInfo.getData().getClueBasic());
-                //项目id
-                request.setAttribute("projectId", clueInfo.getData().getClueProject().getProjectId());
             } else {
                 request.setAttribute("base", new ArrayList());
             }
