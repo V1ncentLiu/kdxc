@@ -104,8 +104,7 @@
                 <el-table-column prop="cancelInvite" label="取消邀约数"></el-table-column>
                 <el-table-column prop="delInvite" label="删除邀约数"></el-table-column>
                 <el-table-column prop="visitCus" label="来访客户数"></el-table-column>
-                <el-table-column prop="noVisitCus" label="未来访客户数（无有效来访默认未到访）">
-                </el-table-column>
+                <el-table-column prop="noVisitCus" label="未来访客户数" :render-header="renderHeader"></el-table-column>
                 <el-table-column prop="visit" label="来访次数"></el-table-column>
                 <el-table-column prop="signCus" label="签约客户数"></el-table-column>
                 <el-table-column prop="signOrder" label="签约单数"></el-table-column>
@@ -169,9 +168,37 @@
                 clueCategoryList: clueCategoryList,
                 cusLevelList: cusLevelList,
                 provinceList: provinceList,
-            }             
+            }
         },
-        methods: {    
+        methods: {
+            renderHeader(h, { column, $index }) {
+                return [
+                    column.label,
+                    h(
+                        'el-tooltip',
+                        {
+                            props: {
+                                content: (function() {
+                                    let label = column.label
+                                    switch (label) {
+                                        case '未来访客户数':
+                                            return '无有效来访默认未到访'
+                                            break;
+                                    }
+                                })(),
+                                placement: 'top'
+                            }
+                        },
+                        [
+                            h('span', {
+                                class: {
+                                    'el-icon-question': true
+                                }
+                            })
+                        ]
+                    )
+                ]
+            },
             centerStyle(){
                 return "text-align:center"
             },
