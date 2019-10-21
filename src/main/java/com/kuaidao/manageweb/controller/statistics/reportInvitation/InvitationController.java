@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.statistics.reportInvitation;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
@@ -15,6 +16,7 @@ import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.invitation.InvitationDto;
 import com.kuaidao.stastics.dto.performance.PerformanceDto;
 import com.kuaidao.sys.constant.RegionTypeEnum;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -95,6 +97,15 @@ public class InvitationController extends BaseStatisticsController {
         initSaleDept(request);
         ////初始化页面数据
         initModel(request);
+        if(null==deptId && null!=teleGroupId){
+            //查看所属事业部
+            IdEntity id=new IdEntity();
+            id.setId(teleGroupId+"");
+            JSONResult<OrganizationDTO> result =organizationFeignClient.queryOrgById(id);
+            if("0".equals(result.getCode())){
+                deptId=result.getData().getParentId();
+            }
+        }
         initBaseDto(request,deptId,teleGroupId,teleSaleId,category,cusLevel,province,startTime,endTime);
         return "reportResources/selfVisitFollowTableTeam";
     }
