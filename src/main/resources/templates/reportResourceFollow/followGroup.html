@@ -344,7 +344,7 @@
                 window.history.go(-1);
             },
             gotoPerson(row){
-                var teleSaleId = row.userId;
+                var teleSaleId = row.teleSaleId;
                 var teleDeptId = this.export.teleDeptId;
                 var teleGroupId = this.export.teleGroupId;
                 var startTime = this.export.startTime;
@@ -352,6 +352,17 @@
                 var source = this.export.source;
                 if(teleSaleId){
                     window.location.href="/resourceVisit/saleList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&source="+ source +"&startTime=" + startTime + "&endTime=" + endTime;
+                }
+            },
+            gotoTeam(row){
+                var teleGroupId = row.teleGroupId;
+                var saleId=row.teleSaleId;
+                var teleDeptId = this.export.teleDeptId;
+                var source = this.export.source;
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                if(saleId){
+                    window.location.href="/resourceVisit/saleList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId +"&teleSaleId="+saleId + "&source="+ source +"&startTime=" + startTime + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -444,7 +455,7 @@
                 param.teleGroupId = this.export.teleGroupId;
                 param.teleSaleId = this.export.teleSaleId;
                 param.source = this.export.source;
-                axios.post('/statistics/receptionVisit/exportPersonDayAllList',param,{responseType:'blob'})
+                axios.post('/resourceVisit/managerExport',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
