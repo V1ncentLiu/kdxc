@@ -133,7 +133,7 @@ public class ClueRepetitionController {
         List<Long> idList = new ArrayList<Long>();
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
             // 如果当前登录的为电销总监,查询所有下属电销员工
-            List<UserInfoDTO> userList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name());
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(),user.getBusinessLine());
             idList = userList.stream().map(c -> c.getId()).collect(Collectors.toList());
         } else if (roleList != null
                 && RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())) {
@@ -178,13 +178,18 @@ public class ClueRepetitionController {
     /**
      * 根据机构和角色类型获取用户
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
-    private List<UserInfoDTO> getUserList(Long orgId, String roleCode) {
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode,Integer businessLise) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(1);
+        statusList.add(3);
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setBusinessLine(businessLise);
+        userOrgRoleReq.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
@@ -193,7 +198,7 @@ public class ClueRepetitionController {
     /**
      * 根据机构和角色类型获取用户
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     private List<UserInfoDTO> getUserLists(List<Long> orgIds, String roleCode) {
@@ -208,7 +213,7 @@ public class ClueRepetitionController {
     /**
      * 获取当前登录账号
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     private UserInfoDTO getUser() {
@@ -252,6 +257,7 @@ public class ClueRepetitionController {
     @RequestMapping("/dealPetitionListPage")
     public String dealPetitionListPage(HttpServletRequest request) {
     	UserInfoDTO user = getUser();
+    	List<RoleInfoDTO> roleList = user.getRoleList();
     	// 添加重单字段限制的业务线
         String repetitionBusinessLine = getSysSetting(SysConstant.REPETITION_BUSINESSLINE);
     	boolean isShowRepetition = false;
@@ -259,7 +265,15 @@ public class ClueRepetitionController {
         	isShowRepetition = true;
         }
         request.setAttribute("isShowRepetition", isShowRepetition);
-        return "clue/repetition/dealPetitionList";
+        if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZG.name())){
+            List<UserInfoDTO> userInfoList = getUserList(null,RoleCodeEnum.PDZY.name(),user.getBusinessLine());
+            request.setAttribute("userInfoList", userInfoList);
+            return "clue/repetition/dealPetitionList";
+        }else{
+            return "clue/repetition/dealPetitionListByPdzy";
+        }
+
+
     }
 
     /**
@@ -272,8 +286,12 @@ public class ClueRepetitionController {
     public JSONResult<PageBean<ClueRepetitionDTO>> dealPetitionList(HttpServletRequest request,
             @RequestBody ClueRepetitionDTO clueRepetitionDTO) {
         UserInfoDTO userInfoDTO = getUser();
+        List<RoleInfoDTO> roleList = userInfoDTO.getRoleList();
         if (userInfoDTO.getBusinessLine() != null) {
             clueRepetitionDTO.setBusinessLine(userInfoDTO.getBusinessLine());
+        }
+        if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZY.name())){
+            clueRepetitionDTO.setPdUser(userInfoDTO.getId());
         }
         JSONResult<PageBean<ClueRepetitionDTO>> list =
                 clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
@@ -343,8 +361,12 @@ public class ClueRepetitionController {
     public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,
             @RequestBody BusinessSignDTO businessSignDTO) {
         UserInfoDTO user = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
         if (user.getBusinessLine() != null) {
             businessSignDTO.setBusinessLine(user.getBusinessLine());
+        }
+        if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZY.name())){
+            businessSignDTO.setPdUser(user.getId());
         }
         JSONResult<PageBean<BusinessSignDTO>> list =
                 businessSignFeignClient.businessSignDealList(businessSignDTO);
@@ -435,5 +457,16 @@ public class ClueRepetitionController {
             return byCode.getData().getValue();
         }
         return null;
+    }
+
+    /**
+     * 分配判单用户
+     *
+     * @return
+     */
+    @RequestMapping("/distributionPdUser")
+    @ResponseBody
+    public JSONResult distributionPdUser(@RequestBody ClueRepetitionDTO clueRepetitionDTO){
+        return clueRepetitionFeignClient.distributionPdUser(clueRepetitionDTO);
     }
 }

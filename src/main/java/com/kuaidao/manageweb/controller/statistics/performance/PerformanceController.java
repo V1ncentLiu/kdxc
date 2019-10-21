@@ -110,6 +110,7 @@ public class PerformanceController extends BaseStatisticsController {
     @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<Map<String,Object>>  queryByPage(@RequestBody BaseQueryDto baseQueryDto){
         initParams(baseQueryDto);
+//        baseQueryDto.setTeleDeptId(null);
         return performanceClient.queryByPage(baseQueryDto);
     }
 
@@ -121,12 +122,14 @@ public class PerformanceController extends BaseStatisticsController {
     @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/querySalePage")
     public @ResponseBody JSONResult<Map<String,Object>>  querySaleByPage(@RequestBody BaseQueryDto baseQueryDto){
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        String roleCode=getRoleCode();
+        //去掉事业部参数-保留电销组参数
+//        baseQueryDto.setTeleDeptId(null);
         //根据角色不同，使用查询方法不同
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             return performanceClient.querySalePageAndUser(baseQueryDto);
         }else{
+//            JSONResult<List<PerformanceDto>> json= performanceClient.queryListByParams(baseQueryDto);
             return performanceClient.querySalePage(baseQueryDto);
         }
     }
@@ -141,6 +144,7 @@ public class PerformanceController extends BaseStatisticsController {
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
+            baseQueryDto.setTeleDeptId(null);
             JSONResult<List<PerformanceDto>> json=performanceClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
@@ -174,12 +178,12 @@ public class PerformanceController extends BaseStatisticsController {
             JSONResult<List<PerformanceDto>> json= null;
             //根据角色不同，使用查询方法不同
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            baseQueryDto.setTeleDeptId(null);
             String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
             if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
                 json= performanceClient.querySaleListByUser(baseQueryDto);
             }else{
-                json= performanceClient.queryListByParams(baseQueryDto);
-
+                json= performanceClient.querySaleListByParams(baseQueryDto);
             }
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
@@ -232,7 +236,12 @@ public class PerformanceController extends BaseStatisticsController {
 
         queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
-            queryDTO.setParentId(curLoginUser.getOrgId());
+            //如果有事业部筛选
+            if(null!=baseQueryDto.getTeleDeptId()){
+                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            }else{
+                queryDTO.setParentId(curLoginUser.getOrgId());
+            }
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
             if(null!=baseQueryDto.getTeleDeptId()){
