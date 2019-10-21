@@ -252,20 +252,15 @@ public class BusPerformanceController extends BaseStatisticsController {
     public void proType(HttpServletRequest request){
         List<Map<String,Object>> prolist=new ArrayList<>();
         //品类字典
-        List<DictionaryItemRespDTO> list= getDictionaryByCode(Constants.PROJECT_CATEGORY);
-        for(DictionaryItemRespDTO dt:list){
-            if(dt.getName().indexOf("饮品")==0){
-                Map<String,Object> par=new HashMap<>();
-                par.put("name","饮品");
-                par.put("value",dt.getValue());
-                prolist.add(par);
-                break;
-            }
-        }
         Map<String,Object> par=new HashMap<>();
-        par.put("name","非饮品");
-        par.put("value",0);
+        par.put("name","饮品");
+        par.put("value",1);
         prolist.add(par);
+
+        Map<String,Object> par1=new HashMap<>();
+        par1.put("name","非饮品");
+        par1.put("value",0);
+        prolist.add(par1);
         request.setAttribute("prolist",prolist);
     }
 

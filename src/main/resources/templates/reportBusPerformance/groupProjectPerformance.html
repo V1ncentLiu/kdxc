@@ -8,7 +8,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>集团项目业绩表</el-breadcrumb-item>
+        <el-breadcrumb-item>集团项目业绩表<span style="color:red;">（暂时支持每天更新一次数据，更新时间：每天早上7:00）</span></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="searchMonth">月统计</el-button>
@@ -94,8 +94,8 @@
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
                 <el-table-column prop="signRate" label="签约率"></el-table-column>
-                <el-table-column prop="amount" label="净业绩金额" ></el-table-column>
-                <el-table-column prop="signSingle" label="签约单笔"></el-table-column>
+                <el-table-column prop="amount" :formatter="format_number" label="净业绩金额" ></el-table-column>
+                <el-table-column prop="signSingle"  :formatter="format_number" label="签约单笔"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -430,13 +430,13 @@
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 //商务大区
-                param.busAreaId = this.form.busAreaId;
+                param.busAreaId = this.export.busAreaId;
                 //商务组
-                param.businessGroupId = this.form.businessGroupId;
+                param.businessGroupId = this.export.businessGroupId;
                 //商务经理
-                param.businessManagerId = this.form.businessManagerId;
+                param.businessManagerId = this.export.businessManagerId;
                 //餐饮集团
-                param.groupId = this.form.groupId;
+                param.groupId = this.export.groupId;
                 axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;

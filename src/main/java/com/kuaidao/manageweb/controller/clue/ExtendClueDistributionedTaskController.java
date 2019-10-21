@@ -4,9 +4,11 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
@@ -182,6 +185,10 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
@@ -319,6 +326,10 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
+        }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
@@ -327,6 +338,8 @@ public class ExtendClueDistributionedTaskController {
         dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
                 && listJSONResult.getData().size() != 0) {
+            List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
+                    getDictionaryByCode(DicCodeEnum.PHASE.getCode());
             List<ClueDistributionedTaskDTO> orderList = listJSONResult.getData();
             int size = orderList.size();
             for (int i = 0; i < size; i++) {
@@ -378,6 +391,33 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getFirstAsssignTeleGroupName());
                 // 首次分配电销总监
                 curList.add(taskDTO.getFirstAsssignTeleDirectorName());
+                String phase = "";
+                // 添加资源阶段
+                if (taskDTO.getPhase() != null) {
+                    if (dictionaryItemRespDTOs != null && dictionaryItemRespDTOs.size() > 0) {
+                        for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
+                            if (dictionaryItemRespDTO.getValue()
+                                    .equals(taskDTO.getPhase().toString())) {
+                                phase = dictionaryItemRespDTO.getName();
+                            }
+                        }
+                    }
+                }
+                curList.add(phase);
+                String phtraIsCall = "";
+                if (AggregationConstant.YES.equals(taskDTO.getPhtraIsCall())) {
+                    phtraIsCall = "是";
+                } else if (AggregationConstant.NO.equals(taskDTO.getPhtraIsCall())) {
+                    phtraIsCall = "否";
+                }
+                curList.add(phtraIsCall);
+                String phstatus = "";
+                if (AggregationConstant.YES.equals(taskDTO.getPhstatus())) {
+                    phstatus = "是";
+                } else if (AggregationConstant.NO.equals(taskDTO.getPhstatus())) {
+                    phstatus = "否";
+                }
+                curList.add(phstatus);
                 dataList.add(curList);
             }
         }
@@ -459,6 +499,10 @@ public class ExtendClueDistributionedTaskController {
         if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
+        }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
@@ -627,6 +671,9 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("首次分配话务组");
         headTitleList.add("首次分配电销组");
         headTitleList.add("首次分配电销组总监");
+        headTitleList.add("资源阶段");
+        headTitleList.add("话务是否接通");
+        headTitleList.add("话务是否有效");
         return headTitleList;
     }
 
@@ -741,5 +788,85 @@ public class ExtendClueDistributionedTaskController {
             return byCode.getData().getValue();
         }
         return null;
+    }
+
+    /**
+     * 导出资源情况数量，用于导出前提示
+     */
+    // @RequiresPermissions("aggregation:truckingOrder:export")
+    @PostMapping("/findCluesCount")
+    @ResponseBody
+    public JSONResult<Long> findCluesCount(@RequestBody ClueDistributionedTaskQueryDTO queryDto)
+            throws Exception {
+        UserInfoDTO user = getUser();
+        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        List<Long> idList = new ArrayList<Long>();
+        // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
+        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
+            // 推广客服、内勤文员 能看自己的数据
+            idList.add(user.getId());
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+            // 客服主管、内勤主管 能看自己组员数据
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
+            for (UserInfoDTO userInfoDTO : userList) {
+                idList.add(userInfoDTO.getId());
+            }
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+            // 内勤经理 能看下属组的数据
+            List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
+            for (OrganizationRespDTO organizationRespDTO : groupList) {
+                List<UserInfoDTO> userList = getUserList(organizationRespDTO.getId(), null, null);
+                for (UserInfoDTO userInfoDTO : userList) {
+                    idList.add(userInfoDTO.getId());
+                }
+            }
+            // 自己组织内的人
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
+            for (UserInfoDTO userInfoDTO : userList) {
+                idList.add(userInfoDTO.getId());
+            }
+        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
+            idList = null;
+        }
+        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setShowTrafficClue(true);
+        }
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+            queryDto.setOperatorIdList(idList);
+        }
+        queryDto.setResourceDirectorList(idList);
+        queryDto.setUserDataAuthList(user.getUserDataAuthList());
+        JSONResult<Long> listJSONResult = extendClueFeignClient.findCluesCount(queryDto);
+        Long count = 0L;
+        JSONResult<Long> jsonResult = new JSONResult<Long>().success(count);
+        if (listJSONResult != null && JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
+            return listJSONResult;
+        }
+        return jsonResult;
     }
 }

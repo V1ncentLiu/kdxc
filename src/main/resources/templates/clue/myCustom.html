@@ -315,7 +315,7 @@
                                  v-else-if="item.fieldCode == 'isTrack'">
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack === 1">
-                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
+                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -353,9 +353,9 @@
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                                  v-else-if="item.fieldCode == 'teleReceiveTime'">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2 || scope.row.teleReceiveSource == 5">
+                        <!--<div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2 || scope.row.teleReceiveSource == 5">-->
                             {{scope.row.teleReceiveTime}}
-                        </div>
+                        <!--</div>-->
                     </template>
                 </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'distributionTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
@@ -1096,7 +1096,22 @@
             this.repeatApplyForm.repeatPhone="";
             this.repeatCurClueArr=[];
         },
-      gettelNumberIcon(tel,clueId) {
+        async gettelNumberIcon(tel,clueId) {
+        	var isReturn =false;
+        	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+            .then(function (response) {
+            	if(response.data !=""){
+            		mycustomVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+            		isReturn = true; ;
+            	}
+               ;
+            });
+        	if(isReturn){
+        		return;
+        	}
         //外呼手机
         var param = {};
         param.clueId = clueId;
@@ -1242,7 +1257,7 @@
         }
         this.setSessionStore("otherVal", otherVal);
 
-        window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId;
+        window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId+"&type=1";
       },
       //日期数据格式化方法
       dateFormat(row, column, cellValue, index) {
@@ -1561,7 +1576,22 @@
         // }
       },
       //外呼号码
-      outboundCall(outboundInputPhone,clueId){//外呼
+      async outboundCall(outboundInputPhone,clueId){//外呼
+    	  var isReturn =false;
+      	await axios.post('/call/callRecord/missedCalPhone?phone='+outboundInputPhone, {})
+          .then(function (response) {
+          	if(response.data !=""){
+          		mycustomVM.$message({
+                      message: response.data,
+                      type: 'warning'
+                  });
+          		isReturn = true; ;
+          	}
+             ;
+          });
+      	if(isReturn){
+      		return;
+      	}
         var  param={};
         param.clueId=clueId;
         window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){

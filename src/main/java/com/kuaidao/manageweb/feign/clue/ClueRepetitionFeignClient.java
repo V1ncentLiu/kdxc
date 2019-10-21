@@ -87,7 +87,13 @@ public interface ClueRepetitionFeignClient {
 	 */
 	@PostMapping("/updateBusinessPetitionById")
 	public JSONResult updateBusinessPetitionById(@RequestBody BusinessSignDTO businessSignDTO);
-	
+	/**
+	 * 分配判单用户
+	 * @param
+	 * @return
+	 */
+	@PostMapping("/distributionPdUser")
+	public JSONResult distributionPdUser(@RequestBody ClueRepetitionDTO clueRepetitionDTO);
 	 /**
      *  根据重单主表id查询重单详细信
      *
@@ -162,6 +168,11 @@ public interface ClueRepetitionFeignClient {
 		public JSONResult updateBusinessPetitionById(BusinessSignDTO businessSignDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("签约重单审核通过失败");
+		}
+
+		@Override
+		public JSONResult distributionPdUser(ClueRepetitionDTO clueRepetitionDTO) {
+			return fallBackError("分配失败");
 		}
 
 
