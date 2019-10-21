@@ -19,6 +19,7 @@
             <!--< el-button type="primary" @click="cancelButton">撤销申请</el-button> -->
             <el-button type="primary" @click="detailButton">处理</el-button>
             <el-button type="success" @click="openFormInfo">申请重单</el-button>
+            <el-button type="success" @click="distributionPdzy">分配判单</el-button>
         </el-col>
     </el-row>
     <div class="mainSearchBg">        
@@ -97,6 +98,16 @@
                 		</el-select>
                     </el-form-item>
                     <br>
+                    <el-form-item label="判单专员:">
+                        <el-select filterable v-model="pdUser" placeholder="判单专员" clearable>
+                            <el-option
+                                    v-for="item in userInfoList"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="资源ID:">
                         <el-input v-model="clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                     </el-form-item>
@@ -177,6 +188,7 @@
                 </el-table-column>
                 <el-table-column align="center" prop="statusResult" width="100" label="处理状态" ></el-table-column>
                 </el-table-column>
+                <el-table-column align="center" prop="pdUserName" width="100" label="判单专员"></el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
         </el-row>  
@@ -494,8 +506,26 @@
             <el-button type="primary" :disabled="btnDisabled" @click="repeatsubmitForm('repeatApplyForm')">确 定</el-button>
             <el-button @click="dialogFormVisiblerepeat = false" >取 消</el-button>
         </div>
-    </el-dialog>       
-         
+    </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="分配判单" :visible.sync="distributionPdzySyc" width="540px">
+        <el-form :model="pdzyform" ref="pdzyform" :rules="pdzyrules">
+            <el-form-item label="判单专员：" :label-width="formLabelWidth"  prop="pdUser">
+                <el-select filterable v-model="pdzyform.pdUser" placeholder="组内判单专员" style="width:80%;">
+                    <el-option
+                            v-for="item in userInfoList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="addbutton('pdzyform')">提交</el-button>
+            <el-button @click="distributionPdzySyc= false">取消</el-button>
+        </div>
+    </el-dialog>
 </div>
 <input id="addOrUpdate" type="hidden" >
 </body>
@@ -503,9 +533,15 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 var isShowRepetition =[[${isShowRepetition}]];
+var userInfoList = [[${userInfoList}]];
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+            distributionPdzySyc:false,
+            pdzyform:{
+                pdUser:""
+            },
+            userInfoList:userInfoList,
             isShowSearch:false,
             btnDisabled: false, 
           	form:{
@@ -548,6 +584,7 @@ var isShowRepetition =[[${isShowRepetition}]];
         	signId:"",
         	teleGorupId:"",
         	teleDeptId:"",
+            pdUser:"",
         	beginTime:"",
         	endTime:"",
         	dxList:"",
@@ -588,6 +625,11 @@ var isShowRepetition =[[${isShowRepetition}]];
                 repeatClue:'',
                 textarea:'',
                 repeadclue:''
+            },
+            pdzyrules:{
+                pdUser: [
+                    { required: true, message: '请选择判单专员', trigger: 'blur' },
+                ]
             },
             repeatRules:{
                 phone:[
@@ -639,7 +681,11 @@ var isShowRepetition =[[${isShowRepetition}]];
                	{
                   value: '1',
                    label: '已审批处理'	
-                  }
+                  },
+                {
+                    value: '4',
+                    label: '待审批（变更）'
+                }
         	],
         	isSignList:[
         		{
@@ -920,6 +966,7 @@ var isShowRepetition =[[${isShowRepetition}]];
                 param.isSign = this.isSign;
                 param.cusPhone = this.cusPhone;
                 param.clueId = this.clueId;
+                param.pdUser = this.pdUser;
                 if(this.beginTime !=null && this.beginTime != '' && this.endTime !=null && this.endTime != '' && this.beginTime>this.endTime){
                 	  this.$message("开始时间不能大于结束时间");
            	         return;
@@ -1247,6 +1294,48 @@ var isShowRepetition =[[${isShowRepetition}]];
                   console.log(error);
                 });
               },
+            distributionPdzy(){
+                var rows = this.multipleSelection;
+                if (this.$refs['pdzyform']!=undefined) {
+                    this.$refs['pdzyform'].resetFields();
+                }
+                if(rows.length  <1){
+                    this.$message({
+                        message: '请选择数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+    		    this.distributionPdzySyc = true;
+            },
+            addbutton(formName){
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        var idList = [];
+                        var rows = this.multipleSelection;
+                        for ( var i = 0; i <rows.length; i++){
+                            idList.push(rows[i].repeatId)
+                        }
+                        param.idList = idList;
+                        param.pdUser = this.pdzyform.pdUser;
+                        axios.post('/clue/cluerepetition/distributionPdUser', param).then(function (response) {
+                            if(response.data.data){
+                                orgVM.distributionPdzySyc = false;
+                                orgVM.search();
+                            }else{
+                                orgVM.$message({
+                                    message: '分配失败请重试',
+                                    type: 'warning'
+                                });
+                            }
+
+                        });
+                    }
+
+
+                })
+            },
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';

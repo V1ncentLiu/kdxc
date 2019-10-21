@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
-import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
@@ -109,7 +110,12 @@ public interface ExtendClueFeignClient {
     @RequestMapping("/findCommunicateRecords")
     public JSONResult<List<ClueDistributionedTaskDTO>> findCommunicateRecords(
             @RequestBody ClueDistributionedTaskQueryDTO queryDto);
-
+    /**
+     * 导出线索：线索情况
+     */
+    @RequestMapping("/findCluesCount")
+    public JSONResult<Long> findCluesCount(
+            @RequestBody ClueDistributionedTaskQueryDTO queryDto);
     @Component
     static class HystrixClientFallback implements ExtendClueFeignClient {
 
@@ -185,6 +191,11 @@ public interface ExtendClueFeignClient {
                 ClueDistributionedTaskQueryDTO queryDto) {
             return fallBackError("导出线索：资源沟通记录");
         }
+
+		@Override
+		public JSONResult<Long> findCluesCount(ClueDistributionedTaskQueryDTO queryDto) {
+			return fallBackError("导出线索：资源数量");
+		}
 
     }
 

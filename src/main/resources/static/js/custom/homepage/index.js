@@ -806,7 +806,22 @@ var homePageVM=new Vue({
     		this.dialogOutboundVisible = false;
     		this.outboundDialogMin=true;
     	},
-    	outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    	async outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    		var isReturn =false;
+        	await axios.post('/call/callRecord/missedCalPhone?phone='+outboundInputPhone, {})
+            .then(function (response) {
+            	if(response.data !=""){
+            		homePageVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+            		isReturn = true; ;
+            	}
+               ;
+            });
+        	if(isReturn){
+        		return;
+        	}
     		outboundCallPhone(outboundInputPhone,callSource,clueId,null);
     		//stopSound();//停止播放录音
     		/*clearTimer();//清除定时器
