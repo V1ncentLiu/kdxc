@@ -61,9 +61,9 @@ public class ResourceVisitController extends BaseStatisticsController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null);
-            return "reportWork/managerList";
+            return "reportResourceFollow/followGroup";
         }
-        return "reportWork/teamList";
+        return "reportResourceFollow/followDept";
     }
 
     /**
@@ -76,7 +76,7 @@ public class ResourceVisitController extends BaseStatisticsController {
                                Long teleSaleId,Integer source,Long startTime,Long endTime){
         initSaleDept(request);
         initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,source,startTime,endTime);
-        return "reportWork/managerList";
+        return "reportResourceFollow/followGroup";
     }
 
     /**
@@ -89,7 +89,7 @@ public class ResourceVisitController extends BaseStatisticsController {
                             Integer source,Long startTime,Long endTime){
         initSaleDept(request);
         initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,source,startTime,endTime);
-        return "reportWork/saleList";
+        return "reportResourceFollow/followManager";
     }
 
     /**
