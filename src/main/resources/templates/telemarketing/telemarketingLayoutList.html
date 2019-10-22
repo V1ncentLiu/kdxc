@@ -95,7 +95,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="电销组：" :label-width="formLabelWidth" prop="telemarketingTeamId">
-                <el-select filterable v-model="form.telemarketingTeamId" placeholder="选择电销组" style="width: 290px;">
+                <el-select filterable v-model="form.telemarketingTeamId"  placeholder="选择电销组" style="width: 290px;">
                     <el-option
                         v-for="item in dzList"
                         :key="item.id"
@@ -104,7 +104,37 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-					
+            <el-form-item label="设定资源类别："   :label-width="formLabelWidth" prop="category">
+                <el-select clearable filterable v-model="form.category" multiple placeholder="请选择资源类别" style="width: 290px;" @change="categoryChange">
+                    <el-option
+                            v-for="item in categoryList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-row v-show="isShow">
+                <el-form-item label="媒介："  :label-width="formLabelWidth" prop="sourceShow">
+                    <el-radio-group v-model="form.sourceShow">
+                        <el-radio label="0" >不可查看</el-radio>
+                        <el-radio label="1" >可查看</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="资源项目："  :label-width="formLabelWidth" prop="projectShow">
+                    <el-radio-group v-model="form.projectShow" >
+                        <el-radio label="0" >不可查看</el-radio>
+                        <el-radio label="1"  >可查看</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="广告文案："  :label-width="formLabelWidth" prop="adShow">
+                    <el-radio-group v-model="form.adShow">
+                        <el-radio label="0" >不可查看</el-radio>
+                        <el-radio label="1" >可查看</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-row>
+
             <el-form-item label="开始时间：" :label-width="formLabelWidth" prop="beginTime">
                 <el-date-picker value-format="yyyy-MM-dd" v-model="form.beginTime" type="date" placeholder="选择日期" style="width: 290px;">
 					</el-date-picker>
@@ -196,9 +226,12 @@
 
     var dzList=[[${dzList}]];
 	var projectList = [[${projectList}]];
+	var categoryList =[[${categoryList}]]
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+            categoryList:categoryList,
+            isShow:false,
             btnDisabled: false,
         	dataNum:"",
         	showTitle:"",
@@ -225,7 +258,11 @@
         	 telemarketingTeamId: '',
         	 beginTime:'',
         	 endTime:'',
-        	 status:'0'
+        	 status:'0',
+             adShow:"0",
+             projectShow:"0",
+             sourceShow:"0",
+             category:"",
         	
         	},
         	 statusList:[
@@ -259,7 +296,46 @@
                 ],
                 status: [
                     { required: true, message: '请选择启用状态', trigger: 'blur' }
-                ]
+                ],
+                adShow: [
+                     { required: true, message: '请选择广告文案是否可以查看', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            if(orgVM.form.category ==null || orgVM.form.category ==''){
+                                callback();
+                            }else{
+                                if(orgVM.form.adShow ==null){
+                                    callback(new Error("请选择广告文案是否可以查看"));
+                                }
+                                callback();
+                            }
+                        }, trigger: 'blur'}
+                ],
+                sourceShow   : [
+                    { required: true, message: '请选择媒介是否可以查看', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            if(orgVM.form.category ==null || orgVM.form.category ==''){
+                                callback();
+                            }else{
+                                if(orgVM.form.sourceShow ==null){
+                                    callback(new Error("请选择媒介是否可以查看"));
+                                }
+                                callback();
+                            }
+                        }, trigger: 'blur'}
+                ],
+                projectShow  : [
+                    { required: true, message: '请选择资源项目是否可以查看', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            if(orgVM.form.category ==null || orgVM.form.category ==''){
+                                callback();
+                            }else{
+                                if(orgVM.form.projectShow ==null){
+                                    callback(new Error("请选择广告文案是否可以查看"));
+                                }
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                ],
             }
              
         },
@@ -337,6 +413,13 @@
                     	  orgVM.form.endTime = telemarketing.endTime;
                     	  orgVM.form.status = telemarketing.status+"";
                     	  var projects = telemarketing.projectIds;
+                    	  var category = telemarketing.category ;
+                    	  if(category !=null && category !=""){
+                              orgVM.isShow = true;
+                              orgVM.form.adShow = telemarketing.adShow+"" ;
+                              orgVM.form.sourceShow = telemarketing.sourceShow+"" ;
+                              orgVM.form.projectShow = telemarketing.projectShow+"" ;
+                          }
                     	  var valueMultiple=[];
                     	  var obj = projects.split(',');
                     	    if(null!=projects&&obj.length>0) {
@@ -344,7 +427,15 @@
                          	       valueMultiple.push(obj[i]+"");
                          	     }
                          	   }
-                    	    orgVM.form.projectIds=valueMultiple;
+                    	  orgVM.form.projectIds=valueMultiple;
+                          var categoryvalueMultiple=[];
+                          var categoryobj = category.split(',');
+                          if(null!=category&&categoryobj.length>0) {
+                              for(var i=0;i<categoryobj.length;i++){
+                                  categoryvalueMultiple.push(categoryobj[i]+"");
+                              }
+                          }
+                          orgVM.form.category=categoryvalueMultiple;
                      }else{
                     	 alert(response.data.data.message);
 	                  	  	return ;
@@ -487,7 +578,22 @@
                         	  this.$message("开始时间不能大于结束时间");
                    	         return;
                           }
-                          orgVM.btnDisabled = true; 
+
+                            if(this.form.category !=null && this.form.category !=''){
+                                var categorys = ""
+                                for ( var i = 0; i <formData.category.length; i++){
+                                    if(categorys !=""){
+                                        categorys = categorys+","+formData.category[i];
+                                    }else{
+                                        categorys = formData.category[i];
+                                    }
+                                }
+                                param.category = categorys;
+                                param.adShow = this.form.adShow;
+                                param.sourceShow = this.form.sourceShow;
+                                param.projectShow = this.form.projectShow;
+                            }
+                          orgVM.btnDisabled = true;
                           var url = "/telemarketing/addTelemarketingLayout";
                           if($("#addOrUpdate").val() ==2){
                         	  url = "/telemarketing/updateTelemarketingLayout"
@@ -628,7 +734,17 @@
                 	if (this.$refs['form']!=undefined) {
                    		this.$refs['form'].resetFields();
                    	  }
+                },
+            categoryChange(){
+        	    if(this.form.category ==null || this.form.category ==''){
+                    this.isShow = false;
+                }else{
+                    this.isShow = true;
+                    this.form.adShow = "0";
+                    this.form.projectShow = "0";
+                    this.form.sourceShow = "0";
                 }
+            }
         },
         created(){
             // 取页数存储

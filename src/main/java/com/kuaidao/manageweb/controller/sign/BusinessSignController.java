@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
@@ -122,6 +125,7 @@ public class BusinessSignController {
   @RequestMapping("/businessSignValidPage")
   public String businessSignValidPage(HttpServletRequest request) {
     UserInfoDTO user = CommUtil.getCurLoginUser();
+    List<RoleInfoDTO> roleList = user.getRoleList();
     OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
     orgDto.setOrgType(OrgTypeConstant.SWZ);
     orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -145,7 +149,13 @@ public class BusinessSignController {
     request.setAttribute("dxList", dxList.getData());
     request.setAttribute("projectList", allProject.getData());
     request.setAttribute("provinceList", proviceslist);
-    return "business/businessSignValidPage";
+    if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZG.name())){
+      List<UserInfoDTO> userInfoList = getUserList(null,RoleCodeEnum.PDZY.name(),user.getBusinessLine());
+      request.setAttribute("userInfoList", userInfoList);
+      return "business/businessSignValidPage";
+    }else{
+      return "business/businessSignValidPageByPdzy";
+    }
   }
 
   /**
@@ -158,8 +168,12 @@ public class BusinessSignController {
   public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(HttpServletRequest request,
       @RequestBody BusinessSignDTO businessSignDTO) {
     UserInfoDTO user = CommUtil.getCurLoginUser();
+    List<RoleInfoDTO> roleList = user.getRoleList();
     if(user.getBusinessLine() != null){
       businessSignDTO.setBusinessLine(user.getBusinessLine());
+    }
+    if(roleList.get(0).getRoleCode().equals(RoleCodeEnum.PDZY.name())){
+      businessSignDTO.setPdUser(user.getId());
     }
     JSONResult<PageBean<BusinessSignDTO>> list =
         businessSignFeignClient.businessSignValidList(businessSignDTO);
@@ -500,7 +514,7 @@ public class BusinessSignController {
    */
   @RequestMapping("/myCustomSignRecordPage")
   public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId,
-      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam String createUser,@RequestParam(required = false) String showSignButton) throws Exception {
+      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam String createUser,@RequestParam(required = false) String showSignButton, @RequestParam String type) throws Exception {
     IdEntityLong idEntityLong = new IdEntityLong();
     idEntityLong.setId(Long.valueOf(signId));
     SignParamDTO paramDTO = new SignParamDTO();
@@ -629,6 +643,7 @@ public class BusinessSignController {
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
     request.setAttribute("signStatus",sign.getSignStatus());
     request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+    request.setAttribute("type", type);
     return "clue/showSignAndPayDetail";
   }
 
@@ -667,7 +682,7 @@ public class BusinessSignController {
    */
   @RequestMapping("/visitRecordPage")
   public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
+      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton,int type) throws Exception {
 
     IdEntityLong idEntityLong = new IdEntityLong();
     idEntityLong.setId(Long.valueOf(signId));
@@ -767,6 +782,7 @@ public class BusinessSignController {
     request.setAttribute("signId", signId);
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
     request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+    request.setAttribute("type", type);
     return "bus_mycustomer/showSignAndPayDetail";
   }
   /**
@@ -881,4 +897,35 @@ public class BusinessSignController {
       }
       return businessSignFeignClient.updateSignDetail(dto);
     }
+
+  /**
+   * 根据机构和角色类型获取用户
+   *
+   * @param
+   * @return
+   */
+  private List<UserInfoDTO> getUserList(Long orgId, String roleCode,Integer businessLise) {
+    UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+    List<Integer> statusList = new ArrayList<>();
+    statusList.add(1);
+    statusList.add(3);
+    userOrgRoleReq.setStatusList(statusList);
+    userOrgRoleReq.setOrgId(orgId);
+    userOrgRoleReq.setRoleCode(roleCode);
+    userOrgRoleReq.setBusinessLine(businessLise);
+    JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+    return listByOrgAndRole.getData();
+  }
+
+  /**
+   * 分配判单用户
+   *
+   * @return
+   */
+  @RequestMapping("/distributionPdUser")
+  @ResponseBody
+  public JSONResult distributionPdUser(@RequestBody BusinessSignDTO businessSignDTO){
+    return businessSignFeignClient.distributionPdUser(businessSignDTO);
+  }
 }

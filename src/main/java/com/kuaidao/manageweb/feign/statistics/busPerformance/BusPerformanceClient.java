@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "statstics-service3", path = "/statstics/busPerformance/", fallback = BusPerformanceClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/busPerformance/", fallback = BusPerformanceClient.HystrixClientFallback.class)
 public interface BusPerformanceClient {
 
     @PostMapping("/queryPage")

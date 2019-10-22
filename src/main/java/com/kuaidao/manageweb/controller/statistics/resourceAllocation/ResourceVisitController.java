@@ -3,16 +3,20 @@ package com.kuaidao.manageweb.controller.statistics.resourceAllocation;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceAllocation.ResourceVisitFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.dupOrder.DupOrderDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceVisitDto;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -48,6 +52,8 @@ public class ResourceVisitController extends BaseStatisticsController {
     private ResourceVisitFeignClient resourceVisitFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
     /**
      * 一级页面跳转
@@ -75,6 +81,15 @@ public class ResourceVisitController extends BaseStatisticsController {
     public String  managerList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,
                                Long teleSaleId,Integer source,Long startTime,Long endTime){
         initSaleDept(request);
+        if(null==teleDeptId && null!=teleGroupId){
+            //查看所属事业部
+            IdEntity id=new IdEntity();
+            id.setId(teleGroupId+"");
+            JSONResult<OrganizationDTO> result =organizationFeignClient.queryOrgById(id);
+            if("0".equals(result.getCode())){
+                teleDeptId=result.getData().getParentId();
+            }
+        }
         initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,source,startTime,endTime);
         return "reportResourceFollow/followGroup";
     }
@@ -88,6 +103,19 @@ public class ResourceVisitController extends BaseStatisticsController {
     public String  saleList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long teleSaleId,
                             Integer source,Long startTime,Long endTime){
         initSaleDept(request);
+        if(null==teleGroupId && null!=teleSaleId){
+            IdEntityLong id=new IdEntityLong(teleSaleId);
+            JSONResult<UserInfoDTO> json=userInfoFeignClient.get(id);
+            if("0".equals(json.getCode())){
+                teleGroupId=json.getData().getOrgId();
+                //查看所属事业部
+                IdEntity orgId=new IdEntity(teleGroupId+"");
+                JSONResult<OrganizationDTO> result =organizationFeignClient.queryOrgById(orgId);
+                if("0".equals(result.getCode())){
+                    teleDeptId=result.getData().getParentId();
+                }
+            }
+        }
         initBaseDto(request,teleDeptId,teleGroupId,teleSaleId,source,startTime,endTime);
         return "reportResourceFollow/followManager";
     }
@@ -160,13 +188,13 @@ public class ResourceVisitController extends BaseStatisticsController {
                 outputStream.close();
             }
         }catch (Exception e){
-            logger.error(" TailOrder export error:",e);
+            logger.error(" ResourceVisitDto export error:",e);
         }
     }
 
 
 
-    @RequestMapping("managerExport")
+    @RequestMapping("/managerExport")
     public @ResponseBody void manaerExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             //查询组权限初始化
@@ -191,7 +219,7 @@ public class ResourceVisitController extends BaseStatisticsController {
                 outputStream.close();
             }
         }catch (Exception e){
-            logger.error(" TailOrder export error:",e);
+            logger.error(" ResourceVisitDto export error:",e);
         }
     }
 
@@ -221,7 +249,7 @@ public class ResourceVisitController extends BaseStatisticsController {
                 outputStream.close();
             }
         }catch (Exception e){
-            logger.error(" TailOrder export error:",e);
+            logger.error(" ResourceVisitDto export error:",e);
         }
     }
 

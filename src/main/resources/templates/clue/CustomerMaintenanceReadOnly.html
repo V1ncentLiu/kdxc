@@ -21,7 +21,8 @@
             <el-breadcrumb separator="  " class="elBreadcrumb">
                 <el-breadcrumb-item><font color="red" class="fs16">资源ID：<span th:text="${clueId}"></span></font> <span v-show="repeatShowFalg">[{{teleReceiveSource}}] {{teleReceiveTime}}</span></el-breadcrumb-item>
                 <el-breadcrumb-item><el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button></el-breadcrumb-item>
-                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
+                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </el-breadcrumb>
             <div class="marginB20 fs16">资源信息</div>
             <div class="borderbox padding20">
@@ -78,6 +79,21 @@
                     <el-col :span="8" v-show="repeatShowFalg">
                         <el-form-item label="创建角色：" :label-width="formLabelWidth120">
                             <span>{{clueBase.createUserRole}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.projectShow ==1">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            <span >{{clueProject.projectName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                            <span>{{clueBase.sourceName}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                        <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                            <span >{{clueBase.ad}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -925,6 +941,9 @@ var commonPool=[[${commonPool}]];//共有池控制标识
 var repeatFlag=[[${repeatFlag}]];//重单审批控制标识
 var callRecord=[[${callRecord}]];//上传文件
 var loginUserId=[[${loginUserId}]];
+var telemarketingLayout = [[${telemarketingLayout}]];
+var clueProject = [[${clueProject}]];
+var mediumList = [[${mediumList}]]
 var showPhone = true;
 var ossUrl = [[${ossUrl}]];//上传文件地址
 
@@ -1019,6 +1038,9 @@ var vxShow = false;
 var showwchatcode = "/images/errorIcon.jpg";
 if(customer==null){
     vform= {
+            mediumList:mediumList,
+            mediumName:"",
+            telemarketingLayout:telemarketingLayout,
             customerName:"",
             cusNameCreateUserRoleName:"",
             cusNameUpdateUserRoleName:"",
@@ -1770,6 +1792,13 @@ if(base==null){
             document.getElementById('addCustomer').style.display = 'block';
         },
         created(){
+            if(mediumList !=null && mediumList.size>0){
+                for(var i=0;i<mediumList.length;i++){
+                    if(mediumList[i].value==base.source()){
+                        this.sourceName = mediumList[i].name;
+                    }
+                }
+            }
             //初始资源类别数据
           	var  param={};
           	param.groupCode="clueCategory";
