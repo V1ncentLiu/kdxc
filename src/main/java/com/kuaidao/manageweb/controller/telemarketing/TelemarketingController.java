@@ -1,24 +1,5 @@
 package com.kuaidao.manageweb.controller.telemarketing;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -29,13 +10,31 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: admin
@@ -59,7 +58,8 @@ public class TelemarketingController {
 
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
     /**
      * 电销布局列表
      * 
@@ -80,6 +80,23 @@ public class TelemarketingController {
         request.setAttribute("categoryList", categoryList);
         request.setAttribute("dzList", dzList.getData());
         request.setAttribute("projectList", allProject.getData());
+
+        //获取集团商家
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoDTO.setStatusList(null);
+        List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
+        request.setAttribute("userInfoList",userInfoList);
+        //新增修改页面使用，排除禁用商家
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        UserInfoDTO userInfoAddDTO = new UserInfoDTO();
+        userInfoAddDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoAddDTO.setStatusList(statusList);
+        List<UserInfoDTO> userInfoAddList = getMerchantUser(userInfoAddDTO);
+        request.setAttribute("userInfoAddList",userInfoAddList);
+
         return "telemarketing/telemarketingLayoutList";
     }
 
@@ -336,5 +353,30 @@ public class TelemarketingController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+    /**
+     * @Description 查询商家账号
+     * @param userInfoDTO
+     * @Return java.util.List<com.kuaidao.sys.dto.user.UserInfoDTO>
+     * @Author xuyunfeng
+     * @Date 2019/10/15 17:19
+     **/
+    private List<UserInfoDTO> getMerchantUser(UserInfoDTO userInfoDTO) {
+        JSONResult<List<UserInfoDTO>> merchantUserList =
+                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        List<UserInfoDTO> userInfoDTOList = merchantUserList.getData();
+        if(userInfoDTOList != null & userInfoDTOList.size() >0){
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            userInfoDTOList.sort((a1,a2)->{
+                try {
+                    return df.parse(sdf.format(a2.getCreateTime())).compareTo(df.parse(sdf.format(a1.getCreateTime())));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                return 1;
+            });
+        }
+        return userInfoDTOList;
     }
 }
