@@ -34,6 +34,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +66,7 @@ public class CompanyController {
         List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
         request.setAttribute("userInfoList",userInfoList);
 
-        //新增修改页面使用
+        //新增修改页面使用，排除禁用商家
         List<Integer> statusList = new ArrayList<>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
@@ -214,6 +216,19 @@ public class CompanyController {
     private List<UserInfoDTO> getMerchantUser(UserInfoDTO userInfoDTO) {
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
-        return merchantUserList.getData();
+        List<UserInfoDTO> userInfoDTOList = merchantUserList.getData();
+        if(userInfoDTOList != null & userInfoDTOList.size() >0){
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            userInfoDTOList.sort((a1,a2)->{
+                try {
+                    return df.parse(sdf.format(a2.getCreateTime())).compareTo(df.parse(sdf.format(a1.getCreateTime())));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                return 1;
+            });
+        }
+        return userInfoDTOList;
     }
 }
