@@ -27,7 +27,7 @@
         <div class="mainSearchFormBox">
           	<el-form :inline="true" class="demo-form-inline mainSearchForm">
                 <el-form-item label="集团:" label-width="55px" >
-                    <el-select v-model="companyGroupId" filterable clearable placeholder="选择所属集团">
+                    <el-select v-model="companyGroupId" @change="currentProjects" filterable clearable placeholder="选择所属集团">
                         <el-option
                                 v-for="item in userInfoList"
                                 :key="item.id"
@@ -106,7 +106,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="集团：" :label-width="formLabelWidth" prop="companyGroupId">
-                <el-select filterable v-model="form.companyGroupId" @change="currentProjects"  placeholder="选择所属集团" style="width: 290px;">
+                <el-select filterable v-model="form.companyGroupId" @change="currentAddProjects"  placeholder="选择所属集团" style="width: 290px;">
                     <el-option
                             v-for="item in userInfoAddList"
                             :key="item.id"
@@ -247,7 +247,7 @@
 <script th:inline="javascript">
 
     var dzList=[[${dzList}]];
-	var projectList = [[${projectList}]];
+	//var projectList = [[${projectList}]];
 	var categoryList =[[${categoryList}]];
     var userInfoList=[[${userInfoList}]];//商家集团集合
     var userInfoAddList = [[${ userInfoAddList }]];
@@ -277,7 +277,7 @@
         	multipleSelection: [],
         	exportdataTable:[],
         	dzList:dzList,
-        	projectList:projectList,
+        	projectList:[],
             projectAddList:[],
         	projectId:"",
             companyGroupId:'',
@@ -373,6 +373,16 @@
         },
         methods: {
             currentProjects(seleVal){
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.groupId=seleVal;
+                axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
+                    orgVM.projectList=response.data.data;
+                });
+            },
+            currentAddProjects(seleVal){
                 if(null==seleVal||seleVal==""){
                     return ;
                 }
