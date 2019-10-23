@@ -39,7 +39,7 @@ public interface TelemarketingLayoutFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/getTelemarketingLayoutByTeamId")
     public JSONResult<TelemarketingLayoutDTO> getTelemarketingLayoutByTeamId(
-            @RequestBody TelemarketingLayoutDTO queryDTO);
+        @RequestBody TelemarketingLayoutDTO queryDTO);
 
 
     @Component
