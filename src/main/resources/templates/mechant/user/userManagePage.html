@@ -47,9 +47,7 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-
-                <!-- <div class="mainSearchBtnBox">  -->
-                <el-form-item label=""> 
+                <el-form-item label="">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
                 </el-form-item>    
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -100,10 +98,10 @@
                 </div>
               </shiro:hasPermission>
             </template>
-
           </el-table-column>
           </el-table>
           <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
     </div>
       <!-- dialog -->
       <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="540px">
@@ -205,7 +203,7 @@ var userVM = new Vue({
       password:"",
       orgName:"",
       orgId:"",
-        id:""
+      id:""
    },
     addOrModifyDialogTitle:'添加商家账号',
     rules: {
@@ -444,8 +442,9 @@ var userVM = new Vue({
         userVM.clueTemplateForm.name ="";
         userVM.clueTemplateForm.username ="";
         userVM.clueTemplateForm.password="";
-        userVM.clueTemplateForm.roleId ="",
+        userVM.clueTemplateForm.roleId ="";
         userVM.clueTemplateForm.id ="";
+        userVM.showIsCharge = true;
         this.dialogFormVisible = true;
     },
     //跳转新增用户页
@@ -473,6 +472,7 @@ var userVM = new Vue({
                     userVM.clueTemplateForm.orgId = user.orgId;
                     userVM.clueTemplateForm.roleId = user.roleId;
                     userVM.clueTemplateForm.id = user.id;
+                    userVM.clueTemplateForm.merchatType = user.merchatType;
                     userVM.dialogFormVisible = true;
                     userVM.addOrModifyDialogTitle = "修改商家账号"
                     userVM.multipleTreeSelection=[];
@@ -657,7 +657,7 @@ var userVM = new Vue({
     seleckClick(){
       // console.log(0)
       this.isShow=false;
-    }
+    },
   },
   created(){
       // 进入页面判断有是否有存储值

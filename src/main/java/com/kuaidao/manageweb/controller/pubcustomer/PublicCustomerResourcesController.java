@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.pubcustomer;
 
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
+import com.kuaidao.manageweb.service.telelayout.ITelemarketingLayoutService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,6 +76,8 @@ public class PublicCustomerResourcesController {
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
 
+    @Autowired
+    private ITelemarketingLayoutService telemarketingLayoutService;
 
     /**
      * 分配资源
@@ -255,6 +259,14 @@ public class PublicCustomerResourcesController {
                 || RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             logger.info("共有池电销相关角色:{}", roleCode);
             dto.setRoleCode(roleInfoDTO.getRoleCode());
+            Long orgId = user.getOrgId();
+            // 获取电销组所在集团
+            Long cmpanyGroupId = telemarketingLayoutService.getTelemarketingLayout(orgId);
+            // 获取集团所在包好全部电销组
+            List<Long> teleTeamIdOnCompanyGroup = telemarketingLayoutService
+                .getTeleTeamIdOnCompanyGroup(cmpanyGroupId);
+            // 设置参数
+            dto.setTeleGroupIdList(teleTeamIdOnCompanyGroup);
         }
         dto.setBusinessLine(user.getBusinessLine());
         return publicCustomerFeignClient.queryListPage(dto);
