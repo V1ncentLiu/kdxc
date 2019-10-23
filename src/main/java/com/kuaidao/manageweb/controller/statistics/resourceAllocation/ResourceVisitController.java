@@ -47,8 +47,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/resourceVisit")
 public class ResourceVisitController extends BaseStatisticsController {
-
-
     @Autowired
     private ResourceVisitFeignClient resourceVisitFeignClient;
     @Autowired
@@ -173,6 +171,7 @@ public class ResourceVisitController extends BaseStatisticsController {
         }
         return this.resourceVisitFeignClient.querySalePage(dto);
     }
+
 
     /**
      * 一级页面导出excel
