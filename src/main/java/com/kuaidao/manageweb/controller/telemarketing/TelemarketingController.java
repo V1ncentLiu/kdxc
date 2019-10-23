@@ -18,6 +18,7 @@ import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -60,16 +61,16 @@ public class TelemarketingController {
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
 
     /**
-     * 根据集团Id条件查询集团所属的所有电销布局
+     * 根据集团Id条件查询集团所属的所有电销组
      *
      * @return
      */
     @RequestMapping("/getTelemarketingLayoutListByCompanyGroupId")
     @ResponseBody
-    public JSONResult<List<TelemarketingLayoutDTO>> getTelemarketingLayoutListByCompanyGroupId(
+    public JSONResult<List<OrganizationDTO>> getTelemarketingLayoutListByCompanyGroupId(
             HttpServletRequest request,
             @RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
-        return telemarketingLayoutFeignClient.getListByParams(telemarketingLayoutDTO);
+        return telemarketingLayoutFeignClient.getdxListByCompanyGroupId(telemarketingLayoutDTO);
     }
 
     /**

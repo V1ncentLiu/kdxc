@@ -4,6 +4,7 @@ import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -42,8 +43,8 @@ public interface TelemarketingLayoutFeignClient {
     @RequestMapping(method = RequestMethod.POST, value = "/getTelemarketingLayoutByTeamId")
     public JSONResult<TelemarketingLayoutDTO> getTelemarketingLayoutByTeamId(
         @RequestBody TelemarketingLayoutDTO queryDTO);
-    @PostMapping("/getListByParams")
-    public JSONResult<List<TelemarketingLayoutDTO>> getListByParams(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO);
+    @PostMapping("/getdxListByCompanyGroupId")
+    public JSONResult<List<OrganizationDTO>> getdxListByCompanyGroupId(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO);
 
     @Component
     static class HystrixClientFallback implements TelemarketingLayoutFeignClient {
@@ -97,8 +98,8 @@ public interface TelemarketingLayoutFeignClient {
         }
 
         @Override
-        public JSONResult<List<TelemarketingLayoutDTO>> getListByParams(TelemarketingLayoutDTO telemarketingLayoutDTO) {
-            return fallBackError("根据条件查询电销布局失败");
+        public JSONResult<List<OrganizationDTO>> getdxListByCompanyGroupId(TelemarketingLayoutDTO telemarketingLayoutDTO) {
+            return fallBackError("根据集团Id查询集团下电销组失败");
         }
     }
 }
