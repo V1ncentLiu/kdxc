@@ -3,14 +3,19 @@ package com.kuaidao.manageweb.controller.statistics.resourcesReport;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceFreeReceive.ResourceFreeReceiveFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveQueryDto;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +30,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author: guhuitao
@@ -39,6 +46,8 @@ public class FreedReportController extends BaseStatisticsController {
 
     @Autowired
     private ResourceFreeReceiveFeignClient resourceFreeReceiveFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
 
     private static final Integer GROUP = 1;
     private static final Integer PERSON = 2;
@@ -102,6 +111,7 @@ public class FreedReportController extends BaseStatisticsController {
     @RequestMapping("/getGroupPageList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getGroupPageList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
+        initParams(resourceFreeReceiveQueryDto);
         return resourceFreeReceiveFeignClient.getGroupPageList(resourceFreeReceiveQueryDto);
     }
 
@@ -110,6 +120,7 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/exportGroupAllList")
     public void exportGroupAllList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
+        initParams(resourceFreeReceiveQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getResourceFreedTitleList(GROUP));
         JSONResult<Map<String, Object>> result = resourceFreeReceiveFeignClient.getGroupAllList(resourceFreeReceiveQueryDto);
@@ -139,6 +150,7 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/exportPersonAllList")
     public void  exportPersonAllList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
+        initParams(resourceFreeReceiveQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getResourceFreedTitleList(PERSON));
         JSONResult<Map<String, Object>> result = resourceFreeReceiveFeignClient.getPersonAllList(resourceFreeReceiveQueryDto);
@@ -167,6 +179,7 @@ public class FreedReportController extends BaseStatisticsController {
     @RequestMapping("/getPersonPageList")
     @ResponseBody
     public JSONResult<Map<String, Object>> getPersonPageList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
+        initParams(resourceFreeReceiveQueryDto);
         return resourceFreeReceiveFeignClient.getPersonPageList(resourceFreeReceiveQueryDto);
     }
     /**
@@ -175,6 +188,7 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/exportPersonDayAllList")
     public void  exportPersonDayAllList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
+        initParams(resourceFreeReceiveQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getResourceFreedTitleList(DAY));
         JSONResult<Map<String, Object>> result = resourceFreeReceiveFeignClient.getPersonDayAllList(resourceFreeReceiveQueryDto);
@@ -203,6 +217,7 @@ public class FreedReportController extends BaseStatisticsController {
     @RequestMapping("/getPersonDayPageList")
     @ResponseBody
     public JSONResult<Map<String, Object>> getPersonDayPageList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
+        initParams(resourceFreeReceiveQueryDto);
         return resourceFreeReceiveFeignClient.getPersonDayPageList(resourceFreeReceiveQueryDto);
     }
 
@@ -292,6 +307,47 @@ public class FreedReportController extends BaseStatisticsController {
         resourceFreeReceiveQueryDto.setTeleDeptId(teleDeptId);
         resourceFreeReceiveQueryDto.setCategory(category);
         request.setAttribute("resourceFreeReceiveQueryDto",resourceFreeReceiveQueryDto);
+    }
+
+
+    /**
+     * 初始化查询参数-根据角色查对应事业部
+     * @param dto
+     */
+    public void initParams(ResourceFreeReceiveQueryDto dto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
+            if(null!=dto.getTeleDeptId()){
+                dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
+            }else {
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                //总监理查看下属所有事业部
+                queryDTO.setOrgType(OrgTypeConstant.DZSYB);
+                queryDTO.setParentId(curLoginUser.getOrgId());
+                JSONResult<List<OrganizationRespDTO>> result =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                List<Long> ids = result.getData().stream().map(c -> c.getId()).collect(Collectors.toList());
+                dto.setTeleDeptIds(ids);
+            }
+        }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
+            //副总查看当前事业部
+            dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
+            //总监查看自己组
+            dto.setTeleGroupId(curLoginUser.getOrgId());
+        }else if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            //顾问查看自己
+            dto.setTeleSaleId(curLoginUser.getId());
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            //管理员可以查看全部
+            if(null!=dto.getTeleDeptId()){
+                dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
+            }
+        }else{
+            //other
+            dto.setTeleSaleId(curLoginUser.getId());
+        }
     }
 
 
