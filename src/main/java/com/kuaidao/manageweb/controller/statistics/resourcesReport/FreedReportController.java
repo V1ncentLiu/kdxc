@@ -166,7 +166,7 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/getPersonPageList")
     @ResponseBody
-    public JSONResult<Map<String, Object>> getPersonPageList(ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
+    public JSONResult<Map<String, Object>> getPersonPageList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
         return resourceFreeReceiveFeignClient.getPersonPageList(resourceFreeReceiveQueryDto);
     }
     /**
@@ -202,7 +202,7 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/getPersonDayPageList")
     @ResponseBody
-    public JSONResult<Map<String, Object>> getPersonDayPageList(ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
+    public JSONResult<Map<String, Object>> getPersonDayPageList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto){
         return resourceFreeReceiveFeignClient.getPersonDayPageList(resourceFreeReceiveQueryDto);
     }
 
