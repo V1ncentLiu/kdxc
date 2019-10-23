@@ -91,15 +91,12 @@
                         <span v-else>{{scope.row.userName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allocationResorceNum" label="不跟进释放公共资源数"></el-table-column>
-                <el-table-column prop="noVisitRate" label="其他释放公共资源数"></el-table-column>
-                <el-table-column prop="thirtyMinVisitRate" label="无效释放公共资源数"></el-table-column>
-                <el-table-column prop="oneVisitRate" label="无效释放数"></el-table-column>
-                <el-table-column prop="twoVisitRate" label="总释放数"></el-table-column>
-                <el-table-column prop="threeVisitRate" label="总监领取数"></el-table-column>
-                <el-table-column prop="sixVisitRate" label="顾问领取数"></el-table-column>
-                <el-table-column prop="twelveVisitRate" label="总领取数"></el-table-column>
-                <el-table-column prop="twentyFourVisitRate" label="释放/领取比例"></el-table-column>
+                <el-table-column prop="unfollowCount" label="不跟进释放公共资源数"></el-table-column>
+                <el-table-column prop="otherCount" label="其他释放公共资源数"></el-table-column>
+                <el-table-column prop="uselessCount" label="无效释放数"></el-table-column>
+                <el-table-column prop="totalFreeCount" label="总释放数"></el-table-column>
+                <el-table-column prop="teleSaleCount" label="顾问领取数"></el-table-column>
+                <el-table-column prop="freeRate" label="释放/领取比例"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -148,40 +145,7 @@
                     teleSaleId: '',
                     category: ''
                 },
-                tableData: [
-                    {
-                        orgId: 99999,
-                        teleSaleId: 99999,
-                        userName: '合计',
-                        orgName: '合计',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1,
-                        twoVisitRate: 1,
-                        threeVisitRate: 1,
-                        sixVisitRate: 1,
-                        twelveVisitRate: 1,
-                        twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
-                    },
-                    {
-                        orgId: 1,
-                        teleSaleId: 1,
-                        userName: '电销顾问1',
-                        orgName: '电销组名1',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1,
-                        twoVisitRate: 1,
-                        threeVisitRate: 1,
-                        sixVisitRate: 1,
-                        twelveVisitRate: 1,
-                        twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
-                    }
-                ],
+                tableData: [],
                 deptList: deptList, // 电销事业部
                 orgTeleArr: '', // 电销组
                 busSaleArr: '', // 电销顾问
@@ -306,7 +270,7 @@
                 param.teleSaleId = this.form.teleSaleId;
                 param.category = this.form.category;
                 this.loading = true; 
-                axios.post('/statistics/receptionVisit/getPersonDayPageList',param).then(function (response) {
+                axios.post('/freedReport/getPersonPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -478,7 +442,7 @@
                 param.teleGroupId = this.export.teleGroupId;
                 param.teleSaleId = this.export.teleSaleId;
                 param.category = this.export.category;
-                axios.post('/statistics/receptionVisit/exportPersonDayAllList',param,{responseType:'blob'})
+                axios.post('/freedReport/exportPersonAllList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
