@@ -6,6 +6,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.service.telelayout.ITelemarketingLayoutService;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,13 +44,13 @@ public class TelemarketingLayoutServiceImpl implements ITelemarketingLayoutServi
   public List<Long> getTeleTeamIdOnCompanyGroup(Long companygId){
     TelemarketingLayoutDTO queryDTO = new TelemarketingLayoutDTO();
     queryDTO.setCompanyGroupId(companygId);
-    JSONResult<List<TelemarketingLayoutDTO>> layout = telemarketingLayoutFeignClient
-        .getListByParams(queryDTO);
+    JSONResult<List<OrganizationDTO>> layout = telemarketingLayoutFeignClient
+        .getdxListByCompanyGroupId(queryDTO);
     Long companyGroupId =0L;
     List<Long> teleTeamIdList = new ArrayList();
     if(CommonUtil.resultCheck(layout)){
-      List<TelemarketingLayoutDTO> data = layout.getData();
-      teleTeamIdList = data.stream().map(a -> a.getTelemarketingTeamId())
+      List<OrganizationDTO> data = layout.getData();
+      teleTeamIdList = data.stream().map(a ->a.getId())
           .collect(Collectors.toList());
     }
     return teleTeamIdList;
