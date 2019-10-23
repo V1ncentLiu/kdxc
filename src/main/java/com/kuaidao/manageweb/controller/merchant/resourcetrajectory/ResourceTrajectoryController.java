@@ -24,6 +24,7 @@ import com.kuaidao.merchant.dto.resourcetrajectory.ResourceTrajectoryDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +98,10 @@ public class ResourceTrajectoryController {
     Integer cpoolReceiveFlag = 0;
     if(CommonUtil.resultCheck(listJSONResult)){
       List<ClueManagementDto> data = listJSONResult.getData();
-      ClueManagementDto clueManagementDto = data.get(0);
-      cpoolReceiveFlag = clueManagementDto.getCpoolReceiveFlag();
+      if(CollectionUtils.isNotEmpty(data)){
+        ClueManagementDto clueManagementDto = data.get(0);
+        cpoolReceiveFlag = clueManagementDto.getCpoolReceiveFlag();
+      }
     }
 
     if(CommonUtil.resultCheck(clueInfo)){
