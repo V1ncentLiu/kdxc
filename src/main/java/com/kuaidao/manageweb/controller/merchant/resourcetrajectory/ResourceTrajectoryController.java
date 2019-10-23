@@ -91,24 +91,6 @@ public class ResourceTrajectoryController {
     queryDTO.setClueId(clueId.getId());
     JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
-
-    // 查询当前资源是否来源于共有池
-    ClueManagementParamDto reqDto = new ClueManagementParamDto();
-    reqDto.setClueId(clueId.getId());
-    // 设定死的值，无意义
-    reqDto.setUserId(1L);
-    reqDto.setUserType(2);
-    JSONResult<List<ClueManagementDto>> listJSONResult = clueManagementFeignClient
-        .listNoPage(reqDto);
-    Integer cpoolReceiveFlag = 0;
-    if(CommonUtil.resultCheck(listJSONResult)){
-      List<ClueManagementDto> data = listJSONResult.getData();
-      if(CollectionUtils.isNotEmpty(data)){
-        ClueManagementDto clueManagementDto = data.get(0);
-        cpoolReceiveFlag = clueManagementDto.getCpoolReceiveFlag();
-      }
-    }
-
     if(CommonUtil.resultCheck(clueInfo)){
       ClueDTO data = clueInfo.getData();
       ClueCustomerDTO clueCustomer = data.getClueCustomer();
@@ -116,11 +98,7 @@ public class ResourceTrajectoryController {
         resourceTrajectory.setAge(clueCustomer.getAge());
         resourceTrajectory.setCusName(clueCustomer.getCusName());
         resourceTrajectory.setEmail(clueCustomer.getEmail());
-        if(MerchantConstant.MERCHANT_FLAG_YES.equals(cpoolReceiveFlag)){
-          resourceTrajectory.setPhone("***");
-        }else{
-          resourceTrajectory.setPhone(clueCustomer.getPhone());
-        }
+        resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone2(clueCustomer.getPhone2());
         resourceTrajectory.setPhone3(clueCustomer.getPhone3());
