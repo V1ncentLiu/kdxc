@@ -71,8 +71,8 @@ public class FreedReportController extends BaseStatisticsController {
      * @return
      */
     @RequestMapping("/groupList")
-    public String teamList(HttpServletRequest request,Long teleDeptId,Long orgId,Long category,Long userId,Long startTime,Long endTime){
-        pageParams(teleDeptId,orgId,category,userId,startTime,endTime,request);
+    public String teamList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long category,Long teleSaleId,Long startTime,Long endTime){
+        pageParams(teleDeptId,teleGroupId,category,teleSaleId,startTime,endTime,request);
         initSaleDept(request);
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
@@ -86,8 +86,8 @@ public class FreedReportController extends BaseStatisticsController {
      * @return
      */
     @RequestMapping("/managerList")
-    public String managerList(HttpServletRequest request,Long teleDeptId,Long orgId,Long category,Long userId,Long startTime,Long endTime){
-        pageParams(teleDeptId,orgId,category,userId,startTime,endTime,request);
+    public String managerList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long category,Long teleSaleId,Long startTime,Long endTime){
+        pageParams(teleDeptId,teleGroupId,category,teleSaleId,startTime,endTime,request);
         initSaleDept(request);
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
@@ -283,12 +283,12 @@ public class FreedReportController extends BaseStatisticsController {
     }
 
 
-    private void pageParams(Long teleDeptId,Long orgId,Long category,Long userId,Long startTime,Long endTime,HttpServletRequest request){
+    private void pageParams(Long teleDeptId,Long teleGroupId,Long category,Long teleSaleId,Long startTime,Long endTime,HttpServletRequest request){
         ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto = new ResourceFreeReceiveQueryDto();
-        resourceFreeReceiveQueryDto.setOrgId(orgId);
+        resourceFreeReceiveQueryDto.setTeleGroupId(teleGroupId);
         resourceFreeReceiveQueryDto.setStartTime(startTime);
         resourceFreeReceiveQueryDto.setEndTime(endTime);
-        resourceFreeReceiveQueryDto.setUserId(userId);
+        resourceFreeReceiveQueryDto.setTeleSaleId(teleSaleId);
         resourceFreeReceiveQueryDto.setTeleDeptId(teleDeptId);
         resourceFreeReceiveQueryDto.setCategory(category);
         request.setAttribute("resourceFreeReceiveQueryDto",resourceFreeReceiveQueryDto);
