@@ -36,7 +36,6 @@ public class TelemarketingLayoutServiceImpl implements ITelemarketingLayoutServi
   }
 
 
-  @Override
   public Long getTeleTeamIdOnCompanyGroup(Long companygROUP){
     TelemarketingLayoutDTO queryDTO = new TelemarketingLayoutDTO();
 
