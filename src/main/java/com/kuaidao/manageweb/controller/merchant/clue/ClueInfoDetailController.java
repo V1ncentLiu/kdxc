@@ -198,6 +198,8 @@ public class ClueInfoDetailController {
 
     /**
      * 进入详情页面
+     * 跟进记录主账号看自己和所有的子账号的 子账号看自己和主账号的
+     * 通话记录主账号看自己和所有的子账号的  子账号自能看自己的
      *
      * @param idEntityLong
      * @return
@@ -209,14 +211,19 @@ public class ClueInfoDetailController {
         log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
         List<Long> userList = new ArrayList<>();
+        //通话记录用户集合
+        List<Long> callUserList = new ArrayList<>();
         // 商家主账户能看商家子账号所有的记录
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
+            callUserList.addAll(userList);
         }
-        // 商家子账号看自己和主账号的记录
+        // 跟进记录商家子账号看自己和主账号的记录
+        //通话记录子账号只看自己的
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userList.add(user.getId());
             userList.add(user.getParentId());
+            callUserList.add(user.getId());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
         queryDTO.setClueId(clueId);
@@ -225,8 +232,10 @@ public class ClueInfoDetailController {
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId + "");
         if (CollectionUtils.isNotEmpty(userList)) {
-            call.setAccountIdList(userList);
             fileDto.setIdList(userList);
+        }
+        if (CollectionUtils.isNotEmpty(callUserList)) {
+            call.setAccountIdList(callUserList);
         }
         JSONResult<ClueDTO> clueInfo = clueInfoDetailFeignClient.findClueInfo(queryDTO);
         if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
