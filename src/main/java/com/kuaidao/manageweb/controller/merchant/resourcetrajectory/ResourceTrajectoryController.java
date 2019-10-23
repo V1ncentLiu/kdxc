@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.clue.ClueIntentionDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueReceiveDTO;
 import com.kuaidao.aggregation.dto.log.ImLogsDTO;
+import com.kuaidao.common.constant.ComConstant.USER_STATUS;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.hibernate.usertype.UserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +95,9 @@ public class ResourceTrajectoryController {
     // 查询当前资源是否来源于共有池
     ClueManagementParamDto reqDto = new ClueManagementParamDto();
     reqDto.setClueId(clueId.getId());
+    // 设定死的值，无意义
+    reqDto.setUserId(1L);
+    reqDto.setUserType(2);
     JSONResult<List<ClueManagementDto>> listJSONResult = clueManagementFeignClient
         .listNoPage(reqDto);
     Integer cpoolReceiveFlag = 0;
