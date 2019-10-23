@@ -15,7 +15,6 @@ import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.log.ImLogMgtFeignClient;
-import com.kuaidao.manageweb.feign.merchant.clue.ClueInfoDetailFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.merchant.dto.clue.ClueManagementDto;
 import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
@@ -48,10 +47,6 @@ public class ResourceTrajectoryController {
 
   @Autowired
   private MyCustomerFeignClient myCustomerFeignClient;
-
-  @Autowired
-  private ClueManagementFeignClient clueManagementFeignClient;
-
 
   /**
    * 页面跳转
@@ -88,16 +83,8 @@ public class ResourceTrajectoryController {
     queryDTO.setClueId(clueId.getId());
     JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
     // 查询当前资源是否来源于共有池
-    ClueManagementParamDto reqDto = new ClueManagementParamDto();
-    reqDto.setClueId(clueId.getId());
-    JSONResult<List<ClueManagementDto>> listJSONResult = clueManagementFeignClient
-        .listNoPage(reqDto);
-    Integer cpoolReceiveFlag = 0;
-    if(CommonUtil.resultCheck(listJSONResult)){
-      List<ClueManagementDto> data = listJSONResult.getData();
-      ClueManagementDto clueManagementDto = data.get(0);
-      cpoolReceiveFlag = clueManagementDto.getCpoolReceiveFlag();
-    }
+
+
 
     if(CommonUtil.resultCheck(clueInfo)){
       ClueDTO data = clueInfo.getData();
@@ -106,11 +93,6 @@ public class ResourceTrajectoryController {
         resourceTrajectory.setAge(clueCustomer.getAge());
         resourceTrajectory.setCusName(clueCustomer.getCusName());
         resourceTrajectory.setEmail(clueCustomer.getEmail());
-        if(cpoolReceiveFlag!=null&&cpoolReceiveFlag==1){
-          resourceTrajectory.setPhone("***");
-        }else{
-          resourceTrajectory.setPhone(clueCustomer.getPhone());
-        }
         resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone2(clueCustomer.getPhone2());
         resourceTrajectory.setPhone3(clueCustomer.getPhone3());
