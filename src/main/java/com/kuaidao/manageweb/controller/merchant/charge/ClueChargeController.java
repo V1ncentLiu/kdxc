@@ -82,6 +82,8 @@ public class ClueChargeController {
      * @param idEntity
      * @return
      */
+    @ResponseBody
+    @PostMapping("/delete")
     public JSONResult<String> delete(@RequestBody IdEntityLong idEntity) {
     return clueChargeFeignClient.delete(idEntity);
     }
