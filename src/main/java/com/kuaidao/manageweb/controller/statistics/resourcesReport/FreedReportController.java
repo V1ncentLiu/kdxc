@@ -247,13 +247,26 @@ public class FreedReportController extends BaseStatisticsController {
             ResourceFreeReceiveDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            if(type.equals(GROUP)){
+                curList.add(ra.getOrgName());
+            }
+            if(type.equals(PERSON)){
+                curList.add(ra.getUserName());
+            }
+            if(type.equals(DAY)){
+                curList.add(ra.getDateId());
+            }
             curList.add(ra.getUnfollowCount());
             curList.add(ra.getOtherCount());
             curList.add(ra.getUselessCount());
             curList.add(ra.getTotalFreeCount());
-            curList.add(ra.getTeleManagerCount());
+            if(type.equals(GROUP)){
+                curList.add(ra.getTeleManagerCount());
+            }
             curList.add(ra.getTeleSaleCount());
-            curList.add(ra.getTotalReceiveCount());
+            if(type.equals(GROUP)){
+                curList.add(ra.getTotalReceiveCount());
+            }
             curList.add(ra.getFreeRate());
             dataList.add(curList);
         }
