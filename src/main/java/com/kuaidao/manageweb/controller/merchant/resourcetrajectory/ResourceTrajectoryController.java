@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.clue.ClueIntentionDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueReceiveDTO;
 import com.kuaidao.aggregation.dto.log.ImLogsDTO;
+import com.kuaidao.common.constant.ComConstant.USER_STATUS;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
@@ -24,7 +25,9 @@ import com.kuaidao.merchant.dto.resourcetrajectory.ResourceTrajectoryDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.hibernate.usertype.UserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,19 +91,6 @@ public class ResourceTrajectoryController {
     queryDTO.setClueId(clueId.getId());
     JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
-
-    // 查询当前资源是否来源于共有池
-    ClueManagementParamDto reqDto = new ClueManagementParamDto();
-    reqDto.setClueId(clueId.getId());
-    JSONResult<List<ClueManagementDto>> listJSONResult = clueManagementFeignClient
-        .listNoPage(reqDto);
-    Integer cpoolReceiveFlag = 0;
-    if(CommonUtil.resultCheck(listJSONResult)){
-      List<ClueManagementDto> data = listJSONResult.getData();
-      ClueManagementDto clueManagementDto = data.get(0);
-      cpoolReceiveFlag = clueManagementDto.getCpoolReceiveFlag();
-    }
-
     if(CommonUtil.resultCheck(clueInfo)){
       ClueDTO data = clueInfo.getData();
       ClueCustomerDTO clueCustomer = data.getClueCustomer();
@@ -108,11 +98,7 @@ public class ResourceTrajectoryController {
         resourceTrajectory.setAge(clueCustomer.getAge());
         resourceTrajectory.setCusName(clueCustomer.getCusName());
         resourceTrajectory.setEmail(clueCustomer.getEmail());
-        if(MerchantConstant.MERCHANT_FLAG_YES.equals(cpoolReceiveFlag)){
-          resourceTrajectory.setPhone("***");
-        }else{
-          resourceTrajectory.setPhone(clueCustomer.getPhone());
-        }
+        resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone2(clueCustomer.getPhone2());
         resourceTrajectory.setPhone3(clueCustomer.getPhone3());
