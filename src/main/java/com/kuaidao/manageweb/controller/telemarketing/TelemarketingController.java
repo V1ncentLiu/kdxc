@@ -32,9 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: admin
@@ -60,6 +58,20 @@ public class TelemarketingController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+
+    /**
+     * 根据集团Id条件查询集团所属的所有电销布局
+     *
+     * @return
+     */
+    @RequestMapping("/getTelemarketingLayoutListByCompanyGroupId")
+    @ResponseBody
+    public JSONResult<List<TelemarketingLayoutDTO>> getTelemarketingLayoutListByCompanyGroupId(
+            HttpServletRequest request,
+            @RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
+        return telemarketingLayoutFeignClient.getListByParams(telemarketingLayoutDTO);
+    }
+
     /**
      * 电销布局列表
      * 
@@ -206,13 +218,15 @@ public class TelemarketingController {
                 String value = (String) object;
                 if (j == 0) {// 序号
                     rowDto.setSerialNumber(value);
-                } else if (j == 1) {// 商务小组
+                } else if (j == 1) {// 电销组
                     rowDto.setTelemarketingTeam(value);
-                } else if (j == 2) {// 区域
+                } else if (j == 2) {// 集团
+                    rowDto.setCompanyGroupName(value);
+                }  else if (j == 3) {// 项目
                     rowDto.setProjects(value);
-                } else if (j == 3) {// 电销组
+                } else if (j == 4) {// 起始时间
                     rowDto.setBeginTime(value);
-                } else if (j == 4) {// 签约项目
+                } else if (j == 5) {// 结束时间
                     rowDto.setEndTime(value);
                 }
             } // inner foreach end
@@ -256,13 +270,37 @@ public class TelemarketingController {
                 organizationFeignClient.queryOrgByParam(orgDto);
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
-
-
+        //获取商家集团账号
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        UserInfoDTO userInfoAddDTO = new UserInfoDTO();
+        userInfoAddDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoAddDTO.setStatusList(statusList);
+        List<UserInfoDTO> userInfoAddList = getMerchantUser(userInfoAddDTO);
+        Map<String, Long> hashMap = new HashMap<String, Long>();
+        // 遍历结果集生成<id,name>map
+        for (UserInfoDTO userInfoDTO : userInfoAddList) {
+            hashMap.put(userInfoDTO.getName(), userInfoDTO.getId());
+        }
         if (list != null && list.size() > 0) {
 
             for (TelemarketingLayoutDTO telemarketingLayoutDTO2 : list) {
                 boolean islegal = true;// true合法 false不合法
                 String projectIds = "";
+                //转换商家集团名称，获取商家集团名称对应Id
+                if (islegal && telemarketingLayoutDTO2.getCompanyGroupName() != null) {
+                    islegal = false;
+                    if(hashMap.containsKey(telemarketingLayoutDTO2.getCompanyGroupName().trim())){
+                        telemarketingLayoutDTO2.setCompanyGroupId(hashMap.get(telemarketingLayoutDTO2.getCompanyGroupName().trim()));
+                        islegal = true;
+                    }else {
+                        islegal = false;
+                    }
+                } else {
+                    islegal = false;
+                }
+                //转换电销组名称，获取电销组Id
                 if (islegal && telemarketingLayoutDTO2.getTelemarketingTeam() != null) {
                     islegal = false;
                     for (OrganizationRespDTO organizationRespDTO : dxList.getData()) {
@@ -277,7 +315,7 @@ public class TelemarketingController {
                 } else {
                     islegal = false;
                 }
-
+                //获取项目对应的项目Id
                 if (islegal && telemarketingLayoutDTO2.getProjects() != null) {
                     String[] projects = telemarketingLayoutDTO2.getProjects().split(",");
                     for (int i = 0; i < projects.length; i++) {
