@@ -63,7 +63,8 @@ public class FreedReportController extends BaseStatisticsController {
      * @return
      */
     @RequestMapping("/groupList")
-    public String teamList(HttpServletRequest request){
+    public String teamList(HttpServletRequest request,Long teleDeptId,Long orgId,Long category,Long userId,Long startTime,Long endTime){
+        pageParams(teleDeptId,orgId,category,userId,startTime,endTime,request);
         initSaleDept(request);
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
@@ -77,7 +78,8 @@ public class FreedReportController extends BaseStatisticsController {
      * @return
      */
     @RequestMapping("/managerList")
-    public String managerList(HttpServletRequest request){
+    public String managerList(HttpServletRequest request,Long teleDeptId,Long orgId,Long category,Long userId,Long startTime,Long endTime){
+        pageParams(teleDeptId,orgId,category,userId,startTime,endTime,request);
         initSaleDept(request);
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
@@ -128,7 +130,7 @@ public class FreedReportController extends BaseStatisticsController {
      * 二级页面查询人（不分页）
      */
     @RequestMapping("/exportPersonAllList")
-    public void  exportPersonAllList(ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
+    public void  exportPersonAllList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getResourceFreedTitleList(PERSON));
         JSONResult<Map<String, Object>> result = resourceFreeReceiveFeignClient.getPersonAllList(resourceFreeReceiveQueryDto);
@@ -164,7 +166,7 @@ public class FreedReportController extends BaseStatisticsController {
      * 三级页面查询人+天（不分页）
      */
     @RequestMapping("/exportPersonDayAllList")
-    public void  exportPersonDayAllList(ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
+    public void  exportPersonDayAllList(@RequestBody ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto,HttpServletResponse response) throws IOException {
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getResourceFreedTitleList(DAY));
         JSONResult<Map<String, Object>> result = resourceFreeReceiveFeignClient.getPersonDayAllList(resourceFreeReceiveQueryDto);
@@ -226,7 +228,7 @@ public class FreedReportController extends BaseStatisticsController {
     private void addTotalExportData(ResourceFreeReceiveDto ra, List<List<Object>> dataList, Integer type) {
         List<Object> curList = new ArrayList<>();
         curList.add("");
-        curList.add("");
+        curList.add("合计");
         curList.add(ra.getUnfollowCount());
         curList.add(ra.getOtherCount());
         curList.add(ra.getUselessCount());
@@ -270,6 +272,18 @@ public class FreedReportController extends BaseStatisticsController {
             curList.add(ra.getFreeRate());
             dataList.add(curList);
         }
+    }
+
+
+    private void pageParams(Long teleDeptId,Long orgId,Long category,Long userId,Long startTime,Long endTime,HttpServletRequest request){
+        ResourceFreeReceiveQueryDto resourceFreeReceiveQueryDto = new ResourceFreeReceiveQueryDto();
+        resourceFreeReceiveQueryDto.setOrgId(orgId);
+        resourceFreeReceiveQueryDto.setStartTime(startTime);
+        resourceFreeReceiveQueryDto.setEndTime(endTime);
+        resourceFreeReceiveQueryDto.setUserId(userId);
+        resourceFreeReceiveQueryDto.setTeleDeptId(teleDeptId);
+        resourceFreeReceiveQueryDto.setCategory(category);
+        request.setAttribute("resourceFreeReceiveQueryDto",resourceFreeReceiveQueryDto);
     }
 
 
