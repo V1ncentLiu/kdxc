@@ -263,6 +263,10 @@ public class PublicCustomerResourcesController {
             // 获取电销组所在集团
             Long cmpanyGroupId = telemarketingLayoutService.getTelemarketingLayout(orgId);
             // 获取集团所在包好全部电销组
+            List<Long> teleTeamIdOnCompanyGroup = telemarketingLayoutService
+                .getTeleTeamIdOnCompanyGroup(cmpanyGroupId);
+            // 设置参数
+            dto.setTeleGroupIdList(teleTeamIdOnCompanyGroup);
         }
         dto.setBusinessLine(user.getBusinessLine());
         return publicCustomerFeignClient.queryListPage(dto);
