@@ -27,7 +27,7 @@
         <div class="mainSearchFormBox">
           	<el-form :inline="true" class="demo-form-inline mainSearchForm">
                 <el-form-item label="集团:" label-width="55px" >
-                    <el-select v-model="companyGroupId" filterable clearable placeholder="选择所属集团">
+                    <el-select v-model="companyGroupId" @change="currentProjects" filterable clearable placeholder="选择所属集团">
                         <el-option
                                 v-for="item in userInfoList"
                                 :key="item.id"
@@ -36,7 +36,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销组:" label-width="55px">			
+                <el-form-item label="电销组:" label-width="55px">
           				<el-select filterable v-model="telemarketingTeamId" placeholder="电销组" clearable>
           			    <el-option
           			      v-for="item in dzList"
@@ -70,14 +70,14 @@
             </el-form>
         </div>
         <el-row>
-            <el-table 
+            <el-table
                 ref="multipleTable"
                 tooltip-effect="dark"
                 empty-text="无数据"
                 style="width: 100%"
                 border
                 :data="dataTable"  @selection-change="handleSelectionChange">
-                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" prop="projects" label="项目名称"></el-table-column>
                 <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
@@ -88,7 +88,7 @@
                 <el-table-column align="center" prop="status" label="启用状态" :formatter="transformStatus" width="100"></el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
-        </el-row> 
+        </el-row>
     </div>
 
     <!-- dialog -->
@@ -106,7 +106,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="集团：" :label-width="formLabelWidth" prop="companyGroupId">
-                <el-select filterable v-model="form.companyGroupId" @change="currentProjects"  placeholder="选择所属集团" style="width: 290px;">
+                <el-select filterable v-model="form.companyGroupId" @change="currentAddProjects"  placeholder="选择所属集团" style="width: 290px;">
                     <el-option
                             v-for="item in userInfoAddList"
                             :key="item.id"
@@ -186,7 +186,7 @@
                <el-row class="marginB20">
                                  <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
                                  下载批量上传模版：<a href="/excel-templates/telemarketinglayout.xlsx" download="电销布局模板"><span style="color:#409EFF">电销布局模板下载</span></a>
-               
+
                </el-row>
                <el-row>
                   <el-upload
@@ -200,25 +200,25 @@
                       :before-upload="beforeUpload"
                       :on-success="uploadSuccess"
                      :on-error="uploadError"
-                      
+
                       :auto-upload="false">
                       <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件</el-button>
                       <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
                     </el-upload>
-               
-               
+
+
                </el-row>
               <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="submitUpload">确 定</el-button>
                 <el-button @click="dialogBatchVisible = false">取 消</el-button>
               </div>
             </el-dialog>
-            
+
             <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%" @close="submitExportclose">
             <el-form>
             <div id="totalNumId" class="marginB10">{{dataNum}}</div>
                  <el-row>
-                <el-table 
+                <el-table
                     ref="multipleTable"
                     tooltip-effect="dark"
                     empty-text="无数据"
@@ -247,7 +247,7 @@
 <script th:inline="javascript">
 
     var dzList=[[${dzList}]];
-	var projectList = [[${projectList}]];
+	//var projectList = [[${projectList}]];
 	var categoryList =[[${categoryList}]];
     var userInfoList=[[${userInfoList}]];//商家集团集合
     var userInfoAddList = [[${ userInfoAddList }]];
@@ -277,7 +277,7 @@
         	multipleSelection: [],
         	exportdataTable:[],
         	dzList:dzList,
-        	projectList:projectList,
+        	projectList:[],
             projectAddList:[],
         	projectId:"",
             companyGroupId:'',
@@ -292,16 +292,16 @@
              sourceShow:"0",
              category:"",
               companyGroupId:''
-        	
+
         	},
         	 statusList:[
         		 {
                		value: '0',
-                   label: '启用'	
+                   label: '启用'
                	},
                	{
                   value: '1',
-                   label: '禁用'	
+                   label: '禁用'
                   }
         	  ],
             pager:{
@@ -369,10 +369,20 @@
                         }, trigger: 'blur'}
                 ],
             }
-             
+
         },
         methods: {
             currentProjects(seleVal){
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.groupId=seleVal;
+                axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
+                    orgVM.projectList=response.data.data;
+                });
+            },
+            currentAddProjects(seleVal){
                 if(null==seleVal||seleVal==""){
                     return ;
                 }
@@ -383,7 +393,7 @@
                 });
             },
         	inviteAreaListPage(){//查询按钮
-            	  var param = {}; 
+            	  var param = {};
             	  var pageSize = this.pager.pageSize;
                   var pageNum = this.pager.currentPage;
                   param.pageNum = pageNum;
@@ -396,7 +406,7 @@
                 	  if(this.beginTime>this.endTime){
                     	  this.$message("开始时间不能大于结束时间");
                	         return;
-                      } 
+                      }
                   }
                   if(this.beginTime !=null && this.beginTime !=''){
                 	  param.beginTime=this.beginTime+" 00:00:00";
@@ -404,33 +414,33 @@
                   if(this.endTime !=null && this.endTime !=''){
                 	  param.endTime=this.endTime+" 23:59:59";
                   }
-                 
+
                   axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
                   	  console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
 	                  	  alert(response.data.msg);
 	                  	  return ;
                      }else{
-                    	 orgVM.dataTable =response.data.data.data; 
+                    	 orgVM.dataTable =response.data.data.data;
                     	 orgVM.pager.currentPage= response.data.data.currentPage;
                     	 orgVM.pager.total= response.data.data.total;
-                     } 
+                     }
                   })
                   .catch(function (error) {
                     console.log(error);
                   })
                   .then(function () {
-                  });  
-                  
+                  });
+
               } ,
-            
+
               updateButton(){
             	  this.showTitle="修改布局"
             	  if (this.$refs['form']!=undefined) {
                  		this.$refs['form'].resetFields();
                  	  }
             	  $("#addOrUpdate").val(2);
-            	  //修改菜单数据	
+            	  //修改菜单数据
               	var rows = this.multipleSelection;
                   if(rows.length!=1){
                       this.$message({
@@ -492,13 +502,13 @@
                      }else{
                     	 alert(response.data.data.message);
 	                  	  	return ;
-                     } 
+                     }
                   }).catch(function (error) {
                       console.log(error);
                   })
                   .then(function () {
                     // always executed
-                  });  
+                  });
               },
               deleButton(){
             	  var rows = this.multipleSelection;
@@ -537,30 +547,30 @@
     	                 axios.post('/telemarketing/deleTelemarketingLayout',param).then(function (response) {
     	                  	  console.log(response);
     	                      if(null !==response && response.data !=null && response.data.code=='0'){
-    	                    	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+    	                    	  window.location.href="/telemarketing/telemarketingLayoutList";
     	                     }else{
     	                    	 alert(response.data.data.msg);
      	                  	  	return ;
-    	                     } 
+    	                     }
     	                  }).catch(function (error) {
                               console.log(error);
                           })
                           .then(function () {
                             // always executed
-                          });  
-     	              
+                          });
+
                      }
                    }).catch(() => {
                        this.$message({
                            type: 'info',
                            message: '已取消删除'
-                       });          
+                       });
                    });
-    	           
-    	     
+
+
               },
               exportButton(){
-            	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
+            	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id;
               },
               showExport(){//点击弹出新增dialog
               	this.dialogFormVisible = true;
@@ -576,7 +586,7 @@
               handleSelectionChange(val) {
                   this.multipleSelection = val;
               },
-              
+
               transformStatus(row, column, cellValue, index) {
             	  var text="";
                   if(cellValue=="0"){
@@ -585,22 +595,22 @@
                 	  text="禁用"
                   }
                   return text;
-              }, 
+              },
             //时间格式化
               dateFormat(row, column){
-            	  var date = row[column.property]; 
-            	     if (date == undefined || date ==null || date =="") { 
-            	       return ""; 
-            	     } 
-            	     return moment(new Date(date)).format("YYYY-MM-DD"); 
+            	  var date = row[column.property];
+            	     if (date == undefined || date ==null || date =="") {
+            	       return "";
+            	     }
+            	     return moment(new Date(date)).format("YYYY-MM-DD");
             	} ,
                 //时间格式化
                 dateFormatTime(row, column){
-              	  var date = row[column.property]; 
-              	     if (date == undefined) { 
-              	       return ""; 
-              	     } 
-              	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
+              	  var date = row[column.property];
+              	     if (date == undefined) {
+              	       return "";
+              	     }
+              	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss");
               	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
