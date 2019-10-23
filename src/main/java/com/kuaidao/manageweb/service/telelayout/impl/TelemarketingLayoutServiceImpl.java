@@ -36,4 +36,20 @@ public class TelemarketingLayoutServiceImpl implements ITelemarketingLayoutServi
   }
 
 
+  public Long getTeleTeamIdOnCompanyGroup(Long companygROUP){
+    TelemarketingLayoutDTO queryDTO = new TelemarketingLayoutDTO();
+
+
+
+    JSONResult<TelemarketingLayoutDTO> layout = telemarketingLayoutFeignClient
+        .getTelemarketingLayoutByTeamId(queryDTO);
+    Long companyGroupId =0L;
+    if(CommonUtil.resultCheck(layout)){
+      TelemarketingLayoutDTO data = layout.getData();
+      companyGroupId = data.getCompanyGroupId();
+    }
+    return companyGroupId;
+  }
+
+
 }
