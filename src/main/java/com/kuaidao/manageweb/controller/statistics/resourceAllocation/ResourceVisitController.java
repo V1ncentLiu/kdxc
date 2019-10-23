@@ -236,7 +236,7 @@ public class ResourceVisitController extends BaseStatisticsController {
             JSONResult<List<ResourceVisitDto>> json=resourceVisitFeignClient.querySaleList(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 ResourceVisitDto[] dtos = json.getData().isEmpty()?new ResourceVisitDto[]{}:json.getData().toArray(new ResourceVisitDto[0]);
-                String[] keys = {"visitDate","resNum","noVisitRate","halfHourRate","oneHourRate","twoHourRate","threeHourRate","sixHourRate","twelveHourRate","twentyFourRate","moreRate"};
+                String[] keys = {"visitTime","resNum","noVisitRate","halfHourRate","oneHourRate","twoHourRate","threeHourRate","sixHourRate","twelveHourRate","twentyFourRate","moreRate"};
                 String[] hader = {"日期","分配资源数","未跟访占比","30分钟内跟访占比","1小时内跟访占比","2小时内跟访占比","3小时内跟访占比","6小时内跟访占比","12小时内跟访占比","24小时内跟访占比","24小时外跟访占比"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("电销顾问分配资源跟访时间分布表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
