@@ -3,12 +3,15 @@ package com.kuaidao.manageweb.controller.statistics.resourcesReport;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.statistics.resourceFreeReceive.ResourceFreeReceiveFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveQueryDto;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -54,6 +57,11 @@ public class FreedReportController extends BaseStatisticsController {
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
                 getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            return "reportResources/resourceFreedGroup";
+        }
         return "reportResources/resourceFreedDept";
     }
 
