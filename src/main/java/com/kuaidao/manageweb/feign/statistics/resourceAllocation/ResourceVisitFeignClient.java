@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name="statstics-service3",path = "/statstics/resourceVisit", fallback =ResourceVisitFeignClient.HystrixClientFallback.class )
+@FeignClient(name="statstics-service",path = "/statstics/resourceVisit", fallback =ResourceVisitFeignClient.HystrixClientFallback.class )
 public interface ResourceVisitFeignClient {
 
     @RequestMapping("/queryPage")
