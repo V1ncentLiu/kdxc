@@ -5,15 +5,19 @@ import com.alibaba.fastjson.JSONArray;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceFreeReceive.ResourceFreeReceiveFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveQueryDto;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -48,6 +52,8 @@ public class FreedReportController extends BaseStatisticsController {
     private ResourceFreeReceiveFeignClient resourceFreeReceiveFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
     private static final Integer GROUP = 1;
     private static final Integer PERSON = 2;
@@ -81,6 +87,15 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/groupList")
     public String teamList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long category,Long teleSaleId,Long startTime,Long endTime){
+        if(null==teleDeptId && null!=teleGroupId){
+            //查看所属事业部
+            IdEntity id=new IdEntity();
+            id.setId(teleGroupId+"");
+            JSONResult<OrganizationDTO> result =organizationFeignClient.queryOrgById(id);
+            if("0".equals(result.getCode())){
+                teleDeptId=result.getData().getParentId();
+            }
+        }
         pageParams(teleDeptId,teleGroupId,category,teleSaleId,startTime,endTime,request);
         initSaleDept(request);
         // 查询字典资源类别集合
@@ -96,6 +111,19 @@ public class FreedReportController extends BaseStatisticsController {
      */
     @RequestMapping("/managerList")
     public String managerList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long category,Long teleSaleId,Long startTime,Long endTime){
+        if(null==teleGroupId && null!=teleSaleId){
+            IdEntityLong id=new IdEntityLong(teleSaleId);
+            JSONResult<UserInfoDTO> json=userInfoFeignClient.get(id);
+            if("0".equals(json.getCode())){
+                teleGroupId=json.getData().getOrgId();
+                //查看所属事业部
+                IdEntity orgId=new IdEntity(teleGroupId+"");
+                JSONResult<OrganizationDTO> result =organizationFeignClient.queryOrgById(orgId);
+                if("0".equals(result.getCode())){
+                    teleDeptId=result.getData().getParentId();
+                }
+            }
+        }
         pageParams(teleDeptId,teleGroupId,category,teleSaleId,startTime,endTime,request);
         initSaleDept(request);
         // 查询字典资源类别集合
