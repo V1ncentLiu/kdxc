@@ -21,6 +21,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,8 +47,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/resourceVisit")
 public class ResourceVisitController extends BaseStatisticsController {
-
-
     @Autowired
     private ResourceVisitFeignClient resourceVisitFeignClient;
     @Autowired
@@ -60,6 +59,7 @@ public class ResourceVisitController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:resourceVisit:view")
     @RequestMapping("/groupList")
     public String  groupList(HttpServletRequest request){
         initSaleDept(request);
@@ -77,6 +77,7 @@ public class ResourceVisitController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:resourceVisit:view")
     @RequestMapping("/managerList")
     public String  managerList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,
                                Long teleSaleId,Integer source,Long startTime,Long endTime){
@@ -99,6 +100,7 @@ public class ResourceVisitController extends BaseStatisticsController {
      * @param request
      * @return
      */
+    @RequiresPermissions("statistics:resourceVisit:view")
     @RequestMapping("/saleList")
     public String  saleList(HttpServletRequest request,Long teleDeptId,Long teleGroupId,Long teleSaleId,
                             Integer source,Long startTime,Long endTime){
@@ -125,6 +127,7 @@ public class ResourceVisitController extends BaseStatisticsController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("statistics:resourceVisit:view")
     @RequestMapping("queryByPage")
     public @ResponseBody
     JSONResult<Map<String,Object>> queryByPage(@RequestBody BaseQueryDto dto){
@@ -138,6 +141,7 @@ public class ResourceVisitController extends BaseStatisticsController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("statistics:resourceVisit:view")
     @RequestMapping("queryManagerPage")
     public @ResponseBody
     JSONResult<Map<String,Object>> queryManagerPage(@RequestBody BaseQueryDto dto){
@@ -155,6 +159,7 @@ public class ResourceVisitController extends BaseStatisticsController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("statistics:resourceVisit:view")
     @RequestMapping("querySalePage")
     public @ResponseBody
     JSONResult<Map<String,Object>> querySalePage(@RequestBody BaseQueryDto dto){
@@ -167,6 +172,13 @@ public class ResourceVisitController extends BaseStatisticsController {
         return this.resourceVisitFeignClient.querySalePage(dto);
     }
 
+
+    /**
+     * 一级页面导出excel
+     * @param baseQueryDto
+     * @param response
+     */
+    @RequiresPermissions("statistics:resourceVisit:export")
     @RequestMapping("export")
     public @ResponseBody void export(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -192,8 +204,12 @@ public class ResourceVisitController extends BaseStatisticsController {
         }
     }
 
-
-
+    /**
+     * 二级页面数据导出
+     * @param baseQueryDto
+     * @param response
+     */
+    @RequiresPermissions("statistics:resourceVisit:export")
     @RequestMapping("/managerExport")
     public @ResponseBody void manaerExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -223,7 +239,12 @@ public class ResourceVisitController extends BaseStatisticsController {
         }
     }
 
-
+    /**
+     * 三级页面数据导出
+     * @param baseQueryDto
+     * @param response
+     */
+    @RequiresPermissions("statistics:resourceVisit:export")
     @RequestMapping("saleExport")
     public @ResponseBody void saleExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -236,7 +257,7 @@ public class ResourceVisitController extends BaseStatisticsController {
             JSONResult<List<ResourceVisitDto>> json=resourceVisitFeignClient.querySaleList(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 ResourceVisitDto[] dtos = json.getData().isEmpty()?new ResourceVisitDto[]{}:json.getData().toArray(new ResourceVisitDto[0]);
-                String[] keys = {"visitDate","resNum","noVisitRate","halfHourRate","oneHourRate","twoHourRate","threeHourRate","sixHourRate","twelveHourRate","twentyFourRate","moreRate"};
+                String[] keys = {"visitTime","resNum","noVisitRate","halfHourRate","oneHourRate","twoHourRate","threeHourRate","sixHourRate","twelveHourRate","twentyFourRate","moreRate"};
                 String[] hader = {"日期","分配资源数","未跟访占比","30分钟内跟访占比","1小时内跟访占比","2小时内跟访占比","3小时内跟访占比","6小时内跟访占比","12小时内跟访占比","24小时内跟访占比","24小时外跟访占比"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("电销顾问分配资源跟访时间分布表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
