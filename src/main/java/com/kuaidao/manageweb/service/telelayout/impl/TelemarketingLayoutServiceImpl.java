@@ -6,6 +6,9 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.service.telelayout.ITelemarketingLayoutService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -34,21 +37,20 @@ public class TelemarketingLayoutServiceImpl implements ITelemarketingLayoutServi
     }
     return companyGroupId;
   }
-
-
-  public Long getTeleTeamIdOnCompanyGroup(Long companygROUP){
+  @Override
+  public List<Long> getTeleTeamIdOnCompanyGroup(Long companygId){
     TelemarketingLayoutDTO queryDTO = new TelemarketingLayoutDTO();
-
-
-
-    JSONResult<TelemarketingLayoutDTO> layout = telemarketingLayoutFeignClient
-        .getTelemarketingLayoutByTeamId(queryDTO);
+    queryDTO.setCompanyGroupId(companygId);
+    JSONResult<List<TelemarketingLayoutDTO>> layout = telemarketingLayoutFeignClient
+        .getListByParams(queryDTO);
     Long companyGroupId =0L;
+    List<Long> teleTeamIdList = new ArrayList();
     if(CommonUtil.resultCheck(layout)){
-      TelemarketingLayoutDTO data = layout.getData();
-      companyGroupId = data.getCompanyGroupId();
+      List<TelemarketingLayoutDTO> data = layout.getData();
+      teleTeamIdList = data.stream().map(a -> a.getTelemarketingTeamId())
+          .collect(Collectors.toList());
     }
-    return companyGroupId;
+    return teleTeamIdList;
   }
 
 
