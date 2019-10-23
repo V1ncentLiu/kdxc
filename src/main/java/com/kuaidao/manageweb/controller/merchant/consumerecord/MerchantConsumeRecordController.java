@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.account.dto.consume.CountConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordPageParam;
@@ -96,14 +99,12 @@ public class MerchantConsumeRecordController {
      *
      * @return
      */
-    @RequestMapping("/initInfoList/{createDate}")
+    @RequestMapping("/initInfoList")
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
-    public String initInfoList(HttpServletRequest request, @PathVariable("createDate") String createDate) {
+    public String initInfoList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 当前人员id
         request.setAttribute("userId", user.getId() + "");
-        //消费日期
-        request.setAttribute("createDate", createDate);
         // 当前人员角色code
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && roleList.size() != 0) {
@@ -129,7 +130,7 @@ public class MerchantConsumeRecordController {
     @ResponseBody
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
     public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(
-            @RequestBody MerchantConsumeRecordPageParam pageParam) {
+            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setMainAccountId(user.getId());

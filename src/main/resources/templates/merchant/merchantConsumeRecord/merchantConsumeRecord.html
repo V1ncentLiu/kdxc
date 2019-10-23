@@ -19,13 +19,13 @@
         <el-breadcrumb-item>费用管理</el-breadcrumb-item>
         <el-breadcrumb-item>消费记录</el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="mainSearchBg">
+    <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
                 <div class="main-search-box">
                 <el-form-item label="时间：" label-width="auto" class="call-time" prop="createDateStart">
                     <el-date-picker
-                        format="yyyy-MM-dd"
+                        format="yyyy-MM-dd"  
                         value-format="yyyy-MM-dd"
                         v-model="form.createDateStart"
                         type="datetime"
@@ -34,7 +34,7 @@
                 </el-form-item>
                 <el-form-item label="—" class="widthauto" prop="createDateEnd">
                     <el-date-picker
-                        format="yyyy-MM-dd"
+                        format="yyyy-MM-dd"  
                         value-format="yyyy-MM-dd"
                         v-model="form.createDateEnd"
                         type="datetime"
@@ -58,10 +58,10 @@
             </div>
             </el-form>
         </div>
-        <el-row class="marginB20 button-menu">
-            <el-button type="success" @click="gotoInfo(null)">消费明细</el-button>
+        <el-row class="marginB20 button-menu">        
+            <el-button type="success" @click="gotoInfo">消费明细</el-button>
         </el-row>
-        <el-row>
+        <el-row>            
             <el-table
                 ref="multipleTable"
                 tooltip-effect="dark"
@@ -74,13 +74,7 @@
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="userName" label="商家账户"></el-table-column>
                 <el-table-column align="center" prop="createDate" label="日期（天）"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="clueNum" label="消费资源数">
-                    <template slot-scope="scope">
-                    <el-button class="fontColor2"  type="text" @click="gotoInfo(scope.row.createDate)">
-                        <span>{{scope.row.clueNum}}</span>
-                    </el-button>
-                </template>
-                </el-table-column>
+                <el-table-column align="center" prop="clueNum" label="消费资源数"></el-table-column>
                 <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
@@ -112,7 +106,7 @@
                 formLabelWidth: '120px',
                 dataTable: [],
                 merchantUserListOptions:merchantUserList,
-            }
+            }        	  
         },
         methods: {
             clickRow(row){
@@ -140,7 +134,7 @@
                 }
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
+                param.pageNum = this.pager.currentPage; 
                 param.createDateStart = this.form.createDateStart;
                 param.createDateEnd = this.form.createDateEnd;
                 param.userId = this.form.userId;
@@ -157,12 +151,12 @@
                         ocmVM.pager.currentPage = table.currentPage;
                     }else{
                         ocmVM.$message.error(result.msg);
-                    }
+                    }                    
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
-
+                
             },
             resetFormResource(formName) {
                 if (this.$refs[formName]) {
@@ -178,9 +172,8 @@
               }
               return moment(cellValue).format("YYYY-MM-DD");
             },
-            gotoInfo(createDate){
-                debugger;
-                window.location.href='/merchant/merchantConsumeRecord/initInfoList/'+createDate;
+            gotoInfo(){
+                window.location.href='/merchant/merchantConsumeRecord/initInfoList';
             },
         },
         created(){

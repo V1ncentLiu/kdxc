@@ -26,16 +26,6 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
           	<el-form :inline="true" class="demo-form-inline mainSearchForm">
-                <el-form-item label="集团:" label-width="55px" >
-                    <el-select v-model="companyGroupId" @change="currentProjects" filterable clearable placeholder="选择所属集团">
-                        <el-option
-                                v-for="item in userInfoList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <el-form-item label="电销组:" label-width="55px">			
           				<el-select filterable v-model="telemarketingTeamId" placeholder="电销组" clearable>
           			    <el-option
@@ -81,7 +71,6 @@
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" prop="projects" label="项目名称"></el-table-column>
                 <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="companyGroupName" label="集团"></el-table-column>
                 <el-table-column align="center"  prop="beginTime" label="起始时间" :formatter="dateFormat" width="140"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat" width="140"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime" width="170"></el-table-column>
@@ -95,6 +84,16 @@
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
         <!-- <el-form :model="form" ref="form" :rules="rules" class="width500"> -->
         <el-form :model="form" ref="form" :rules="rules" >
+            <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
+                <el-select filterable v-model="form.projectIds" multiple placeholder="选择项目" style="width: 290px;">
+                    <el-option
+                        v-for="item in projectList"
+                        :key="item.id"
+                        :label="item.projectName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
             <el-form-item label="电销组：" :label-width="formLabelWidth" prop="telemarketingTeamId">
                 <el-select filterable v-model="form.telemarketingTeamId"  placeholder="选择电销组" style="width: 290px;">
                     <el-option
@@ -102,26 +101,6 @@
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="集团：" :label-width="formLabelWidth" prop="companyGroupId">
-                <el-select filterable v-model="form.companyGroupId" @change="currentAddProjects"  placeholder="选择所属集团" style="width: 290px;">
-                    <el-option
-                            v-for="item in userInfoAddList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
-                <el-select filterable v-model="form.projectIds" multiple placeholder="选择项目" style="width: 290px;">
-                    <el-option
-                            v-for="item in projectAddList"
-                            :key="item.id"
-                            :label="item.projectName"
-                            :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -227,7 +206,6 @@
                     :data="exportdataTable"  >
                     <el-table-column align="center" prop="serialNumber" label="序号"></el-table-column>
                     <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center" prop="companyGroupName" label="集团"></el-table-column>
                     <el-table-column align="center" prop="projects" label="项目"></el-table-column>
                     <el-table-column align="center" prop="beginTime" label="起始时间" :formatter="dateFormat"></el-table-column>
                     <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat"></el-table-column>
@@ -247,15 +225,11 @@
 <script th:inline="javascript">
 
     var dzList=[[${dzList}]];
-	//var projectList = [[${projectList}]];
-	var categoryList =[[${categoryList}]];
-    var userInfoList=[[${userInfoList}]];//商家集团集合
-    var userInfoAddList = [[${ userInfoAddList }]];
+	var projectList = [[${projectList}]];
+	var categoryList =[[${categoryList}]]
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-            userInfoList:userInfoList,
-            userInfoAddList:userInfoAddList,
             categoryList:categoryList,
             isShow:false,
             btnDisabled: false,
@@ -277,10 +251,8 @@
         	multipleSelection: [],
         	exportdataTable:[],
         	dzList:dzList,
-        	projectList:[],
-            projectAddList:[],
+        	projectList:projectList,
         	projectId:"",
-            companyGroupId:'',
         	form:{
         	 projectIds: '',
         	 telemarketingTeamId: '',
@@ -291,7 +263,6 @@
              projectShow:"0",
              sourceShow:"0",
              category:"",
-              companyGroupId:''
         	
         	},
         	 statusList:[
@@ -316,9 +287,6 @@
                 ],
                 telemarketingTeamId: [
                     { required: true, message: '请选择电销组', trigger: 'change' }
-                ],
-                companyGroupId: [
-                    { required: true, message: '请选择所属集团', trigger: 'change' }
                 ],
                 beginTime: [
                     { required: true, message: '请选择开始时间', trigger: 'blur' }
@@ -372,26 +340,6 @@
              
         },
         methods: {
-            currentProjects(seleVal){
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                param={};
-                param.groupId=seleVal;
-                axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
-                    orgVM.projectList=response.data.data;
-                });
-            },
-            currentAddProjects(seleVal){
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                param={};
-                param.groupId=seleVal;
-                axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
-                    orgVM.projectAddList=response.data.data;
-                });
-            },
         	inviteAreaListPage(){//查询按钮
             	  var param = {}; 
             	  var pageSize = this.pager.pageSize;
@@ -400,7 +348,6 @@
                   param.pageSize = pageSize;
                   param.projectIds=this.projectId;
                   param.telemarketingTeamId=this.telemarketingTeamId;
-                  param.companyGroupId=this.companyGroupId;
                   console.log(param);
                   if(this.beginTime !=null && this.endTime !=null && this.beginTime !='' && this.endTime != ''){
                 	  if(this.beginTime>this.endTime){
@@ -464,7 +411,6 @@
                     	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
                     	  orgVM.form.beginTime = telemarketing.beginTime;
                     	  orgVM.form.endTime = telemarketing.endTime;
-                          orgVM.form.companyGroupId = telemarketing.companyGroupId;
                     	  orgVM.form.status = telemarketing.status+"";
                     	  var projects = telemarketing.projectIds;
                     	  var category = telemarketing.category ;
@@ -490,15 +436,6 @@
                               }
                           }
                           orgVM.form.category=categoryvalueMultiple;
-                          console.log("companyGroupId:"+orgVM.form.companyGroupId);
-                          if(null==orgVM.form.companyGroupId||orgVM.form.companyGroupId==""){
-                              return ;
-                          }
-                          param={};
-                          param.groupId=orgVM.form.companyGroupId;
-                          axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
-                              orgVM.projectAddList=response.data.data;
-                          });
                      }else{
                     	 alert(response.data.data.message);
 	                  	  	return ;
@@ -631,7 +568,6 @@
                           param.beginTime = formData.beginTime;
                           param.endTime = formData.endTime;
                           param.status = formData.status;
-                            param.companyGroupId = formData.companyGroupId;
                           var str = "";
                           var rows = this.multipleSelection;
                           for ( var i = 0; i <rows.length; i++){
