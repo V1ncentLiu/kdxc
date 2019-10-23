@@ -1,17 +1,19 @@
 package com.kuaidao.manageweb.feign.telemarketing;
 
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.List;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/telemarketinglayout",
         fallback = TelemarketingLayoutFeignClient.HystrixClientFallback.class)
@@ -40,7 +42,8 @@ public interface TelemarketingLayoutFeignClient {
     @RequestMapping(method = RequestMethod.POST, value = "/getTelemarketingLayoutByTeamId")
     public JSONResult<TelemarketingLayoutDTO> getTelemarketingLayoutByTeamId(
             @RequestBody TelemarketingLayoutDTO queryDTO);
-
+    @PostMapping("/getListByParams")
+    public JSONResult<List<TelemarketingLayoutDTO>> getListByParams(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO);
 
     @Component
     static class HystrixClientFallback implements TelemarketingLayoutFeignClient {
@@ -91,6 +94,11 @@ public interface TelemarketingLayoutFeignClient {
                 TelemarketingLayoutDTO queryDTO) {
             // TODO Auto-generated method stub
             return fallBackError("根据id查询电销布局失败");
+        }
+
+        @Override
+        public JSONResult<List<TelemarketingLayoutDTO>> getListByParams(TelemarketingLayoutDTO telemarketingLayoutDTO) {
+            return fallBackError("根据条件查询电销布局失败");
         }
     }
 }
