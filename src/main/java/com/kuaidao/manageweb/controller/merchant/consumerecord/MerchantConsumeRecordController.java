@@ -66,7 +66,7 @@ public class MerchantConsumeRecordController {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
 
-        userList.addAll(userList);
+        userList.add(user);
         request.setAttribute("userList", userList);
 
         return "merchant/merchantConsumeRecord/merchantConsumeRecord";
@@ -117,9 +117,8 @@ public class MerchantConsumeRecordController {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
         // 商家账号(当前登录商家主账号加子账号)
-        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+        List<UserInfoDTO> userList = buildUserList();
         userList.add(user);
-        userList.addAll(getMerchantUser(user.getId(), null));
         request.setAttribute("userList", userList);
 
         return "merchant/merchantConsumeRecord/merchantConsumeRecordInfo";
