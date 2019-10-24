@@ -219,10 +219,14 @@
                             @selection-change="handleSelectionChange" style="width: 100%"
                             :data="dynamicValidateForm.dataTable">
                             <el-table-column align="center" type="selection" label="序号" width="55"></el-table-column>
-                            <el-table-column align="center" prop="chargeName" label="资费名称" min-width="80"></el-table-column>
-                            <el-table-column align="center" prop="industryCategoryName" label="行业类别" min-width="80"></el-table-column>
-                            <el-table-column align="center" prop="categoryName" label="资源类别" min-width="80"></el-table-column>
-                            <el-table-column align="center" prop="sourceName" label="资源媒介" min-width="80"></el-table-column>
+                            <el-table-column align="center" prop="chargeName" label="资费名称" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="industryCategoryName" label="行业类别" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="categoryName" label="资源类别" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="sourceName" label="资源媒介" min-width="80">
+                            </el-table-column>
                             <el-table-column align="center" prop="charge" label="价格（元）/条" min-width="95">
                                 <!-- <template slot-scope="scope">
                                     <el-form-item :prop="'dataTable.' + scope.$index + '.charge'" :rules='rules.charge'
@@ -233,10 +237,19 @@
                                     </el-form-item>
                                 </template> -->
                             </el-table-column>
-                            <el-table-column align="center" prop="merchantType" label="商家所属" min-width="80"></el-table-column>
-                            <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat" min-width="80">
+                            <el-table-column align="center" prop="merchantType" label="商家所属" min-width="80">
+                                <template slot-scope="scope">
+                                    <span v-if="scope.row.merchantType==0">全部商家</span>
+                                    <span v-if="scope.row.merchantType==1">内部商家</span>
+                                    <span v-if="scope.row.merchantType==2">外部商家</span>
+                                </template>
+
                             </el-table-column>
-                            <el-table-column align="center" prop="updateUserName" label="操作人员" min-width="80"></el-table-column>
+                            <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat"
+                                min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="updateUserName" label="操作人员" min-width="80">
+                            </el-table-column>
                             <el-table-column align="center" prop="" label="状态" min-width="80">
                                 <template slot-scope="scope">
                                     <span v-if="scope.row.deleted" style="color: red">已删除</span>
@@ -281,9 +294,13 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源定价/条：" :label-width="formLabelWidth" prop="iframesecretKey">
-                        <el-input @keyup.native="inputNumber" maxlength="10" v-model="subAccountForm.iframesecretKey"
-                            autocomplete="off" style="width: 290px;"></el-input>
+                        <el-input @keyup.native="inputNumber" maxlength="10" v-model="subAccountForm.iframesecretKey" autocomplete="off"
+                            style="width: 290px;"></el-input>
                     </el-form-item>
+                    <!-- <el-form-item label="资源定价/条：" :label-width="formLabelWidth" prop="iframesecretKey">
+                        <el-input  maxlength="10" v-model="subAccountForm.iframesecretKey"
+                            autocomplete="off" style="width: 290px;"></el-input>
+                    </el-form-item> -->
                     <el-form-item label="商家所属：" :label-width="formLabelWidth">
                         <el-select v-model="subAccountForm.iframemerchantType" style="width: 290px;" placeholder="全部商家">
                             <el-option v-for="item in merchantOwnedOptions" :key="item.value" :label="item.name"
@@ -337,33 +354,34 @@
             },
             title: '添加',
             dynamicValidateForm: {
-                dataTable: [
-                    {
-                        id: '1',
-                        chargeName: '奥术大师多撒大所大',
-                        industryCategoryName: '火锅',
-                        categoryName: '联展',
-                        sourceName: '58',
-                        charge: '222',
-                        updateTime: '3333',
-                        updateUserName: '444',
-                        deleted: 1,
-                        merchantType: '内部商家'
+                dataTable: [],
+                // [
+                //     {
+                //         id: '1',
+                //         chargeName: '奥术大师多撒大所大',
+                //         industryCategoryName: '火锅',
+                //         categoryName: '联展',
+                //         sourceName: '58',
+                //         charge: '222',
+                //         updateTime: '3333',
+                //         updateUserName: '444',
+                //         deleted: 1,
+                //         merchantType: '内部商家'
 
-                    }, {
-                        id: '1',
-                        chargeName: '8888',
-                        industryCategoryName: '火锅',
-                        categoryName: '联展',
-                        sourceName: '58',
-                        charge: '222',
-                        updateTime: '3333',
-                        updateUserName: '444',
-                        deleted: 1,
-                        merchantType: '内部商家'
+                //     }, {
+                //         id: '1',
+                //         chargeName: '8888',
+                //         industryCategoryName: '火锅',
+                //         categoryName: '联展',
+                //         sourceName: '58',
+                //         charge: '222',
+                //         updateTime: '3333',
+                //         updateUserName: '444',
+                //         deleted: 1,
+                //         merchantType: '内部商家'
 
-                    }
-                ]
+                //     }
+                // ]
             },
             dialogFormVisible: false,
             centerDialogVisible: false,
@@ -371,9 +389,6 @@
             multipleSelection: [],
             formLabelWidth: '150px',
             rules: {
-                charge: [
-                    { required: true, message: '请输入价格', trigger: 'blur' },
-                ],
                 iframeseatNo: [
                     { required: true, message: '资费名称不能为空', trigger: 'blur' },
                     { max: 20, message: '最大20个字符', trigger: 'blur' },
@@ -389,7 +404,9 @@
                 ],
                 iframesecretKey: [
                     { required: true, message: '资源定价不能为空', trigger: 'blur' },
-                    { max: 10, message: '最大10个字符', trigger: 'blur' },
+                ],
+                iframemerchantType: [
+                    { required: true, message: '行业类别不能为空', trigger: 'change' },
                 ],
 
             }
@@ -416,16 +433,14 @@
                     case 'edit':
                         this.title = '编辑资费设置'
                         if (this.multipleSelection.length === 1) {
-                            const { chargeName, categoryName, industryCategoryName, sourceName, charge, merchantType } = this.dynamicValidateForm.dataTable[0]
-                            var data = {}
+                            const { chargeName, categoryName, industryCategoryName, sourceName, charge, merchantType } = this.multipleSelection[0]
                             this.centerDialogVisible = true
-                            data.iframeseatNo = chargeName
-                            data.iframecompany = industryCategoryName
-                            data.iframeaddress = categoryName
-                            data.iframeaccountNo = sourceName
-                            data.iframesecretKey = charge
-                            data.iframemerchantType = merchantType
-                            this.subAccountForm = data
+                            this.subAccountForm.iframeseatNo = chargeName
+                            this.subAccountForm.iframecompany = industryCategoryName
+                            this.subAccountForm.iframeaddress = categoryName
+                            this.subAccountForm.iframeaccountNo = sourceName
+                            this.subAccountForm.iframesecretKey = charge
+                            this.subAccountForm.iframemerchantType = merchantType==0?'全部商家':merchantType==1?'内部商家':'外部商家'
                         } else {
                             clueChargeVM.$message.warning('请正确选择');
                         }
@@ -544,10 +559,11 @@
                     .then(function (response) {
                         var result = response.data;
                         if (result.code == 0) {
-                            // var table = result.data;
+                            var table = result.data;
+                            console.log(table.data);
                             that.dynamicValidateForm.dataTable = table.data
-                            // that.pager.total = table.total;
-                            // that.pager.currentPage = table.currentPage;
+                            that.pager.total = table.total;
+                            that.pager.currentPage = table.currentPage;
                         } else {
                             clueChargeVM.$message.error(result.msg);
                         }
