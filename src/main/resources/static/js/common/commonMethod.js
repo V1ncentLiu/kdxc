@@ -20,3 +20,6 @@ function removeSessionStore (name) {//移除sessionStorage
 function openCostList(){
     homePageVM.openCostList()
 }
+function openPaymentOnline(){
+    homePageVM.openPaymentOnline()
+}

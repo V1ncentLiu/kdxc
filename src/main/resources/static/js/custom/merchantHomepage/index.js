@@ -950,6 +950,21 @@ var homePageVM = new Vue({
 				"src": dataUrl //设置ifream地址
 			});
 		},
+		openPaymentOnline() {//打开在线充值页面
+			$(".menu.is-active").removeClass("is-active")
+			console.log($(".menu .name").html())
+			var a = $(".menu");
+			a.each(function () {
+				console.log($(this).text())
+				if ($(this).text() == "在线充值") {
+					$(this).addClass("is-active")
+				}
+			});
+			var dataUrl = "/merchant/merchantOnlineRecharge/initOnlineRecharge";
+			$("#iframeBox").attr({
+				"src": dataUrl //设置ifream地址
+			});
+		},
 		validClientNo(cno) {//验证坐席是否属于自己
 			var isPass = false;
 			$.ajax({
