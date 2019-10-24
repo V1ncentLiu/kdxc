@@ -266,7 +266,7 @@
                     </el-table-column>
                     <el-table-column align="center" prop="isAssignSubAccount" label="用户行为">
                         <template slot-scope="scope">
-                            <div class="fontColor2" @click="seeResource(scope.row.clueId)">查看</div>
+                            <div class="fontColor2" @click="seeResource(scope.row.clueId,scope.row.phone)">查看</div>
                             <div v-if="scope.row.isAssignSubAccount == 0">未分配</div>
                             <div v-else="scope.row.isAssignSubAccount == 1"><span style="color: red">已分配</span></div>
                         </template>
@@ -320,7 +320,7 @@
                     </el-form-item>
                     <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="cusNum" class="xreuired">
                         <el-input v-model="inviteForm.cusNum" maxlength="3"
-                            onkeyup="this.value=this.value.replace(/[^\d.]/g,'');" autocomplete="off"
+                            onkeyup='this.value=this.value.replace(/^[0]+[0-9]*$/gi,"")' autocomplete="off"
                             class="input-width"></el-input>
                     </el-form-item>
                     <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired" prop="province">
@@ -779,9 +779,12 @@
                     });
 
             },
-            seeResource(id) {
+            seeResource(id,phone) {
                 console.log()
-                document.location.href = '/merchant/resourceTrajectory/topage?clueId=' + id;
+                if(phone == "null"){
+                    phone = "";
+                }
+                document.location.href = '/merchant/resourceTrajectory/topage?clueId=' + id +'&phone='+phone;
             },
             //日期数据格式化方法
             dateFormat(row, column, cellValue, index) {
