@@ -5,6 +5,7 @@ package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -92,6 +93,15 @@ public class MerchantConsumeRecordController {
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
+        List<UserInfoDTO> userInfoDTOS = buildUserList();
+        userInfoDTOS.add(user);
+        if (CollectionUtils.isNotEmpty(userInfoDTOS)) {
+            //构建用户id集合
+            List<Long> userIds = userInfoDTOS.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+            pageParam.setUserList(userIds);
+        }
+        //商家所属
+        pageParam.setMerchantType(user.getMerchantType());
         // 消费记录
         JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant = merchantConsumeRecordFeignClient.countListMerchant(pageParam);
 
@@ -111,6 +121,8 @@ public class MerchantConsumeRecordController {
         request.setAttribute("userId", user.getId() + "");
         // 消费日期
         request.setAttribute("createDate", createDate);
+        // 消费日期
+        request.setAttribute("merchantType", user.getMerchantType());
         // 当前人员角色code
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && roleList.size() != 0) {
