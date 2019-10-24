@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.PageBean;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -79,13 +80,13 @@ public class ClueChargeController {
     /**
      * 删除资源费用
      *
-     * @param idEntity
+     * @param idListLongReq
      * @return
      */
     @ResponseBody
     @PostMapping("/delete")
-    public JSONResult<String> delete(@RequestBody IdEntityLong idEntity) {
-    return clueChargeFeignClient.delete(idEntity);
+    public JSONResult<String> delete(@RequestBody IdListLongReq idListLongReq) {
+    return clueChargeFeignClient.delete(idListLongReq);
     }
 
     /***

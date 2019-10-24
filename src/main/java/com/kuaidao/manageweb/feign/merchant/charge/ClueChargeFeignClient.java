@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.merchant.charge;
 import java.util.List;
 
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public interface ClueChargeFeignClient {
     /**
      * 查询资源资费集合
      * 
-     * @param menuDTO
+     * @param param
      * @return
      */
     @PostMapping("/listNoPage")
@@ -57,11 +58,11 @@ public interface ClueChargeFeignClient {
     /**
      * 删除资源费用
      *
-     * @param idEntity
+     * @param idListLongReq
      * @return
      */
     @PostMapping("/delete")
-    JSONResult<String> delete(@RequestBody IdEntityLong idEntity);
+    JSONResult<String> delete(@RequestBody IdListLongReq idListLongReq);
 
     @Component
     static class HystrixClientFallback implements FallbackFactory<ClueChargeFeignClient> {
@@ -95,7 +96,7 @@ public interface ClueChargeFeignClient {
                     return fallBackError("查询资源资费列表");
                 }
                 @Override
-                public JSONResult<String> delete( IdEntityLong idEntity){
+                public JSONResult<String> delete( IdListLongReq idListLongReq){
                     return fallBackError("删除资费");
                 }
             };
