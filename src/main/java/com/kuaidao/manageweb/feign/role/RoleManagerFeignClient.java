@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.feign.role;
 
 import java.util.List;
 
+import com.kuaidao.common.entity.IdListReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -34,6 +35,8 @@ public interface RoleManagerFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/qeuryRoleByName")
 	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(RoleQueryDTO roleDTO);
+	@RequestMapping(method = RequestMethod.POST, value = "/qeuryRoleListByRoleIds")
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleListByRoleIds(IdListReq idListReq);
 
 	/**
 	 * 删除角色时判断是否有用户关联
@@ -95,6 +98,11 @@ public interface RoleManagerFeignClient {
 		public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(RoleQueryDTO roleDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("查询角色数据失败");
+		}
+
+		@Override
+		public JSONResult<List<RoleInfoDTO>> qeuryRoleListByRoleIds(IdListReq idListReq) {
+			return fallBackError("根据idList查询角色");
 		}
 
 		@Override
