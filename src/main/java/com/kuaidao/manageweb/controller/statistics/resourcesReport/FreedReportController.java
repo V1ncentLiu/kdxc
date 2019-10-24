@@ -307,7 +307,10 @@ public class FreedReportController extends BaseStatisticsController {
                 curList.add(ra.getUserName());
             }
             if(type.equals(DAY)){
-                curList.add(ra.getDateId());
+                StringBuilder sb = new StringBuilder(ra.getDateId());
+                sb.insert(6,"-");
+                sb.insert(4,"-");
+                curList.add(sb);
             }
             curList.add(ra.getUnfollowCount());
             curList.add(ra.getOtherCount());
