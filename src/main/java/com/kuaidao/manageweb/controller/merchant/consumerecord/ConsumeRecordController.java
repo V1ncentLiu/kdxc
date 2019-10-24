@@ -296,7 +296,7 @@ public class ConsumeRecordController {
     @RequestMapping("/initInfoList")
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initInfoList(HttpServletRequest request) {
-        // 商家账号(当前登录商家主账号加子账号)
+        // 商家主账号
         List<UserInfoDTO> userList = getMerchantUser(null);
 
         request.setAttribute("userList", userList);
