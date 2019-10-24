@@ -70,7 +70,13 @@
                 <el-table-column align="center" prop="orderId" label="订单号"></el-table-column>                
                 <el-table-column align="center" prop="createTime" label="消费时间"  :formatter="dateFormat" width="200"></el-table-column>
                 <el-table-column align="center" prop="userName" label="商家账号"></el-table-column>
-                <el-table-column align="center" prop="clueId" label="资源ID"></el-table-column>
+                <el-table-column align="center" prop="clueId" label="资源ID">
+                    <template slot-scope="scope">
+                        <el-button class="fontColor2"  type="text" @click="gotoInfo(scope.row.clueId)">
+                            <span>{{scope.row.clueId}}</span>
+                        </el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable(null)"></table-pagination>
@@ -85,6 +91,7 @@
 <script th:inline="javascript">
     var merchantUserList=[[${userList}]];//商户集合
     var createDate = [[${createDate}]];//消费日期
+    var merchantType = [[${merchantType}]];//消费日期
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -118,6 +125,13 @@
             },
             handleForbid(index, row) {
                 console.log(index, row);
+            },
+            gotoInfo(clueId){
+                var url = '/merchant/resourceTrajectory/topage?clueId=' + clueId;
+                if (merchantType == 1) {
+                    url = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId=' + clueId;
+                }
+                window.location.href = url;
             },
             searchTable(date) {
                 var startTime=this.form.createDateStart;
