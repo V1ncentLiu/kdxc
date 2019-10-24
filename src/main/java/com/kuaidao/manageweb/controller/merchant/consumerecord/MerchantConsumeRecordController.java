@@ -15,6 +15,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -205,8 +206,12 @@ public class MerchantConsumeRecordController {
             TelemarketingLayoutDTO reqDto = new TelemarketingLayoutDTO();
             reqDto.setCompanyGroupId(user.getId());
             JSONResult<List<OrganizationDTO>> result = telemarketingLayoutFeignClient.getdxListByCompanyGroupId(reqDto);
-            List<OrganizationDTO> teleGroupList = result.getData();
+            List<OrganizationDTO> orgList = result.getData();
             if (result.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(result.getData())) {
+                for (OrganizationDTO organizationDTO : orgList) {
+                    UserInfoDTO userInfoDTO = new UserInfoDTO();
+                    BeanUtils.copyProperties(organizationDTO,userInfoDTO);
+                }
 
             }
         }
