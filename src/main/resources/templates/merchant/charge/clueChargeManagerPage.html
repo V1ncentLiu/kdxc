@@ -221,6 +221,8 @@
                             <el-table-column align="center" type="selection" label="序号" width="55"></el-table-column>
                             <el-table-column align="center" prop="chargeName" label="资费名称" min-width="80">
                             </el-table-column>
+                            <!-- <el-table-column align="center" prop="id" label="ID" min-width="80">
+                            </el-table-column> -->
                             <el-table-column align="center" prop="industryCategoryName" label="行业类别" min-width="80">
                             </el-table-column>
                             <el-table-column align="center" prop="categoryName" label="资源类别" min-width="80">
@@ -246,7 +248,7 @@
 
                             </el-table-column>
                             <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat"
-                                min-width="80">
+                                min-width="120">
                             </el-table-column>
                             <el-table-column align="center" prop="updateUserName" label="操作人员" min-width="80">
                             </el-table-column>
@@ -294,14 +296,14 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源定价/条：" :label-width="formLabelWidth" prop="iframesecretKey">
-                        <el-input @keyup.native="inputNumber" maxlength="10" v-model="subAccountForm.iframesecretKey" autocomplete="off"
-                            style="width: 290px;"></el-input>
+                        <el-input @keyup.native="inputNumber" maxlength="10" v-model="subAccountForm.iframesecretKey"
+                            autocomplete="off" style="width: 290px;"></el-input>
                     </el-form-item>
                     <!-- <el-form-item label="资源定价/条：" :label-width="formLabelWidth" prop="iframesecretKey">
                         <el-input  maxlength="10" v-model="subAccountForm.iframesecretKey"
                             autocomplete="off" style="width: 290px;"></el-input>
                     </el-form-item> -->
-                    <el-form-item label="商家所属：" :label-width="formLabelWidth">
+                    <el-form-item label="商家所属：" :label-width="formLabelWidth" prop="iframemerchantType">
                         <el-select v-model="subAccountForm.iframemerchantType" style="width: 290px;" placeholder="全部商家">
                             <el-option v-for="item in merchantOwnedOptions" :key="item.value" :label="item.name"
                                 :value="item.value">
@@ -390,7 +392,7 @@
             formLabelWidth: '150px',
             rules: {
                 iframeseatNo: [
-                    { required: true, message: '资费名称不能为空', trigger: 'blur' },
+                    { required: true, message: '资费名称不能为空', trigger: 'change' },
                     { max: 20, message: '最大20个字符', trigger: 'blur' },
                 ],
                 iframecompany: [
@@ -403,7 +405,7 @@
                     { required: true, message: '资源媒介不能为空', trigger: 'change' },
                 ],
                 iframesecretKey: [
-                    { required: true, message: '资源定价不能为空', trigger: 'blur' },
+                    { required: true, message: '资源定价不能为空', trigger: 'change' },
                 ],
                 iframemerchantType: [
                     { required: true, message: '行业类别不能为空', trigger: 'change' },
@@ -440,7 +442,7 @@
                             this.subAccountForm.iframeaddress = categoryName
                             this.subAccountForm.iframeaccountNo = sourceName
                             this.subAccountForm.iframesecretKey = charge
-                            this.subAccountForm.iframemerchantType = merchantType==0?'全部商家':merchantType==1?'内部商家':'外部商家'
+                            this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部商家' : '外部商家'
                         } else {
                             clueChargeVM.$message.warning('请正确选择');
                         }
@@ -500,11 +502,7 @@
                         param.charge = this.subAccountForm.iframesecretKey
                         param.merchantType = this.selectionValue(this.subAccountForm.iframemerchantType, this.merchantOwnedOptions)
                         if (this.title === '编辑资费设置') {
-                            param.id = this.dynamicValidateForm.dataTable[0].id
-                        }
-                        if (param.industryCategory == param.category && param.industryCategory == param.source && param.industryCategory == param.merchantType) {
-                            clueChargeVM.$message.warning('此资费设置已存在');
-                            return
+                            param.id = this.multipleSelection[0].id
                         }
                         axios.post('/merchant/clueChargeManager/saveClueCharge', param)
                             .then(function (response) {
