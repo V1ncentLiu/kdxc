@@ -684,7 +684,7 @@
     </el-dialog>
     <el-dialog title="" :visible.sync="showMessageDialog">
         <div class="padding20" style="text-align: center;">
-            分配失败，请重新分配
+            {errMessage}
         </div>
         <div slot="footer" class="dialog-footer" style="text-align: center;">
             <el-button type="primary" @click="showMessageDialog = false;"> 知道了</el-button>
@@ -947,6 +947,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                errMessage:"分配失败，请重新分配",
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
@@ -1613,7 +1614,8 @@
                         .then(function (response) {
                             if(response.data.code!=0&&flag=='toTele'){
                                 addCustomerVM.showMessageDialog =true;
-                                addCustomerVM.btnDisabled = false;   
+                                addCustomerVM.btnDisabled = false;
+                                addCustomerVM.errMessage = response.data.msg;
                             }else  if(response.data.code!=0&&flag!='toTele'){
                                 addCustomerVM.$message({message: response.data.msg, type: 'error'});
                                 addCustomerVM.btnDisabled = false; 
