@@ -117,7 +117,7 @@
                   <el-input v-model="clueTemplateForm.phone" autocomplete="off"  maxlength="11" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
-                  <el-input v-model="clueTemplateForm.password" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
+                  <el-input v-model="clueTemplateForm.password" autocomplete="off"  maxlength="30" style="width: 290px;" @keyup.native="passwordVal"></el-input>
               </el-form-item>
               <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="username">
                   <!-- <el-input v-model="clueTemplateForm.username" :disabled="loginDisabled" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input> -->
@@ -176,7 +176,7 @@
                   <el-input v-model="subAccountForm.phone" autocomplete="off"  maxlength="11" style="width: 290px;"></el-input>
               </el-form-item>
               <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
-                  <el-input v-model="subAccountForm.password" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
+                  <el-input v-model="subAccountForm.password" autocomplete="off"  maxlength="30" style="width: 290px;" @keyup.native="passwordVal"></el-input>
               </el-form-item>
               <el-form-item label="登录用户名："  :label-width="formLabelWidth" prop="username">
                   <!-- <el-input v-model="subAccountForm.username"  onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input> -->
@@ -424,16 +424,17 @@ var userVM = new Vue({
     scrollTop: 0,
   },
   methods: {
+      passwordVal(){
+          //只能输入字母／数字
+          this.clueTemplateForm.password=this.clueTemplateForm.password.replace(/[^\a-\z\A-\Z0-9]/g,'');
+          this.subAccountForm.password=this.subAccountForm.password.replace(/[^\a-\z\A-\Z0-9]/g,'');
+      },
       textVal(){
-      　　this.clueTemplateForm.name=this.clueTemplateForm.name.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');//只能输入中文英文数字
-          this.clueTemplateForm.name=this.clueTemplateForm.name.replace('.','');
+          //只能输入中文英文数字
+      　　this.clueTemplateForm.name=this.clueTemplateForm.name.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');
           this.clueTemplateForm.username=this.clueTemplateForm.username.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');
-          this.clueTemplateForm.username=this.clueTemplateForm.username.replace('.','');
-
           this.subAccountForm.name=this.subAccountForm.name.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');
-          this.subAccountForm.name=this.subAccountForm.name.replace('.','');
           this.subAccountForm.username=this.subAccountForm.username.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');
-          this.subAccountForm.username=this.subAccountForm.username.replace('.','');
       },
       saveAccountUser(formName){
           this.$refs[formName].validate((valid) => {
