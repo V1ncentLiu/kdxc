@@ -57,7 +57,7 @@
             </el-form-item>
             <div class="f-tac">
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm('form')">保存</el-button>
+                    <el-button type="primary" @click="submitForm('form')" :disabled="isDisabled">保存</el-button>
                     <el-button @click="cancel">取消</el-button>
                 </el-form-item>
             </div>
@@ -76,6 +76,7 @@
         el: '#recordPaymentOffline',
         data: function() {
             return {
+                isDisabled:false,
                 merchantUserListOptions:merchantUserList,
                 form: {
                     rechargeBusiness:'',
@@ -127,6 +128,7 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        this.isDisabled=true;
                         var param ={};   
                         param.rechargeBusiness = this.form.rechargeBusiness;
                         param.rechargeMoney = this.form.rechargeMoney; 
@@ -139,6 +141,7 @@
                             if(result.code=="0"){
                                 window.location.href="/merchant/merchantRechargeRecordManage/initRechargeRecordManage"    
                             }else{
+                                this.isDisabled=false;
                                 addClueVM.$message.error(result.msg);
                             }           
                         })
