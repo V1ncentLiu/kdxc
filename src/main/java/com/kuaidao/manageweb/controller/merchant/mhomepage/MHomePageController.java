@@ -140,12 +140,14 @@ public class MHomePageController {
             accountId = user.getParentId();
         }
         JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(accountId);
+      logger.info("accountId::"+accountId);
         if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
           CallBuyPackageModel data = hasBuyPackageResult.getData();
           if(data!=null){
             hasBuyPackage = true;
             IdEntityLong idEntity = new IdEntityLong();
             idEntity.setId(data.getPackageId());
+            logger.info("getPackageId::"+data.getPackageId());
             JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
                 .queryOutboundPackageById(idEntity);
             if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
@@ -154,6 +156,7 @@ public class MHomePageController {
             }
           }
         }
+      logger.info("packageName::"+packageName);
         request.setAttribute("hasBuyPackage", hasBuyPackage);
         request.setAttribute("packageName", packageName);
         // 判断显示主/子账户首页
