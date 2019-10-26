@@ -443,7 +443,7 @@ var homePageVM = new Vue({
 
 					if (data.code == '0') {
 						var resData = data.data;
-						homePageVM.$message({ message: "登录成功", type: 'success' });
+						homePageVM.$message({ message: "登录成功", type: 'success',duration:1500 });
 						homePageVM.callTitle = "呼叫中心（七陌ON）";
 						homePageVM.dialogLoginClientVisible = false;
 						homePageVM.isQimoClient = true;
