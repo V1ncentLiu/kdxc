@@ -17,21 +17,27 @@
             <el-row type="flex" class="row-bg marginB20" justify="start">
                 <el-col :span="12">
                     <div class="name">
-                        <b>{{merchantName}},<span> 您好</span></b>
-                        <p v-if="buyedFlag">您已购买{{merchantName}}套餐</p>
-                        <p v-else>您还没有购买任何套餐</p>
-                        <p v-if="buyedFlag">
-                            <!-- <span>查看已购买服务</span> -->
+                        <b><span class="first">{{merchantName}}</span><span class="last">, 您好:</span></b>
+                        <p v-if="buyedFlag" class="noMonth">
+                            <b>您已购买{{merchantName}}套餐</b>
                             <el-button class="titleButton" type="primary" @click="buyCloud">查看已购买服务</el-button>
                         </p>
-                        <p  v-else>
+                        <p v-else class="noMonth">
+                            <b>您还没有购买任何套餐</b>
                             <el-button class="titleButton" type="primary" @click="buyCloud">购买云服务</el-button>
-                            <!-- <span>购买云服务</span> -->
                         </p>
                     </div>
                 </el-col>
                 <el-col :span="12">
-                    <div class="name money">
+                    <div class="name">
+                        <b><span class="last">账户余额：</span></b>
+                        <p class="noMonth">
+                            <b class="noMonthmoney" v-if="countBlance">{{countBlance}}</b>
+                            <b class="noMonthmoney" v-else>0.00</b>
+                            <el-button class="titleButton" type="primary" @click="immediateRecharge">立即充值</el-button>
+                        </p>
+                    </div>
+                    <!-- <div class="name money">
                         <div class="difference">
                             <img th:src="@{/images/merchantmoney.png}" alt="">
                             <span>{{countBlance}}</span>
@@ -39,9 +45,8 @@
                         <p class="balance">账户余额</p>
                         <p>
                             <el-button @click="immediateRecharge" class="titleButton" type="primary">立即充值</el-button>
-                            <!-- <span >立即充值</span> -->
                         </p>
-                    </div>
+                    </div> -->
                 </el-col>
             </el-row>
         </div>
@@ -136,7 +141,7 @@
                     selectValue: '',
                 },
                 myChart: '',
-                fatherShow: userType,//userType
+                fatherShow: 2,//userType
                 merchantName: merchantName,
                 countBlance: countBlance,
                 buyedFlag: buyedFlag,
@@ -152,7 +157,7 @@
                     },
                     grid: {
                         left: '70',
-                        right:'70'
+                        right: '70'
                     },
                     tooltip: {
                         formatter: function (param) {
@@ -461,8 +466,8 @@
                             that.$message.error(error);
                         });
                 },
-                buyCloud(){// 购买云服务
-                    window.location.href="/merchant/call/package/index"
+                buyCloud() {// 购买云服务
+                    window.location.href = "/merchant/call/package/index"
                 }
             },
             created() {
