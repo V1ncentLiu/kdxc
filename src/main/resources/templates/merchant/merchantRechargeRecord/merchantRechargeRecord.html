@@ -14,13 +14,19 @@
             display: none;
         }
 
-        .el-button--primary{
-    background:linear-gradient(-90deg,rgba(75,128,255,1),rgba(118,157,248,1))!important;
-    box-shadow:0px 13px 21px 0px rgba(76,129,255,0.53);
-    border-radius:6px;
-  }
-  .el-button--primary:hover{opacity: 0.9;}
-  .button-menu{padding-top:10px;}
+        .el-button--primary {
+            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1)) !important;
+            box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
+            border-radius: 6px;
+        }
+
+        .el-button--primary:hover {
+            opacity: 0.9;
+        }
+
+        .button-menu {
+            padding-top: 10px;
+        }
     </style>
 </head>
 
@@ -35,16 +41,21 @@
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                     <div class="main-search-box">
-                        <el-form-item label="充值时间:" label-width="auto" class="call-time" prop="rechargeBeginTime">
-                            <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                v-model="form.rechargeBeginTime" type="datetime" placeholder="选择日期时间">
-                            </el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="—" class="widthauto" prop="rechargeEndTime">
-                            <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.rechargeEndTime"
-                                type="datetime" placeholder="选择日期时间">
-                            </el-date-picker>
-                        </el-form-item>
+                        <div class="get-search-time">
+                            <div class="get-time">充值时间:</div>
+                            <div class="time-style">
+                                <el-form-item label-width="auto" class="call-time" prop="rechargeBeginTime">
+                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                        v-model="form.rechargeBeginTime" type="datetime" placeholder="选择开始时间">
+                                    </el-date-picker>
+                                </el-form-item>
+                                <el-form-item label="—" class="widthauto" prop="rechargeEndTime">
+                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                        v-model="form.rechargeEndTime" type="datetime" placeholder="选择结束时间">
+                                    </el-date-picker>
+                                </el-form-item>
+                            </div>
+                        </div>
                         <el-form-item label="发票状态:" prop="invoiceStatus">
                             <el-select v-model="form.invoiceStatus" clearable placeholder="全部">
                                 <el-option v-for="item in statusOptions" :key="item.value" :label="item.name"
@@ -54,11 +65,11 @@
                         </el-form-item>
                     </div>
                     <div class="mainSearchBtnBox">
-                            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"
-                                class="searchBtn" style="margin-left: 10px;">搜索</el-button>
-                            <el-button @click="resetFormResource('form')">重置</el-button>
+                        <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
+                            style="margin-left: 10px;">搜索</el-button>
+                        <el-button @click="resetFormResource('form')">重置</el-button>
                     </div>
-                    
+
                 </el-form>
             </div>
             <el-row class="marginB20  button-menu">
@@ -75,18 +86,18 @@
                     <el-table-column align="center" type="selection" width="55" :selectable="checkSelectable">
                     </el-table-column>
                     <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                    <el-table-column align="center" prop="createTime" label="充值时间" :formatter="dateFormat" width="200">
+                    <el-table-column align="center" prop="createTime" label="充值时间" :formatter="dateFormat" width="150">
                     </el-table-column>
                     <el-table-column align="center" prop="serialNumber" label="流水号"></el-table-column>
-                    <el-table-column align="center" prop="rechargeMoney" label="充值金额"></el-table-column>
-                    <el-table-column align="center" prop="givenAmount" label="赠送金额"></el-table-column>
-                    <el-table-column align="center" prop="rechargeWay" label="充值方式">
+                    <el-table-column align="center" prop="rechargeMoney" label="充值金额" width="140"></el-table-column>
+                    <el-table-column align="center" prop="givenAmount" label="赠送金额" width="140"></el-table-column>
+                    <el-table-column align="center" prop="rechargeWay" label="充值方式" width="140">
                         <template slot-scope="scope">
                             <span v-if="scope.row.rechargeWay == 1">支付宝</span>
                             <span v-if="scope.row.rechargeWay == 2">微信</span>
                         </template>
                     </el-table-column>
-                    <el-table-column align="center" prop="rechargeType" label="充值类型">
+                    <el-table-column align="center" prop="rechargeType" label="充值类型" width="140">
                         <template slot-scope="scope">
                             <span v-if="scope.row.rechargeType == 1">线上</span>
                             <span v-if="scope.row.rechargeType == 2">线下</span>
@@ -282,8 +293,8 @@
             resetFormResource(formName) {
                 if (this.$refs[formName]) {
                     this.$refs[formName].resetFields();
-                    this.$set(this.form,'rechargeBeginTime','');
-                    this.$set(this.form,'rechargeEndTime','');
+                    this.$set(this.form, 'rechargeBeginTime', '');
+                    this.$set(this.form, 'rechargeEndTime', '');
                 }
             },
             numFormat(num) {
