@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 资源资费
@@ -70,6 +71,10 @@ public interface CallPackageJobFeignClient {
     JSONResult<String> schedulePullCallRecord() ;
 
 
+    @PostMapping("/deduct/package")
+    JSONResult<String> deductPackage(@RequestParam("endTime") String endTime);
+
+
     @Component
     class HystrixClientFallback implements FallbackFactory<CallPackageJobFeignClient> {
 
@@ -108,6 +113,11 @@ public interface CallPackageJobFeignClient {
                 @Override
                 public JSONResult<String> schedulePullCallRecord() {
                     return fallBackError("定期来去通话记录");
+                }
+
+                @Override
+                public JSONResult<String> deductPackage(String endTime) {
+                    return fallBackError("扣除套餐费用");
                 }
 
                 @SuppressWarnings("rawtypes")

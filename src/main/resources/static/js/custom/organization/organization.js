@@ -374,7 +374,7 @@
               },
               
               initOrgTree(){//刷新根节点tree
-            	  axios.post('/organization/organization/query',{})
+            	  axios.post('/organization/organization/query',{source:1})
                   .then(function (response) {
                       var data =  response.data
                       if(data.code=='0'){
