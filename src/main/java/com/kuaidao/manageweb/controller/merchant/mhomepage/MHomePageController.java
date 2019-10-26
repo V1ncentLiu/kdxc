@@ -140,12 +140,14 @@ public class MHomePageController {
             accountId = user.getParentId();
         }
         JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(accountId);
+      logger.info("accountId::"+accountId);
         if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
           CallBuyPackageModel data = hasBuyPackageResult.getData();
           if(data!=null){
             hasBuyPackage = true;
             IdEntityLong idEntity = new IdEntityLong();
             idEntity.setId(data.getPackageId());
+            logger.info("getPackageId::"+data.getPackageId());
             JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
                 .queryOutboundPackageById(idEntity);
             if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
@@ -154,6 +156,7 @@ public class MHomePageController {
             }
           }
         }
+      logger.info("packageName::"+packageName);
         request.setAttribute("hasBuyPackage", hasBuyPackage);
         request.setAttribute("packageName", packageName);
         // 判断显示主/子账户首页
@@ -175,12 +178,31 @@ public class MHomePageController {
             // 查询账户余额
             setCountBalance(request);
             // 查询是否购买套餐
-            JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(curLoginUser.getId());
+//            JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(curLoginUser.getId());
             boolean buyedFlag = false;
-            if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
-              buyedFlag = hasBuyPackageResult.getData();
+            String packageName = "";
+//            if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+//              buyedFlag = hasBuyPackageResult.getData();
+//            }
+          JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(curLoginUser.getId());
+          logger.info("accountId::"+curLoginUser.getId());
+          if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+            CallBuyPackageModel data = hasBuyPackageResult.getData();
+            if(data!=null){
+              buyedFlag = true;
+              IdEntityLong idEntity = new IdEntityLong();
+              idEntity.setId(data.getPackageId());
+              logger.info("getPackageId::"+data.getPackageId());
+              JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
+                  .queryOutboundPackageById(idEntity);
+              if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
+                OutboundPackageRespDTO data1 = outboundPackageRespDTOJSONResult.getData();
+                packageName = data1.getPackageName();
+              }
             }
-            request.setAttribute("buyedFlag",buyedFlag); // 当前无法进行。在第四批需求
+          }
+          request.setAttribute("buyedFlag",buyedFlag); // 当前无法进行。在第四批需求
+          request.setAttribute("packageName", packageName);
         }else{
         }
         request.setAttribute("userType",userType);
