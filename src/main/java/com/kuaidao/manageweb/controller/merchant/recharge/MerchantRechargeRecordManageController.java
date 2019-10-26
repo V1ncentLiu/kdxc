@@ -4,6 +4,7 @@ import com.kuaidao.account.dto.recharge.MerchantRechargeRecordDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeRecordQueryDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargeReq;
 import com.kuaidao.account.dto.recharge.RechargeAccountDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargeRecordManageFeignClient;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @description: MerchantRechargeRecordBusinessController
@@ -43,6 +46,8 @@ public class MerchantRechargeRecordManageController {
   MerchantRechargeRecordManageFeignClient merchantRechargeRecordManageFeignClient;
   @Autowired
   private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+  @Autowired
+  RedisTemplate redisTemplate;
   /**
    * @Description 初始化管理端充值记录页面
    * @param request
@@ -109,11 +114,15 @@ public class MerchantRechargeRecordManageController {
   @RequestMapping("/initOfflinePayment")
   @RequiresPermissions("merchant:merchantRechargeRecordManage:add")
   public String initOfflinePayment(HttpServletRequest request){
+    UserInfoDTO user = CommUtil.getCurLoginUser();
     // 商家账号
     List<UserInfoDTO> userList = getMerchantUser(null);
     request.setAttribute("merchantUserList",userList);
     request.setAttribute("ossUrl",ossUrl);
-
+    String token = UUID.randomUUID().toString();
+    //随机生成token放入Redis
+    redisTemplate.opsForValue().set(user.getId().toString(),token);
+    request.setAttribute("token",token);
     return "merchant/rechargeRecord/rechargePaymentOffline";
   }
 
@@ -128,17 +137,42 @@ public class MerchantRechargeRecordManageController {
   @RequestMapping("/saveOfflinePayment")
   @RequiresPermissions("merchant:merchantRechargeRecordManage:add")
   public JSONResult<Boolean> saveOfflinePayment(@RequestBody  MerchantRechargeReq req){
+    UserInfoDTO user = CommUtil.getCurLoginUser();
     try {
-      UserInfoDTO user = CommUtil.getCurLoginUser();
+      //判断是否重复提交
+      if (!isSubmit(req,user)) {
+        return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"请不要重复提交");
+      }
       req.setCreateUser(user.getId());
       JSONResult<Boolean> list = merchantRechargeRecordManageFeignClient.saveOfflinePayment(req);
       return list;
     }catch (Exception e){
       logger.error("录入线下付款信息:{}",e);
-      return new JSONResult<Boolean>().fail("-1","录入线下付款信息接口异常");
+      redisTemplate.opsForValue().set(user.getId().toString(),req.getToken());
+      return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"录入线下付款信息接口异常");
     }
   }
+  /**
+   * @Title: isSubmit
+   * @Description: 判断token值是否相同以及是否有伪token值得传入
+   * @param req
+   * @return
+   * boolean
+   */
 
+  public boolean isSubmit(MerchantRechargeReq req,UserInfoDTO user){
+    String sessionToken = null;
+    if(redisTemplate.hasKey(user.getId().toString())){
+      sessionToken = (String)redisTemplate.opsForValue().get(user.getId().toString());
+      if (!(sessionToken.equals(req.getToken()))) {
+        return false;
+      }
+      redisTemplate.delete(user.getId().toString());
+    }else {
+      return false;
+    }
+    return true;
+  }
   /**
    * 查询商家账号
    *

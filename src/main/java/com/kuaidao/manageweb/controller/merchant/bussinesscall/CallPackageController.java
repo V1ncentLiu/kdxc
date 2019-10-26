@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 import com.kuaidao.account.dto.call.*;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageFeignClient;
+import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageJobFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -22,6 +23,8 @@ public class CallPackageController {
 
     @Autowired
     private CallPackageFeignClient callPackageFeignClient;
+    @Autowired
+    private CallPackageJobFeignClient callPackageJobFeignClient;
 
 
     /**
@@ -38,10 +41,10 @@ public class CallPackageController {
             if (jsonResult.getCode().equals(JSONResult.SUCCESS)
                     && jsonResult.getData() != null) {
                 request.setAttribute("originPackageId", jsonResult.getData().getPackageId());
-                request.setAttribute("buyCount",jsonResult.getData().getSheetCount());
+                request.setAttribute("buyCount", jsonResult.getData().getSheetCount());
             }
         } catch (Exception e) {
-            log.error("CallPackageController.index error,user={}", e,user);
+            log.error("CallPackageController.index error,user={}", e, user);
         }
         return "merchant/cloudCall/cloudCall";
     }
@@ -84,6 +87,27 @@ public class CallPackageController {
         log.info("CallPackageBuyController,list,userId={}", userId);
         return callPackageFeignClient.list(userId);
     }
+
+    @PostMapping("/schedule/deduct/call")
+    @ResponseBody
+    public JSONResult<String> scheduleDeductCall() {
+        log.info("CallPackageBuyController,list");
+        return callPackageJobFeignClient.scheduleDeductCall();
+    }
+
+    /**
+     * 收到扣除套餐费用 endTime是yyyyMMdd
+     *
+     * @param endTime
+     * @return
+     */
+    @PostMapping("/deduct/package")
+    @ResponseBody
+    public JSONResult<String> deductPackage(@RequestParam("endTime") String endTime) {
+        log.info("CallPackageBuyController,list,endTime={}", endTime);
+        return callPackageJobFeignClient.deductPackage(endTime);
+    }
+
 
     /**
      * 获取当前登录账号
