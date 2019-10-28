@@ -70,6 +70,9 @@ public interface CallPackageJobFeignClient {
     @PostMapping("/schedule/pull/callRecord")
     JSONResult<String> schedulePullCallRecord() ;
 
+    @PostMapping("/schedule/deduct/callCost")
+    JSONResult<String> scheduleDeductCallCost(@RequestParam("day") String day);
+
 
     @PostMapping("/deduct/package")
     JSONResult<String> deductPackage(@RequestParam("endTime") String endTime);
@@ -113,6 +116,11 @@ public interface CallPackageJobFeignClient {
                 @Override
                 public JSONResult<String> schedulePullCallRecord() {
                     return fallBackError("定期来去通话记录");
+                }
+
+                @Override
+                public JSONResult<String> scheduleDeductCallCost(String day) {
+                     return fallBackError("扣除指定时间费用话费");
                 }
 
                 @Override
