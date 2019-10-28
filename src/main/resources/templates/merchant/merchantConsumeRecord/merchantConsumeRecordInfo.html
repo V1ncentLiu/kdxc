@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
     <style>
     .el-date-picker__time-header{display: none;}
     </style>
@@ -18,7 +16,7 @@
         <el-breadcrumb-item>消费记录</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="mainSearchBg">        
-        <div class="mainSearchFormBox">
+        <!-- <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
                 <el-form-item label="时间：" label-width="auto">
                     <el-date-picker
@@ -51,6 +49,39 @@
                 <el-form-item label="">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
                 </el-form-item>
+            </el-form>
+        </div> -->
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <div class="main-search-box">
+                    <div class="get-search-time">
+                        <div class="get-time">时间:</div>
+                        <div class="time-style">
+                            <el-form-item label-width="auto" class="call-time" prop="createDateStart">
+                                <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                    v-model="form.createDateStart" type="datetime" placeholder="选择开始时间">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="—" class="widthauto" prop="createDateEnd">
+                                <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                    v-model="form.createDateEnd" type="datetime" placeholder="选择结束时间">
+                                </el-date-picker>
+                            </el-form-item>
+                        </div>
+                    </div>
+                    <el-form-item label="商家账户：" prop="userId">
+                        <el-select v-model="form.userId" filterable clearable placeholder="商家账户名">
+                            <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </div>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
+                        style="margin-left: 10px;">搜索</el-button>
+                    <el-button @click="resetFormResource('form')">重置</el-button>
+                </div>
             </el-form>
         </div>
         <el-row>            
@@ -100,7 +131,14 @@
                 merchantUserListOptions:merchantUserList,
             }             
         },
-        methods: {
+        methods: {            
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form, 'createDateStart', '');
+                    this.$set(this.form, 'createDateEnd ', '');
+                }
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
