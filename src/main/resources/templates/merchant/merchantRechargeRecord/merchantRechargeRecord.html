@@ -43,15 +43,15 @@
                     <div class="main-search-box">
                         <div class="get-search-time">
                             <div class="get-time">充值时间:</div>
-                            <div class="time-style">
+                            <div class="time-style" :class="{'selectActive':colorStatus}" >
                                 <el-form-item label-width="auto" class="call-time" prop="rechargeBeginTime">
-                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.rechargeBeginTime" type="datetime" placeholder="选择开始时间">
+                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" 
+                                        v-model="form.rechargeBeginTime" v-on:focus="setColor"  v-on:blur="changeNameFun" type="datetime" placeholder="选择开始时间">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="rechargeEndTime">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.rechargeEndTime" type="datetime" placeholder="选择结束时间">
+                                        v-model="form.rechargeEndTime" v-on:focus="setColor"  v-on:blur="changeNameFun" type="datetime" placeholder="选择结束时间">
                                     </el-date-picker>
                                 </el-form-item>
                             </div>
@@ -170,26 +170,8 @@
                     invoiceStatus: ''
                 },
                 formLabelWidth: '120px',
-                dataTable: [
-                    // {
-                    //     createTime:'1',
-                    //     serialNumber:'1',
-                    //     rechargeMoney:1,
-                    //     givenAmount:'1',
-                    //     rechargeWay:'1',
-                    //     rechargeType:'1',
-                    //     invoiceStatus:'0',
-                    // },
-                    // {
-                    //     createTime:'1',
-                    //     serialNumber:'1',
-                    //     rechargeMoney:2,
-                    //     givenAmount:'1',
-                    //     rechargeWay:'1',
-                    //     rechargeType:'1',
-                    //     invoiceStatus:'0',
-                    // }
-                ],
+                dataTable: [],
+
                 merchantUserListOptions: merchantUserList,
                 statusOptions: [{
                     value: "",
@@ -212,6 +194,7 @@
                     name: '',
                     invoiceAmount: 0,
                 },
+                colorStatus:false,
                 rules: {
                     invoiceHeader: [
                         { required: true, message: '发票抬头不能为空', trigger: 'blur' },
@@ -315,6 +298,12 @@
                 console.log(val)
                 this.multipleSelection = val;
             },
+            changeNameFun(){
+                this.colorStatus=false;
+            },
+            setColor(){
+                this.colorStatus=true;
+            },
             handleStart(index, row) {
                 console.log(index, row);
             },
