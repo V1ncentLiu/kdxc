@@ -130,6 +130,7 @@ var myCallRecordVm = new Vue({
 
       param.pageNum = this.pager.currentPage;
       param.pageSize = this.pager.pageSize;
+      param.accountIdList=[];
       if(this.searchForm.accountIdLista!=''){
       param.accountIdList.push(this.searchForm.accountIdLista);
       }
