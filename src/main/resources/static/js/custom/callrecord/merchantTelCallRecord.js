@@ -43,6 +43,7 @@ var myCallRecordVm = new Vue({
       callType: '',
       startTime: '',
       endTime: '',
+      accountIdLista: '',
       accountIdList: []
     },
     merchantUserList: merchantUserList,//外呼账户
@@ -129,6 +130,9 @@ var myCallRecordVm = new Vue({
 
       param.pageNum = this.pager.currentPage;
       param.pageSize = this.pager.pageSize;
+      if(this.searchForm.accountIdLista!=''){
+      param.accountIdList.push(this.searchForm.accountIdLista);
+      }
       axios.post('/merchant/merchantCallRecord/listMerchantCallRecord', param)
         .then(function (response) {
           var data = response.data;
