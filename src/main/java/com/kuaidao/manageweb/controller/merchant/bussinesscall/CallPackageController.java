@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.merchant.bussinesscall;
 import com.kuaidao.account.dto.call.*;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageFeignClient;
+import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageJobFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -22,6 +23,8 @@ public class CallPackageController {
 
     @Autowired
     private CallPackageFeignClient callPackageFeignClient;
+    @Autowired
+    private CallPackageJobFeignClient callPackageJobFeignClient;
 
 
     /**
@@ -83,6 +86,13 @@ public class CallPackageController {
     public JSONResult<CallBuyPackageRes> list(@RequestParam Long userId) {
         log.info("CallPackageBuyController,list,userId={}", userId);
         return callPackageFeignClient.list(userId);
+    }
+
+
+    @PostMapping("/schedule/deduct/callCost")
+    public JSONResult<String> scheduleDeductCallCost(@RequestParam("day") String day){
+        log.info("scheduleDeductCallCost,param={}",day);
+        return callPackageJobFeignClient.scheduleDeductCallCost(day);
     }
 
     /**
