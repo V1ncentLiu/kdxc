@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.clue.ClueIntentionDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueReceiveDTO;
 import com.kuaidao.aggregation.dto.log.ImLogsDTO;
+import com.kuaidao.common.constant.ComConstant.USER_STATUS;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
@@ -15,12 +16,18 @@ import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.log.ImLogMgtFeignClient;
+import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
+import com.kuaidao.merchant.constant.MerchantConstant;
+import com.kuaidao.merchant.dto.clue.ClueManagementDto;
+import com.kuaidao.merchant.dto.clue.ClueManagementParamDto;
 import com.kuaidao.merchant.dto.pubcusres.ClueReceiveRecordsDTO;
 import com.kuaidao.merchant.dto.resourcetrajectory.ResourceTrajectoryDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.hibernate.usertype.UserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +51,9 @@ public class ResourceTrajectoryController {
 
   @Autowired
   private MyCustomerFeignClient myCustomerFeignClient;
+
+  @Autowired
+  private ClueManagementFeignClient clueManagementFeignClient;
 
 
   /**
@@ -88,6 +98,7 @@ public class ResourceTrajectoryController {
         resourceTrajectory.setAge(clueCustomer.getAge());
         resourceTrajectory.setCusName(clueCustomer.getCusName());
         resourceTrajectory.setEmail(clueCustomer.getEmail());
+        resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone(clueCustomer.getPhone());
         resourceTrajectory.setPhone2(clueCustomer.getPhone2());
         resourceTrajectory.setPhone3(clueCustomer.getPhone3());

@@ -10,7 +10,7 @@ var myCallRecordVm = new Vue({
       currentPage: 1,
       pageSize: 20,
     },
-    totalTalkTime: 0,
+    totalCost: 0,
     callRecordData: [],
     callStatus: [
       {
@@ -41,9 +41,9 @@ var myCallRecordVm = new Vue({
       seatPhone: '',
       startTime: '',
       endTime: '',
+      searchType:"1"
     },
     userInfoList: userInfoList,//绑定账户
-    totalMerchantCost:totalMerchantCost,
     isActive1:true,
     isActive2:false,
     isActive3:false,
@@ -81,7 +81,14 @@ var myCallRecordVm = new Vue({
     //   }]
 
     // },
-    initCallRecordData() {
+    initCallRecordData(val) {
+      if(val&&val=="1"){
+        this.isActive1=false;
+        this.isActive2=false;
+        this.isActive3=false;
+        this.isActive4=false;
+        this.$set(this.searchForm,'searchType',"1");
+      }
       // this._initData();
        var startTime = this.searchForm.startTime;
        var endTime = this.searchForm.endTime;
@@ -114,8 +121,8 @@ var myCallRecordVm = new Vue({
        }else{
       	 param.accountIdList=[];
        }
-      	 param.beginCostTime=new Date(this.searchForm.startTime);
-      	 param.endCostTime=new Date(this.searchForm.endTime);
+       param.beginCostTime=new Date(this.searchForm.startTime)&&this.searchForm.startTime!=null?new Date(this.searchForm.startTime):'';
+       param.endCostTime=new Date(this.searchForm.endTime)&&this.searchForm.endTime!=null?new Date(this.searchForm.endTime):'';
       	 param.pageNum=this.pager.currentPage;
          param.pageSize=this.pager.pageSize;
       
@@ -125,8 +132,11 @@ var myCallRecordVm = new Vue({
                if(data.code=='0'){
                  var resData = data.data;
                  var callRecordData = resData.data;
-                 myCallRecordVm.callRecordData = resData.data;
+                 myCallRecordVm.callRecordData = callRecordData.data;
                 //3.分页组件
+
+                console.log(resData.total,"resData.total");
+                myCallRecordVm.totalCost=resData.totalCost;
                	myCallRecordVm.pager.total= callRecordData.total;
                	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
                	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
@@ -228,6 +238,7 @@ var myCallRecordVm = new Vue({
       this.isActive2=false;
       this.isActive3=false;
       this.isActive4=false;
+      this.$set(this.searchForm,'searchType',"1");
       var today = new Date();
       today.setTime(today.getTime() - 24 * 60 * 60 * 1000);
       var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + " 00:00:00";
@@ -241,6 +252,7 @@ var myCallRecordVm = new Vue({
       this.isActive1=false;
       this.isActive3=false;
       this.isActive4=false;
+      this.$set(this.searchForm,'searchType',"1");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -259,6 +271,7 @@ var myCallRecordVm = new Vue({
       this.isActive1=false;
       this.isActive2=false;
       this.isActive4=false;
+      this.$set(this.searchForm,'searchType',"1");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -278,6 +291,7 @@ var myCallRecordVm = new Vue({
       this.isActive1=false;
       this.isActive2=false;
       this.isActive3=false;
+      this.$set(this.searchForm,'searchType',"2");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -345,7 +359,6 @@ var myCallRecordVm = new Vue({
     var date = a.getDate();
     this.searchForm.startTime = year + "-" + (month + 1) + "-" + date + " 00:00:00";
     this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
-    this.initCallRecordData();
     this.searchYesterday();
   },
   mounted() {

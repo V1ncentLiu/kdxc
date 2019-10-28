@@ -1,5 +1,9 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
+import com.kuaidao.account.dto.call.CallBuyPackageModel;
+import com.kuaidao.account.dto.outboundpackage.OutboundPackageRespDTO;
+import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
+import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
 import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
 import com.kuaidao.common.constant.ComConstant.DIMENSION;
 import com.kuaidao.common.constant.ComConstant.QFLAG;
@@ -15,8 +19,10 @@ import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.merchant.bussinesscall.CallPackageFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.ClueManagementFeignClient;
 import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClient;
+import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
 import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.outboundpackage.OutboundPackageFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
@@ -27,6 +33,7 @@ import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -81,6 +88,12 @@ public class MHomePageController {
     @Autowired
     private CallPackageFeignClient callPackageFeignClient;
 
+    @Autowired
+    private MerchantUserAccountFeignClient merchantUserAccountFeignClient;
+
+    @Autowired
+    private OutboundPackageFeignClient outboundPackageFeignClient;
+
     /**
      * 首页 跳转
      *
@@ -119,17 +132,33 @@ public class MHomePageController {
         }
         //查询主账号是否购买云呼叫套餐
         boolean hasBuyPackage = false;
+        String packageName = "";
         Long accountId = user.getId();
         if(Constants.USER_TYPE_TWO.equals(user.getUserType())){
             accountId = user.getId();
         }else if(Constants.USER_TYPE_THREE.equals(user.getUserType())){
             accountId = user.getParentId();
         }
-        JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(accountId);
+        JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(accountId);
+      logger.info("accountId::"+accountId);
         if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
-            hasBuyPackage = hasBuyPackageResult.getData();
+          CallBuyPackageModel data = hasBuyPackageResult.getData();
+          if(data!=null){
+            hasBuyPackage = true;
+            IdEntityLong idEntity = new IdEntityLong();
+            idEntity.setId(data.getPackageId());
+            logger.info("getPackageId::"+data.getPackageId());
+            JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
+                .queryOutboundPackageById(idEntity);
+            if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
+              OutboundPackageRespDTO data1 = outboundPackageRespDTOJSONResult.getData();
+              packageName = data1.getPackageName();
+            }
+          }
         }
+      logger.info("packageName::"+packageName);
         request.setAttribute("hasBuyPackage", hasBuyPackage);
+        request.setAttribute("packageName", packageName);
         // 判断显示主/子账户首页
         Integer userType = user.getUserType();
         request.setAttribute("isShowConsoleBtn", userType); // 主账户==2  子账户==3
@@ -147,9 +176,33 @@ public class MHomePageController {
         Integer userType = curLoginUser.getUserType();
         if(Constants.USER_TYPE_TWO.equals(userType)){
             // 查询账户余额
-            request.setAttribute("countBlance","111.1"); // 代码合并后，补上代码
+            setCountBalance(request);
             // 查询是否购买套餐
-            request.setAttribute("buyedFlag",1); // 当前无法进行。在第四批需求
+//            JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(curLoginUser.getId());
+            boolean buyedFlag = false;
+            String packageName = "";
+//            if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+//              buyedFlag = hasBuyPackageResult.getData();
+//            }
+          JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(curLoginUser.getId());
+          logger.info("accountId::"+curLoginUser.getId());
+          if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+            CallBuyPackageModel data = hasBuyPackageResult.getData();
+            if(data!=null){
+              buyedFlag = true;
+              IdEntityLong idEntity = new IdEntityLong();
+              idEntity.setId(data.getPackageId());
+              logger.info("getPackageId::"+data.getPackageId());
+              JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
+                  .queryOutboundPackageById(idEntity);
+              if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
+                OutboundPackageRespDTO data1 = outboundPackageRespDTOJSONResult.getData();
+                packageName = data1.getPackageName();
+              }
+            }
+          }
+          request.setAttribute("buyedFlag",buyedFlag); // 当前无法进行。在第四批需求
+          request.setAttribute("packageName", packageName);
         }else{
         }
         request.setAttribute("userType",userType);
@@ -157,6 +210,30 @@ public class MHomePageController {
         request.setAttribute("countSources",countSource());
         return  "merchant/homePage/accoun";
     }
+
+
+  private void setCountBalance( HttpServletRequest request ){
+    //查询商家账号余额信息
+    UserInfoDTO user = CommUtil.getCurLoginUser();
+    MerchantUserAccountQueryDTO dto = new MerchantUserAccountQueryDTO();
+    dto.setUserId(user.getId());
+    JSONResult<MerchantUserAccountDTO> accountDTOJSONResult = merchantUserAccountFeignClient.getMerchantUserAccountInfo(dto);
+    MerchantUserAccountDTO merchantUserAccountDTO = new MerchantUserAccountDTO();
+    merchantUserAccountDTO = accountDTOJSONResult.getData();
+    if(merchantUserAccountDTO == null || merchantUserAccountDTO.getBalance() == null){
+      merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+    }
+    if(merchantUserAccountDTO == null || merchantUserAccountDTO.getTotalAmounts() == null){
+      merchantUserAccountDTO.setBalance(new BigDecimal("0.00"));
+    }
+    BigDecimal totalAmounts = merchantUserAccountDTO.getTotalAmounts();
+    if(totalAmounts==null){
+      request.setAttribute("countBlance","0.00");
+    }else{
+      request.setAttribute("countBlance",totalAmounts.doubleValue());
+    }
+
+  }
 
     private ResourceCountDTO countSource(){
         // 主账户相关统计

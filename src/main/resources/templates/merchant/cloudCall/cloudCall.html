@@ -6,6 +6,9 @@
     <!-- import CSS -->
     <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
     <style> 
+      .test td {
+        background: #e1e3e8!important;
+      }
     </style>
 </head>
 <body>
@@ -24,6 +27,7 @@
         <el-table 
             ref="dataTable"
             tooltip-effect="dark"
+            :row-class-name="tableRowClassName"
             border
             :data="dataTable"
             >
@@ -32,12 +36,16 @@
             <el-table-column align="center" prop="" label="内容" width="500">
                 <template scope="scope">
                     <p style="margin-right: 10px;">坐席费：<em style="width: 100px;">{{scope.row.sheetCost}}元/坐席</em></p>
-                    <p style="margin-right: 10px;">固话月租费：<em style="width: 100px;">{{scope.row.fixCost}}/月</em></p>
-                    <p>小号月租费：{{scope.row.subAccountCost}}/月</p>
+                    <p style="margin-right: 10px;">固话月租费：<em style="width: 100px;">{{scope.row.fixCost}}元/月</em></p>
+                    <p>小号月租费：{{scope.row.subAccountCost}}元/月</p>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="maxSheetNum" label="支持坐席最大数量"></el-table-column>
-            <el-table-column align="center" prop="totalCost" label="月固定费用/个"></el-table-column>
+            <el-table-column align="center" prop="" label="月固定费用/个">
+                <template scope="scope">
+                    {{scope.row.totalCost}}元/月
+                </template>
+            </el-table-column>
             <!-- <el-table-column align="center" type="selection" label="选择服务"> -->
                 <!-- <template scope="scope"> -->
                     <!-- <el-radio :label="scope.row.radioVal" v-model="templateRadio">&nbsp;</el-radio> -->
@@ -47,13 +55,13 @@
                     <!-- </div>              -->
                 <!-- </template> -->
             <!-- </el-table-column> -->
-            <el-table-column label="选择服务" width="auto" align="center">
+            <el-table-column label="选择服务" width="120" align="center">
                 <template scope="scope">
                     <!-- 是否已购买1是，0否 -->
                     <!-- <el-radio v-if="scope.row.status==1" @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
                     <p v-else>已购买，<el-button type="primary" @click="showChangeBtn">变更</el-button></p> -->
-                    <p v-if="scope.row.status==1">已购买<span v-if="isChangeBtnShow">,&nbsp;&nbsp;<el-button type="primary" @click="showChangeBtn(scope.row)">变更</el-button></span></p>
-                    <el-radio v-else @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
+                    <p v-if="scope.row.status==1">已购买服务<span v-if="isChangeBtnShow"><el-button type="primary" @click="showChangeBtn(scope.row)">变更</el-button></span></p>
+                    <el-radio v-else @change="showRow(scope.row)" v-model="radio" :label="scope.$index" style="margin-right: -20px;">&nbsp;</el-radio>
                </template>
             </el-table-column>
         </el-table>
@@ -116,8 +124,10 @@
 <script>  
     var userId = '[[${userId}]]';
     var originPackageId = '[[${originPackageId}]]';
+    var oldBuyCount = '[[${oldBuyCount}]]';;
     // console.log(userId)
     // console.log(originPackageId)
+    // console.log(oldBuyCount)
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -171,9 +181,16 @@
                         }, trigger: 'blur'}                                   
                     ],
                 },
+                oldTotalCost:'',//已购买数量
             }             
         },
         methods: {
+            tableRowClassName({row, rowIndex}) {
+                // console.log(row)
+                if (row.status==1) {
+                    return 'test';
+                }
+            },
             formBuyCount(){
                 var rows = this.multipleSelection;
                 var aone = parseFloat(this.formBuy.buyCount);
@@ -215,20 +232,20 @@
                 this.formChange.buyCount=this.formChange.buyCount.replace('.','');
             },
             showChangeBtn(val){
-                console.log(val)
+                // console.log(val)
                 this.isBuyBtn=false;
                 this.isChangeBtn=true;
                 val.status=0;
             },
             showRow(val){
-                console.log(val)
+                // console.log(val)
                 //赋值给radio
                 this.radio = this.dataTable.indexOf(val);
                 this.multipleSelection=val;
                 
             },
             handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
+                // console.log(val)
                 this.multipleSelection = val;
             }, 
             buyClick(){                
@@ -241,6 +258,8 @@
                     return;
                 }
                 this.buyFormVisible=true;
+                // 申请按钮可点击
+                this.btnDisabled=false;
                 // 账号余额不足去充值默认不显示
                 this.isShowTipBuy=false;
                 // 设置需支付首月固定费用为空
@@ -250,17 +269,30 @@
                 }                
             },
             changeClick(){
-                this.changeFormVisible=true;
+                this.changeFormVisible=true;                
+                // 变更按钮可点击
+                this.btnDisabled=false;
                 // 设置需支付首月固定费用为空
                 this.formChange.cost="";
                 // 账号余额不足去充值默认不显示
-                this.formChange.isShowTipChange=false;
+                this.isShowTipChange=false;
                 if (this.$refs['formChange']!=undefined) {
                     this.$refs['formChange'].resetFields();
                 }   
                 var rows = this.multipleSelection;
                 // 给新套餐名称赋值
                 this.formChange.newName=rows.packageName;
+                // 给购买坐席个数赋值
+                // if(oldBuyCount){
+                //     this.formChange.buyCount=oldBuyCount;
+                //     // 计算需支付费用                    
+                //     var aone = parseFloat(this.formChange.buyCount);
+                //     var atwo = parseFloat(this.oldTotalCost);
+                //     if (isNaN(aone)) aone = 0;
+                //     if (isNaN(atwo)) atwo = 0;
+                //     var totalNum=(aone * atwo) + "";
+                //     this.formChange.cost = totalNum;
+                // }
             },
             submitBuyForm(formName ){
                 var rows = this.multipleSelection;
@@ -310,7 +342,7 @@
                     }
                 });   
             },
-            submitChangeForm(){
+            submitChangeForm(formName){
                 var rows=this.multipleSelection;
                 // 超过最大坐席数量提示
                 var maxNum=rows.maxSheetNum;
@@ -318,26 +350,37 @@
                     this.$message.error("本套餐暂不支持如此大的坐席数量，请联系管理人员。");
                     return;
                 }
-                var param ={};
-                param.userId = userId;
-                param.fromPackageId = originPackageId;//变更前套餐ID
-                param.toPackageId = rows.packageId;//变更后套餐ID
-                param.buyCount = this.formChange.buyCount;
-                console.info(param);
-                axios.post('/merchant/call/package/change', param)
-                .then(function (response) {
-                    console.log(response)
-                    var result =  response.data;
-                    if(result.code==0){
-                        var table=result.data;
-                        window.location.href="/merchant/call/package/index";                       
-                    }else{
-                        mainDivVM.$message.error(result.msg);
-                    }                    
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });    
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param ={};
+                        param.userId = userId;
+                        param.fromPackageId = originPackageId;//变更前套餐ID
+                        param.toPackageId = rows.packageId;//变更后套餐ID
+                        param.buyCount = this.formChange.buyCount;
+                        console.info(param);
+                        axios.post('/merchant/call/package/change', param)
+                        .then(function (response) {
+                            console.log(response)
+                            var result =  response.data;
+                            if(result.code==0){
+                                var table=result.data;
+                                mainDivVM.$message({
+                                    message: '申请变更套餐成功，下月生效，相关扣费也将在下月自动扣除。', type:'success', duration: 2000, onClose: function () {
+                                        window.location.href="/merchant/call/package/index";   
+                                    }
+                                });                                                    
+                            }else{
+                                mainDivVM.$message.error(result.msg);
+                            }                    
+                        })
+                        .catch(function (error) {
+                             console.log(error);
+                        }); 
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    } 
+                });   
             },
             searchTable() {                 
                 axios.get('/merchant/call/package/list?userId='+userId)
@@ -371,6 +414,7 @@
                             for(var i=0;i<list.length;i++){
                                 if(list[i].status==1){
                                     mainDivVM.formChange.name=list[i].packageName;
+                                    mainDivVM.oldTotalCost=list[i].totalCost;
                                 }
                             }
                         }                        

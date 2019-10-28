@@ -20,6 +20,7 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="dealButton">有效性处理</el-button>
+		<el-button type="success" @click="distributionPdzy">分配判单</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -95,6 +96,7 @@
                 				    </el-option>
                 				</el-select>
             				</el-form-item>
+
             				<el-form-item label="客户姓名:">
             				    <el-input v-model="cusName" placeholder="请输入客户姓名"></el-input>
             				</el-form-item>
@@ -104,7 +106,19 @@
 									<el-form-item label="客户手机号:" >
 										<el-input v-model="cusPhone" placeholder="客户手机号"></el-input>
 									</el-form-item>
-                </el-row>
+					<el-form-item label="判单专员:" label-width="55px">
+						<el-select filterable v-model="pdUser" placeholder="判单专员" clearable>
+							<el-option
+									v-for="item in userInfoList"
+									:key="item.id"
+									:label="item.name"
+									:value="item.id">
+							</el-option>
+						</el-select>
+					</el-form-item>
+
+
+				</el-row>
                 <div class="mainSearchBtnBox">
         				    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -145,6 +159,7 @@
                 <el-table-column align="center" prop="constraintNotConsistency" label="约束不一致" ></el-table-column>
                 <el-table-column align="center" prop="dealStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
                 <el-table-column align="center" prop="valid" label="有效性" :formatter="transvalidStatus"></el-table-column>
+				<el-table-column align="center" prop="pdUserName" width="100" label="判单专员"></el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
         </el-row>  
@@ -169,7 +184,25 @@
         </div>
     </el-dialog>
 
-
+	<!-- dialog -->
+	<el-dialog title="分配判单" :visible.sync="distributionPdzySyc" width="540px">
+		<el-form :model="pdzyform" ref="pdzyform" :rules="pdzyrules">
+			<el-form-item label="判单专员：" :label-width="formLabelWidth"  prop="pdUser">
+				<el-select filterable v-model="pdzyform.pdUser" placeholder="组内判单专员" style="width:80%;">
+					<el-option
+							v-for="item in userInfoList"
+							:key="item.id"
+							:label="item.name"
+							:value="item.id">
+					</el-option>
+				</el-select>
+			</el-form-item>
+		</el-form>
+		<div slot="footer" style="text-align: center" class="dialog-footer">
+			<el-button type="primary" :disabled="btnDisabled" @click="addbutton('pdzyform')">提交</el-button>
+			<el-button @click="distributionPdzySyc= false">取消</el-button>
+		</div>
+	</el-dialog>
 </div>
 <input id="addOrUpdate" type="hidden" >
 </body>
@@ -181,9 +214,16 @@
 	var projectList = [[${projectList}]];
 	var provinceList = [[${provinceList}]];
 	var swList = [[${swList}]];
+	var userInfoList = [[${userInfoList}]];
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+			distributionPdzySyc:false,
+			pdzyform:{
+				pdUser:""
+			},
+			pdUser:"",
+			userInfoList:userInfoList,
             isShow:false,
             btnDisabled: false,
         	formLabelWidth: '150px',
@@ -246,6 +286,8 @@
        	 	constraint:"",
        	 	signProvince:"",
        	 	signProjectId:"",
+			clueId:"",
+			cusPhone:"",
        	 	businessGroupId:"",
        	 	teleGroupid:"",
        	 	valid:"",
@@ -260,7 +302,12 @@
             	status: [
                     { required: true, message: '请选择有效性', trigger: 'blur' }
                 ]
-            }
+            },
+			pdzyrules:{
+				pdUser: [
+					{ required: true, message: '请选择判单专员', trigger: 'blur' },
+				]
+			},
              
         },
         methods: {
@@ -348,6 +395,7 @@
                   param.customerName = cusName;
                   param.cusPhone = this.cusPhone;
                   param.clueId = this.clueId;
+				param.pdUser = this.pdUser;
                   axios.post('/businesssign/businessSignValidList',param).then(function (response) {
                   	//   console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
@@ -416,6 +464,48 @@
                       this.isShow=true
                   }          
                 },
+			distributionPdzy(){
+				var rows = this.multipleSelection;
+				if (this.$refs['pdzyform']!=undefined) {
+					this.$refs['pdzyform'].resetFields();
+				}
+				if(rows.length  <1){
+					this.$message({
+						message: '请选择数据',
+						type: 'warning'
+					});
+					return;
+				}
+				this.distributionPdzySyc = true;
+			},
+			addbutton(formName){
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						var param = {};
+						var idList = [];
+						var rows = this.multipleSelection;
+						for ( var i = 0; i <rows.length; i++){
+							idList.push(rows[i].id)
+						}
+						param.idList = idList;
+						param.pdUser = this.pdzyform.pdUser;
+						axios.post('/businesssign/distributionPdUser', param).then(function (response) {
+							if(response.data.data){
+								orgVM.distributionPdzySyc = false;
+								orgVM.search();
+							}else{
+								orgVM.$message({
+									message: '分配失败请重试',
+									type: 'warning'
+								});
+							}
+
+						});
+					}
+
+
+				})
+			},
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';

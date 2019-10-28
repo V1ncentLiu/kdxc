@@ -1,13 +1,11 @@
 package com.kuaidao.manageweb.feign.merchant.recharge;
 
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceDTO;
 import com.kuaidao.account.dto.recharge.MerchantApplyInvoiceReq;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import feign.hystrix.FallbackFactory;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;

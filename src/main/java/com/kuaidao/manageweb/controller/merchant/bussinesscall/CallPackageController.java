@@ -41,10 +41,10 @@ public class CallPackageController {
             if (jsonResult.getCode().equals(JSONResult.SUCCESS)
                     && jsonResult.getData() != null) {
                 request.setAttribute("originPackageId", jsonResult.getData().getPackageId());
-                request.setAttribute("buyCount",jsonResult.getData().getSheetCount());
+                request.setAttribute("buyCount", jsonResult.getData().getSheetCount());
             }
         } catch (Exception e) {
-            log.error("CallPackageController.index error,user={}", e,user);
+            log.error("CallPackageController.index error,user={}", e, user);
         }
         return "merchant/cloudCall/cloudCall";
     }
@@ -87,6 +87,27 @@ public class CallPackageController {
         log.info("CallPackageBuyController,list,userId={}", userId);
         return callPackageFeignClient.list(userId);
     }
+
+    @PostMapping("/schedule/deduct/call")
+    @ResponseBody
+    public JSONResult<String> scheduleDeductCall() {
+        log.info("CallPackageBuyController,list");
+        return callPackageJobFeignClient.scheduleDeductCall();
+    }
+
+    /**
+     * 收到扣除套餐费用 endTime是yyyyMMdd
+     *
+     * @param endTime
+     * @return
+     */
+    @PostMapping("/deduct/package")
+    @ResponseBody
+    public JSONResult<String> deductPackage(@RequestParam("endTime") String endTime) {
+        log.info("CallPackageBuyController,list,endTime={}", endTime);
+        return callPackageJobFeignClient.deductPackage(endTime);
+    }
+
 
 
     @PostMapping("/schedule/deduct/callCost")

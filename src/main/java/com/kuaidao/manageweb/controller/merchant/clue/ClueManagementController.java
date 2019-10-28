@@ -132,6 +132,17 @@ public class ClueManagementController {
         pageParam.setUserType(userInfoDTO.getUserType());
         // 用户id
         pageParam.setUserId(userInfoDTO.getId());
+        List<Long> userList = new ArrayList<>();
+        // 商家主账户能看商家子账号所有的记录
+        if (SysConstant.USER_TYPE_TWO.equals(userInfoDTO.getUserType())) {
+            getSubAccountIds(userList, userInfoDTO.getId());
+        }
+        // 商家子账号看自己和主账号的记录
+        if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
+            userList.add(userInfoDTO.getId());
+            userList.add(userInfoDTO.getParentId());
+        }
+        pageParam.setUserList(userList);
         return clueManagementFeignClient.queryPage(pageParam);
     }
 
@@ -393,4 +404,28 @@ public class ClueManagementController {
         userReqDto.setParentId(id);
         return userReqDto;
     }
+    /**
+     * 获取商家主账户下的子账号
+     *
+     * @author: Fanjd
+     * @param subIds 用户集 合userId 用户id
+     * @return: void
+     * @Date: 2019/10/10 20:30
+     * @since: 1.0.0
+     **/
+    private void getSubAccountIds(List<Long> subIds, Long userId) {
+        subIds.add(userId);
+        // 获取商家主账号下的子账号列表
+        UserInfoDTO userReqDto = buildQueryReqDto(SysConstant.USER_TYPE_THREE, userId);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userReqDto);
+        if (merchantUserList.getCode().equals(JSONResult.SUCCESS)) {
+            if (CollectionUtils.isNotEmpty(merchantUserList.getData())) {
+                // 获取子账号id放入子账号集合中
+                subIds.addAll(merchantUserList.getData().stream().map(UserInfoDTO::getId).collect(Collectors.toList()));
+            }
+        }
+
+    }
+
+
 }

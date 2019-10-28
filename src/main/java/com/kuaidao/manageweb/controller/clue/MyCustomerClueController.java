@@ -9,10 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.aggregation.constant.AggregationConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -27,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -51,6 +47,7 @@ import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
@@ -64,6 +61,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.SortUtils;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
@@ -71,8 +69,10 @@ import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -81,6 +81,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -127,6 +128,11 @@ public class MyCustomerClueController {
     @Autowired
     private RepeatClueRecordFeignClient repeatClueRecordFeignClient;
 
+    @Autowired
+    private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
@@ -159,7 +165,7 @@ public class MyCustomerClueController {
         request.setAttribute("ossUrl", ossUrl);
         // 添加重单字段限制的业务线
         String repetitionBusinessLine = getSysSetting(SysConstant.REPETITION_BUSINESSLINE);
-     // 项目
+        // 项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(-1);
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
@@ -167,8 +173,8 @@ public class MyCustomerClueController {
             request.setAttribute("proSelect", proJson.getData());
         }
         boolean isShowRepetition = false;
-        if((","+repetitionBusinessLine+",").contains(","+user.getBusinessLine()+",")) {
-        	isShowRepetition = true;
+        if (("," + repetitionBusinessLine + ",").contains("," + user.getBusinessLine() + ",")) {
+            isShowRepetition = true;
         }
         request.setAttribute("isShowRepetition", isShowRepetition);
         return "clue/myCustom";
@@ -219,7 +225,7 @@ public class MyCustomerClueController {
                 }
             }
         }
-
+        dto.setOrgId(user.getOrgId());
         JSONResult<PageBean<CustomerClueDTO>> jsonResult =
                 myCustomerFeignClient.findTeleClueInfo(dto);
         long time2 = System.currentTimeMillis();
@@ -285,6 +291,8 @@ public class MyCustomerClueController {
         logger.info("customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
+        List<DictionaryItemRespDTO> mediumList = new ArrayList<>();
+        TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
@@ -303,10 +311,26 @@ public class MyCustomerClueController {
                         accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
                                 .collect(Collectors.toList());
                     }
-                    accountList.add(user.getId()); //电销总监，能够看见自身已经手下全部电销顾问的记录
+                    accountList.add(user.getId()); // 电销总监，能够看见自身已经手下全部电销顾问的记录
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
+                // 获取电销布局信息
+                if (roleCode.equals(RoleCodeEnum.DXZJ.name())
+                        || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+
+                    telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
+                    JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult =
+                            telemarketingLayoutFeignClient
+                                    .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
+                    if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS)
+                            && telemarketingLayoutResult.getData() != null
+                            && telemarketingLayoutResult.getData().getId() != null) {
+                        telemarketingLayoutDTO = telemarketingLayoutResult.getData();
+                    }
+                }
+
+
             }
         }
         // 获取资源跟进记录数据
@@ -326,27 +350,27 @@ public class MyCustomerClueController {
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
-//            CallRecordRespDTO callRecordRespDTO = null;
-//            Optional<CallRecordRespDTO>  optional =callRecord.getData().stream()
-//                .filter(a -> StringUtils.isNotBlank(a.getStartTime()))
-//                .max(Comparator.comparing(CallRecordRespDTO::getStartTime));
-//            if(optional !=null && optional.isPresent()){
-//                callRecordRespDTO = optional.get();
-//            }
-//            if (callRecordRespDTO != null) {
-//                String date =
-//                        convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime()) * 1000L);
-//                request.setAttribute("teleEndTime", date);
-//            } else {
-//                request.setAttribute("teleEndTime", new Date());
-//            }
+            // CallRecordRespDTO callRecordRespDTO = null;
+            // Optional<CallRecordRespDTO> optional =callRecord.getData().stream()
+            // .filter(a -> StringUtils.isNotBlank(a.getStartTime()))
+            // .max(Comparator.comparing(CallRecordRespDTO::getStartTime));
+            // if(optional !=null && optional.isPresent()){
+            // callRecordRespDTO = optional.get();
+            // }
+            // if (callRecordRespDTO != null) {
+            // String date =
+            // convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime()) * 1000L);
+            // request.setAttribute("teleEndTime", date);
+            // } else {
+            // request.setAttribute("teleEndTime", new Date());
+            // }
         } else {
-           // request.setAttribute("teleEndTime", new Date());
+            // request.setAttribute("teleEndTime", new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
         queryDTO.setClueId(new Long(clueId));
-
+        queryDTO.setOrgId(user.getOrgId());
         request.setAttribute("clueId", clueId);
 
         request.setAttribute("ossUrl", ossUrl);
@@ -369,7 +393,17 @@ public class MyCustomerClueController {
                 request.setAttribute("customer", new ArrayList());
             }
             if (null != clueInfo.getData().getClueBasic()) {
-                request.setAttribute("base", clueInfo.getData().getClueBasic());
+                ClueBasicDTO clueBasicDTO = clueInfo.getData().getClueBasic();
+                if (telemarketingLayoutDTO != null && telemarketingLayoutDTO.getId() != null) {
+                    if (StringUtils.isNotBlank(telemarketingLayoutDTO.getCategory())
+                            && clueBasicDTO.getCategory() != null
+                            && ("," + telemarketingLayoutDTO.getCategory() + ",")
+                                    .contains("," + clueBasicDTO.getCategory().toString() + ",")) {
+                        mediumList = getDictionaryByCode(Constants.MEDIUM);
+                        request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
+                    }
+                }
+                request.setAttribute("base", clueBasicDTO);
             } else {
                 request.setAttribute("customer", new ArrayList());
             }
@@ -383,6 +417,11 @@ public class MyCustomerClueController {
                 request.setAttribute("intention", clueInfo.getData().getClueIntention());
             } else {
                 request.setAttribute("customer", new ArrayList());
+            }
+            if (null != clueInfo.getData().getClueProject()) {
+                request.setAttribute("clueProject", clueInfo.getData().getClueProject());
+            } else {
+                request.setAttribute("clueProject", new ArrayList());
             }
         }
 
@@ -433,8 +472,8 @@ public class MyCustomerClueController {
         } else {
             request.setAttribute("repeatClueStatus", 0);
         }
-
-        request.setAttribute("zjFalg",request.getParameter("zjFalg"));
+        request.setAttribute("mediumList", mediumList);
+        request.setAttribute("zjFalg", request.getParameter("zjFalg"));
         return "clue/addCustomerMaintenance";
     }
 
@@ -448,10 +487,11 @@ public class MyCustomerClueController {
     @RequestMapping("/customerInfoReadOnly")
     public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId,
             @RequestParam(required = false) String commonPool,
-            @RequestParam(required = false) String repeatFlag
-        ) {
+            @RequestParam(required = false) String repeatFlag) {
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
+        TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
+        request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
         String role = null;
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
@@ -476,6 +516,20 @@ public class MyCustomerClueController {
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
+                // 获取电销布局信息
+                if (roleCode.equals(RoleCodeEnum.DXZJ.name())
+                        || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+
+                    telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
+                    JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult =
+                            telemarketingLayoutFeignClient
+                                    .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
+                    if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS)
+                            && telemarketingLayoutResult.getData() != null
+                            && telemarketingLayoutResult.getData().getId() != null) {
+                        telemarketingLayoutDTO = telemarketingLayoutResult.getData();
+                    }
+                }
             }
         }
         // 获取已上传的文件数据
@@ -497,6 +551,7 @@ public class MyCustomerClueController {
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
         queryDTO.setClueId(new Long(clueId));
+        queryDTO.setOrgId(user.getOrgId());
 
         request.setAttribute("clueId", clueId);
 
@@ -517,15 +572,28 @@ public class MyCustomerClueController {
                     clueCustomerDTO.setPhone4CreateTime(null);
                     clueCustomerDTO.setPhone5CreateTime(null);
                     request.setAttribute("customer", clueCustomerDTO);
-                }else {
+                } else {
                     request.setAttribute("customer", clueInfo.getData().getClueCustomer());
                 }
 
             } else {
                 request.setAttribute("customer", new ArrayList());
             }
+            request.setAttribute("mediumList", new ArrayList<>());
+
             if (null != clueInfo.getData().getClueBasic()) {
                 ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
+                if (telemarketingLayoutDTO != null && telemarketingLayoutDTO.getId() != null) {
+                    if (StringUtils.isNotBlank(telemarketingLayoutDTO.getCategory())
+                            && clueBasic.getCategory() != null
+                            && ("," + telemarketingLayoutDTO.getCategory() + ",")
+                                    .contains("," + clueBasic.getCategory().toString() + ",")) {
+                        List<DictionaryItemRespDTO> mediumList =
+                                getDictionaryByCode(Constants.MEDIUM);
+                        request.setAttribute("mediumList", mediumList);
+                        request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
+                    }
+                }
                 request.setAttribute("base", clueBasic);
             } else {
                 request.setAttribute("base", new ArrayList());
@@ -535,10 +603,15 @@ public class MyCustomerClueController {
             } else {
                 request.setAttribute("intention", new ArrayList());
             }
-            if (null !=  clueInfo.getData().getClueRelate()) {
+            if (null != clueInfo.getData().getClueRelate()) {
                 request.setAttribute("relate", clueInfo.getData().getClueRelate());
-            }else{
+            } else {
                 request.setAttribute("relate", new ArrayList());
+            }
+            if (null != clueInfo.getData().getClueProject()) {
+                request.setAttribute("clueProject", clueInfo.getData().getClueProject());
+            } else {
+                request.setAttribute("clueProject", new ArrayList());
             }
         }
         // 获取资源跟进记录数据
@@ -632,7 +705,7 @@ public class MyCustomerClueController {
                         accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
                                 .collect(Collectors.toList());
                     }
-                   accountList.add(user.getId());
+                    accountList.add(user.getId());
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
@@ -814,7 +887,7 @@ public class MyCustomerClueController {
         if (result.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("isInviteLetter", result.getData());
         }
-        //查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
+        // 查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(IS_NOT_SIGN_NO);
         // 项目
@@ -1181,19 +1254,24 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
-            if(dto.getClueCustomer().getPhoneCreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            if (dto.getClueCustomer().getPhoneCreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())) {
                 dto.getClueCustomer().setPhoneCreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone2CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            if (dto.getClueCustomer().getPhone2CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())) {
                 dto.getClueCustomer().setPhone2CreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone3CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            if (dto.getClueCustomer().getPhone3CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())) {
                 dto.getClueCustomer().setPhone3CreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone4CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            if (dto.getClueCustomer().getPhone4CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())) {
                 dto.getClueCustomer().setPhone4CreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone5CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            if (dto.getClueCustomer().getPhone5CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
         }
@@ -1219,19 +1297,24 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
-            if(dto.getClueCustomer().getPhoneCreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            if (dto.getClueCustomer().getPhoneCreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())) {
                 dto.getClueCustomer().setPhoneCreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone2CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            if (dto.getClueCustomer().getPhone2CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())) {
                 dto.getClueCustomer().setPhone2CreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone3CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            if (dto.getClueCustomer().getPhone3CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())) {
                 dto.getClueCustomer().setPhone3CreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone4CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            if (dto.getClueCustomer().getPhone4CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())) {
                 dto.getClueCustomer().setPhone4CreateUser(user.getId());
             }
-            if(dto.getClueCustomer().getPhone5CreateTime() !=null && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            if (dto.getClueCustomer().getPhone5CreateTime() != null
+                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
         }
@@ -1285,6 +1368,19 @@ public class MyCustomerClueController {
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
     }
 
-	public static void main(String[] args) {
-	}
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
 }

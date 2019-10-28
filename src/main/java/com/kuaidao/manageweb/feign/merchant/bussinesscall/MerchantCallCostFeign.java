@@ -1,10 +1,8 @@
 package com.kuaidao.manageweb.feign.merchant.bussinesscall;
 
-import com.kuaidao.account.dto.call.MerchantCallCostDTO;
 import com.kuaidao.account.dto.call.MerchantCallCostReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import feign.hystrix.FallbackFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +10,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Map;
 
 /**
  * @description: MerchantCallCostFeign
@@ -31,7 +31,7 @@ public interface MerchantCallCostFeign {
    * @Date 2019/10/10 17:08
    **/
   @RequestMapping("/getBussinessCallCostList")
-  public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(MerchantCallCostReq req);
+  public JSONResult<Map<String, Object>> getBussinessCallCostList(MerchantCallCostReq req);
   /**
    * @Description 管理端商家通话费用查询
    * @param req
@@ -40,7 +40,7 @@ public interface MerchantCallCostFeign {
    * @Date 2019/10/10 17:47
    **/
   @RequestMapping("/getManageCallCostList")
-  public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(MerchantCallCostReq req);
+  public JSONResult<Map<String, Object>> getManageCallCostList(MerchantCallCostReq req);
 
   /**
    * @Description 获取商家累计消费
@@ -63,12 +63,12 @@ public interface MerchantCallCostFeign {
       return new MerchantCallCostFeign() {
 
         @Override
-        public JSONResult<PageBean<MerchantCallCostDTO>> getBussinessCallCostList(@RequestBody MerchantCallCostReq req) {
+        public JSONResult<Map<String, Object>> getBussinessCallCostList(@RequestBody MerchantCallCostReq req) {
           return fallBackError("商家端商家通话费用列表查询");
         }
 
         @Override
-        public JSONResult<PageBean<MerchantCallCostDTO>> getManageCallCostList(
+        public JSONResult<Map<String, Object>> getManageCallCostList(
             MerchantCallCostReq req) {
           return fallBackError("管理端商家通话费用查询");
         }

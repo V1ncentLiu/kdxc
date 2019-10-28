@@ -75,6 +75,10 @@ public interface CallPackageJobFeignClient {
     JSONResult<String> scheduleDeductCallCost(@RequestParam("day") String day);
 
 
+    @PostMapping("/deduct/package")
+    JSONResult<String> deductPackage(@RequestParam("endTime") String endTime);
+
+
     @Component
     class HystrixClientFallback implements FallbackFactory<CallPackageJobFeignClient> {
 
@@ -113,6 +117,11 @@ public interface CallPackageJobFeignClient {
                 @Override
                 public JSONResult<String> schedulePullCallRecord() {
                     return fallBackError("定期来去通话记录");
+                }
+
+                @Override
+                public JSONResult<String> deductPackage(String endTime) {
+                    return fallBackError("扣除套餐费用");
                 }
 
                 @Override

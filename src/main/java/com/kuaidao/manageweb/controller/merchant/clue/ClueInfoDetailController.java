@@ -67,6 +67,8 @@ public class ClueInfoDetailController {
 
     /**
      * 进入详情页面
+     * 跟进记录主账号看自己和所有的子账号的 子账号看自己和主账号的
+     * 通话记录主账号看自己和所有的子账号的 子账号自能看自己的
      *
      * @param request
      * @return
@@ -88,13 +90,18 @@ public class ClueInfoDetailController {
         request.setAttribute("ossUrl", ossUrl);
 
         List<Long> userList = new ArrayList<>();
+        // 通话记录用户集合
+        List<Long> callUserList = new ArrayList<>();
         // 商家主账户能看商家子账号所有的记录
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
+            callUserList.addAll(userList);
         }
-        // 商家子账号看自己的记录
+        // 商家子账号看自己和主账号的记录
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
+            userList.add(user.getParentId());
             userList.add(user.getId());
+            callUserList.add(user.getId());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
         queryDTO.setClueId(clueId);
@@ -103,8 +110,10 @@ public class ClueInfoDetailController {
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId + "");
         if (CollectionUtils.isNotEmpty(userList)) {
-            call.setAccountIdList(userList);
             fileDto.setIdList(userList);
+        }
+        if (CollectionUtils.isNotEmpty(callUserList)) {
+            call.setAccountIdList(callUserList);
         }
         JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
@@ -113,6 +122,7 @@ public class ClueInfoDetailController {
         } else {
             request.setAttribute("callRecord", new ArrayList());
         }
+        queryDTO.setIdList(userList);
         JSONResult<ClueDTO> clueInfo = clueInfoDetailFeignClient.findClueInfo(queryDTO);
         if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode())) {
             // 客户基本信息
@@ -165,13 +175,13 @@ public class ClueInfoDetailController {
      * @return
      */
     @RequestMapping("/inviteCustomer")
-    public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, @RequestParam String cusName, @RequestParam String cusPhone,
-            Model model) {
+    public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, @RequestParam String projectId,
+            @RequestParam String cusName, @RequestParam String cusPhone, Model model) {
         UserInfoDTO userInfoDTO = getUser();
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
-
+        request.setAttribute("projectId", projectId);
         // 查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(IS_NOT_SIGN_NO);
@@ -195,7 +205,7 @@ public class ClueInfoDetailController {
     }
 
     /**
-     * 进入详情页面
+     * 进入详情页面 跟进记录主账号看自己和所有的子账号的 子账号看自己和主账号的 通话记录主账号看自己和所有的子账号的 子账号自能看自己的
      *
      * @param idEntityLong
      * @return
@@ -207,13 +217,19 @@ public class ClueInfoDetailController {
         log.info("ClueInfoDetailController.customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
         List<Long> userList = new ArrayList<>();
+        // 通话记录用户集合
+        List<Long> callUserList = new ArrayList<>();
         // 商家主账户能看商家子账号所有的记录
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
+            callUserList.addAll(userList);
         }
-        // 商家子账号看自己的记录
+        // 跟进记录商家子账号看自己和主账号的记录
+        // 通话记录子账号只看自己的
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userList.add(user.getId());
+            userList.add(user.getParentId());
+            callUserList.add(user.getId());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
         queryDTO.setClueId(clueId);
@@ -222,8 +238,10 @@ public class ClueInfoDetailController {
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId + "");
         if (CollectionUtils.isNotEmpty(userList)) {
-            call.setAccountIdList(userList);
             fileDto.setIdList(userList);
+        }
+        if (CollectionUtils.isNotEmpty(callUserList)) {
+            call.setAccountIdList(callUserList);
         }
         JSONResult<ClueDTO> clueInfo = clueInfoDetailFeignClient.findClueInfo(queryDTO);
         if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
@@ -268,6 +286,7 @@ public class ClueInfoDetailController {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
         }
+        dto.setUserList(getUserList());
         return clueInfoDetailFeignClient.updateCustomerClue(dto);
     }
 
@@ -289,9 +308,10 @@ public class ClueInfoDetailController {
         if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
             getSubAccountIds(userList, user.getId());
         }
-        // 商家子账号看自己的记录
+        // 商家子账号看自己和主账号的记录
         if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
             userList.add(user.getId());
+            userList.add(user.getParentId());
         }
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(String.valueOf(idEntityLong.getId()));
@@ -309,8 +329,36 @@ public class ClueInfoDetailController {
             list.sort(comparator.reversed());
             CallRecordRespDTO callRecordRespDTO = list.get(0);
             now = callRecordRespDTO.getStartTime();
+            if (StringUtils.isNotBlank(now)) {
+                now = DateUtil.timeStamp2Str(now, DateUtil.ymdhms);
+            }
         }
         return new JSONResult<String>().success(now);
+    }
+
+    /**
+     * 获取登录人集合 如果登录人为主账号 则集合为所有子账号和主账号本身 如果登录人为子账号 则集合为主账号和子账号本身
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2019/10/18 14:46
+     * @since: 1.0.0
+     **/
+    private List<Long> getUserList() {
+        UserInfoDTO user = getUser();
+        List<Long> userList = new ArrayList<>();
+        // 商家主账户能看商家子账号所有的记录
+        if (SysConstant.USER_TYPE_TWO.equals(user.getUserType())) {
+            getSubAccountIds(userList, user.getId());
+        }
+        // 商家子账号看自己和主账号的记录
+        if (SysConstant.USER_TYPE_THREE.equals(user.getUserType())) {
+            userList.add(user.getId());
+            userList.add(user.getParentId());
+        }
+        return userList;
+
     }
 
     /**

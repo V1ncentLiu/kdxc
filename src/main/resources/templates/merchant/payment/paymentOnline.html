@@ -21,9 +21,9 @@
     .merchantGreyBox{background: #eff2f9;padding:30px 18px;border-radius: 4px;margin-bottom: 35px; }
 
     /*支付页面*/
-    .paymentOnline ul{overflow: hidden;width: 1110px;background: #f2f5fc;}
+    .paymentOnline ul{overflow: hidden;width: 1065px;background: #f2f5fc;}
     .paymentOnline ul li{float: left;width: 50%;font-size: 16px;color: #666;}
-    .paymentOnline ul li p{border-right: 1px solid #ecedf2;border-bottom: 1px solid #e6eaf4;padding:19px;}
+    .paymentOnline ul li p{border-right: 1px solid #ecedf2;border-bottom: 1px solid #e6eaf4;padding:12px 0 12px 25px;}
     .paymentOnline ul li:nth-of-type(even) p{border-right: none;}
     .paymentOnline ul li span{display: inline-block;}
     .paymentOnline ul li span em{display: inline-block;}   
@@ -33,8 +33,10 @@
     .paymentImg .f-fl{margin-right: 50px;}
     .paymentImg img{width: 250px;}
     .rechargeMoney .el-form-item__error{padding-left: 72px;}
-    .preferentialH{max-height: 117px;}
-      
+    .preferentialH{max-height: 91px;}
+    .el-form-item__label,.el-form-item__content{font-size: 14px;} 
+    .paymentTitle{font-size: 14px;}  
+    .el-input__inner{height: 36px;}   
     </style>
 </head>
 <body>
@@ -50,31 +52,31 @@
             <ul :class="{preferentialH:isClass}">                
                 <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值：<em class="w100 f-tac">{{item.rechargeAmount}}</em><em style="margin-right: 30px;">+</em></span><span>送：<em class="w100 f-tac">{{item.givenAmount}}</em><em style="margin-right: 40px;">=</em></span><span>得：<em class="w100 f-tac">{{item.totalAmount}}</em></span></p></li>
             </ul>
-            <div class="f-tac" style="width: 1110px;padding-top: 10px;" v-show="isShowMore">
-                <span style="color: #5c6be8;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+            <div class="f-tac" style="width: 1085px;padding-top: 10px;" v-show="isShowMore">
+                <span style="color: #3a84f4;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
             </div>
         </el-row>        
         <el-row class="merchantMainBox padding20 marginB20" v-if="paymentIsShow">
             <div style="text-align: center;margin:50px 0 40px;"><img th:src="@{/images/step1.jpg}" alt=""> </div>
             <div style="width: 540px;margin:0 auto 40px">
-                <el-row class="marginB20"> 
-                    <el-form-item label="当前余额：" label-width="73px">
+                <el-row style="margin-bottom: 40px;"> 
+                    <el-form-item label="当前余额：" label-width="84px">
                          <span>{{merchantUserAccountDTO.totalAmounts}}</span>
                     </el-form-item>
                     <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney" class="rechargeMoney">
                         <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;" maxLength="7" @keyup.native="number"></el-input>元
                     </el-form-item>
                 </el-row>            
-                <div class="paymentTitle marginB20"><span class="redcolor" style="margin-right: 5px;">*</span>选择支付方式：<span style="padding:0 55px 0 30px;">线上支付</span><span><a href="/merchant/merchantRechargePreferential/initOfflinePayment" style="color: #3a84f4;text-decoration: underline;">线下支付</a></span></div> 
+                <div class="paymentTitle marginB20"><span class="redcolor" style="margin-right: 5px;">*</span>选择支付方式：<span style="padding:0px 40px 0px 20px;">线上支付</span><span><a href="/merchant/merchantRechargePreferential/initOfflinePayment" style="color: #4d81ff;text-decoration: underline;">线下支付</a></span></div> 
                 <el-form-item label="" label-width="auto">  
-                    <el-radio v-model="form.rechargeWay" label="1" style="margin-right: 130px;">支付宝</el-radio>
+                    <el-radio v-model="form.rechargeWay" label="1" style="margin-right: 125px;">支付宝</el-radio>
                     <el-radio v-model="form.rechargeWay" label="2">微信支付</el-radio>
                 </el-form-item>
-                <div class="paymentImg clearFix marginB20">
+                <div class="paymentImg clearFix" style="margin-bottom: 30px;">
                     <div class="f-fl"><img th:src="@{/images/iconPayment.png}" alt="" style="width: 175px;"></div>
                     <div class="f-fl"><img th:src="@{/images/iconPayment1.png}" alt="" style="width: 175px;"></div>
                 </div>
-                <el-button type="primary" @click="submitForm('form')" style="width:140px;height: 50px;">下一步</el-button>
+                <el-button type="primary" @click="submitForm('form')" style="width:114px;height: 36px;">下一步</el-button>
             </div>
         </el-row>        
     </el-form>
@@ -84,7 +86,7 @@
             <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">￥{{rechargeMoneyWx}}</span>，请使用微信扫描下方二维码完成支付</p>
             <div id="qrCode" ref="qrCodeDiv" style="margin: 0 auto 15px;width: 120px;"></div>
             <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
-            <el-button type="primary" style="width:140px;height: 50px;" @click="goback">上一步</el-button>
+            <el-button type="primary" style="width:114px;height: 36px;" @click="goback">上一步</el-button>
         </div>
     </el-row>
     

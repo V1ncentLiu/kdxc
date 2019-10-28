@@ -548,18 +548,23 @@ var mainDivVM = new Vue({
               ]
         },
     },
-    computed: {
-
-        formSigningAmountPerformance(){
+    
+    methods: {
+    	number3() {//添加签约单业绩金额
+            this.formSigning.performanceAmount = this.formSigning.performanceAmount.replace(/[^\.\d]/g, '');
+            this.formSigning.performanceAmount = this.formSigning.performanceAmount.replace('.', '');
+        },
+        number4() {//编辑签约单业绩金额
+            this.updateFormSigning.performanceAmount = this.updateFormSigning.performanceAmount.replace(/[^\.\d]/g, '');
+            this.updateFormSigning.performanceAmount = this.updateFormSigning.performanceAmount.replace('.', '');
+        },
+    	formSigningAmountPerformance() {
             var aone = parseFloat(this.formSigning.amountReceived);
             var atwo = parseFloat(this.formSigning.firstToll);
-            if(isNaN(aone)) aone = 0
-            if(isNaN(atwo)) atwo = 0
-            return aone + atwo
-        }
-    },
-    methods: {
-
+            if (isNaN(aone)) aone = 0
+            if (isNaN(atwo)) atwo = 0
+            this.formSigning.performanceAmount = (aone + atwo) + ""
+        },
       updateFormSigningAmountPerformance(){
         var aone = parseFloat(this.updateFormSigning.amountReceived);
         var atwo = parseFloat(this.updateFormSigning.firstToll);
@@ -1057,7 +1062,7 @@ var mainDivVM = new Vue({
             //关闭未到访原因弹窗
             this.notVisitdDialogVisible=false;
            // 打开编辑到访记录
-            this.('addVisitRecord')
+            this.resetForm('addVisitRecord')
             var param ={};
             if(row.clueId){
                 param.id = row.clueId;
@@ -1595,9 +1600,9 @@ var mainDivVM = new Vue({
             if( this.formSigning.payTime){
                 this.formSigning.payTime = new Date( this.formSigning.payTime);
             }
+            this.formSigning.amountPerformance = this.formSigning.performanceAmount;
             this.formSigning.payMode = mainDivVM.tansPayModeNameToValue(this.formSigning.payModes);
             var param = this.formSigning;
-            param.amountPerformance = this.formSigningAmountPerformance;
             console.log(param)
             // 设置 clueid
             this.$refs[formName].validate((valid) => {

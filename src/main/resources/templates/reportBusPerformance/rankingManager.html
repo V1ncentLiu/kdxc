@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+</head>
+<body>
+    <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>数据报表</el-breadcrumb-item>
+            <el-breadcrumb-item>商务业绩排名<span style="color:red;">（暂时支持每天更新一次数据，更新时间：每天早上7:00）</span></el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="marginB20">
+            <el-button type="primary" @click="searchMonth">月累计排名</el-button>
+            <el-button type="success" @click="searchYear">年累计排名</el-button>
+            <el-button type="warning" @click="searchMonthAverage">年累计月均排名</el-button> 
+            <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
+            <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
+            <!-- </shiro:hasPermission> -->
+        </el-row>
+        <div class="mainSearchBg">        
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                    <el-form-item label="商务大区：">
+                        <el-select v-model="form.area" placeholder="全部" style="width: 100%;" clearable filterable @change="curDepart">
+                            <el-option
+                                v-for="item in areaArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="商务组：">  
+                        <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale">
+                            <el-option
+                                v-for="item in deptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="商务经理：">  
+                        <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable @change="curTelSale" filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <div class="mainSearchBtnBox">
+                        <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
+                    </div>  
+                </el-form>
+            </div>
+            <el-row>
+                <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+                    <el-tab-pane label="商务组排名" name="first" v-if="isShowDept"></el-tab-pane>
+                    <el-tab-pane label="商务经理排名" name="second"></el-tab-pane>
+                </el-tabs>
+                <el-table 
+                    ref="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="tableData"
+                    v-loading="loading"
+                    :cell-style="centerStyle"
+                    :header-cell-style="centerStyle">
+                    <el-table-column type="index" label="序号" width="55"></el-table-column>
+                    <el-table-column prop="businessLineRank" label="全国排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.businessLineRank == 1||scope.row.businessLineRank == 2||scope.row.businessLineRank == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.businessLineRank}}
+                            </div>
+                            <span v-else>{{scope.row.businessLineRank}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="groupRank" label="大区排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.centerRank == 1||scope.row.centerRank == 2||scope.row.centerRank == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.centerRank}}
+                            </div>
+                            <span v-else>{{scope.row.centerRank}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="groupRank" label="商务组内排名">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.groupRank == 1||scope.row.groupRank == 2||scope.row.groupRank == 3">
+                                <img src="/images/icon_ranking_champion.png" alt="" style="width: 24px;height: 24px;vertical-align: bottom;">
+                                {{scope.row.groupRank}}
+                            </div>
+                            <span v-else>{{scope.row.groupRank}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="teleName" label="商务经理">
+                        <template slot-scope="scope">
+                            <el-button type="text" size="small" v-if="scope.row.id == curUserId">
+                                {{scope.row.businessName}}
+                            </el-button>
+                            <span v-else>{{scope.row.businessName}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="groupName" label="商务组"></el-table-column>
+                    <el-table-column prop="centerName" label="商务大区"></el-table-column>
+                </el-table>
+                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            </el-row>
+        </div>
+    </div>
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
+</body>
+<div th:include="_footer_include :: #jsLib"></div>
+<script  th:inline="javascript">
+
+    var curUserId=[[${curUserId}]];
+    var areaList=[[${areaList}]];// 地区
+    var deptList=[[${deptList}]];// 事业部
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                activeName: 'second',
+                loading: false,
+                isShowDept: false,
+                isShowOrg: false,
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 30,
+                },
+                form: {
+                    area:'',
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: '',
+                    type: 1
+                },
+                export: {
+                    area:'',
+                    teleDeptId: '',
+                    teleGroupId: '',
+                    teleSaleId: '',
+                    type: 1
+                },
+                tableData: [],
+                areaArr: areaList,
+                deptList: '',
+                orgTeleArr:'', // 电销组
+                busSaleArr: '', // 电销顾问
+                curUserId: curUserId
+            }             
+        },
+        methods: {    
+            handleClick(tab, event) {
+                if(tab.name=='first'){
+                    window.location.href="/busRanking/busRankingList";
+                }else if (tab.name == 'second'){
+                    window.location.href="/busRanking/busManageRankingList";
+                }
+            },  
+            centerStyle(){
+                return "text-align:center"
+            },
+            curDepart(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleDeptId = '';
+                this.form.teleGroupId = '';
+                this.form.teleSaleId = '';
+                this.getDepart(seleVal);
+            },
+            getDepart(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=2;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.deptList=response.data.data;
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "查询事业部请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            curTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleSaleId = '';
+                this.getTelSale(seleVal);
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.form.teleSaleId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="SWJL";
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getTelSale(seleVal){
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            searchTable(firstPage) { 
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+    
+                if(firstPage){
+                    param.pageNum = firstPage;
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
+                param.centerId = this.form.area;
+                param.groupId = this.form.teleDeptId;
+                // param.groupId = this.form.teleGroupId;
+                param.userId = this.form.teleGroupId;
+                param.type = this.form.type;
+                //查询参数 4 商务组  5 商务经理
+                param.selectType = "5";
+                this.loading = true; 
+                axios.post('/busRanking/getBusPerformanceRankPage',param).then(function (response) {
+                    if(!response || !response.data){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(resobj.code != '0'){
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }else if(resobj.data){   
+                        var tableData = resobj.data;
+                        mainDivVM.tableData = tableData.data;
+                        mainDivVM.pager.currentPage = tableData.currentPage;
+                        mainDivVM.pager.total = tableData.total;
+                        mainDivVM.loading = false;
+                        mainDivVM.export.area = mainDivVM.form.area;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
+                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
+                        mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
+                        mainDivVM.export.type = mainDivVM.form.type;
+                    }else{
+                        mainDivVM.loading = false;
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            limitTime (start, end) {
+                var endTime = this.minuteFormat (end);
+                var startTime = this.minuteFormat (start);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
+            },
+            percentFormat(row, column) { //百分比格式化
+                var percent = row[column.property];
+                if (!percent) { // 如果没有值或值为0
+                    return "0%";
+                }
+                percent = (percent * 1000) / 10 + "%";
+                return percent;
+            },
+            minuteFormat (m) {
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear()
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                return timeRes;
+            },
+            searchMonth(){ // 月
+                this.form.type = 1
+                this.searchTable(1);
+            },
+            searchYear(){ // 年
+                this.form.type = 2
+               this.searchTable(1);
+            },
+            searchMonthAverage(){ // 年累计月均排名
+               this.form.type = 3
+               this.searchTable(1);
+            },
+            exportRs(){
+                var param = {};
+                param.centerId = this.form.area;
+                param.groupId = this.form.teleDeptId;
+                // param.departId = this.form.teleDeptId;
+                // param.groupId = this.form.teleGroupId;
+                param.userId = this.export.teleGroupId;
+                param.type = this.export.type;
+                param.selectType = "5";
+                axios.post('/busRanking/exportBusPerformanceRankList',param,{responseType:'blob'})
+                .then(function (response) {
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    mainDivVM.$message({
+                        message: "导出失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            }
+        },
+	created(){
+        if(curUserId){
+            this.isShowDept = false;
+        }else{
+            this.isShowDept = true;
+        }
+		this.searchTable();
+	},
+	mounted(){
+        document.getElementById('maindiv').style.display = 'block';
+    }
+});
+</script>
+</body>
+</html>
