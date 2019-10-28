@@ -109,6 +109,13 @@ public class CallPackageController {
     }
 
 
+
+    @PostMapping("/schedule/deduct/callCost")
+    public JSONResult<String> scheduleDeductCallCost(@RequestParam("day") String day){
+        log.info("scheduleDeductCallCost,param={}",day);
+        return callPackageJobFeignClient.scheduleDeductCallCost(day);
+    }
+
     /**
      * 获取当前登录账号
      *
