@@ -194,17 +194,17 @@
             </el-form-item>
             <div class="get-search-time">
               <div class="get-time">预约来访时间:</div>
-              <div class="time-style" v-drag>
-                <el-form-item class="search-box-margin" prop="reserveStartTime">
-                  <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.reserveStartTime" type="datetime"
-                    placeholder="选择开始时间">
-                  </el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto" prop="reserveEndTime">
-                  <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.reserveEndTime" type="datetime"
-                    placeholder="选择结束时间">
-                  </el-date-picker>
-                </el-form-item>
+              <div class="time-style" :class="{'selectActive':colorStatus}">
+                  <el-form-item class="search-box-margin" prop="reserveStartTime">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss"  v-on:focus="setColor"  v-on:blur="changeNameFun" v-model="form.reserveStartTime" type="datetime"
+                      placeholder="选择开始时间">
+                    </el-date-picker>
+                  </el-form-item>
+                  <el-form-item label="—" class="widthauto" prop="reserveEndTime">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss"  v-on:focus="setColor" v-on:blur="changeNameFun" v-model="form.reserveEndTime" type="datetime"
+                      placeholder="选择结束时间">
+                    </el-date-picker>
+                  </el-form-item>
               </div>
             </div>
             <el-form-item label="考察项目:" prop="proSelect">
@@ -291,21 +291,26 @@
         colorStatus:false
       }
     },
-    // directives: {
-		// 		drag(el){
-		// 			el.onmousedown = function(e){
-		// 				ocmVM.colorStatus=true;
-    //         console.log(1);
-		// 				document.onmousemove = function(e) {
-    //           ocmVM.colorStatus=true;
-		// 				}
-		// 				document.onmouseup = function(e) {
-    //           ocmVM.colorStatus=true;
-		// 				}
-		// 			}
-		// 		}
-		// 	},
+    directives: {
+				drag(el){
+					el.onmousedown = function(e){
+						ocmVM.colorStatus=true;
+						document.onmousemove = function(e) {
+              ocmVM.colorStatus=true;
+						}
+						document.onmouseup = function(e) {
+              ocmVM.colorStatus=true;
+						}
+					}
+				}
+			},
     methods: {
+      changeNameFun(obj){
+        this.colorStatus=false;
+      },
+      setColor(e){
+        this.colorStatus=true;
+      },
        searchTable() {
         var startTime = this.form.reserveStartTime;
         var endTime = this.form.reserveEndTime;

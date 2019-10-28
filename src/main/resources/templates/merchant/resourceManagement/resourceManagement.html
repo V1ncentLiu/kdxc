@@ -173,13 +173,13 @@
                         </el-form-item>
                         <div class="get-search-time">
                             <div class="get-time">获取时间:</div>
-                            <div  class="time-style">
+                            <div  class="time-style" :class="{'selectActive':colorStatus}">
                                 <el-form-item  class="search-box-margin" prop="searchStartTime">
-                                    <el-date-picker v-model="form.searchStartTime" type="datetime" placeholder="选择开始时间">
+                                    <el-date-picker v-model="form.searchStartTime" type="datetime"  v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始时间">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="searchEndTime">
-                                    <el-date-picker v-model="form.searchEndTime" type="datetime" placeholder="选择结束时间">
+                                    <el-date-picker v-model="form.searchEndTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择结束时间">
                                     </el-date-picker>
                                 </el-form-item>
                             </div>
@@ -483,6 +483,7 @@
                 proSelect: proSelect,//考察项目
                 clueId: '',//资源cusName
                 getCusName: '',
+                colorStatus:false,
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -596,6 +597,13 @@
                     this.$set(this.form, 'searchStartTime', '');
                     this.$set(this.form, 'searchEndTime', '');
                 }
+            },
+            changeNameFun(){
+                console.log(this.colorStatus,99);
+                this.colorStatus=false;
+            },
+            setColor(){
+                this.colorStatus=true;
             },
             // 获取时间
             getTime(cid) {
