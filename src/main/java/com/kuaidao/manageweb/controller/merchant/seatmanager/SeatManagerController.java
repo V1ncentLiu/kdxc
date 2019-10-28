@@ -55,10 +55,13 @@ public class SeatManagerController {
   @RequestMapping("/toPage")
 //  @RequiresPermissions("merchant:seatMagager:view")
   public String toPage(HttpServletRequest request, @RequestParam Long userId,@RequestParam Long buyPackageId,@RequestParam Long packageId) {
-    UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
     // 商家主账号
+    UserInfoDTO merchantById = merchantComponent.getMerchantById(userId);
+    // 商家子账号
     List<UserInfoDTO> userList = merchantComponent.getMerchantSubUser(userId,null);
-
+    if(merchantById!=null){
+      userList.add(merchantById);
+    }
     request.setAttribute("userList", userList);
     request.setAttribute("userId",userId); // 商家ID
     request.setAttribute("userName",merchantById.getName()); // 商家ID
