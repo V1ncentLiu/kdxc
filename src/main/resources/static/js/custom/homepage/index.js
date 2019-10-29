@@ -51,7 +51,9 @@ var homePageVM=new Vue({
 		   	isLogin:false,//坐席是否登录
 		   	isTrClient:false,//天润坐席是否登录
 		   	isQimoClient:false,//七陌坐席是否登录
-		   	isHeliClient:false,//合力坐席是否登录
+            isHeliClient:false,//合力坐席是否登录
+            isKeTianClient:false,//科天坐席是否登录
+		   	isRongLianClient:false,//容联坐席是否登录
 	    	callTitle:'呼叫中心',
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
@@ -308,6 +310,12 @@ var homePageVM=new Vue({
         		}else if(this.isHeliClient){
         			this.loginClientForm.clientType=3;
         			this.dialogLogoutClientVisible  = true;
+                }else if(this.isKeTianClient){
+                    this.loginClientForm.clientType=4;
+                    this.dialogLogoutClientVisible  = true;
+                }else if(this.isRongLianClient){
+                    this.loginClientForm.clientType=5;
+                    this.dialogLogoutClientVisible  = true;
         		}else{
         			 if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
@@ -348,8 +356,11 @@ var homePageVM=new Vue({
         		this.loginClientForm.bindPhoneType = 1;
 			}else if (selectedValue==1 || selectedValue ==3){//天润 合力
         		this.loginClientForm.bindPhoneType = 2;
-
-			}
+			}else if (selectedValue==4){//科天
+                this.loginClientForm.bindPhoneType = 3;
+            }else if (selectedValue==5){//容联
+                this.loginClientForm.bindPhoneType = 4;
+            }
         },
         loginClient(formName){
        	 this.$refs[formName].validate((valid) => {
@@ -361,7 +372,11 @@ var homePageVM=new Vue({
              		this.loginQimoClient();
              	}else if(clientType==3){
              		this.loginHeliClient();
-             	}
+             	}else if(clientType==4){//科天坐席登录
+                    this.loginKeTianClient();
+                }else if(clientType==5){//容联坐席登录
+                    this.loginRongLianClient();
+                }
              	
              } else {
                return false;
@@ -650,6 +665,12 @@ var homePageVM=new Vue({
 			
 			
         },
+        loginKeTianClient(){//科天登录
+
+        },
+        loginRongLianClient(){//容连登录
+
+        },
         logoutClient(formName){//坐席退出
         	if(this.isQimoClient){
         		 axios.post('/client/client/qimoLogout',{})
@@ -709,7 +730,11 @@ var homePageVM=new Vue({
          	   this.trClientLogout();
         	}else if(this.isHeliClient){
         		this.heliClientLogout();
-        	}
+        	}else if(this.isHeliClient){
+                this.KeTianClientLogout();
+            }else if(this.isHeliClient){
+                this.RongLianClientLogout();
+            }
         },
         heliClientLogout(){
          var param = {};
@@ -782,6 +807,12 @@ var homePageVM=new Vue({
              });
         	 
         	 
+        },
+        KeTianClientLogout(){
+
+        },
+        RongLianClientLogout(){
+
         },
         openOutboundDialog(){//打开主动外呼diaolog 
         	this.dialogOutboundVisible = true;
