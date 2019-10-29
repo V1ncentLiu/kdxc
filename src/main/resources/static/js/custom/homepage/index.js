@@ -154,11 +154,21 @@ var homePageVM=new Vue({
             		 },trigger:'blur'},
             	]
             },
-            ktClientFormRules:{//登录坐席校验规则
-                
-            },
             rlClientFormRules:{//登录坐席校验规则
-                
+                clientType:[
+                    { required: true, message: '选择呼叫中心不能为空'}
+                ],
+                loginClient:[
+                    { required: true, message: '登录坐席不能为空'},
+                    {validator:function(rule,value,callback){
+                     if(!/^[0-9]*$/.test(value)){
+                              callback(new Error("只可以输入数字,不超过10位"));     
+                          }else{
+                              callback();
+                          }
+                     
+                 },trigger:'blur'},
+                ],
             },
           /*  clientRules:'trClientFormRules',*/
             enterpriseId:enterpriseId,
@@ -1042,9 +1052,9 @@ var homePageVM=new Vue({
 	    		 return this.qimoClientFormRules;
 	    	}else if(clientType==3){
 	    		 return this.heliClientFormRules;
-	    	}else if(clientType==4){
-                 return this.ktClientFormRules;
-            }else if(clientType==5){
+	    	}else if(clientType==4){//科天
+                 return this.qimoClientFormRules;
+            }else if(clientType==5){//容联
                  return this.rlClientFormRules;
             }
 	    }
