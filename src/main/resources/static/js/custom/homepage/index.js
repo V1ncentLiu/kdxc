@@ -72,6 +72,12 @@ var homePageVM=new Vue({
             }, {
                 value: 3,
                 label: '登录合力呼叫中心'
+            }, {
+                value: 4,
+                label: '登录科天呼叫中心'
+            }, {
+                value: 5,
+                label: '登录容联呼叫中心'
             }],
             bindPhoneTypeOptions: [
             	{
@@ -146,6 +152,12 @@ var homePageVM=new Vue({
             			 
             		 },trigger:'blur'},
             	]
+            },
+            ktClientFormRules:{//登录坐席校验规则
+                
+            },
+            rlClientFormRules:{//登录坐席校验规则
+                
             },
           /*  clientRules:'trClientFormRules',*/
             enterpriseId:enterpriseId,
@@ -1001,7 +1013,11 @@ var homePageVM=new Vue({
 	    		 return this.qimoClientFormRules;
 	    	}else if(clientType==3){
 	    		 return this.heliClientFormRules;
-	    	}
+	    	}else if(clientType==4){
+                 return this.ktClientFormRules;
+            }else if(clientType==5){
+                 return this.rlClientFormRules;
+            }
 	    }
 	 }
 })
