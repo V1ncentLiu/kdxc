@@ -45,8 +45,7 @@ var homePageVM=new Vue({
 		   			{ required: true, message: '确认密码不能为空',trigger:'blur'},
 		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
 		   		    { validator: validatePass, trigger: 'blur' }
-		   		 ]
-		   		
+		   		 ]		   		
 		   	},
 		   	isLogin:false,//坐席是否登录
 		   	isTrClient:false,//天润坐席是否登录
@@ -155,11 +154,21 @@ var homePageVM=new Vue({
             		 },trigger:'blur'},
             	]
             },
-            ktClientFormRules:{//登录坐席校验规则
-                
-            },
             rlClientFormRules:{//登录坐席校验规则
-                
+                clientType:[
+                    { required: true, message: '选择呼叫中心不能为空'}
+                ],
+                loginClient:[
+                    { required: true, message: '登录坐席不能为空'},
+                    {validator:function(rule,value,callback){
+                     if(!/^[0-9]*$/.test(value)){
+                              callback(new Error("只可以输入数字,不超过10位"));     
+                          }else{
+                              callback();
+                          }
+                     
+                 },trigger:'blur'},
+                ],
             },
           /*  clientRules:'trClientFormRules',*/
             enterpriseId:enterpriseId,
@@ -352,14 +361,13 @@ var homePageVM=new Vue({
         	this.$refs.loginClientForm.resetFields();
         	this.$refs.loginClientForm.clearValidate();
         	this.loginClientForm.clientType=selectedValue;
-        	if(selectedValue==2){//七陌
+            // bindPhoneType绑定类型 1是手机外显2是普通电话
+        	if(selectedValue==2 || selectedValue==4){//七陌、科天
         		this.loginClientForm.bindPhoneType = 1;
 			}else if (selectedValue==1 || selectedValue ==3){//天润 合力
         		this.loginClientForm.bindPhoneType = 2;
-			}else if (selectedValue==4){//科天
-                this.loginClientForm.bindPhoneType = 3;
-            }else if (selectedValue==5){//容联
-                this.loginClientForm.bindPhoneType = 4;
+			}else if (selectedValue==5){//容联
+                this.loginClientForm.bindPhoneType = "";
             }
         },
         loginClient(formName){
@@ -461,6 +469,8 @@ var homePageVM=new Vue({
                      homePageVM.isQimoClient=true;
                      homePageVM.isTrClient=false;
                      homePageVM.isHeliClient=false;
+                     homePageVM.isKeTianClient=false;
+                     homePageVM.isRongLianClient=false;
                      //sessionStorage.setItem("loginClient","qimo");
                      //sessionStorage.setItem("accountId",homePageVM.accountId);
                      var clientInfo={};
@@ -1044,9 +1054,9 @@ var homePageVM=new Vue({
 	    		 return this.qimoClientFormRules;
 	    	}else if(clientType==3){
 	    		 return this.heliClientFormRules;
-	    	}else if(clientType==4){
-                 return this.ktClientFormRules;
-            }else if(clientType==5){
+	    	}else if(clientType==4){//科天
+                 return this.qimoClientFormRules;
+            }else if(clientType==5){//容联
                  return this.rlClientFormRules;
             }
 	    }
