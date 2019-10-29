@@ -141,11 +141,15 @@ public class KetianClientController {
             logger.warn("update client ,illegal param {{}}", reqDTO);
             return CommonUtil.getParamIllegalJSONResult();
         }
+        Long id = reqDTO.getId();
+        if(id == null){
+            return CommonUtil.getParamIllegalJSONResult();
+        }
         return ketianFeignClient.insertAndUpdateClient(reqDTO);
     }
 
     /**
-     * 根据坐席号查询坐席信息
+     * 根据登录名查询坐席信息
      * 
      * @param ketianClientReqDTO
      * @return
