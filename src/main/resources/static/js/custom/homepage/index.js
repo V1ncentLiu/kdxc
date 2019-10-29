@@ -469,6 +469,8 @@ var homePageVM=new Vue({
                      homePageVM.isQimoClient=true;
                      homePageVM.isTrClient=false;
                      homePageVM.isHeliClient=false;
+                     homePageVM.isKeTianClient=false;
+                     homePageVM.isRongLianClient=false;
                      //sessionStorage.setItem("loginClient","qimo");
                      //sessionStorage.setItem("accountId",homePageVM.accountId);
                      var clientInfo={};
