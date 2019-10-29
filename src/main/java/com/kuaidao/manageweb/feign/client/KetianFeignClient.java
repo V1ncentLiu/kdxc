@@ -1,9 +1,6 @@
 package com.kuaidao.manageweb.feign.client;
 
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientInsertAndUpdateReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientPageReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientRespDTO;
+import com.kuaidao.callcenter.dto.ketianclient.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -59,6 +56,15 @@ public interface KetianFeignClient {
     @PostMapping("/insertAndUpdateClient")
     JSONResult insertAndUpdateClient(KetianClientInsertAndUpdateReqDTO reqDTO);
 
+    /**
+     * 外呼
+     * @param outboundDTO
+     * @return
+     */
+    @PostMapping("/outbound")
+    JSONResult outbound(@RequestBody  KetianClientOutboundDTO outboundDTO);
+
+
     @Component
     static class HystrixClientFallback implements KetianFeignClient {
 
@@ -87,6 +93,11 @@ public interface KetianFeignClient {
         @Override
         public JSONResult insertAndUpdateClient(KetianClientInsertAndUpdateReqDTO reqDTO) {
             return fallBackError("添加或修改坐席");
+        }
+
+        @Override
+        public JSONResult outbound(KetianClientOutboundDTO outboundDTO) {
+            return fallBackError("坐席外呼失败");
         }
     }
 

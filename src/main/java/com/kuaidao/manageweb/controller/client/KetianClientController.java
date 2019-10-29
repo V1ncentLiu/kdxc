@@ -183,7 +183,7 @@ public class KetianClientController {
     @ResponseBody
     public JSONResult<Boolean> clientLoginRecord(@Valid @RequestBody KetianClientLoginDTO ketianClientLoginDTO, BindingResult result) {
         if (result.hasErrors()) {
-            logger.warn("ketian  clientLoginRecord param{{}}", ketianClientLoginDTO);
+            logger.warn("ketian  clientLoginRecord illegal param{{}}", ketianClientLoginDTO);
             return CommonUtil.validateParam(result);
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -208,6 +208,7 @@ public class KetianClientController {
         clientLoginRecord.setClientType(clientLoginRecord.getClientType());
         clientLoginRecord.setCno(ketianClientRespDTO.getClientExtNo());
         clientLoginRecord.setOrgId(curLoginUser.getOrgId());
+        clientLoginRecord.setAccountNo(ketianClientRespDTO.getUserName());
         return clientFeignClient.clientLoginRecord(clientLoginRecord);
     }
 
@@ -221,9 +222,10 @@ public class KetianClientController {
     @ResponseBody
     public JSONResult outbound(@Valid @RequestBody KetianClientOutboundDTO outboundDTO, BindingResult result) {
         if (result.hasErrors()) {
+            logger.warn("ketian outbound illegal param {{}}",outboundDTO);
             return CommonUtil.validateParam(result);
         }
-        return new JSONResult<>().success(true);
+        return ketianFeignClient.outbound(outboundDTO);
     }
 
 }
