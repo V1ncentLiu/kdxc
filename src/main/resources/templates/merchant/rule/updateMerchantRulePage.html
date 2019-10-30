@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+	<title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+<div id="addOptimizeRule" class="addOptimizeRule mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商家分发资源规则</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="inforTitle">修改规则</div> 
+    <el-form :model="form" :rules="rules" ref="form">
+        <div class="borderbox padding20">
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="规则名称：" prop="ruleName" :label-width="formLabelWidth">
+                        <el-input v-model="form.ruleName" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="资源项目：" prop="projectId" :label-width="formLabelWidth">
+                        <el-select v-model="form.projectId" multiple clearable filterable placeholder="请选择" style="width: 300px;">
+                            <el-option
+                                v-for="item in projectOptions"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
+                <el-col :span="12">
+                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+           
+            <el-row>
+                <el-col :span="12">
+                <el-form-item label="是否启用：" prop="isUse" :label-width="formLabelWidth">
+                    <el-select v-model="form.status" placeholder="请选择" style="width:300px;">
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
+                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                            <el-option
+                                v-for="item in categoryOptions"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>   
+            <el-form-item label="选择商家：" prop="chooseTeam" :label-width="formLabelWidth" style="margin-bottom: 15px;">
+                <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
+                <el-button type="primary" @click="addDomain">添加商家</el-button>
+            </el-form-item>
+            <el-table :data="form.teamList" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="userId" label="商家*">
+                    <template slot-scope="scope">
+                            <el-form-item :prop="'teamList.' + scope.$index + '.userId'" :rules='rules.userId' style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-select filterable v-model="scope.row.userId" placeholder="请选择" @change="getClueApply(scope.$index, form.teamList)">
+                                <el-option
+                                    v-for="item in userOptions"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column align="center" prop="applyArea" label="需求资源地域">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'teamList.' + scope.$index + '.applyArea'">
+                            <el-input  v-model="scope.row.applyArea" disabled="disabled"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="applyTime" label="申请周期" width="280">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'teamList.' + scope.$index + '.applyTime'"  style="width: 260px;margin:0 auto;height: 57px;">
+                            <el-input  v-model="scope.row.applyTime" disabled="disabled"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="applyNum" label="需求资源总条数" width="120">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'teamList.' + scope.$index + '.applyNum'"  style="width: 100px;margin:0 auto;height: 57px;">
+                            <el-input  v-model="scope.row.applyNum" disabled="disabled"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="dailyMaxNum" label="每日需求资源上限" width="120">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'teamList.' + scope.$index + '.dailyMaxNum'"  style="width: 100px;margin:0 auto;height: 57px;">
+                            <el-input  v-model="scope.row.dailyMaxNum" disabled="disabled"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*" width="140">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'teamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 120px;margin:0 auto;height: 57px;">
+                            <!-- input值 -->
+                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.teamList)" v-model="scope.row.resourceMaxNum" maxlength="10"></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.teamList)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.teamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+               
+                <el-table-column align="center" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.teamList)" type="text" size="small">删除</el-button>
+                    </template>
+            	</el-table-column>
+            </el-table>
+            
+            <div class="padding20 f-tac">            
+                <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
+                <el-button @click="cancelForm()">取 消</el-button>
+            </div> 
+        </div>        
+    </el-form>  
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+var categoryList=[[${categoryList}]];//资源类别集合
+var projectList=[[${projectList}]];//话务组集合
+var userList=[[${userList}]];//商家集合
+var merchantAssignRule=[[${merchantAssignRule}]];//规则
+    var aorVM = new Vue({
+        el: '#addOptimizeRule',
+        data: function() {
+            return {                
+                form: {
+                	 ruleName:'',
+                     startTime:'',
+                     endTime:'',
+                     projectId:[],
+                     category:[],
+                     status:1,
+                     teamList: [
+                         // {
+                         //      orgId:'',
+                         //      proportion:'',
+                         //      resourceMaxNum:'',
+                         //      isPrior:'',
+                         //      unlimited:'',//不限文字
+                         //      unlimitedVal:'',//不限-1取值
+                         //      unlimitedShow:false,//是否显示不限input
+                         // }
+                     ]
+                },
+                formLabelWidth: '180px',
+                rules:{
+                    ruleName: [
+                        { required: true, message: '请输入规则名称', trigger: 'blur' }
+                    ],
+                    startTime: [
+                        { required: true, message: '请选择规则有效开始时间', trigger: 'blur' }
+                    ],
+                    endTime: [
+                        { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
+                    ],
+                    category: [
+                        { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
+                    ],
+                    status: [
+                        { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
+                    ],                    
+                    chooseTeam: [
+                                 { validator:function(rule,value,callback){
+                                     if(aorVM.form.teamList.length==0){
+                                         callback(new Error("请添加商家"));
+                                         return;
+                                     }
+                                     callback();
+                                 }, trigger: 'change'}
+                             ],                    
+                    userId: [
+                                   { required: true, required: true, message: '请选择商家', trigger: 'change' }
+                               ],
+                   
+                    resourceMaxNum: [
+                        { required: true, required: true, message: '请添加资源条数', trigger: 'change' },
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数数字"));
+                            }else{
+                               callback();
+                            } 
+                            callback();
+                        }, trigger: 'change'}
+                    ],
+                },
+                submitDisabled:false,
+                userOptions:userList,
+                categoryOptions:categoryList,
+                projectOptions:projectList ,
+                statusOptions: [{
+                    value: 1,
+                    name: '启用'
+                }, {
+                    value: 0,
+                    name: '禁用'
+                }]
+            }        	  
+        },
+        methods: {
+            unlimitedBtn(index, rows){                
+                rows[index].unlimitedShow=true 
+                rows[index].unlimited="不限" 
+                rows[index].unlimitedVal="-1" 
+                rows[index].resourceMaxNum="0" //为了不让校验而赋的无用的值  
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].resourceMaxNum)                             
+            },
+            unlimitedIpt(index, rows){//点击不限input
+                rows[index].unlimitedShow=false 
+                rows[index].unlimited=""
+                rows[index].unlimitedVal="" 
+                rows[index].resourceMaxNum=""                             
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].resourceMaxNum)
+            },
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                    	var form = JSON.parse(JSON.stringify(this.form)); 
+                    	// 开始时间不能大约结束时间
+                        var startTime=form.startTime;
+                        var endTime=form.endTime;
+                        var  start=new Date(startTime).getTime();
+                        var  end=new Date(endTime).getTime();
+                        if(start>end){
+                            this.$message({
+                                message: '结束时间不允许选择早于开始时间',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+                     // 不能选择重复商家
+                        var orgIdChoose=form.teamList; 
+                        var ary=[];                   
+                        for(var i=0;i<orgIdChoose.length;i++){
+                        	var userId=orgIdChoose[i].userId;
+                            ary.push(userId);//把选择的值放入一个数组
+                            var s = ary.join(",")+","; 
+                            for(var j=0;j<ary.length;j++) {
+                                if(ary[j]!=""){
+                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
+                                        this.$message({
+                                            message: '请不要选择相同的商家',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }                                
+                            }
+                        }
+                    
+                        var param=form;
+                        param.ruleName=form.ruleName;
+                        param.startTime=form.startTime;
+                        param.endTime=form.endTime;
+                        param.status=form.status;
+                        param.teamList=form.teamList;
+                        if(this.form.projectId){
+	                        param.projectId=this.form.projectId.join(',');
+                        }else{
+                        	param.projectId='';
+                        }
+                        param.category=this.form.category.join(',');
+                       
+                        aorVM.submitDisabled=true;
+                        axios.post('/merchant/merchantAssignRule/update', param)
+	       	            .then(function (response) {
+	       	            	var data =response.data;
+	       	            	if(data.code!="0"){
+                                aorVM.$message(data.msg);
+                                aorVM.submitDisabled=false;
+	       	            	}else{
+	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    aorVM.submitDisabled=false;
+		       	                	document.location.href='/merchant/merchantAssignRule/initRuleList';
+	                      	    }});
+	       	            	}
+	       	            })
+	       	            .catch(function (error) {
+	       	            	aorVM.submitDisabled=false;
+                            console.log(error);
+	       	            });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            deleteRow(index, rows) {//删除一行表格
+                rows.splice(index, 1);
+            },
+            addFun1() {//添加包含搜索词
+                let searchWord = this.form.searchWord;
+                if (searchWord) {
+                    this.tags1.push(searchWord);
+                }
+                this.form.searchWord = '';
+            },
+            addDomain() {
+                // 取第一条
+                var first="";
+                
+                this.form.teamList.push({
+                    orgId: '',                    
+                    applyArea: '',                    
+                    applyNum: '',                    
+                    dailyMaxNum: '',                    
+                    applyTime: '',                    
+                    resourceMaxNum:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                });
+            },
+            resourceMaxNumber(index, rows){
+                for(var i=0;i<rows.length;i++){                    
+        　　      	  			rows[i].proportion=rows[i].proportion.replace(/[^\.\d]/g,'');
+                    rows[i].proportion=rows[i].proportion.replace('.','');                    
+                }
+        　　		},
+            resourceMaxNumber1(index, rows){
+                for(var i=0;i<rows.length;i++){                    
+        　　        				rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace(/[^\.\d]/g,'');
+                    rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace('.','');                    
+                }
+        　　		},
+      		cancelForm(){
+            	document.location.href='/merchant/merchantAssignRule/initRuleList';
+            },
+          //根据商家查询最新资源申请
+            getClueApply(index,rows) {
+              rows[index].orgId= '';
+          	  var param ={};
+          	  param.id =rows[index].userId;
+                axios.post('/merchant/merchantAssignRule/getPassByUserId', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var date=result.data;
+                      if(date){
+	                      rows[index].applyArea= date.applyArea;
+                    	  if(!date.applyArea){
+                    		  rows[index].applyArea="不限";
+                    	  }
+	                      rows[index].applyNum= date.applyNum;
+	                      rows[index].dailyMaxNum= date.dailyMaxNum;
+	                      rows[index].applyTime= moment(date.applyStartTime).format("YYYY-MM-DD HH:mm:ss")+"--"+moment(date.applyEndTime).format("YYYY-MM-DD HH:mm:ss");
+                      }
+                 })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
+        },
+        mounted(){
+            document.getElementById('addOptimizeRule').style.display = 'block';
+            this.form.id=merchantAssignRule.id;
+            this.form.ruleName=merchantAssignRule.ruleName;
+            this.form.startTime=merchantAssignRule.startTime;
+            this.form.endTime=merchantAssignRule.endTime;
+            this.form.category=merchantAssignRule.category.split(',');
+            if(merchantAssignRule.projectId){
+	            this.form.projectId=merchantAssignRule.projectId.split(',');
+            }
+            this.form.status=merchantAssignRule.status;
+            var teamList=merchantAssignRule.teamList;
+            for(var i=0;i<teamList.length;i++){
+            	if(teamList[i].resourceMaxNum==-1){
+            		this.unlimitedBtn(i,teamList);
+            	}
+            	if(teamList[i].applyStartTime&&teamList[i].applyEndTime){
+            		
+            		teamList[i].applyTime=moment(teamList[i].applyStartTime).format("YYYY-MM-DD HH:mm:ss")+"--"+moment(teamList[i].applyEndTime).format("YYYY-MM-DD HH:mm:ss")
+            	}
+            }
+            this.form.teamList=teamList;
+         
+        }
+    })
+</script>
+</html>

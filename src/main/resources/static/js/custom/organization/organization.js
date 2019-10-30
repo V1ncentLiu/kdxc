@@ -85,7 +85,8 @@
                 multipleSelection:[],//选择的列
                 btnDisabled: false, 
                 businessLineDisabledSelect:false,//是否禁用业务线下拉框
-                tgzxBusinessLine:''//临时业务线编码
+                tgzxBusinessLine:'',//临时业务线编码
+                searchOrgName:""
             }             
         },
         methods: {
@@ -212,6 +213,7 @@
               
                 param.parentId = parentId;
                 param.name = this.inputOrgName;
+                param.source = 1;
                 axios.post('/organization/organization/queryOrgDataByParam?pageNum='+pageNum+"&pageSize="+pageSize,param)
                     .then(function (response) {
                         var data =  response.data
@@ -324,7 +326,8 @@
                     	 this.form.businessLine = this.tgzxBusinessLine;
                      }
                  
-                    orgVM.btnDisabled = true;  
+                    orgVM.btnDisabled = true;
+                      param.source = 1;
                     axios.post('/organization/organization/'+this.submitUrl, param)
                     .then(function (response) {
                     	var resData = response.data;
@@ -371,7 +374,7 @@
               },
               
               initOrgTree(){//刷新根节点tree
-            	  axios.post('/organization/organization/query',{})
+            	  axios.post('/organization/organization/query',{source:1})
                   .then(function (response) {
                       var data =  response.data
                       if(data.code=='0'){
@@ -532,7 +535,11 @@
                   this.pagerStaffNum.pageSize = 20;
                 }
                 this.pagerStaffNum.currentPage = 1;
-              }
+              },
+            filterNode(value, data) {
+                if (!value) return true;
+                return data.label.indexOf(value) !== -1;
+            }
         },
        mounted(){
            document.getElementById('organizationManage').style.display = 'block';
@@ -550,5 +557,10 @@
     		   }
     		   return Number(str); 
     	   } 
-       }
+       },
+       watch: {
+           searchOrgName(val) {
+               this.$refs.tree.filter(val);
+           }
+       },
     })

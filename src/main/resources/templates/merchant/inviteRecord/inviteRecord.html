@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+  <title>后台管理系统</title>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="css/element-ui.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+  <style>
+    #optimizeClueManagement {
+      background: #f3f7fe;
+    }
+
+    .dialogForm .el-form-item {
+      margin-bottom: 5px;
+    }
+
+    .invite-area {
+      width: 94px;
+    }
+
+    .invite-margin {
+      margin: 0 10px;
+    }
+
+    .xreuired .el-form-item__label:before {
+      content: '* ';
+      color: red;
+    }
+
+    .input-width {
+      width: 310px;
+    }
+
+    .el-date-editor.el-input,
+    .el-date-editor.el-input__inner {
+      width: 310px;
+    }
+
+    .invite-top {
+      margin-top: 14px;
+    }
+
+    .el-input__inner {
+      background: #F2F4F8;
+      border: none;
+      border-radius: 6px;
+    }
+
+    .el-pagination {
+      margin-top: 30px;
+    }
+
+    .mainSearchFormBox {
+      margin: 0;
+      max-width: 100%;
+      padding: 10px 17px 20px;
+      flex-direction: row;
+      background: #fff;
+      margin-bottom: 15px;
+      box-shadow: 9px 11px 33px 7px rgba(73, 126, 250, 0.1);
+      border-radius: 8px;
+
+    }
+
+    .main-search-box {
+      width: calc(100% - 200px);
+    }
+
+    .mainSearchForm {
+      display: flex;
+      max-width: auto;
+      justify-content: space-between;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      width: auto;
+      max-width: 1110px;
+      margin: 0 auto;
+    }
+
+    .mainSearchBtnBox {
+      margin-bottom: 0;
+      padding: 10px 0 0;
+      display: flex;
+      width: 200px;
+      justify-content: flex-end;
+    }
+
+    .mainSearchBtnBox .el-button {
+      height: 36px;
+      border-radius: 6px;
+      padding: 0 15px;
+    }
+
+    .mainSearchBtnBox .el-button--default {
+      border: none;
+      background: none;
+      border-radius: 6px;
+      color: #4B80FF
+    }
+
+    .mainSearchBtnBox .searchBtn {
+      width: 100px;
+      background: linear-gradient(to left, #4B80FF, #769DF8);
+      /* box-shadow: 13px 21px 0.25 rgba(0,0,0,0.4); */
+      box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
+    }
+
+    .el-input--suffix .el-input__inner {
+      height: 36px;
+      line-height: 36px;
+    }
+
+    .el-form--inline .el-form-item {
+      margin-bottom: 0;
+      margin-top: 10px;
+      margin-right: 35px;
+    }
+
+    .el-icon-arrow-up:before {
+      content: "\E60C";
+      color: #294366;
+    }
+
+    .el-form--inline .el-form-item.search-box-margin {
+      margin-right: 0;
+    }
+
+    .mainSearchBg {
+      padding: 0;
+      background: none;
+    }
+
+    .mainSearchBg .el-form-item__label {
+      width: auto;
+    }
+
+    .el-table--border,
+    .el-table--group {
+      border-radius: 8px;
+      box-shadow: 0px 0px 41px 14px rgba(73, 127, 250, 0.1);
+    }
+
+    .el-table thead tr th {
+      background: #fff;
+      height: 58px;
+      line-height: 58px;
+      border: none;
+    }
+
+    .el-table td,
+    .el-table th.is-leaf {
+      border: none;
+    }
+
+    .el-table--enable-row-transition .el-table__body td {
+      height: 46px;
+      line-height: 46px;
+      border: none;
+    }
+
+    .el-table--enable-row-transition .el-table__body tr:nth-child(odd) td {
+      background-color: #f2f4f8;
+    }
+
+    .el-pagination.is-background .el-pager li:not(.disabled).active {
+      background: #4b80ff;
+    }
+
+    .el-table--border,
+    .el-table--group {
+      box-shadow: 0px 0px 41px 14px rgba(73, 127, 250, 0.1);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+      <el-breadcrumb-item>邀约来访记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="mainSearchBg">
+      <div class="mainSearchFormBox">
+        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+          <div class="main-search-box">
+            <el-form-item label="客户姓名:" prop="cusName">
+              <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
+            </el-form-item>
+            <div class="get-search-time">
+              <div class="get-time">预约来访时间:</div>
+              <div class="time-style" :class="{'selectActive':colorStatus}">
+                  <el-form-item class="search-box-margin" prop="reserveStartTime">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss"  v-on:focus="setColor"  v-on:blur="changeNameFun" v-model="form.reserveStartTime" type="datetime"
+                      placeholder="选择开始时间">
+                    </el-date-picker>
+                  </el-form-item>
+                  <el-form-item label="—" class="widthauto" prop="reserveEndTime">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss"  v-on:focus="setColor" v-on:blur="changeNameFun" v-model="form.reserveEndTime" type="datetime"
+                      placeholder="选择结束时间">
+                    </el-date-picker>
+                  </el-form-item>
+              </div>
+            </div>
+            <el-form-item label="考察项目:" prop="proSelect">
+              <el-select filterable v-model="form.proSelect" clearable placeholder="请选择考察项目">
+                <el-option v-for="item in proSelect" :key="item.value" :label="item.projectName" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="开店区域:" prop="province">
+              <el-select filterable v-model="form.province" placeholder="选择开店区域" class="invite-area"
+                @change="currentProvince" clearable>
+                <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </div>
+          <div class="mainSearchBtnBox">
+
+            <el-button type="primary" @click="searchTable('form')" class="searchBtn">
+              搜索</el-button>
+            <el-button @click="resetForm('form')">重置</el-button>
+          </div>
+        </el-form>
+      </div>
+      <el-row>
+        <el-table ref="multipleTable" tooltip-effect="dark" border :data="dataTable">
+          <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+          <el-table-column align="center" prop="cusName" label="客户姓名" width="100" ></el-table-column>
+          <el-table-column align="center" prop="cusNum" label="客户人数" width="80"></el-table-column>
+          <el-table-column align="center" prop="area" label="开店区域"></el-table-column>
+          <el-table-column align="center" prop="receiverName" label="接待人"  width="100"></el-table-column>
+          <el-table-column align="center" prop="reserveTime" label="预约来访时间" :formatter="dateFormat" width="130">
+          </el-table-column>
+          <el-table-column align="center" prop="projectName" label="考察项目"></el-table-column>
+          <el-table-column align="center" prop="remark" label="备注"></el-table-column>
+        </el-table>
+        <table-pagination :pager=" pager" @change="searchTable">
+        </table-pagination>
+      </el-row>
+    </div>
+
+  </div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+  var userId = [[${ userId }]];//登录人账号id
+  var roleCode = [[${ roleCode }]];//登录人角色code
+  var clueInfo = [[${ clueInfo }]];//资源信息
+  var merchantUserList = [[${ merchantAppiontUserList }]]; //接待人
+  var proSelect = [[${ proSelect }]]; //考察项目
+  // merchantUserList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
+  // proSelect = [{ id: "1", projectName: "项目一" }, { id: "1", projectName: "项目二" }];
+  var ocmVM = new Vue({
+    el: '#optimizeClueManagement',
+    data: function () {
+      return {
+        provinceArr: [],
+        merchantUserList: merchantUserList, //接待人
+        proSelect: proSelect,//考察项目
+        pager: {
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
+        },
+        form: {
+          type: '',
+          reserveStartTime: '',
+          reserveEndTime: '',
+          province: '',
+          city: '',
+          district: '',
+          cusName: '',
+          age: '',
+          receiver: '',
+          remark: '',
+          reserveTime: '',
+          proSelect: '',
+        },
+        formLabelWidth: '120px',
+        dataTable: [],
+        colorStatus:false
+      }
+    },
+    directives: {
+				drag(el){
+					el.onmousedown = function(e){
+						ocmVM.colorStatus=true;
+						document.onmousemove = function(e) {
+              ocmVM.colorStatus=true;
+						}
+						document.onmouseup = function(e) {
+              ocmVM.colorStatus=true;
+						}
+					}
+				}
+			},
+    methods: {
+      changeNameFun(obj){
+        this.colorStatus=false;
+      },
+      setColor(e){
+        this.colorStatus=true;
+      },
+       searchTable() {
+        var startTime = this.form.reserveStartTime;
+        var endTime = this.form.reserveEndTime;
+        if (endTime && startTime > endTime) {
+          this.$message({
+            message: '结束时间不允许选择早于开始时间',
+            type: 'warning'
+          });
+          return;
+        }
+        var param = {};
+        param.cusName = this.form.cusName;
+        param.reserveStartTime = startTime;
+        param.reserveEndTime = endTime;
+        //param.reserveStartTime = "2019-10-01 00:01:00";
+        //param.reserveEndTime = "2019-10-23 00:01:00";
+        param.pageSize = this.pager.pageSize;
+        param.pageNum = this.pager.currentPage;
+        param.projectId = this.form.proSelect;
+        param.province = this.form.province;
+        console.info(param);
+        // this._initData();
+        axios.post('/merchant/merchantAppiontment/queryPage', param)
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              console.info(result);
+              var table = result.data;
+
+              ocmVM.dataTable = table.data; //列表数据
+              ocmVM.pager.total = table.total;
+              ocmVM.pager.currentPage = table.currentPage;
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      //日期数据格式化方法
+      dateFormat(row, column, cellValue, index) {
+        if (cellValue == undefined) {
+          return "";
+        }
+        return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+      },
+      resetForm(formName) {
+        if (this.$refs[formName]) {
+          this.$refs[formName].resetFields();
+        }
+      },
+    },
+    created() {
+      var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+      if (localVal) {
+        this.pager.pageSize = localVal;
+      }
+      this.searchTable();
+      var param = {};
+      param.type = "0";
+      axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+        ocmVM.provinceArr = response.data.data.data;
+      });
+    },
+    mounted() {
+      document.getElementById('optimizeClueManagement').style.display = 'block';
+    }
+  })
+</script>
+
+</html>

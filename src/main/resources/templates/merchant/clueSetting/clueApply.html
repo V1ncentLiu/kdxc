@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:include="_header_include::frag(~{::title},~{::link},~{::style})"></head>
+<title>后台管理系统</title>
+<link rel="stylesheet" href="/css/common/merchant_base.css">
+<style>
+    .el-button--primary {
+        line-height: 30px;
+        padding: 0 35px;
+    }
+
+    .el-button--default {
+        line-height: 30px;
+        padding: 0 35px;
+        background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
+        box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+        border-radius: 4px;
+    }
+    .el-button--default:hover {
+        opacity: 0.9;
+        background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
+        box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+        border-radius: 4px;
+    }
+    .resource-get-text{margin-right:10px;float: left;margin-top:13px;}
+    .el-form--inline .el-form-item{float: left;margin-right: 13px;}
+    .el-radio__input.is-checked+.el-radio__label{color:#4D81FF;}
+    .el-radio__input.is-checked .el-radio__inner{ background:#4D81FF;border-color:#4D81FF;}
+    .el-form-item__error{width: 230px;}
+    .passBtn{width:106px;height: 32px;color:#48bb61;font-size: 20px;background: rgba(72,187,97,0.2);text-align: center;line-height: 32px;border-radius:32px;display: inline-block;margin-top: 20px;}
+</style>
+</head>
+
+<body>
+    <div id="resourceApply" class="resourceApply mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>资源设置</el-breadcrumb-item>
+            <el-breadcrumb-item>资源需求申请</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="mainSearchFormBox">
+            <div class="greyTip" v-if="auditPassShow"><span class="passBtn">审核通过</span> </div>
+            <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="商家账号：" :label-width="formLabelWidth">
+                            <span>{{user.name}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="申请资源设置：" :label-width="formLabelWidth"></el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="周期：" :label-width="formLabelWidth" prop="applyStartTime">
+                            <el-date-picker style="width: 200px;" v-model="form.applyStartTime" type="datetime"
+                                placeholder="选择日期时间" :disabled="isDisabled">
+                            </el-date-picker>
+                        </el-form-item>
+                        <span style="line-height: 34px;" class="resource-get-text">至</span>
+                        <el-form-item label="" prop="applyEndTime">
+                            <el-date-picker style="width: 200px;" v-model="form.applyEndTime" type="datetime"
+                                placeholder="选择日期时间" :disabled="isDisabled">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="资源数量：需要" label-width="173px" prop="applyNum">
+                            <el-input v-model="form.applyNum" autocomplete="off" maxLength="8" style="width: 100px;"
+                                :disabled="isDisabled" @keyup.native="number"></el-input>
+                            <span style="margin-left: 10px">条资源</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="每日需求资源上限：" label-width="150px" prop="dailyMaxNum">
+                            <el-input v-model="form.dailyMaxNum" autocomplete="off" maxLength="8" style="width: 100px;"
+                                :disabled="isDisabled" @keyup.native="number1"></el-input>
+                            <!-- <span style="margin-left: 10px">条资源</span> -->
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="地域：" :label-width="formLabelWidth" prop="radioProject">
+                            <el-radio v-model="form.radioApplyArea" label="1" @change="projectChange"
+                                :disabled="isDisabled">不限
+                            </el-radio>
+                            <el-radio v-model="form.radioApplyArea" label="2" @change="projectChange"
+                                :disabled="isDisabled">省
+                            </el-radio>
+                        </el-form-item>
+                        <el-form-item label="" prop="applyArea" v-if="applyAreaShow">
+                            <el-select v-model="form.applyArea" multiple filterable placeholder="请选择"
+                                :disabled="isDisabled" style="width: 292px">
+                                <el-option v-for="item in applyAreaList" :key="item.value" :label="item.name"
+                                    :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="资源需求申请：" :label-width="formLabelWidth" prop="open">
+                            <el-radio v-model="form.open" label="1" :disabled="isDisabled">开启</el-radio>
+                            <el-radio v-model="form.open" label="0" :disabled="isDisabled">暂停</el-radio>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="资源需求申请说明：" :label-width="formLabelWidth" prop="remark">
+                            <el-input type="textarea" v-model="form.remark" autocomplete="off" maxLength="50"
+                                style="width: 420px" :disabled="isDisabled"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <div class="padding20 f-tac">
+                    <el-button type="primary" @click="submitForm('form')" :disabled="addApplyButtonAble">提交</el-button>
+                    <el-button @click="cancel" :disabled="isDisabled">取 消</el-button>
+                </div>
+            </el-form>
+        </el-row>
+
+    </div>
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    //省份列表
+    var provinceList = [[${ provinceList }]];
+    //当前用户信息
+    var user = [[${ user }]];
+    var resourceApplyVm = new Vue({
+        el: '#resourceApply',
+        data: function () {
+            return {
+                applyAreaShow: false,//省份下拉默认显示
+                user: user,
+                addApplyButtonAble: false,
+                isDisabled: false,
+                auditPassShow: false,
+                form: {
+                    applyStartTime: '',
+                    applyEndTime: '',
+                    applyNum: '',
+                    dailyMaxNum: '',
+                    radioApplyArea: '1',//单选默认选项
+                    open: '1',//单选默认选项
+                    applyArea: [],
+                    remark: '',
+                },
+                applyAreaList: provinceList,
+                formLabelWidth: '150px',
+                rules: {
+                    applyStartTime: [
+                        { required: true, message: '规则有效开始时间不能为空', trigger: 'blur' }
+                    ],
+                    applyEndTime: [
+                        { required: true, message: '规则有效结束时间不能为空', trigger: 'blur' },
+                    ],
+                    applyNum: [
+                        { required: true, message: '资源数量不能为空', trigger: 'blur' }
+                    ],
+                    dailyMaxNum: [
+                        { required: true, message: '每日需求资源上限不能为空', trigger: 'blur' }
+                    ],
+                    applyArea: [
+                        { required: true, message: '选择省份不能为空', trigger: 'blur' }
+                    ],
+                    remark: [
+                        { required: true, message: '资源需求申请说明不能为空', trigger: 'blur' },
+                    ]
+                },
+            }
+        },
+        methods: {
+            submitForm(form) {
+                var startTime = this.form.applyStartTime;
+                var endTime = this.form.applyEndTime;
+                var startTimestamp = Date.parse(new Date(startTime));
+                if (endTime) {
+                    var endTimestamp = new Date(endTime);
+                    if (startTimestamp > endTimestamp) {
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                // var param = this.form;
+                var param = {};
+                param.applyStartTime = this.form.applyStartTime;
+                param.applyEndTime = this.form.applyEndTime;
+                param.applyNum = this.form.applyNum;
+                param.dailyMaxNum = this.form.dailyMaxNum;
+                param.open = this.form.open;
+                param.remark = this.form.remark;
+                var applyAreaStrs = "";
+                if (this.form.radioApplyArea == 2) {
+                    var appllyAreas = this.form.applyArea;
+                    for (var i = 0; i < appllyAreas.length; i++) {
+                        if (applyAreaStrs != "") {
+                            applyAreaStrs = applyAreaStrs + "," + appllyAreas[i];
+                        } else {
+                            applyAreaStrs = appllyAreas[i];
+                        }
+                    }
+                }
+                param.applyArea = applyAreaStrs;
+                console.log(param)
+
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        console.log('submit!');
+                        resourceApplyVm.addApplyButtonAble = true;
+                        axios.post("/merchant/clue/setting/save", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    resourceApplyVm.$message({
+                                        type: 'success', message: '申请保存成功!', duration: 500, onClose: function () {
+                                            resourceApplyVm.addApplyButtonAble = false;
+                                            window.location.href = "/merchant/clue/setting/applyIndex";
+                                        }
+                                    });
+                                } else {
+                                    resourceApplyVm.$message.error(response.data.msg);
+                                    resourceApplyVm.addApplyButtonAble = false;
+                                }
+                            }).catch(function (error) {
+                                console.log(error);
+                                resourceApplyVm.addApplyButtonAble = false;
+                            });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            getByUserId() {
+                var param = {};
+                axios.post('/merchant/clue/setting/getByUserId', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        console.info("getByUserId:" + result);
+                        if (result.code == '0' && result.data != null) {
+                            var data = result.data;
+                            resourceApplyVm.form = data;
+                            if (data.auditStatus != 2) {
+                                resourceApplyVm.isDisabled = true;
+                                resourceApplyVm.addApplyButtonAble = true;
+                            }
+                            if (data.auditStatus == 2) {
+                                resourceApplyVm.auditPassShow = true;
+                            }
+                            //是否开启
+                            if (data.open == 1) {
+                                resourceApplyVm.form.open = "1";
+                            } else {
+                                resourceApplyVm.form.open = "0"
+                            }
+                            //申请区域
+                            var applyAreas = data.applyArea;
+                            if (applyAreas == null || applyAreas == "") {
+                                resourceApplyVm.form.radioApplyArea = "1";
+                            } else {
+                                resourceApplyVm.form.radioApplyArea = "2";
+                                resourceApplyVm.applyArea = provinceList;
+                                resourceApplyVm.applyAreaShow = true;
+                                var applyAreasMultiple = [];
+                                var applyAreasObj = applyAreas.split(',');
+                                if (applyAreasObj.length > 0) {
+                                    for (var i = 0; i < applyAreasObj.length; i++) {
+                                        applyAreasMultiple.push(applyAreasObj[i] + "");
+                                    }
+                                    if (applyAreasMultiple != null && applyAreasMultiple != "") {
+                                        resourceApplyVm.form.applyArea = applyAreasMultiple;
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            // 单选切换
+            projectChange() {
+                if (this.form.radioApplyArea == "2") {//省
+                    this.applyAreaShow = true;
+                    // this.applyArea = provinceList;
+                } else if (this.form.radioApplyArea == "1") {//不限
+                    this.applyAreaShow = false;
+                }
+            },
+            cancel() {
+                window.location.href = "/merchant/clue/setting/applyIndex";
+            },
+            number() {
+	                this.form.applyNum = this.form.applyNum.replace(/[^\.\d]/g, '');
+	                this.form.applyNum = this.form.applyNum.replace('.', '');
+            },
+            number1() {
+	                this.form.dailyMaxNum = this.form.dailyMaxNum.replace(/[^\.\d]/g, '');
+	                this.form.dailyMaxNum = this.form.dailyMaxNum.replace('.', '');
+            },
+        },
+        created() {
+            console.info("create method");
+            this.getByUserId();
+        },
+        mounted() {
+            document.getElementById('resourceApply').style.display = 'block';
+        }
+    })
+</script>
+
+</html>

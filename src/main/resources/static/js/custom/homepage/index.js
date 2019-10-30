@@ -199,8 +199,16 @@ var homePageVM=new Vue({
 	        	this.modifyPwd();
 	        }else if(command=='logout'){//退出
 	        	this.logout();
-	        }
+	        }else{
+                this.gotoUserInfo();
+            }
 	     },
+         gotoUserInfo(){
+            var dataUrl = "/merchant/userManager/userInfo";
+            $("#iframeBox").attr({
+                "src":dataUrl //设置ifream地址
+            });
+         },
 	     modifyPwd(){//修改密码
 	    	 //重置表单
 	    	 this.dialogModifyPwdVisible=true;
