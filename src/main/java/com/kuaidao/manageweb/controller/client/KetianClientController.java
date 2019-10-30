@@ -2,13 +2,18 @@ package com.kuaidao.manageweb.controller.client;
 
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.callcenter.dto.ketianclient.*;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.client.KetianFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +25,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +45,9 @@ public class KetianClientController {
     @Autowired
     ClientFeignClient clientFeignClient;
 
+    @Autowired
+    OrganizationFeignClient organizationFeignClient;
+
 
     /**
      * 页面跳转
@@ -48,8 +57,50 @@ public class KetianClientController {
      */
     @GetMapping("/ketianClientPage")
     public String ketianClientPage(HttpServletRequest request) {
+        List<OrganizationDTO> orgList = new ArrayList<>();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
+            if(curOrgGroupByOrgId!=null) {
+                orgList.add(curOrgGroupByOrgId);
+            }
+            request.setAttribute("orgList", orgList);
+        } else {
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            //查询全部
+            JSONResult<List<OrganizationRespDTO>> orgListJr =
+                    organizationFeignClient.queryOrgByParam(queryDTO);
+            if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+                logger.error("跳转科天坐席时，查询组织机构列表报错,res{{}}", orgListJr);
+            } else {
+                request.setAttribute("orgList", orgListJr.getData());
+            }
+        }
 
         return "client/ketianClientPage";
+    }
+
+    /**
+     * 获取当前 orgId所在的组织
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 
     /**
@@ -214,6 +265,22 @@ public class KetianClientController {
         clientLoginRecord.setOrgId(curLoginUser.getOrgId());
         clientLoginRecord.setAccountNo(ketianClientRespDTO.getUserName());
         return clientFeignClient.clientLoginRecord(clientLoginRecord);
+    }
+
+
+    /**
+     * 删除坐席
+     * @param idListLongReq
+     * @return
+     */
+    @PostMapping("/deleteClientByIdList")
+    @ResponseBody
+    public JSONResult deleteClientByIdList(@RequestBody IdListLongReq idListLongReq){
+        List<Long> idList = idListLongReq.getIdList();
+        if(CollectionUtils.isEmpty(idList)){
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        return  ketianFeignClient.deleteClientByIdList(idListLongReq);
     }
 
     /**

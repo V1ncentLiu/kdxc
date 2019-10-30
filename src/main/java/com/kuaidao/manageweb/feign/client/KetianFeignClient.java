@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.client;
 import com.kuaidao.callcenter.dto.ketianclient.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
@@ -64,6 +65,14 @@ public interface KetianFeignClient {
     @PostMapping("/outbound")
     JSONResult outbound(@RequestBody  KetianClientOutboundDTO outboundDTO);
 
+    /**
+     * 删除坐席
+     * @param idListLongReq
+     * @return
+     */
+    @PostMapping("/deleteClientByIdList")
+    JSONResult deleteClientByIdList(@RequestBody IdListLongReq idListLongReq);
+
 
     @Component
     static class HystrixClientFallback implements KetianFeignClient {
@@ -98,6 +107,11 @@ public interface KetianFeignClient {
         @Override
         public JSONResult outbound(KetianClientOutboundDTO outboundDTO) {
             return fallBackError("坐席外呼失败");
+        }
+
+        @Override
+        public JSONResult deleteClientByIdList(IdListLongReq idListLongReq) {
+            return fallBackError("删除坐席");
         }
     }
 
