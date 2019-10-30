@@ -73,8 +73,7 @@ public class KetianClientController {
             OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
             queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
             //查询全部
-            JSONResult<List<OrganizationRespDTO>> orgListJr =
-                    organizationFeignClient.queryOrgByParam(queryDTO);
+            JSONResult<List<OrganizationRespDTO>> orgListJr = organizationFeignClient.queryOrgByParam(queryDTO);
             if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
                 logger.error("跳转科天坐席时，查询组织机构列表报错,res{{}}", orgListJr);
             } else {
