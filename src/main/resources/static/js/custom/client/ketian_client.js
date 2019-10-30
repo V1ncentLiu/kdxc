@@ -26,19 +26,15 @@ var clientVm = new Vue({
          uploadErrorDialogVisible:false,//上传失败dialog
          uploadErrorData:[],//上传失败
          form:{//坐席form
-           id:'',
-           clientNo:'',
-             numberAttributionCompany:'',
-             attribution:'',
-           loginClient:'',
-           accountNo:'',
-           secretKey:'',
-           phone1:'',
-           phone2:'',
-           proxyurl:'',
-           isUserStatus:1,
-           userId:'',
-             isDxzj:false
+            id:'',
+            userName:'',
+            clientExtNo:'',
+            userName:'',
+            pwd:'',
+            phone:'',
+            requestUrl:'',
+            accountId:'',
+            isDxzj:false
          },
          options: [{
              value: 1,
@@ -53,9 +49,9 @@ var clientVm = new Vue({
            loginName:'',
          },
          rules:{
-           loginClient:[
-             { required: true, message: '登录坐席不能为空'},
-            /* {validator:function(rule,value,callback){
+            loginName:[
+              { required: true, message: '登录坐席不能为空'},
+              /* {validator:function(rule,value,callback){
                var param = {loginClient:value}
                axios.post('/client/client/queryQimoClientByParam', param)
                      .then(function (response) {
@@ -81,106 +77,84 @@ var clientVm = new Vue({
                      })
                      .catch(function (error) {
                           console.log(error);
-                     });
-               
-             },trigger:'blur'}*/
-             
-          ],
-           accountNo:[
-             { required: true, message: '账户编号不能为空'},
-        
-             
-          ],
-           clientNo:[
-             { required: true, message: '坐席编号不能为空'},
-          /*   {validator:function(rule,value,callback){
-                if(!/^[0-9]*$/.test(value)){
-                  callback(new Error("只可以输入正整数,不超过50位"));     
-                    }else{
-                      callback();
-                    }
-               
-             },trigger:'blur'},*/
-   /*          {validator:function(rule,value,callback){
-            
-                var param = {clientNo:value};
-                 axios.post('/client/client/queryQimoClientByParam', param)
-                       .then(function (response) {
-                           var resData = response.data;
-                           if(resData.code=='0'){
-                             var data = resData.data;
-                             if(data){
-                               if(data.id==clientVm.form.id){
-                                 callback();
-                               }else{
-                                 callback(new Error("此坐席编号已存在，请修改后提交"));
-                               }
-                               
-                             }else{
-                               callback();
-                             }
-                               
-                           }else{
-                             clientVm.$message({message:'查询失败',type:'error'});
-                               console.error(resData);
-                           }
-                       
-                       })
-                       .catch(function (error) {
-                            console.log(error);
-                       });
-               
-             },trigger:'blur'}*/
-           ],
-           phone1:[
-             {validator:function(rule,value,callback){
-               if(value){
+                     });               
+              },trigger:'blur'}*/             
+            ],
+            clientExtNo:[
+              { required: true, message: '坐席编号不能为空'},
+             /*   {validator:function(rule,value,callback){
                   if(!/^[0-9]*$/.test(value)){
-                      callback(new Error("只可以输入正整数,不超过11位"));     
-                        }else{
-                          callback();
-                        }
+                    callback(new Error("只可以输入正整数,不超过50位"));     
+                      }else{
+                        callback();
+                      }
                  
-               }else{
-                 callback(); 
-               }
-               
-             },trigger:'blur'},
-             
-           ],
-           phone2:[
-             {validator:function(rule,value,callback){
-               if(value){
-                 if(!/^[0-9]*$/.test(value)){
-                      callback(new Error("只可以输入正整数,不超过11位"));     
-                        }else{
-                          callback();
-                        }
+                  },trigger:'blur'},*/
+              /*{validator:function(rule,value,callback){
+              
+                  var param = {clientNo:value};
+                   axios.post('/client/client/queryQimoClientByParam', param)
+                         .then(function (response) {
+                             var resData = response.data;
+                             if(resData.code=='0'){
+                               var data = resData.data;
+                               if(data){
+                                 if(data.id==clientVm.form.id){
+                                   callback();
+                                 }else{
+                                   callback(new Error("此坐席编号已存在，请修改后提交"));
+                                 }
+                                 
+                               }else{
+                                 callback();
+                               }
+                                 
+                             }else{
+                               clientVm.$message({message:'查询失败',type:'error'});
+                                 console.error(resData);
+                             }
+                         
+                         })
+                         .catch(function (error) {
+                              console.log(error);
+                         });
                  
-               }else{
-                 callback(); 
-               }
+               },trigger:'blur'}*/
+            ],
+            userName:[
+               { required: true, message: '坐席用户名不能为空'},             
+            ],
+            pwd:[
+               { required: true, message: '密码不能为空'},
                
-             },trigger:'blur'},
+             ],
+            accountId:[
+               { required: true, message: '关联用户不能为空'},
              
-           ],
-           isUserStatus:[
-             { required: true, message: '七陌用户状态不能为空'},
-             
-           ],
-           userId:[
-             { required: true, message: '关联用户不能为空'},
-             
-           ],
+            ],
+            phone:[
+                {validator:function(rule,value,callback){
+                  if(value){
+                    if(!/^[0-9]*$/.test(value)){
+                        callback(new Error("只可以输入正整数,不超过11位"));     
+                          }else{
+                            callback();
+                          }
+                   
+                  }else{
+                   callback(); 
+                  }                 
+                },trigger:'blur'},               
+            ],             
          }
       },
      methods: {
-       handleSelectionChange(val) {
+        handleSelectionChange(val) {
              this.multipleSelection = val;
          },
          addClientDialog(){//添加坐席弹窗
            this.addOrModifyDialogTitle='添加坐席';
-           this.submitClientUrl ='saveQimoClient';
+           this.submitClientUrl ='insertClient';
            if (this.$refs['clientForm']!==undefined) {
             this.$refs['clientForm'].resetFields();
            }
@@ -217,7 +191,7 @@ var clientVm = new Vue({
              for(var i=0;i<rows.length;i++){
                  var curRow = rows[i];
                  rowIds.push(curRow.id);
-                 rowNames.push("【"+curRow.clientNo+"】");
+                 rowNames.push("【"+curRow.clientExtNo+"】");
              }
              var clientNos = rowNames.join(" ");
              
@@ -229,7 +203,7 @@ var clientVm = new Vue({
                  type: 'warning'
                }).then(() => {
                 var param  = {idList:rowIds};
-                axios.post('/client/client/deleteQimoClient', param)
+                axios.post('/client/ketianClient/deleteClientByIdList', param)
                   .then(function (response) {
                       var resData = response.data;
                       if(resData.code=='0'){
@@ -273,7 +247,7 @@ var clientVm = new Vue({
            
            
            this.addOrModifyDialogTitle='修改坐席';
-           this.submitClientUrl ='updateQimoClient';
+           this.submitClientUrl ='updateClient';
            if (this.$refs['clientForm']!==undefined) {
               this.$refs['clientForm'].resetFields();
             }
@@ -286,7 +260,7 @@ var clientVm = new Vue({
                     clientVm.userList = resData.data;    
                     
                  var param={id:rows[0].id};
-                 axios.post('/client/client/queryQimoClientById', param)
+                 axios.post('/client/ketianClient/queryById', param)
                  .then(function (response) {
                      var resData = response.data;
                      if(resData.code=='0'){
@@ -347,7 +321,8 @@ var clientVm = new Vue({
                   //fieldMenuVM.$refs.confirmBtn.disabled=true;
                   clientVm.confirmBtnDisabled=true;//禁用提交按钮
                     var param=this.form;
-                   axios.post('/client/client/'+this.submitClientUrl, param)
+                   // axios.post('/client/client/'+this.submitClientUrl, param)
+                   axios.post('/client/ketianClient/'+this.submitClientUrl, param)
                    .then(function (response) {
                        var resData = response.data;
                        if(resData.code=='0'){
