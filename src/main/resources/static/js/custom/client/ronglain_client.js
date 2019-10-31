@@ -27,15 +27,7 @@ var clientVm = new Vue({
          uploadErrorData:[],//上传失败
          form:{//坐席form
         	 id:'',
-        	 clientNo:'',
-             attribution:'',
-        	 loginClient:'',
-        	 accountNo:'',
-        	 secretKey:'',
-        	 phone1:'',
-        	 phone2:'',
-        	 proxyurl:'',
-        	 isUserStatus:1,
+        	 
         	 userId:'',
              isDxzj:false
          },
@@ -181,7 +173,7 @@ var clientVm = new Vue({
          },
          addClientDialog(){//添加坐席弹窗
         	 this.addOrModifyDialogTitle='添加坐席';
-        	 this.submitClientUrl ='saveQimoClient';
+        	 this.submitClientUrl ='insertRonglianClient';
         	 if (this.$refs['clientForm']!==undefined) {
          		this.$refs['clientForm'].resetFields();
          	 }
@@ -274,7 +266,7 @@ var clientVm = new Vue({
            
         	 
         	 this.addOrModifyDialogTitle='修改坐席';
-        	 this.submitClientUrl ='updateQimoClient';
+        	 this.submitClientUrl ='updateRonglianClient';
         	 if (this.$refs['clientForm']!==undefined) {
           		this.$refs['clientForm'].resetFields();
           	}
@@ -348,7 +340,8 @@ var clientVm = new Vue({
                  	//fieldMenuVM.$refs.confirmBtn.disabled=true;
                  	clientVm.confirmBtnDisabled=true;//禁用提交按钮
                     var param=this.form;
-                   axios.post('/client/client/'+this.submitClientUrl, param)
+                   // axios.post('/client/client/'+this.submitClientUrl, param)
+                   axios.post('/client/ronglianClient/'+this.submitClientUrl, param)
                    .then(function (response) {
                        var resData = response.data;
                        if(resData.code=='0'){
