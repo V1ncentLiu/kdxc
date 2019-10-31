@@ -710,6 +710,8 @@ var homePageVM=new Vue({
 								var clientNo = resData.clientExtNo;
 								//登录
 								CtiAgentBar.login(clientNo);
+								//就绪
+								CtiAgentBar.ready();
 								var clientType = homePageVM.loginClientForm.clientType;
 								//记录登录信息
 								homePageVM.ketianClientLoginRecord({"loginName":loginClient,"accountType":homePageVM.accountType,"clientType":clientType});
