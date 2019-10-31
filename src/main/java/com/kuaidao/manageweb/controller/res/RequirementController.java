@@ -70,7 +70,7 @@ public class RequirementController extends BaseStatisticsController {
      * @param response
      * @param dto
      */
-    @RequestMapping("/querylist")
+    @RequestMapping("/export")
     public @ResponseBody void export(HttpServletResponse response, @RequestBody ResQueryDto dto){
         try{
             initDto(dto);
