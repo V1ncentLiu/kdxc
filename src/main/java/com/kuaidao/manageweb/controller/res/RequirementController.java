@@ -75,7 +75,7 @@ public class RequirementController extends BaseStatisticsController {
         try{
             initDto(dto);
             JSONResult<List<ResRequirement>> json=requirementFeignClient.queryList(dto);
-            if("0".equals(json.getCode()) && !json.getData().isEmpty()){
+            if("0".equals(json.getCode())){//&& !json.getData().isEmpty()
                 ResRequirement[] dtos = json.getData().isEmpty()?new ResRequirement[]{}:json.getData().toArray(new ResRequirement[0]);
                 String[] keys = {"months","teleGroupName","projectNames","projectType","biddingPrice","optimization","information","remarks"};
                 String[] hader = {"月份","电销组","电销组项目","项目类别","竞价(日均量)","优化(日均量)","信息流(日均量)","备注"};
