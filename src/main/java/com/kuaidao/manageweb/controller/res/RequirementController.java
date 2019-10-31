@@ -51,7 +51,7 @@ public class RequirementController extends BaseStatisticsController {
     @RequestMapping("requirmentlist")
     public String requirmentlist(HttpServletRequest request){
         super.initSaleDept(request);
-        return  "res/list";
+        return  "/repetition/clueRequirement";
     }
 
     /**
