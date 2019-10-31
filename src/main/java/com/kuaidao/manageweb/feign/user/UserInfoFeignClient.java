@@ -30,7 +30,7 @@ public interface UserInfoFeignClient {
     /**
      * 根据id查询用户信息
      * 
-     * @param menuDTO
+     * @param
      * @return
      */
     @PostMapping("/get")
@@ -39,7 +39,7 @@ public interface UserInfoFeignClient {
     /**
      * 根据手机号查询用户信息
      * 
-     * @param menuDTO
+     * @param
      * @return
      */
     @PostMapping("/getbyPhone")
@@ -48,7 +48,7 @@ public interface UserInfoFeignClient {
     /**
      * 根据用户名查询用户信息
      * 
-     * @param menuDTO
+     * @param
      * @return
      */
     @PostMapping("/getbyUserName")
@@ -57,7 +57,7 @@ public interface UserInfoFeignClient {
     /**
      * 查询用户集合
      * 
-     * @param menuDTO
+     * @param
      * @return
      */
     @PostMapping("/list")
@@ -66,7 +66,7 @@ public interface UserInfoFeignClient {
     /**
      * 修改用户信息
      * 
-     * @param idEntity
+     * @param
      * @return
      */
     @PostMapping("/update")
@@ -75,7 +75,7 @@ public interface UserInfoFeignClient {
     /**
      * 新增用户
      * 
-     * @param queryDTO
+     * @param
      * @return
      */
     @PostMapping("/create")
@@ -84,7 +84,7 @@ public interface UserInfoFeignClient {
     /**
      * 角色列表
      * 
-     * @param queryDTO
+     * @param
      * @return
      */
     @PostMapping("/roleList")
@@ -107,8 +107,18 @@ public interface UserInfoFeignClient {
     @PostMapping("/listByOrgAndRole")
     JSONResult<List<UserInfoDTO>> listByOrgAndRole(@RequestBody UserOrgRoleReq userOrgRoleReq);
 
+
+
     @RequestMapping(method = RequestMethod.POST, value = "/listById")
     public JSONResult<List<UserInfoDTO>> listById(@RequestBody IdListLongReq idList);
+    /**
+     * 查询商家用户集合
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/merchantlist")
+    public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam param);
 
     @Component
     static class HystrixClientFallback implements UserInfoFeignClient {
@@ -180,6 +190,11 @@ public interface UserInfoFeignClient {
         public JSONResult<List<UserInfoDTO>> listById(IdListLongReq idList) {
             // TODO Auto-generated method stub
             return fallBackError("根据idlist查询用户集合");
+        }
+
+        @Override
+        public JSONResult<PageBean<UserInfoDTO>> merchantlist(UserInfoPageParam param) {
+            return fallBackError("查询商家账号");
         }
 
     }

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head th:include="_header_include::frag(~{::title},~{::link},~{})">
+    <title>通话费用</title>
+    <link th:href="@{'/font-awesome-4.7.0/css/font-awesome.css'}" rel="stylesheet">
+    <!-- <link th:href="@{'/css/custom/callrecord/simpleAudio.css'}" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/css/common/merchant_base.css">
+</head>
+<style>
+    .call-menu {
+        float: left;
+        display: inline;
+        background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
+        border-radius: 4px;
+    }
+
+    .el-button {
+        background: none;
+        color: #FFFFFF;
+        border-radius: 0;
+    }
+
+    .call-menu .el-button:hover {
+        background: #FFFFFF;
+        color: #4B80FF;
+    }
+
+    .call-search-box {
+        margin-bottom: 0;
+    }
+
+    .el-button.call-button-active {
+        background: #FFFFFF;
+        color: #4B80FF;
+    }
+
+    .callLogBox {
+        margin-top: 30px;
+    }
+
+    .call-time-long {
+        color: #4E82FF;
+    }
+
+    .call-money {
+        margin-left: 30px;
+        height: 30px;
+        line-height: 30px;
+        float: left;
+        display: inline;
+        color: #000000;
+        font-size: 14px;
+    }
+
+    .call-money span {
+        color: #4D81FF;
+    }
+
+    .mainSearchFormBox {
+        border-radius: 0px 8px 8px 8px;
+    }
+
+    .call-menu {
+        border-radius: 4px 4px 0px 0px;
+        margin-top: 2px;
+    }
+
+    .call-menu .el-button:first-child {
+        border-radius: 4px 0px 0px 0px;
+    }
+
+    .call-menu .el-button:last-child {
+        border-radius: 0px 4px 0px 0px;
+    }
+
+    .call-menu .el-button:first-child.call-button-active {
+        border-radius: 4px 0px 0px 0px;
+    }
+
+    .call-menu .el-button:last-child.call-button-active {
+        border-radius: 0px 4px 0px 0px;
+    }
+</style>
+
+<body>
+    <div id="myCallRecordVm" class="optimizeClueManagement mainPadding" style="display:none">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>费用管理</el-breadcrumb-item>
+            <el-breadcrumb-item>通话费用</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="marginB20 call-search-box">
+            <div class="call-menu">
+                <el-button @click="searchYesterday" :class="{'call-button-active':isActive1,}">昨天</el-button>
+                <el-button @click="searchWeek" :class="{'call-button-active':isActive2}">近七天</el-button>
+                <el-button @click="searchMonth" :class="{'call-button-active':isActive3}">本月</el-button>
+                <el-button @click="searchMonthHistory" :class="{'call-button-active':isActive4}">按月份查看</el-button>
+            </div>
+            <div class="call-money">
+                累积消费：<span v-if="totalCost">{{totalCost}}元</span><span v-else>0.00元</span>
+            </div>
+        </el-row>
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="searchForm" ref="searchForm">
+                    <div class="main-search-box">
+                        <el-form-item label="绑定账户:" prop="bindAccount">
+                            <el-select v-model="searchForm.bindAccount" placeholder="绑定账户" value-key="id" clearable>
+                                <el-option v-for="item in userInfoList" :key="item.id" :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <div class="get-search-time">
+                            <div class="get-time">消费时间段:</div>
+                            <div class="time-style" :class="{'selectActive':colorStatus}">
+                                <el-form-item  prop="startTime" class="call-time">
+                                    <el-date-picker v-model="searchForm.startTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始日期"
+                                        value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
+                                    </el-date-picker>
+                                </el-form-item>
+                                <el-form-item label="—" class="widthauto" prop="endTime">
+                                    <el-date-picker v-model="searchForm.endTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择结束日期"
+                                        value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
+                                    </el-date-picker>
+                                </el-form-item>
+                            </div>
+                        </div>
+                        <el-form-item label="坐席编号:" prop="seatNumber">
+                            <el-input placeholder="坐席编号" v-model="searchForm.seatNumber"></el-input>
+                        </el-form-item>
+                        <el-form-item label="坐席电话:" prop="seatPhone">
+                            <el-input placeholder="坐席电话" v-model="searchForm.seatPhone"></el-input>
+                        </el-form-item>
+
+                    </div>
+                    <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" @click="initCallRecordData('1')"
+                            class="searchBtn">搜索</el-button>
+                        <el-button @click="resetForm('searchForm')">重置</el-button>
+                        <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                        <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                    </div>
+                </el-form>
+            </div>
+            <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="callRecordData">
+                <el-table-column align="center" type="index" width="55" label="序号"> </el-table-column>
+                <el-table-column align="center" v-if="isActive4" prop="costMonth" label="消费时间(月)" width="140">
+                </el-table-column>
+                <!-- <el-table-column align="center" prop="customerName" label="商家账户"></el-table-column> -->
+                <el-table-column align="center" prop="bindAccountName" label="绑定账户"></el-table-column>
+                <el-table-column align="center" prop="seatNumber" label="坐席编号"></el-table-column>
+                <el-table-column align="center" prop="seatPhone" label="坐席电话"></el-table-column>
+                <el-table-column align="center" prop="monthRent" label="月租(元)"></el-table-column>
+                <el-table-column align="center" prop="cost" label="日常消费(元)"></el-table-column>
+                <el-table-column align="center" prop="callNumber" label="通话次数"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="initCallRecordData"></table-pagination>
+        </div>
+    </div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var userInfoList = [[${ userInfoList }]];
+   //userInfoList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
+</script>
+<!-- 当前页面的js -->
+<script th:src="@{/js/custom/callrecord/merchantCallCost.js}"></script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
+<!-- <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script> -->
+
+</html>

@@ -96,7 +96,6 @@ var myCallRecordVm = new Vue({
     		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
-        	 debugger;
         	 axios.post('/call/callRecord/listAllTmCallRecord',param)
              .then(function (response) {
             	 

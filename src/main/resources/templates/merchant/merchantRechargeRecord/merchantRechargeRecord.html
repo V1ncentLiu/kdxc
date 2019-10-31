@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/element-ui.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style>
+        .el-date-picker__time-header {
+            display: none;
+        }
+
+        .el-button--primary {
+            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1)) !important;
+            box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
+            border-radius: 6px;
+        }
+
+        .el-button--primary:hover {
+            opacity: 0.9;
+        }
+
+        .button-menu {
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>费用管理</el-breadcrumb-item>
+            <el-breadcrumb-item>充值记录</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                    <div class="main-search-box">
+                        <div class="get-search-time">
+                            <div class="get-time">充值时间:</div>
+                            <div class="time-style" :class="{'selectActive':colorStatus}" >
+                                <el-form-item label-width="auto" class="call-time" prop="rechargeBeginTime">
+                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" 
+                                        v-model="form.rechargeBeginTime" v-on:focus="setColor"  v-on:blur="changeNameFun" type="datetime" placeholder="选择开始时间">
+                                    </el-date-picker>
+                                </el-form-item>
+                                <el-form-item label="—" class="widthauto" prop="rechargeEndTime">
+                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                        v-model="form.rechargeEndTime" v-on:focus="setColor"  v-on:blur="changeNameFun" type="datetime" placeholder="选择结束时间">
+                                    </el-date-picker>
+                                </el-form-item>
+                            </div>
+                        </div>
+                        <el-form-item label="发票状态:" prop="invoiceStatus">
+                            <el-select v-model="form.invoiceStatus" clearable placeholder="全部">
+                                <el-option v-for="item in statusOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                    <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
+                            style="margin-left: 10px;">搜索</el-button>
+                        <el-button @click="resetFormResource('form')">重置</el-button>
+                    </div>
+
+                </el-form>
+            </div>
+            <el-row class="marginB20  button-menu">
+                <el-button type="primary" @click="openassignrDig">申请开发票</el-button>
+            </el-row>
+            <el-row class="greyTip">
+                <span style="margin-right: 10px;">累积充值：{{this.numFormat(rechargeDTO.totalRechargeMoney)}}元</span><span
+                    style="margin-right: 10px;">累积赠送：{{this.numFormat(rechargeDTO.totalGivenMoney)}}元</span><span
+                    style="margin-right: 10px;">剩余金额：{{this.numFormat(rechargeDTO.totalAmounts)}}元</span>
+            </el-row>
+            <el-row>
+                <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="dataTable"
+                    @selection-change="handleSelectionChange">
+                    <el-table-column align="center" type="selection" width="55" :selectable="checkSelectable">
+                    </el-table-column>
+                    <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                    <el-table-column align="center" prop="createTime" label="充值时间" :formatter="dateFormat" width="150">
+                    </el-table-column>
+                    <el-table-column align="center" prop="serialNumber" label="流水号"></el-table-column>
+                    <el-table-column align="center" prop="rechargeMoney" label="充值金额" width="140"></el-table-column>
+                    <el-table-column align="center" prop="givenAmount" label="赠送金额" width="140"></el-table-column>
+                    <el-table-column align="center" prop="rechargeWay" label="充值方式" width="140">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.rechargeWay == 1">支付宝</span>
+                            <span v-if="scope.row.rechargeWay == 2">微信</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="rechargeType" label="充值类型" width="140">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.rechargeType == 1">线上</span>
+                            <span v-if="scope.row.rechargeType == 2">线下</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="invoiceStatus" label="发票状态" width="80">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.invoiceStatus == '0'">未申请</span>
+                            <span v-if="scope.row.invoiceStatus == '1'">已申请</span>
+                            <span v-if="scope.row.invoiceStatus == '2'">已开具</span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            </el-row>
+        </div>
+        <!-- 分配资源 -->
+        <el-dialog title="申请开发票" :visible.sync="applyFormVisible" width="540px">
+            <el-form :model="formApply" ref="formApply" :rules="rules">
+                <el-form-item label="发票金额（元）：" :label-width="formLabelWidth">
+                    <span>{{formApply.invoiceAmount}}</span>
+                </el-form-item>
+                <el-form-item label="发票抬头：" prop="invoiceHeader" :label-width="formLabelWidth">
+                    <el-input v-model="formApply.invoiceHeader" placeholder="" maxLength="30"></el-input>
+                </el-form-item>
+                <el-form-item label="纳税人识别号：" prop="taxpayerIdentificationNum" :label-width="formLabelWidth">
+                    <el-input v-model="formApply.taxpayerIdentificationNum" placeholder="" maxLength="20"></el-input>
+                </el-form-item>
+                <el-form-item label="邮寄地址：" prop="address" :label-width="formLabelWidth">
+                    <el-input v-model="formApply.address" placeholder="" maxLength="100"></el-input>
+                </el-form-item>
+                <el-form-item label="联系电话：" prop="phone" :label-width="formLabelWidth">
+                    <el-input v-model="formApply.phone" placeholder="" maxLength="11" @keyup.native="number"></el-input>
+                </el-form-item>
+                <el-form-item label="联系人姓名：" prop="name" :label-width="formLabelWidth">
+                    <el-input v-model="formApply.name" placeholder="" maxLength="8"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer" style="text-align:center;">
+                <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formApply')">提交</el-button>
+                <el-button @click="applyFormVisible = false;">取 消</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList = [[${ merchantUserList }]];//商户集合
+    var rechargeAccountDTO = [[${ rechargeAccountDTO }]];
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function () {
+            return {
+                applyFormVisible: false,
+                btnDisabled: false,
+                rechargeDTO: rechargeAccountDTO,
+                pendingReviewNum: '',
+                multipleSelection: [],//选择行
+                pager: {
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                form: {
+                    rechargeBeginTime: '',
+                    rechargeEndTime: '',
+                    invoiceStatus: ''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+
+                merchantUserListOptions: merchantUserList,
+                statusOptions: [{
+                    value: "",
+                    name: '全部'
+                }, {
+                    value: 0,
+                    name: '未申请'
+                }, {
+                    value: 1,
+                    name: '已申请'
+                }, {
+                    value: 2,
+                    name: '已开具'
+                }],
+                formApply: {
+                    invoiceHeader: '',
+                    taxpayerIdentificationNum: '',
+                    address: '',
+                    phone: '',
+                    name: '',
+                    invoiceAmount: 0,
+                },
+                colorStatus:false,
+                rules: {
+                    invoiceHeader: [
+                        { required: true, message: '发票抬头不能为空', trigger: 'blur' },
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                    return;
+                                } else {
+                                    callback();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    taxpayerIdentificationNum: [
+                        { required: true, message: '纳税人识别号不能为空', trigger: 'blur' },
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                    return;
+                                } else {
+                                    callback();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    address: [
+                        { required: true, message: '邮寄地址不能为空', trigger: 'blur' },
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                    return;
+                                } else {
+                                    callback();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    phone: [
+                        { required: true, message: '联系电话不能为空', trigger: 'blur' },
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[0-9]+[0-9]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入整数的充值金额"));
+                                    return;
+                                }
+                                if (value.length != 11) {
+                                    callback(new Error("请输入正确的手机号"));
+                                    return;
+                                }
+                                callback();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    name: [
+                        { required: true, message: '联系人姓名不能为空', trigger: 'blur' },
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[A-Za-z0-9\u4e00-\u9fa5]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的格式,不支持特殊字符"));
+                                    return;
+                                } else {
+                                    callback();
+                                }
+                            }, trigger: 'blur'
+                        }
+                    ],
+                },
+            }
+        },
+        methods: {
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form, 'rechargeBeginTime', '');
+                    this.$set(this.form, 'rechargeEndTime', '');
+                }
+            },
+            numFormat(num) {
+                var c = (num.toString().indexOf('.') !== -1) ? num.toLocaleString() : num.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
+                return c;
+            },
+            checkSelectable(row) {
+                return row.invoiceStatus == 0
+            },
+            number() {
+                this.formApply.phone = this.formApply.phone.replace(/[^\.\d]/g, '');
+                this.formApply.phone = this.formApply.phone.replace('.', '');
+            },
+            clickRow(row) {
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            },
+            changeNameFun(){
+                this.colorStatus=false;
+            },
+            setColor(){
+                this.colorStatus=true;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+                var startTime = this.form.rechargeBeginTime;
+                var endTime = this.form.rechargeEndTime;
+                if (endTime && startTime > endTime) {
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.rechargeBeginTime = this.form.rechargeBeginTime;
+                param.rechargeEndTime = this.form.rechargeEndTime;
+                param.invoiceStatus = this.form.invoiceStatus;
+                console.info(param);
+                axios.post('/merchant/merchantRechargeRecordBusiness/queryBusinessPageList', param)
+                    .then(function (response) {
+                        console.log(response)
+                        var result = response.data;
+                        if (result.code == 0) {
+                            var table = result.data;
+                            ocmVM.dataTable = table.data;
+                            ocmVM.pager.total = table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        } else {
+                            ocmVM.$message.error(result.msg);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            //日期数据格式化方法
+            dateFormat(row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            openassignrDig() {
+                var rows = this.multipleSelection;
+                if (rows.length < 1) {
+                    this.$message({
+                        message: '请选择开票的信息',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var multipleSelectionVal = 0;
+                for (var i = 0; i < rows.length; i++) {
+                    multipleSelectionVal += rows[i].rechargeMoney;
+                }
+                this.formApply.invoiceAmount = multipleSelectionVal;
+                this.applyFormVisible = true;
+                if (this.$refs['formApply']) {
+                    this.$refs['formApply'].resetFields();
+                }
+            },
+            submitApplyForm(formName) {
+                var rows = this.multipleSelection;
+                if (rows.length < 1) {
+                    this.$message({
+                        message: '请选择开票的信息',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var str = "";
+                for (var i = 0; i < rows.length; i++) {
+                    str += rows[i].serialNumber + ",";
+                }
+                //去掉最后一个逗号(如果不需要去掉，就不用写)
+                if (str.length > 0) {
+                    str = str.substr(0, str.length - 1);
+                }
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        var param = {};
+
+                        // 申请开发票id集合，逗号隔开字符串
+                        param.rechangeId = str;
+                        param.invoiceAmount = this.formApply.invoiceAmount;
+                        param.invoiceHeader = this.formApply.invoiceHeader;
+                        param.taxpayerIdentificationNum = this.formApply.taxpayerIdentificationNum;
+                        param.address = this.formApply.address;
+                        param.phone = this.formApply.phone;
+                        param.name = this.formApply.name;
+                        console.log(param)
+                        axios.post('/merchant/merchantRechargeRecordBusiness/applyInvoice', param)
+                            .then(function (response) {
+                                var data = response.data;
+                                if (data.code == '0') {
+                                    ocmVM.$message({
+                                        message: '申请成功', type: 'success', duration: 2000, onClose: function () {
+                                            ocmVM.applyFormVisible = false;
+                                            ocmVM.btnDisabled = false;
+                                            ocmVM.searchTable();
+                                        }
+                                    });
+                                } else {
+                                    ocmVM.$message({
+                                        message: data.msg,
+                                        type: 'error'
+                                    });
+                                    ocmVM.btnDisabled = false;
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                            .then(function () {
+
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+        },
+        created() {
+            var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+            if (localVal) { this.pager.pageSize = localVal; }
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted() {
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+    })
+</script>
+
+</html>

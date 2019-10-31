@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style> 
+    /*公共样式*/
+    .merchantMainBox{margin: 0;
+        max-width: 100%;
+        padding: 10px 17px 20px;
+        flex-direction: row;
+        background: #fff;
+        margin-bottom: 15px;
+        box-shadow: 9px 11px 33px 7px rgba(73, 126, 250, 0.1);
+        border-radius: 8px;}
+    .mgB20{margin-bottom: 20px;}
+    .w100{width: 100px;}
+    .title18{font-size: 18px;color: #000;}
+    .merchantGreyBox{background: #eff2f9;padding:30px 18px;border-radius: 4px;margin-bottom: 35px; }
+
+    /*支付页面*/
+    .paymentOnline ul{overflow: hidden;width: 1065px;background: #f2f5fc;}
+    .paymentOnline ul li{float: left;width: 50%;font-size: 16px;color: #666;}
+    .paymentOnline ul li p{border-right: 1px solid #ecedf2;border-bottom: 1px solid #e6eaf4;padding:12px 0 12px 25px;}
+    .paymentOnline ul li:nth-of-type(even) p{border-right: none;}
+    .paymentOnline ul li span{display: inline-block;}
+    .paymentOnline ul li span em{display: inline-block;}   
+    .paymentBtnType span{display:inline-block;width: 100px;height: 35px;line-height: 35px;text-align: center;background: #c3c5d4;color: #fff;}  
+    .paymentBtnType span a{color: #fff;}
+    .paymentBtnType span.current{background: #5c6be8;}
+    .paymentImg .f-fl{margin-right: 50px;}
+    .paymentImg img{width: 250px;}
+    .rechargeMoney .el-form-item__error{padding-left: 72px;}
+    .preferentialH{max-height: 91px;}       
+    </style>
+</head>
+<body>
+<div id="paymentOnline" class="paymentOnline mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>在线充值</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="merchantMainBox mgB20" style="padding: 20px 40px 50px;"> 
+        <div class="title18 mgB20">充值优惠</div>
+        <ul :class="{preferentialH:isClass}">                
+            <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值：<em class="w100 f-tac">{{item.rechargeAmount}}</em><em style="margin-right: 30px;">+</em></span><span>送：<em class="w100 f-tac">{{item.givenAmount}}</em><em style="margin-right: 40px;">=</em></span><span>得：<em class="w100 f-tac">{{item.totalAmount}}</em></span></p></li>
+        </ul>
+        <div class="f-tac" style="width: 1085px;padding-top: 10px;" v-show="isShowMore">
+            <span style="color: #3a84f4;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+        </div>
+    </el-row>
+    <el-row class="merchantMainBox padding20 marginB20">
+        <div style="text-align: center;margin: 50px auto 80px;width: 950px;"><img th:src="@{/images/step3.jpg}" alt=""> </div>
+        <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 14px;">
+            <p style="margin-bottom: 20px;">感谢你的支持，已支付成功</p>
+            <img th:src="@{/images/successIco.jpg}" alt="">
+            <!-- <p v-show="isShowTip" style="margin-bottom: 40px;">您可在“<a href="/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness" style="color: #5c8de8;">充值记录</a>”中查看</p> -->
+            <p v-show="isShowTip" style="margin-bottom: 40px;">您可在“<span @click="gotoCostList" style="color: #5c8de8;">充值记录</span>”中查看</p>
+        </div>
+    </el-row>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script type="text/javascript" src="/js/common/commonMethod.js"></script>
+<!-- import common js-->
+<script th:inline="javascript">  
+    var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息  
+    var rechargeWay=[[${rechargeWay}]];//优惠 信息  
+    var ocmVM = new Vue({
+        el: '#paymentOnline',
+        data: function() {
+            return { 
+                isShowMore:false,
+                isClass:true,
+                isShow:false,
+                preferentialDTOList:preferentialDTOList,
+                isShowTip:true,
+            }              
+        },
+        methods: {
+            gotoCostList(){
+                window.parent.parent.openCostList();
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                    this.isClass=true
+                }else{
+                    this.isShow=true
+                    this.isClass=false
+                }          
+            },
+            isShowTipM(){
+              console.log("rechargeWay："+rechargeWay)
+                if(rechargeWay==1){
+                    this.isShowTip=false;
+                }
+            }
+        },
+        created(){
+            this.isShowTipM();
+        },
+        mounted(){
+            document.getElementById('paymentOnline').style.display = 'block';
+        }
+  })
+</script>
+</html> 

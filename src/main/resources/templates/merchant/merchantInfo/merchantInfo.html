@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style>  
+    /*公共样式*/
+    .merchantMainBox{margin: 0;
+        max-width: 100%;
+        padding: 10px 17px 20px;
+        flex-direction: row;
+        background: #fff;
+        margin-bottom: 15px;
+        box-shadow: 9px 11px 33px 7px rgba(73, 126, 250, 0.1);
+        border-radius: 8px;}
+    .mgB20{margin-bottom: 20px;}
+    .w100{width: 100px;}
+    .title18{font-size: 16px;color: #000;}
+    .merchantGreyBox{background: #eff2f9;padding:30px 18px;border-radius: 4px;margin-bottom: 35px; }
+   
+    /*用户信息*/
+    .merchantInfo .headerBox{width: 110px;height: 110px;border-radius: 50%;overflow: hidden;margin: 0 0 20px 97px;}
+    .merchantInfo .headerBox img{width: 110px;height: 110px;border-radius: 50%;overflow: hidden;}
+    .merchantInfo .changeHeaderImg{width: 310px;font-size: 16px;}
+    .merchantInfo .labelWidth{width: 125px;text-align: right;color: #757d88;font-size: 14px;margin-right: 55px;display: block;float: left;}
+    .merchantInfo .rightContent{color: #2d2e3e;font-size: 14px;}
+    .merchantInfo .marginB50{margin-bottom: 40px;}       
+    </style>
+</head>
+<body>
+<div id="resourceApply" class="resourceApply mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>用户信息</el-breadcrumb-item>
+    </el-breadcrumb>     
+    <el-row class="merchantMainBox padding20 merchantInfo" style="padding-left: 60px;">
+        <div class="title18 mgB20" style="padding-top: 30px;">用户信息</div>         
+        <el-col :span="24" style="margin-bottom: 30px">
+            <div class="headerBox">
+                <img v-if="merchantIconShow" th:src="@{/images/header.jpg}" alt="">
+                <img else :src="merchantIcon" alt="">
+            </div>
+            <el-button type="text" class="changeHeaderImg" @click="openWechat">更改头像</el-button>
+        </el-col>
+        <el-col :span="24" class="marginB50">
+            <span class="labelWidth">账号</span><span class="rightContent">{{userName}}</span>            
+        </el-col>
+        <el-col :span="24" class="marginB50">
+            <span class="labelWidth">密码</span>
+            <span class="marginR10 rightContent">******</span><span class="fs16 bluecolorM cursorP" @click="changePassword">更改密码</span>            
+        </el-col>
+        <el-col :span="24" class="marginB50">
+            <span class="labelWidth">联系人</span><span class="rightContent">{{linkName}}</span>            
+        </el-col>
+        <div class="title18" style="margin-bottom: 35px;">绑定信息</div>
+        <el-col :span="24" style="margin-bottom: 200px;">
+            <span class="labelWidth">手机号</span><span class="rightContent">{{phone}}</span>            
+        </el-col>
+    </el-row> 
+    <el-dialog title="设置头像" :visible.sync="wechatVisible" width="540px">
+        <template>
+            <el-form :model="wechatForm" ref="wechatForm" >
+                <div class="marginB20">选择本地照片，上传编辑自己的头像:</div>
+                <el-form-item label="" label-width="auto" prop="fileList">
+                    <el-upload
+                        class="upload-demo"
+                        :action="uploadOssHost"
+                        ref="refundApplyImgUpload"
+                        :on-preview="handlePreview"
+                        :on-remove="handleRemove"
+                        :on-success="handleSuccess"
+                        :on-error="handleError"
+                        :before-upload="handleBefore"
+                        accept=".jpg,.png,.jpeg"
+                        multiple
+                        :data="uploadParamData"
+                        :limit='1'
+                        :on-change="selectFile"
+                        :on-exceed="handleExceed"
+                        :auto-upload="false"
+                        :file-list="fileList">
+                        <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
+                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                        <div slot="tip" class="el-upload__tip">支持图片大小2M以内，jpg/jpeg/png格式的图片</div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="" label-width="auto" >
+                      <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="80px" height="80px">
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="wechatSumbit()">保存头像</el-button>
+            </div>
+        </template>
+    </el-dialog> 
+    <!-- 修改密码 dialog start -->
+     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog" width="540px">
+        <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
+            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
+                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
+                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
+                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" center="true">
+            <el-button type="primary" @click="saveModifyForm('modifyForm')">保存</el-button>
+            <el-button @click="cancelModifyForm('modifyForm')">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<!-- import common js-->
+<script th:inline="javascript">
+    var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+    var userId = [[${userId}]];//用户信息
+    var addClueVM = new Vue({
+        el: '#resourceApply',
+        data: function() {
+            var validatePass = (rule, value, callback) => {
+                if (value !== this.modifyForm.newPassword) {
+                    callback(new Error('确认密码与新密码不一致，请重新输入'));
+                } else {
+                    callback();
+                }
+            };
+            return {
+                dialogModifyPwdVisible:false,//修改密码dialog 是否显示
+                modifyForm:{
+                    oldPassword:'',
+                    newPassword:'',
+                    confirmPwd:''
+                },
+                modifyFormRules:{
+                    oldPassword:[
+                        { required: true, message: '当前密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符' },
+                        {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}  
+                      ],
+                    newPassword:[
+                        { required: true, message: '新密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+                        {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}  
+                     ],
+                     confirmPwd:[
+                        { required: true, message: '确认密码不能为空',trigger:'blur'},
+                        { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+                        { validator: validatePass, trigger: 'blur' }
+                     ]
+                    
+                },
+                merchantIconShow:true,
+                merchantIcon:'',
+                userName:'',//账号
+                linkName:'',
+                phone:'',
+                formLabelWidth: '140px',
+                wechatVisible:false,
+                wechatForm: {
+                    wechatUrl:'',
+                    fileList:[]
+                },
+                uploadOssHost:'',
+                uploadParamData: {
+                    key:'22',
+                    policy:'',
+                    OSSAccessKeyId:'',
+                    success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                    signature:'', 
+                    'x:params':'',
+                    'realName':''
+                 },
+                 fileList:[],
+                 limit:1,
+                 ossUrl:ossSignatureUrl,
+            }        	  
+        },
+        methods: {
+            openWechat() {
+                this.wechatVisible = true
+            },
+            getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
+                
+                 axios.get(signUrl, param)
+                .then(function (response) {
+                   // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                            dir:respData.dir,
+                            'policy': respData.policy,
+                            'OSSAccessKeyId': respData.accessid,
+                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                            'signature': respData.signature,
+                            'x:params':params,//自定义编码，basse64编码后的字符串,
+                            'realName':''
+                   };
+                  addClueVM.uploadParamData= new_multipart_params;
+                  addClueVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
+            selectFile(file, fileList){
+                addClueVM.uploadParamData.key= addClueVM.uploadParamData.dir+addClueVM.random_string(10)+addClueVM.get_suffix(file.name),
+                addClueVM.uploadParamData.realName= file.name
+            },
+            submitUpload(){
+                //this.customUpload();
+                this.$refs.refundApplyImgUpload.submit();
+            },
+            handlePreview(file){
+             
+            },
+            handleRemove(file,fileList){
+                this.fileList=[];
+                this.wechatForm.fileList=[];
+            },
+            handleExceed(files, fileList) {
+             //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            handleSuccess(response, file, fileList){
+                console.info(fileList);
+                console.info(addClueVM.fileList);
+                var realName = file.name;
+                var randomName = addClueVM.uploadParamData.key;
+                var imgUrl =  addClueVM.uploadOssHost+"/"+randomName;
+                this.wechatForm.wechatUrl=imgUrl;
+                this.wechatForm.fileList.push(realName);
+                this.fileList=[];
+                this.wechatForm.fileList=[];
+            },
+            handleError(err, file, fileList){
+                console.info(err);
+            },
+            handleBefore(file){
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg'|| file.type==='image/jpg';
+                if(!isTextComputer){
+                   this.fileList=[];
+                   this.$message.error('请上传正确格式的图片');
+                   return false;
+                }
+                if(file.size>2*1024*1024){
+                   this.fileList=[];
+                   this.$message.error('请上传2MB以内的图片');
+                   return false;
+                }
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                   suffix = filename.substring(pos);
+                }
+                return suffix;
+            },
+            wechatSumbit(formName) {
+                var formData = this.wechatForm;
+                var param={};
+                param.merchantIcon = formData.wechatUrl;//url地址
+                param.id=userId;
+                // param.id='1153604277760090112';
+                axios.post('/merchant/userManager/updateIcon',param).then(function (response) {
+                    console.log(response);
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        addClueVM.wechatVisible = false;
+                        addClueVM.merchantIcon=formData.wechatUrl;
+                        addClueVM.merchantIconShow=false;
+                        if(formData.wechatUrl){
+                            var str=`<img src=`+formData.wechatUrl+` alt="" class="headIco">`
+                            window.parent.$('.headPortrait').html(str)
+                            window.location.href="/merchant/userManager/userInfo"                        
+                        }else{
+                            window.location.href="/merchant/userManager/userInfo"
+                        }
+                    }else{
+                        addClueVM.$message.error(result.msg+',修改头像失败');
+                        addClueVM.wechatVisible = false;
+                    }
+                    
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                // always executed
+                });  
+            },
+            getInfo(){
+                var param={};
+                param.id=userId;
+                // param.id='1153604277760090112';
+                axios.post('/user/userManager/getUser',param).then(function (response) {
+                    console.log(response);
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        if(result.data.merchantIcon){
+                            addClueVM.merchantIcon=result.data.merchantIcon;
+                            addClueVM.merchantIconShow=false;
+                        }else{
+                            addClueVM.merchantIconShow=true;//显示默认头像
+                        }
+                        
+                        addClueVM.userName=result.data.username;
+                        addClueVM.linkName=result.data.name;
+                        var phone=result.data.phone;
+                        tel = "" + phone;
+                        // replace()方法在字符串中用一些字符替换另一些字符，或替换一个与正则表达式匹配的子串。
+                        var tel1 =tel.replace(tel.substring(3,7), "****")
+                        addClueVM.phone=tel1;
+                        
+                    }else{
+                        addClueVM.$message.error(result.msg);
+                    }
+                    
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                // always executed
+                });  
+            },
+            changePassword(){
+                this.dialogModifyPwdVisible=true;
+            },
+            cancelModifyForm(formName){//取消修改密码
+                this.$refs[formName].resetFields();
+                 this.dialogModifyPwdVisible = false;
+             },
+             saveModifyForm(formName){//保存
+                 this.$refs[formName].validate((valid) => {
+                     if (valid) {
+                        var param={};
+                        param.id=userId;
+                        // param.id="1153604277760090112";
+                        param.oldPassword=this.modifyForm.oldPassword;
+                        param.newPassword=this.modifyForm.newPassword;
+                        param.confirmPwd=this.modifyForm.confirmPwd;                        
+                        axios.post('/user/userManager/updatePassword', param)
+                        .then(function (response) {
+                           var resData = response.data;
+                           if(resData.code=='0'){
+                               addClueVM.$message({message:'请使用新密码重新登录',type:'success'});
+                               addClueVM.cancelModifyForm(formName);
+                               
+                               setTimeout(function(){//去登录页
+                                   window.location.href="/login";
+                               },2000);
+                           }else{
+                               addClueVM.$message(resData.msg);
+                               console.error(resData);
+                           }
+                       
+                       })
+                       .catch(function (error) {
+                            console.log(error);
+                            addClueVM.$message({
+                                message: "系统出错",
+                                type: 'error'
+                            }); 
+                       });
+                        
+                     } else {
+                       return false;
+                     }
+                   });
+            },
+            closeModifyPwdDialog(){
+                this.$refs.modifyForm.resetFields();
+            },
+        },
+        created(){
+            this.getUploadParam();
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            
+        },
+        mounted(){
+            document.getElementById('resourceApply').style.display = 'block';
+            this.getInfo();
+        }
+  })
+</script>
+</html>

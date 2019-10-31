@@ -78,7 +78,8 @@ public class Constants {
     public static Integer UNOPTIMIZE = 23;
     // 优化类资源导入模板列数
     public static Integer OPTIMIZE = 21;
-
+    //不限
+    public static String NO_LIMIT = "-1";
     /**
      * 不带走资源
      ***/
@@ -96,4 +97,44 @@ public class Constants {
      * 返回码成功
      */
     public static final String SUCCESS = "0";
+    /**
+     * 收款户名
+     */
+    //todo
+    public static final String PAYMENT_NAME = "???";
+    /**
+     * 收款银行
+     */
+    //todo
+    public static final String BANK = "???";
+    /**
+     * 收款账号
+     */
+    //todo
+    public static final String PAYMENT_ACCOUNT = "???";
+    /**
+     * 商家主账号
+     */
+    public static Integer MERCHANT_PRIMARY_ACCOUNT = 2;
+    /**
+     * 七陌呼叫类型：手机外显
+     */
+    public static final String BIND_TYPE_TWO = "2";
+    /**
+     * 七陌呼叫类型：普通外呼
+     */
+    public static final String BIND_TYPE_ONE = "1";
+
+
+    //慧聚
+    public  static  Integer USER_TYPE_ONE = 1;
+    //商家主账号
+    public  static  Integer USER_TYPE_TWO = 2;
+    //商家子账号
+    public  static  Integer USER_TYPE_THREE = 3;
+
+    //支付宝
+    public  static  Integer RECHARGE_WAY_ALI_PAY = 1;
+    //微信
+    public  static  Integer RECHARGE_WAY_WEXIN_PAY = 2;
 }
