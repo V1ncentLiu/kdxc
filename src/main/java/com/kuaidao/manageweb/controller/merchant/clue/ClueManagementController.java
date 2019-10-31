@@ -274,7 +274,7 @@ public class ClueManagementController {
                 // 联系电话
                 curList.add(dto.getPhone());
                 // 资源区域
-                curList.add(dto.getClueArea());
+                curList.add(dto.getAddress());
                 // 获取时间
                 curList.add(getTimeStr(dto.getReceiveTime()));
                 // 价格(元)/条
