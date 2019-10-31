@@ -80,7 +80,7 @@
                         <span v-else>合计</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="resNum" label="分配资源数"></el-table-column>
+                <el-table-column prop="resNum" label="分配资源数" :formatter="format_number"></el-table-column>
                 <el-table-column prop="noVisitRate" label="未跟访占比"></el-table-column>
                 <el-table-column prop="halfHourRate" label="30分钟内跟访占比"></el-table-column>
                 <el-table-column prop="oneHourRate" label="1小时内跟访占比"></el-table-column>
@@ -138,7 +138,34 @@
                 sourceList: [{id: 1,name: '新资源'},{id: 0,name: '非新资源'}]
             }             
         },
-        methods: {   
+        methods: {
+            format_number(row, column){ // 千分位数字格式化
+                var nStr = row[column.property];
+                if('--'==nStr){
+                    return nStr;
+                }
+                nStr += '';
+                if(nStr.indexOf('.') == -1){
+                    var x1 = nStr;
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1;
+                }else{
+                    var x = nStr.split('.');
+                    x1 = x[0];
+                    if(!x[1]){
+                        x[1] = '00';
+                    }
+                    x2 = x.length > 1 ? '.' + x[1] : '';
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1 + x2;
+                }
+            },
             centerStyle(){
                 return "text-align:center"
             },
