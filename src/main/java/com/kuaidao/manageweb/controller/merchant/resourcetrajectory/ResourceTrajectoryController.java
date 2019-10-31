@@ -96,12 +96,18 @@ public class ResourceTrajectoryController {
                 resourceTrajectory.setQq(clueCustomer.getQq());
                 resourceTrajectory.setSex(
                         clueCustomer.getSex() != null && clueCustomer.getSex() == 1 ? "男" : "女");
+
+                resourceTrajectory.setCreateTime(clueCustomer.getCreateTime());
+
             }
             ClueBasicDTO clueBasic = data.getClueBasic();
             if (clueBasic != null) {
                 // 客户详情信息
+                resourceTrajectory.setPutTime(clueBasic.getPutTime());
+                resourceTrajectory.setAssignTime(clueBasic.getAssignTime());
                 resourceTrajectory.setClueId(clueBasic.getId());
                 resourceTrajectory.setMessageTime(clueBasic.getMessageTime());
+                resourceTrajectory.setConsultTime(clueBasic.getMessageTime());
                 resourceTrajectory.setMessagePoint(clueBasic.getMessagePoint());
                 resourceTrajectory.setAge(getAge(clueBasic.getMessagePoint()));
                 resourceTrajectory.setSearchWord(clueBasic.getSearchWord());
