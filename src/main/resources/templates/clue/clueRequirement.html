@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源需求</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <!-- <shiro:hasPermission name="clueAssignRule:ruleReport:export"> -->
+            <el-button type="primary" @click="exportFun"><i ></i>导出</el-button>
+        <!-- </shiro:hasPermission> -->
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form"> 
+                <el-form-item label="统计日期：">
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.startTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="电销事业部：">  
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in deptList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组:" label-width="57px">
+                    <el-select v-model="form.teleOrg" placeholder="选择电销组" style="width: 100%;" clearable  filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>            
+                <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                v-loading="loading" 
+                @selection-change="handleSelectionChange">
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="月份" :formatter="dateFormat" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleOrgName" label="电销组"  width="120"></el-table-column>
+                <el-table-column align="center" prop="teleOrgName" label="电销组项目"  width="120"></el-table-column>
+                <el-table-column align="center" prop="teleOrgName" label="项目类别"  width="120"></el-table-column>
+                <el-table-column align="center" prop="teleOrgName" label="竞价（日均量）"  width="120"></el-table-column>
+                <el-table-column align="center" prop="teleOrgName" label="优化（日均量）"  width="120"></el-table-column>
+                <el-table-column align="center" prop="teleOrgName" label="信息流（日均量）"  width="120"></el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var categoryList=[[${categoryList}]];//资源类别集合
+    var typeList=[[${typeList}]];//资源类型集合
+    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
+    var sourceList=[[${sourceList}]];//媒介集合
+    var sourceTypeList=[[${sourceTypeList}]];//广告位集合
+    var queryOrg=[[${queryOrg}]];//电销组
+    var ruleList=[[${ruleList}]];//电销组
+    var deptList = [[${deptList}]]; // 电销事业部
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                dialogFormVisible: false,
+                loading: false,
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  ruleName:'',
+                  type:'',
+                  source:'',
+                  sourceType:'',
+                  category:'',
+                  industryCategory:'',
+                  teleOrg:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                ruleOptions:ruleList,
+                sourceOptions:sourceList,
+                sourceTypeOptions:sourceTypeList,
+                typeOptions:typeList,
+                categoryOptions:categoryList,
+                industryCategoryOptions:industryCategoryList ,
+                orgTeleArr:queryOrg,
+                storeId: '',
+                scrollTop: 0,
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },            
+            searchTable() {
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/clueAssignRule/ruleReport/list', param)
+                .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+                        // 取出存储的id
+                        if(!ocmVM.paginationShow){
+                            if(ocmVM.storeId){
+                                ocmVM.$nextTick(function(){
+                                    var storage = [];
+                                    ocmVM.dataTable.forEach(function(item, index){
+                                        if(item.id === ocmVM.storeId ){
+                                            storage.push(ocmVM.dataTable[index]);
+                                        }
+                                    })
+                                    ocmVM.toggleSelection(storage);
+                                    ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                                })
+                            }
+                        }else{
+                            ocmVM.removeSessionStore ("optRuleManagerStoreForm");
+                            ocmVM.removeSessionStore ("optRuleManagerOtherVal");
+                        }
+                        ocmVM.paginationShow = true;
+                        ocmVM.storeForm = ocmVM.form;
+
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            exportFun(){
+                var param = this.form;
+                param.pageNum='';
+                param.pageSize='';
+                axios.post('/clueAssignRule/ruleReport/export',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                	ocmVM.loading=false;
+                });                     	
+            	
+            },
+          //状态转换方法
+            transformRuleType(row, column, cellValue, index) {
+          	  	var text="";
+          	  	var now= new Date();
+                if(cellValue==1){
+              	  text="优化"
+                }else{
+              	  text="非优化"
+                }
+                return text;
+            },
+          //资源数转换方法
+            transformNum(row, column, cellValue, index) {
+                if(cellValue==-1){
+              	  return "不限";
+                }else{
+	              return cellValue;
+                }
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+        //       return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+              return moment(cellValue).format("YYYY-MM");
+            },
+          //媒介转换方法
+            transformSource(row, column, cellValue, index) {
+         	   var text="";
+           	   if(sourceList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<sourceList.length;j++){
+	 	                		if(array[i]==sourceList[j].value){
+	 	                			if(i==0){
+		 	                			text=sourceList[j].name;
+	 	                			}else{
+		 	                			text=text+","+sourceList[j].name;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+          //广告位转换方法
+            transformSourceType(row, column, cellValue, index) {
+         	   var text="";
+           	   if(sourceTypeList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<sourceTypeList.length;j++){
+	 	                		if(array[i]==sourceTypeList[j].value){
+	 	                			if(i==0){
+		 	                			text=sourceTypeList[j].name;
+	 	                			}else{
+		 	                			text=text+","+sourceTypeList[j].name;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+          //行业类别转换方法
+            transformIndustry(row, column, cellValue, index) {
+         	   var text="";
+           	   if(industryCategoryList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<industryCategoryList.length;j++){
+	 	                		if(array[i]==industryCategoryList[j].value){
+	 	                			if(i==0){
+		 	                			text=industryCategoryList[j].name;
+	 	                			}else{
+		 	                			text=text+","+industryCategoryList[j].name;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+          //资源类别转换方法
+            transformCategory(row, column, cellValue, index) {
+          	   var text="";
+            	   if(categoryList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<categoryList.length;j++){
+ 	 	                		if(array[i]==categoryList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=categoryList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+categoryList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+          //资源类型转换方法
+            transformType(row, column, cellValue, index) {
+          	   var text="";
+            	   if(typeList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<typeList.length;j++){
+ 	 	                		if(array[i]==typeList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=typeList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+typeList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+             toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
+        },
+        created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("optRuleManagerStoreForm");
+                var otherVal = this.getSessionStore("optRuleManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
