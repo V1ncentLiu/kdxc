@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public interface RequirementFeignClient {
      * @param dto
      * @return
      */
+    @RequestMapping("/queryPage")
     public JSONResult<PageBean<ResRequirement>> queryPage(@RequestBody ResQueryDto dto);
 
     /**
@@ -32,6 +34,7 @@ public interface RequirementFeignClient {
      * @param dto
      * @return
      */
+    @RequestMapping("/querylist")
     public JSONResult<List<ResRequirement>> queryList(@RequestBody ResQueryDto dto);
 
 
