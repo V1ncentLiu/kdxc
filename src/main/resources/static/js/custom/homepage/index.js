@@ -421,6 +421,8 @@ var homePageVM=new Vue({
 	                 homePageVM.isHeliClient=true;
 	                 homePageVM.isTrClient=false;
 	                 homePageVM.isQimoClient = false;
+	                 homePageVM.isRongLianClient = false;
+	                 homePageVM.isKeTianClient = false;
 	                 //sessionStorage.setItem("loginClient","qimo");
 	                 //sessionStorage.setItem("accountId",homePageVM.accountId);
 	                 var clientInfo={};
@@ -616,6 +618,8 @@ var homePageVM=new Vue({
 			                     homePageVM.isQimoClient=false;
 			                     homePageVM.isTrClient=true;
 			                     homePageVM.isHeliClient=false;
+			                     homePageVM.isKeTianClient=false;
+			                     homePageVM.isRongLianClient = false;
 			                     //sessionStorage.setItem("loginClient","tr");
 			                    // sessionStorage.setItem("accountId",homePageVM.accountId);
 			                     
@@ -676,8 +680,108 @@ var homePageVM=new Vue({
 			
         },
         loginKeTianClient(){//科天登录
+			var bindType = this.loginClientForm.bindPhoneType;
+			if(bindType==1){
+				this.$message({message:"科天不支持普通电话模式登录！",type:'warning'});
+				return;
+			}
+			var loginClient = this.loginClientForm.loginClient;
+			var param = {};
+			param.loginName = loginClient;
+			axios.post('/client/ketianClient/queryClientByLoginName',param)
+				.then(function (response) {
+					var data =  response.data;
+					if(data.code=='0'){
+						var resData = data.data;
+						if(!resData){
+							homePageVM.$message({message:"登陆失败，该坐席号不属于您",type:'error'});
+						}
+						var requestUrl = "https://tky.ketianyun.com";
+						var userName = resData.userName;
+						var password = resData.pwd;
+						//注册
+						var configuration = {};
+						configuration.baseUrl = requestUrl;
+						configuration.username = userName;
+						configuration.password = password;
+						configuration.enableWebRTC = "true";
+						CtiAgentBar.init(configuration, this.initCallback,this.webRTCCallback).then((res) => {
+							if(res.code === 200){
+								var clientNo = resData.clientExtNo;
+								//登录
+								CtiAgentBar.login(clientNo);
+								var clientType = homePageVM.loginClientForm.clientType;
+								//记录登录信息
+								homePageVM.ketianClientLoginRecord({"loginName":loginClient,"accountType":homePageVM.accountType,"clientType":clientType});
+
+							}else{
+								homePageVM.$message({message:"注册失败-"+res.msg,type:'error'});
+							}
+						});
+					}else{
+						console.error(data);
+						homePageVM.$message({message:"查询坐席是否属于自己:"+data.msg,type:'error'});
+					}
+				})
+				.catch(function (error) {
+					console.log(error);
+				})
+				.then(function () {
+					// always executed
+				});
 
         },
+		ketianClientLoginRecord(param){
+			axios.post('/client/ketianClient/clientLoginRecord',param)
+				.then(function (response) {
+					var data = response.data;
+					if(data.code!=0){
+						homePageVM.$message({message:"登录坐席失败-"+data.msg,type:'error'});
+						return ;
+					}
+					homePageVM.$message({message:"登录成功",type:'success'});
+					homePageVM.callTitle="呼叫中心（科天ON）";
+					homePageVM.dialogLoginClientVisible =false;
+					homePageVM.isQimoClient=false;
+					homePageVM.isTrClient=false;
+					homePageVM.isHeliClient=false;
+					homePageVM.isKeTianClient=true;
+					homePageVM.isRongLianClient = false;
+
+					var clientInfo={};
+					clientInfo.loginClientType="ketian";
+					clientInfo.clientType = homePageVM.loginClientForm.clientType;
+					clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+					clientInfo.loginClient = homePageVM.loginClientForm.loginClient;
+					localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+					console.info("clientInfo"+JSON.stringify(clientInfo));
+
+				})
+				.catch(function (error) {
+					console.log(error);
+				});
+		},
+		initCallback(data) {//科天登录初始化
+			console.log("data:==>" + JSON.stringify(data));
+			if (data.code === 200) {
+				console.log(data.msg);
+			} else {
+				CtiAgentBar.destroy();
+			}
+		},
+		webRTCCallback:{//科天登录回调
+			handle:(event,msg)=>{
+				if(event === 'check'){
+					if(!msg){
+						homePageVM.$message({message:"初始化失败，请检查麦克风！",type:'error'});
+					}
+				}
+				if (event === 'invite') {
+					//TODO devin next
+                    debugger;
+				}
+			}
+		},
         loginRongLianClient(){//容连登录
 
         },
@@ -693,6 +797,8 @@ var homePageVM=new Vue({
                          homePageVM.isQimoClient=false;
                          homePageVM.isTrClient=false;
                          homePageVM.isHeliClient=false;
+                         homePageVM.isKeTianClient=false;
+                         homePageVM.isRongLianClient=false;
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -740,9 +846,9 @@ var homePageVM=new Vue({
          	   this.trClientLogout();
         	}else if(this.isHeliClient){
         		this.heliClientLogout();
-        	}else if(this.isHeliClient){
+        	}else if(this.isKeTianClient){
                 this.KeTianClientLogout();
-            }else if(this.isHeliClient){
+            }else if(this.isRongLianClient){
                 this.RongLianClientLogout();
             }
         },
@@ -759,6 +865,8 @@ var homePageVM=new Vue({
                  homePageVM.isQimoClient=false;
                  homePageVM.isTrClient=false;
                  homePageVM.isHeliClient=false;
+                 homePageVM.isKeTianClient = false;
+                 homePageVM.isRongLianClient = false;
              	// sessionStorage.removeItem("loginClient");
              	// sessionStorage.removeItem("accountId");
                  localStorage.removeItem("clientInfo");
@@ -792,6 +900,8 @@ var homePageVM=new Vue({
                 	 homePageVM.isQimoClient=false;
                      homePageVM.isTrClient=false;
                      homePageVM.isHeliClient=false;
+                     homePageVM.isKeTianClient =false;
+                     homePageVM.isRongLianClient = false;
                      homePageVM.callTitle="呼叫中心";
                     // sessionStorage.removeItem("loginClient");
                    //  sessionStorage.removeItem("accountId");
@@ -819,8 +929,26 @@ var homePageVM=new Vue({
         	 
         },
         KeTianClientLogout(){
+			CtiAgentBar.logout();
+			homePageVM.dialogLogoutClientVisible =false;
+			homePageVM.$message({message:"退出成功",type:'success'});
+			homePageVM.callTitle="呼叫中心";
+			this.setLoginClientMark();
+			localStorage.removeItem("clientInfo");
 
+			homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
+			homePageVM.loginClientForm.bindPhoneType=2;
+			homePageVM.loginClientForm.cno='';
+			homePageVM.loginClientForm.bindPhone='';
+			homePageVM.loginClientForm.loginClient='';
         },
+		setLoginClientMark(){
+			homePageVM.isQimoClient=false;
+			homePageVM.isTrClient=false;
+			homePageVM.isHeliClient=false;
+			homePageVM.isKeTianClient = false;
+			homePageVM.isRongLianClient = false;
+		},
         RongLianClientLogout(){
 
         },

@@ -23,6 +23,11 @@ $(function(){
 			homePageVM.loginClientForm.cno = clientInfoObj.clientNo;
 			homePageVM.loginClientForm.bindPhoneType = clientInfoObj.bindType;
             homePageVM.loginHeliClient();
+		}else if(loginClientType=="ketian"){
+			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+			homePageVM.loginKeTianClient();
 		}
 	}
 	
@@ -128,7 +133,9 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
           });
  	}else if(homePageVM.isHeliClient){
  		heliClientOutbound(outboundInputPhone,callSource,clueId,callback);
- 	}
+ 	}else if(homePageVM.isKeTianClient){
+ 		ketianClientOutbound(outboundInputPhone,callSource,clueId,callback);
+	}
 	
 } 
 
@@ -324,4 +331,9 @@ function heliClientOutbound(outboundInputPhone,callSource,clueId,callback){
 	      .then(function () {
 	        // always executed
 	      });
+}
+
+//科天外呼
+function ketianClientOutbound(outboundInputPhone,callSource,clueId,callback){
+
 }

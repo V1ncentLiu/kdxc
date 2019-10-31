@@ -259,7 +259,7 @@ public class KetianClientController {
         ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
         clientLoginRecord.setAccountId(accountId);
         clientLoginRecord.setAccountType(ketianClientLoginDTO.getAccountType());
-        clientLoginRecord.setClientType(clientLoginRecord.getClientType());
+        clientLoginRecord.setClientType(Integer.parseInt(ketianClientLoginDTO.getClientType()));
         clientLoginRecord.setCno(ketianClientRespDTO.getClientExtNo());
         clientLoginRecord.setOrgId(curLoginUser.getOrgId());
         clientLoginRecord.setAccountNo(ketianClientRespDTO.getUserName());
