@@ -172,6 +172,7 @@ var clientVm = new Vue({
              this.multipleSelection = val;
          },
          addClientDialog(){//添加坐席弹窗
+          debugger
         	 this.addOrModifyDialogTitle='添加坐席';
         	 this.submitClientUrl ='insertRonglianClient';
         	 if (this.$refs['clientForm']!==undefined) {
@@ -181,6 +182,7 @@ var clientVm = new Vue({
              axios.post('/user/userManager/listUserInfoByOrgId', {})
              .then(function (response) {
                  var resData = response.data;
+                 console.log(resData)
                  if(resData.code=='0'){
               	    clientVm.userList = resData.data;                     
                  }else{
