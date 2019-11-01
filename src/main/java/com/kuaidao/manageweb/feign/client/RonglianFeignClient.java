@@ -4,6 +4,7 @@ import com.kuaidao.callcenter.dto.RonglianClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
 import com.kuaidao.callcenter.dto.RonglianClientOutCallResqDTO;
 import com.kuaidao.callcenter.dto.RonglianClientResqDTO;
+import com.kuaidao.callcenter.dto.RonglianOutCallCallId;
 import com.kuaidao.callcenter.dto.ketianclient.KetianClientInsertAndUpdateReqDTO;
 import com.kuaidao.callcenter.dto.ketianclient.KetianClientOutboundDTO;
 import com.kuaidao.callcenter.dto.ketianclient.KetianClientPageReqDTO;
@@ -75,7 +76,7 @@ public interface RonglianFeignClient {
 
     /**
      * 根据idList删除容联坐席
-     * @param idList
+     * @param idListLongReq
      * @return
      */
     @PostMapping("/deleteRonglianClient")
@@ -87,7 +88,7 @@ public interface RonglianFeignClient {
      * @return
      */
     @PostMapping("/setRonglianClientState")
-    public JSONResult<RonglianClientOutCallResqDTO> setRonglianClientState (@RequestBody RonglianClientDTO ronglianClientDTO);
+    public JSONResult setRonglianClientState (@RequestBody RonglianClientDTO ronglianClientDTO);
 
     /**
      * 容联外呼
@@ -95,7 +96,7 @@ public interface RonglianFeignClient {
      * @return
      */
     @PostMapping("/ronglianOutBoundCall")
-    public JSONResult<RonglianClientOutCallResqDTO> ronglianOutBoundCall (@RequestBody RonglianClientDTO ronglianClientDTO);
+    public JSONResult ronglianOutBoundCall (@RequestBody RonglianClientDTO ronglianClientDTO);
 
     @Component
     static class HystrixClientFallback implements RonglianFeignClient {
@@ -140,13 +141,13 @@ public interface RonglianFeignClient {
         }
 
         @Override
-        public JSONResult<RonglianClientOutCallResqDTO> setRonglianClientState(
+        public JSONResult setRonglianClientState(
             RonglianClientDTO ronglianClientDTO) {
             return fallBackError("设置坐席状态");
         }
 
         @Override
-        public JSONResult<RonglianClientOutCallResqDTO> ronglianOutBoundCall(
+        public JSONResult ronglianOutBoundCall(
             RonglianClientDTO ronglianClientDTO) {
             return fallBackError("容联外呼");
         }

@@ -1,29 +1,21 @@
 package com.kuaidao.manageweb.controller.client;
 
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
-import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
 import com.kuaidao.callcenter.dto.RonglianClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
 import com.kuaidao.callcenter.dto.RonglianClientOutCallResqDTO;
 import com.kuaidao.callcenter.dto.RonglianClientResqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientInsertAndUpdateReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientPageReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientRespDTO;
-import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
+import com.kuaidao.callcenter.dto.RonglianOutCallCallId;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.JSONUtil;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
-import com.kuaidao.manageweb.feign.client.KetianFeignClient;
 import com.kuaidao.manageweb.feign.client.RonglianFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -201,7 +193,7 @@ public class RonglianClientController {
      */
     @PostMapping("/login")
     @ResponseBody
-    public JSONResult<RonglianClientOutCallResqDTO> login(@RequestBody RonglianClientDTO ronglianClientDTO) {
+    public JSONResult login(@RequestBody RonglianClientDTO ronglianClientDTO) {
         String loginName = ronglianClientDTO.getLoginName();
         String accountType = ronglianClientDTO.getAccountType();
         Integer clientType = ronglianClientDTO.getClientType();
@@ -214,7 +206,7 @@ public class RonglianClientController {
         reqDTO.setLoginName(loginName);
         JSONResult<RonglianClientResqDTO> ronglianJr = ronglianFeignClient.queryRonglianClientByLoginName(reqDTO);
         if (!JSONResult.SUCCESS.equals(ronglianJr.getCode()) || null == ronglianJr.getData()) {
-            return new JSONResult<RonglianClientOutCallResqDTO>()
+            return new JSONResult()
                 .fail(SysErrorCodeEnum.ERR_NO_EXISTS_FAIL.getCode(), "登录坐席不存在");
         }
         //根据登录坐席和登录用户查询
@@ -224,7 +216,7 @@ public class RonglianClientController {
         reqDTOByLoginNameAndUser.setLoginName(loginName);
         JSONResult<RonglianClientResqDTO> ronglianJrByLoginNameAndUser = ronglianFeignClient.queryRonglianClientByLoginName(reqDTOByLoginNameAndUser);
         if (!JSONResult.SUCCESS.equals(ronglianJrByLoginNameAndUser.getCode()) || null == ronglianJrByLoginNameAndUser.getData()) {
-            return new JSONResult<RonglianClientOutCallResqDTO>()
+            return new JSONResult()
                 .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该坐席不属于你");
         }
         // 将坐席号放入seesion 便于后续使用
@@ -236,7 +228,7 @@ public class RonglianClientController {
         ronglianClientDTO.setState("11");
         ronglianClientDTO.setUserId(curLoginUser.getId());
 
-        JSONResult<RonglianClientOutCallResqDTO> loginJson = ronglianFeignClient.setRonglianClientState(ronglianClientDTO);
+        JSONResult loginJson = ronglianFeignClient.setRonglianClientState(ronglianClientDTO);
         if (!JSONResult.SUCCESS.equals(loginJson.getCode())) {
             return loginJson;
         }
@@ -263,7 +255,7 @@ public class RonglianClientController {
      */
     @ResponseBody
     @PostMapping("/logout")
-    public JSONResult<RonglianClientOutCallResqDTO> logout(@RequestBody RonglianClientDTO ronglianClientDTO) {
+    public JSONResult logout(@RequestBody RonglianClientDTO ronglianClientDTO) {
         String loginName = ronglianClientDTO.getLoginName();
         if (CommonUtil.isBlank(loginName)) {
             logger.error("ronglian loginout param{{}}", ronglianClientDTO);
