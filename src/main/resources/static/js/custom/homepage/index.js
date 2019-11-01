@@ -180,6 +180,7 @@ var homePageVM=new Vue({
             tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
             consoleBtnVisible:isShowConsoleBtn,//控制台按鈕是否可見
             accountType:accountType,
+            ringOffdialogVisible:false,//默认不显示挂断弹窗
 	    }
 	},
  	methods: {
