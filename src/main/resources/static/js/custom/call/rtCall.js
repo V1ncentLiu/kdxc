@@ -249,7 +249,6 @@ function getPhoneLocale(phone,callSource){
      .then(function (response) {
          var data =  response.data;
          if(data.code=='0'){
-    		 console.info(data);
     		 var resData = data.data;
     		 var result = resData.result;
     		 if(result=="0"){

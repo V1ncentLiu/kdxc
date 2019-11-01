@@ -180,6 +180,19 @@ var homePageVM=new Vue({
             tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
             consoleBtnVisible:isShowConsoleBtn,//控制台按鈕是否可見
             accountType:accountType,
+			webRTCCallback:{//科天登录回调
+				handle:(event,msg)=>{
+					if(event === 'check'){
+						if(!msg){
+							this.$message({message:"初始化失败，请检查麦克风！",type:'error'});
+						}
+					}
+					if (event === 'invite') {
+						//TODO devin next
+					debugger;
+					}
+				}
+			},
 	    }
 	},
  	methods: {
@@ -705,8 +718,8 @@ var homePageVM=new Vue({
 						configuration.username = userName;
 						configuration.password = password;
 						configuration.enableWebRTC = "true";
-						configuration.stateEventListener = this.ketianStateEventListener;
-						CtiAgentBar.init(configuration, this.initCallback,this.webRTCCallback).then((res) => {
+						configuration.stateEventListener = homePageVM.ketianStateEventListener;
+						CtiAgentBar.init(configuration, homePageVM.initCallback,homePageVM.webRTCCallback).then((res) => {
 							if(res.code === 200){
 								var clientNo = resData.clientExtNo;
 								//登录
@@ -747,6 +760,7 @@ var homePageVM=new Vue({
 						//登录成功
 					} else {
 						console.log(data.data.message);
+						this.$message({message:"坐席登录失败-"+data.data.message,type:'error'});
 					}
 					break;
 				case "CB_LOGOUT":
@@ -756,7 +770,8 @@ var homePageVM=new Vue({
 						//就绪成功
 					}else{
 						//TODO  devin
-						this.$message({message:"坐席准备失败-"+data.data.message,type:'error'});
+						console.error("就绪%o",data);
+						this.$message({message:"坐席就绪失败-"+data.data.message,type:'error'});
 					}
 					break;
 				case "CB_BUSY":
@@ -783,8 +798,10 @@ var homePageVM=new Vue({
 				case "CB_RINGING":
 					//振铃事件
 					console.log(data.data.data); //弹屏数据,具体参数如下
+					CtiAgentBar.webRTCAnswer();
 					break;
 				case "CB_ANSWERING":
+					console.info("answering");
 					//接听事件
 					break;
 				case "CB_REALTIME":
@@ -820,6 +837,10 @@ var homePageVM=new Vue({
 						//success
 					}
 					break;
+				case "CB_KICKOUT":
+					this.$message({message:"您的坐席已在其他地方登陆，本地已强制下线！",type:'error'});
+					break;
+
 			}
 		},
 		ketianClientLoginRecord(param){
@@ -860,19 +881,7 @@ var homePageVM=new Vue({
 				CtiAgentBar.destroy();
 			}
 		},
-		webRTCCallback:{//科天登录回调
-			handle:(event,msg)=>{
-				if(event === 'check'){
-					if(!msg){
-						homePageVM.$message({message:"初始化失败，请检查麦克风！",type:'error'});
-					}
-				}
-				if (event === 'invite') {
-					//TODO devin next
-                    debugger;
-				}
-			}
-		},
+
         loginRongLianClient(){//容连登录
 
         },
