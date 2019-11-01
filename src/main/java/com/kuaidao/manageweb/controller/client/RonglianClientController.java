@@ -213,7 +213,7 @@ public class RonglianClientController {
         RonglianClientDTO reqDTO = new RonglianClientDTO();
         reqDTO.setLoginName(loginName);
         JSONResult<RonglianClientResqDTO> ronglianJr = ronglianFeignClient.queryRonglianClientByLoginName(reqDTO);
-        if (JSONResult.SUCCESS.equals(ronglianJr.getCode()) || null == ronglianJr.getData()) {
+        if (!JSONResult.SUCCESS.equals(ronglianJr.getCode()) || null == ronglianJr.getData()) {
             return new JSONResult<RonglianClientOutCallResqDTO>()
                 .fail(SysErrorCodeEnum.ERR_NO_EXISTS_FAIL.getCode(), "登录坐席不存在");
         }
@@ -223,7 +223,7 @@ public class RonglianClientController {
         reqDTOByLoginNameAndUser.setUserId(curLoginUser.getId());
         reqDTOByLoginNameAndUser.setLoginName(loginName);
         JSONResult<RonglianClientResqDTO> ronglianJrByLoginNameAndUser = ronglianFeignClient.queryRonglianClientByLoginName(reqDTOByLoginNameAndUser);
-        if (JSONResult.SUCCESS.equals(ronglianJrByLoginNameAndUser.getCode()) || null == ronglianJrByLoginNameAndUser.getData()) {
+        if (!JSONResult.SUCCESS.equals(ronglianJrByLoginNameAndUser.getCode()) || null == ronglianJrByLoginNameAndUser.getData()) {
             return new JSONResult<RonglianClientOutCallResqDTO>()
                 .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该坐席不属于你");
         }
