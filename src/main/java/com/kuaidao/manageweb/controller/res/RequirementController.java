@@ -64,7 +64,7 @@ public class RequirementController extends BaseStatisticsController {
     @RequiresPermissions("resource:requirment:view")
     @RequestMapping("queryPage")
     public @ResponseBody JSONResult<PageBean<ResRequirement>> quetyPage(@RequestBody ResQueryDto dto){
-        initDto(dto);
+        //initDto(dto);
         return requirementFeignClient.queryPage(dto);
     }
 
@@ -77,7 +77,7 @@ public class RequirementController extends BaseStatisticsController {
     @RequestMapping("/export")
     public @ResponseBody void export(HttpServletResponse response, @RequestBody ResQueryDto dto){
         try{
-            initDto(dto);
+           // initDto(dto);
             JSONResult<List<ResRequirement>> json=requirementFeignClient.queryList(dto);
             if("0".equals(json.getCode())){//&& !json.getData().isEmpty()
                 ResRequirement[] dtos = json.getData().isEmpty()?new ResRequirement[]{}:json.getData().toArray(new ResRequirement[0]);
