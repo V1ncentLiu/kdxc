@@ -29,6 +29,7 @@ import javax.validation.Valid;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class RonglianClientController {
      * @param request
      * @return
      */
+    @RequiresPermissions("aggregation:ronglianClient:view")
     @GetMapping("/ronglianClientPage")
     public String ronglianClientPage(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
