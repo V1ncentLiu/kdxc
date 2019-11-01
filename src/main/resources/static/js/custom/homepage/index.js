@@ -755,11 +755,13 @@ var homePageVM=new Vue({
 				case "CB_CONNECT":
 					if (data.data.code === 200) {
 						//连接成功
+						console.info();
 					}
 					break;
 				case "CB_LOGIN":
 					if (data.data.code === 200) {
 						//登录成功
+						console.info("登录成功");
 					} else {
 						console.log(data.data.message);
 						this.$message({message:"坐席登录失败-"+data.data.message,type:'error'});
@@ -770,6 +772,7 @@ var homePageVM=new Vue({
 				case "CB_READY":
 					if (data.data.code === 200) {
 						//就绪成功
+						console.info("就绪成功");
 					}else{
 						//TODO  devin
 						console.error("就绪%o",data);
