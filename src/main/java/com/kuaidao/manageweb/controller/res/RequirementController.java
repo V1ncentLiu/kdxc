@@ -52,7 +52,12 @@ public class RequirementController extends BaseStatisticsController {
     @RequiresPermissions("resource:requirment:view")
     @RequestMapping("requirmentlist")
     public String requirmentlist(HttpServletRequest request){
-        super.initSaleDept(request);
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        //查询电销事业部
+        queryDTO.setOrgType(OrgTypeConstant.DZSYB);
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        request.setAttribute("deptList",queryOrgByParam.getData());
         return  "/clue/clueRequirement";
     }
 
