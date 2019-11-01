@@ -135,6 +135,62 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  		heliClientOutbound(outboundInputPhone,callSource,clueId,callback);
  	}else if(homePageVM.isKeTianClient){
  		ketianClientOutbound(outboundInputPhone,callSource,clueId,callback);
+	}else if(homePageVM.isRongLianClient){
+ 		var param = {};
+ 		param.customerPhone = outboundInputPhone;
+ 		if(clueId){
+ 			param.clueId = clueId;
+ 		}
+ 		param.accountType = homePageVM.accountType;
+ 		homePageVM.$message({message:"外呼中",type:'success'});
+ 		 axios.post('/client/ronglianClient/outbound',param)
+          .then(function (response) {
+              var data =  response.data;
+              if(data.code=='0'){
+             	  var resData = data.data;
+             	  if(resData.Succeed){
+             		  if(callSource==1){
+             			 homePageVM.dialogOutboundVisible =true;
+             			 $("#outboundCallTime").html("");
+    					 $('#outboundPhoneLocaleArea').html("");
+    				 	 intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
+    					 getPhoneLocale(outboundInputPhone,callSource);
+             		  }else if(callSource==2) {
+             			 homePageVM.tmOutboundCallDialogVisible =true;
+    					 $("#tmOutboundCallTime").html("");
+    					 $('#tmOutboundPhoneLocaleArea').html("");
+    					 intervalTimer("tmOutboundCallTime",10,2);
+    					 //查询手机号归属地
+    					 getPhoneLocale(outboundInputPhone,callSource);
+             		  }
+             	
+         		   
+         		    if (typeof callback === 'function') {
+ 		               callback();
+ 		             }
+      				
+             	  }else{
+             	  	console.error(data);
+             		  clearTimer();//清除定时器
+					  var  qimoResMsg = resData.Message;
+					  if(qimoResMsg.indexOf("404") != -1){
+						  homePageVM.$message({message:"呼叫失败，绑定类型错误",type:'error'});
+					  }else{
+						  homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
+					  }
+             	  }
+              }else{
+				  console.error(data);
+            	   clearTimer();//清除定时器
+             		homePageVM.$message({message:"外呼失败【"+data.msg+"】",type:'error'});
+              }
+          })
+          .catch(function (error) {
+             console.log(error);
+          })
+          .then(function () {
+            // always executed
+          });
 	}
 	
 } 

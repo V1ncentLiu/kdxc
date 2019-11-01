@@ -887,8 +887,41 @@ var homePageVM=new Vue({
 			}
 		},
 
-        loginRongLianClient(){//容连登录
-
+      loginRongLianClient(){//容联登录
+          var loginClient = this.loginClientForm.loginClient;
+          var param={};
+          param.loginName = loginClient;
+          param.accountType = homePageVM.accountType;
+          param.clientType = homePageVM.loginClientForm.clientType;
+           axios.post('/client/ronglianClient/login',param)
+             .then(function (response) {
+                 var data =  response.data;                 
+                 if(data.code=='0'){
+                    var resData = data.data;
+                    homePageVM.$message({message:"登录成功",type:'success'});
+                    homePageVM.callTitle="呼叫中心（容联ON）";
+                    homePageVM.dialogLoginClientVisible =false;
+                    homePageVM.isQimoClient=false;
+                    homePageVM.isTrClient=false;
+                    homePageVM.isHeliClient=false;
+                    homePageVM.isKeTianClient=false;
+                    homePageVM.isRongLianClient=true;
+                    var clientInfo={};
+                    clientInfo.loginClientType="ronglian";
+                    clientInfo.loginClient = homePageVM.loginClientForm.loginClient
+                    clientInfo.clientType = homePageVM.loginClientForm.clientType;
+                    localStorage.setItem("clientInfo",JSON.stringify(clientInfo));                     
+                }else{
+                    console.error(data);
+                    homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
+                }
+             })
+             .catch(function (error) {
+                console.log(error);
+             })
+             .then(function () {
+               // always executed
+             });
         },
         logoutClient(formName){//坐席退出
         	if(this.isQimoClient){
