@@ -193,6 +193,7 @@ var homePageVM=new Vue({
 					}
 				}
 			},
+            ringOffdialogVisible:false,//默认不显示挂断弹窗
 	    }
 	},
  	methods: {

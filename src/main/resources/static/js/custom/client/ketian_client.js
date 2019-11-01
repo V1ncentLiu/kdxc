@@ -281,7 +281,7 @@ var clientVm = new Vue({
                         }
                         clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }else{
-                         clientVm.$message({message:'查询七陌坐席失败',type:'error'});
+                         clientVm.$message({message:'查询科天坐席失败',type:'error'});
                         //  console.error(resData);
                          clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }

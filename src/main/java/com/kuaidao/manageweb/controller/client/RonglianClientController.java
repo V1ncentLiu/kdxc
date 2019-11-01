@@ -269,25 +269,14 @@ public class RonglianClientController {
             logger.error("ronglian loginout param{{}}", ronglianClientDTO);
             return CommonUtil.getParamIllegalJSONResult();
         }
-        //根据登录坐席查询坐席
-        RonglianClientDTO reqDTO = new RonglianClientDTO();
-        reqDTO.setLoginName(loginName);
-        JSONResult<RonglianClientResqDTO> ronglianJr = ronglianFeignClient.queryRonglianClientByLoginName(reqDTO);
-        if (JSONResult.SUCCESS.equals(ronglianJr.getCode()) || null == ronglianJr.getData()) {
-            return new JSONResult<RonglianClientOutCallResqDTO>()
-                .fail(SysErrorCodeEnum.ERR_NO_EXISTS_FAIL.getCode(), "登录坐席不存在");
-        }
-        RonglianClientResqDTO ronglianClientResqDTO = ronglianJr.getData();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         // 退出删除坐席号
         Session session = SecurityUtils.getSubject().getSession();
         session.removeAttribute("agentId:ronglian");
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        Long orgId = curLoginUser.getOrgId();
+
         //容联下班state参数值:00
         ronglianClientDTO.setState("00");
         ronglianClientDTO.setUserId(curLoginUser.getId());
-        ronglianClientDTO.setOrgId(orgId);
-        ronglianClientDTO.setAgentId(ronglianClientResqDTO.getAgentId());
         return ronglianFeignClient.setRonglianClientState(ronglianClientDTO);
     }
 
