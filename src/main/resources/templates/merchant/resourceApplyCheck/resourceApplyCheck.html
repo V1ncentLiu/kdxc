@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>费用设置</el-breadcrumb-item>
+        <el-breadcrumb-item>资源需求审批</el-breadcrumb-item>
+    </el-breadcrumb>    
+    <div class="mainSearchBg">
+        <el-row class="greyTip">
+            待审核：{{pendingReviewNum}}条
+        </el-row>
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
+                <el-form-item label="商家:" label-width="auto">
+                    <el-select v-model="form.applyPerson" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="申请周期时间:">
+                    <el-date-picker
+                        v-model="form.applyStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.applyEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="审核状态:">
+                    <el-select v-model="form.auditStatus" clearable placeholder="全部">
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="applyPersonStr" label="商家账户" width="130"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="申请时间周期"  :formatter="dateFormat" width="300">
+                    <template slot-scope="scope">
+                        {{scope.row.applyStartTime}} - {{scope.row.applyEndTime}}
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="applyNum" label="需求总资源数" width="100"></el-table-column>
+                <el-table-column align="center" prop="dailyMaxNum" label="每日需求资源上限" width="120"></el-table-column>
+                <el-table-column align="center" prop="applyArea" label="申请地域" width="135">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.applyArea == null || scope.row.applyArea == ''">不限</div>
+                        <div v-else>{{scope.row.applyArea}}</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="remark" label="申请说明"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.auditStatus == '2'">
+                            <el-button size="mini" type="text">已审核</el-button>
+                        </span>
+                        <span v-else>
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">审核</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList=[[${merchantUserList}]];//商户集合
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                pendingReviewNum:'',
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  applyPerson:'',
+                  applyStartTime:'',
+                  applyEndTime:'',
+                  auditStatus:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                merchantUserListOptions:merchantUserList,
+                statusOptions: [{
+                  value: "",
+                  name: '全部'
+                },{
+                  value: 0,
+                  name: '待审核'
+                }, {
+                  value: 2,
+                  name: '已审核'
+                }],
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            }, 
+            //审核
+            updateStatus(id) {
+                var param = {};
+                param.id=id; 
+                this.$confirm('确认审核通过吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post('/merchant/clue/setting/pass', param)
+                    .then(function (response) {
+                        var result =  response.data;
+                        if (result.code == "0") {
+                            ocmVM.$message({
+                                message: '审核成功', type: 'success', duration: 1000, onClose: function () {
+                                    ocmVM.searchTable();
+                                    ocmVM.getPendingReview();
+                                }
+                            });
+                        }else{
+                        	  ocmVM.$message.error("审核失败");
+                        }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    });
+                }).catch(() => {
+                    console.log(error);
+                });
+            },
+            searchTable() {
+            	var startTime=this.form.applyStartTime;
+                var endTime=this.form.applyEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.applyPerson = this.form.applyPerson;
+                param.applyStartTime = this.form.applyStartTime;
+                param.applyEndTime = this.form.applyEndTime;
+                param.auditStatus = this.form.auditStatus;
+                console.info(param);
+                axios.post('/merchant/clue/setting/applyPage', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }                    
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            getPendingReview() {
+                var startTime=this.form.applyStartTime;
+                var endTime=this.form.applyEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.applyPerson = this.form.applyPerson;
+                param.applyStartTime = this.form.applyStartTime;
+                param.applyEndTime = this.form.applyEndTime;
+                param.auditStatus = this.form.auditStatus;
+                console.info(param);
+                axios.post('/merchant/clue/setting/getPendingReview', param)
+                .then(function (response) {
+                    console.log(response)
+                    ocmVM.pendingReviewNum =  response.data.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+                
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+            this.getPendingReview();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>

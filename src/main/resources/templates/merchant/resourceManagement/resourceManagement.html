@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style>
+        .dialogForm .el-form-item {
+            margin-bottom: 5px;
+        }
+
+        .invite-area {
+            width: 94px;
+        }
+
+        .invite-margin {
+            margin: 0 10px;
+        }
+
+        .xreuired .el-form-item__label:before {
+            content: '* ';
+            color: red;
+        }
+
+        .input-width {
+            width: 310px;
+        }
+
+        .el-date-editor.el-input,
+        .el-date-editor.el-input__inner {
+            width: 310px;
+        }
+
+        .el-table .cell {
+            display: flex;
+            justify-content: center;
+        }
+
+        .invite-top {
+            margin-top: 14px;
+        }
+
+        .el-dialog__header {
+            background: none;
+        }
+
+        .el-dialog__header:before {
+            width: 122px;
+            height: 86px;
+            background-size: 122px 86px;
+            right: 103px;
+        }
+
+        .fontColor2 {
+            color: #3A84F4;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .el-dialog__headerbtn .el-dialog__close {
+            background: #3A84F4;
+            border-radius: 50%;
+            color: #fff;
+        }
+
+        .merchant-submit {
+            cursor: pointer;
+        }
+
+        .el-dialog__title {
+            color: #4C4E67;
+        }
+
+        .r-dailog .el-button {
+            width: 190px;
+        }
+
+        .r-dailog .el-button--primary {
+            height: 43px;
+            line-height: 43px;
+            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+            box-shadow: 0px 9px 27px 2px rgba(75, 128, 255, 0.46);
+            border-radius: 4px;
+        }
+
+        .r-dailog .el-button--primary span {
+            height: 26px;
+            line-height: 26px;
+            display: block;
+        }
+
+        .r-dailog .el-button--default {
+            height: 43px;
+            line-height: 43px;
+            background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
+            box-shadow: 0px 10px 28px 4px rgba(146, 162, 203, 0.47);
+            border-radius: 4px;
+        }
+
+        .r-dailog .el-button--default span {
+            height: 26px;
+            line-height: 26px;
+            display: block;
+        }
+
+        .invite-box {
+            width: 470px;
+            margin: 0 auto;
+        }
+
+        .xreuired .el-form-item__label:before {
+            content: ''
+        }
+
+        .form-margin {
+            margin-top: 14px;
+        }
+
+        .invite-box {
+            width: 470px;
+            margin: 0 auto;
+        }
+
+        .xreuired .el-form-item__label:before {
+            content: ''
+        }
+
+        .callIphone {
+            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .callIphone img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .button-menu {
+            margin-top: 10px;
+        }
+
+        .el-tooltip__popper.is-dark {
+            width: 600px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+            <el-breadcrumb-item>资源列表</el-breadcrumb-item>
+        </el-breadcrumb>
+
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                    <div class="main-search-box">
+                        <el-form-item label="资源类别:" prop="category">
+                            <el-select v-model="form.category" clearable placeholder="资源类别">
+                                <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <div class="get-search-time">
+                            <div class="get-time">获取时间:</div>
+                            <div  class="time-style" :class="{'selectActive':colorStatus}">
+                                <el-form-item  class="search-box-margin" prop="searchStartTime">
+                                    <el-date-picker v-model="form.searchStartTime" type="datetime"  v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始时间">
+                                    </el-date-picker>
+                                </el-form-item>
+                                <el-form-item label="—" class="widthauto" prop="searchEndTime">
+                                    <el-date-picker v-model="form.searchEndTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择结束时间">
+                                    </el-date-picker>
+                                </el-form-item>
+                            </div>
+                        </div>
+                        <el-form-item label="资源类型:" prop="type">
+                            <el-select v-model="form.type" filterable clearable placeholder="资源类型">
+                                <el-option v-for="item in clueTypeOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="行业类别:" prop="industryCategory">
+                            <el-select v-model="form.industryCategory" clearable placeholder="行业类别">
+                                <el-option v-for="item in industryCategoryOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="搜索词:" prop="searchWord">
+                            <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                        </el-form-item>
+                        <el-form-item label="电话:" prop="phone">
+                            <el-input v-model="form.phone" placeholder="电话"></el-input>
+                        </el-form-item>
+                        <el-form-item label="客户姓名:" prop="cusName">
+                            <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
+                        </el-form-item>
+                        <el-form-item label="客户状态:" prop="customerStatus">
+                            <el-select v-model="form.customerStatus" placeholder="客户状态" clearable>
+                                <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="资源是否有效:" prop="status">
+                            <el-select v-model="form.status" placeholder="资源是否有效" clearable>
+                                <el-option v-for="item in comArr" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                    <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
+                            搜索</el-button>
+                        <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                        <el-button @click="resetFormResource('form')">重置</el-button>
+                    </div>
+                </el-form>
+            </div>
+
+            <el-row>
+                <!--
+            <div class="greyTip">今日分发 <span v-if="todayAssignClueNum != null && todayAssignClueNum">{{todayAssignClueNum}}</span><span else>0</span> 条 累计分发 <span v-if="totalAssignClueNum != null && totalAssignClueNum >0">{{totalAssignClueNum}}</span><span else>0</span> 条  今日领取  <span v-if="todayReceiveClueNum != null && todayReceiveClueNum >0">{{todayReceiveClueNum}}</span><span else>0</span>  条  累计领取 <span v-if="totalReceiveClueNum != null && totalReceiveClueNum >0"> {{totalReceiveClueNum}}</span><span else>0</span> 条</div>
+-->
+                <el-row class="marginB20 button-menu">
+                    <shiro:hasPermission name="clue:management:export">
+                        <el-button type="success" @click="exportFun"><i></i>批量导出</el-button>
+                    </shiro:hasPermission>
+                    <shiro:hasPermission name="clue:management:allocation">
+                        <el-button type="primary" @click="openassignrDig"><i></i>分配资源</el-button>
+                    </shiro:hasPermission>
+                </el-row>
+                <div class="greyTip"> 今日分发 <em>{{todayAssignClueNum == null ? '0' : todayAssignClueNum}}</em> 条 累计分发
+                    <em>{{totalAssignClueNum == null ? '0' : totalAssignClueNum}}</em> 条 今日领取
+                    <em>{{todayReceiveClueNum == null ? '0' : todayReceiveClueNum}}</em> 条 累计领取
+                    <em>{{totalReceiveClueNum == null ? '0' : totalReceiveClueNum}}</em> 条</div>
+                <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="dataTable"
+                    @selection-change="handleSelectionChange" @row-dblclick="customerEidt">
+                    <el-table-column align="center" type="selection" width="55"></el-table-column>
+                    <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                    <el-table-column align="center" prop="clueId" label="主键" v-if="show"></el-table-column>
+                    <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource" width="100">
+                    </el-table-column>
+                    <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
+                    <el-table-column align="center" prop="cusName" label="客户姓名" width="100"></el-table-column>
+                    <el-table-column align="center" prop="searchWord" label="搜索词" width="100"></el-table-column>
+                    <el-table-column align="center" prop="messageTime" label="留言时间" :formatter="dateFormat" width="130">
+                    </el-table-column>
+                    <el-table-column align="center" prop="messagePoint" label="留言内容" width="200"></el-table-column>
+                    <el-table-column align="center" prop="phone" label="联系电话">
+                        <template slot-scope="scope">
+                            <!-- <span style="max-width: 125px;">{{scope.row.phone}}</span> -->
+                            <span style="max-width: 125px;">{{scope.row.phone == "null" ? '' : scope.row.phone}}</span>
+                            <span v-if="scope.row.showPhoneFlag=='1'" class="callIphone"
+                                @click="callIphone(scope.row.callPhone,scope.row.clueId)"><img
+                                    th:src="@{/images/icon_call2.png}" alt="" style="width: 22px;height: 22px;"></span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="" label="跟进记录" width="100">
+                        <template slot-scope="scope">
+                            <el-button class="fontColor2" v-if="scope.row.showAddTrack==1" type="text"
+                                @click="openTrackingDialog(scope.row.clueId)">查看</el-button>
+                            <el-button class="fontColor2" v-else type="text" @click="openAddTracking(scope.row.clueId)">
+                                添加</el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="isAssignSubAccount" label="用户行为">
+                        <template slot-scope="scope">
+                            <div class="fontColor2" @click="seeResource(scope.row.clueId,scope.row.phone)">查看</div>
+                            <div v-if="scope.row.isAssignSubAccount == 0">未分配</div>
+                            <div v-else="scope.row.isAssignSubAccount == 1"><span style="color: red">已分配</span></div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="address" label="资源地域" width="100"></el-table-column>
+                    <el-table-column align="center" prop="receiveTime" label="获取时间" :formatter="dateFormat" width="130">
+                    </el-table-column>
+                    <el-table-column align="center" prop="cluePrice" label="价格（元）/条" width="130"></el-table-column>
+                    <el-table-column align="center" prop="" label="客户状态" width="120">
+                        <template slot-scope="scope">
+                            <span>{{scope.row.customerStatusName}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="merchantIsInvite" label="操作" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.merchantIsInvite == '1'">已邀约</div>
+                            <div v-else @click="postInvite(scope.row.clueId,scope.row.cusName,scope.row.projectId)"
+                                class="merchant-submit fontColor2">提交邀约</div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            </el-row>
+        </div>
+        <!-- 分配资源 -->
+        <el-dialog title="分配资源" :visible.sync="allocateFormVisible" width="540px">
+            <el-form :model="formAllocat" ref="formAllocat">
+                <el-form-item label="员工：" prop="userId" :rules="[
+                    { required: true, message: '请选择员工姓名', trigger: 'change' }
+                ]" :label-width="formLabelWidth">
+                    <el-select v-model="formAllocat.userId" placeholder="员工姓名" style="width: 80%;">
+                        <el-option v-for="item in userList" :key="item.id" :label="item.name" :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer" style="text-align:center;">
+                <el-button type="primary" :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交
+                </el-button>
+                <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
+            </div>
+        </el-dialog>
+        <!-- 查看手机号 -->
+
+        <el-dialog title="提交邀约来访" :visible.sync="inviteVisible" width="540px" @close="handleClose">
+            <template>
+                <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="invite-box">
+                    <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
+                        <el-input v-model="inviteForm.cusName" autocomplete="off" maxLength="10" class="input-width">
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="cusNum" class="xreuired">
+                        <el-input v-model="inviteForm.cusNum" maxlength="3"
+                            onkeyup='this.value=this.value.replace(/^[0]+[0-9]*$/gi,"")' autocomplete="off"
+                            class="input-width"></el-input>
+                    </el-form-item>
+                    <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired" prop="province">
+                        <el-select filterable v-model="inviteForm.province" placeholder="省" class="invite-area"
+                            @change="currentProvince" clearable>
+                            <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                        <el-select filterable v-model="inviteForm.city" placeholder="市"
+                            class="invite-area invite-margin" @change="currentCity" clearable>
+                            <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name">
+                            </el-option>
+                        </el-select>
+                        <el-select filterable v-model="inviteForm.district" placeholder="区/县" class="invite-area"
+                            clearable>
+                            <el-option v-for="item in districtArr" :key="item.name" :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="选择接待人：" :label-width="formLabelWidth" prop="receiverId" class="xreuired">
+                        <el-select v-model="inviteForm.receiverId" placeholder="请选择" class="input-width">
+                            <el-option v-for="item in merchantUserList" :key="item.value" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="预约来访时间：" :label-width="formLabelWidth" prop="reserveTime" class="xreuired">
+                        <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="projectId" class="xreuired">
+                        <el-select v-model="inviteForm.projectId" placeholder="" class="input-width" multiple
+                            filterable>
+                            <el-option v-for="item in  proSelect" :key="item.id" :label="item.projectName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark" class="invite-top">
+                        <el-input type="textarea" v-model="inviteForm.remark" class="input-with-select input-width"
+                            maxlength="200" :rows="4"></el-input>
+                    </el-form-item>
+                    <div class="padding20 f-tac r-dailog ">
+                        <el-button type="primary" :disabled="btnDisabled" @click="submitInviteForm('inviteForm')">提交
+                        </el-button>
+                        <el-button @click="resetForm('inviteForm')">取 消</el-button>
+                    </div>
+                </el-form>
+            </template>
+        </el-dialog>
+
+        <!-- 跟进记录 -->
+        <dialog-tracking :param="trackingParam"></dialog-tracking>
+        <!-- 添加跟进记录弹窗 -->
+        <el-dialog title="添加跟进记录" :visible.sync="trackingVisible" width="540px">
+            <template>
+                <el-form :model="trackingForm" :rules="trackingRules" ref="trackingForm">
+                    <el-form-item label="拨打时间：" :label-width="formLabelWidth" prop="callTime">
+                        <el-date-picker v-model="trackingForm.callTime" class="input-width" type="datetime"
+                            style="width: 325px;">
+                        </el-date-picker>
+                    </el-form-item>
+                    <!-- 客户状态一级 -->
+                    <el-form-item label="客户状态：" :label-width="formLabelWidth" prop="customerStatus">
+                        <el-select v-model="trackingForm.customerStatus" @change="customerStatusChange"
+                            placeholder="客户状态" clearable>
+                            <el-option v-for="item in cusStatusArrTracking" :key="item.value" :label="item.name"
+                                :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <!-- 客户状态二级 -->
+                    <el-form-item :label-width="formLabelWidth" prop="customerStatusSub" v-show="!substatus">
+                        <el-select v-model="trackingForm.customerStatusSub" placeholder="客户状态" clearable>
+                            <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name"
+                                :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否接通：" :label-width="formLabelWidth" prop="isCall">
+                        <el-select v-model="trackingForm.isCall" clearable style="width: 325px;">
+                            <el-option v-for="item in isCallArr" :key="item.value" :label="item.label"
+                                :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="下次回访时间：" :label-width="formLabelWidth" prop="nextVisitTime">
+                        <el-date-picker v-model="trackingForm.nextVisitTime" type="datetime" style="width: 325px;">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="客户关注点：" :label-width="formLabelWidth" prop="focusPoint">
+                        <el-input type="textarea" v-model="trackingForm.focusPoint" maxlength="200" :rows="4"
+                            style="width: 325px;"></el-input>
+                    </el-form-item>
+                    <div class="padding20 f-tac r-dailog ">
+                        <el-button type="primary" :disabled="btnDisabled" @click="submitTrackingForm('trackingForm')">提交
+                        </el-button>
+                        <el-button @click="resetForm('trackingForm')">取 消</el-button>
+                    </div>
+                </el-form>
+            </template>
+        </el-dialog>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var userList = [[${ merchantUserList }]];//电销顾问
+    var clueTypeList = [[${ clueTypeList }]];//资源类型
+    var clueCategoryList = [[${ clueCategoryList }]];//资源类别集合
+    var industryCategoryList = [[${ industryCategoryList }]];//行业类别集合
+    var mediumList = [[${ mediumList }]];//媒介集合
+    var userId = [[${ userId }]];//登录人账号id
+    var roleCode = [[${ roleCode }]];//登录人角色code
+    var clueInfo = [[${ clueInfo }]];//资源信息
+    var merchantUserList = [[${ merchantAppiontUserList }]]; //接待人
+    var proSelect = [[${ proSelect }]]; //考察项目
+    // console.log(merchantUserList,"merchantUserList");
+    //  merchantUserList=[{id:"1",name:"张三"},{id:"2",name:"李四"}];
+    // proSelect=[{id:"1",projectName:"项目一"},{id:"1",projectName:"项目二"}];
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function () {
+            return {
+                trackingParam: {
+                    trackingDialogVisible: false,
+                    tableData: []
+                },
+                todayAssignClueNum: '',//今日分发资源
+                totalAssignClueNum: '',//累计分发资源
+                todayReceiveClueNum: '',//今日领取资源
+                totalReceiveClueNum: '',// 累计领取资源
+                show: false,
+                btnDisabled: false,
+                paginationShow: false,
+                isShow: false,
+                allocateFormVisible: false,
+                inviteVisible: false,
+                multseleSelection: [],//选择行
+                userList: userList,
+                provinceArr: [],
+                cityArr: [],
+                districtArr: [],
+                merchantUserList: merchantUserList, //接待人
+                proSelect: proSelect,//考察项目
+                clueId: '',//资源cusName
+                getCusName: '',
+                colorStatus:false,
+                pager: {
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                form: {
+                    category: '',
+                    type: '',
+                    industryCategory: '',
+                    searchStartTime: '',
+                    searchEndTime: '',
+                    searchWord: '',
+                    phone: '',
+                    cusName: '',
+                    customerStatus: '',//客户状态
+                    status: '',//资源是否有效
+                },
+                inviteForm: {
+                    province: '',
+                    city: '',
+                    district: '',
+                    cusName: '',
+                    cusNum: '',
+                    receiver: '',
+                    remark: '',
+                    reserveTime: '',
+                    proSelect: '',
+                    projectId: [],
+                    receiverId: ''
+                },
+                formAllocat: {
+                    userId: '',
+                },
+                rules: {
+                    cusNum: [
+                        {
+                            required: true, message: '客户人数不能为空', trigger: 'change',
+                        },
+
+                    ],
+                    province: [
+                        { required: true, message: '请选择开店区域', trigger: 'blur' }
+                    ],
+                    cusName: [
+                        { required: true, message: '客户姓名不能为空', trigger: 'change' }
+                    ],
+                    receiverId: [
+                        { required: true, message: '接待人不能为空', trigger: 'change' }
+                    ],
+                    reserveTime: [
+                        { required: true, message: '预约来访时间不能为空', trigger: 'change' }
+                    ],
+
+                    projectId: [
+                        { required: true, message: '请选择考察项目', trigger: 'change' }
+                    ],
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                clueTypeOptions: clueTypeList,
+                categoryOptions: clueCategoryList,
+                industryCategoryOptions: industryCategoryList,
+                trackingVisible: false,//跟进记录弹窗
+                cusStatusArr: [],//客户状态list
+                cusStatusArrTracking: [],//跟进记录客户状态list
+                substatus: true,//客户状态二级是否显示
+                customerStatusSubArr: [],//客户状态二级list
+                trackingForm: {
+                    callTime: '',
+                    customerStatus: '2',//默认未联系
+                    customerStatusSub: '',
+                    isCall: '1',//默认已接通
+                    nextVisitTime: '',
+                    focusPoint: ''
+                },
+                isCallArr: [{
+                    value: '1',
+                    label: '是'
+                }, {
+                    value: '0',
+                    label: '否'
+                }],
+                trackingRules: {
+                    callTime: [
+                        { required: true, message: '拨打时间不能为空', trigger: 'change', },
+                    ],
+                    customerStatus: [
+                        { required: true, message: '请选择客户状态', trigger: 'change' }
+                    ],
+                    isCall: [
+                        { required: true, message: '请选择是否接通', trigger: 'change' }
+                    ],
+                },
+                addClueId: '',//点击添加记录存储资源id
+                comArr: [
+                    { value: "", name: "全部" },
+                    { value: "1", name: "有效" },
+                    { value: "0", name: "无效" }
+                ],
+
+            }
+        },
+        methods: {
+            customerEidt(row) {
+                var clueId = row.clueId;
+                window.location.href = "/clueInfo/init/" + clueId;
+            },
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form, 'searchStartTime', '');
+                    this.$set(this.form, 'searchEndTime', '');
+                }
+            },
+            changeNameFun(){
+                console.log(this.colorStatus,99);
+                this.colorStatus=false;
+            },
+            setColor(){
+                this.colorStatus=true;
+            },
+            // 获取时间
+            getTime(cid) {
+                var param = {};
+                param.id = cid;
+                axios.post('/clueInfo/getLastCallTime', param)
+                    .then(function (response) {
+                        console.log(response)
+                        ocmVM.trackingForm.callTime = response.data.data;
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            submitTrackingForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        //提交跟进记录
+                        var param = {};
+                        param.clueId = this.addClueId;
+                        var callTime = this.trackingForm.callTime;
+                        if (typeof (callTime) == 'string') {
+                            callTime = new Date(Date.parse(callTime.replace(/-/g, "/")));
+                        }
+                        param.callTime = callTime;
+
+                        param.customerStatus = this.trackingForm.customerStatus;
+                        if (this.trackingForm.customerStatus == "3") {
+                            param.customerStatusSub = this.trackingForm.customerStatusSub;
+                        } else {
+                            param.customerStatusSub = "";
+                        }
+                        param.isCall = this.trackingForm.isCall;
+                        param.focusPoint = this.trackingForm.focusPoint;
+                        var nextVisitTime = this.trackingForm.nextVisitTime;
+                        if (typeof (nextVisitTime) == 'string') {
+                            nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                        }
+                        param.nextVisitTime = nextVisitTime;
+                        console.log(param)
+                        axios.post('/tracking/insert', param)
+                            .then(function (response) {
+                                var data = response.data;
+                                console.log(data)
+                                if (data.code == '0') {
+                                    window.location.href = "/clue/management/init"
+                                } else {
+                                    ocmVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                                ocmVM.btnDisabled = false;
+                            })
+                            .catch(function (error) {
+                                ocmVM.btnDisabled = false;
+                                console.log(error);
+                            })
+                            .then(function () {
+
+                            });
+                    } else {
+                        this.btnDisabled = false;
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+            customerStatusChange(selVal) {
+                if (selVal == '3') {
+                    this.substatus = false;
+                } else {
+                    this.substatus = true;
+                }
+            },
+            openAddTracking(cid) {//新增跟进记录
+                this.btnDisabled = false;
+                if (this.$refs['trackingForm']) {
+                    this.$refs['trackingForm'].resetFields();
+                }
+                this.trackingVisible = true;
+                console.log(cid);
+                this.addClueId = cid;
+                this.getTime(cid);//获取时间
+            },
+            openTrackingDialog(cid) {//查看跟进记录
+                var param = {};
+                param.id = cid;
+                axios.post('/tracking/findByClueId', param)
+                    .then(function (response) {
+                        console.log(response.data)
+                        if (response.data.code == 0) {
+                            ocmVM.trackingParam.tableData = response.data.data
+                            ocmVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                            ocmVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            // 呼叫
+            callIphone(tel, clueId) {
+                axios.post('/merchant/seatManager/queryListBySubMerchant')
+                    .then(function (response) {
+                        if (response.data.data) {
+                            window.parent.outboundCallPhone(tel, 2, clueId, null);
+                        } else {
+                            ocmVM.$message({ message: '此账户未绑定坐席', type: 'warning' });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multseleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+                var startTime = this.form.searchStartTime;
+                var endTime = this.form.searchEndTime;
+                if (endTime && startTime > endTime) {
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param = this.form;
+                param.startTime = startTime;
+                param.endTime = endTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                // console.info(param);
+                axios.post('/clue/management/queryPage', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            // console.info(result);
+                            var table = result.data;
+                            ocmVM.dataTable = table.data;
+                            ocmVM.pager.total = table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+
+            },
+            getResourceStatistics() {
+                var param = {};
+                param.userId = userId;
+                axios.post('/clue/management/getResourceStatistics', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        // console.info("getResourceStatistics:" + result);
+                        if (result.code == '0') {
+                            var data = result.data;
+                            ocmVM.todayAssignClueNum = data.todayAssignClueNum;
+                            ocmVM.totalAssignClueNum = data.totalAssignClueNum;
+                            ocmVM.todayReceiveClueNum = data.todayReceiveClueNum;
+                            ocmVM.totalReceiveClueNum = data.totalReceiveClueNum;
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+
+            exportFun() {
+                var param = this.form;
+                param.pageNum = '';
+                param.pageSize = '';
+                axios.post('/clue/management/export', param, { responseType: 'blob' })
+                    .then(function (response) {
+                        console.log(response)
+                        var data = response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data, decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function () {
+                        ocmVM.loading = false;
+                    });
+
+            },
+            seeResource(id, phone) {
+                console.log()
+                if (phone == "null") {
+                    phone = "";
+                }
+                document.location.href = '/merchant/resourceTrajectory/topage?clueId=' + id + '&phone=' + phone;
+            },
+            //日期数据格式化方法
+            dateFormat(row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //媒介转换方法
+            transformSource(row, column, cellValue, index) {
+                var text = "";
+                if (mediumList && cellValue) {
+                    var array = cellValue.split(",");
+                    for (var i = 0; i < array.length; i++) {
+                        for (var j = 0; j < mediumList.length; j++) {
+                            if (array[i] == mediumList[j].value) {
+                                if (i == 0) {
+                                    text = mediumList[j].name;
+                                } else {
+                                    text = text + "," + mediumList[j].name;
+                                }
+                            }
+                        }
+                    }
+                }
+                return text;
+            },
+            toogleClick() {
+                if (this.isShow) {
+                    this.isShow = false
+                } else {
+                    this.isShow = true
+                }
+            },
+            openassignrDig() {
+                var rows = this.multseleSelection;
+                if (rows.length < 1) {
+                    this.$message({
+                        message: '请选分配资源',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.allocateFormVisible = true;
+                if (this.$refs['formAllocat']) {
+                    this.$refs['formAllocat'].resetFields();
+                }
+            },
+            resetForm(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.inviteForm.cusName = '';
+                    this.inviteForm.projectId = [];
+                    // if(this.inviteForm.province == ''){
+                    //     this.inviteForm.district = '';
+                    //     this.inviteForm.city = '';
+                    // }
+                    this.currentProvince();
+                    this.currentCity();
+
+                }
+            },
+            handleClose() {
+                if (this.$refs['inviteForm']) {
+                    this.$refs['inviteForm'].resetFields();
+                    this.$set(this.inviteForm, 'cusName', '')//此处为重点
+                    this.$set(this.inviteForm, 'city', '')//此处为重点
+                    this.$set(this.inviteForm, 'district', '')//此处为重点
+                    ocmVM.inviteForm.projectId = [];
+                    // ocmVM.currentProvince();
+                    // ocmVM.currentCity();
+
+                    ocmVM.allocateFormVisible = false;
+
+                }
+                // this.inviteForm.cusName = '';
+                // this.inviteForm.projectId = [];
+                // ocmVM.allocateFormVisible = false;
+            },
+            submitAllocatForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        var rows = this.multseleSelection;
+                        var rowIds = [];
+                        for (var i = 0; i < rows.length; i++) {
+                            var curRow = rows[i];
+                            rowIds.push(curRow.clueId);
+                        }
+                        //分配
+                        var param = {};
+                        param.clueIds = rowIds;
+                        param.userId = this.formAllocat.userId;
+                        axios.post('/clue/management/clueAssign', param)
+                            .then(function (response) {
+                                var data = response.data;
+                                // debugger;
+                                if (data.code == '0') {
+                                    ocmVM.$message({
+                                        message: '分配成功', type: 'success', duration: 2000, onClose: function () {
+                                            ocmVM.allocateFormVisible = false;
+                                            ocmVM.btnDisabled = false;
+                                            ocmVM.searchTable();
+                                        }
+                                    });
+                                } else {
+                                    clueVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                            .then(function () {
+
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+            postInvite(id, name, projectId) {
+                this.clueId = id;
+                this.inviteVisible = true;
+                this.$set(this.inviteForm, 'cusName', name)//此处为重点
+                ocmVM.inviteForm.projectId = [];
+                ocmVM.inviteForm.projectId.push(projectId);
+                if (this.$refs['inviteForm']) {
+                    this.$refs['inviteForm'].resetFields();
+                    ocmVM.currentProvince();
+                    ocmVM.currentCity();
+                    this.$set(this.inviteForm, 'cusName', name)//此处为重点
+                    ocmVM.inviteForm.projectId = [];
+                    ocmVM.inviteForm.projectId.push(projectId);
+
+                }
+            },
+            //提交邀约
+            submitInviteForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        var param = {};
+                        param.clueId = this.clueId;
+                        param.cusName = this.inviteForm.cusName;
+                        param.cusNum = this.inviteForm.cusNum;
+                        param.province = this.inviteForm.province;;
+                        param.city = this.inviteForm.city;
+                        param.district = this.inviteForm.district;
+                        param.receiverId = this.inviteForm.receiverId;
+                        param.reserveTime = this.inviteForm.reserveTime;
+                        param.projectId = this.inviteForm.projectId.join(',');
+                        param.remark = this.inviteForm.remark;
+                        axios.post('/merchant/merchantAppiontment/insertMerchantAppiontment', param)
+                            .then(function (response) {
+                                console.log(response, "response")
+                                var data = response.data;
+                                console.log(data, "data");
+                                if (data.code == '0') {
+                                    console.log(33333);
+                                    ocmVM.$message({
+                                        message: '邀约成功', type: 'success', duration: 2000, onClose: function () {
+                                            ocmVM.inviteVisible = false;
+                                            ocmVM.btnDisabled = false;
+                                            ocmVM.searchTable();
+                                        }
+                                    });
+                                } else {
+                                    ocmVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+            //开店区域联动方法
+            currentProvince(selVal) {
+                param = {};
+                param.type = "1";
+                param.name = selVal;
+                console.log(selVal, "selVal")
+                if (selVal) {
+                    this.inviteForm.district = null;
+                    this.inviteForm.city = null;
+                    this.districtArr = null;
+                    axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                        ocmVM.cityArr = response.data.data.data;
+                    });
+                } else {
+                    this.inviteForm.district = null;
+                    this.inviteForm.city = null;
+                    this.districtArr = null;
+                    ocmVM.cityArr = null;
+                }
+            },
+            currentCity(selVal) {
+                param = {};
+                param.type = "2";
+                param.name = selVal;
+                if (selVal) {
+                    this.inviteForm.district = null;
+                    axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                        ocmVM.districtArr = response.data.data.data;
+                    });
+                } else {
+                    this.inviteForm.district = null;
+                    ocmVM.districtArr = null;
+                }
+            },
+        },
+        created() {
+            var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+            if (localVal) {
+                this.pager.pageSize = localVal;
+            }
+            this.searchTable();
+            this.getResourceStatistics();
+            var param = {};
+            param.type = "0";
+            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                ocmVM.provinceArr = response.data.data.data;
+            });
+            //搜索栏客户状态
+            param = {};
+            param.groupCode = "customerStatus";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                var data = response.data.data;
+                var arr = new Array();
+                for (let i = 0, len = data.length; i < len; i++) {
+                    if (data[i].name != "未到访" && data[i].name != "到访未签约" && data[i].name != "已签约") {
+                        arr.push(data[i]);
+                    };
+                }
+                var allArr = { value: "", name: "全部" }
+                arr.unshift(allArr)
+                ocmVM.cusStatusArr = arr;
+                console.log(ocmVM.cusStatusArr)
+            });
+            //跟进记录客户状态一级
+            param = {};
+            param.groupCode = "customerStatus";
+            axios.post('/dictionary/DictionaryItem/queryTeleMyCusCustomerStatus', param).then(function (response) {
+                var data = response.data.data;
+                var arr = new Array();
+                for (let i = 0, len = data.length; i < len; i++) {
+                    if (data[i].name != "未联系") {
+                        arr.push(data[i]);
+                    };
+                }
+                ocmVM.cusStatusArrTracking = arr;
+            });
+            //客户状态二级
+            param = {};
+            param.groupCode = "customerStatusSub";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                ocmVM.customerStatusSubArr = response.data.data;
+            });
+        },
+        mounted() {
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+    })
+</script>
+
+</html>

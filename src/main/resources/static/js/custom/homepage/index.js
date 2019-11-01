@@ -199,8 +199,16 @@ var homePageVM=new Vue({
 	        	this.modifyPwd();
 	        }else if(command=='logout'){//退出
 	        	this.logout();
-	        }
+	        }else{
+                this.gotoUserInfo();
+            }
 	     },
+         gotoUserInfo(){
+            var dataUrl = "/merchant/userManager/userInfo";
+            $("#iframeBox").attr({
+                "src":dataUrl //设置ifream地址
+            });
+         },
 	     modifyPwd(){//修改密码
 	    	 //重置表单
 	    	 this.dialogModifyPwdVisible=true;
@@ -479,7 +487,7 @@ var homePageVM=new Vue({
               	   ,915319638079196,915320465997397,915320621197701,214991403833604
               	   ,115410338236403,115565818271983,115622112138370,1154293728744181760
               	   ,1149232865020612608,1149232925418590208,1149232985145479168,1149233047493808128
-              	   ,1149636656941375488,1149232583238885376
+              	   ,1149636656941375488,1149232583238885376,214991401620051
               	   ];
              	var  curOrgId = this.user.orgId;
              	var isLimit = false;

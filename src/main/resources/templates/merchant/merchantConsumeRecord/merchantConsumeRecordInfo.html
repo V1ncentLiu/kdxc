@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style>
+    .el-date-picker__time-header{display: none;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>费用管理</el-breadcrumb-item>
+        <el-breadcrumb-item>消费记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="mainSearchBg">        
+        <!-- <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">  
+                <el-form-item label="时间：" label-width="auto">
+                    <el-date-picker
+                        format="yyyy-MM-dd"  
+                        value-format="yyyy-MM-dd"
+                        v-model="form.createDateStart"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        format="yyyy-MM-dd"  
+                        value-format="yyyy-MM-dd"
+                        v-model="form.createDateEnd"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="商家账户：">
+                    <el-select v-model="form.userId" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </div> -->
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <div class="main-search-box">
+                    <div class="get-search-time">
+                        <div class="get-time">时间:</div>
+                        <div class="time-style" :class="{'selectActive':colorStatus}">
+                            <el-form-item label-width="auto" class="call-time" prop="createDateStart">
+                                <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                    v-model="form.createDateStart" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始时间">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="—" class="widthauto" prop="createDateEnd">
+                                <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                    v-model="form.createDateEnd" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun"  placeholder="选择结束时间">
+                                </el-date-picker>
+                            </el-form-item>
+                        </div>
+                    </div>
+                    <el-form-item label="商家账户：" prop="userId">
+                        <el-select v-model="form.userId" filterable clearable placeholder="商家账户名">
+                            <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </div>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
+                        style="margin-left: 10px;">搜索</el-button>
+                    <el-button @click="resetFormResource('form')">重置</el-button>
+                </div>
+            </el-form>
+        </div>
+        <el-row>            
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="orderId" label="订单号"></el-table-column>                
+                <el-table-column align="center" prop="createTime" label="消费时间"  :formatter="dateFormat" width="200"></el-table-column>
+                <el-table-column align="center" prop="userName" label="商家账号"></el-table-column>
+                <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList=[[${userList}]];//商户集合
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  createDateStart:'',
+                  createDateEnd:'',
+                  userId:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                merchantUserListOptions:merchantUserList,
+                colorStatus:false
+            }             
+        },
+        methods: {            
+            resetFormResource(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.$set(this.form, 'createDateStart', '');
+                    this.$set(this.form, 'createDateEnd ', '');
+                }
+            },
+            changeNameFun(){
+                this.colorStatus=false;
+            },
+            setColor(){
+                this.colorStatus=true;
+            },
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+                var startTime=this.form.createDateStart;
+                var endTime=this.form.createDateEnd;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage; 
+                param.createDateStart = this.form.createDateStart;
+                param.createDateEnd = this.form.createDateEnd;
+                param.userId = this.form.userId;
+
+                console.info(param);
+                axios.post('/merchant/merchantConsumeRecord/list', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }                    
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
