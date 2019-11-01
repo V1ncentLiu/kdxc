@@ -16,6 +16,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,6 +49,7 @@ public class RequirementController extends BaseStatisticsController {
     private OrganizationFeignClient organizationFeignClient;
 
 
+    @RequiresPermissions("resource:requirment:view")
     @RequestMapping("requirmentlist")
     public String requirmentlist(HttpServletRequest request){
         super.initSaleDept(request);
@@ -59,6 +61,7 @@ public class RequirementController extends BaseStatisticsController {
      * @param dto
      * @return
      */
+    @RequiresPermissions("resource:requirment:view")
     @RequestMapping("queryPage")
     public @ResponseBody JSONResult<PageBean<ResRequirement>> quetyPage(@RequestBody ResQueryDto dto){
         initDto(dto);
@@ -70,6 +73,7 @@ public class RequirementController extends BaseStatisticsController {
      * @param response
      * @param dto
      */
+    @RequiresPermissions("resource:requirment:export")
     @RequestMapping("/export")
     public @ResponseBody void export(HttpServletResponse response, @RequestBody ResQueryDto dto){
         try{
