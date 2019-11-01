@@ -194,6 +194,7 @@ var homePageVM=new Vue({
 				}
 			},
             ringOffdialogVisible:false,//默认不显示挂断弹窗
+            isRingOff:false,//默认不显示挂断按钮
 	    }
 	},
  	methods: {
