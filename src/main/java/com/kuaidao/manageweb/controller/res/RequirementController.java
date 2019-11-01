@@ -58,7 +58,7 @@ public class RequirementController extends BaseStatisticsController {
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("deptList",queryOrgByParam.getData());
-        return  "/clue/clueRequirement";
+        return  "/clue/clueResRequirement";
     }
 
     /**
