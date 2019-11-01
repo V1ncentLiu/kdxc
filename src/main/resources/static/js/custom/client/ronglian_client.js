@@ -207,7 +207,7 @@ var clientVm = new Vue({
                  type: 'warning'
                }).then(() => {
             	  var param  = {idList:rowIds};
-        	      axios.post('/client/client/deleteQimoClient', param)
+        	      axios.post('/client/ronglianClient/deleteClientByIdList', param)
                   .then(function (response) {
                       var resData = response.data;
                       if(resData.code=='0'){
@@ -264,7 +264,7 @@ var clientVm = new Vue({
               	    clientVm.userList = resData.data;    
               	    
                	 var param={id:rows[0].id};
-                 axios.post('/client/client/queryQimoClientById', param)
+                 axios.post('/client/ronglianClient/queryById', param)
                  .then(function (response) {
                      var resData = response.data;
                      if(resData.code=='0'){
