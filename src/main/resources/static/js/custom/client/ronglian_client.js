@@ -26,10 +26,17 @@ var clientVm = new Vue({
          uploadErrorDialogVisible:false,//上传失败dialog
          uploadErrorData:[],//上传失败
          form:{//坐席form
-        	 id:'',
-        	 
-        	 userId:'',
-             isDxzj:false
+        	  id:'',
+        	  loginName:'',
+            authToken:'',
+            disnumber:'',
+            voipNum:'',
+            voipPwd:'',
+            userId:'',
+            appId:'',
+            agentId:'',
+            accountSid:'',
+            isDxzj:false
          },
          options: [{
              value: 1,
@@ -46,47 +53,54 @@ var clientVm = new Vue({
             loginName:"",
          },
          rules:{
-        	 loginClient:[
-        		 { required: true, message: '登录坐席不能为空'},
-        		/* {validator:function(rule,value,callback){
-        			 var param = {loginClient:value}
-        			 axios.post('/client/client/queryQimoClientByParam', param)
-                     .then(function (response) {
-                         var resData = response.data;
-                         if(resData.code=='0'){
-                      	   var data = resData.data;
-                      	   if(data){
-                      		   if(data.id==clientVm.form.id){
-                      			   callback();
-                      		   }else{
-                      			   callback(new Error("此登录坐席已存在，请修改后提交"));
-                      		   }
-                      		   
-                      	   }else{
-                      		   callback();
-                      	   }
-                             
-                         }else{
-                      	   clientVm.$message({message:'查询失败',type:'error'});
-                             console.error(resData);
-                         }
-                     
-                     })
-                     .catch(function (error) {
-                          console.log(error);
-                     });
-        			 
-        		 },trigger:'blur'}*/
-        		 
-        	],
-        	 accountNo:[
-        		 { required: true, message: '账户编号不能为空'},
-        
-        		 
-        	],
-        	 clientNo:[
-        		 { required: true, message: '坐席编号不能为空'},
-        	/*	 {validator:function(rule,value,callback){
+          	loginName:[
+          		 { required: true, message: '登录坐席不能为空'},
+          		/* {validator:function(rule,value,callback){
+          			 var param = {loginClient:value}
+          			 axios.post('/client/client/queryQimoClientByParam', param)
+                       .then(function (response) {
+                           var resData = response.data;
+                           if(resData.code=='0'){
+                        	   var data = resData.data;
+                        	   if(data){
+                        		   if(data.id==clientVm.form.id){
+                        			   callback();
+                        		   }else{
+                        			   callback(new Error("此登录坐席已存在，请修改后提交"));
+                        		   }
+                        		   
+                        	   }else{
+                        		   callback();
+                        	   }
+                               
+                           }else{
+                        	   clientVm.$message({message:'查询失败',type:'error'});
+                               console.error(resData);
+                           }
+                       
+                       })
+                       .catch(function (error) {
+                            console.log(error);
+                       });
+          			 
+          		 },trigger:'blur'}*/        		 
+          	],
+            appId:[
+             { required: true, message: '应用id不能为空'},
+            ],
+            agentId:[
+             { required: true, message: '坐席id不能为空'},
+            ],
+            accountSid:[
+             { required: true, message: '账号id不能为空'},
+            ],
+          	authToken:[
+          		 { required: true, message: '主账号授权令牌不能为空'},      
+          		 
+          	],
+        	  disnumber:[
+        		  { required: true, message: '外显小号不能为空'},
+        	    /*	 {validator:function(rule,value,callback){
        				  if(!/^[0-9]*$/.test(value)){
        					  callback(new Error("只可以输入正整数,不超过50位"));     
        	        	  }else{
@@ -94,7 +108,7 @@ var clientVm = new Vue({
        	        	  }
         			 
         		 },trigger:'blur'},*/
-   /*     		 {validator:function(rule,value,callback){
+             /* {validator:function(rule,value,callback){
         		
         			  var param = {clientNo:value};
         			   axios.post('/client/client/queryQimoClientByParam', param)
@@ -125,45 +139,14 @@ var clientVm = new Vue({
         			 
         		 },trigger:'blur'}*/
         	 ],
-        	 phone1:[
-        		 {validator:function(rule,value,callback){
-        			 if(value){
-        				  if(!/^[0-9]*$/.test(value)){
-           					  callback(new Error("只可以输入正整数,不超过11位"));     
-           	        	  }else{
-           	        		  callback();
-           	        	  }
-        				 
-        			 }else{
-        				 callback(); 
-        			 }
-        			 
-        		 },trigger:'blur'},
-        		 
+        	 voipNum:[           
+        		 { required: true, message: 'voip号码不能为空'},
         	 ],
-        	 phone2:[
-        		 {validator:function(rule,value,callback){
-        			 if(value){
-        				 if(!/^[0-9]*$/.test(value)){
-          					  callback(new Error("只可以输入正整数,不超过11位"));     
-          	        	  }else{
-          	        		  callback();
-          	        	  }
-	       				 
-	       			 }else{
-	       				 callback(); 
-	       			 }
-        			 
-        		 },trigger:'blur'},
-        		 
-        	 ],
-        	 isUserStatus:[
-        		 { required: true, message: '七陌用户状态不能为空'},
-        		 
+        	 voipPwd:[
+        		 { required: true, message: 'voip密码不能为空'},        		 
         	 ],
         	 userId:[
-        		 { required: true, message: '关联用户不能为空'},
-        		 
+        		 { required: true, message: '关联用户不能为空'},        		 
         	 ],
          }
       },
@@ -302,7 +285,7 @@ var clientVm = new Vue({
                   	    }
                         clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }else{
-                  	     clientVm.$message({message:'查询七陌坐席失败',type:'error'});
+                  	     clientVm.$message({message:'查询容联坐席失败',type:'error'});
                         //  console.error(resData);
                          clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }
