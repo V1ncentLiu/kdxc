@@ -6,6 +6,8 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.client.KetianFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -235,6 +237,7 @@ public class KetianClientController {
      */
     @PostMapping("/clientLoginRecord")
     @ResponseBody
+    @LogRecord(description = "科天坐席登录", operationType = LogRecord.OperationType.CLIENT_LOGIN, menuName = MenuEnum.KETIAN_CLIENT_MANAGEMENT)
     public JSONResult<Boolean> clientLoginRecord(@Valid @RequestBody KetianClientLoginDTO ketianClientLoginDTO, BindingResult result) {
         if (result.hasErrors()) {
             logger.warn("ketian  clientLoginRecord illegal param{{}}", ketianClientLoginDTO);
@@ -290,6 +293,7 @@ public class KetianClientController {
      */
     @PostMapping("/outbound")
     @ResponseBody
+    @LogRecord(description = "科天坐席外呼", operationType = LogRecord.OperationType.OUTBOUNDCALL, menuName = MenuEnum.KETIAN_CLIENT_MANAGEMENT)
     public JSONResult outbound(@Valid @RequestBody KetianClientOutboundDTO outboundDTO, BindingResult result) {
         if (result.hasErrors()) {
             logger.warn("ketian outbound illegal param {{}}",outboundDTO);

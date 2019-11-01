@@ -705,6 +705,7 @@ var homePageVM=new Vue({
 						configuration.username = userName;
 						configuration.password = password;
 						configuration.enableWebRTC = "true";
+						configuration.stateEventListener = this.ketianStateEventListener;
 						CtiAgentBar.init(configuration, this.initCallback,this.webRTCCallback).then((res) => {
 							if(res.code === 200){
 								var clientNo = resData.clientExtNo;
@@ -733,6 +734,94 @@ var homePageVM=new Vue({
 				});
 
         },
+		ketianStateEventListener(data){
+        	console.info(data);
+			switch (data.event) {
+				case "CB_CONNECT":
+					if (data.data.code === 200) {
+						//连接成功
+					}
+					break;
+				case "CB_LOGIN":
+					if (data.data.code === 200) {
+						//登录成功
+					} else {
+						console.log(data.data.message);
+					}
+					break;
+				case "CB_LOGOUT":
+				//登出成功
+				case "CB_READY":
+					if (data.data.code === 200) {
+						//就绪成功
+					}else{
+						//TODO  devin
+						this.$message({message:"坐席准备失败-"+data.data.message,type:'error'});
+					}
+					break;
+				case "CB_BUSY":
+					if (data.data.code === 200) {
+						//成功置忙
+					} else {
+						console.log(data.data.message);
+					}
+					break;
+				case "CB_REST":
+					if (data.data.code === 200) {
+						//成功设置为小休
+					} else {
+						console.log(data.data.message);
+					}
+					break;
+				case "CB_PROGRESS":
+					if (data.data.code === 200) {
+						//成功设置为后处理
+					} else {
+						console.log(data.data.message);
+					}
+					break;
+				case "CB_RINGING":
+					//振铃事件
+					console.log(data.data.data); //弹屏数据,具体参数如下
+					break;
+				case "CB_ANSWERING":
+					//接听事件
+					break;
+				case "CB_REALTIME":
+					//被叫应答
+					console.log('-------> 被叫应答 <-------');
+					break;
+				case "CB_HANGUP":
+					//坐席挂机
+					console.log('-------> 挂机放音 <-------');
+					break;
+				case "CB_HOLD":
+					//保持
+					break;
+				case "CB_UNHOLD":
+					//取消保持(取回)
+					break;
+				case "CB_MAKECALL":
+					//发起呼叫回调
+					if (data.data.code !== 200) {
+						//发起呼叫失败
+						console.log(data.data.message);
+					}
+					break;
+				case "CB_LISTENCALL":
+					//监听回调
+					if (data.data.code !== 200) {
+						console.log(data.data.message);
+					}
+					break;
+				case "CB_THREEWAY":
+					//三方回调
+					if(data.data.code === 200){
+						//success
+					}
+					break;
+			}
+		},
 		ketianClientLoginRecord(param){
 			axios.post('/client/ketianClient/clientLoginRecord',param)
 				.then(function (response) {
