@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 请求资源
  */
-@FeignClient(name = "aggregation-service3",path="/aggregation//app/requirment",fallback =RequirementFeignClient.HystrixClientFallback.class )
+@FeignClient(name = "aggregation-service",path="/aggregation//app/requirment",fallback =RequirementFeignClient.HystrixClientFallback.class )
 public interface RequirementFeignClient {
 
     /**
