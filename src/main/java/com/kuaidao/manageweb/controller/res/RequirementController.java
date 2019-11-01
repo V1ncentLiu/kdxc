@@ -50,8 +50,9 @@ public class RequirementController extends BaseStatisticsController {
 
 
 //    @RequiresPermissions("resource:requirment:view")
-    @RequestMapping("requirmentlist")
+    @RequestMapping("/requirmentlist")
     public String requirmentlist(HttpServletRequest request){
+        logger.info("requirment requirmentlist...");
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         //查询电销事业部
         queryDTO.setOrgType(OrgTypeConstant.DZSYB);
@@ -67,7 +68,7 @@ public class RequirementController extends BaseStatisticsController {
      * @return
      */
 //    @RequiresPermissions("resource:requirment:view")
-    @RequestMapping("queryPage")
+    @RequestMapping("/queryPage")
     public @ResponseBody JSONResult<PageBean<ResRequirement>> quetyPage(@RequestBody ResQueryDto dto){
         //initDto(dto);
         return requirementFeignClient.queryPage(dto);
