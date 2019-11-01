@@ -148,7 +148,6 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
               var data =  response.data;
               if(data.code=='0'){
              	  var resData = data.data;
-             	  if(resData.Succeed){
              		  if(callSource==1){
              			 homePageVM.dialogOutboundVisible =true;
              			 $("#outboundCallTime").html("");
@@ -168,17 +167,6 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
          		    if (typeof callback === 'function') {
  		               callback();
  		             }
-      				
-             	  }else{
-             	  	console.error(data);
-             		  clearTimer();//清除定时器
-					  var  qimoResMsg = resData.Message;
-					  if(qimoResMsg.indexOf("404") != -1){
-						  homePageVM.$message({message:"呼叫失败，绑定类型错误",type:'error'});
-					  }else{
-						  homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
-					  }
-             	  }
               }else{
 				  console.error(data);
             	   clearTimer();//清除定时器

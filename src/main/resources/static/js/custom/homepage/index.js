@@ -984,7 +984,36 @@ var homePageVM=new Vue({
         	}else if(this.isKeTianClient){
                 this.KeTianClientLogout();
             }else if(this.isRongLianClient){
-                this.RongLianClientLogout();
+                var loginClient = this.loginClientForm.loginClient;
+                var param={};
+                param.loginName = loginClient;
+                axios.post('/client/ronglianClient/logout',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                       homePageVM.dialogLogoutClientVisible =false;
+                         homePageVM.$message({message:"退出成功",type:'success'});
+                         homePageVM.callTitle="呼叫中心";
+                         homePageVM.isQimoClient=false;
+                         homePageVM.isTrClient=false;
+                         homePageVM.isHeliClient=false;
+                         homePageVM.isKeTianClient=false;
+                         homePageVM.isRongLianClient=false;
+                      // sessionStorage.removeItem("loginClient");
+                      // sessionStorage.removeItem("accountId");
+                         localStorage.removeItem("clientInfo");
+                      
+                         
+                     }else{
+                        homePageVM.$message({message:data.msg,type:'error'});
+                     }
+                 })
+                 .catch(function (error) {
+                    console.log(error);
+                 })
+                 .then(function () {
+                   // always executed
+                 });
             }
         },
         heliClientLogout(){
