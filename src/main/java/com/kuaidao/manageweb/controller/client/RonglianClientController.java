@@ -120,6 +120,7 @@ public class RonglianClientController {
      * @param reqDTO
      * @return
      */
+    @RequiresPermissions("callCenter:ronglianClient:view")
     @PostMapping("/listRonglianClientPage")
     @ResponseBody
     public JSONResult<PageBean<RonglianClientResqDTO>> listRonglianClientPage(@RequestBody RonglianClientDTO reqDTO) {
@@ -143,6 +144,7 @@ public class RonglianClientController {
      *
      * @return
      */
+    @RequiresPermissions("callCenter:ronglianClient:add")
     @PostMapping("/insertRonglianClient")
     @ResponseBody
     public JSONResult insertRonglianClient(@Valid @RequestBody RonglianClientInsertReq reqDTO, BindingResult result) {
@@ -160,6 +162,7 @@ public class RonglianClientController {
      *
      * @return
      */
+    @RequiresPermissions("callCenter:ronglianClient:edit")
     @PostMapping("/updateRonglianClient")
     @ResponseBody
     public JSONResult updateRonglianClient(@RequestBody RonglianClientDTO reqDTO) {
@@ -175,6 +178,7 @@ public class RonglianClientController {
      * @param idListLongReq
      * @return
      */
+    @RequiresPermissions("callCenter:ronglianClient:delete")
     @PostMapping("/deleteClientByIdList")
     @ResponseBody
     public JSONResult deleteClientByIdList(@RequestBody IdListLongReq idListLongReq){
