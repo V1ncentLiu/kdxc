@@ -188,7 +188,7 @@ var homePageVM=new Vue({
 						}
 					}
 					if (event === 'invite') {
-
+						console.info("invite");
 					}
 				}
 			},
@@ -813,7 +813,7 @@ var homePageVM=new Vue({
 					if(resData.dir=="INBOUND"){
 						//显示接听弹窗
 						this.ringOffdialogVisible =true;
-						this.ketianInBoundPhone = resData.ani+"("+resData.area)+")";
+						this.ketianInBoundPhone = resData.ani+" ("+resData.area+")";
 					}else{
 						CtiAgentBar.webRTCAnswer();
 					}

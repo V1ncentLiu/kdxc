@@ -7,8 +7,7 @@ KetianClientToolBar.ketianClient = new function (){
 	};
 
 	//播放挂机铃声
-        self.playHangupMedia() {
-        const _this = this;
+        self.playHangupMedia= function () {
         var hangupAudio = document.getElementById("hangupMediaAudioId")
         if(!hangupAudio){
             hangupAudio = document.createElement('audio');
@@ -20,7 +19,7 @@ KetianClientToolBar.ketianClient = new function (){
         hangupAudio.play();
     };
     //播放来电振铃
-    self.playRingMedia() {
+    self.playRingMedia = function (){
         const _this = this;
         _this.stopPlayRingMedia();
         var ringAudio = document.createElement('audio');
@@ -32,7 +31,7 @@ KetianClientToolBar.ketianClient = new function (){
         ringAudio.play();
     };
     //停止播放来电振铃
-    self.stopPlayRingMedia() {
+    self.stopPlayRingMedia = function () {
         const _this = this;
         var ringAudio = document.getElementById("ringMediaAudioId");
         if (ringAudio) {
