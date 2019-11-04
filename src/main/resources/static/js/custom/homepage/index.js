@@ -926,6 +926,7 @@ var homePageVM=new Vue({
                     clientInfo.loginClientType="ronglian";
                     clientInfo.loginClient = homePageVM.loginClientForm.loginClient
                     clientInfo.clientType = homePageVM.loginClientForm.clientType;
+                    clientInfo.acountType = homePageVM.accountType;
                     localStorage.setItem("clientInfo",JSON.stringify(clientInfo));                     
                 }else{
                     console.error(data);
