@@ -67,7 +67,7 @@ public class RonglianClientController {
      * @param request
      * @return
      */
-    @RequiresPermissions("aggregation:ronglianClient:view")
+    @RequiresPermissions("callCenter:ronglianClient:view")
     @GetMapping("/ronglianClientPage")
     public String ronglianClientPage(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
