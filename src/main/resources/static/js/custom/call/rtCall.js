@@ -28,7 +28,12 @@ $(function(){
 			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
 			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
 			homePageVM.loginKeTianClient();
-		}
+		}else if(loginClientType=="ronglian"){
+      homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+      homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+      homePageVM.acountType = clientInfoObj.acountType;
+      homePageVM.loginRongLianClient();
+    }
 	}
 	
 });
