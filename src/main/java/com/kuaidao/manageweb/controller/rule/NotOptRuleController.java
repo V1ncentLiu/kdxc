@@ -36,7 +36,6 @@ import com.kuaidao.aggregation.dto.rule.AssignRuleTeamDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleReq;
-import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -52,11 +51,9 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
-import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -87,10 +84,6 @@ public class NotOptRuleController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
-    @Autowired
-    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
-    @Autowired
-    private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
 
     /***
      * 非优化规则列表页
@@ -150,13 +143,7 @@ public class NotOptRuleController {
                 organizationFeignClient.listBusinessLineOrg();
         logger.info("listBusinessLineOrg", JSON.toJSONString(listBusinessLineOrg.getData()));
         // 查询所有业务线
-        // request.setAttribute("businessLineList", listBusinessLineOrg.getData());
-        // 所有内部商家主账号
-        List<Integer> arrayList = new ArrayList<Integer>();
-        arrayList.add(SysConstant.USER_STATUS_ENABLE);
-        arrayList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> userList = getMerchantUser(arrayList);
-        request.setAttribute("companyGroupList", userList);
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -186,12 +173,14 @@ public class NotOptRuleController {
         if (data != null && data.getTeleList() != null) {
             List<AssignRuleTeamDTO> teleList = data.getTeleList();
             for (AssignRuleTeamDTO assignRuleTeamDTO : teleList) {
-                TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
-                telemarketingLayoutDTO.setGroupId(assignRuleTeamDTO.getCompanyGroupId());
-                JSONResult<List<OrganizationDTO>> orgList = telemarketingLayoutFeignClient
-                        .getdxListByCompanyGroupId(telemarketingLayoutDTO);
-                List<OrganizationDTO> dxzList = orgList.getData();
-                Collections.sort(dxzList, Comparator.comparing(OrganizationDTO::getCreateTime));
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+                queryDTO.setOrgType(OrgTypeConstant.DXZ);
+                queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
+                JSONResult<List<OrganizationRespDTO>> orgList =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                List<OrganizationRespDTO> dxzList = orgList.getData();
+                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
                 assignRuleTeamDTO.setTeleOptions(dxzList);
             }
         }
@@ -204,13 +193,7 @@ public class NotOptRuleController {
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
-        // request.setAttribute("businessLineList", listBusinessLineOrg.getData());
-        // 所有内部商家主账号
-        List<Integer> arrayList = new ArrayList<Integer>();
-        arrayList.add(SysConstant.USER_STATUS_ENABLE);
-        arrayList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> userList = getMerchantUser(arrayList);
-        request.setAttribute("companyGroupList", userList);
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -581,20 +564,4 @@ public class NotOptRuleController {
         return null;
     }
 
-    /**
-     * 查询商家主账号
-     *
-     * @param code
-     * @return
-     */
-    private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
-        userInfoDTO.setStatusList(arrayList);
-        // 只查内部商家
-        userInfoDTO.setMerchantType(SysConstant.MerchantType.TYPE1);
-        JSONResult<List<UserInfoDTO>> merchantUserList =
-                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
-        return merchantUserList.getData();
-    }
 }

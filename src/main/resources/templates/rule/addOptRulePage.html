@@ -182,15 +182,15 @@
             </el-form-item>
             <el-table :data="form.teleRuleTeamList" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="companyGroupId" label="业务线*">
+                <el-table-column align="center" prop="businessLine" label="业务线*">
                     <template slot-scope="scope">
-                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.companyGroupId'" :rules='rules.companyGroupId' style="width: 160px;margin:0 auto;height: 57px;">
-                            <el-select filterable v-model="scope.row.companyGroupId" placeholder="请选择" @change="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
+                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.businessLine'" :rules='rules.businessLine' style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" @change="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
                                 <el-option
-                                    v-for="item in companyGroupIdOptions"
-                                    :key="item.id"
+                                    v-for="item in businessLineOptions"
+                                    :key="item.businessLine"
                                     :label="item.name"
-                                    :value="item.id">
+                                    :value="item.businessLine">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -325,8 +325,7 @@ var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
 var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
 var mediumList=[[${mediumList}]];//媒介集合
 var trafficList=[[${trafficList}]];//话务组集合
-var companyGroupIdList=[[${companyGroupIdList}]];//业务线集合
-var companyGroupList=[[${companyGroupList}]];//集团集合
+var businessLineList=[[${businessLineList}]];//业务线集合
     var aorVM = new Vue({
         el: '#addOptimizeRule',
         data: function() {
@@ -401,8 +400,8 @@ var companyGroupList=[[${companyGroupList}]];//集团集合
                     orgId: [
                         { required: true, required: true, message: '请选择电销组', trigger: 'change' }
                     ],
-                    companyGroupId: [
-                                   { required: true, required: true, message: '请选择集团', trigger: 'change' }
+                    businessLine: [
+                                   { required: true, required: true, message: '请选择业务线', trigger: 'change' }
                                ],
                     proportion: [
                         { required: true, required: true, message: '请输入比例', trigger: 'change'},
@@ -429,7 +428,7 @@ var companyGroupList=[[${companyGroupList}]];//集团集合
                 },
                 submitDisabled:false,
                 trafficOptions:trafficList,
-                companyGroupIdOptions:companyGroupIdList,
+                businessLineOptions:businessLineList,
                 sourceOptions:mediumList,
                 categoryOptions:clueCategoryList,
                 industryOptions:industryCategoryList ,
@@ -611,23 +610,25 @@ var companyGroupList=[[${companyGroupList}]];//集团集合
                 this.tags4.splice(this.tags4.indexOf(tag), 1);
             },
             addDomain() {
-                console.log(companyGroupIdList)
+                console.log(businessLineList)
                 // 取第一条
                 var first=null;
-                for(var i=0;i<companyGroupIdList.length;i++){
-                    first=companyGroupIdList[0].id;
+                for(var i=0;i<businessLineList.length;i++){
+                    first=businessLineList[0].businessLine;
                 }
                 var param ={};
-            	  param.companyGroupId = first;
+            	  param.systemCode = "HUIJU";
+            	  param.orgType = 1;
+            	  param.businessLine = first;
                   console.info(param);
-                  axios.post('/telemarketing/getTelemarketingLayoutListByCompanyGroupId', param)
+                  axios.post('/organization/organization/queryOrgByBusinessline', param)
                   .then(function (response) {
                         var result =  response.data;
                         console.info(result);
                         var table=result.data;
                         aorVM.form.teleRuleTeamList.push({
                             orgId: '',                    
-                            companyGroupId: first,//业务线取第一条                 
+                            businessLine: first,//业务线取第一条                 
                             teleOptions:table,                    
                             orgType: '',                    
                             proportion:'',
@@ -682,9 +683,9 @@ var companyGroupList=[[${companyGroupList}]];//集团集合
           	  var param ={};
           	  param.systemCode = "HUIJU";
           	  param.orgType = 1;
-          	  param.companyGroupId = rows[index].id;
+          	  param.businessLine = rows[index].businessLine;
                 console.info(param);
-                axios.post('/telemarketing/getTelemarketingLayoutListByCompanyGroupId', param)
+                axios.post('/organization/organization/queryOrgByBusinessline', param)
                 .then(function (response) {
                       var result =  response.data;
                       console.info(result);
