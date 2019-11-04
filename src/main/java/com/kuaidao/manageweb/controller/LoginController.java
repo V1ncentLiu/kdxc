@@ -125,6 +125,11 @@ public class LoginController {
     private String wsUrlHttps;
     @Value("${session_time_out}")
     private int sessionTimeOut;
+    // 汇聚-商家端 域名：用来判断首页跳转
+    @Value("${merchantServletName}")
+    private String merchantServletName;
+
+
     /**
      * 是否显示验证码
      **/
@@ -155,17 +160,33 @@ public class LoginController {
         SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         request.setAttribute("isShowLogoutBox", isShowLogoutBox);
         request.setAttribute("verificationCodeShow", verificationCodeShow);
-        return "login/login";
+
+        String serverName = request.getServerName();
+        if(serverName.equals(merchantServletName)){
+            // 汇聚商家端：跳转
+            return "merchantLogin/login";
+        }else{
+            // 系统默认 汇聚登录页
+            return "login/login";
+        }
     }
 
     /***
      * 修改密码页
-     *
      * @return
      */
     @RequestMapping("/login/resetPwd")
     public String resetPwd() {
         return "login/resetPwd";
+    }
+
+    /**
+     * 商家版修改密码
+     * @return
+     */
+    @RequestMapping("/merchantLogin/resetPwd")
+    public String resetMerchantPwd() {
+        return "merchantLogin/resetPwd";
     }
 
     @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
@@ -423,8 +444,6 @@ public class LoginController {
     /**
      * 发送短信或语音验证码验证
      *
-     * @param dataPackage
-     * @param jsonResult
      * @param request
      * @return
      * @throws Exception
@@ -497,8 +516,6 @@ public class LoginController {
     /**
      * 发送短信或语音验证码验证
      *
-     * @param dataPackage
-     * @param jsonResult
      * @param request
      * @return
      * @throws Exception
@@ -536,7 +553,6 @@ public class LoginController {
     /**
      * 忘记密码
      *
-     * @param orgDTO
      * @return
      */
     @PostMapping("/login/updatePassword")
@@ -690,7 +706,6 @@ public class LoginController {
     /**
      * 发送验证码
      *
-     * @param code
      * @return
      */
     private JSONResult<String> send(String type, UserInfoDTO user) {
@@ -720,7 +735,6 @@ public class LoginController {
     /**
      * 是否提醒修改密码
      *
-     * @param code
      * @return
      */
     private boolean isRepwdNotify(UserInfoDTO loginUser, long pwdTime) {
