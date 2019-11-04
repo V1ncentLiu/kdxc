@@ -443,7 +443,7 @@ var homePageVM = new Vue({
 
 					if (data.code == '0') {
 						var resData = data.data;
-						homePageVM.$message({ message: "登录成功", type: 'success' });
+						homePageVM.$message({ message: "登录成功", type: 'success',duration:1500 });
 						homePageVM.callTitle = "呼叫中心（七陌ON）";
 						homePageVM.dialogLoginClientVisible = false;
 						homePageVM.isQimoClient = true;
@@ -946,6 +946,21 @@ var homePageVM = new Vue({
 				}
 			});
 			var dataUrl = "/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness";
+			$("#iframeBox").attr({
+				"src": dataUrl //设置ifream地址
+			});
+		},
+		openPaymentOnline() {//打开在线充值页面
+			$(".menu.is-active").removeClass("is-active")
+			console.log($(".menu .name").html())
+			var a = $(".menu");
+			a.each(function () {
+				console.log($(this).text())
+				if ($(this).text() == "在线充值") {
+					$(this).addClass("is-active")
+				}
+			});
+			var dataUrl = "/merchant/merchantOnlineRecharge/initOnlineRecharge";
 			$("#iframeBox").attr({
 				"src": dataUrl //设置ifream地址
 			});

@@ -144,12 +144,15 @@ public class BusinessMyCustomerController {
             }
 
             for (Map.Entry<Long, OrganizationDTO> entry : groupMap.entrySet()) {
-                teleGroupList.add(entry.getValue());
+                if (entry.getValue().getCreateTime() != null) {
+                    teleGroupList.add(entry.getValue());
+                }
             }
             for (Map.Entry<Long, OrganizationDTO> entry : saleMap.entrySet()) {
                 teleSaleList.add(entry.getValue());
             }
         }
+        logger.info("电销组,{{}}" + teleGroupList);
         Collections.sort(teleGroupList, Comparator.comparing(OrganizationDTO::getCreateTime));
         map.put("teleGroupList", teleGroupList);
         map.put("teleSaleList", teleSaleList);

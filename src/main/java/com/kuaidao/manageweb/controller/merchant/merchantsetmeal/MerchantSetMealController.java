@@ -60,9 +60,9 @@ public class MerchantSetMealController {
     // 商家主账号
     List<UserInfoDTO> merchantUser = merchantComponent
         .getMerchantUser(SysConstant.USER_TYPE_TWO, null);
-    // 商家子账户
-    List<UserInfoDTO> userList = merchantComponent.getMerchantUser(SysConstant.USER_TYPE_THREE,null);
-    merchantUser.addAll(merchantUser);
+//    // 商家子账户
+//    List<UserInfoDTO> userList = merchantComponent.getMerchantUser(SysConstant.USER_TYPE_THREE,null);
+//    merchantUser.addAll(userList);
     request.setAttribute("userList", merchantUser);
     return "merchant/serviceManagement/serviceManagement";
   }

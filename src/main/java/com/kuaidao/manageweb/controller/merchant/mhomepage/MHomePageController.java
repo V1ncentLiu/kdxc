@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.merchant.mhomepage;
 
+import com.kuaidao.account.dto.call.CallBuyPackageModel;
+import com.kuaidao.account.dto.outboundpackage.OutboundPackageRespDTO;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountDTO;
 import com.kuaidao.account.dto.recharge.MerchantUserAccountQueryDTO;
 import com.kuaidao.callcenter.dto.seatmanager.SeatManagerResp;
@@ -20,6 +22,7 @@ import com.kuaidao.manageweb.feign.merchant.publiccustomer.PubcustomerFeignClien
 import com.kuaidao.manageweb.feign.merchant.recharge.MerchantUserAccountFeignClient;
 import com.kuaidao.manageweb.feign.merchant.rule.RuleAssignRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.outboundpackage.OutboundPackageFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
 import com.kuaidao.merchant.dto.clue.ResourceStatisticsParamDTO;
@@ -88,6 +91,9 @@ public class MHomePageController {
     @Autowired
     private MerchantUserAccountFeignClient merchantUserAccountFeignClient;
 
+    @Autowired
+    private OutboundPackageFeignClient outboundPackageFeignClient;
+
     /**
      * 首页 跳转
      *
@@ -126,17 +132,33 @@ public class MHomePageController {
         }
         //查询主账号是否购买云呼叫套餐
         boolean hasBuyPackage = false;
+        String packageName = "";
         Long accountId = user.getId();
         if(Constants.USER_TYPE_TWO.equals(user.getUserType())){
             accountId = user.getId();
         }else if(Constants.USER_TYPE_THREE.equals(user.getUserType())){
             accountId = user.getParentId();
         }
-        JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(accountId);
+        JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(accountId);
+      logger.info("accountId::"+accountId);
         if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
-            hasBuyPackage = hasBuyPackageResult.getData();
+          CallBuyPackageModel data = hasBuyPackageResult.getData();
+          if(data!=null){
+            hasBuyPackage = true;
+            IdEntityLong idEntity = new IdEntityLong();
+            idEntity.setId(data.getPackageId());
+            logger.info("getPackageId::"+data.getPackageId());
+            JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
+                .queryOutboundPackageById(idEntity);
+            if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
+              OutboundPackageRespDTO data1 = outboundPackageRespDTOJSONResult.getData();
+              packageName = data1.getPackageName();
+            }
+          }
         }
+      logger.info("packageName::"+packageName);
         request.setAttribute("hasBuyPackage", hasBuyPackage);
+        request.setAttribute("packageName", packageName);
         // 判断显示主/子账户首页
         Integer userType = user.getUserType();
         request.setAttribute("isShowConsoleBtn", userType); // 主账户==2  子账户==3
@@ -156,12 +178,31 @@ public class MHomePageController {
             // 查询账户余额
             setCountBalance(request);
             // 查询是否购买套餐
-            JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(curLoginUser.getId());
+//            JSONResult<Boolean> hasBuyPackageResult = callPackageFeignClient.hasBuyPackage(curLoginUser.getId());
             boolean buyedFlag = false;
-            if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
-              buyedFlag = hasBuyPackageResult.getData();
+            String packageName = "";
+//            if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+//              buyedFlag = hasBuyPackageResult.getData();
+//            }
+          JSONResult<CallBuyPackageModel> hasBuyPackageResult = callPackageFeignClient.getCallBuyPackage(curLoginUser.getId());
+          logger.info("accountId::"+curLoginUser.getId());
+          if (JSONResult.SUCCESS.equals(hasBuyPackageResult.getCode())) {
+            CallBuyPackageModel data = hasBuyPackageResult.getData();
+            if(data!=null){
+              buyedFlag = true;
+              IdEntityLong idEntity = new IdEntityLong();
+              idEntity.setId(data.getPackageId());
+              logger.info("getPackageId::"+data.getPackageId());
+              JSONResult<OutboundPackageRespDTO> outboundPackageRespDTOJSONResult = outboundPackageFeignClient
+                  .queryOutboundPackageById(idEntity);
+              if(CommonUtil.resultCheck(outboundPackageRespDTOJSONResult)){
+                OutboundPackageRespDTO data1 = outboundPackageRespDTOJSONResult.getData();
+                packageName = data1.getPackageName();
+              }
             }
-            request.setAttribute("buyedFlag",buyedFlag); // 当前无法进行。在第四批需求
+          }
+          request.setAttribute("buyedFlag",buyedFlag); // 当前无法进行。在第四批需求
+          request.setAttribute("packageName", packageName);
         }else{
         }
         request.setAttribute("userType",userType);

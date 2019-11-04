@@ -110,6 +110,7 @@ public class MerchantClueSettingController {
         // 获取当前登录人
         UserInfoDTO user = getUser();
         reqDTO.setApplyPerson(user.getId());
+        reqDTO.setApplyPersonName(user.getName());
         reqDTO.setApplyTime(new Date());
         return merchantClueApplyFeignClient.save(reqDTO);
     }
