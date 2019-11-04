@@ -2,21 +2,12 @@ package com.kuaidao.manageweb.feign.client;
 
 import com.kuaidao.callcenter.dto.RonglianClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
-import com.kuaidao.callcenter.dto.RonglianClientOutCallResqDTO;
 import com.kuaidao.callcenter.dto.RonglianClientResqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientInsertAndUpdateReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientOutboundDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientPageReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientReqDTO;
-import com.kuaidao.callcenter.dto.ketianclient.KetianClientRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import java.util.List;
-import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -75,7 +66,7 @@ public interface RonglianFeignClient {
 
     /**
      * 根据idList删除容联坐席
-     * @param idList
+     * @param idListLongReq
      * @return
      */
     @PostMapping("/deleteRonglianClient")
@@ -87,7 +78,7 @@ public interface RonglianFeignClient {
      * @return
      */
     @PostMapping("/setRonglianClientState")
-    public JSONResult<RonglianClientOutCallResqDTO> setRonglianClientState (@RequestBody RonglianClientDTO ronglianClientDTO);
+    public JSONResult setRonglianClientState (@RequestBody RonglianClientDTO ronglianClientDTO);
 
     /**
      * 容联外呼
@@ -95,7 +86,7 @@ public interface RonglianFeignClient {
      * @return
      */
     @PostMapping("/ronglianOutBoundCall")
-    public JSONResult<RonglianClientOutCallResqDTO> ronglianOutBoundCall (@RequestBody RonglianClientDTO ronglianClientDTO);
+    public JSONResult ronglianOutBoundCall (@RequestBody RonglianClientDTO ronglianClientDTO);
 
     @Component
     static class HystrixClientFallback implements RonglianFeignClient {
@@ -140,13 +131,13 @@ public interface RonglianFeignClient {
         }
 
         @Override
-        public JSONResult<RonglianClientOutCallResqDTO> setRonglianClientState(
+        public JSONResult setRonglianClientState(
             RonglianClientDTO ronglianClientDTO) {
             return fallBackError("设置坐席状态");
         }
 
         @Override
-        public JSONResult<RonglianClientOutCallResqDTO> ronglianOutBoundCall(
+        public JSONResult ronglianOutBoundCall(
             RonglianClientDTO ronglianClientDTO) {
             return fallBackError("容联外呼");
         }
