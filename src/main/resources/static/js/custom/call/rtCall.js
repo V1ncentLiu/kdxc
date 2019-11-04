@@ -23,7 +23,17 @@ $(function(){
 			homePageVM.loginClientForm.cno = clientInfoObj.clientNo;
 			homePageVM.loginClientForm.bindPhoneType = clientInfoObj.bindType;
             homePageVM.loginHeliClient();
-		}
+		}else if(loginClientType=="ketian"){
+			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+			homePageVM.loginKeTianClient();
+		}else if(loginClientType=="ronglian"){
+      homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+      homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+      homePageVM.acountType = clientInfoObj.acountType;
+      homePageVM.loginRongLianClient();
+    }
 	}
 	
 });
@@ -46,7 +56,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 	}
 	stopSound();//停止播放录音
 	clearTimer();//清除定时器
-	if(!homePageVM.isQimoClient && !homePageVM.isTrClient && !homePageVM.isHeliClient){
+	if(!homePageVM.isQimoClient && !homePageVM.isTrClient && !homePageVM.isHeliClient && !homePageVM.isKeTianClient && !homePageVM.isRongLianClient){
 		   homePageVM.$message({message:"请登录呼叫中心",type:'warning'});
 		   return ;
  	}
@@ -128,7 +138,53 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
           });
  	}else if(homePageVM.isHeliClient){
  		heliClientOutbound(outboundInputPhone,callSource,clueId,callback);
- 	}
+ 	}else if(homePageVM.isKeTianClient){
+ 		ketianClientOutbound(outboundInputPhone,callSource,clueId,callback);
+	}else if(homePageVM.isRongLianClient){
+ 		var param = {};
+ 		param.customerPhone = outboundInputPhone;
+ 		if(clueId){
+ 			param.clueId = clueId;
+ 		}
+ 		param.accountType = homePageVM.accountType;
+ 		homePageVM.$message({message:"外呼中",type:'success'});
+ 		 axios.post('/client/ronglianClient/outbound',param)
+          .then(function (response) {
+              var data =  response.data;
+              if(data.code=='0'){
+             	  var resData = data.data;
+             		  if(callSource==1){
+             			 homePageVM.dialogOutboundVisible =true;
+             			 $("#outboundCallTime").html("");
+    					 $('#outboundPhoneLocaleArea').html("");
+    				 	 intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
+    					 getPhoneLocale(outboundInputPhone,callSource);
+             		  }else if(callSource==2) {
+             			 homePageVM.tmOutboundCallDialogVisible =true;
+    					 $("#tmOutboundCallTime").html("");
+    					 $('#tmOutboundPhoneLocaleArea').html("");
+    					 intervalTimer("tmOutboundCallTime",10,2);
+    					 //查询手机号归属地
+    					 getPhoneLocale(outboundInputPhone,callSource);
+             		  }
+             	
+         		   
+         		    if (typeof callback === 'function') {
+ 		               callback();
+ 		             }
+              }else{
+				  console.error(data);
+            	   clearTimer();//清除定时器
+             		homePageVM.$message({message:"外呼失败【"+data.msg+"】",type:'error'});
+              }
+          })
+          .catch(function (error) {
+             console.log(error);
+          })
+          .then(function () {
+            // always executed
+          });
+	}
 	
 } 
 
@@ -242,7 +298,6 @@ function getPhoneLocale(phone,callSource){
      .then(function (response) {
          var data =  response.data;
          if(data.code=='0'){
-    		 console.info(data);
     		 var resData = data.data;
     		 var result = resData.result;
     		 if(result=="0"){
@@ -324,4 +379,60 @@ function heliClientOutbound(outboundInputPhone,callSource,clueId,callback){
 	      .then(function () {
 	        // always executed
 	      });
+}
+
+//科天外呼
+function ketianClientOutbound(outboundInputPhone,callSource,clueId,callback){
+	homePageVM.$message({message:"外呼中",type:'success'});
+	if(callSource==1){
+		homePageVM.dialogOutboundVisible =true;
+		$('#outboundPhoneLocaleArea').html("");
+		getPhoneLocale(outboundInputPhone,callSource);
+	}else if(callSource==2) {
+		homePageVM.tmOutboundCallDialogVisible =true;
+		$('#tmOutboundPhoneLocaleArea').html("");
+		//查询手机号归属地
+		getPhoneLocale(outboundInputPhone,callSource);
+	}
+
+
+	var axbParam = {};
+	axbParam.loginName = homePageVM.loginClientForm.loginClient;
+	axbParam.orgId = homePageVM.user.orgId;
+	axbParam.accountId = homePageVM.accountId;
+	axbParam.clueId = clueId;
+	axbParam.customerPhone = outboundInputPhone;
+	axbParam.accountType = homePageVM.accountType;
+	axios.post('/client/ketianClient/outbound',axbParam)
+		.then(function (response) {
+			var data =  response.data;
+			if(data.code=='0'){
+				//10分钟后红色字体显示
+				// intervalTimer("outboundCallTime",1,2);
+
+				if(callSource==1){
+					homePageVM.dialogOutboundVisible =true;
+					$("#outboundCallTime").html("");
+					intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
+				}else if(callSource==2) {
+					homePageVM.tmOutboundCallDialogVisible =true;
+					$("#tmOutboundCallTime").html("");
+					intervalTimer("tmOutboundCallTime",10,2);
+					//查询手机号归属地
+				}
+
+				if (typeof callback === 'function') {
+					callback();
+				}
+			}else{
+				clearTimer();//清除定时器
+				homePageVM.$message({message:data.msg,type:'error'});
+			}
+		})
+		.catch(function (error) {
+			console.log(error);
+		})
+		.then(function () {
+			// always executed
+		});
 }
