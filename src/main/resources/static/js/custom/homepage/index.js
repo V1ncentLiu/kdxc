@@ -77,7 +77,7 @@ var homePageVM=new Vue({
             {
                 value: 4,
                 label: '登录科天呼叫中心'
-            }, 
+            },
             {
                 value: 5,
                 label: '登录容联呼叫中心'
