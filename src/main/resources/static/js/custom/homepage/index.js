@@ -190,13 +190,13 @@ var homePageVM=new Vue({
 						}
 					}
 					if (event === 'invite') {
-						//TODO devin next
-					debugger;
+						console.info("invite");
 					}
 				}
 			},
             ringOffdialogVisible:false,//默认不显示挂断弹窗
             isRingOff:false,//默认不显示挂断按钮
+			ketianInBoundPhone:'',//科天来电手机号
 	    }
 	},
  	methods: {
@@ -729,11 +729,11 @@ var homePageVM=new Vue({
 								//登录
 								CtiAgentBar.login(clientNo);
 								//就绪
-								CtiAgentBar.ready();
+								//CtiAgentBar.ready();
 								var clientType = homePageVM.loginClientForm.clientType;
 								//记录登录信息
 								homePageVM.ketianClientLoginRecord({"loginName":loginClient,"accountType":homePageVM.accountType,"clientType":clientType});
-
+								homePageVM.isRingOff = true;
 							}else{
 								homePageVM.$message({message:"注册失败-"+res.msg,type:'error'});
 							}
@@ -751,17 +751,26 @@ var homePageVM=new Vue({
 				});
 
         },
+		ketianConnection(){
+			CtiAgentBar.webRTCAnswer();
+		},
+		ketianHangup(){
+			CtiAgentBar.hangup();
+		},
 		ketianStateEventListener(data){
         	console.info(data);
 			switch (data.event) {
 				case "CB_CONNECT":
 					if (data.data.code === 200) {
 						//连接成功
+						console.info();
 					}
 					break;
 				case "CB_LOGIN":
 					if (data.data.code === 200) {
 						//登录成功
+						console.info("登录成功");
+						CtiAgentBar.ready();
 					} else {
 						console.log(data.data.message);
 						this.$message({message:"坐席登录失败-"+data.data.message,type:'error'});
@@ -772,8 +781,8 @@ var homePageVM=new Vue({
 				case "CB_READY":
 					if (data.data.code === 200) {
 						//就绪成功
+						console.info("就绪成功");
 					}else{
-						//TODO  devin
 						console.error("就绪%o",data);
 						this.$message({message:"坐席就绪失败-"+data.data.message,type:'error'});
 					}
@@ -801,8 +810,16 @@ var homePageVM=new Vue({
 					break;
 				case "CB_RINGING":
 					//振铃事件
-					console.log(data.data.data); //弹屏数据,具体参数如下
-					CtiAgentBar.webRTCAnswer();
+					var resData = data.data.data;
+					console.log(resData); //弹屏数据,具体参数如下
+					if(resData.dir=="INBOUND"){
+						//显示接听弹窗
+						this.ringOffdialogVisible =true;
+						this.ketianInBoundPhone = resData.ani+" ("+resData.area+")";
+					}else{
+						CtiAgentBar.webRTCAnswer();
+					}
+
 					break;
 				case "CB_ANSWERING":
 					console.info("answering");
@@ -1096,6 +1113,8 @@ var homePageVM=new Vue({
         },
         KeTianClientLogout(){
 			CtiAgentBar.logout();
+			homePageVM.isRingOff = true;
+
 			homePageVM.dialogLogoutClientVisible =false;
 			homePageVM.$message({message:"退出成功",type:'success'});
 			homePageVM.callTitle="呼叫中心";
