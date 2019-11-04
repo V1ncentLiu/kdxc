@@ -20,7 +20,7 @@ import java.util.List;
  * @author Devin.Chen
  * @Date: 2019/10/23 16:32
  */
-@FeignClient(name = "callcenter-service-chen", path = "/callcenter/ketianClient", fallback = KetianFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "callcenter-service", path = "/callcenter/ketianClient", fallback = KetianFeignClient.HystrixClientFallback.class)
 public interface KetianFeignClient {
 
 
