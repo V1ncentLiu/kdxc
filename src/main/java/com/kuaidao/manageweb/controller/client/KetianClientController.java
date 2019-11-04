@@ -19,6 +19,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,7 @@ public class KetianClientController {
      * @return
      */
     @GetMapping("/ketianClientPage")
+    @RequiresPermissions("callCenter:ketianClient:view")
     public String ketianClientPage(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -112,6 +114,7 @@ public class KetianClientController {
      */
     @PostMapping("/listClientPage")
     @ResponseBody
+    @RequiresPermissions("callCenter:ketianClient:view")
     public JSONResult<PageBean<KetianClientRespDTO>> listClientPage(@RequestBody KetianClientPageReqDTO reqDTO) {
         return ketianFeignClient.listClientPage(reqDTO);
     }
@@ -171,6 +174,7 @@ public class KetianClientController {
      */
     @PostMapping("/insertClient")
     @ResponseBody
+    @RequiresPermissions("callCenter:ketianClient:add")
     public JSONResult insertClient(@Valid @RequestBody KetianClientInsertAndUpdateReqDTO reqDTO, BindingResult result) {
         if (result.hasErrors()) {
             logger.warn("insert client ,illegal param {{}}", reqDTO);
@@ -188,6 +192,7 @@ public class KetianClientController {
      */
     @PostMapping("/updateClient")
     @ResponseBody
+    @RequiresPermissions("callCenter:ketianClient:edit")
     public JSONResult updateClient(@Valid @RequestBody KetianClientInsertAndUpdateReqDTO reqDTO, BindingResult result) {
         if (result.hasErrors()) {
             logger.warn("update client ,illegal param {{}}", reqDTO);
@@ -277,6 +282,7 @@ public class KetianClientController {
      */
     @PostMapping("/deleteClientByIdList")
     @ResponseBody
+    @RequiresPermissions("callCenter:ketianClient:delete")
     public JSONResult deleteClientByIdList(@RequestBody IdListLongReq idListLongReq){
         List<Long> idList = idListLongReq.getIdList();
         if(CollectionUtils.isEmpty(idList)){
