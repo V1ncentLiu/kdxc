@@ -212,7 +212,8 @@ var clientVm = new Vue({
                       var resData = response.data;
                       if(resData.code=='0'){
                     		clientVm.$message({message:'刪除成功',type:'success',duration:2000,onClose:function(){
-                    			clientVm.initClientData();
+                    			// clientVm.initClientData();
+                          window.location.href="/client/ronglianClient/ronglianClientPage"
                     	    }});  ;                     
                       }else{
                    	     clientVm.$message({message:'删除失败',type:'error'});
