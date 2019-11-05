@@ -181,7 +181,7 @@ public class ReceptionVisitController {
         headTitleList.add("来访客户数");
         headTitleList.add("首访数占比");
         headTitleList.add("签约单数");
-        headTitleList.add("订金率");
+        headTitleList.add("定金率");
         headTitleList.add("退款单数");
         headTitleList.add("退款率");
         headTitleList.add("平均每客户来访次数");
