@@ -957,7 +957,7 @@ var homePageVM=new Vue({
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
-                         homePageVM.isRingOff = false;//退出之后不显示挂断按钮
+                         
                          
                      }else{
                     		homePageVM.$message({message:data.msg,type:'error'});
@@ -1003,6 +1003,7 @@ var homePageVM=new Vue({
         		this.heliClientLogout();
         	}else if(this.isKeTianClient){
                 this.KeTianClientLogout();
+                homePageVM.isRingOff = false;//退出之后不显示挂断按钮
             }else if(this.isRongLianClient){
                 var loginClient = this.loginClientForm.loginClient;
                 var param={};
