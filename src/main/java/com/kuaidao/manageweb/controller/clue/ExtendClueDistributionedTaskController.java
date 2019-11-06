@@ -4,11 +4,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
@@ -181,7 +178,8 @@ public class ExtendClueDistributionedTaskController {
             return new JSONResult<PageBean<ClueDistributionedTaskDTO>>()
                     .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
-        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
