@@ -49,10 +49,9 @@ public class RequirementController extends BaseStatisticsController {
     private OrganizationFeignClient organizationFeignClient;
 
 
-//    @RequiresPermissions("resource:requirment:view")
-    @RequestMapping("/requirmentlist")
+    @RequiresPermissions("resource:requirment:view")
+    @RequestMapping("requirmentlist")
     public String requirmentlist(HttpServletRequest request){
-        logger.info("requirment requirmentlist...");
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         //查询电销事业部
         queryDTO.setOrgType(OrgTypeConstant.DZSYB);
@@ -67,8 +66,8 @@ public class RequirementController extends BaseStatisticsController {
      * @param dto
      * @return
      */
-//    @RequiresPermissions("resource:requirment:view")
-    @RequestMapping("/queryPage")
+    @RequiresPermissions("resource:requirment:view")
+    @RequestMapping("queryPage")
     public @ResponseBody JSONResult<PageBean<ResRequirement>> quetyPage(@RequestBody ResQueryDto dto){
         //initDto(dto);
         return requirementFeignClient.queryPage(dto);
@@ -79,7 +78,7 @@ public class RequirementController extends BaseStatisticsController {
      * @param response
      * @param dto
      */
-//    @RequiresPermissions("resource:requirment:export")
+    @RequiresPermissions("resource:requirment:export")
     @RequestMapping("/export")
     public @ResponseBody void export(HttpServletResponse response, @RequestBody ResQueryDto dto){
         try{
