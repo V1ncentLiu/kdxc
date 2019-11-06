@@ -957,7 +957,7 @@ var homePageVM=new Vue({
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
-                      
+                         homePageVM.isRingOff = false;//退出之后不显示挂断按钮
                          
                      }else{
                     		homePageVM.$message({message:data.msg,type:'error'});
