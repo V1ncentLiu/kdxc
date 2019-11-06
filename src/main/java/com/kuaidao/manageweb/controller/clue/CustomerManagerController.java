@@ -85,9 +85,9 @@ public class CustomerManagerController {
             List<UserInfoDTO> userList =
                     getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-            ownOrgId =  String.valueOf(user.getOrgId());
+            ownOrgId = String.valueOf(user.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
-            if(curOrgGroupByOrgId!=null) {
+            if (curOrgGroupByOrgId != null) {
                 dataList.add(curOrgGroupByOrgId);
             }
             // 查询同事业部下的电销组
@@ -304,6 +304,7 @@ public class CustomerManagerController {
 
     /**
      * 获取当前 orgId所在的组织
+     * 
      * @param orgId
      * @param
      * @return
@@ -311,10 +312,10 @@ public class CustomerManagerController {
     private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
         // 电销组
         IdEntity idEntity = new IdEntity();
-        idEntity.setId(orgId+"");
+        idEntity.setId(orgId + "");
         JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
-        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
-            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+        if (!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}", idEntity, orgJr);
             return null;
         }
         return orgJr.getData();

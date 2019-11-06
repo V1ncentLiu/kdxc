@@ -96,7 +96,6 @@ var myCallRecordVm = new Vue({
     		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
-        	 debugger;
         	 axios.post('/call/callRecord/listAllTmCallRecord',param)
              .then(function (response) {
             	 
@@ -277,10 +276,13 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-                		 if(callSource=='3'){
-                			 var decodeUrl = encodeURI(url);
-                			 url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                		 }
+                         var decodeUrl = "";
+                         if(callSource == 4){
+                             decodeUrl = encodeURI(fileName.substring(0,fileName.lastIndexOf("/")));
+                         }else if(callSource=='3'  ||callSource =='5'){
+                             decodeUrl = encodeURI(url);
+                         }
+                         url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
             			 var x=new XMLHttpRequest();
              			x.open("GET", url, true);
              			x.responseType = 'blob';

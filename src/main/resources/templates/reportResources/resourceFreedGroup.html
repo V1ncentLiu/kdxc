@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -62,9 +62,9 @@
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -87,19 +87,16 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="userName" label="电销顾问">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.teleSaleId!='99999'" @click="gotoPerson(scope.row)">{{scope.row.userName}}</el-button>
-                        <span v-else>{{scope.row.userName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.teleGroupId!='99999'" @click="gotoPerson(scope.row)">{{scope.row.userName}}</el-button>
+                        <span v-else>{{scope.row.orgName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allocationResorceNum" label="不跟进释放公共资源数"></el-table-column>
-                <el-table-column prop="noVisitRate" label="其他释放公共资源数"></el-table-column>
-                <el-table-column prop="thirtyMinVisitRate" label="无效释放公共资源数"></el-table-column>
-                <el-table-column prop="oneVisitRate" label="无效释放数"></el-table-column>
-                <el-table-column prop="twoVisitRate" label="总释放数"></el-table-column>
-                <el-table-column prop="threeVisitRate" label="总监领取数"></el-table-column>
-                <el-table-column prop="sixVisitRate" label="顾问领取数"></el-table-column>
-                <el-table-column prop="twelveVisitRate" label="总领取数"></el-table-column>
-                <el-table-column prop="twentyFourVisitRate" label="释放/领取比例"></el-table-column>
+                <el-table-column prop="unfollowCount" label="不跟进释放公共资源数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="otherCount" label="其他释放公共资源数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="uselessCount" label="无效释放数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="totalFreeCount" label="总释放数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="teleSaleCount" label="顾问领取数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="freeRate" label="释放/领取比例"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -112,7 +109,7 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var parentParam=[[${receptionVisitQueryDto}]];
+    var parentParam=[[${resourceFreeReceiveQueryDto}]];
     var deptList=[[${deptList}]];// 事业部
     var clueCategoryList=[[${clueCategoryList}]];// 资源类别
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
@@ -135,7 +132,7 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     teleSaleId: '',
                     category:''
@@ -143,45 +140,12 @@
                 export: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     teleSaleId: '',
                     category: ''
                 },
-                tableData: [
-                    {
-                        orgId: 99999,
-                        teleSaleId: 99999,
-                        userName: '合计',
-                        orgName: '合计',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1,
-                        twoVisitRate: 1,
-                        threeVisitRate: 1,
-                        sixVisitRate: 1,
-                        twelveVisitRate: 1,
-                        twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
-                    },
-                    {
-                        orgId: 1,
-                        teleSaleId: 1,
-                        userName: '电销顾问1',
-                        orgName: '电销组名1',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1,
-                        twoVisitRate: 1,
-                        threeVisitRate: 1,
-                        sixVisitRate: 1,
-                        twelveVisitRate: 1,
-                        twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
-                    }
-                ],
+                tableData: [],
                 deptList: deptList, // 电销事业部
                 orgTeleArr: '', // 电销组
                 busSaleArr: '', // 电销顾问
@@ -198,7 +162,34 @@
                 return oYear+"-"+oMonth+"-"+oDay; 
           },
         },
-        methods: {    
+        methods: {
+            format_number(row, column){ // 千分位数字格式化
+                var nStr = row[column.property];
+                if('--'==nStr){
+                    return nStr;
+                }
+                nStr += '';
+                if(nStr.indexOf('.') == -1){
+                    var x1 = nStr;
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1;
+                }else{
+                    var x = nStr.split('.');
+                    x1 = x[0];
+                    if(!x[1]){
+                        x[1] = '00';
+                    }
+                    x2 = x.length > 1 ? '.' + x[1] : '';
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1 + x2;
+                }
+            },
             centerStyle(){
                 return "text-align:center"
             }, 
@@ -301,12 +292,12 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.deptId = this.form.deptId;
+                param.teleDeptId = this.form.teleDeptId;
                 param.teleGroupId = this.form.teleGroupId;
                 param.teleSaleId = this.form.teleSaleId;
                 param.category = this.form.category;
                 this.loading = true; 
-                axios.post('/statistics/receptionVisit/getPersonDayPageList',param).then(function (response) {
+                axios.post('/freedReport/getPersonPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -335,7 +326,7 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.deptId = mainDivVM.form.deptId;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                         mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
                         mainDivVM.export.category = mainDivVM.form.category;
@@ -379,13 +370,13 @@
             },
             gotoPerson(row){
                 var teleSaleId = row.teleSaleId;
-                var deptId = this.export.deptId;
+                var teleDeptId = this.export.teleDeptId;
                 var teleGroupId = this.export.teleGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var category = this.export.category;
                 if(teleSaleId){
-                    window.location.href="/freedReport/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime;
+                    window.location.href="/freedReport/managerList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -474,11 +465,11 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.deptId = this.export.deptId;
+                param.teleDeptId = this.export.teleDeptId;
                 param.teleGroupId = this.export.teleGroupId;
                 param.teleSaleId = this.export.teleSaleId;
                 param.category = this.export.category;
-                axios.post('/statistics/receptionVisit/exportPersonDayAllList',param,{responseType:'blob'})
+                axios.post('/freedReport/exportPersonAllList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -498,21 +489,22 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curDeptId){
                 this.isDisabled = true;
-                this.form.deptId = curDeptId;
-                this.firstCurTelGroupSale(curDeptId);
-                if(curOrgId){ // 有角色
+                this.form.teleDeptId = curDeptId;
+                if(curOrgId){ 
                     this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
-                    this.firstCurTelSale(curOrgId);
                     if(curUserId){
                         this.isDisabledUserId = true;
                         this.form.teleSaleId = curUserId;
                     }else{
                         this.form.teleSaleId = parentParam&&parentParam.teleSaleId?parentParam.teleSaleId:'';
                     }
+                }else{
+                    this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
+                    this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
                 }
             }else{
-                this.form.deptId = parentParam&&parentParam.deptId ? parentParam.deptId:'';
+                this.form.teleDeptId = parentParam&&parentParam.teleDeptId ? parentParam.teleDeptId:'';
                 this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
                 this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
             }
@@ -529,15 +521,20 @@
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
             this.form.category = parentParam&&parentParam.category ? parentParam.category:'';
-            this.export.deptId = this.form.deptId; 
+            this.export.teleDeptId = this.form.teleDeptId; 
             this.export.teleGroupId = this.form.teleGroupId;
             this.export.teleSaleId = this.form.teleSaleId; 
             this.export.category = this.form.category;
             
+            if(this.form.teleDeptId){
+                this.firstCurTelGroupSale(this.form.teleDeptId);
+            }
+            if(this.form.teleGroupId){
+                this.firstCurTelSale(this.form.teleGroupId);
+            }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

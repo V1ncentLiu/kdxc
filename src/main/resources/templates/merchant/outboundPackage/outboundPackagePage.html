@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>服务费用设置</title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>费用设置</el-breadcrumb-item>
+        <el-breadcrumb-item>服务费用设置</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+             <shiro:hasPermission name="merchant:outboundPackage:add">
+              <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>新增服务套餐</el-button>
+             </shiro:hasPermission>
+        </el-col>
+    </el-row>
+    <div class="mainSearchBg">
+        <el-row>
+          <el-table
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable" @selection-change="handleSelectionChange">
+                <el-table-column  align="center" type="index" label="序号" width="50"></el-table-column>
+                <el-table-column align="center" prop="packageName" label="服务套餐名称"></el-table-column>
+                <el-table-column align="center" prop="supplyCompanyName" label="供应商" width="120"></el-table-column>
+                <el-table-column align="center" prop="maxClientNum" label="支持最大坐席数" width="130"></el-table-column>
+                <el-table-column align="center" prop="clientCost" label="坐席费" width="80"></el-table-column>
+                <el-table-column align="center" prop="fixedPhoneMonthlyRent" label="固化月租费/个" width="130"></el-table-column>
+                <el-table-column align="center" prop="smallMonthlyRent" label="小号月租费/个" width="130"></el-table-column>
+                <el-table-column align="center" prop="callCharge" label="通话资费/分钟" width="130"></el-table-column>
+                <el-table-column align="center" prop="operate" label="操作" width="150">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.isDel == '1'">
+                      <el-button size="mini" type="text">已删除</el-button>
+                    </span>
+                    <span  v-else>
+                      <shiro:hasPermission name="merchant:outboundPackage:edit">
+                        <el-button
+                          size="mini"
+                          type="success"
+                          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                      </shiro:hasPermission>
+                      <shiro:hasPermission name="merchant:outboundPackage:delete">
+                      <el-button
+                        size="mini"
+                        type="danger"
+                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                      </shiro:hasPermission>
+                    </span>
+                  </template>
+                </el-table-column>
+            </el-table>
+             <table-pagination :pager="pager"  @change="initListData"></table-pagination> 
+        </el-row>
+    </div>
+    <!-- dialog -->
+     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px" @close="closeAddCustomFieldDialog">
+        <el-form :model="form" ref="form" :rules="rules" >
+            <el-form-item 
+                label="服务套餐名称：" 
+                prop="packageName"
+                :rules="[
+                    { required: true, message: '提醒标题不能为空', trigger: 'blur' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-input v-model="form.packageName" placeholder="" style="width: 290px;" maxlength="50" @keyup.native="textFun"></el-input>
+            </el-form-item>
+            <el-form-item label="供应商：" :label-width="formLabelWidth" prop="supplyCompany">
+                <el-select  v-model="form.supplyCompany"   placeholder="请选择供应商"  style="width: 290px;">
+                    <el-option
+                        v-for="item in supplyCompanyList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item 
+                label="支持最大坐席数：" 
+                prop="maxClientNum"
+                :rules="[
+                    { required: true, message: '支持最大坐席数不能为空', trigger: 'blur' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-input v-model="form.maxClientNum" placeholder="" style="width: 290px;" maxlength="5" @keyup.native="number"></el-input>
+            </el-form-item>
+            <el-form-item 
+                label="坐席费用：" 
+                prop="clientCost"
+                :rules="[
+                    { required: true, message: '坐席费用不能为空', trigger: 'blur' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-input v-model="form.clientCost" placeholder="" style="width: 290px;" maxlength="10" @keyup.native="number"></el-input>元
+            </el-form-item>
+            <el-form-item 
+                label="固化月租费用/个：" 
+                prop="fixedPhoneMonthlyRent"
+                :rules="[
+                    { required: true, message: '固化月租费用/个不能为空', trigger: 'blur' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-input v-model="form.fixedPhoneMonthlyRent" placeholder="" style="width: 290px;" maxlength="10" @keyup.native="number"></el-input>元
+            </el-form-item>
+            <el-form-item 
+                label="小号月租费用/个：" 
+                prop="smallMonthlyRent"
+                :rules="[
+                    { required: true, message: '小号月租费用/个不能为空', trigger: 'blur' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-input v-model="form.smallMonthlyRent" placeholder="" style="width: 290px;" maxlength="10" @keyup.native="number"></el-input>元
+            </el-form-item>
+            <el-form-item 
+                label="通话资费/分钟：" 
+                prop="callCharge"
+                :rules="[
+                    { required: true, message: '通话资费/分钟不能为空', trigger: 'blur' }
+                ]"
+                :label-width="formLabelWidth">
+                <el-input v-model="form.callCharge" placeholder="" style="width: 290px;" maxlength="10" @keyup.native.prevent="number"></el-input>
+            </el-form-item>
+        </el-form>
+
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">确定</el-button>
+            <el-button @click="dialogFormVisible= false">取消</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog :title="showTitle" :visible.sync="dialogFormVisible1" width="540px" @close="closeAddCustomFieldDialog">
+        <div>您确定要删除此服务套餐吗?</div>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitFormDelete()">确定</el-button>
+            <el-button @click="dialogFormVisible1= false">取消</el-button>
+        </div>
+    </el-dialog>
+
+
+</div>
+<input id="addOrUpdate" type="hidden" >
+<input id="deleteId" type="hidden" >
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+  var supplyCompanyList=[[${supplyCompanyList}]];
+
+   var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+          dataTable: [
+            /*{
+              id: '1181441839882960896',
+              packageName: '服务套餐名称1',
+              supplyCompanyName: '供应商1',
+              maxClientNum: '支持最大坐席数1',
+              clientCost:'坐席费1',
+              fixedPhoneMonthlyRent:'固化月租费1',
+              smallMonthlyRent:'小号月租费1',
+              callCharge:'通话资费1',
+              isDel:'0',
+            },
+            {
+              id: '3333333333333333',
+              packageName: '服务套餐名称2',
+              supplyCompanyName: '供应商2',
+              maxClientNum: '支持最大坐席数2',
+              clientCost:'坐席费2',
+              fixedPhoneMonthlyRent:'固化月租费2',
+              smallMonthlyRent:'小号月租费1',
+              callCharge:'通话资费2',
+              isDel:'1',
+            }*/
+          ],
+          dialogFormVisible: false,
+          dialogFormVisible1: false,
+          formLabelWidth: '130px',
+          form:{
+              id: '',
+              packageName: '',
+              // supplyCompanyName: '',
+              supplyCompany: '',
+              maxClientNum: '',
+              clientCost:'',
+              fixedPhoneMonthlyRent:'',
+              smallMonthlyRent:'',
+              callCharge:'',
+              isDel:'',
+          },
+          rules: {
+            supplyCompany: [
+                  { required: true, message: '请选择供应商', trigger: 'change' }
+              ],               
+          },
+          pager:{
+              total: 0,
+              currentPage: 1,
+              pageSize: 20,
+          },
+          loading:false,
+          supplyCompanyList:supplyCompanyList,
+          btnDisabled: false,
+          showTitle:"",             
+        },
+        methods: {
+          number(){
+          　　this.form.maxClientNum=this.form.maxClientNum.replace(/[^\.\d]/g,'');
+              this.form.maxClientNum=this.form.maxClientNum.replace('.','');
+
+              this.form.clientCost=this.form.clientCost.replace(/[^\.\d]/g,'');
+              this.form.clientCost=this.form.clientCost.replace('.','');
+
+              this.form.fixedPhoneMonthlyRent=this.form.fixedPhoneMonthlyRent.replace(/[^\.\d]/g,'');
+              this.form.fixedPhoneMonthlyRent=this.form.fixedPhoneMonthlyRent.replace('.','');
+
+              this.form.smallMonthlyRent=this.form.smallMonthlyRent.replace(/[^\.\d]/g,'');
+              this.form.smallMonthlyRent=this.form.smallMonthlyRent.replace('.','');
+
+              this.form.callCharge=this.form.callCharge.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
+              this.form.callCharge=this.form.callCharge.replace(/^\./g, ""); //验证第一个字符是数字
+              this.form.callCharge=this.form.callCharge.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
+              this.form.callCharge=this.form.callCharge.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+              this.form.callCharge=this.form.callCharge.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数
+          },
+          textFun(){
+              this.form.packageName=this.form.packageName.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');
+              this.form.packageName=this.form.packageName.replace('.','');
+          },
+          handleSelectionChange(val) {
+              this.multipleSelection = val;
+          },
+          addbutton(){
+              this.showTitle="新增服务套餐";
+              $("#addOrUpdate").val(1);
+              this.dialogFormVisible=true;
+              if (this.$refs['form']!=undefined) {
+                  this.form.packageName = "";
+                  this.form.supplyCompany = "";
+                  this.form.supplyCompanyName = "";
+                  this.form.maxClientNum = "";
+                  this.form.clientCost = "";
+                  this.form.fixedPhoneMonthlyRent = "";
+                  this.form.smallMonthlyRent = "";
+                  this.form.callCharge = "";
+                  this.$refs['form'].resetFields();
+              }
+          },
+          closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+              if (this.$refs['customMenuForm']!=undefined) {
+                  this.$refs['customMenuForm'].resetFields();
+              }
+          },
+          handleEdit(index, row) {
+            this.showTitle="编辑服务套餐";
+            if (this.$refs['form']!=undefined) {
+              this.$refs['form'].resetFields();
+            }
+            $("#deleteId").val(row.id);
+            $("#addOrUpdate").val(2);
+            var param = {};
+            param.id = row.id;
+            axios.post('/merchant/outboundPackage/queryOutboundPackageById', param).then(function (response) {
+              if(null !==response && response.data !=null && response.data.code=='0'){
+                 // console.log(response);
+                 var formEditLayout = response.data.data;
+                 orgVM.form.id = formEditLayout.id;
+                 orgVM.form.packageName = formEditLayout.packageName;
+                 orgVM.form.supplyCompany = formEditLayout.supplyCompany;
+                 orgVM.form.maxClientNum = formEditLayout.maxClientNum;
+                 orgVM.form.clientCost = formEditLayout.clientCost;
+                 orgVM.form.fixedPhoneMonthlyRent = formEditLayout.fixedPhoneMonthlyRent;
+                 orgVM.form.smallMonthlyRent = formEditLayout.smallMonthlyRent;
+                 orgVM.form.callCharge = formEditLayout.callCharge;
+                 orgVM.form.isDel = formEditLayout.isDel;
+                 orgVM.dialogFormVisible = true;
+              }
+            }).catch(function (error) {
+              console.log(error);
+            }).then(function () {
+               // always executed
+             });
+          },
+          handleDelete(index, row) {
+            this.showTitle="提示";
+            this.dialogFormVisible1=true;
+            // console.log(index, row.id);
+            $("#deleteId").val(row.id);
+          },
+          supplierChangeSelect(selVal) {
+            console.log('selVal')
+          },
+          submitForm(formName) {
+            this.$refs[formName].validate((valid) => {
+              if (valid) {
+                var formData = this.form;
+                var param={};
+                param.packageName = formData.packageName;
+                param.supplyCompany = formData.supplyCompany;     
+                param.maxClientNum = formData.maxClientNum;          
+                param.clientCost = formData.clientCost;
+                param.fixedPhoneMonthlyRent = formData.fixedPhoneMonthlyRent; 
+                param.smallMonthlyRent = formData.smallMonthlyRent;  
+                param.callCharge = formData.callCharge;
+                if($("#addOrUpdate").val() ==2){
+                  param.id = $("#deleteId").val() || '';
+                }
+                
+                this.btnDisabled = true;
+                var url = $("#addOrUpdate").val() ==2 ? '/merchant/outboundPackage/updateOutboundPackage': '/merchant/outboundPackage/addOutboundPackage';
+                axios.post(url,param).then(function (response) {
+                  //   console.log(response);
+                    if(null !==response && response.data !=null && response.data.code=='0'){
+                        orgVM.btnDisabled = false; 
+                        window.location.href="/merchant/outboundPackage/index"; 
+                   }else{
+                         orgVM.$message({message: response.data.msg, type: 'warning'});
+                         orgVM.btnDisabled = false; 
+                        return ;
+                   } 
+                }).catch(function (error) {
+                       console.log(error);
+                       orgVM.btnDisabled = false; 
+                   })
+                   .then(function () {
+                     // always executed
+                   }); 
+              } else {
+                  console.log('error submit!!');
+                  return false;
+              }
+            });
+          },
+          submitFormDelete(formName) {
+            console.log('delete');
+            var param = {};
+            var arr = [];
+            arr.push($("#deleteId").val());
+            param.idList = arr;
+            axios.post('/merchant/outboundPackage/deleteOutboundPackage',param).then(function (response) {
+              if(null===response||response.data==null||response.data.code!='0'){
+                  orgVM.$message({message: response.data.msg, type: 'warning'});
+                  return ;
+               }else{
+                  orgVM.$message({message: "删除成功", type: 'success'});
+                  orgVM.dialogFormVisible1=false;
+                  window.location.href="/merchant/outboundPackage/index";  
+               } 
+            }).catch(function (error) {
+              console.log(error);
+            });
+          },
+          initListData() {
+            var param = {}; 
+            var pageSize = this.pager.pageSize;
+            var pageNum = this.pager.currentPage;
+            param.pageNum = pageNum;
+            param.pageSize = pageSize;
+           
+            axios.post('/merchant/outboundPackage/listOutboundPackagePage',param).then(function (response) {
+                // console.log(response);
+              if(null===response||response.data==null||response.data.code!='0'){
+                  orgVM.$message({message: response.data.msg, type: 'warning'});
+                  return ;
+               }else{
+                 orgVM.dataTable =response.data.data.data; 
+                 orgVM.pager.currentPage= response.data.data.currentPage;
+                 orgVM.pager.total= response.data.data.total;
+               } 
+            })
+            .catch(function (error) {
+              console.log(error);
+            }); 
+          },
+        
+        },
+        created(){
+          // 取页数存储
+          // var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+          // if(localVal){this.pager.pageSize = localVal;}
+
+          this.initListData();
+          document.getElementById('organizationManage').style.display = 'block';
+        },//created方法 结束
+        mounted(){
+            document.getElementById('organizationManage').style.display = 'block';
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+<head th:include="_header_include::frag(~{::title},~{::link},~{})">
+    <title>通话记录</title>
+    <link th:href="@{'/font-awesome-4.7.0/css/font-awesome.css'}" rel="stylesheet">
+    <!-- <link th:href="@{'/css/custom/callrecord/simpleAudio.css'}" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/css/common/merchant_base.css">
+</head>
+<style>
+    .call-menu {
+        float: left;
+        display: inline;
+        background: linear-gradient(90deg, rgba(198, 205, 222, 1), rgba(188, 196, 214, 1));
+        border-radius: 4px;
+    }
+
+    .el-button {
+        background: none;
+        color: #FFFFFF;
+        border-radius: 0;
+    }
+
+    .call-menu .el-button:hover {
+        background: #FFFFFF;
+        color: #4B80FF;
+    }
+
+    .call-search-box {
+        margin-bottom: 0;
+    }
+
+    .el-button.call-button-active {
+        background: #FFFFFF;
+        color: #4B80FF;
+    }
+
+    .callLogBox {
+        margin-top: 30px;
+    }
+
+    .call-time-long {
+        color: #4E82FF;
+    }
+
+    .mainSearchFormBox {
+        border-radius: 0px 8px 8px 8px;
+    }
+
+    .call-menu {
+        border-radius: 4px 4px 0px 0px;
+        margin-top: 2px;
+    }
+
+    .call-menu .el-button:first-child {
+        border-radius: 4px 0px 0px 0px;
+    }
+
+    .call-menu .el-button:last-child {
+        border-radius: 0px 4px 0px 0px;
+    }
+
+    .call-menu .el-button:first-child.call-button-active {
+        border-radius: 4px 0px 0px 0px;
+    }
+
+    .call-menu .el-button:last-child.call-button-active {
+        border-radius: 0px 4px 0px 0px;
+    }
+</style>
+
+<body>
+    <div id="myCallRecordVm" class="optimizeClueManagement mainPadding" style="display:none">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+            <el-breadcrumb-item>通话记录</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="marginB20 call-search-box">
+            <div class="call-menu">
+                <el-button @click="searchYesterday" :class="{'call-button-active':isActive1}">昨天</el-button>
+                <el-button @click="searchWeek" :class="{'call-button-active':isActive2}">近七天</el-button>
+                <el-button @click="searchMonth" :class="{'call-button-active':isActive3}">本月</el-button>
+            </div>
+        </el-row>
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="searchForm" ref="searchForm">
+                    <div class="main-search-box">
+                        <el-form-item label="客户姓名:" prop="customerName">
+                            <el-input placeholder="客户姓名" v-model="searchForm.customerName"></el-input>
+                        </el-form-item>
+                        <div class="get-search-time">
+                            <div class="get-time">通话时间段:</div>
+                            <div class="time-style" :class="{'selectActive':colorStatus}">
+                                <el-form-item prop="startTime">
+                                    <el-date-picker v-model="searchForm.startTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始日期"
+                                        value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
+                                    </el-date-picker>
+                                </el-form-item>
+                                <el-form-item label="—" class="widthauto" prop="endTime">
+                                    <el-date-picker v-model="searchForm.endTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择结束日期"
+                                        value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
+                                    </el-date-picker>
+                                </el-form-item>
+                            </div>
+                        </div>
+                        <el-form-item label="外呼账户:" prop="accountIdLista">
+                            <el-select v-model="searchForm.accountIdLista" placeholder="外呼账户" value-key="id"
+                                filterable clearable>
+                                <el-option v-for="item in merchantUserList" :key="item.id" :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="接通状态:" prop="callStatus">
+                            <el-select v-model="searchForm.callStatus" placeholder="接通状态" value-key="value" clearable>
+                                <el-option v-for="item in callStatus" :key="item.value" :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="客户电话:" prop="customerPhone">
+                            <el-input placeholder="客户电话" v-model="searchForm.customerPhone"></el-input>
+                        </el-form-item>
+                        <el-form-item label="通话类型:" prop="callType">
+                            <el-select v-model="searchForm.callType" placeholder="通话类型" value-key="value" clearable>
+                                <el-option v-for="item in callTypeList" :key="item.value" :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                    <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" @click="initCallRecordData('1')"
+                            class="searchBtn">搜索</el-button>
+                        <el-button @click="resetForm('searchForm')">重置</el-button>
+                        <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                        <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                    </div>
+                </el-form>
+            </div>
+            <div class="fs16 marginB20 callLogBox">
+                通话总时长：<span class="call-time-long" v-if="totalTalkTime">{{totalTalkTime | fomatSeconds2}}</span><span
+                    class="call-time-long" v-else>0小时0分钟0秒</span>
+                <!-- 播放器 -->
+                <audio style="top: auto;bottom: 0;" id="audio" src="" controls="controls" autoplay="autoplay"
+                    controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
+            </div>
+            <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="callRecordData">
+                <el-table-column align="center" type="index" width="55" label="序号"> </el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名" width="100" ></el-table-column>
+                <el-table-column align="center" prop="customerPhone" label="客户电话" width="100"></el-table-column>
+                <el-table-column align="center" prop="phoneLocale" label="电话归属地" ></el-table-column>
+                <el-table-column align="center" prop="hotLine" label="热线号码" width="100"></el-table-column>
+                <el-table-column align="center" prop="accountName" label="拨打账户" width="120"></el-table-column>
+                <el-table-column align="center" prop="bindPhone" label="坐席电话" width="100"></el-table-column>
+                <el-table-column align="center" prop="callType" label="通话类型" :formatter="getCallTypeText" width="90">
+                </el-table-column>
+                <el-table-column align="center" prop="startTime" label="通话时间" :formatter="getStartTimeText">
+                </el-table-column>
+                <el-table-column align="center" prop="callStatus" label="接通状态" :formatter="getCallStatusText"
+                    width="90"></el-table-column>
+                <el-table-column align="center" prop="talkTime" label="通话时长" :formatter="getTalkTimeText" width="100">
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+                        <a :id="scope.row.id"
+                            class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP"
+                            @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+                            <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
+                        </a>
+                        <!-- <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button> -->
+                        <a class="download_img"
+                            @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                    </template>
+
+                </el-table-column>
+
+            </el-table>
+            <table-pagination :pager="pager" @change="initCallRecordData"></table-pagination>
+        </div>
+    </div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var merchantUserList = [[${ merchantUserList }]];
+   //merchantUserList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
+</script>
+<!-- 当前页面的js -->
+<script th:src="@{/js/custom/callrecord/merchantTelCallRecord.js}"></script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+
+<style>
+    .fa-play-1 {
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+        background-image: url(/images/icon_play_m.png);
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+    }
+
+    .fa-stop-1 {
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+        background-image: url(/images/icon_stop_m.png);
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+    }
+
+    .download_img {
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+        background-image: url(/images/icon_download_m.png);
+        background-size: 25px 25px;
+        background-repeat: no-repeat;
+        margin-left: 10px;
+    }
+</style>
+
+</html>

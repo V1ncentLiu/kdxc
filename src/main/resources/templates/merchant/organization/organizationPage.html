@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{::style})">
+    <title>组织机构管理</title>
+    <style>
+        .organizationManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;background: #fff;}
+        .organizationManage .leftTitle{background:#c0defc;text-indent: 20px;height: 40px;line-height: 40px;}
+        .organizationManage .leftTree{padding:10px;}
+        .organizationManage .rightTitle{background:#c0defc;padding-left: 20px;height: 40px;line-height: 40px;}
+        .el-dialog {width: 650px;}
+        /*20190419*/
+        .organizationManage .leftTitle, .organizationManage .rightTitle { color: #ffffff; background-color: #5c6be8; border-color: #5c6be8;border-top-left-radius: 4px;border-top-right-radius: 4px; }
+        .el-message-box__btns{text-align: center;}
+        .input-with-select{margin: 0 auto;text-align: center;padding-top: 10px;}
+        .leftBox .input-with-select .el-input__inner{width: 85%;}
+    </style>
+</head>
+<body>
+<div id="organizationManage" class="organizationManage mainPadding" style="display:none">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>组织机构管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row :gutter="20">
+        <el-col :span="5">
+            <div class="leftBox">
+                <div class="leftTitle fs16">组织机构列表</div>
+                <el-input placeholder="按照组织名称进行查询" class="input-with-select" v-model="searchOrgName"></el-input>
+                <el-tree
+                    :data="dataTree"              
+                    node-key="id"
+                    :default-expanded-keys="expandedKeys"
+                    ref="tree"
+                    highlight-current
+                    :expand-on-click-node=false
+                    @node-click="clickOrgNode"
+                    @selection-change="handleSelectionChange"
+                    :filter-node-method="filterNode"
+                    class="leftTree">
+                </el-tree>
+            </div>            
+        </el-col>
+        <el-col :span="19">
+            <el-row class="marginB20">
+                <el-col :span="17">
+                  <shiro:hasPermission name="organization:add">
+                    <el-button type="primary" @click="addChildOrg"><i class="el-icon-plus"></i>添加下一级组织</el-button>
+                 </shiro:hasPermission>
+                  <shiro:hasPermission name="organization:edit">
+                    <el-button type="success" @click="modifyChildOrg"><i class="el-icon-edit"></i>修改</el-button>
+                    </shiro:hasPermission>
+                     <shiro:hasPermission name="organization:delete">
+                    <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+                    </shiro:hasPermission>
+                </el-col>
+                <el-col :span="7">
+                    <el-input placeholder="按照组织名称进行查询" class="input-with-select" v-model="inputOrgName">                        
+                    <el-button slot="append" icon="el-icon-search" @click="getQuery">搜索</el-button>
+                    </el-input>
+                </el-col>
+            </el-row>
+            <el-row class="rightTitle fs16"> {{form2.parentName}} 下一级组织</el-row>
+            <div class="mainSearchBg">
+                <el-row>
+                    <el-table 
+                        ref="multipleTable"
+                        tooltip-effect="dark"
+                        empty-text="当前组织无下级组织"
+                        style="width: 100%"
+                        @selection-change="handleSelectionChange"
+                        border
+                        :data="dataTable" 
+                        >
+                        <el-table-column align="center" type="selection" width="55"></el-table-column> 
+                         <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                        <el-table-column align="center" prop="name" label="组织名称"></el-table-column>
+                        <el-table-column align="center" prop="staffNum" label="组内成员（人）">
+                        
+                        <template slot-scope="scope" v-if="scope.row.staffNum!=0">
+          				        <el-button type="text" @click="openStaffNumTable(scope.row.id)">{{ scope.row.staffNum }}</el-button>
+          				        
+          				      </template>
+    				      
+    				            <template slot-scope="scope">
+                          <el-button v-if="scope.row.staffNum!=0" type="text" @click="openStaffNumTable(scope.row.id)">{{ scope.row.staffNum }}</el-button>
+                          <span v-else>0</span>
+                        </template>
+                           
+    				   
+                        </el-table-column>
+                        <el-table-column align="center" prop="remark" label="备注"></el-table-column>
+                    </el-table>
+                    <table-pagination :pager="pager" @change="getQuery"></table-pagination>
+                </el-row>
+            </div>
+        </el-col>
+    </el-row>
+    <!-- dialog -->
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddOrgDialog">
+        <el-form :model="form"  ref="ruleForm" :rules="rules">
+            <el-form-item label="上级组织：" :label-width="formLabelWidth" prop="parentName">
+                   {{form2.parentName}}
+            </el-form-item> 
+            <el-form-item label="组织名称：" :label-width="formLabelWidth" prop="name">
+                <el-input v-model="form.name" autocomplete="off" maxlength="30"   placeholder="组织名称" style="width: 90%;"></el-input>
+            </el-form-item>
+            
+               <el-form-item label="部门类型：" :label-width="formLabelWidth" prop="orgType">
+                   <el-select v-model="form.orgType"  value-key="value" clearable placeholder="请选择" style="width: 90%;">
+                       <el-option
+                           v-for="item in orgTypeList"
+                           :key="item.id"
+                           :label="item.name"
+                           :value="item.value">
+                       </el-option>
+                   </el-select>
+               </el-form-item>
+               
+               <el-form-item label="所属业务线：" :label-width="formLabelWidth" prop="businessLine">
+                   <el-select v-model="form.businessLine"  value-key="value" clearable placeholder="请选择" style="width: 90%;" 
+                   :disabled="businessLineDisabledSelect">
+                       <el-option
+                           v-for="item in businessLineList"
+                           :key="item.id"
+                           :label="item.name"
+                           :value="item.value">
+                       </el-option>
+                   </el-select>
+               </el-form-item>
+            
+            <el-form-item label="组织备注：" :label-width="formLabelWidth" prop="remark">
+                <el-input
+                      type="textarea"
+                      :rows="4"
+                      maxlength="200"
+                      placeholder="填写备注信息,最大200字符"
+                      style="width: 90%;"
+                      v-model="form.remark">
+                </el-input>
+                <!-- <p>200字</p> -->
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" @click="submitForm('ruleForm')" :disabled="btnDisabled">确 定</el-button>
+            <el-button @click="cancelForm('ruleForm')">取 消</el-button>            
+        </div>
+    </el-dialog>
+    
+    
+    <el-dialog title="组内成员" :visible.sync="dialogStaffNumVisible" @close="closeStaffNumDialog" width="870px">
+        <el-row>
+		 <el-form :inline="true" :model="staffNumSearch" class="demo-form-inline" ref="staffNumSearch"> 
+		      <el-form-item label="" prop="name">
+                  <el-input v-model="staffNumSearch.name" placeholder="姓名"></el-input> 
+              </el-form-item> 
+               <el-form-item label="" prop="username"> 
+                 <el-input v-model="staffNumSearch.username" placeholder="登录名"></el-input> 
+              </el-form-item>
+               <el-form-item label="" prop="phone"> 
+                 <el-input v-model="staffNumSearch.phone" placeholder="手机号"></el-input> 
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="initStaffNumTable">搜索</el-button> 
+              </el-form-item> 
+         </el-form>
+        </el-row>
+             <el-row>
+                <el-table 
+                    ref="staffNumTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="staffNumTable" 
+                    >
+                     <el-table-column align="center" type="index" width="80" label="序号"></el-table-column>
+                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                    <el-table-column align="center" prop="name" label="姓名"></el-table-column>
+                    <el-table-column align="center" prop="username" label="登录名"></el-table-column>
+                    <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+                    <el-table-column align="center" prop="roleName" label="所属角色"></el-table-column>
+                   
+                </el-table>
+                 <table-pagination :pager="pagerStaffNum" @change="initStaffNumTable"></table-pagination>
+            </el-row>
+         
+         
+      </el-dialog>
+    
+    
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var orgData=[[${orgData}]];
+    var orgTypeList = [[${orgTypeList}]];
+    var businessLineList = [[${businessLineList}]];
+    
+    var expandedKeys =[];//默认展开节点
+    for(var i=0;i<orgData.length;i++){
+    	var curNode = orgData[i];
+    	expandedKeys.push(curNode.id);
+    	var childs = curNode.children;
+    	if(childs){
+    		for(var j=0;j<childs.length;j++){
+    			var curChildNode = childs[j];
+    			expandedKeys.push(curChildNode.id);
+    		}
+    	}
+    	
+    }
+    
+</script>
+<script th:src="@{/js/custom/organization/merchantOrganization.js?v=1.0.5}"></script>
+</html>

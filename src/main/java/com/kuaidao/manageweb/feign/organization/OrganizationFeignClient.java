@@ -166,6 +166,14 @@ public interface OrganizationFeignClient {
     public JSONResult<List<TreeData>> listOrgTreeDataByParentId(
             @RequestBody IdEntityLong idEntityLong);
 
+    /**
+     * 查询组织机构 树
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/queryList")
+    JSONResult<List<TreeData>> queryList(@RequestBody OrganizationQueryDTO reqDto);
     @Component
     static class HystrixClientFallback implements OrganizationFeignClient {
 
@@ -272,6 +280,11 @@ public interface OrganizationFeignClient {
         @Override
         public JSONResult<List<TreeData>> listOrgTreeDataByParentId(IdEntityLong idEntityLong) {
             return fallBackError("根据父级id 查询 它的组织机构树");
+        }
+
+        @Override
+        public JSONResult<List<TreeData>> queryList(OrganizationQueryDTO reqDto) {
+            return fallBackError("查询组织机构");
         }
     }
 
