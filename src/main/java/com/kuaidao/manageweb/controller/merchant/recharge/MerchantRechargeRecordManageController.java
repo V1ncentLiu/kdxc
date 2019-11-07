@@ -121,7 +121,7 @@ public class MerchantRechargeRecordManageController {
     request.setAttribute("ossUrl",ossUrl);
     String token = UUID.randomUUID().toString();
     //随机生成token放入Redis
-    redisTemplate.opsForValue().set(user.getId().toString(),token);
+    //redisTemplate.opsForValue().set(user.getId().toString(),token);
     request.setAttribute("token",token);
     return "merchant/rechargeRecord/rechargePaymentOffline";
   }
@@ -140,15 +140,15 @@ public class MerchantRechargeRecordManageController {
     UserInfoDTO user = CommUtil.getCurLoginUser();
     try {
       //判断是否重复提交
-      if (!isSubmit(req,user)) {
-        return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"请不要重复提交");
-      }
+//      if (!isSubmit(req,user)) {
+//        return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"请不要重复提交");
+//      }
       req.setCreateUser(user.getId());
       JSONResult<Boolean> list = merchantRechargeRecordManageFeignClient.saveOfflinePayment(req);
       return list;
     }catch (Exception e){
       logger.error("录入线下付款信息:{}",e);
-      redisTemplate.opsForValue().set(user.getId().toString(),req.getToken());
+      //redisTemplate.opsForValue().set(user.getId().toString(),req.getToken());
       return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"录入线下付款信息接口异常");
     }
   }
