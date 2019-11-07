@@ -172,6 +172,10 @@ public class CallRecordController {
         if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
             request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(BusinessLineConstant.XIAOWUZHONG));
         }
+        //监察-查询业务线对应下的电销组
+        if(RoleCodeEnum.JC.name().equals(roleCode)){
+            request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(curLoginUser.getBusinessLine()));
+        }
 
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
@@ -388,6 +392,19 @@ public class CallRecordController {
                    List<Long> idList=new ArrayList<>();
                    if(userJr.getData()!=null && !userJr.getData().isEmpty()){
                         idList = userJr.getData().parallelStream().map(user -> user.getId())
+                               .collect(Collectors.toList());
+                   }
+                   myCallRecordReqDTO.setAccountIdList(idList);
+               }else if(RoleCodeEnum.JC.name().equals(roleCode)){
+                   //监察角色查看该业务线下所有的通话记录
+                   //总裁办文员
+                   UserOrgRoleReq req = new UserOrgRoleReq();
+                   req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                   req.setBusinessLine(curLoginUser.getBusinessLine());
+                   JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                   List<Long> idList=new ArrayList<>();
+                   if(userJr.getData()!=null && !userJr.getData().isEmpty()){
+                       idList = userJr.getData().parallelStream().map(user -> user.getId())
                                .collect(Collectors.toList());
                    }
                    myCallRecordReqDTO.setAccountIdList(idList);

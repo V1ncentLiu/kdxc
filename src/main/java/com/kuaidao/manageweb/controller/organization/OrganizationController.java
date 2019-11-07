@@ -85,14 +85,16 @@ public class OrganizationController {
         String roleCode = roleInfoDTO.getRoleCode();
         // JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         JSONResult<List<TreeData>> treeJsonRes = null;
+        OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
+        reqDto.setSource(1);
         if (RoleCodeEnum.GLY.name().equals(roleCode)) {
             // 管理员
-            treeJsonRes = organizationFeignClient.query();
+            treeJsonRes = organizationFeignClient.queryList(reqDto);
         } else {
             // 业务管理员
             Long orgId = curLoginUser.getOrgId();
-            OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
             reqDto.setParentId(orgId);
+
             treeJsonRes = organizationFeignClient.queryByOrg(reqDto);
         }
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
@@ -297,18 +299,17 @@ public class OrganizationController {
      */
     @PostMapping("/query")
     @ResponseBody
-    public JSONResult<List<TreeData>> query() {
+    public JSONResult<List<TreeData>> query(@RequestBody OrganizationQueryDTO reqDto) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
 
         RoleInfoDTO roleInfoDTO = curLoginUser.getRoleList().get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         if (RoleCodeEnum.GLY.name().equals(roleCode)) {
             // 管理员
-            return organizationFeignClient.query();
+            return organizationFeignClient.queryList(reqDto);
         } else {
             // 业务管理员
             Long orgId = curLoginUser.getOrgId();
-            OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
             reqDto.setParentId(orgId);
             return organizationFeignClient.queryByOrg(reqDto);
         }

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
+    <title>首页</title>
+    <link rel="stylesheet" th:href="@{/css/custom/cheranthomepage/home.css}">
+    <style>
+
+    </style>
+</head>
+
+<body>
+
+    <div id="merchantHome" style="display: none;">
+        <!-- 主账户会显示 -->
+        <div class="fatherShow" v-if="fatherShow===2">
+            <el-row type="flex" class="row-bg marginB20" justify="start">
+                <el-col :span="12">
+                    <div class="name">
+                        <b><span class="first">{{merchantName}}</span><span class="last">, 您好:</span></b>
+                        <p v-if="buyedFlag" class="noMonth">
+                            <b>您已购买{{packageName}}套餐</b>
+                            <el-button class="titleButton" type="primary" @click="buyCloud">查看已购买服务</el-button>
+                        </p>
+                        <p v-else class="noMonth">
+                            <b>您还没有购买任何套餐</b>
+                            <el-button class="titleButton" type="primary" @click="buyCloud">购买云服务</el-button>
+                        </p>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="name">
+                        <b><span class="last">账户余额：</span></b>
+                        <p class="noMonth">
+                            <b class="noMonthmoney" v-if="countBlance">{{countBlance}}.00</b>
+                            <b class="noMonthmoney" v-else>0.00</b>
+                            <el-button class="titleButton" type="primary" @click="immediateRecharge">立即充值</el-button>
+                        </p>
+                    </div>
+                    <!-- <div class="name money">
+                        <div class="difference">
+                            <img th:src="@{/images/merchantmoney.png}" alt="">
+                            <span>{{countBlance}}</span>
+                        </div>
+                        <p class="balance">账户余额</p>
+                        <p>
+                            <el-button @click="immediateRecharge" class="titleButton" type="primary">立即充值</el-button>
+                        </p>
+                    </div> -->
+                </el-col>
+            </el-row>
+        </div>
+        <!-- 根据日期筛选 -->
+        <div class="homeTime">
+            <el-row :gutter="20">
+                <el-col :span="7" style="width: 320px">
+                    <span @click="timeClick(0)" class="time" :class="{active:showButton===0} ">昨天</span>
+                    <span @click="timeClick(1)" class="time" :class="{active:showButton===1}">近7天</span>
+                    <span @click="timeClick(2)" class="time" :class="{active:showButton===2}">近30天</span>
+                </el-col>
+                <el-col :span="9" style="width: 458px">
+                    <div class="dateTime">
+                        <b>日期</b>
+                        <el-date-picker v-model="from.startTime" type="datetime" placeholder=" 请选择时间"
+                            @change="inputBlur(1)">
+                        </el-date-picker>
+                        <span>&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+                        <el-date-picker v-model="from.endTime" type="datetime" placeholder=" 请选择时间"
+                            @change="inputBlur(2)">
+                        </el-date-picker>
+                    </div>
+                </el-col>
+                <el-col :span="5" style="width: 215px">
+                    <div class="grain">
+                        <b>颗粒度</b>
+                        <el-select v-model="from.selectValue" placeholder="" style="width: 110px;">
+                            <el-option v-for="item in options" :key="item.value" :label="item.label"
+                                :disabled="item.disabled" :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </div>
+                </el-col>
+                <el-col :span="2">
+                    <el-button class="query" @click="submitQuery" type="primary">查询</el-button>
+                    <!-- <div class="query" @click="submitQuery">查询</div> -->
+                </el-col>
+        </div>
+        <!-- 获取资源 -->
+        <div class="resources">
+            <el-row type="flex" class="row-bg">
+                <el-col :span="8">
+                    <div class="content">
+                        <div class="top">
+                            <img th:src="@{/images/today.png}" alt="">
+                            <span>今日获取资源</span>
+                        </div>
+                        <p>{{countSources.dayCount}}</p>
+                    </div>
+                </el-col>
+                <el-col :span="8">
+                    <div class="content">
+                        <div class="top">
+                            <img th:src="@{/images/month.png}" alt="">
+                            <span>本月获取资源</span>
+                        </div>
+                        <p>{{countSources.monthCount}}</p>
+                    </div>
+                </el-col>
+                <el-col :span="8">
+                    <div class="content other">
+                        <div class="top">
+                            <img th:src="@{/images/cumulative.png}" alt="">
+                            <span>累计获取资源数</span>
+                        </div>
+                        <p>{{countSources.allCount}}</p>
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+        <div class="textContent">资源获取量</div>
+        <!-- 曲线图 -->
+        <div id="resourceMap" style="width: 100%;height:415px;background: #ffffff;"></div>
+    </div>
+
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
+    <script th:src="@{/js/common/echarts.min.js}"></script>
+    <script type="text/javascript" src="/js/common/commonMethod.js"></script>
+    <script th:inline="javascript">
+        var countBlance = [[${ countBlance }]];
+        var buyedFlag = [[${ buyedFlag }]];
+        var userType = [[${ userType }]];
+        var merchantName = [[${ merchantName }]];
+        var packageName = [[${ packageName }]];
+        var countSources = [[${ countSources }]];
+        var merchantHomeDivVM = new Vue({
+            el: '#merchantHome',
+            data: {
+                from: {
+                    startTime: '',
+                    endTime: new Date,
+                    selectValue: '',
+                },
+                myChart: '',
+                fatherShow: userType,//userType
+                merchantName: merchantName,
+                countBlance: countBlance,
+                packageName:packageName,
+                buyedFlag: buyedFlag,
+                showButton: 1,
+                options: '',
+                defaultValue: '',
+                // 今日获取资源
+                countSources: countSources,
+                // 指定图表的配置项和数据
+                option: {
+                    title: {
+                        text: '',
+                    },
+                    grid: {
+                        left: '70',
+                        right: '70'
+                    },
+                    tooltip: {
+                        formatter: function (param) {
+                            return '<div style=""> ' + param.value
+                            '</div>';
+                        },
+                        backgroundColor: ['#fff'],
+                        borderRadius: 6,
+                        textStyle: {
+                            color: '#000'
+                        },
+                        extraCssText: 'width:149px;height:65px;text-align:center;line-height:65px;font-size:30px;box-shadow:9px 6px 29px 0px rgba(93,93,234,0.14);'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: ['#f4f3f3'],
+                                fontSize: 15,
+                            },
+                        },
+                        // axisTick: { // X轴线 刻度线
+                        //     show: true,
+                        //     length: 10,
+                        //     lineStyle: {
+                        //         color: 'red',
+                        //         type: 'solid',
+                        //         width: 2
+                        //     }
+                        // },
+                        axisLine: {
+                            show: true, // x轴线
+                            // length: 10,
+                            lineStyle: {
+                                color: ['#ecebeb'],
+                                // width: 2
+                            }
+                        },
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: ['#294366'],
+                                fontSize: 15,
+                            }
+                        },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: ['#f4f3f3'],
+                                fontSize: 15,
+                            },
+                        },
+                        axisLabel: {
+                            show: true,
+                            textStyle: {
+                                color: ['#294366'],
+                                fontSize: 15,
+                            }
+                        },
+                        axisLine: {
+                            show: true, // Y轴线
+                            lineStyle: {
+                                color: ['#ecebeb']
+                            }
+                        },
+                    },
+                    series: [{
+                        // symbol:'circle',
+                        data: [0, 1, 2, 3, 4, 5, 6],
+                        // data: [820, 932, 901, 934, 1290, 1330, 1320],
+                        type: 'line',
+                        areaStyle: {},
+                        smooth: true,
+
+                        itemStyle: {
+                            normal: {
+                                areaStyle: {
+                                    type: 'default',
+                                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1,//变化度
+                                        //三种由深及浅的颜色
+                                        [{
+                                            offset: 0,
+                                            color: '#769DF8'
+                                        }, {
+                                            offset: 0.5,
+                                            color: '#769DF8'
+                                        }, {
+                                            offset: 1,
+                                            color: '#fff'
+                                        }]),
+
+                                },
+                                color: '#4B80FF',
+                                lineStyle: {
+                                    color: '#3c85f4'
+                                },
+                                label: {
+                                    show: true,
+                                    position: 'top',
+                                    textStyle: {
+                                        color: '#294366',
+                                        fontSize: 14
+                                    }
+                                }
+                            }
+                        }
+
+                    }]
+                }
+            },
+            methods: {
+                initEcharts(id) {
+                    this.myChart = echarts.init(document.getElementById(id));
+
+                    this.myChart.setOption(this.option);
+                },
+                // 时间选择联动
+                inputBlur(data) {
+                    var yesterday = 24 * 60 * 60 * 1000;
+                    var thanTwo = 24 * 2 * 60 * 60 * 1000;
+                    var thanThirty = 30 * 24 * 60 * 60 * 1000;
+                    var thanSeven = 7 * 24 * 60 * 60 * 1000;
+                    var yearTime = 365 * 24 * 60 * 60 * 1000;
+                    var timeDifference = this.from.endTime.getTime() - this.from.startTime.getTime()
+                    switch (data) {
+                        case 1:
+                            if (parseInt(this.from.startTime.getTime() / 1000) == parseInt(new Date().getTime() / 1000)) {
+                                this.showButton = null
+                                this.from.endTime = this.from.startTime
+                            } else if (this.from.startTime > new Date || this.from.endTime - this.from.startTime >= yearTime) {
+                                this.$message({
+                                    message: '请正确选择时间',
+                                    type: 'warning'
+                                });
+                                this.from.startTime = new Date
+                                this.from.endTime = new Date
+                                this.showButton = null
+                            }
+                            break;
+                        case 2:
+                            if (this.from.endTime < this.from.startTime || this.from.endTime > new Date || this.from.endTime - this.from.startTime >= yearTime) {
+                                this.$message({
+                                    message: '请正确选择时间',
+                                    type: 'warning'
+                                });
+                                this.from.endTime = new Date
+                                var newtimeDifference = this.from.endTime.getTime() - this.from.startTime.getTime()
+                                if (newtimeDifference < yesterday) {
+                                    this.showButton = null
+                                    this.isProhibit(false, false, true, true, '天')
+                                } else if (newtimeDifference >= yesterday && newtimeDifference < thanTwo) {
+                                    this.showButton = 0
+                                    this.isProhibit(false, true, true, true, '小时')
+                                } else if (newtimeDifference >= thanTwo && newtimeDifference < thanSeven) {
+                                    this.showButton = 1
+                                    this.isProhibit(true, false, false, true, '天')
+                                } else if (newtimeDifference >= thanSeven && newtimeDifference <= thanThirty) {
+                                    this.showButton = 2
+                                    this.isProhibit(false, false, false, true, '天')
+                                } else if (newtimeDifference > thanThirty) {
+                                    this.showButton = null
+                                    this.isProhibit(true, true, false, false, '月')
+                                }
+                                return
+                            }
+                            break;
+                        default: return ''
+                    }
+                    if (timeDifference < yesterday) {
+                        this.showButton = null
+                        this.isProhibit(false, true, true, true, '小时')
+                    } else if (timeDifference >= yesterday && timeDifference < thanTwo) {
+                        this.showButton = 0
+                        this.isProhibit(false, true, true, true, '小时')
+                    } else if (timeDifference >= thanTwo && timeDifference < thanSeven) {
+                        this.showButton = 1
+                        this.isProhibit(true, false, false, true, '天')
+                    } else if (timeDifference >= thanSeven && timeDifference <= thanThirty) {
+                        this.showButton = 2
+                        this.isProhibit(false, false, false, true, '天')
+                    } else if (timeDifference > thanThirty) {
+                        this.showButton = null
+                        this.isProhibit(true, true, false, false, '月')
+                    }
+                },
+
+                // 立即充值
+                immediateRecharge() {
+                    // document.location.href = '/merchant/merchantOnlineRecharge/initOnlineRecharge';
+                    window.parent.parent.openPaymentOnline();
+                },
+
+                // 日期选择
+                timeClick(data) {
+                    this.showButton = data
+                    if (data === 0) {
+                        this.isProhibit(false, true, true, true, '小时')
+
+                        var today = new Date();
+                        today.setHours(0);
+                        today.setMinutes(0);
+                        today.setSeconds(0);
+                        today.setMilliseconds(0);
+                        var oneday = 1000 * 60 * 60 * 24;
+                        // 昨天
+                        var yesterday = new Date(today - oneday);
+                        this.from.startTime = yesterday
+                        this.from.endTime = new Date(today - 1000)
+                    } else if (data === 1) {
+                        this.isProhibit(true, false, false, true, '天')
+                        this.daysAge(6)
+                        this.from.endTime = new Date
+
+                    } else if (data === 2) {
+                        this.isProhibit(true, false, false, true, '天')
+                        this.daysAge(29)
+                        this.from.endTime = new Date
+
+                    }
+                },
+
+                // 查询
+                submitQuery() {
+                    this.axiosData()
+                },
+
+                // 处理时间
+                daysAge(day) {
+                    var newDate = new Date().getTime()
+                    var Date7 = new Date(newDate - (24 * day) * 60 * 60 * 1000);
+                    Date7.setHours(0);
+                    Date7.setMinutes(0);
+                    Date7.setSeconds(0);
+                    Date7.setMilliseconds(0);
+                    this.from.startTime = Date7
+                    // 几天之前
+                },
+
+                // 判断选择框是否禁用
+                isProhibit(hour, day, week, month, defaultValue) {
+                    this.from.selectValue = defaultValue
+                    this.options = [{
+                        value: 'hour',
+                        label: '小时',
+                        disabled: hour
+                    }, {
+                        value: 'day',
+                        label: '天',
+                        disabled: day
+                    }, {
+                        value: 'week',
+                        label: '周',
+                        disabled: week
+                    }, {
+                        value: 'month',
+                        label: '月',
+                        disabled: month
+                    }]
+                },
+
+                //请求时间接口数据
+                axiosData() {
+                    var that = this
+                    var param = {};
+                    // 按钮字段判断
+                    switch (this.showButton) {
+                        case 0:
+                            param.qflag = '1'
+                            break;
+                        case 1:
+                            param.qflag = '7'
+                            break;
+                        case 2:
+                            param.qflag = '30'
+                            break;
+                        default:
+                            param.qflag = ''
+                    }
+                    param.stime = this.from.startTime.getTime()
+                    param.etime = this.from.endTime.getTime()
+                    // 年月日判断
+                    if (!this.from.selectValue) {
+                        param.dimension = 'day'
+                    } else if (this.from.selectValue === '天') {
+                        param.dimension = 'day'
+                    } else if (this.from.selectValue === '月') {
+                        param.dimension = 'week'
+                    } else if (this.from.selectValue === '小时') {
+                        param.dimension = "hour"
+                    } else {
+                        param.dimension = this.from.selectValue
+                    }
+                    axios.post('/mhomePage/receiveStatics', param)
+                        .then(function (response) {
+                            that.option.xAxis.data = response.data.data.xlist
+                            that.option.series[0].data = response.data.data.ylist
+                            that.myChart.setOption(that.option, true)
+                        })
+                        .catch(function (error) {
+                            that.$message.error(error);
+                        });
+                },
+                buyCloud() {// 购买云服务
+                    window.location.href = "/merchant/call/package/index"
+                }
+            },
+            created() {
+                this.daysAge(6)
+                this.axiosData()
+                this.isProhibit(true, false, false, true, '天')
+            },
+            mounted() {
+                document.getElementById('merchantHome').style.display = 'block';
+                this.$nextTick(function () {
+                    this.initEcharts("resourceMap");
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

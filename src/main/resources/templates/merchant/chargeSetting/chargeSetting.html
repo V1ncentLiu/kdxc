@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        html,body{background: #eff3f6}
+        .titleLine{border-bottom: 1px solid #ecedf2;font-size: 16px;padding-bottom: 10px;padding-left: 10px;margin-bottom: 10px;}
+        .headerBox{width: 150px;height: 150px;border-radius: 50%;overflow: hidden;margin-bottom: 10px;border:1px solid #ecedf2;}
+        .headerBox img{width: 150px;height: 150px;border-radius: 50%;}
+        .changeHeaderImg{width: 150px;}
+    </style>
+</head>
+<body>
+<div id="resourceApply" class="resourceApply mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>充值优惠设置</el-breadcrumb-item>
+    </el-breadcrumb>     
+    <el-row class="borderbox padding20">         
+        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" :inline="true">
+            <div class="clearFix marginB20">
+                充值送金额：<el-button type="primary" @click="addDomain" :disabled="addIsDisabled"><i class="el-icon-plus"></i>新建优惠档</el-button>
+                <el-button type="success" class="f-fr" @click="editDomain" :disabled="editIsDisabled"><i class="el-icon-edit"></i>编辑</el-button>
+            </div>
+            <el-row v-for="(domain, index) in dynamicValidateForm.domains">
+                <el-form-item
+                :label="'充值'"
+                :prop="'domains.' + index + '.rechargeAmount'"
+                :rules="[
+                    { required: true, message: '充值信息不能为空', trigger: 'blur' },
+                    { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }
+                ]"
+                >
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                </el-form-item>
+                <el-form-item
+                :label="'送'"
+                :prop="'domains.' + index + '.givenAmount'"
+                :rules="[
+                    { required: true, message: '赠送信息不能为空', trigger: 'blur' },
+                    { pattern: /^\+?[1-9][0-9]*$/, message: '赠送信息仅可输入正整数', trigger: 'blur,change' }
+                ]"
+                >
+                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
+                </el-form-item>
+                <el-form-item
+                :label="'总得'"
+                :prop="'domains.' + index + '.totalAmount'">
+                    <el-input v-model="domain.totalAmount" disabled></el-input>                    
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-if="domain.isShowDel" style="margin-left: 10px;">删除</el-button>
+                </el-form-item>
+            </el-row>
+            <el-row class="f-tac">
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存设置</el-button>
+                    <el-button @click="cancel">取消</el-button>
+                </el-form-item>
+            </el-row>
+        </el-form>
+    </el-row> 
+    <input type="hidden" value="" id="hiddenVal">
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var addClueVM = new Vue({
+        el: '#resourceApply',
+        data: function() {
+            return {
+                addIsDisabled:false,
+                editIsDisabled:true,//默认不可点击
+                dynamicValidateForm: {
+                    domains: [
+                        // {
+                        //     id:'',
+                        //     rechargeAmount: '',
+                        //     givenAmount: '',
+                        //     totalAmount: '',
+                        //     isDisabled:null,
+                        //     isShowDel:null
+                        // }
+                    ]
+                }
+            }      	  
+        },
+        methods: {
+            number(){
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
+                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
+                }
+            },
+            formSigningAmountPerformance() {
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                    var aone = parseFloat(domains[i].rechargeAmount);
+                    var atwo = parseFloat(domains[i].givenAmount);
+                    if (isNaN(aone)) aone = 0
+                    if (isNaN(atwo)) atwo = 0
+                    this.dynamicValidateForm.domains[i].totalAmount = (aone + atwo) + ""
+                }                
+            },
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param={};
+                        // var param=[];
+                        // var paramObj={};
+                        // paramObj.rechargeAmount = "200";   
+                        // paramObj.givenAmount = "10";   
+                        // paramObj.totalAmount = "210";
+                        // var paramObj1={};
+                        // paramObj1.rechargeAmount = "100";   
+                        // paramObj1.givenAmount = "20";   
+                        // paramObj1.totalAmount = "120";
+                        // param.push(paramObj,paramObj1)
+
+                        var url="";
+                        var hiddenVal=$("#hiddenVal").val();
+                        var domains = this.dynamicValidateForm.domains;
+                        if(hiddenVal=="1"){
+                            var filterArr = domains.filter((item) => !item.id);
+                            param = filterArr
+                            console.log(param)
+                            url="/merchant/merchantRechargePreferential/saveBatchRechargePreferential" //批量新增保存
+                        }else{
+                            param = domains 
+                            console.log(param)
+                            url="/merchant/merchantRechargePreferential/updateBatchRechargePreferential" //批量修改保存
+                        } 
+                        console.log(url)                  
+                        console.log(param)                  
+                       
+                        axios.post(url,param).then(function (response) {
+                              console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                            }else{
+                                addClueVM.$message({
+                                     message: response.data.msg,
+                                     type: 'warning'
+                                });
+                                return ;
+                             } 
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                            // always executed
+                        });  
+
+                    } else {
+                        console.log('error submit!!');
+                    return false;
+                    }
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            cancel(){
+                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+            },
+            removeDomain(item) {    
+                this.$refs['dynamicValidateForm'].clearValidate();            
+                var index = this.dynamicValidateForm.domains.indexOf(item)
+                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
+                    // 条件改为根据后台返回的标识判断是否可编辑
+                    this.$confirm("确定要删除吗?", '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        // 查询 table 需要数据
+                        var param = {};
+                        param.id=item.id;
+                        axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
+                              console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                                // window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
+                                if(index !== -1) {
+                                    addClueVM.dynamicValidateForm.domains.splice(index, 1)
+                                }
+                                if(addClueVM.dynamicValidateForm.domains.length==0){//如果编辑的删除没了，则新建按钮可点击,编辑按钮不可点击
+                                    addClueVM.addIsDisabled=false;
+                                    addClueVM.editIsDisabled=true;
+                                }
+                                // if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
+                                //     addClueVM.$refs['dynamicValidateForm'].resetFields();
+                                // }
+                            }else{
+                                addClueVM.$message({
+                                     message: response.data.msg,
+                                     type: 'warning'
+                                });
+                                return ;
+                             } 
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                            // always executed
+                        });  
+                          
+
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });          
+                    });
+                }else{
+                    if(index !== -1) {
+                        this.dynamicValidateForm.domains.splice(index, 1)
+                    }
+                    if(!this.dynamicValidateForm.domains[index].isShowDel){//如果新增的删除没了，则编辑按钮可点击
+                        this.editIsDisabled=false;
+                    }
+                }
+            },
+            addDomain() {
+                $("#hiddenVal").val("1");
+                this.editIsDisabled=true;//新增时候禁止编辑                
+                this.dynamicValidateForm.domains.unshift({
+                    rechargeAmount: '',
+                    givenAmount: '',
+                    totalAmount: '',
+                    isDisabled:false,
+                    isShowDel:true
+                });
+            },
+            editDomain() {
+                this.addIsDisabled=true;//编辑时候禁止新增 
+                $("#hiddenVal").val("2");
+                var param ={};
+                axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        addClueVM.dynamicValidateForm.domains=result.data
+                        for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
+                            addClueVM.dynamicValidateForm.domains[i].isDisabled=false;
+                            addClueVM.dynamicValidateForm.domains[i].isShowDel=true;
+                        }
+                    }else{
+                        addClueVM.$message.error(result.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }); 
+            },
+            searchTable() {
+                var param ={};
+                axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        addClueVM.dynamicValidateForm.domains=result.data
+                        for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
+                            addClueVM.dynamicValidateForm.domains[i].isDisabled=true;
+                        }
+                        console.log(result.data)
+                        if(result.data&&result.data.length>0){
+                            addClueVM.editIsDisabled=false;
+                        }
+                    }else{
+                        addClueVM.$message.error(result.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });                
+            },
+        },
+        created(){
+            //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            //if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('resourceApply').style.display = 'block';
+        }
+  })
+</script>
+</html>

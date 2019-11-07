@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <style> 
+    </style>
+</head>
+<body>
+    <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+            <el-breadcrumb-item>资源列表</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="mainSearchFormBox" style="padding:30px 0;">
+            <el-form :model="inviteForm" :rules="rules" ref="inviteForm" class="invite-box">
+                <el-form-item label="客户姓名：" prop="cusName" :label-width="formLabelWidth">
+                    <el-input v-model="inviteForm.cusName" autocomplete="off" maxLength="10" class="input-width">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="cusNum" class="xreuired">
+                    <el-input v-model="inviteForm.cusNum" maxlength="3"
+                        onkeyup="this.value=this.value.replace(/[^\d.]/g,'');" autocomplete="off"
+                        class="input-width"></el-input>
+                </el-form-item>
+                <el-form-item label="开店区域：" :label-width="formLabelWidth" class="xreuired" prop="province">
+                    <el-select filterable v-model="inviteForm.province" placeholder="省" class="invite-area"
+                        @change="currentProvince" clearable>
+                        <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                    </el-select>
+                    <el-select filterable v-model="inviteForm.city" placeholder="市"
+                        class="invite-area invite-margin" @change="currentCity" clearable>
+                        <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name">
+                        </el-option>
+                    </el-select>
+                    <el-select filterable v-model="inviteForm.district" placeholder="区/县" class="invite-area"
+                        clearable>
+                        <el-option v-for="item in districtArr" :key="item.name" :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择接待人：" :label-width="formLabelWidth" prop="receiverId" class="xreuired">
+                    <el-select v-model="inviteForm.receiverId" placeholder="请选择" class="input-width">
+                        <el-option v-for="item in merchantUserList" :key="item.value" :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="预约来访时间：" :label-width="formLabelWidth" prop="reserveTime" class="xreuired">
+                    <el-date-picker v-model="inviteForm.reserveTime" class="input-width" type="datetime">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="考察项目：" :label-width="formLabelWidth" prop="projectId" class="xreuired">
+                    <el-select v-model="inviteForm.projectId" placeholder="" class="input-width" multiple
+                        filterable>
+                        <el-option v-for="item in  proSelect" :key="item.id" :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注：" :label-width="formLabelWidth" class="invite-top">
+                    <el-input type="textarea" v-model="inviteForm.remark" class="input-with-select input-width"
+                        maxlength="200" :rows="4"></el-input>
+                </el-form-item>
+                <div class="padding20 f-tac r-dailog ">
+                    <el-button type="primary" :disabled="btnDisabled" @click="submitInviteForm('inviteForm')">提交
+                    </el-button>
+                    <el-button @click="rebackClue">取 消</el-button>
+                </div>
+            </el-form>
+        </div>
+    </div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var proSelect = [[${ proSelect }]]; //考察项目
+    var clueId=[[${clueId}]];//资源id
+    var cusName=[[${cusName}]];//客户姓名
+    var cusPhone=[[${cusPhone}]];//客户电话
+    var merchantUserList = [[${ merchantAppiontUserList }]]; //接待人
+    var projectId = [[${ projectId }]]; //项目id
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function () {
+            return {
+                btnDisabled: false,
+                inviteForm: {
+                    province: '',
+                    city: '',
+                    district: '',
+                    cusName: '',
+                    cusNum: '',
+                    receiver: '',
+                    remark: '',
+                    reserveTime: '',
+                    proSelect: '',
+                    projectId: [],
+                    receiverId: ''
+                },
+                rules: {
+                    cusNum: [
+                        {
+                            required: true, message: '客户人数不能为空', trigger: 'change',
+                        },
+
+                    ],
+                    province: [
+                        { required: true, message: '请选择开店区域', trigger: 'change' }
+                    ],
+                    cusName: [
+                        { required: true, message: '客户姓名不能为空', trigger: 'change' }
+                    ],
+                    receiverId: [
+                        { required: true, message: '接待人不能为空', trigger: 'change' }
+                    ],
+                    reserveTime: [
+                        { required: true, message: '预约来访时间不能为空', trigger: 'change' }
+                    ],
+
+                    projectId: [
+                        { required: true, message: '请选择考察项目', trigger: 'change' }
+                    ],
+                },
+                formLabelWidth: '120px',
+                provinceArr: [],
+                cityArr: [],
+                districtArr: [],
+                proSelect: proSelect,//考察项目
+                merchantUserList: merchantUserList, //接待人
+            }
+        },
+        methods: {
+            rebackClue(){
+                window.location.href="/clueInfo/init/"+clueId;
+            },
+            resetForm(formName) {
+                if (this.$refs[formName]) {
+                    this.$refs[formName].resetFields();
+                    this.inviteForm.cusName = '';
+                    this.inviteForm.projectId = [];
+                }
+            },
+            //提交邀约
+            submitInviteForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.btnDisabled = true;
+                        var param = {};
+                        param.clueId = clueId;
+                        param.cusName = this.inviteForm.cusName;
+                        param.cusNum = this.inviteForm.cusNum;
+                        param.province = this.inviteForm.province;;
+                        param.city = this.inviteForm.city;
+                        param.district = this.inviteForm.district;
+                        param.receiverId = this.inviteForm.receiverId;
+                        param.reserveTime = this.inviteForm.reserveTime;
+                        param.projectId = this.inviteForm.projectId.join(',');
+                        param.remark = this.inviteForm.remark;
+                        axios.post('/merchant/merchantAppiontment/insertMerchantAppiontment', param)
+                            .then(function (response) {
+                                console.log(response, "response")
+                                var data = response.data;
+                                console.log(data, "data");
+                                if (data.code == '0') {
+                                    console.log(33333);
+                                    ocmVM.$message({
+                                        message: '邀约成功', type: 'success', duration: 2000, onClose: function () {
+                                            window.location.href="/clue/management/init"
+                                        }
+                                    });
+                                } else {
+                                    ocmVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            })
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+            //开店区域联动方法
+            currentProvince(selVal) {
+                param = {};
+                param.type = "1";
+                param.name = selVal;
+                console.log(selVal, "selVal")
+                if (selVal) {
+                    this.inviteForm.district = null;
+                    this.inviteForm.city = null;
+                    this.districtArr = null;
+                    axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                        ocmVM.cityArr = response.data.data.data;
+                    });
+                } else {
+                    this.inviteForm.district = null;
+                    this.inviteForm.city = null;
+                    this.districtArr = null;
+                    ocmVM.cityArr = null;
+                }
+            },
+            currentCity(selVal) {
+                param = {};
+                param.type = "2";
+                param.name = selVal;
+                if (selVal) {
+                    this.inviteForm.district = null;
+                    axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                        ocmVM.districtArr = response.data.data.data;
+                    });
+                } else {
+                    this.inviteForm.district = null;
+                    ocmVM.districtArr = null;
+                }
+            },
+        },
+        created() {
+            var param = {};
+            param.type = "0";
+            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                ocmVM.provinceArr = response.data.data.data;
+            });
+            // 姓名
+            this.inviteForm.cusName=cusName;
+            // 考察项目
+            this.inviteForm.projectId.push(projectId)
+
+        },
+        mounted() {
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+    })
+</script>
+
+</html>

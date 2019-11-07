@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
+    <title>后台管理系统</title>
+    <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}">
+    <style>
+        /*去掉type为number的箭头*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .el-form-item__label {
+            padding: 1px 3px 0 0;
+        }
+        #loginVerification .el-form-item__content{
+            margin-left: 0 !important;
+        }
+        #loginVerification .el-input__inner{
+            font-size: 14px !important;
+        }
+        #loginVerification .el-form-item__error{
+            padding-left: 110px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="Loading">
+        <div class="loader-inner ball-beat">
+            <div style="background: rgba(75, 128, 255, 1)"></div>
+            <div style="background: rgba(75, 128, 255, 1)"></div>
+            <div style="background: rgba(75, 128, 255, 1)"></div>
+        </div>
+    </div>
+    <div id="header_top">
+        <div class="headerimage"><img th:src="@{/images/merchantlogo.png}" alt=""></div>
+        <!-- <span>汇聚系统</span> -->
+    </div>
+    <div id="loginbox" class="loginbox loginboxbar">
+        <div class="control-group normal_text">
+            <!-- <img src="images/loginLogo.png" alt="Logo">                 -->
+            <span>商机盒子商家版</span>
+        </div>
+        <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-loginForm" label-width="110px">
+            <el-row class="accountNumber">
+                <el-form-item prop="nameInput" label="登录账号">
+                    <el-input v-model="loginForm.nameInput" @input="checkLogin('loginForm')" maxlength="30"
+                        placeholder="请输入用户名"></el-input>
+                </el-form-item>
+            </el-row>
+            <el-row class="accountNumber">
+                <el-form-item prop="pswInput" label="密码">
+                    <el-input type="password" v-model="loginForm.pswInput" @input="checkLogin('loginForm')"
+                        maxlength="30" placeholder="请输入密码"></el-input>
+                    <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span>
+                </el-form-item>
+            </el-row>
+            <!-- 验证码是否显示增加判断，测试开发环境不显示，线上环境显示 -->
+            <!-- v-if="verificationCodeShow" -->
+            <!-- <div style="margin-top: -30px" > -->
+            <div v-if="verificationCodeShow">
+                <el-row class="accountNumber" id="loginVerification" >
+                    <el-col :span="14">
+                        <el-form-item prop="codeInput">
+                            <!-- <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span> -->
+                            <el-input type="number" v-model="loginForm.codeInput" @keyup.native="checkLogin('loginForm')"
+                                oninput="if(value.length>6)value=value.slice(0,6)" placeholder="请输入验证码                    |"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-button type="primary" class="codeBtn" @click="sendCode('loginForm','2');"
+                            :disabled="isDisabled">{{buttonName}}</el-button>
+                    </el-col>
+                </el-row>
+                <div id="codeTipDiv" class="codeTip">
+                    未收到验证码，使用<span class="link">
+                        <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled"
+                            @click="sendCode('loginForm','1');">短信验证码</el-button>
+                        <!-- <a id="msgHref" type="submit" @click="sendCode('loginForm','1');">短信验证码</a> -->
+                    </span>
+                </div>
+            </div>
+            <!-- </div> -->
+            <!-- //登录后是否显示修改密码  2-不显示 1-显示 -->
+            <input type="hidden" id="isUpdatePassword" name="isUpdatePassword" value="2">
+
+            <div class="control-group controlActive">
+                <!-- 提示语 -->
+                <div class="tipCntBox"><span id="errorSpan" style="display: none;"></span></div>
+                <!-- <el-form-item> -->
+                <el-button type="primary" class="loginBtn" :disabled="loginDisabled" @click="submitForm('loginForm')">
+                    登&nbsp;&nbsp;录</el-button>
+                <!-- <el-form-item> -->
+                <a type="submit" @click="toResetPwd();" class="pswForgetBtn">忘记密码</a>
+            </div>
+            <!-- 图形验证码弹窗 移除hideBox则显示-->
+            <div id="passwordForgetBoxDiv" class="passwordForgetBox f-dn">
+                <div class="title">请输入下面的图形验证码</div>
+                <div class="codeImgBox"><img id="codeImg" @click="toCodeImg" src="images/code.jpg"></div>
+                <div class="whiteIptBox">
+                    <el-form-item prop="imgcodeInput">
+                        <el-input v-model="loginForm.imgcodeInput" placeholder="输入图形验证码"></el-input>
+                    </el-form-item>
+                </div>
+                <div class="tip" id="codeImgMsg" style="display: none">请输入正确的验证码</div>
+                <el-button type="primary" class="blueSubmitBtn" @click="sendCode('loginForm','3');">提&nbsp;&nbsp;交
+                </el-button>
+            </div>
+        </el-form>
+        <!-- 下线通知 移除hideBox则显示-->
+        <div id="logoutBoxDiv" class="logoutBox f-dn">
+            <div class="box">
+                <div class="title">下线通知</div>
+                <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<el-button class="msgBtn" type="submit"
+                        id="msgHref" :disabled="isDisabled" @click="resetLogin('1')">修改密码</el-button>
+                </div>
+                <el-button type="primary" class="blueSubmitBtn floatLeft" @click="resetLogin()">重新登录</el-button>
+                <el-button type="primary" class="blueSubmitBtn floatRight" @click="resetLogin()">确定</el-button>
+            </div>
+        </div>
+        <!-- 下线通知 移除hideBox则显示-->
+        <div id="isShowNotUserBox" class="logoutBox f-dn">
+            <div class="box">
+                <div class="title">下线通知</div>
+                <div class="cnt" style="color: red;text-align: center;margin: 30px 0;">帐号异常请联系管理员</div>
+                <el-button type="primary" class="blueSubmitBtn" @click="confirmButton()"
+                    style="margin: 0 auto;display: block;">确定</el-button>
+            </div>
+        </div>
+    </div>
+    <!-- 关于我们介绍 -->
+    <div id="aboutUs">
+        <p><span>关于我们</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<span>业务介绍</span></p>
+        <p>版权所有: 北京快道网络有限公司 京ICP备14037633号</p>
+    </div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var error = [[${ error }]];
+    var verificationCodeShow = [[${ verificationCodeShow }]];
+    var disType = "";
+    var vm = new Vue({
+        el: '#loginbox',
+        data: {
+            labelPosition: 'right',
+            formLabelAlign: {
+                name: '',
+                region: '',
+                type: ''
+            },
+
+
+
+            buttonName: "获取语音验证码",
+            isDisabled: false,
+            loginDisabled: true,
+            verificationCodeShow: true,
+            time: 60,
+            loginForm: {
+                nameInput: '',
+                pswInput: '',
+                codeInput: '',
+                imgcodeInput: '',
+                isUpdatePassword: '2'
+            },
+            rules: {
+                nameInput: [
+                    { required: true, message: '用户名不能为空', trigger: 'blur' },
+                    { max: 30, message: '最大30个字符', trigger: 'blur' },
+                    {
+                        validator: function (rule, value, callback) {
+
+                            if (/^[A-Za-z0-9]+$/.test(value) == false) {
+                                callback(new Error("请输入数字和字母"));
+                            } else {
+                                callback();
+                            }
+                            callback();
+
+                        }, trigger: 'change'
+                    }
+                ],
+                pswInput: [
+                    { required: true, message: '密码不能为空', trigger: 'change' },
+                    { max: 30, message: '最大30个字符', trigger: 'blur' },
+                    { min: 6, message: '最少6个字符', trigger: 'blur' },
+                    {
+                        validator: function (rule, value, callback) {
+
+                            if (/^[A-Za-z0-9]+$/.test(value) == false) {
+                                callback(new Error("请输入数字和字母"));
+                            } else {
+                                callback();
+                            }
+                            callback();
+
+                        }, trigger: 'change'
+                    }
+                ],
+                codeInput: [
+                    { required: true, message: '验证码不能为空', trigger: 'change' },
+                    { max: 6, message: '最大6个字符', trigger: 'blur' },
+                    {
+                        validator: function (rule, value, callback) {
+
+                            if (/^[0-9]*$/.test(value) == false) {
+                                callback(new Error("请输入数字"));
+                            } else {
+                                callback();
+                            }
+                            callback();
+
+                        }, trigger: 'change'
+                    }
+                ],
+                imgcodeInput: [
+                    { required: true, message: '验证码不能为空', trigger: 'change' }
+                ]
+            },
+        },
+
+        methods: {
+            submitForm(formName) {
+                var valid = true;
+                this.$refs[formName].validateField(["nameInput", "pswInput", "codeInput"], (error) => {
+                    if (error) {
+                        valid = false;
+                    }
+                });
+                if (valid) {
+                    var formData = vm.loginForm;
+                    var param = {};
+                    param.username = formData.nameInput;
+                    param.password = formData.pswInput;
+                    param.code = formData.codeInput;
+                    console.info(param);
+
+                    axios.post("/login/index", param)
+                        .then(function (response) {
+                            console.info(response);
+                            var data = response.data;
+                            if (data.code != "0") {
+                                $("#errorSpan").text(data.msg);
+                                $("#errorSpan").show();
+                            } else {
+                                // vm.$message('登录成功');
+                                vm.$message({ message: '登录成功', type: 'success' });
+                                localStorage.removeItem("clientInfo");
+                                var isUpdatePassword = vm.loginForm.isUpdatePassword;
+                                if (isUpdatePassword == "1") {
+                                    document.location.href = '/mhomePage/merchantIndex?isUpdatePassword=1';
+                                } else {
+                                    // document.location.href = '/homePage/index';
+                                    document.location.href = '/mhomePage/merchantIndex';
+                                }
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                } else {
+                    console.log('数据未通过校验！');
+                    return false;
+                }
+            },
+            sendCode(formName, type) {
+                var valid = true;
+                var fieldName = [];
+                if (type == '3') {
+                    fieldName = ["nameInput", "pswInput", "imgcodeInput"];
+                } else {
+                    fieldName = ["nameInput", "pswInput"];
+                }
+                this.$refs[formName].validateField(fieldName, (error) => {
+                    if (error) {
+                        valid = false;
+                    }
+                });
+                if (valid) {
+                    vm.isDisabled = true;
+                    if (type != '3') {
+                        disType = type;
+                    }
+                    var code = $("#imgcodeInput").val();
+                    var formData = vm.loginForm;
+                    var param = {};
+                    param.username = formData.nameInput;
+                    param.password = formData.pswInput;
+                    param.type = disType;
+                    param.code = formData.imgcodeInput;
+                    console.info(param);
+                    axios.post("/login/sendmsg", param)
+                        .then(function (response) {
+                            vm.isDisabled = false;
+                            console.info(response);
+                            var data = response.data;
+                            var msg = "";
+                            if (data.code == "21604") {
+                                $("#passwordForgetBoxDiv").removeClass("f-dn");
+                                document.getElementById("codeImg").src = "/login/getCaptcha?" + Math.random();
+                                $("#code").val("");
+                            } else if (data.code == "21601" || data.code == "21602") {
+                                $("#passwordForgetBoxDiv").removeClass("f-dn");
+                                document.getElementById("codeImg").src = "/login/getCaptcha?" + Math.random();
+                                $("#codeImgMsg").show();
+                                $("#code").val("");
+                            } else if (data.code == "0") {
+                                vm.cutDown();//倒计时
+                                if (disType == "1") {
+                                    msg = "短信验证码已发送，请注意查收！";
+                                } else {
+                                    msg = "请注意接听语音来电获取验证码！";
+                                }
+                                $("#passwordForgetBoxDiv").addClass("f-dn");
+                                $("#codeImgMsg").hide();
+                                $("#code").val("");
+                            } else {
+                                $("#passwordForgetBoxDiv").addClass("f-dn");
+                                $("#codeImgMsg").hide();
+                                $("#code").val("");
+                                msg = data.msg;
+                            }
+                            $("#errorSpan").text(msg);
+                            $("#errorSpan").show();
+                        })
+                        .catch(function (error) {
+                            vm.isDisabled = false;
+                            console.log(error);
+                        });
+                } else {
+                    console.log('数据未通过校验！');
+                    return false;
+                }
+            },
+            toResetPwd() {
+                document.location.href = '/merchantLogin/resetPwd';
+            },
+            checkLogin(formName) {
+                var formData = this.loginForm;
+                if (verificationCodeShow && formData.nameInput != "" && formData.pswInput != "" && formData.codeInput != "") {
+                    this.loginDisabled = false;
+                } else if (!verificationCodeShow && formData.nameInput != "" && formData.pswInput != "") {
+                    this.loginDisabled = false;
+                } else {
+                    this.loginDisabled = true;
+                }
+            },
+            toCodeImg() {
+                document.getElementById("codeImg").src = "/login/getCaptcha?" + Math.random();
+            },
+            resetLogin(isUpdatePassword) {
+                $("#logoutBoxDiv").addClass("f-dn");
+                this.loginForm.isUpdatePassword = isUpdatePassword;
+            },
+            cutDown() {
+                var me = this;
+                me.isDisabled = true;
+                var interval = window.setInterval(function () {
+                    me.buttonName = '重新发送(' + me.time + ')';
+                    --me.time;
+                    if (me.time < 0) {
+                        me.buttonName = "获取语音验证码";
+                        me.time = 60;
+                        me.isDisabled = false;
+                        window.clearInterval(interval);
+                    }
+                }, 1000);
+
+            },
+            confirmButton() {
+                $("#isShowNotUserBox").addClass("f-dn");
+            }
+        },
+        created() {
+            document.body.removeChild(document.getElementById('Loading'));
+            var isShowLogoutBox = [[${ isShowLogoutBox }]];
+            if ("1" == isShowLogoutBox) {
+                $("#logoutBoxDiv").removeClass("f-dn");
+                isShowLogoutBox = "2";
+            } else if ("3" == isShowLogoutBox) {
+                $("#isShowNotUserBox").removeClass("f-dn");
+                isShowLogoutBox = "2";
+            }
+            if (!verificationCodeShow) {
+                this.verificationCodeShow = false;
+
+            }
+            this.checkLogin('loginForm');
+            //初始化页面跳转，为了防止从iframe跳转到login页面直接在iframe中显示login页面
+            if (window.top != window.self) {
+                top.location.href = location.href;
+            }
+        }
+    })
+</script>
+
+</html>

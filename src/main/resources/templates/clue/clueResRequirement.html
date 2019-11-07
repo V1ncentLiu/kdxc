@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <!--<link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">-->
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源需求</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <!-- <shiro:hasPermission name="clueAssignRule:ruleReport:export"> -->
+        <el-button type="primary" @click="exportFun"><i ></i>导出</el-button>
+        <!-- </shiro:hasPermission> -->
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="统计日期：">
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.month" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="电销事业部：">
+                    <el-select v-model="form.teleDeptId" placeholder="电销事业部" style="width: 100%;" clearable @change="curTelGroupSale" filterable :disabled="isDisabled">
+                        <el-option
+                                v-for="item in deptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组：">
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable @change="curTelSale" filterable :disabled="isDisabledOrgId">
+                        <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="dataTable"
+                    v-loading="loading"
+                    @selection-change="handleSelectionChange">
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="months" label="月份" :formatter="dateFormat" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleGroupName" label="电销组"  width="120"></el-table-column>
+                <el-table-column align="center" prop="projectNames" label="电销组项目"></el-table-column>
+                <el-table-column align="center" prop="projectType" label="项目类别"  width="120"></el-table-column>
+                <el-table-column align="center" prop="biddingPrice" label="竞价（日均量）"  width="120"></el-table-column>
+                <el-table-column align="center" prop="optimization" label="优化（日均量）"  width="120"></el-table-column>
+                <el-table-column align="center" prop="information" label="信息流（日均量）"  width="120"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var categoryList=[[${categoryList}]];//资源类别集合
+    var typeList=[[${typeList}]];//资源类型集合
+    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
+    var sourceList=[[${sourceList}]];//媒介集合
+    var sourceTypeList=[[${sourceTypeList}]];//广告位集合
+    var queryOrg=[[${queryOrg}]];//电销组
+    var ruleList=[[${ruleList}]];//电销组
+    // 电销事业部
+    var deptList = [[${deptList}]];
+    // 事业部id
+    var deptId =[[${deptId}]];
+    // 电销组id
+    var teleGroupId =[[${teleGroupId}]];
+
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                loading: false,
+                isDisabled: false,
+                isDisabledOrgId: false,
+                multipleSelection: [],//选择行
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                form: {
+                    month:'',
+                    teleDeptId:'',
+                    teleGroupId:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                deptList:deptList,
+                orgTeleArr:queryOrg,
+
+            }
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },
+            searchTable() {
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                axios.post('/requirment/queryPage', param)
+                    .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        if(result.code=="0"){
+                            var table=result.data;
+                            ocmVM.dataTable= table.data;
+                            ocmVM.pager.total =  table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        }else{
+                            ocmVM.$message.error(result.msg);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            exportFun(){
+                var param = this.form;
+                param.pageNum='';
+                param.pageSize='';
+                axios.post('/requirment/export',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response)
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                    ocmVM.loading=false;
+                });
+
+            },
+            //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                //       return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+                return moment(cellValue).format("YYYY-MM");
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.form.teleSaleId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            curTelSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleSaleId = '';
+                this.getTelSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=1;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    ocmVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                    ocmVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            getTelSale(seleVal){
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/base/getSaleList' ,param).then(function (response) {
+                    ocmVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                    ocmVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+    })
+</script>
+</html>

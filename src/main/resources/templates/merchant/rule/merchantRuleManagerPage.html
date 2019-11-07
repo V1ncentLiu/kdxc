@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商家分发资源规则</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <shiro:hasPermission name="merchantAssignRule:ruleManager:add">
+            <el-button type="primary" @click="addFun"><i class="el-icon-plus"></i>添加新规则</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="merchantAssignRule:ruleManager:edit">
+            <el-button type="success" @click="editFun"><i class="el-icon-edit"></i>修改规则</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="merchantAssignRule:ruleManager:delete">
+            <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="商家:">
+                    <el-select v-model="form.userId" clearable placeholder="请选择商家">
+                        <el-option
+                            v-for="item in userOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.category" clearable placeholder="选择资源类别">
+                        <el-option
+                            v-for="item in categoryOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                 <el-form-item label="资源项目:">
+                    <el-select v-model="form.projectId" filterable clearable placeholder="资源项目">
+                        <el-option
+                            v-for="item in projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="有效时间段:">
+                    <el-date-picker
+                        v-model="form.searchStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.searchEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+              
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                </div>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @row-click="clickRow"
+                @row-dblclick="rowDblClick"
+                @selection-change="handleSelectionChange"
+            >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="规则名称"></el-table-column>
+                <el-table-column align="center" prop="merchantName" label="分发商家"></el-table-column>
+                <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" ></el-table-column>
+                <el-table-column align="center" prop="projectId" label="资源项目" :formatter="transformProject"  ></el-table-column>
+                <!-- <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="130"></el-table-column> -->
+                <el-table-column align="center" prop="startTime" label="开始时间"  :formatter="dateFormat" ></el-table-column>
+                <el-table-column align="center" prop="endTime" label="结束时间"  :formatter="dateFormat"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status == '0'">
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status == '1'">
+                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'禁用')">禁用</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="状态" width="80" :formatter="transformStatus"></el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <el-dialog title="规则详情" :visible.sync="dialogFormVisible" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="规则名称：" :label-width="formLabelWidth">
+                            {{dialogForm.ruleName}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{dialogForm.category}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="生效开始时间：" :label-width="formLabelWidth">
+                            {{dialogForm.startTime}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="生效结束时间：" :label-width="formLabelWidth">
+                            {{dialogForm.endTime}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            {{dialogForm.projectName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+        <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" prop="userName" label="商家"></el-table-column>
+            <el-table-column align="center" prop="applyArea" label="需求地域"></el-table-column>
+            <el-table-column align="center" prop="applyTime" label="申请周期"></el-table-column>
+            <el-table-column align="center" prop="applyNum" label="需求资源总条数"></el-table-column>
+            <el-table-column align="center" prop="dailyMaxNum" label="每日需求资源上限"></el-table-column>
+            <el-table-column align="center" prop="resourceMaxNum" label="资源条数" :formatter="transformNum"></el-table-column>
+        </el-table>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var categoryList=[[${categoryList}]];//资源类别集合
+    var projectList=[[${projectList}]];//资源类别集合
+    var userList=[[${userList}]];//登录人账号id
+    var userId=[[${userId}]];//登录人账号id
+    var roleCode=[[${roleCode}]];//登录人角色code
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  userId:'',
+                  category:'',
+                  projectId:'',
+                  searchStartTime:'',
+                  searchEndTime:'',
+                },
+                dialogForm:{
+                  ruleName:'',
+                  category:'',
+                  projectId:'',
+                  projectName:'',
+                  startTime:'',
+                  endTime:'',
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],
+                categoryOptions:categoryList,
+                projectOptions:projectList ,
+                userOptions:userList ,
+                statusOptions: [{
+                  value: 1,
+                  name: '有效'
+                }, {
+                  value: 0,
+                  name: '无效'
+                }],
+                storeForm: {
+                	 userId:'',
+                     category:'',
+                     projectId:'',
+                     searchStartTime:'',
+                     searchEndTime:'',
+                },
+                storeId: '',
+                scrollTop: 0,
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },            
+            deleteFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+             	   var curRow = rows[i];
+             	  
+                   rowIds.push(curRow.id);
+                   rowNames.push("【"+curRow.ruleName+"】");
+                }
+             this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //删除
+             	var param  = {idList:rowIds};
+                 axios.post('/merchant/merchantAssignRule/delete',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+           
+            //修改状态
+            updateStatus(id,status,msg) {
+              var param = {};
+              param.id=id;
+              param.status=status;
+              var url='/merchant/merchantAssignRule/updateStatusEnable';
+              if(status==0){
+            	  url='/merchant/merchantAssignRule/updateStatusDisable';
+              }
+              axios.post(url, param)
+              .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                	ocmVM.searchTable();
+          	      }});
+                  
+                }else{
+                	ocmVM.$message.error(msg+"失败");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            },
+            searchTable() {
+            	var startTime=this.form.searchStartTime;
+                var endTime=this.form.searchEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.merchantId = this.form.userId;
+                console.info(param);
+                axios.post('/merchant/merchantAssignRule/list', param)
+                .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+                        // 取出存储的id
+                        if(!ocmVM.paginationShow){
+                            if(ocmVM.storeId){
+                                ocmVM.$nextTick(function(){
+                                    var storage = [];
+                                    ocmVM.dataTable.forEach(function(item, index){
+                                        if(item.id === ocmVM.storeId ){
+                                            storage.push(ocmVM.dataTable[index]);
+                                        }
+                                    })
+                                    ocmVM.toggleSelection(storage);
+                                    ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                                })
+                            }
+                        }else{
+                            ocmVM.removeSessionStore ("ruleManagerStoreForm");
+                            ocmVM.removeSessionStore ("ruleManagerOtherVal");
+                        }
+                        ocmVM.paginationShow = true;
+                        ocmVM.storeForm = ocmVM.form;
+
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            rowDblClick(row, column, event){//双击查看详情
+                this.dialogFormVisible = true;
+                this.dialogForm.ruleName = row.ruleName;
+                this.dialogForm.category =this.transformCategory(null,null,row.category);;
+                this.dialogForm.projectName =this.transformProject(null,null,row.projectId);;
+                this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                var param={};
+                param.id=row.id;
+                axios.post('/merchant/merchantAssignRule/get', param)
+                .then(function (response) {
+                  var result =  response.data;
+                  if(result.code=="0"){
+                  	var teamList =result.data.teamList;
+                  	if(teamList){
+	                  	for(var i=0;i<teamList.length;i++){
+	                    	if(teamList[i].applyStartTime&&teamList[i].applyEndTime){
+	                    		teamList[i].applyTime=moment(teamList[i].applyStartTime).format("YYYY-MM-DD HH:mm:ss")+"--"+moment(teamList[i].applyEndTime).format("YYYY-MM-DD HH:mm:ss")
+	                    	}
+	                    }
+                  	}
+                  	ocmVM.dialogTableData=teamList;
+                  }
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+            },
+            addFun(){
+            	document.location.href='/merchant/merchantAssignRule/initCreate';
+            },
+            editFun() {
+                var rows = this.multipleSelection;                
+                if(rows.length!=1){
+                    this.$message({
+                        message: '请选择一条数据进行编辑',
+                        type: 'warning'
+                    });
+                    return;
+                }else{           
+                    // 存储选中信息--start
+                    var clueId=rows[0].id; 
+                    this.setSessionStore("ruleManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId,
+                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    }
+                    this.setSessionStore("ruleManagerOtherVal", otherVal);
+                    // 存储选中信息--end
+                	document.location.href='/merchant/merchantAssignRule/initUpdate?id='+clueId;
+                }                
+            },
+          
+          //状态转换方法
+            transformStatus(row, column, cellValue, index) {
+          	  	var text="无效";
+          	  	var now= new Date();
+                if(cellValue==1&&row.startTime<now&&row.endTime>now){
+              	  text="有效"
+                }
+                return text;
+            },
+          //资源数转换方法
+            transformNum(row, column, cellValue, index) {
+                if(cellValue==-1){
+              	  return "不限";
+                }else{
+	              return cellValue;
+                }
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+          
+          //项目转换方法
+            transformProject(row, column, cellValue, index) {
+         	   var text="";
+           	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+          //资源类别转换方法
+            transformCategory(row, column, cellValue, index) {
+          	   var text="";
+            	   if(categoryList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<categoryList.length;j++){
+ 	 	                		if(array[i]==categoryList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=categoryList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+categoryList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+             toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
+        },
+        created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("ruleManagerStoreForm");
+                var otherVal = this.getSessionStore("ruleManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>s

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+  <title>后台管理系统</title>
+  <style>
+  button a{color:#fff!important;}
+  .formItem,.formItem .el-form-item__content{width:100%}
+  .orgSelectOopover{width:100%;text-align: left;position: relative;border: 1px solid #dcdde2;background: #fff;}
+  .orgSelectOopover:hover{background-color: #fff;border-color: #c0c4cc;}
+  .orgSelectInput{position: absolute;left: 0;top: 0;width: 90%;}
+  .orgSelectInput input{border: none;background: none;}
+  .orgSelectInput input:hover{cursor: pointer;}
+  .el-tree-node__expand-icon.is-leaf~.el-tree-node__label{color: #1979fd}
+</style>
+</head>
+<body>
+  <div id="userManage" class="userManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>商家账号管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <shiro:hasPermission name="sys:userManager:add">
+          <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加账号</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="sys:userManager:edit">
+        <el-button type="success" @click="toUpdateUser"><i class="el-icon-edit"></i>编辑账号</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="userSearchForm" class="demo-form-inline mainSearchForm" ref="userSearchForm">
+                <el-form-item label="登录名" >
+                    <el-input v-model="userSearchForm.userName"  class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="商家名称" >
+                    <el-input v-model="userSearchForm.name"  class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="账号状态:" prop="status" label-width="75px">
+                  <el-select clearable v-model="userSearchForm.status" placeholder="全部状态" @visible-change="seleckClick">
+                    <el-option
+                      v-for="item in statusOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+
+                <!-- <div class="mainSearchBtnBox">  -->
+                <el-form-item label=""> 
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>    
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                <!-- </div>  -->
+            </el-form>
+        </div>
+        <el-row>
+          <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable">
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
+            <el-table-column align="center" prop="username" label="登录用户名"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号" width="130"></el-table-column>
+            <el-table-column align="center" prop="name" label="商家名称"></el-table-column>
+            <el-table-column align="center" prop="name" label="账号余额"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
+            <el-table-column align="center" prop="num" label="商家子账号">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.num > 0">
+                        <a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&clueId='+item.clueId+''" target="_blank">子账号（{{scope.row.num}}）</a>
+                    </div>
+                    <div v-if="scope.row.num = 0">
+                        <a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly'" target="_blank">添加</a>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus" width="80"></el-table-column>
+            <el-table-column align="center" label="操作" width="150">
+              <template slot-scope="scope">
+                <shiro:hasPermission name="sys:userManager:edit">
+                <div v-if="scope.row.status === 1">
+                  <el-button  @click="updateStatus(scope.row.id,2,'禁用')" type="danger"  size="small">
+                    禁用
+                  </el-button>
+                  <el-button  @click="updateStatus(scope.row.id,3,'锁定')" type="warning"  size="small">
+                    锁定
+                  </el-button>
+                </div>
+
+                <div v-else-if="scope.row.status === 2">
+                  <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
+                    启用
+                  </el-button>
+                </div>
+                <div v-else-if="scope.row.status === 3">
+                  <el-button @click="updateStatus(scope.row.id,1,'解锁')"  type="primary"  size="small">
+                    解锁
+                  </el-button>
+                </div>
+              </shiro:hasPermission>
+            </template>
+
+          </el-table-column>
+          </el-table>
+          <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+    </div>
+      <!-- dialog -->
+      <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="540px">
+          <el-form :model="clueTemplateForm" ref="clueTemplateForm" :rules="rules">
+              <el-form-item label="商家名称：" :label-width="formLabelWidth" prop="name">
+                  <el-input v-model="clueTemplateForm.name" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="50" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="手机号：" :label-width="formLabelWidth" prop="phone">
+                  <el-input v-model="clueTemplateForm.phone" autocomplete="off"  maxlength="11" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
+                  <el-input v-model="clueTemplateForm.password" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="username">
+                  <el-input v-model="clueTemplateForm.username" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input>
+              </el-form-item>
+              <el-form-item label="所属组织架构：" :label-width="formLabelWidth" prop="orgName">
+                  <el-popover placement="bottom" trigger="click" v-model="isShow">
+                      <div style="max-height: 300px;overflow-y: auto;">
+                          <el-tree
+                                  :data="dataTree"
+                                  node-key="id"
+                                  :default-expanded-keys="expandedKeys"
+                                  :default-checked-keys="multipleTreeSelection"
+                                  ref="tree"
+                                  highlight-current
+                                  @node-click="treeNodeClick">
+                          </el-tree>
+                      </div>
+                      <el-button slot="reference" class="orgSelectOopover" style="width: 290px;">
+                          <el-input v-model="clueTemplateForm.orgName" placeholder="选择所属组织" class="orgSelectInput" readonly></el-input>
+                          <i class="el-icon-arrow-down" style="float: right;margin-right: -12px;color: #c0c4cc;"></i>
+                      </el-button>
+                  </el-popover>
+                  <!--<el-input v-model="clueTemplateForm.orgName" autocomplete="off" prop="orgName" style="width:185px;margin-right: 6px;"></el-input>
+                  <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
+              </el-form-item>
+              <el-form-item label="商家角色：" :label-width="formLabelWidth" prop="roleId">
+                  <el-select clearable v-model="clueTemplateForm.roleId" placeholder="角色选择" @visible-change="seleckClick" style="width: 290px;">
+                      <el-option
+                              v-for="item in roleOptions"
+                              :key="item.id"
+                              :label="item.roleName"
+                              :value="item.id">
+                      </el-option>
+                  </el-select>
+                  <!--<el-input v-model="clueTemplateForm.orgName" autocomplete="off" prop="orgName" style="width:185px;margin-right: 6px;"></el-input>
+                  <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
+              </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align:center;">
+              <el-button type="primary" :disabled="submitDisabled" @click="saveUser('clueTemplateForm')">提交</el-button>
+              <el-button @click="cancelForm('clueTemplateForm')">取 消</el-button>
+          </div>
+      </el-dialog>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
+var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+var domains =[];
+var orgData=[[${orgData}]];
+var expandedKeys =[];//默认展开节点
+var roleList=[[${roleList}]];//当前字段所属的菜单组
+if(orgData !=null){
+    for(var i=0;i<orgData.length;i++){
+        var curNode = orgData[i];
+        expandedKeys.push(curNode.id);
+        var childs = curNode.children;
+        if(childs){
+            for(var j=0;j<childs.length;j++){
+                var curChildNode = childs[j];
+                expandedKeys.push(curChildNode.id);
+            }
+        }
+
+    }
+}
+
+var userVM = new Vue({
+  el: '#userManage',
+  data: {
+    paginationShow: false,
+    isShow:false,
+    expandedKeys:expandedKeys,
+    dataTree: orgData,
+    roleOptions: roleList,
+    userSearchForm: {
+      status: '',
+      userName: '',
+      name: '',
+    },
+    clueTemplateForm:{
+      username:"",
+      name:"",
+      phone:"",
+      password:"",
+      orgName:"",
+      orgId:"",
+        id:""
+   },
+    addOrModifyDialogTitle:'添加商家账号',
+    rules: {
+        name: [
+            { required: true, message: '商家名称不能为空', trigger: 'blur' }
+        ],
+        username: [
+            { required: true, message: '登录用户名不能为空', trigger: 'blur' }
+        ],
+        phone:[
+            { required: true, message: '请输入手机号', trigger: 'blur' },
+            { validator:function(rule,value,callback){
+                    if(/^[0-9]*$/.test(value) == false){
+                        callback(new Error("请输入数字"));
+                        return
+                    }
+                    if(value.length!==11){
+                        callback(new Error("请输入11位数字"));
+                        return
+                    }
+                    callback();
+                }, trigger: 'blur'}
+        ],
+    password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' },
+          { validator:function(rule,value,callback){
+                  if(value.length<6 || value.length>30){
+                      callback(new Error("密码为6-30位字母／数字"));
+                      return
+                  }
+                  callback();
+              }, trigger: 'blur'}
+      ],
+        orgName: [
+            { required: true, message: '组织不能为空', trigger: 'change' }
+        ],
+        roleId: [
+            { required: true, message: '角色不能为空', trigger: 'change' }
+        ]
+
+
+  },
+    submitDisabled:false,
+    dataTable:[],
+    pager:{
+      total: 0,
+      currentPage: 1,
+      pageSize: 20,
+    },
+    multipleSelection:[],
+    multipleTreeSelection:[],
+    passwordExpires:passwordExpires,
+    reminderTime:reminderTime,
+    radio:'',
+    dialogFormVisible: false,
+    dialogFormAdd: false,
+    dialogFormChooseRole: false,
+    dialogFormChooseOrg: false,
+    form: {
+      domains: domains,
+      maxDay: passwordExpires
+    },
+
+    formLabelWidth: '150px',
+    formLabelWidth1: '120px',
+    statusOptions: [{
+      value: '',
+      label: '全部'
+    }, {
+      value: 1,
+      label: '启用'
+    }, {
+      value: 2,
+      label: '禁用'
+    }, {
+      value: 3,
+      label: '锁定'
+    }],
+    searchTypeOptions: [{
+      value: 1,
+      label: '登录名'
+    }, {
+      value: 2,
+      label: '姓名'
+    }, {
+      value: 3,
+      label: '手机号'
+    }],
+    storeForm: {
+      roleId: '',
+      status: '',
+      searchType: 2,
+      searchText: '',
+      orgId: '',
+      orgName:''
+    },
+    storeId: '',
+    scrollTop: 0,
+  },
+  methods: {
+      saveUser(formName) {
+          this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  var formData = userVM.clueTemplateForm;
+                  var param={};
+                  param.name= formData.name;
+                  param.username= formData.username;
+                  param.password = formData.password;
+                  param.phone = formData.phone;
+                  param.orgId = formData.orgId;
+                  param.userType = 2;
+                  param.status = 1;
+                  param.id = formData.id;
+                  var roleList=new Array();
+                  roleList.push(formData.roleId);
+                  param.roleList=roleList;
+                  var url = "";
+                  if(formData.id !=null && formData.id !=''){
+                      if(formData.password =="******"){
+                          param.password ="";
+                      }
+                      url =  "/mechant/userManager/updateUser";
+                  }else {
+                      url = "/mechant/userManager/saveUser";
+                  }
+                  axios.post(url, param)
+                      .then(function (response) {
+                          console.info(response);
+                          var data =response.data;
+                          if(data.code!="0"){
+                              userVM.$message(data.msg);
+                              userVM.btnDisabled = false;
+                          }else{
+                              if(userVM.clueTemplateForm.id !=null && userVM.clueTemplateForm.id !=''){
+                                  userVM.$message('修改成功');
+                              }else {
+                                  userVM.$message('新增成功');
+                              }
+
+                              userVM.clueTemplateForm.phone ="";
+                              userVM.clueTemplateForm.name ="";
+                              userVM.clueTemplateForm.username ="";
+                              userVM.clueTemplateForm.password="";
+                              userVM.clueTemplateForm.roleId ="",
+                              userVM.clueTemplateForm.id ="";
+                              userVM.btnDisabled = false;
+                              userVM.dialogFormVisible = false;
+                              userVM.searchTable()
+                          }
+                      })
+                      .catch(function (error) {
+                          userVM.btnDisabled = false;
+                          console.log(error);
+                      });
+              }
+          })
+      },
+      closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+          if (this.$refs['clueTemplateForm']!==undefined) {
+              this.$refs['clueTemplateForm'].resetFields();
+          }
+      },
+      cancelForm(formName) {
+          if (this.$refs[formName]!==undefined) {
+              this.$refs[formName].resetFields();
+          }
+          this.dialogFormVisible = false;
+      },
+    searchTable() {
+      var param ={};
+
+      param.status = this.userSearchForm.status;
+      param.username = this.userSearchForm.userName;
+      param.name = this.userSearchForm.name;
+      param.pageSize = this.pager.pageSize;
+      param.pageNum = this.pager.currentPage;
+      param.userType = 2;
+      console.info(param);
+      axios.post('/mechant/userManager/merchantlist', param)
+      .then(function (response) {
+        var result =  response.data;
+        console.info(result);
+        var table=result.data;
+        userVM.dataTable= table.data;
+        userVM.pager.total =  table.total;
+        userVM.pager.currentPage = table.currentPage;
+
+        // 取出存储的id
+        if(!userVM.paginationShow){
+           if(userVM.storeId){
+               userVM.$nextTick(function(){
+                  var storage = [];
+                  userVM.dataTable.forEach(function(item, index){
+                      if(item.id === userVM.storeId ){
+                          storage.push(userVM.dataTable[index]);
+                      }
+                  })
+                  userVM.toggleSelection(storage);
+                  userVM.$el.querySelector('.el-table__body-wrapper').scrollTop = userVM.scrollTop;
+              })
+          }
+        }else{
+          removeSessionStore ("userManageStoreForm");
+          removeSessionStore ("userManageOtherVal");
+        }
+        userVM.paginationShow = true;
+        userVM.storeForm = userVM.userSearchForm;
+
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    },
+    toggleSelection(rows) { // table select 默认选中fn
+        if (rows) {
+            rows.forEach(row => {
+                this.$refs.multipleTable.toggleRowSelection(row,true);
+            });
+        } else {
+            this.$refs.multipleTable.clearSelection();
+        }
+    },
+    resetForm(formName) {
+      console.info(this.$refs[formName]);
+      this.$refs[formName].resetFields();
+      this.$refs[formName].resetFields();
+    },
+    //选择行
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    //跳转新增用户页
+    toAddUser() {
+        userVM.clueTemplateForm.phone ="";
+        userVM.clueTemplateForm.name ="";
+        userVM.clueTemplateForm.username ="";
+        userVM.clueTemplateForm.password="";
+        userVM.clueTemplateForm.roleId ="",
+        userVM.clueTemplateForm.id ="";
+        this.dialogFormVisible = true;
+    },
+    //跳转新增用户页
+    toUpdateUser() {
+      var rows = this.multipleSelection;
+      if(rows.length!=1){
+        this.$message({
+          message: '请选择一条数据进行修改',
+          type: 'warning'
+        });
+        return;
+      }
+        var param ={};
+        param.id = rows[0].id;
+        var url = "/mechant/userManager/getMechantUserById";
+        axios.post(url, param)
+            .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                    var user = result.data;
+                    userVM.clueTemplateForm.username = user.username ;
+                    userVM.clueTemplateForm.password = "******";
+                    userVM.clueTemplateForm.phone = user.phone;
+                    userVM.clueTemplateForm.name = user.name;
+                    userVM.clueTemplateForm.orgId = user.orgId;
+                    userVM.clueTemplateForm.roleId = user.roleId;
+                    userVM.clueTemplateForm.id = user.id;
+                    userVM.dialogFormVisible = true;
+                    userVM.addOrModifyDialogTitle = "修改商家账号"
+                    userVM.multipleTreeSelection=[];
+                    var orgId = user.orgId+"";
+                    userVM.multipleTreeSelection.push();
+
+                }else{
+                    userVM.$message.error(msg+"失败");
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    },
+    //修改状态
+    updateStatus(id,status,msg) {
+      var param = {};
+      param.id=id;
+      param.status=status;
+      var url="/user/userManager/updateStatusDisable";
+      if(status  !=1){
+    	  url="/user/userManager/updateStatusEnable";
+      }
+      axios.post(url, param)
+      .then(function (response) {
+        var result =  response.data;
+        if(result.code=="0"){
+          userVM.$message({message:'用户'+msg+'成功',type:'success',duration:1000,onClose:function(){
+        	  userVM.searchTable();
+  	      }});
+          
+        }else{
+          userVM.$message.error(msg+"失败");
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    },
+    //状态转换方法
+    transformStatus(row, column, cellValue, index) {
+      var text="";
+      if(cellValue=="1"){
+        text="启用"
+      }else if(cellValue=="2"){
+        text="禁用"
+      }else if(cellValue=="3"){
+        text="锁定"
+      }
+      return text;
+    },
+    //机构名称展示方法
+    transformOrg(row, column, cellValue, index) {
+      var text="";
+      if(row.parentParentOrgName){
+    	  text+=row.parentParentOrgName+"-";
+      }
+      if(row.parentOrgName){
+    	  text+=row.parentOrgName+"-";
+      }
+      if(cellValue){
+    	  text+=cellValue;
+      }
+      return text;
+    },
+    //角色转换方法
+    transformRole(row, column, cellValue, index) {
+      var text="";
+      if(cellValue!=undefined&&cellValue[0]!=undefined){
+        text=cellValue[0].roleName;
+      }
+      return text;
+    },
+    //日期数据格式化方法
+    dateFormat(row, column, cellValue, index) {
+      if (cellValue == undefined) {
+         return "";
+      }
+      return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+    },
+    handleSizeChange(val) {
+        //下拉框  每页 10,20条切换 调用
+        console.log(`每页 ${val} 条`);
+        this.pageSize = val;
+        this.initTableData(1);
+    },
+    handleCurrentChange(val) {
+        //点击 页码
+        console.log(`当前页: ${val}`);
+        this.initTableData(val);
+    },
+    // 提交弹窗
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+        console.log(this.form.domains)//
+        var domainsList =this.form.domains;
+        var array= new Array();
+        var newReminderTime="";
+        for(var i=0;i<domainsList.length;i++){
+          array.push(domainsList[i].value);
+          if(i==0){
+            newReminderTime=newReminderTime+domainsList[i].value;
+          }else{
+            newReminderTime=newReminderTime+","+domainsList[i].value;
+          }
+        }
+        if(passwordExpires==this.form.maxDay&&reminderTime==newReminderTime){
+          userVM.dialogFormVisible=false;
+          return;
+        }
+        this.$confirm('确定更新保存并执行操作？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var param = {};
+          param.passwordExpires=this.form.maxDay;
+          param.reminderTime=array;
+          axios.post('/user/userManager/updatePasswordSetting', param)
+          .then(function (response) {
+            var result =  response.data;
+            if(result.code=="0"){
+              userVM.$message.success("设置成功");
+              userVM.dialogFormVisible=false;
+              passwordExpires=userVM.form.maxDay;
+              reminderTime=newReminderTime;
+            }else{
+              userVM.$message.error(result.msg);
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });          
+        });
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    showDialogFormVisible() {
+    	if (this.$refs['form']!==undefined) {
+    		this.$refs['form'].resetFields();
+    	}
+    	var newDomains =[];
+    	var reminderTimeList=reminderTime.split(",");
+    	for(var i=0;i<reminderTimeList.length;i++){
+    	  var domain = {};
+    	  domain.value=reminderTimeList[i];
+    	  newDomains.push(domain);
+    	}
+    	domains=newDomains;
+      this.form.domains=domains;
+      this.form.maxDay=passwordExpires;
+      this.dialogFormVisible=true;
+    },
+    removeDomain(item) {
+      var index = this.form.domains.indexOf(item)
+      if (index !== -1) {
+        this.form.domains.splice(index, 1)
+      }
+    },
+    addDomain() {
+      this.form.domains.push({
+        value: '',
+        key: Date.now()
+      });
+    },
+    treeNodeClick(data,node,obj){
+      //if(data.children==null){
+          this.clueTemplateForm.orgName=data.label;
+          this.clueTemplateForm.orgId=data.id;
+          this.isShow=false
+      //}
+    },
+    seleckClick(){
+      // console.log(0)
+      this.isShow=false;
+    }
+  },
+  created(){
+      // 进入页面判断有是否有存储值
+      if(!this.paginationShow){
+          var storeVal = getSessionStore("userManageStoreForm");
+          var otherVal = getSessionStore("userManageOtherVal");
+          if(storeVal && otherVal){
+              this.userSearchForm = storeVal;
+              this.$set(this.pager,"currentPage",otherVal.currentPage);
+              this.storeId = otherVal.clueId;
+              this.scrollTop = otherVal.scrollTop;
+          }
+      };
+      // console.info("create method");
+      var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+      if(localVal){this.pager.pageSize = localVal;}
+      this.searchTable();
+  },
+  mounted(){
+    console.info("mounted method");
+    document.getElementById('userManage').style.display = 'block';
+  }
+})
+
+</script>
+</html>

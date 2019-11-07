@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+  <title>后台管理系统</title>
+</head>
+<body>
+  <div id="userManage" class="userManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>账号管理</el-breadcrumb-item>
+      <el-breadcrumb-item>商家子账号管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="toAddAccount"><i class="el-icon-plus"></i>添加子账号</el-button>
+        <el-button type="success" @click="toUpdateAccount"><i class="el-icon-edit"></i>编辑子账号</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="userSearchForm" class="demo-form-inline mainSearchForm" ref="userSearchForm"> 
+                <el-form-item label="登录名：" :label-width="formLabelWidth" prop="name">
+                    <el-input v-model="userSearchForm.name" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="姓名：" :label-width="formLabelWidth" prop="companyName">
+                    <el-input v-model="userSearchForm.companyName" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label=""> 
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>    
+            </el-form>
+        </div>
+        <el-row>
+          <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable">
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" prop="username" label="登录用户名" width="120"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号" width="130"></el-table-column>
+            <el-table-column align="center" prop="name" label="姓名" width="130"></el-table-column>
+            <el-table-column align="center" prop="name" label="角色" width="130"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
+            <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus" width="80"></el-table-column>
+            <el-table-column align="center" label="操作" width="150">
+              <template slot-scope="scope">
+                <div v-if="scope.row.status === 1">
+                  <el-button  @click="updateStatus(scope.row.id,2,'禁用')" type="danger"  size="small">
+                    禁用
+                  </el-button>
+                  <el-button  @click="updateStatus(scope.row.id,3,'锁定')" type="warning"  size="small">
+                    锁定
+                  </el-button>
+                </div>
+
+                <div v-else-if="scope.row.status === 2">
+                  <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
+                    启用
+                  </el-button>
+                </div>
+                <div v-else-if="scope.row.status === 3">
+                  <el-button @click="updateStatus(scope.row.id,1,'解锁')"  type="primary"  size="small">
+                    解锁
+                  </el-button>
+                </div>
+            </template>
+
+          </el-table-column>
+          </el-table>
+          <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+
+    <!-- dialog -->
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="540px">
+        <el-form :model="clueTemplateForm" ref="clueTemplateForm" :rules="rules">
+            <el-form-item label="商家名称：" :label-width="formLabelWidth" prop="companyName">
+                <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="手机号：" :label-width="formLabelWidth" prop="phone">
+                <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
+                <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="userName">
+                <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+            <el-button type="primary" :disabled="submitDisabled" @click="saveClueTemplate('clueTemplateForm')">提交</el-button>
+            <el-button @click="cancelForm('clueTemplateForm')">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var accountVM = new Vue({
+  el: '#userManage',
+  data: {
+    paginationShow: false,
+    userSearchForm: {
+      id: '',
+      name: '',
+      companyName: '',
+      status: ''
+    },
+    dataTable:[],
+    pager:{
+      total: 0,
+      currentPage: 1,
+      pageSize: 20,
+    },
+    multipleSelection:[],
+    reminderTime:reminderTime,
+    radio:'',
+    dialogFormVisible: false,
+    formLabelWidth: '150px',
+    formLabelWidth1: '120px',
+    statusOptions: [{
+      value: 1,
+      label: '启用'
+    }, {
+      value: 2,
+      label: '禁用'
+    }, {
+      value: 3,
+      label: '锁定'
+    }],
+    addOrModifyDialogTitle:'',
+    rules: {
+      companyName: [
+        { required: true, message: '商家名称不能为空', trigger: 'blur' }
+      ],
+      phone: [
+        { required: true, message: '手机号不能为空', trigger: 'blur' }
+      ],
+      password: [
+        { required: true, message: '登录密码不能为空', trigger: 'blur' }
+      ],
+      userName: [
+        { required: true, message: '登录用户名不能为空', trigger: 'blur' }
+      ],
+    },
+    submitDisabled: false,
+  },
+  methods: {
+    searchTable() {
+      var param ={};
+
+      
+      param.pageSize = this.pager.pageSize;
+      param.pageNum = this.pager.currentPage;
+      console.info(param);
+      axios.post('/user/userManager/list', param)
+      .then(function (response) {
+        var result =  response.data;
+        console.info(result);
+        var table=result.data;
+        accountVM.dataTable= table.data;
+        accountVM.pager.total =  table.total;
+        accountVM.pager.currentPage = table.currentPage;
+
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    },
+    resetForm(formName) {
+      console.info(this.$refs[formName]);
+      this.$refs[formName].resetFields();
+      this.$refs[formName].resetFields();
+    },
+    //选择行
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    //添加账号弹窗
+    toAddAccount() {
+          this.userSearchForm.id='';
+          if (this.$refs['userSearchForm']!==undefined) {
+          this.$refs['userSearchForm'].resetFields();
+        }
+          this.dialogFormVisible = true;
+          this.addOrModifyDialogTitle="添加账号";
+    },
+    //修改账号弹窗
+    toUpdateAccount() {
+      var rows = this.multipleSelection;
+        if(rows.length!=1){
+            this.$message({
+               message: '请选择一条数据进行修改',
+               type: 'warning'
+             });
+            return;
+        }
+        this.addOrModifyDialogTitle="编辑账号";
+        var param={id:rows[0].id};
+        //根据id获取数据
+        axios.post('/aggregation/clueTemplate/get',param)
+        .then(function (response) {
+            var data =  response.data;
+              console.error(data);
+            }
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        .then(function () {
+        }); 
+        this.dialogFormVisible = true;
+      
+    },
+    //跳转新增子账号页
+    toSubAccount() {
+      document.location.href='';
+    },
+    //修改状态
+    updateStatus(id,status,msg) {
+      var param = {};
+      param.id=id;
+      param.status=status;
+      var url="/user/userManager/updateStatusDisable";
+      if(status  !=1){
+        url="/user/userManager/updateStatusEnable";
+      }
+      axios.post(url, param)
+      .then(function (response) {
+        var result =  response.data;
+        if(result.code=="0"){
+          accountVM.$message({message:'用户'+msg+'成功',type:'success',duration:1000,onClose:function(){
+            accountVM.searchTable();
+          }});
+          
+        }else{
+          accountVM.$message.error(msg+"失败");
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    },
+    //状态转换方法
+    transformStatus(row, column, cellValue, index) {
+      var text="";
+      if(cellValue=="1"){
+        text="启用"
+      }else if(cellValue=="2"){
+        text="禁用"
+      }else if(cellValue=="3"){
+        text="锁定"
+      }
+      return text;
+    },
+    //日期数据格式化方法
+    dateFormat(row, column, cellValue, index) {
+      if (cellValue == undefined) {
+         return "";
+      }
+      return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+    },
+    handleSizeChange(val) {
+        //下拉框  每页 10,20条切换 调用
+        console.log(`每页 ${val} 条`);
+        this.pageSize = val;
+        this.initTableData(1);
+    },
+    handleCurrentChange(val) {
+        //点击 页码
+        console.log(`当前页: ${val}`);
+        this.initTableData(val);
+    },
+    closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+        if (this.$refs['clueTemplateForm']!==undefined) {
+          this.$refs['clueTemplateForm'].resetFields();
+        }
+     },
+     cancelForm(formName) {
+       if (this.$refs[formName]!==undefined) {
+        this.$refs[formName].resetFields();
+        }
+         this.dialogFormVisible = false;
+     },
+     // 提交
+     saveClueTemplate(formName){
+        this.$refs[formName].validate((valid) => {
+            if (valid) {
+                accountVM.submitDisabled=true;
+                var param=accountVM.clueTemplateForm;
+                var url="";
+                if(param.id!=""){
+                  url="/aggregation/clueTemplate/update"; 
+                }else{
+                  url="/aggregation/clueTemplate/save";
+                }
+                axios.post(url, param)
+                .then(function (response) {
+                  var resData = response.data;
+                  if(resData.code=='0'){
+                    accountVM.cancelForm(formName);
+                    accountVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                          accountVM.submitDisabled=false;
+                      accountVM.searchTable();
+                      }});
+                  }else{
+                    accountVM.$message('提交失败');
+                      accountVM.submitDisabled=false;
+                      console.error(resData);
+                  }
+              })
+              .catch(function (error) {
+                  accountVM.submitDisabled=false;
+                  console.log(error);
+              });
+               
+            } else {
+              return false;
+            }
+          });
+     }
+  },
+  created(){
+      // console.info("create method");
+      var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+      if(localVal){this.pager.pageSize = localVal;}
+      this.searchTable();
+  },
+  mounted(){
+    console.info("mounted method");
+    document.getElementById('userManage').style.display = 'block';
+  }
+})
+
+</script>
+</html>

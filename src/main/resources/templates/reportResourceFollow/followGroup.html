@@ -7,8 +7,7 @@
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销报表</el-breadcrumb-item>
-        <el-breadcrumb-item>工作管理报表</el-breadcrumb-item>
+        <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>分配资源跟访时间分布表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
@@ -30,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销事业部：">  
-                    <el-select v-model="form.deptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                    <el-select v-model="form.teleDeptId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -59,10 +58,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="分配来源:">  
-                    <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
+                <el-form-item label="分配来源：">  
+                    <el-select v-model="form.source" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in clueCategoryList"
+                            v-for="item in sourceList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -86,22 +85,22 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="userName" label="电销顾问">
+                <el-table-column prop="teleSaleName" label="电销顾问">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.userId!='99999'" @click="gotoPerson(scope.row)">{{scope.row.userName}}</el-button>
-                        <span v-else>{{scope.row.userName}}</span>
+                        <el-button type="text" size="small" v-if="scope.row.teleSaleId!='99999'" @click="gotoPerson(scope.row)">{{scope.row.teleSaleName}}</el-button>
+                        <span v-else>合计</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="allocationResorceNum" label="分配资源数"></el-table-column>
+                <el-table-column prop="resNum" label="分配资源数" :formatter="format_number"></el-table-column>
                 <el-table-column prop="noVisitRate" label="未跟访占比"></el-table-column>
-                <el-table-column prop="thirtyMinVisitRate" label="30分钟内跟访占比"></el-table-column>
-                <el-table-column prop="oneVisitRate" label="1小时内跟访占比"></el-table-column>
-                <el-table-column prop="twoVisitRate" label="2小时内跟访占比"></el-table-column>
-                <el-table-column prop="threeVisitRate" label="3小时内跟访占比"></el-table-column>
-                <el-table-column prop="sixVisitRate" label="6小时内跟访占比"></el-table-column>
-                <el-table-column prop="twelveVisitRate" label="12小时内跟访占比"></el-table-column>
-                <el-table-column prop="twentyFourVisitRate" label="24小时内跟访占比"></el-table-column>
-                <el-table-column prop="twentyFourOutVisitRate" label="24小时外跟访占比"></el-table-column>
+                <el-table-column prop="halfHourRate" label="30分钟内跟访占比"></el-table-column>
+                <el-table-column prop="oneHourRate" label="1小时内跟访占比"></el-table-column>
+                <el-table-column prop="twoHourRate" label="2小时内跟访占比"></el-table-column>
+                <el-table-column prop="threeHourRate" label="3小时内跟访占比"></el-table-column>
+                <el-table-column prop="sixHourRate" label="6小时内跟访占比"></el-table-column>
+                <el-table-column prop="twelveHourRate" label="12小时内跟访占比"></el-table-column>
+                <el-table-column prop="twentyFourRate" label="24小时内跟访占比"></el-table-column>
+                <el-table-column prop="moreRate" label="24小时外跟访占比"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -114,12 +113,11 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var parentParam=[[${receptionVisitQueryDto}]];
+    var parentParam=[[${baseQueryDto}]];
     var deptList=[[${deptList}]];// 事业部
-    var clueCategoryList=[[${clueCategoryList}]];// 分配来源
-    var curDeptId =[[${deptId}]]; // 当前用户事业部Id
+    var curDeptId =[[${deptId}]]; // 当前用户事业部id
     var curOrgId = [[${teleGroupId}]]; // 当前用户电销组id
-    var curUserId = '';
+    var curUserId = [[${teleSaleId}]]; // 当前用户电销顾问id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -137,57 +135,24 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     teleSaleId: '',
-                    category:''
+                    source: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    deptId: '',
+                    teleDeptId: '',
                     teleGroupId: '',
                     teleSaleId: '',
-                    category: ''
+                    source: ''
                 },
-                tableData: [
-                    {
-                        orgId: 99999,
-                        userId: 99999,
-                        userName: '合计',
-                        orgName: '合计',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1,
-                        twoVisitRate: 1,
-                        threeVisitRate: 1,
-                        sixVisitRate: 1,
-                        twelveVisitRate: 1,
-                        twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
-                    },
-                    {
-                        orgId: 1,
-                        userId: 1,
-                        userName: '电销顾问1',
-                        orgName: '电销组名1',
-                        allocationResorceNum: 1,
-                        noVisitRate: 1,
-                        thirtyMinVisitRate: 1,
-                        oneVisitRate: 1,
-                        twoVisitRate: 1,
-                        threeVisitRate: 1,
-                        sixVisitRate: 1,
-                        twelveVisitRate: 1,
-                        twentyFourVisitRate: 1,
-                        twentyFourOutVisitRate: 1,
-                    }
-                ],
+                tableData: [],
                 deptList: deptList, // 电销事业部
                 orgTeleArr: '', // 电销组
                 busSaleArr: '', // 电销顾问
-                clueCategoryList: clueCategoryList
+                sourceList: [{id: 1,name: '新资源'},{id: 0,name: '非新资源'}]
             }             
         },
         filters: {
@@ -200,7 +165,34 @@
                 return oYear+"-"+oMonth+"-"+oDay; 
           },
         },
-        methods: {    
+        methods: {
+            format_number(row, column){ // 千分位数字格式化
+                var nStr = row[column.property];
+                if('--'==nStr){
+                    return nStr;
+                }
+                nStr += '';
+                if(nStr.indexOf('.') == -1){
+                    var x1 = nStr;
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1;
+                }else{
+                    var x = nStr.split('.');
+                    x1 = x[0];
+                    if(!x[1]){
+                        x[1] = '00';
+                    }
+                    x2 = x.length > 1 ? '.' + x[1] : '';
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1 + x2;
+                }
+            },
             centerStyle(){
                 return "text-align:center"
             }, 
@@ -303,12 +295,12 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.deptId = this.form.deptId;
+                param.teleDeptId = this.form.teleDeptId;
                 param.teleGroupId = this.form.teleGroupId;
                 param.teleSaleId = this.form.teleSaleId;
-                param.category = this.form.category;
+                param.source = this.form.source;
                 this.loading = true; 
-                axios.post('/statistics/receptionVisit/getPersonDayPageList',param).then(function (response) {
+                axios.post('/resourceVisit/queryManagerPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -337,10 +329,10 @@
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.deptId = mainDivVM.form.deptId;
+                        mainDivVM.export.teleDeptId = mainDivVM.form.teleDeptId;
                         mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
                         mainDivVM.export.teleSaleId = mainDivVM.form.teleSaleId;
-                        mainDivVM.export.category = mainDivVM.form.category;
+                        mainDivVM.export.source = mainDivVM.form.source;
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -379,14 +371,25 @@
                 window.history.go(-1);
             },
             gotoPerson(row){
-                var teleSaleId = row.userId;
-                var deptId = this.export.deptId;
+                var teleSaleId = row.teleSaleId;
+                var teleDeptId = this.export.teleDeptId;
                 var teleGroupId = this.export.teleGroupId;
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                var category = this.export.category;
+                var source = this.export.source;
                 if(teleSaleId){
-                    window.location.href="/resourceFollow/managerList?deptId=" + deptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime;
+                    window.location.href="/resourceVisit/saleList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&teleSaleId="+ teleSaleId+ "&source="+ source +"&startTime=" + startTime + "&endTime=" + endTime;
+                }
+            },
+            gotoTeam(row){
+                var teleGroupId = row.teleGroupId;
+                var saleId=row.teleSaleId;
+                var teleDeptId = this.export.teleDeptId;
+                var source = this.export.source;
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                if(saleId){
+                    window.location.href="/resourceVisit/saleList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId +"&teleSaleId="+saleId + "&source="+ source +"&startTime=" + startTime + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -475,11 +478,11 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                param.deptId = this.export.deptId;
+                param.teleDeptId = this.export.teleDeptId;
                 param.teleGroupId = this.export.teleGroupId;
                 param.teleSaleId = this.export.teleSaleId;
-                param.category = this.export.category;
-                axios.post('/statistics/receptionVisit/exportPersonDayAllList',param,{responseType:'blob'})
+                param.source = this.export.source;
+                axios.post('/resourceVisit/managerExport',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -499,21 +502,22 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             if(curDeptId){
                 this.isDisabled = true;
-                this.form.deptId = curDeptId;
-                this.firstCurTelGroupSale(curDeptId);
-                if(curOrgId){ // 有角色
+                this.form.teleDeptId = curDeptId;
+                if(curOrgId){
                     this.isDisabledOrgId = true;
                     this.form.teleGroupId = curOrgId;
-                    this.firstCurTelSale(curOrgId);
                     if(curUserId){
                         this.isDisabledUserId = true;
                         this.form.teleSaleId = curUserId;
                     }else{
                         this.form.teleSaleId = parentParam&&parentParam.teleSaleId?parentParam.teleSaleId:'';
                     }
+                }else{
+                    this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
+                    this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
                 }
             }else{
-                this.form.deptId = parentParam&&parentParam.deptId ? parentParam.deptId:'';
+                this.form.teleDeptId = parentParam&&parentParam.teleDeptId ? parentParam.teleDeptId:'';
                 this.form.teleGroupId = parentParam&&parentParam.teleGroupId ? parentParam.teleGroupId:'';
                 this.form.teleSaleId = parentParam&&parentParam.teleSaleId ? parentParam.teleSaleId:'';
             }
@@ -529,16 +533,21 @@
                 this.export.startTime = this.minuteFormat(this.form.startTime);
                 this.export.endTime = this.minuteFormat(this.form.endTime);
             }
-            this.form.category = parentParam&&parentParam.category ? parentParam.category:'';
-            this.export.deptId = this.form.deptId; 
+            this.form.source = parentParam&&parentParam.source ? parentParam.source:'';
+            this.export.teleDeptId = this.form.teleDeptId; 
             this.export.teleGroupId = this.form.teleGroupId;
             this.export.teleSaleId = this.form.teleSaleId; 
-            this.export.category = this.form.category;
-            
+            this.export.source = this.form.source;
+            if(this.form.teleDeptId){
+                this.firstCurTelGroupSale(this.form.teleDeptId);
+            }
+            if(this.form.teleGroupId){
+                this.firstCurTelSale(this.form.teleGroupId);
+            }
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            // this.searchTable();
+            this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
