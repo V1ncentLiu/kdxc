@@ -324,7 +324,7 @@ public class MHomePageController {
     ResourceStatisticsParamDTO paramDTO = new ResourceStatisticsParamDTO();
     paramDTO.setDimension(indexReqDTO.getDimension());
     paramDTO.setEtime(indexReqDTO.getEtime());
-    paramDTO.setStime(indexReqDTO.getStime());
+    paramDTO.setStime(indexReqDTO.getStime());f
     List<Integer> yList = new ArrayList<>();
     List<String> xList = gainX(indexReqDTO);
     // 主账户相关统计

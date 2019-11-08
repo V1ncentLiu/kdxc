@@ -16,6 +16,8 @@ var homePageVM = new Vue({
 			isActive: true,
 			dialogModifyPwdVisible: false,//修改密码dialog 是否显示
 			dialogLogoutVisible: false,//退出登录 dialog
+			skinVal: 1,//1蓝色 //2白色 皮肤切换
+			skinStatus: false,
 			modifyForm: {
 				'oldPassword': '',
 				'newPassword': '',
@@ -199,6 +201,19 @@ var homePageVM = new Vue({
 				this.isActive = false
 			}
 		},
+		//切换皮肤
+		changeSkin() {
+			 this.skinStatus = !this.skinStatus;
+			 if(this.skinStatus==false){
+				 this.skinVal=1;
+			 }else if(this.skinStatus==true){
+				this.skinVal=2;
+			 }
+			 setSessionStore("skinVal", this.skinVal);
+			 document.cookie="skinVal="+this.skinVal+"; expires=Thu, 18 Dec 2043 12:00:00 GMT";
+			 console.log(getCookieVal("skinVal"),"222");
+	
+			},
 		menuClick: function (ifreamUrl) {
 			$(".menu.is-active").removeClass("is-active")
 			this.$refs.iframeBox.src = ifreamUrl //给ifream的src赋值
@@ -269,7 +284,10 @@ var homePageVM = new Vue({
 		},
 		confirmLogout() {//确认退出系统
 			window.sessionStorage.clear();//清除缓存
+			setSessionStore("skinVal", this.skinVal);
 			location.href = "/index/logout";
+			document.cookie="skinVal="+this.skinVal+"; expires=Thu, 18 Dec 2043 12:00:00 GMT";
+			
 		},
 		gotoHomePage() {//首页跳转
 			location.href = '/login';
@@ -443,7 +461,7 @@ var homePageVM = new Vue({
 
 					if (data.code == '0') {
 						var resData = data.data;
-						homePageVM.$message({ message: "登录成功", type: 'success',duration:1500 });
+						homePageVM.$message({ message: "登录成功", type: 'success', duration: 1500 });
 						homePageVM.callTitle = "呼叫中心（七陌ON）";
 						homePageVM.dialogLoginClientVisible = false;
 						homePageVM.isQimoClient = true;
@@ -1034,6 +1052,7 @@ var homePageVM = new Vue({
 		if (isUpdatePassword == "1") {
 			this.dialogModifyPwdVisible = true;
 		}
+		console.log(document.cookie,"3333");
 	},
 	computed: {
 		clientRules: function () {
