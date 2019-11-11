@@ -1,4 +1,5 @@
 var oLink =  document.getElementById("skinCss");
+var oLinkIndex =  document.getElementById("skinCssIndex");
 var homePageVM = new Vue({
 	el: '#app',
 	data: function () {
@@ -222,7 +223,8 @@ var homePageVM = new Vue({
 				}
 			}, '*')
 			// index切换皮肤
-			oLink['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+			oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";			
 		},
 		menuClick: function (ifreamUrl) {
 			$(".menu.is-active").removeClass("is-active")
@@ -1075,8 +1077,8 @@ var homePageVM = new Vue({
 			this.dialogModifyPwdVisible = true;
 		}
 		console.log(document.cookie,"3333");
-
-		oLink['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+		oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
 	},
 	mounted () {
 		// 在外部vue的window上添加postMessage的监听，并且绑定处理函数handleMessage
