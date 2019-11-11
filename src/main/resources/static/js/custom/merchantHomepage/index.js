@@ -16,7 +16,7 @@ var homePageVM = new Vue({
 			isActive: true,
 			dialogModifyPwdVisible: false,//修改密码dialog 是否显示
 			dialogLogoutVisible: false,//退出登录 dialog
-			skinVal: 1,//1蓝色 //2白色 皮肤切换
+			skinVal: getCookieVal("skinVal") ? getCookieVal("skinVal") : 1,//1蓝色 //2白色 皮肤切换
 			skinStatus: false,
 			modifyForm: {
 				'oldPassword': '',
@@ -58,6 +58,7 @@ var homePageVM = new Vue({
 			callTitle: '',
 			dialogLoginClientVisible: false,//登录坐席dialog 
 			dialogLogoutClientVisible: false,
+			iframeWin: {},
 			loginClientForm: {
 				clientType: 1,
 				cno: '',
@@ -212,7 +213,13 @@ var homePageVM = new Vue({
 			 setSessionStore("skinVal", this.skinVal);
 			 document.cookie="skinVal="+this.skinVal+"; expires=Thu, 18 Dec 2043 12:00:00 GMT";
 			 console.log(getCookieVal("skinVal"),"222");
-	
+			 this.iframeWin.postMessage({
+				cmd: 'getFormJson',
+				params: {
+					success:true,
+					data:this.skinVal
+				}
+			  }, '*')
 			},
 		menuClick: function (ifreamUrl) {
 			$(".menu.is-active").removeClass("is-active")
@@ -1038,10 +1045,22 @@ var homePageVM = new Vue({
 
 			return isPass;
 
-		}
-
+		},
+	
 
 	},
+	handleMessage (event) {
+		// 根据上面制定的结构来解析iframe内部发回来的数据
+		const data = event.data
+		switch (data.cmd) {
+		  case 'returnFormJson':
+			// 业务逻辑
+			break
+		  case 'returnHeight':
+			// 业务逻辑
+			break
+		}
+	  },
 	created() {
 		if (this.hasBuyPackage) {
 			this.loginQimoClient();
@@ -1054,6 +1073,11 @@ var homePageVM = new Vue({
 		}
 		console.log(document.cookie,"3333");
 	},
+	mounted () {
+		// 在外部vue的window上添加postMessage的监听，并且绑定处理函数handleMessage
+		window.addEventListener('message', this.handleMessage);
+		this.iframeWin = this.$refs.iframeBox.contentWindow;
+	  },
 	computed: {
 		clientRules: function () {
 			var clientType = this.loginClientForm.clientType;

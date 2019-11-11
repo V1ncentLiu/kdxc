@@ -6,7 +6,7 @@
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base1.css}" id="skinCss">
+    <link rel="stylesheet"  id="skinCss">
     <style>
         .dialogForm .el-form-item {
             margin-bottom: 5px;
@@ -159,7 +159,6 @@
             <el-breadcrumb-item>资源管理</el-breadcrumb-item>
             <el-breadcrumb-item>资源列表</el-breadcrumb-item>
         </el-breadcrumb>
-
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
@@ -456,7 +455,7 @@
     // console.log(merchantUserList,"merchantUserList");
     //  merchantUserList=[{id:"1",name:"张三"},{id:"2",name:"李四"}];
     // proSelect=[{id:"1",projectName:"项目一"},{id:"1",projectName:"项目二"}];
-   
+    var oLink =  document.getElementById("skinCss");
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -485,6 +484,7 @@
                 clueId: '',//资源cusName
                 getCusName: '',
                 colorStatus:false,
+                skinVal: getCookieVal("skinVal"),
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -593,6 +593,8 @@
                 window.location.href = "/clueInfo/init/" + clueId;
             },
             resetFormResource(formName) {
+                this.skinVal=getCookieVal("skinVal");
+                console.log(this.skinVal,"new");
                 if (this.$refs[formName]) {
                     this.$refs[formName].resetFields();
                     this.$set(this.form, 'searchStartTime', '');
@@ -1030,7 +1032,20 @@
             },
         },
         created() {
-            console.log(document.cookie,"3333");
+            console.log(this.skinVal,"this.skinVal");
+            //监听父窗口信息
+           // 接受父页面发来的信息
+                window.addEventListener("message", function(event){
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                    oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                    }
+                });
+            
+                oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
             var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
             if (localVal) {
                 this.pager.pageSize = localVal;
@@ -1080,14 +1095,8 @@
         },
         mounted() {
             document.getElementById('optimizeClueManagement').style.display = 'block';
-        }
+        },
     })
-    window.onload = function() {
-        var oLink =  document.getElementById("skinCss");
-        console.log(document.cookie);
-        console.log(getCookieVal("shiro.session"),"222");
-        oLink['href'] = "@{/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
-    }
 </script>
 
 </html>

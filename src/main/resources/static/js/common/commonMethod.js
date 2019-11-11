@@ -28,7 +28,7 @@ function openPaymentOnline(){
 function getCookieVal(name){
     //可以搜索RegExp和match进行学习
     var arr,reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
-    if (arr = document.cookie.match(reg)) {
+    if (arr = window.parent.document.cookie.match(reg)) {
         return unescape(arr[2]);
     } else {
         return null;
