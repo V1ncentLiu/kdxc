@@ -8,7 +8,8 @@
   <!-- import CSS -->
   <link rel="stylesheet" href="css/element-ui.css">
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+  <link rel="stylesheet" href="" id="skinCss">
+
   <style>
     #optimizeClueManagement {
       background: #f3f7fe;
@@ -195,16 +196,16 @@
             <div class="get-search-time">
               <div class="get-time">预约来访时间:</div>
               <div class="time-style" :class="{'selectActive':colorStatus}">
-                  <el-form-item class="search-box-margin" prop="reserveStartTime">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss"  v-on:focus="setColor"  v-on:blur="changeNameFun" v-model="form.reserveStartTime" type="datetime"
-                      placeholder="选择开始时间">
-                    </el-date-picker>
-                  </el-form-item>
-                  <el-form-item label="—" class="widthauto" prop="reserveEndTime">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss"  v-on:focus="setColor" v-on:blur="changeNameFun" v-model="form.reserveEndTime" type="datetime"
-                      placeholder="选择结束时间">
-                    </el-date-picker>
-                  </el-form-item>
+                <el-form-item class="search-box-margin" prop="reserveStartTime">
+                  <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-on:focus="setColor" v-on:blur="changeNameFun"
+                    v-model="form.reserveStartTime" type="datetime" placeholder="选择开始时间">
+                  </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto" prop="reserveEndTime">
+                  <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-on:focus="setColor" v-on:blur="changeNameFun"
+                    v-model="form.reserveEndTime" type="datetime" placeholder="选择结束时间">
+                  </el-date-picker>
+                </el-form-item>
               </div>
             </div>
             <el-form-item label="考察项目:" prop="proSelect">
@@ -232,10 +233,10 @@
       <el-row>
         <el-table ref="multipleTable" tooltip-effect="dark" border :data="dataTable">
           <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-          <el-table-column align="center" prop="cusName" label="客户姓名" width="100" ></el-table-column>
+          <el-table-column align="center" prop="cusName" label="客户姓名" width="100"></el-table-column>
           <el-table-column align="center" prop="cusNum" label="客户人数" width="80"></el-table-column>
           <el-table-column align="center" prop="area" label="开店区域"></el-table-column>
-          <el-table-column align="center" prop="receiverName" label="接待人"  width="100"></el-table-column>
+          <el-table-column align="center" prop="receiverName" label="接待人" width="100"></el-table-column>
           <el-table-column align="center" prop="reserveTime" label="预约来访时间" :formatter="dateFormat" width="130">
           </el-table-column>
           <el-table-column align="center" prop="projectName" label="考察项目"></el-table-column>
@@ -258,6 +259,8 @@
   var clueInfo = [[${ clueInfo }]];//资源信息
   var merchantUserList = [[${ merchantAppiontUserList }]]; //接待人
   var proSelect = [[${ proSelect }]]; //考察项目
+  var oLink = document.getElementById("skinCss");
+  console.log(oLink,"oLink");
   // merchantUserList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
   // proSelect = [{ id: "1", projectName: "项目一" }, { id: "1", projectName: "项目二" }];
   var ocmVM = new Vue({
@@ -288,30 +291,30 @@
         },
         formLabelWidth: '120px',
         dataTable: [],
-        colorStatus:false
+        colorStatus: false
       }
     },
     directives: {
-				drag(el){
-					el.onmousedown = function(e){
-						ocmVM.colorStatus=true;
-						document.onmousemove = function(e) {
-              ocmVM.colorStatus=true;
-						}
-						document.onmouseup = function(e) {
-              ocmVM.colorStatus=true;
-						}
-					}
-				}
-			},
+      drag(el) {
+        el.onmousedown = function (e) {
+          ocmVM.colorStatus = true;
+          document.onmousemove = function (e) {
+            ocmVM.colorStatus = true;
+          }
+          document.onmouseup = function (e) {
+            ocmVM.colorStatus = true;
+          }
+        }
+      }
+    },
     methods: {
-      changeNameFun(obj){
-        this.colorStatus=false;
+      changeNameFun(obj) {
+        this.colorStatus = false;
       },
-      setColor(e){
-        this.colorStatus=true;
+      setColor(e) {
+        this.colorStatus = true;
       },
-       searchTable() {
+      searchTable() {
         var startTime = this.form.reserveStartTime;
         var endTime = this.form.reserveEndTime;
         if (endTime && startTime > endTime) {
@@ -364,6 +367,17 @@
       },
     },
     created() {
+      window.addEventListener("message", function (event) {
+        var data = event.data;
+        switch (data.cmd) {
+          case 'getFormJson':
+            oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+            // 处理业务逻辑
+            break;
+        }
+      });
+      console.log(getCookieVal("skinVal"),"getCookieValskinVal");
+      oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
       var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
       if (localVal) {
         this.pager.pageSize = localVal;
