@@ -6,6 +6,7 @@ import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -144,9 +145,14 @@ public class BalanceAccountController {
         Long teleSaledate = System.currentTimeMillis();
         logger.info("所有电销创业顾问查询时间" + (teleSaledate - busSaledate));
 
-        // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(1);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
+        // 查询所有项目
+//        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+//        request.setAttribute("projectList", allProject.getData());
         Long allProjectdate = System.currentTimeMillis();
         logger.info("查询所有项目查询时间" + (allProjectdate - teleSaledate));
         // 查询所有省
