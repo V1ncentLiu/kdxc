@@ -305,7 +305,7 @@ public class BusinessMyCustomerController {
         // 系统参数非优化资源类别
         String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
         request.setAttribute("notOptList", notOptList);
-        return "clue/addCustomerResources";
+        return "clue/addCustomerResourcesBusiness";
     }
 
     /**
