@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
-    <link rel="stylesheet" th:href="@{/css/custom/merhantMessageCenter/index.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <title>消息中心</title>
 </head>
 
@@ -124,13 +124,13 @@
                                     <div class="topTitle">接收时间:</div>
                                     <div class="lowerTimer">
                                         <el-form-item label-width="84px">
-                                            <el-date-picker v-model="annForm.date1" type="datetime" @blur="inputBlur" @focus="inputFocus"
-                                                placeholder="选择日期时间">
+                                            <el-date-picker v-model="annForm.date1" type="datetime" @blur="inputBlur"
+                                                @focus="inputFocus" placeholder="选择日期时间">
                                             </el-date-picker>
                                         </el-form-item>
                                         <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
-                                            <el-date-picker v-model="annForm.date2" type="datetime"@blur="inputBlur" @focus="inputFocus"
-                                                placeholder="选择日期时间">
+                                            <el-date-picker v-model="annForm.date2" type="datetime" @blur="inputBlur"
+                                                @focus="inputFocus" placeholder="选择日期时间">
                                             </el-date-picker>
                                         </el-form-item>
                                     </div>
@@ -280,6 +280,12 @@
     <div th:include="_footer_include :: #jsLib"></div>
 
     <script>
+        var oLink = document.getElementById("skinCss");
+        if (getCookieVal("skinVal")) {
+            oLink['href'] = "/css/custom/merhantMessageCenter/index" + getCookieVal("skinVal") + ".css";
+        } else {
+            oLink['href'] = "/css/custom/merhantMessageCenter/index1.css";
+        }
         var annDialogVm = new Vue({
             el: '#anndialog',
             data: {
@@ -371,6 +377,15 @@
                 }
             },
             created() {
+                window.addEventListener("message", function (event) {
+                    var data = event.data;
+                    switch (data.cmd) {
+                        case 'getFormJson':
+                            oLink['href'] = "/css/custom/merhantMessageCenter/index" + event.data.params.data + ".css";
+                            // 处理业务逻辑
+                            break;
+                    }
+                });
             },
             updated() {
                 this.initDialogData()
@@ -397,34 +412,34 @@
                     date1: "",
                     date2: ""
                 },
-                businessData:[],
-                    // [
-                    //     {
-                    //         title: '2016-05-02',
-                    //         content: '王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小小虎王小虎王小虎王小虎',
-                    //         receiveTime: '上海市普陀区金沙江路 1518 弄',
-                    //         status: 'sdsadsad',
-                    //         status: 1
-                    //     }, {
-                    //         title: '2016-05-02',
-                    //         content: '王小虎',
-                    //         receiveTime: '上海市普陀区金沙江路 1518 弄',
-                    //         status: 'sdsadsad',
-                    //         status: 0
-                    //     }, {
-                    //         title: '2016-05-02',
-                    //         content: '王小虎',
-                    //         receiveTime: '上海市普陀区金沙江路 1518 弄',
-                    //         status: 'sdsadsad',
-                    //         status: 0
-                    //     }, {
-                    //         title: '2016-05-02',
-                    //         content: '王小虎',
-                    //         receiveTime: '上海市普陀区金沙江路 1518 弄',
-                    //         status: 'sdsadsad',
-                    //         status: 1
-                    //     }
-                    // ],
+                businessData: [],
+                // [
+                //     {
+                //         title: '2016-05-02',
+                //         content: '王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小虎王小小虎王小虎王小虎王小虎',
+                //         receiveTime: '上海市普陀区金沙江路 1518 弄',
+                //         status: 'sdsadsad',
+                //         status: 1
+                //     }, {
+                //         title: '2016-05-02',
+                //         content: '王小虎',
+                //         receiveTime: '上海市普陀区金沙江路 1518 弄',
+                //         status: 'sdsadsad',
+                //         status: 0
+                //     }, {
+                //         title: '2016-05-02',
+                //         content: '王小虎',
+                //         receiveTime: '上海市普陀区金沙江路 1518 弄',
+                //         status: 'sdsadsad',
+                //         status: 0
+                //     }, {
+                //         title: '2016-05-02',
+                //         content: '王小虎',
+                //         receiveTime: '上海市普陀区金沙江路 1518 弄',
+                //         status: 'sdsadsad',
+                //         status: 1
+                //     }
+                // ],
 
                 annData: [],
                 falg: 0,
@@ -447,11 +462,11 @@
 
             },
             methods: {
-                inputFocus(){
-                    console.log(22222,'');
+                inputFocus() {
+                    console.log(22222, '');
                     // $('.establishTime .lowerTimer').css('border-color','#4b80ff')   
                 },
-                inputBlur(){
+                inputBlur() {
                     console.log(33333);
                     // $('.establishTime .lowerTimer').css('border-color','#dcdde2')
                 },

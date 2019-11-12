@@ -6,33 +6,13 @@
 
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
   <title>后台管理系统</title>
-  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+  <link rel="stylesheet" href="" id="skinCss">
   <style>
     body {
       background-color: #f0f5fe;
       height: 100%;
     }
 
-    .el-button--primary {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-    }
-
-    .el-checkbox__input.is-checked .el-checkbox__inner,
-    .el-checkbox__input.is-indeterminate .el-checkbox__inner {
-      background-color: #4B80FF;
-      border-color: #4B80FF;
-    }
-
-    .searchBtn:hover {
-      opacity: 0.9 !important;
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-
-    }
-
-    .allBtnHover:hover {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(140, 172, 245, 1));
-      opacity: 0.9;
-    }
 
     .mainSearchForm {
       justify-content: center;
@@ -157,14 +137,17 @@
         <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="address">
           <el-input maxlength="10" v-model="subAccountForm.address" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item   label="账户编号：" :label-width="formLabelWidth" prop="accountNo">
-          <el-input maxlength="200" v-model="subAccountForm.accountNo" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="accountNo">
+          <el-input maxlength="200" v-model="subAccountForm.accountNo" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
-        <el-form-item  label="秘钥：" :label-width="formLabelWidth" prop="secretKey">
-          <el-input maxlength="200" v-model="subAccountForm.secretKey" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="secretKey">
+          <el-input maxlength="200" v-model="subAccountForm.secretKey" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
-        <el-form-item  label="proxyurl：" :label-width="formLabelWidth" prop="proxyUrl">
-          <el-input maxlength="200" v-model="subAccountForm.proxyUrl" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="proxyUrl">
+          <el-input maxlength="200" v-model="subAccountForm.proxyUrl" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
         <el-form-item label="商家子账号" :label-width="formLabelWidth" prop="subMerchant">
           <el-select v-model="selectValue" style="width: 290px;">
@@ -210,7 +193,12 @@
 </body>
 <script th:inline="javascript">
   var userList = [[${ userList }]];//商户集合
-
+  var oLink = document.getElementById("skinCss");
+  if (getCookieVal("skinVal")) {
+    oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+  } else {
+    oLink['href'] = "/css/common/merchant_base1.css";
+  }
   var userVM = new Vue({
     el: '#userManage',
     data: {
@@ -466,6 +454,15 @@
     },
     created() {
       this.searchTable();
+      window.addEventListener("message", function (event) {
+        var data = event.data;
+        switch (data.cmd) {
+          case 'getFormJson':
+            oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+            // 处理业务逻辑
+            break;
+        }
+      });
     },
     mounted() {
       console.info("mounted method");
