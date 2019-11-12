@@ -117,6 +117,9 @@ public interface ReconciliationConfirmFeignClient {
     @PostMapping("/applyConfirm")
     public JSONResult<Void> applyConfirm(@RequestBody ReconciliationConfirmReq req);
 
+    @PostMapping("/validateBalance")
+    public JSONResult<String> validateBalance(@RequestBody ReconciliationConfirmReq req);
+
     @Component
     static class HystrixClientFallback implements ReconciliationConfirmFeignClient {
 
@@ -187,6 +190,10 @@ public interface ReconciliationConfirmFeignClient {
             return fallBackError("对账申请");
         }
 
+        @Override
+        public JSONResult<String> validateBalance(ReconciliationConfirmReq req) {
+            return fallBackError("提交对账校验是否存在未提交对账的付款");
+        }
 
 
     }

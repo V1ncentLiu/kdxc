@@ -1,3 +1,5 @@
+var oLink =  document.getElementById("skinCss");
+var oLinkIndex =  document.getElementById("skinCssIndex");
 var homePageVM = new Vue({
 	el: '#app',
 	data: function () {
@@ -219,8 +221,11 @@ var homePageVM = new Vue({
 					success:true,
 					data:this.skinVal
 				}
-			  }, '*')
-			},
+			}, '*')
+			// index切换皮肤
+			oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";			
+		},
 		menuClick: function (ifreamUrl) {
 			$(".menu.is-active").removeClass("is-active")
 			this.$refs.iframeBox.src = ifreamUrl //给ifream的src赋值
@@ -1062,6 +1067,8 @@ var homePageVM = new Vue({
 		}
 	  },
 	created() {
+		oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+		oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
 		if (this.hasBuyPackage) {
 			this.loginQimoClient();
 		}
@@ -1072,6 +1079,7 @@ var homePageVM = new Vue({
 			this.dialogModifyPwdVisible = true;
 		}
 		console.log(document.cookie,"3333");
+		
 	},
 	mounted () {
 		// 在外部vue的window上添加postMessage的监听，并且绑定处理函数handleMessage

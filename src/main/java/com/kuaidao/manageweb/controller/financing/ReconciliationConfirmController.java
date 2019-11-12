@@ -13,6 +13,8 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -109,7 +111,12 @@ public class ReconciliationConfirmController {
                 getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
         request.setAttribute("teleDeptList", teleDeptList);
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+//        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+//        request.setAttribute("projectList", allProject.getData());
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(1);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
