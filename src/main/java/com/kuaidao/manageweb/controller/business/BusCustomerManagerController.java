@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.BusVisitPerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
@@ -157,8 +158,10 @@ public class BusCustomerManagerController {
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
-        // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(1);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
