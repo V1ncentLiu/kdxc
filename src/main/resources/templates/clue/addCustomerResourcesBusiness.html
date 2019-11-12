@@ -114,15 +114,15 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="联系电话：" prop="customerPhone" :label-width="formLabelWidth">
-                            <el-input v-model="form.customerPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number" maxlength="20"></el-input>
+                        <el-form-item label="联系电话：" prop="linkPhone" :label-width="formLabelWidth">
+                            <el-input v-model="form.linkPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number" maxlength="20"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="邀约来访时间：" prop="inviteTime" :label-width="formLabelWidth">
+                        <el-form-item label="邀约来访时间：" prop="reserveTime" :label-width="formLabelWidth">
                          <el-date-picker
                                 style="width: 200px;"
-                                v-model="form.inviteTime"
+                                v-model="form.reserveTime"
                                 type="datetime"
                                 placeholder="选择日期时间">
                             </el-date-picker>
@@ -357,29 +357,6 @@
         </el-form> 
     </el-row>
 
-    <!-- dialog -->
-    <el-dialog title="添加手机号" :visible.sync="dialogFormVisible" width="540px">
-        <button type="button" aria-label="Close" class="el-dialog__headerbtn" style="position: absolute;z-index: 9;background: #fff;border-radius: 50%;" @click="clearDialog"><i class="el-dialog__close el-icon el-icon-close"></i></button>
-        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
-            <el-form-item  
-                :label-width="formLabelWidth"
-                v-for="(domain, index) in dynamicValidateForm.domains"
-                :label="'手机号' + (parseInt(index)+2) + ':'"
-                :key="domain.key"
-                :prop="'domains.' + index + '.value'"
-                :rules="{
-                    required: true, message: '手机号不能为空', trigger: 'blur',
-                }"
-            >
-                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 200px;margin-right: 10px;"></el-input>
-                <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="f-tac">            
-            <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')"  >提 交</el-button>
-            <el-button type="success" @click="addDomain">添加更多手机号</el-button>
-        </div>
-    </el-dialog>
   <!-- dialog -->
   <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
     <template>
@@ -469,8 +446,7 @@
                     project:'',
                     feedbackTime:'',
                     feedbackPoint:'',
-                    customerName:'',
-                    customerPhone:'',
+                    customerName:'',                    
                     customerSex:'',
                     wechat:'',
                     wechat2:'',
@@ -491,7 +467,8 @@
                     province:'',
                     city:'',
                     district:'',
-                    inviteTime:'',//邀约来访时间
+                    linkPhone:'',//联系方式
+                    reserveTime:'',//邀约来访时间
                     province:'',
                     city:'',
                     district:'',
@@ -536,8 +513,8 @@
                              
                          }, trigger: 'change'}
                     ],
-                    customerPhone: [
-                        { required: true, message: '手机号不能为空', trigger: 'blur' },
+                    linkPhone: [
+                        { required: true, message: '联系电话不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){                 
                             if(/^[0-9]*$/.test(value) == false){
                                callback(new Error("请输入数字"));
@@ -547,7 +524,7 @@
                             callback();
                         }, trigger: 'blur'}
                     ],
-                    inviteTime: [
+                    reserveTime: [
                         { required: true, message: '邀约来访时间不能为空', trigger: 'blur' }
                     ],
                     insideProject: [
@@ -680,8 +657,8 @@
                     	var  customerName=this.form.customerName;
                     	clueCustomer.cusName=customerName;
                    	    //手机号
-                    	var  customerPhone=this.form.customerPhone;
-                    	clueCustomer.phone=customerPhone;
+                    	var  linkPhone=this.form.linkPhone;
+                    	clueCustomer.linkPhone=linkPhone;
                    	    //性别
                     	var customerSex=this.form.customerSex;
                     	clueCustomer.sex=customerSex;
@@ -900,61 +877,6 @@
                     this.form.domains.splice(index, 1)
                 }
             },
-            submitDialogForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {  
-                    	
-                        var domains=this.dynamicValidateForm.domains;
-                        var customerPhone=this.form.customerPhone; 
-                        var ary=[];
-                        console.log(domains)
-                        for(var i=0;i<domains.length;i++){
-                            // 判断弹框里的值是否与页面的手机号1重复
-                            if(domains[i].value==customerPhone){
-                                this.$message({
-                                    message: '请不要提交重复手机号',
-                                    type: 'warning'
-                                });
-                                return;
-                            }
-                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-                            ary.push(domains[i].value);//把输入的手机号放入一个数组
-                            var s = ary.join(",")+",";                            
-                            console.log(ary)
-                            for(var j=0;j<ary.length;j++) {
-                                console.log(ary[j])
-                                if(ary[j]!=""){
-                                    if((","+s.replace(ary[j]+",","")).indexOf(","+ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要提交重复手机号',
-                                            type: 'warning'
-                                        });
-                                        return;
-                                    }
-                                }
-                                
-                            }   
-                            // 如果输入的是非数字
-                            if(/^[0-9]*$/.test(domains[i].value) == false){
-                                this.$message({
-                                    message: '请输入数字',
-                                    type: 'warning'
-                                });
-                                return;
-                            }
-
-                        }
-                        // 按钮变化
-                        this.buttonType='B';
-                        console.log('submit!!');
-                        // 关闭弹窗
-                        this.dialogFormVisible = false;
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
-            },
             removeDomain(item) {
                 var index = this.dynamicValidateForm.domains.indexOf(item);
                 var itemLength = this.dynamicValidateForm.domains.length;                
@@ -1028,13 +950,8 @@
                 });  	
             },
             number(){
-    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
-                this.form.customerPhone=this.form.customerPhone.replace('.','');
-                if(this.form.customerPhone.length==11){
-                    this.isDisabled=false;
-                }else{
-                    this.isDisabled=true;
-                }
+    　　　      this.form.linkPhone=this.form.linkPhone.replace(/[^\.\d]/g,'');
+                this.form.linkPhone=this.form.linkPhone.replace('.','');
         　  },
             phoneNumber(){
                 var domains=this.dynamicValidateForm.domains;
