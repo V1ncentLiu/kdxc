@@ -624,8 +624,8 @@
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         //----资源基本信息---//
-                    	 var clueBasic={};
-                    	 var clueProject={};
+                    	var clueBasic={};
+                    	var clueProject={};
                      	//资源类型
                     	var resource=this.form.resource;
                     	clueBasic.type=resource;
@@ -659,9 +659,7 @@
                    	    //手机号
                     	var  linkPhone=this.form.linkPhone;
                     	clueCustomer.linkPhone=linkPhone;
-                        //邀约来访时间
-                        var  reserveTime=this.form.reserveTime;
-                        clueCustomer.reserveTime=reserveTime;
+                        
                    	    //性别
                     	var customerSex=this.form.customerSex;
                     	clueCustomer.sex=customerSex;
@@ -700,7 +698,7 @@
                 	    clueCustomer.qq=qq;
                    	    var phoneArr=this.dynamicValidateForm.domains;
                 	    if(phoneArr.length>0){
-                	     for(var i=0;i<phoneArr.length;i++){
+                	        for(var i=0;i<phoneArr.length;i++){
                 	    	 if(i==0)  {
                 	    		 clueCustomer.phone2=phoneArr[i].value;	 
                 	         }
@@ -713,20 +711,19 @@
                 	    	 if(i==3)  {
                 	    		 clueCustomer.phone5=phoneArr[i].value;	 
                 	         }
-                	      }
-                	    }
-                	    
+                	        }
+                	    }                	    
                 	    //----投资意向---//
                 	    var  clueIntention={};
                 	    //投资金额
                 	    var  money=this.form.money; 
                 	    clueIntention.advanceAmount=money;
                 	    //店面大小
-                	   var  area= this.form.area;
-                	   clueIntention.area=area;
+                	    var  area= this.form.area;
+                	    clueIntention.area=area;
                 	    //意向品类
-                	   var intentionCategory=this.form.intentionCategory;
-                	   clueIntention.purType=intentionCategory;
+                	    var intentionCategory=this.form.intentionCategory;
+                	    clueIntention.purType=intentionCategory;
                 	    //意向项目
                 	    var radioProject= this.form.radioProject;
                 	    clueIntention.purProjectType=radioProject;
@@ -817,25 +814,28 @@
                	         //区县
                 	    var district= this.form.district;
                 	    clueIntention.district=district;
-               	       var clue={};
-               	      clue.clueCustomer=clueCustomer;
-               	      clue.clueIntention=clueIntention; 
-               	      clue.clueBasic=clueBasic;
-               	      clue.clueProject=clueProject;
-               	      addCustomerVM.confirmBtnDisabled=true;//禁用提交按钮
-                      axios.post('/aggregation/businessMyCustomer/saveCreateClue',clue)
-                      .then(function (response) {
-                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+               	        var clue={};
+               	        clue.clueCustomer=clueCustomer;
+               	        clue.clueIntention=clueIntention; 
+               	        clue.clueBasic=clueBasic;
+               	        clue.clueProject=clueProject;
+                        //邀约来访时间
+                        var  reserveTime=this.form.reserveTime;
+                        clue.reserveTime=reserveTime;
+               	        addCustomerVM.confirmBtnDisabled=true;//禁用提交按钮
+                        axios.post('/aggregation/businessMyCustomer/saveCreateClue',clue)
+                        .then(function (response) {
+                    	    addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                    		    window.location.href="/aggregation/businessMyCustomer/listPage"; 
-                   		// addCustomerVM.confirmBtnDisabled=false;
-   		        	   }});
-                     }).catch(function (error) {
+                   		   // addCustomerVM.confirmBtnDisabled=false;
+   		        	    }});
+                    }).catch(function (error) {
                         addCustomerVM.confirmBtnDisabled=false;
-                     })
-                     .then(function(){
+                    })
+                    .then(function(){
                  		//addCustomerVM.confirmBtnDisabled=false;//启用提交按钮
                  		
-                   });
+                    });
                     } else {
                         console.log('error submit!!');
                         return false;
