@@ -110,35 +110,24 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth">
-                           <el-input v-model="form.customerName" autocomplete="off" maxLength="10" style="width: 200px;"></el-input>
+                           <el-input v-model="form.customerName" autocomplete="off" maxLength="20" style="width: 200px;"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                            <el-input v-model="form.customerPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number" maxlength="11"></el-input>
-                            <!-- <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button> -->
-                            <span v-if="buttonType === 'A'">
-                                <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true" style="padding:7px 5px;"><i class="el-icon-plus"></i>手机号</el-button>
-                            </span>
-                            <span v-else-if="buttonType === 'B'">    
-                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
-                            </span>
+                        <el-form-item label="联系电话：" prop="customerPhone" :label-width="formLabelWidth">
+                            <el-input v-model="form.customerPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number" maxlength="20"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="性别：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 200px;">
-                                <el-option
-                                    v-for="item in optsex"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                        <el-form-item label="邀约来访时间：" prop="inviteTime" :label-width="formLabelWidth">
+                         <el-date-picker
+                                style="width: 200px;"
+                                v-model="form.inviteTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                       <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
                         <el-input v-model="form.wechat" autocomplete="off" style="width: 200px;margin-right: 10px;" maxLength="20"></el-input>
@@ -163,12 +152,22 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
+                        <el-form-item label="性别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in optsex"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
                         <el-form-item label="年龄：" :label-width="formLabelWidth" prop="customerAge" >
                            <el-input type="number" min="1" v-model="form.customerAge" autocomplete="off" maxLength="3" @keyup.native="agenumber" style="width: 200px;"></el-input>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="职业：" :label-width="formLabelWidth">
                            <el-select v-model="form.customerJob" placeholder="请选择" style="width: 200px;">
@@ -205,8 +204,6 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="开店紧迫性：" :label-width="formLabelWidth">
                           <span>   
@@ -279,7 +276,7 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="意向项目：" :label-width="formLabelWidth">
+                        <el-form-item label="意向项目：" :label-width="formLabelWidth" prop="insideProject">
                             <!--<el-radio v-model="form.radioProject" label="1" @change="projectChange" style="margin-right: 10px;">内部项目</el-radio>-->
                             <el-select v-model="form.insideProject" v-show="insideProjectShow" placeholder="请选择" style="width: 200px;" clearable filterable>
                                 <el-option
@@ -294,7 +291,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="16">
-                        <el-form-item label="开店区域：" :label-width="formLabelWidth" style="float: left;margin-right: 10px;">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth" prop="province" style="float: left;margin-right: 10px;">
                            <el-select filterable v-model="form.province" placeholder="省" style="width: 200px;"  @change="currentProvince">
                                 <el-option
                                     v-for="item in provinceArr"
@@ -304,7 +301,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="" style="float: left;">
+                        <el-form-item label="" style="float: left;" prop="city">
                            <el-select filterable v-model="form.city" placeholder="市" style="width: 200px;margin-right: 10px;" @change="currentCity" >
                                 <el-option
                                     v-for="item in cityArr"
@@ -314,7 +311,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="" style="float: left;">
+                        <el-form-item label="" style="float: left;" prop="district">
                            <el-select filterable v-model="form.district" placeholder="区/县" style="width: 200px;">
                                 <el-option
                                     v-for="item in districtArr"
@@ -493,7 +490,11 @@
                     outsideProject:'',
                     province:'',
                     city:'',
-                    district:''
+                    district:'',
+                    inviteTime:'',//邀约来访时间
+                    province:'',
+                    city:'',
+                    district:'',
                 },
               wechatForm: {
                 wechat2:'',
@@ -517,7 +518,7 @@
                 districtArr:[],
                 projectSelect:proSelect,
                 proSelect:purProSelect, 
-                formLabelWidth: '80px',
+                formLabelWidth: '120px',
                 formLabelWidth1: '140px',
                 rules:{
                      customerName: [
@@ -545,7 +546,22 @@
                             } 
                             callback();
                         }, trigger: 'blur'}
-                    ]
+                    ],
+                    inviteTime: [
+                        { required: true, message: '邀约来访时间不能为空', trigger: 'blur' }
+                    ],
+                    insideProject: [
+                        { required: true, message: '请选择意向项目', trigger: 'blur' }
+                    ],
+                    province: [
+                        { required: true, message: '请选择开店区域的省份', trigger: 'blur' }
+                    ],
+                    city: [
+                        { required: true, message: '请选择开店区域的城市', trigger: 'blur' }
+                    ],
+                    district: [
+                        { required: true, message: '请选择开店区域的区/县', trigger: 'blur' }
+                    ],
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
@@ -830,7 +846,7 @@
                       axios.post('/tele/clueMyCustomerInfo/saveCreateClue',clue)
                       .then(function (response) {
                     	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                   		    window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+                   		    window.location.href="/aggregation/businessMyCustomer/listPage"; 
                    		// addCustomerVM.confirmBtnDisabled=false;
    		        	   }});
                      }).catch(function (error) {
