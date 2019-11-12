@@ -988,23 +988,26 @@ var clueVM = new Vue({
                       this.repeatApplyNumber();
                    }
                    //校验
-                   var signId = rows[0].signId;
-                   var param = {};
-                   param.signId = signId;
-                   param.payDetailId=rows[0].payId;
-                   axios.post('/financing/balanceaccount/validateBalance', param).then(function (response) {
-                       var result =  response.data;
-                       if(result.data == 1){
-                           clueVM.$message({
-                               message: "当前签约单还有付款明细未提交对账",
-                               type: 'warning'
-                           });
-                           return;
-                       }
-                       clueVM.submitApplyVisible = true;
-                   }).catch(function (error) {
-                       console.log(error);
-                   });
+                   if(rows[0].payType != "全款" && rows[0].payType != "定金"){
+                       var signId = rows[0].signId;
+                       var param = {};
+                       param.signId = signId;
+                       param.payDetailId=rows[0].payId;
+                       axios.post('/financing/balanceaccount/validateBalance', param).then(function (response) {
+                           var result =  response.data;
+                           if(result.data == 1){
+                               clueVM.$message({
+                                   message: "当前签约单还有付款明细未提交对账",
+                                   type: 'warning'
+                               });
+                               return;
+                           }
+                           clueVM.submitApplyVisible = true;
+                       }).catch(function (error) {
+                           console.log(error);
+                       });
+                   }
+                   clueVM.submitApplyVisible = true;
                },
                //结算确认
                settlementConfirm(form) {
