@@ -17,7 +17,7 @@ var homePageVM = new Vue({
 			dialogModifyPwdVisible: false,//修改密码dialog 是否显示
 			dialogLogoutVisible: false,//退出登录 dialog
 			skinVal: getCookieVal("skinVal") ? getCookieVal("skinVal") : 1,//1蓝色 //2白色 皮肤切换
-			skinStatus: false,
+			skinStatus: getCookieVal("skinVal")==2 ? true : false,
 			modifyForm: {
 				'oldPassword': '',
 				'newPassword': '',

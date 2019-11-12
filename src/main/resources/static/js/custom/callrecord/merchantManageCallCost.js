@@ -49,7 +49,12 @@ var myCallRecordVm = new Vue({
     isActive3: false,
     isActive4: false,
     totalCost: 0,
-    colorStatus: false
+    colorStatus: false,
+    rowStatus: false,
+    minStatus: false,
+    fullWidth: document.documentElement.clientWidth,
+
+
 
   },
   methods: {
@@ -68,30 +73,6 @@ var myCallRecordVm = new Vue({
       }
       return text;
     },
-
-    // _initData() {
-    //   this.callRecordData = [{
-    //     costMonth: "客户姓名",
-    //     businessAccountName:"zahng",
-    //     bindAccountName: "客户电话",
-    //     seatNumber: "电话归属地",
-    //     seatPhone: "热线号码",
-    //     monthRent: "拨打账户",
-    //     cost: "坐席电话",
-    //     callNumber: "开始服务时间",
-    //   },
-    //   {
-    //     costMonth: "客户姓名",
-    //     businessAccountName:"zahng",
-    //     bindAccountName: "客户电话",
-    //     seatNumber: "电话归属地",
-    //     seatPhone: "热线号码",
-    //     monthRent: "拨打账户",
-    //     cost: "坐席电话",
-    //     callNumber: "开始服务时间",
-    //   }]
-
-    // },
     initCallRecordData(val) {
       if (val && val == "1") {
         this.isActive1 = false;
@@ -395,13 +376,30 @@ var myCallRecordVm = new Vue({
         this.isShow = true
       }
     },
-    // clearTeleGroupList(selectedValue) {
-    //   this.teleGroupList = [];
-    //   this.tmList = [];
-    //   this.searchForm.accountId = '';
-    //   this.searchForm.teleGroupId = '';
-    // }
-
+    handleResize(event) {
+      this.fullWidth = document.documentElement.clientWidth;
+      console.log(this.fullWidth, "this.fullWidth");
+      let that = this;
+      this.$nextTick(() => {
+        let childrenLength = that.$refs.itemBox.children.length;
+        if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+          that.rowStatus = true;
+          that.minStatus = false;
+        }
+        else if (that.fullWidth <= 1400 && childrenLength >= 4) {
+          that.rowStatus = true;
+          that.minStatus = true;
+        }
+        else if (that.fullWidth > 1400 && that.fullWidth < 1500 && childrenLength <= 4) {
+          that.rowStatus = true;
+          that.minStatus = true;
+        }
+        else {
+          that.rowStatus = false;
+          that.minStatus = false;
+        }
+      })
+    }
 
   },
   created() {
@@ -419,6 +417,19 @@ var myCallRecordVm = new Vue({
     // });
     //电销总监电销组筛选按钮不可点击
     this.searchYesterday();
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize();
+    //监听父窗口信息
+    // 接受父页面发来的信息
+    window.addEventListener("message", function (event) {
+      var data = event.data;
+      switch (data.cmd) {
+        case 'getFormJson':
+          oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+          // 处理业务逻辑
+          break;
+      }
+    });
   },
   mounted() {
     document.getElementById('myCallRecordVm').style.display = 'block';
