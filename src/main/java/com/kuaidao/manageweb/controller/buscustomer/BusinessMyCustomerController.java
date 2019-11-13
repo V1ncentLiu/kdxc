@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -292,7 +293,7 @@ public class BusinessMyCustomerController {
      * @param model
      * @return
      */
-    @PostMapping("/createClue")
+    @GetMapping("/createClue")
   //  @RequiresPermissions("business:busCustomerManager:add")
     public String createClue(HttpServletRequest request, Model model) {
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -392,6 +393,7 @@ public class BusinessMyCustomerController {
                 }
             }
         }
+
         dto.setCirculationInsertOrUpdateDTO(getCircul(user,dto.getClueId()));
         JSONResult<Boolean> customerClue = busMyCustomerFeignClient.createCustomerClue(dto);
         return customerClue;
