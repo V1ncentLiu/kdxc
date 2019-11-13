@@ -51,9 +51,9 @@
             <el-row>                
                 <el-col :span="12">
                     <el-form-item label="周期内设定有效日：" :label-width="formLabelWidth">
-                        <el-radio v-model="form.radio" label="0">每天</el-radio>
-                        <el-radio v-model="form.radio" label="1" style="margin: 0 10px 0 15px;">特殊设定</el-radio>
-                        <el-select v-model="form.days" filterable  multiple placeholder="请选择" style="width: 135px;">
+                        <el-radio v-model="form.radio" label="0" @change="changeDays">每天</el-radio>
+                        <el-radio v-model="form.radio" label="1" @change="changeDays" style="margin: 0 10px 0 15px;">特殊设定</el-radio>
+                        <el-select v-model="form.days" v-show="showDays" filterable  multiple placeholder="请选择" style="width: 135px;">
                             <el-option
                                 v-for="item in weeksOptions"
                                 :key="item.value"
@@ -387,7 +387,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         //      unlimitedVal:'',//不限-1取值
                         //      unlimitedShow:false,//是否显示不限input
                         // }
-                    ],                    
+                    ],                                      
                     radio:"0",//默认选每天
                     days:[],
                     dayTimeStart:"00:00:00",
@@ -415,6 +415,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     value: "1",
                     name: '星期日'
                 }],
+                showDays:false,//默认不显示星期  
                 formLabelWidth: '180px',
                 rules:{
                     ruleName: [
@@ -509,6 +510,14 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             }        	  
         },
         methods: {
+            changeDays(val){
+                console.log(val)
+                if(val=="0"){
+                    this.showDays=false;
+                }else{
+                    this.showDays=true;
+                }
+            },
             unlimitedBtn(index, rows){                
                 rows[index].unlimitedShow=true; 
                 rows[index].unlimited="不限";
