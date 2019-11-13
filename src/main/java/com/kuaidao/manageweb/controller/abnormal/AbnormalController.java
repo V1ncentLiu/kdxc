@@ -72,6 +72,12 @@ public class AbnormalController {
     public JSONResult<List<DictionaryItemRespDTO>> abnoramlType() {
         JSONResult result = dictionaryItemFeignClient
                 .queryDicItemsByGroupCode(DicCodeEnum.DIC_ABNORMALUSER.getCode());
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(!roleCode.equals(RoleCodeEnum.GLY.name())){
+            List<DictionaryItemRespDTO> list = (List<DictionaryItemRespDTO>) result.getData();
+            list.removeIf(dictionaryItemRespDTO -> dictionaryItemRespDTO.getName().equals("黑名单"));
+        }
         return result;
     }
 

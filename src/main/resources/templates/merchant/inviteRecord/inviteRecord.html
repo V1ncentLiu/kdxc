@@ -71,16 +71,6 @@
       width: calc(100% - 200px);
     }
 
-    .mainSearchForm {
-      display: flex;
-      max-width: auto;
-      justify-content: space-between;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      width: auto;
-      max-width: 1110px;
-      margin: 0 auto;
-    }
 
     .mainSearchBtnBox {
       margin-bottom: 0;
@@ -188,8 +178,8 @@
     </el-breadcrumb>
     <div class="mainSearchBg">
       <div class="mainSearchFormBox">
-        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-          <div class="main-search-box">
+        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form" :class="{'rowMore':rowStatus,'minMore':minStatus}">
+          <div class="main-search-box" ref="itemBox" :class="{'rowMore':rowStatus}">
             <el-form-item label="客户姓名:" prop="cusName">
               <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
             </el-form-item>
@@ -222,7 +212,7 @@
               </el-select>
             </el-form-item>
           </div>
-          <div class="mainSearchBtnBox">
+          <div class="mainSearchBtnBox" :class="{'rowMore':rowStatus}">
 
             <el-button type="primary" @click="searchTable('form')" class="searchBtn">
               搜索</el-button>
@@ -260,7 +250,11 @@
   var merchantUserList = [[${ merchantAppiontUserList }]]; //接待人
   var proSelect = [[${ proSelect }]]; //考察项目
   var oLink = document.getElementById("skinCss");
-  console.log(oLink,"oLink");
+  if (getCookieVal("skinVal")) {
+    oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+  } else {
+    oLink['href'] = "/css/common/merchant_base1.css";
+  }
   // merchantUserList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
   // proSelect = [{ id: "1", projectName: "项目一" }, { id: "1", projectName: "项目二" }];
   var ocmVM = new Vue({
@@ -291,7 +285,10 @@
         },
         formLabelWidth: '120px',
         dataTable: [],
-        colorStatus: false
+        colorStatus: false,
+        rowStatus: false,
+        minStatus: false,
+        fullWidth: document.documentElement.clientWidth,
       }
     },
     directives: {
@@ -334,8 +331,6 @@
         param.pageNum = this.pager.currentPage;
         param.projectId = this.form.proSelect;
         param.province = this.form.province;
-        console.info(param);
-        // this._initData();
         axios.post('/merchant/merchantAppiontment/queryPage', param)
           .then(function (response) {
             var result = response.data;
@@ -365,19 +360,33 @@
           this.$refs[formName].resetFields();
         }
       },
+      handleResize(event) {
+        this.fullWidth = document.documentElement.clientWidth;
+        console.log(this.fullWidth, "this.fullWidth");
+        let that = this;
+        this.$nextTick(() => {
+          let childrenLength = that.$refs.itemBox.children.length;
+          if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+            that.rowStatus = true;
+            that.minStatus = false;
+          }
+          else if (that.fullWidth <= 1400 && childrenLength >= 4) {
+            that.rowStatus = true;
+            that.minStatus = true;
+          }
+          else if(that.fullWidth > 1400 &&that.fullWidth < 1500 && childrenLength <= 4){
+            that.rowStatus = true;
+            that.minStatus = true;
+          }
+          else {
+            that.rowStatus = false;
+            that.minStatus = false;
+          }
+          console.log(that.rowStatus, "that.rowStatus");
+        })
+      },
     },
     created() {
-      window.addEventListener("message", function (event) {
-        var data = event.data;
-        switch (data.cmd) {
-          case 'getFormJson':
-            oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
-            // 处理业务逻辑
-            break;
-        }
-      });
-      console.log(getCookieVal("skinVal"),"getCookieValskinVal");
-      oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
       var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
       if (localVal) {
         this.pager.pageSize = localVal;
@@ -387,6 +396,17 @@
       param.type = "0";
       axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
         ocmVM.provinceArr = response.data.data.data;
+      });
+      window.addEventListener('resize', this.handleResize)
+      this.handleResize();
+      window.addEventListener("message", function (event) {
+        var data = event.data;
+        switch (data.cmd) {
+          case 'getFormJson':
+            oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+            // 处理业务逻辑
+            break;
+        }
       });
     },
     mounted() {
