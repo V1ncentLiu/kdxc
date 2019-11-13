@@ -1067,8 +1067,13 @@ var homePageVM = new Vue({
 		}
 	  },
 	created() {
-		oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
-		oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		if(getCookieVal("skinVal")){
+			oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		}else{
+			oLink['href'] = "/css/common/merchant_base1.css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index1.css";
+		}		
 		if (this.hasBuyPackage) {
 			this.loginQimoClient();
 		}
