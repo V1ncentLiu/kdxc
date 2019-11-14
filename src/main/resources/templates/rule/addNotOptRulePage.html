@@ -172,7 +172,51 @@
                     </el-form-item>
                 </el-col>
             </el-row>
-            
+            <!-- 显示新增的标签 -->
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
+                        <el-tag
+                            v-for="tag in tags3"
+                            :key="tag"
+                            closable
+                            @close="deleteFun3(tag)"
+                            style="margin-right: 10px;">
+                            {{tag}}
+                        </el-tag>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12" style="float: right;">
+                    <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
+                        <el-tag
+                            v-for="tag in tags4"
+                            :key="tag"
+                            closable
+                            @close="deleteFun4(tag)"
+                            style="margin-right: 10px;">
+                            {{tag}}
+                        </el-tag>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="包含省：" :label-width="formLabelWidth" style="float: left;">
+                        <el-input v-model="form.province" autocomplete="off"  maxlength="50" style="width: 224px;margin-right: 6px;"></el-input>                            
+                    </el-form-item>
+                    <el-form-item style="float: left;">
+                        <el-button type="primary" @click="addFun3">添加</el-button>           
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="不包含省：" :label-width="formLabelWidth" style="float: left;">
+                        <el-input v-model="form.notProvince" autocomplete="off"  maxlength="50" style="width: 224px;margin-right: 6px;"></el-input>
+                    </el-form-item>
+                    <el-form-item style="float: left;">
+                        <el-button type="primary" @click="addFun4">添加</el-button>           
+                    </el-form-item>
+                </el-col>
+            </el-row>
             <el-row>
                 <el-form-item label="是否启用：" prop="isUse" :label-width="formLabelWidth">
                     <el-select v-model="form.status" placeholder="请选择" style="width: 300px;">
@@ -352,6 +396,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                     category:[],
                     searchWord:'',
                     notSearchWord:'',
+                    province:'',
+                    notProvince:'',
                     status:1,
                     teleRuleTeamList: [],
                     trafficRuleTeamList: [],
@@ -480,6 +526,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                 }],
                 tags1: [],//包含搜索词
                 tags2: [],//不包含搜索词
+                tags3: [],//包含省
+                tags4: [],//不包含省
             }        	  
         },
         methods: {
@@ -598,6 +646,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         param.category=form.category.join(',');
                         param.searchWord=this.tags1.join(',');
                         param.notSearchWord=this.tags2.join(',');
+                        param.province=this.tags3.join(',');
+                        param.notProvince=this.tags4.join(',');  
                         aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/notOptRule/save', param)
 	       	            .then(function (response) {
@@ -645,6 +695,26 @@ var adsenseList=[[${adsenseList}]];//广告位集合
             },
             deleteFun2(tag) {//删除不包含搜索词
                 this.tags2.splice(this.tags2.indexOf(tag), 1);
+            },
+            addFun3() {//添加包含省
+                let province = this.form.province;
+                if (province) {
+                    this.tags3.push(province);
+                }
+                this.form.province = '';
+            },
+            deleteFun3(tag) {//删除包含省
+                this.tags3.splice(this.tags3.indexOf(tag), 1);
+            },
+            addFun4() {//添加不包含省
+                let notProvince = this.form.notProvince;
+                if (notProvince) {
+                    this.tags4.push(notProvince);
+                }
+                this.form.notProvince = '';
+            },
+            deleteFun4(tag) {//删除不包含省
+                this.tags4.splice(this.tags4.indexOf(tag), 1);
             },
             addDomain() {
                 console.log(businessLineList)
