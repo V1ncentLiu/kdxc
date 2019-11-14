@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -74,6 +79,8 @@ public class CallRecordController {
     
     @Value("${missedCall.business}")
     private String missedCallBusiness;
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
     /**
      * 记录拨打时间
      */
@@ -176,7 +183,21 @@ public class CallRecordController {
         if(RoleCodeEnum.JC.name().equals(roleCode)){
             request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(curLoginUser.getBusinessLine()));
         }
-
+    // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("aggregation:telCallRecord");
+        queryFieldByRoleAndMenuReq.setId(curLoginUser.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(curLoginUser.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(curLoginUser.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("aggregation:telCallRecord");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());

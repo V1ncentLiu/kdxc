@@ -3,7 +3,9 @@
 
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
     <title>后台管理系统</title>
-    <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}">
+    <link rel="stylesheet" href="" id="skinCss">
+    <!-- <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}"> -->
+    <!-- <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login1.css}"> -->
     <style>
         /*去掉type为number的箭头*/
         input::-webkit-outer-spin-button,
@@ -40,6 +42,7 @@
     </div>
     <div id="header_top">
         <div class="headerimage"><img th:src="@{/images/merchantlogo.png}" alt=""></div>
+        <!-- <div class="headerimage"><img th:src="@{/images/skin1/merchantlogo1.png}" alt=""></div> -->
         <!-- <span>汇聚系统</span> -->
     </div>
     <div id="loginbox" class="loginbox loginboxbar">
@@ -146,6 +149,7 @@
     var error = [[${ error }]];
     var verificationCodeShow = [[${ verificationCodeShow }]];
     var disType = "";
+    var oLink =  document.getElementById("skinCss");
     var vm = new Vue({
         el: '#loginbox',
         data: {
@@ -155,9 +159,6 @@
                 region: '',
                 type: ''
             },
-
-
-
             buttonName: "获取语音验证码",
             isDisabled: false,
             loginDisabled: true,
@@ -380,6 +381,15 @@
             }
         },
         created() {
+            
+            if(window.sessionStorage.getItem("skinVal")){
+               var skinVal= window.sessionStorage.getItem("skinVal")
+               oLink['href'] = "/css/custom/merchantlogin/login" + skinVal + ".css";
+            }else{
+                oLink['href'] = "/css/custom/merchantlogin/login1.css";
+            }
+
+            
             document.body.removeChild(document.getElementById('Loading'));
             var isShowLogoutBox = [[${ isShowLogoutBox }]];
             if ("1" == isShowLogoutBox) {
