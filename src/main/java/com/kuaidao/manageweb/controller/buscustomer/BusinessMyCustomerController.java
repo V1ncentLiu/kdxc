@@ -1,5 +1,22 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
+import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
+import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,11 +25,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +87,19 @@ public class BusinessMyCustomerController {
 
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
+
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
+
+
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
+
 
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request) {
@@ -250,4 +286,158 @@ public class BusinessMyCustomerController {
         }
         return null;
     }
+
+    /**
+     *商务客户管理创建资源
+     * @param request
+     * @param model
+     * @return
+     */
+    @GetMapping("/createClue")
+  //  @RequiresPermissions("business:busCustomerManager:add")
+    public String createClue(HttpServletRequest request, Model model) {
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            model.addAttribute("proSelect", proJson.getData());
+        }
+        model.addAttribute("ossUrl", ossUrl);
+        // 系统参数优化资源类别
+        String optList = getSysSetting(SysConstant.OPT_CATEGORY);
+        request.setAttribute("optList", optList);
+        // 系统参数非优化资源类别
+        String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
+        request.setAttribute("notOptList", notOptList);
+        return "clue/addCustomerResourcesBusiness";
+    }
+
+    /**
+     * 新建资源保存
+     *
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/saveCreateClue")
+    @ResponseBody
+    @LogRecord(description = "新建资源保存", operationType = OperationType.INSERT,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
+    public JSONResult<Boolean> saveCreateClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        if (null != user) {
+            // 添加创建人
+            if (null != dto) {
+                ClueCustomerDTO cus = dto.getClueCustomer();
+                if (null != cus) {
+                    cus.setCreateUser(user.getId());
+                    cus.setCreateTime(new Date());
+                }
+                ClueBasicDTO basic = dto.getClueBasic();
+                if (null != basic) {
+                    // 添加创建人
+                    basic.setCreateUser(user.getId());
+                    basic.setCreateTime(new Date());
+                }
+                if (user.getBusinessLine() != null) {
+                    basic.setBusinessLine(user.getBusinessLine());
+                }
+                dto.setClueBasic(basic);
+            }
+
+            // 商务关联数据
+            ClueRelateDTO relation = new ClueRelateDTO();
+            // 商务顾问
+            relation.setBusSaleId(user.getId());
+            // 商务组
+            relation.setBusGroupId(user.getOrgId());
+            dto.setClueRelate(relation);
+
+            UserOrgRoleReq userRole = new UserOrgRoleReq();
+            userRole.setRoleCode(RoleCodeEnum.SWZJ.name());
+            userRole.setOrgId(user.getOrgId());
+            List<Integer> statusList = new ArrayList();
+            statusList.add(1);
+            userRole.setStatusList(statusList);
+            JSONResult<List<UserInfoDTO>> userInfoJson =
+                userInfoFeignClient.listByOrgAndRole(userRole);
+            if (userInfoJson != null && JSONResult.SUCCESS.equals(userInfoJson.getCode())
+                && userInfoJson.getData() != null && userInfoJson.getData().size() > 0) {
+                // 商务总监
+                relation.setBusDirectorId(userInfoJson.getData().get(0).getId());
+            }
+            // 查询用户的上级
+            OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+            orgDto.setId(user.getOrgId());
+            orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+            JSONResult<List<OrganizationDTO>> orgJson =
+                organizationFeignClient.listParentsUntilOrg(orgDto);
+            if (orgJson != null && JSONResult.SUCCESS.equals(orgJson.getCode())
+                && orgJson.getData() != null && orgJson.getData().size() > 0) {
+                for (OrganizationDTO org : orgJson.getData()) {
+                    if (null != org.getOrgType()
+                        && org.getOrgType().equals(OrgTypeConstant.SWDQ)) {
+                        //商务大区
+                        relation.setBusAreaId(org.getId());
+                        UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+                        userRoleInfo.setRoleCode(RoleCodeEnum.SWDQZJ.name());
+                        userRoleInfo.setOrgId(org.getId());
+                        JSONResult<List<UserInfoDTO>> ceoUserInfoJson =
+                            userInfoFeignClient.listByOrgAndRole(userRoleInfo);
+                        if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS)
+                            && null != ceoUserInfoJson.getData()
+                            && ceoUserInfoJson.getData().size() > 0) {
+                            // 商务大区总监
+                            relation.setBusAreaDirectorId(ceoUserInfoJson.getData().get(0).getId());
+                        }
+
+                    }
+                }
+            }
+        }
+
+        dto.setCirculationInsertOrUpdateDTO(getCircul(user,dto.getClueId()));
+        JSONResult<Boolean> customerClue = busMyCustomerFeignClient.createCustomerClue(dto);
+        return customerClue;
+    }
+
+    /**
+     *  流转记录
+     */
+    private CirculationInsertOrUpdateDTO getCircul(UserInfoDTO user,Long clueId){
+        // 保存流转记录
+        CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
+        circul.setAllotUserId(user.getId());
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            circul.setAllotRoleId(user.getRoleList().get(0).getId());
+        }
+//        circul.setTeleReceiveSource(
+//            ClueCirculationConstant.TELE_RECEIVE_SOURCE.TELE_CREATE.getCode());
+        circul.setServiceStaffRole(ClueCirculationConstant.SERVICE_STAFF_ROLE.BUSINESS_MANAGER.getCode());
+        circul.setClueId(clueId);
+        circul.setAllotOrg(user.getOrgId());
+        circul.setUserId(user.getId());
+        // 新资源类型，电销自己创建的和话务主管转给话务的新资源类型一致
+        circul.setNewResource(ClueCirculationConstant.NewResource.OTHER_RESOURCE.getCode());
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            circul.setRoleId(user.getRoleList().get(0).getId());
+        }
+        circul.setOrg(user.getOrgId());
+        return circul;
+    }
+
+    /**
+     * 查询系统参数
+     *
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
+
 }

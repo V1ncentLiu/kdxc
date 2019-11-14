@@ -4,7 +4,9 @@
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
 
     <title>后台管理系统</title>
-    <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}">
+    <link rel="stylesheet" href="" id="skinCss">
+    <!-- <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login.css}"> -->
+    <!-- <link rel="stylesheet" th:href="@{/css/custom/merchantlogin/login1.css}"> -->
     <style>
        /* #aboutUs {
             position: fixed;
@@ -56,6 +58,7 @@
     </div>
     <div id="header_top">
         <div class="headerimage"><img th:src="@{/images/merchantlogo.png}" alt=""></div>
+        <!-- <div class="headerimage"><img th:src="@{/images/skin1/merchantlogo1.png}" alt=""></div> -->
 
         <!-- <div class="headerimage"><img th:src="@{/images/logoimg.png}" alt=""></div> -->
         <!-- <span>汇聚系统</span> -->
@@ -133,7 +136,8 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script>
-var vm =  new Vue({
+    var oLink =  document.getElementById("skinCss");
+    var vm =  new Vue({
         el: '#loginbox',
         data: {
           buttonName: "获取语音验证码",
@@ -308,6 +312,12 @@ var vm =  new Vue({
               }
         },
         created() {  
+            if(window.sessionStorage.getItem("skinVal")){
+               var skinVal= window.sessionStorage.getItem("skinVal")
+               oLink['href'] = "/css/custom/merchantlogin/login" + skinVal + ".css";
+            }else{
+                oLink['href'] = "/css/custom/merchantlogin/login1.css";
+            }
             document.body.removeChild(document.getElementById('Loading'));
             if (this.$refs['resetPwdForm']!==undefined) {
         		this.$refs['resetPwdForm'].resetFields();

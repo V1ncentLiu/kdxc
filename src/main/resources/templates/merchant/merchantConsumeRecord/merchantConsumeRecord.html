@@ -5,7 +5,7 @@
 <head th:include="_header_include::frag(~{::title},~{::link},~{})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <style>
         .el-date-picker__time-header {
             display: none;
@@ -33,12 +33,14 @@
                             <div class="time-style" :class="{'selectActive':colorStatus}">
                                 <el-form-item label-width="auto" class="call-time" prop="createDateStart">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.createDateStart" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始时间">
+                                        v-model="form.createDateStart" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择开始时间">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="createDateEnd">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.createDateEnd" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun"  placeholder="选择结束时间">
+                                        v-model="form.createDateEnd" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择结束时间">
                                     </el-date-picker>
                                 </el-form-item>
                             </div>
@@ -83,6 +85,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList = [[${ userList }]];//商户集合
+    var oLink = document.getElementById("skinCss");
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -101,7 +104,7 @@
                 formLabelWidth: '120px',
                 dataTable: [],
                 merchantUserListOptions: merchantUserList,
-                colorStatus:false
+                colorStatus: false
             }
         },
         methods: {
@@ -118,12 +121,12 @@
             handleForbid(index, row) {
                 console.log(index, row);
             },
-            changeNameFun(){
-                this.colorStatus=false;
-            },
-            setColor(){
-                this.colorStatus=true;
-            },
+            changeNameFun() {
+                this.colorStatus = false;
+            },
+            setColor() {
+                this.colorStatus = true;
+            },
             searchTable() {
                 var startTime = this.form.createDateStart;
                 var endTime = this.form.createDateEnd;
@@ -179,6 +182,16 @@
             },
         },
         created() {
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
+            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
             var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
             if (localVal) { this.pager.pageSize = localVal; }
             // console.info("create method");

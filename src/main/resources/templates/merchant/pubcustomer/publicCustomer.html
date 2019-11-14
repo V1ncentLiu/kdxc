@@ -1,277 +1,341 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>公有池</title>
-<link rel="stylesheet" href="/css/common/merchant_base.css">
+    <link rel="stylesheet" href="" id="skinCss">
     <style>
-        button a{color:#fff!important;}
-        .formItem,.formItem .el-form-item__content{width:100%}
-        .button-menu{margin-top:30px;}
+        button a {
+            color: #fff !important;
+        }
+
+        .formItem,
+        .formItem .el-form-item__content {
+            width: 100%
+        }
+
+        .button-menu {
+            margin-top: 30px;
+        }
     </style>
 </head>
+
 <body>
 
-<div v-loading="loading" id="mainDiv"  class="mainPadding" style="display: none;">
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
-        <el-breadcrumb-item>公海营销</el-breadcrumb-item>
-    </el-breadcrumb>
-    
-    <div class="mainSearchBg">
-        <div class="mainSearchFormBox">
-            <el-form :inline="true" :model="queryForm" class="demo-form-inline mainSearchForm" ref="queryForm" >
-                    <div class="main-search-box">    
-                <el-form-item label="资源类型:"  prop="type">
-                        <el-select v-model="queryForm.type" placeholder="资源类型" width="100" clearable>
-                            <el-option v-for="item in typeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源类别:"  prop="category">
-                        <el-select v-model="queryForm.category" placeholder="资源类别" width="100" clearable>
-                            <el-option v-for="item in categoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="行业类别:"  prop="industryCategory">
-                        <el-select v-model="queryForm.industryCategory" placeholder="行业类别" width="100" clearable>
-                            <el-option v-for="item in industryCategoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="搜索词:" prop="searchWord">
-                        <el-input  v-model="queryForm.searchWord" placeholder="搜索词"></el-input>
-                    </el-form-item>
+    <div v-loading="loading" id="mainDiv" class="mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+            <el-breadcrumb-item>公海营销</el-breadcrumb-item>
+        </el-breadcrumb>
+
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" :model="queryForm" class="demo-form-inline mainSearchForm" ref="queryForm"
+                    :class="{'rowMore':rowStatus,'minMore':minStatus}">
+                    <div class="main-search-box" ref="itemBox" :class="{'rowMore':rowStatus}">
+                        <el-form-item label="资源类型:" prop="type">
+                            <el-select v-model="queryForm.type" placeholder="资源类型" width="100" clearable>
+                                <el-option v-for="item in typeArr" :key="item.value" :label="item.name"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="资源类别:" prop="category">
+                            <el-select v-model="queryForm.category" placeholder="资源类别" width="100" clearable>
+                                <el-option v-for="item in categoryArr" :key="item.value" :label="item.name"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="行业类别:" prop="industryCategory">
+                            <el-select v-model="queryForm.industryCategory" placeholder="行业类别" width="100" clearable>
+                                <el-option v-for="item in industryCategoryArr" :key="item.value" :label="item.name"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="搜索词:" prop="searchWord">
+                            <el-input v-model="queryForm.searchWord" placeholder="搜索词"></el-input>
+                        </el-form-item>
                     </div>
-                </el-row>
-                <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="initList" class="searchBtn">搜索</el-button>
-                    <!--<span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>-->
-                    <el-button @click="resetFormResource('queryForm')">重置</el-button>
-                </div>
-            </el-form>
+                    </el-row>
+                    <div class="mainSearchBtnBox" :class="{'rowMore':rowStatus}">
+                        <el-button icon="el-icon-search" type="primary" @click="initList" class="searchBtn">搜索
+                        </el-button>
+                        <!--<span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>-->
+                        <el-button @click="resetFormResource('queryForm')">重置</el-button>
+                    </div>
+                </el-form>
+            </div>
+            <el-row type="flex" class="row-bg marginB20 button-menu" justify="start">
+                <shiro:hasPermission name="merchant:pubcustomer:receive">
+                    <el-button type="success" @click="openReceive">领取</el-button>
+                </shiro:hasPermission>
+            </el-row>
+            <el-table :data="tableData" border style="width: 100%" tooltip-effect="light" ref="multipleTable"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>
+                <el-table-column prop="xh" label="序号" type="index" width="55" align="center"></el-table-column>
+                <el-table-column prop="cusName" label="客户姓名" align="center" width="100"></el-table-column>
+                <el-table-column prop="searchWord" label="搜索词" align="center" width="100"></el-table-column>
+                <el-table-column prop="typeName" label="资源类型" align="center" width="100"></el-table-column>
+                <el-table-column prop="categoryName" label="资源类别" align="center" width="100"></el-table-column>
+                <!-- 预留字段，当前展示位空 -->
+                <el-table-column prop="address" label="资源地域" align="center" width="120"></el-table-column>
+                <el-table-column prop="projectName" label="资源项目" align="center" width="100"></el-table-column>
+                <el-table-column prop="sourceName" label="媒介" align="center" width="100"></el-table-column>
+                <el-table-column prop="industryCategoryName" label="行业类别" align="center" width="100"></el-table-column>
+                <el-table-column prop="messageTime" label="留言时间" align="center" width="150"></el-table-column>
+                <el-table-column prop="messagePoint" label="留言内容" align="center"></el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initList"></table-pagination>
         </div>
-        <el-row type="flex" class="row-bg marginB20 button-menu" justify="start">
-            <shiro:hasPermission name="merchant:pubcustomer:receive">
-                <el-button type="success" @click="openReceive">领取</el-button>
-            </shiro:hasPermission>
-        </el-row>
-        <el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable" @selection-change="handleSelectionChange" >
-            <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>
-            <el-table-column prop="xh" label="序号" type="index" width="55"  align="center"></el-table-column>
-            <el-table-column prop="cusName" label="客户姓名" align="center" width="100" ></el-table-column>
-            <el-table-column prop="searchWord" label="搜索词" align="center" width="100" ></el-table-column>
-            <el-table-column prop="typeName" label="资源类型" align="center"  width="100" ></el-table-column>
-            <el-table-column prop="categoryName" label="资源类别" align="center"  width="100" ></el-table-column>
-            <!-- 预留字段，当前展示位空 -->
-            <el-table-column prop="address" label="资源地域" align="center" width="120"></el-table-column>
-            <el-table-column prop="projectName" label="资源项目" align="center" width="100"></el-table-column>
-            <el-table-column prop="sourceName" label="媒介" align="center" width="100"></el-table-column>
-            <el-table-column prop="industryCategoryName" label="行业类别" align="center"  width="100"></el-table-column>
-            <el-table-column prop="messageTime" label="留言时间" align="center"   width="150"></el-table-column>
-            <el-table-column prop="messagePoint" label="留言内容" align="center" ></el-table-column>
-        </el-table>
-        <table-pagination v-if="paginationShow" :pager="pager"  @change="initList"></table-pagination>
+
     </div>
 
-</div>
-
-<!-- import common js-->
-<div th:include="_footer_include :: #jsLib"></div>
-<script th:inline="javascript">
-    var mainDivVM = new Vue({
-        el: '#mainDiv',
-        data: {
-            isShow:false,
-            loading:false,
-            paginationShow: false,
-            formLabelWidth:"150px",
-            tableData:[],
-            categoryArr:[],
-            typeArr:[],
-            industryCategoryArr:[],
-            multipleSelection:[],
-            queryForm:{
-                searchWord:"",
-                category:"",
-                type:"",
-                industryCategory:"",
-            },
-            pager:{
-                total: 0,
-                currentPage: 1,
-                pageSize: 20,
-            },
-        },
-        methods: {
-              //日期数据格式化方法
-            dateFormat:function(row, column) {
-              var date = row[column.property];
-                  	if (date == undefined) {
-                       return "";
-                 	}
-                  	return moment(date).format("YYYY-MM-DD HH:mm:ss");
-            },
-            toogleClick(){
-                if(this.isShow){
-                    this.isShow=false
-                }else{
-                    this.isShow=true
-                }
-            },
-            formatCusLevel(row, column){
-                return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
-            },
-
-            handleSelectionChange(val) {
-                this.multipleSelection = val;
-            },
-
-            resetFormResource(formName) {
-                if (this.$refs[formName]) {
-                    this.$refs[formName].resetFields();
-                }
-            },
-            resetForm(formName) {
-                if( mainDivVM.$refs[formName]) {
-                    mainDivVM.$refs[formName].resetFields();
-                }
-            },
-            initList(){
-                var param = this.queryForm;
-                param.pageSize = this.pager.pageSize;
-                param.pageNum =  this.pager.currentPage;
-                console.log(param)
-                  if(param.pageNum > 5000){
-                    axios.post('','').then(function (response) {
-                      ocmVM.pager.currentPage = ocmVM.oldPage;
-                    })
-                    this.$message({
-                      message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
-                      type: 'warning'
-                    });
-                    return;
-                  }else {
-                    this.oldPage = param.pageNum;
-                  }
-
-                axios.post('/merchant/pubcustomer/queryPage',param).then(function (response) {
-                    if(null===response||response.data==null||response.data.code!='0'){
-                        if(response.data.code!='0'){
-                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
-                        }
-                        return false;
-                    }else{
-                        mainDivVM.tableData =response.data.data.data;
-                        mainDivVM.pager.currentPage= response.data.data.currentPage;
-                        mainDivVM.pager.total= response.data.data.total;
-                        mainDivVM.pager.pageSize =  response.data.data.pageSize;
-
-                        // 取出存储的id
-                        if(!mainDivVM.paginationShow){
-                           if(mainDivVM.storeId){
-                               mainDivVM.$nextTick(function(){
-                                  var storage = [];
-                                  mainDivVM.tableData.forEach(function(item, index){
-                                      if(item.clueId === mainDivVM.storeId ){
-                                          storage.push(mainDivVM.tableData[index]);
-                                      }
-                                  })
-                                  mainDivVM.toggleSelection(storage);
-                                  mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
-                              })
-                          }
-                        }else{
-                          removeSessionStore ("publicCustomerStoreForm");
-                          removeSessionStore ("publicCustomerOtherVal");
-                        }
-                        mainDivVM.paginationShow = true;
-                        mainDivVM.storeForm = mainDivVM.queryForm;
-
-                    }
-                })
-            },
-            openReceive(){//领取
-                if(this.multipleSelection.length==0){
-                    this.$message({message: '请选择资源', type: 'warning'});
-                    return false;
-                }else{
-                	this.loading = true;
-                	var param={};
-                	param.idList = []
-                	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-                         param.idList.push(this.multipleSelection[i].clueId)
-                     }
-                	  axios.post('/merchant/pubcustomer/receiveClue', param)
-                      .then(function (response) {
-                    	  
-                            var result =  response.data;
-                            if(result.code == 0){
-                            	if(result.data !=null){
-                            		var data = result.data;
-                            		if(data.backStatus ==3){
-                            			mainDivVM.loading = false;
-                            			mainDivVM.$message({message: data.backResult, type: 'warning'});
-                            		}else if(data.backStatus !=0){
-                            			mainDivVM.loading = false;
-                            			mainDivVM.receiveDialog = true;
-                            			mainDivVM.receiveTitle=data.backResult;
-                            			mainDivVM.receiveTable= data.clueCustomerDTOs;
-                            		}else{
-                            			mainDivVM.$message({message:'领取成功',type:'success',duration:1500,onClose:function(){
-                            				window.location.href="/merchant/pubcustomer/listPage";
-                            			}});
-                            			
-                            		}
-                            	}
-                            	console.info(result);
-                                
-                            }else{
-                            	mainDivVM.loading = false;
-                            	mainDivVM.$message({message: result.msg, type: 'warning'});
-                            }
-                            
-                      }).catch(function (error) {
-                                  console.log(error);
-                      })           
-                    var resourceType=1;//假数据
-                }
-            },
-        },
-        created(){
-
-            // 取页数存储
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
-
-            // 初始化表格
-            this.initList();
-            //初始资源类别数据
-            var  param={};
-            param.groupCode="clueCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                console.log(response.data.data)
-                mainDivVM.categoryArr=response.data.data;
-            });
-            //初始化资源类型数据
-            param={};
-            param.groupCode="clueType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                console.log(response.data.data)
-                mainDivVM.typeArr=response.data.data;
-            });
-            //初始化资行业类别数据
-            param={};
-            param.groupCode="industryCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                console.log(response.data.data)
-                mainDivVM.industryCategoryArr=response.data.data;
-            });
-        },
-        mounted(){
-            document.getElementById('mainDiv').style.display = 'block';
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
+    <script th:inline="javascript">
+        var oLink = document.getElementById("skinCss");
+        if (getCookieVal("skinVal")) {
+            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+        } else {
+            oLink['href'] = "/css/common/merchant_base1.css";
         }
-    });
+        var mainDivVM = new Vue({
+            el: '#mainDiv',
+            data: {
+                isShow: false,
+                loading: false,
+                paginationShow: false,
+                formLabelWidth: "150px",
+                tableData: [],
+                categoryArr: [],
+                typeArr: [],
+                industryCategoryArr: [],
+                multipleSelection: [],
+                rowStatus: false,
+                minStatus: false,
+                fullWidth: document.documentElement.clientWidth,
+                queryForm: {
+                    searchWord: "",
+                    category: "",
+                    type: "",
+                    industryCategory: "",
+                },
+                pager: {
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+            },
+            methods: {
+                //日期数据格式化方法
+                dateFormat: function (row, column) {
+                    var date = row[column.property];
+                    if (date == undefined) {
+                        return "";
+                    }
+                    return moment(date).format("YYYY-MM-DD HH:mm:ss");
+                },
+                toogleClick() {
+                    if (this.isShow) {
+                        this.isShow = false
+                    } else {
+                        this.isShow = true
+                    }
+                },
+                formatCusLevel(row, column) {
+                    return row.cusLevel == 1 ? "VIP" : row.cusLevel == 2 ? "重要" : row.cusLevel == 2 ? "普通" : ""
+                },
 
-</script>
+                handleSelectionChange(val) {
+                    this.multipleSelection = val;
+                },
+
+                resetFormResource(formName) {
+                    if (this.$refs[formName]) {
+                        this.$refs[formName].resetFields();
+                    }
+                },
+                resetForm(formName) {
+                    if (mainDivVM.$refs[formName]) {
+                        mainDivVM.$refs[formName].resetFields();
+                    }
+                },
+                initList() {
+                    var param = this.queryForm;
+                    param.pageSize = this.pager.pageSize;
+                    param.pageNum = this.pager.currentPage;
+                    console.log(param)
+                    if (param.pageNum > 5000) {
+                        axios.post('', '').then(function (response) {
+                            ocmVM.pager.currentPage = ocmVM.oldPage;
+                        })
+                        this.$message({
+                            message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
+                            type: 'warning'
+                        });
+                        return;
+                    } else {
+                        this.oldPage = param.pageNum;
+                    }
+
+                    axios.post('/merchant/pubcustomer/queryPage', param).then(function (response) {
+                        if (null === response || response.data == null || response.data.code != '0') {
+                            if (response.data.code != '0') {
+                                mainDivVM.$message({ message: response.data.msg, type: 'warning' });
+                            }
+                            return false;
+                        } else {
+                            mainDivVM.tableData = response.data.data.data;
+                            mainDivVM.pager.currentPage = response.data.data.currentPage;
+                            mainDivVM.pager.total = response.data.data.total;
+                            mainDivVM.pager.pageSize = response.data.data.pageSize;
+
+                            // 取出存储的id
+                            if (!mainDivVM.paginationShow) {
+                                if (mainDivVM.storeId) {
+                                    mainDivVM.$nextTick(function () {
+                                        var storage = [];
+                                        mainDivVM.tableData.forEach(function (item, index) {
+                                            if (item.clueId === mainDivVM.storeId) {
+                                                storage.push(mainDivVM.tableData[index]);
+                                            }
+                                        })
+                                        mainDivVM.toggleSelection(storage);
+                                        mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
+                                    })
+                                }
+                            } else {
+                                removeSessionStore("publicCustomerStoreForm");
+                                removeSessionStore("publicCustomerOtherVal");
+                            }
+                            mainDivVM.paginationShow = true;
+                            mainDivVM.storeForm = mainDivVM.queryForm;
+
+                        }
+                    })
+                },
+                openReceive() {//领取
+                    if (this.multipleSelection.length == 0) {
+                        this.$message({ message: '请选择资源', type: 'warning' });
+                        return false;
+                    } else {
+                        this.loading = true;
+                        var param = {};
+                        param.idList = []
+                        for (var i = 0; i < this.multipleSelection.length; i++) {
+                            param.idList.push(this.multipleSelection[i].clueId)
+                        }
+                        axios.post('/merchant/pubcustomer/receiveClue', param)
+                            .then(function (response) {
+
+                                var result = response.data;
+                                if (result.code == 0) {
+                                    if (result.data != null) {
+                                        var data = result.data;
+                                        if (data.backStatus == 3) {
+                                            mainDivVM.loading = false;
+                                            mainDivVM.$message({ message: data.backResult, type: 'warning' });
+                                        } else if (data.backStatus != 0) {
+                                            mainDivVM.loading = false;
+                                            mainDivVM.receiveDialog = true;
+                                            mainDivVM.receiveTitle = data.backResult;
+                                            mainDivVM.receiveTable = data.clueCustomerDTOs;
+                                        } else {
+                                            mainDivVM.$message({
+                                                message: '领取成功', type: 'success', duration: 1500, onClose: function () {
+                                                    window.location.href = "/merchant/pubcustomer/listPage";
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                    console.info(result);
+
+                                } else {
+                                    mainDivVM.loading = false;
+                                    mainDivVM.$message({ message: result.msg, type: 'warning' });
+                                }
+
+                            }).catch(function (error) {
+                                console.log(error);
+                            })
+                        var resourceType = 1;//假数据
+                    }
+                },
+                handleResize(event) {
+                    this.fullWidth = document.documentElement.clientWidth;
+                    console.log(this.fullWidth, "this.fullWidth");
+                    let that = this;
+                    this.$nextTick(() => {
+                        let childrenLength = that.$refs.itemBox.children.length;
+                        if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+                            that.rowStatus = true;
+                            that.minStatus = false;
+                        }
+                        else if (that.fullWidth <= 1400 && childrenLength >= 4) {
+                            that.rowStatus = true;
+                            that.minStatus = true;
+                        }
+                        else if (that.fullWidth > 1400 && that.fullWidth < 1500 && childrenLength <= 4) {
+                            that.rowStatus = true;
+                            that.minStatus = true;
+                        }
+                        else {
+                            that.rowStatus = false;
+                            that.minStatus = false;
+                        }
+                    })
+                },
+            },
+            created() {
+
+                // 取页数存储
+                var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+                if (localVal) { this.pager.pageSize = localVal; }
+
+                // 初始化表格
+                this.initList();
+                //初始资源类别数据
+                var param = {};
+                param.groupCode = "clueCategory";
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                    console.log(response.data.data)
+                    mainDivVM.categoryArr = response.data.data;
+                });
+                //初始化资源类型数据
+                param = {};
+                param.groupCode = "clueType";
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                    console.log(response.data.data)
+                    mainDivVM.typeArr = response.data.data;
+                });
+                //初始化资行业类别数据
+                param = {};
+                param.groupCode = "industryCategory";
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                    console.log(response.data.data)
+                    mainDivVM.industryCategoryArr = response.data.data;
+                });
+                window.addEventListener('resize', this.handleResize)
+                this.handleResize();
+                window.addEventListener("message", function (event) {
+                    var data = event.data;
+                    switch (data.cmd) {
+                        case 'getFormJson':
+                            oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                            // 处理业务逻辑
+                            break;
+                    }
+                });
+
+            },
+            mounted() {
+                document.getElementById('mainDiv').style.display = 'block';
+            }
+        });
+
+    </script>
 </body>
+
 </html>
