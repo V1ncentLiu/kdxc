@@ -213,6 +213,7 @@ var homePageVM = new Vue({
 				this.skinVal=2;
 			 }
 			 setSessionStore("skinVal", this.skinVal);
+			 setLocalStore("skinVal", this.skinVal);
 			 document.cookie="skinVal="+this.skinVal+"; expires=Thu, 18 Dec 2043 12:00:00 GMT";
 			 console.log(getCookieVal("skinVal"),"222");
 			 this.iframeWin.postMessage({
@@ -297,6 +298,7 @@ var homePageVM = new Vue({
 		confirmLogout() {//确认退出系统
 			window.sessionStorage.clear();//清除缓存
 			setSessionStore("skinVal", this.skinVal);
+			setLocalStore("skinVal", this.skinVal);
 			location.href = "/index/logout";
 			document.cookie="skinVal="+this.skinVal+"; expires=Thu, 18 Dec 2043 12:00:00 GMT";
 			
@@ -1067,8 +1069,13 @@ var homePageVM = new Vue({
 		}
 	  },
 	created() {
-		oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
-		oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		if(getCookieVal("skinVal")){
+			oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		}else{
+			oLink['href'] = "/css/common/merchant_base1.css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index1.css";
+		}		
 		if (this.hasBuyPackage) {
 			this.loginQimoClient();
 		}

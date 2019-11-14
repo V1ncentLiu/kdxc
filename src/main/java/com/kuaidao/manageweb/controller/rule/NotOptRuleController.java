@@ -411,6 +411,8 @@ public class NotOptRuleController {
                 curList.add(clueAssignRuleDTO.getProjectName());
                 curList.add(clueAssignRuleDTO.getSearchWord());
                 curList.add(clueAssignRuleDTO.getNotSearchWord());
+                curList.add(clueAssignRuleDTO.getProvince());
+                curList.add(clueAssignRuleDTO.getNotProvince());
                 curList.add(getTimeStr(clueAssignRuleDTO.getUpdateTime()));
                 curList.add(getTimeStr(clueAssignRuleDTO.getCreateTime()));
                 curList.add(getTimeStr(clueAssignRuleDTO.getStartTime()));
@@ -431,12 +433,14 @@ public class NotOptRuleController {
         sheet.setColumnWidth(1, 8000);// 设置第二列的宽度为
         sheet.setColumnWidth(6, 5000);// 设置第二列的宽度为
         sheet.setColumnWidth(7, 6000);// 设置第二列的宽度为
-        sheet.setColumnWidth(8, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(8, 5000);// 设置第二列的宽度为
         sheet.setColumnWidth(9, 6000);// 设置第二列的宽度为
         sheet.setColumnWidth(10, 6000);// 设置第二列的宽度为
         sheet.setColumnWidth(11, 6000);// 设置第二列的宽度为
         sheet.setColumnWidth(12, 6000);// 设置第二列的宽度为
-        sheet.setColumnWidth(14, 4000);// 设置第二列的宽度为
+        sheet.setColumnWidth(13, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(14, 6000);// 设置第二列的宽度为
+        sheet.setColumnWidth(15, 4000);// 设置第二列的宽度为
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
@@ -464,6 +468,8 @@ public class NotOptRuleController {
         headTitleList.add("资源项目");
         headTitleList.add("包含搜索词");
         headTitleList.add("不包含搜索词");
+        headTitleList.add("包含省");
+        headTitleList.add("不包含省");
         headTitleList.add("最后编辑时间");
         headTitleList.add("创建时间");
         headTitleList.add("规则有效开始时间");
