@@ -49,21 +49,22 @@
     </style>
 </head>
 <body>
-    <div id="Loading">
-        <div class="loader-inner ball-beat">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
+<div id="Loading">
+    <div class="loader-inner ball-beat">
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
+</div>
+<div id="loginbox" style="height: 100%;"> 
     <div id="header_top">
-        <div class="headerimage"><img th:src="@{/images/merchantlogo.png}" alt=""></div>
-        <!-- <div class="headerimage"><img th:src="@{/images/skin1/merchantlogo1.png}" alt=""></div> -->
-
-        <!-- <div class="headerimage"><img th:src="@{/images/logoimg.png}" alt=""></div> -->
+        <div class="headerimage">
+            <img v-if="skinVal==1" th:src="@{/images/merchantlogo.png}" alt="">
+            <img v-if="skinVal==2" th:src="@{/images/skin1/merchantlogo1.png}" alt="">
+        </div>
         <!-- <span>汇聚系统</span> -->
     </div>
-    <div id="loginbox" class="loginbox">
+    <div class="loginbox">
       <div id="passwordloginbox" class="passwordloginbox">
         <div class="control-group normal_text">忘记密码-找回密码</div>
         <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm" class="demo-resetPwdForm" label-width="100px">
@@ -132,6 +133,7 @@
         <p><span>关于我们</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<span>业务介绍</span></p>
         <p>版权所有: 北京快道网络有限公司 京ICP备14037633号</p>
     </div>
+  </div>
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -140,6 +142,7 @@
     var vm =  new Vue({
         el: '#loginbox',
         data: {
+          skinVal: getLocalStore("skinVal") ? getLocalStore("skinVal") : 1,//1蓝色 //2白色 皮肤切换
           buttonName: "获取语音验证码",
           isDisabled: false,
           time: 60,
@@ -312,16 +315,16 @@
               }
         },
         created() {  
-            if(window.sessionStorage.getItem("skinVal")){
-               var skinVal= window.sessionStorage.getItem("skinVal")
-               oLink['href'] = "/css/custom/merchantlogin/login" + skinVal + ".css";
+            if(getLocalStore("skinVal")){               
+                oLink['href'] = "/css/custom/merchantlogin/login" + getLocalStore("skinVal") + ".css";
             }else{
                 oLink['href'] = "/css/custom/merchantlogin/login1.css";
             }
-            document.body.removeChild(document.getElementById('Loading'));
+            
             if (this.$refs['resetPwdForm']!==undefined) {
-        		this.$refs['resetPwdForm'].resetFields();
-        	}
+          		  this.$refs['resetPwdForm'].resetFields();
+          	}
+            document.body.removeChild(document.getElementById('Loading'));
         }
     })
 </script>
