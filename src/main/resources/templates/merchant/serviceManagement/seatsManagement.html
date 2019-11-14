@@ -6,7 +6,7 @@
 
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
   <title>后台管理系统</title>
-  <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+  <link rel="stylesheet" id="skinCss">
   <style>
     .el-message-box__header {
       display: none;
@@ -15,60 +15,18 @@
     .el-message-box__message {
       text-align: center;
     }
-
-    .el-button--primary {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-    }
-
-
-
     .el-input--suffix .el-input__inner {
       height: 28px;
     }
 
-    .el-pagination.is-background .el-pager li:not(.disabled).active {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-    }
 
     body {
       background-color: #f0f5fe;
       height: 100%;
     }
 
-    .el-pagination .el-select .el-input .el-input__inner {
-      background-color: #fff;
-    }
 
-    .el-pagination.is-background .btn-next.disabled,
-    .el-pagination.is-background .btn-next:disabled,
-    .el-pagination.is-background .btn-prev.disabled,
-    .el-pagination.is-background .btn-prev:disabled,
-    .el-pagination.is-background .el-pager li.disabled {
-      background-color: #fff;
-    }
 
-    .el-pagination__editor.el-input .el-input__inner {
-      background-color: #fff;
-    }
-
-    .el-checkbox__input.is-checked .el-checkbox__inner,
-    .el-checkbox__input.is-indeterminate .el-checkbox__inner {
-      background-color: #4B80FF;
-      border-color: #4B80FF;
-    }
-
-    .btnadd {
-      width: 100px;
-      height: 30px;
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-      box-shadow: 0px 10px 28px 4px rgba(72, 125, 247, 0.47);
-      border-radius: 4px;
-    }
-
-    .btnadd:hover {
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-      opacity: 0.9;
-    }
 
     .btnedit {
       width: 100px;
@@ -94,14 +52,6 @@
     .btnremove:hover {
       background: linear-gradient(90deg, rgba(253, 93, 119, 1), rgba(251, 59, 80, 1));
       opacity: 0.9;
-    }
-
-    .mainSearchBg .searchBtn {
-      width: 100px;
-      height: 30px;
-      background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));
-      box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
-      border-radius: 6px;
     }
 
     .cancel {
@@ -201,19 +151,23 @@
             style="width: 290px;"></el-input>
         </el-form-item>
         <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="iframecompany">
-          <el-input maxlength="10" v-model="subAccountForm.iframecompany" autocomplete="off" style="width: 290px;"></el-input>
+          <el-input maxlength="10" v-model="subAccountForm.iframecompany" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
         <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="iframeaddress">
           <el-input maxlength="10" v-model="subAccountForm.iframeaddress" style="width: 290px;"></el-input>
         </el-form-item>
-        <el-form-item  label="账户编号：" :label-width="formLabelWidth" prop="iframeaccountNo">
-          <el-input maxlength="200" v-model="subAccountForm.iframeaccountNo" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="账户编号：" :label-width="formLabelWidth" prop="iframeaccountNo">
+          <el-input maxlength="200" v-model="subAccountForm.iframeaccountNo" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
-        <el-form-item  label="秘钥：" :label-width="formLabelWidth" prop="iframesecretKey">
-          <el-input maxlength="200" v-model="subAccountForm.iframesecretKey" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="iframesecretKey">
+          <el-input maxlength="200" v-model="subAccountForm.iframesecretKey" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
-        <el-form-item  label="proxyurl：" :label-width="formLabelWidth" prop="iframeproxyUrl">
-          <el-input maxlength="200" v-model="subAccountForm.iframeproxyUrl" autocomplete="off" style="width: 290px;"></el-input>
+        <el-form-item label="proxyurl：" :label-width="formLabelWidth" prop="iframeproxyUrl">
+          <el-input maxlength="200" v-model="subAccountForm.iframeproxyUrl" autocomplete="off" style="width: 290px;">
+          </el-input>
         </el-form-item>
         <el-form-item label="商家子账号" :label-width="formLabelWidth">
           <el-select v-model="merchatSelectName" style="width: 290px;">
@@ -223,7 +177,7 @@
         </el-form-item>
 
       </el-form>
-      <div slot="footer" class="dialog-footer" style="text-align:left;">
+      <div slot="footer" class="dialog-footer">
         <el-button class="allBtnHover" type="primary" :disabled="submitDisabled" @click="submitForm('subAccountForm')">
           提交</el-button>
         <el-button class="cancel" type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
@@ -239,6 +193,12 @@
   var merchantUserList = [[${ userList }]];//商户集合
   var merchatName = [[${ userName }]];//商户集合
   // var merchantUserList = [];//商户集合
+  var oLink = document.getElementById("skinCss");
+  if (getCookieVal("skinVal")) {
+    oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+  } else {
+    oLink['href'] = "/css/common/merchant_base1.css";
+  }
   var app = new Vue({
     el: '#app',
     data() {
@@ -508,6 +468,15 @@
       // console.info("create method");
       this.searchTable();
       // console.log(that.getQueryString('buyPackageId'));
+      window.addEventListener("message", function (event) {
+        var data = event.data;
+        switch (data.cmd) {
+          case 'getFormJson':
+            oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+            // 处理业务逻辑
+            break;
+        }
+      });
 
     },
     mounted() {

@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -291,8 +293,8 @@ public class BusinessMyCustomerController {
      * @param model
      * @return
      */
-    @RequestMapping("/createClue")
-    @RequiresPermissions("business:busCustomerManager:add")
+    @GetMapping("/createClue")
+  //  @RequiresPermissions("business:busCustomerManager:add")
     public String createClue(HttpServletRequest request, Model model) {
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
@@ -320,8 +322,7 @@ public class BusinessMyCustomerController {
     @LogRecord(description = "新建资源保存", operationType = OperationType.INSERT,
         menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<Boolean> saveCreateClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         if (null != user) {
             // 添加创建人
             if (null != dto) {
@@ -392,6 +393,7 @@ public class BusinessMyCustomerController {
                 }
             }
         }
+
         dto.setCirculationInsertOrUpdateDTO(getCircul(user,dto.getClueId()));
         JSONResult<Boolean> customerClue = busMyCustomerFeignClient.createCustomerClue(dto);
         return customerClue;

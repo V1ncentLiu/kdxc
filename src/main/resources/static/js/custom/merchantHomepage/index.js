@@ -19,7 +19,7 @@ var homePageVM = new Vue({
 			dialogModifyPwdVisible: false,//修改密码dialog 是否显示
 			dialogLogoutVisible: false,//退出登录 dialog
 			skinVal: getCookieVal("skinVal") ? getCookieVal("skinVal") : 1,//1蓝色 //2白色 皮肤切换
-			skinStatus: false,
+			skinStatus: getCookieVal("skinVal")==2 ? true : false,
 			modifyForm: {
 				'oldPassword': '',
 				'newPassword': '',
@@ -1067,8 +1067,13 @@ var homePageVM = new Vue({
 		}
 	  },
 	created() {
-		oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
-		oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		if(getCookieVal("skinVal")){
+			oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index" + getCookieVal("skinVal") + ".css";
+		}else{
+			oLink['href'] = "/css/common/merchant_base1.css";
+			oLinkIndex['href'] = "/css/custom/cheranthomepage/index1.css";
+		}		
 		if (this.hasBuyPackage) {
 			this.loginQimoClient();
 		}
