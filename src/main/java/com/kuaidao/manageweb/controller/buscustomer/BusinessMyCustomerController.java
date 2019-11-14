@@ -294,7 +294,7 @@ public class BusinessMyCustomerController {
      * @return
      */
     @GetMapping("/createClue")
-  //  @RequiresPermissions("business:busCustomerManager:add")
+    @RequiresPermissions("businessMyCustomer:add")
     public String createClue(HttpServletRequest request, Model model) {
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
