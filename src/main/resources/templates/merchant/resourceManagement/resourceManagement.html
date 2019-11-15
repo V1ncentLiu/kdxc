@@ -6,7 +6,7 @@
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <style>
         .dialogForm .el-form-item {
             margin-bottom: 5px;
@@ -42,11 +42,6 @@
         .invite-top {
             margin-top: 14px;
         }
-
-        .el-dialog__header {
-            background: none;
-        }
-
         .el-dialog__header:before {
             width: 122px;
             height: 86px;
@@ -149,6 +144,8 @@
         .el-tooltip__popper.is-dark {
             width: 600px;
         }
+
+        
     </style>
 </head>
 
@@ -159,11 +156,11 @@
             <el-breadcrumb-item>资源管理</el-breadcrumb-item>
             <el-breadcrumb-item>资源列表</el-breadcrumb-item>
         </el-breadcrumb>
-
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
-                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                    <div class="main-search-box">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form"
+                    :class="{'rowMore':rowStatus,'minMore':minStatus}">
+                    <div class="main-search-box" ref="itemBox" :class="{'rowMore':rowStatus}">
                         <el-form-item label="资源类别:" prop="category">
                             <el-select v-model="form.category" clearable placeholder="资源类别">
                                 <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
@@ -173,13 +170,15 @@
                         </el-form-item>
                         <div class="get-search-time">
                             <div class="get-time">获取时间:</div>
-                            <div  class="time-style" :class="{'selectActive':colorStatus}">
-                                <el-form-item  class="search-box-margin" prop="searchStartTime">
-                                    <el-date-picker v-model="form.searchStartTime" type="datetime"  v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始时间">
+                            <div class="time-style" :class="{'selectActive':colorStatus}">
+                                <el-form-item class="search-box-margin" prop="searchStartTime">
+                                    <el-date-picker v-model="form.searchStartTime" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择开始时间">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="searchEndTime">
-                                    <el-date-picker v-model="form.searchEndTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择结束时间">
+                                    <el-date-picker v-model="form.searchEndTime" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择结束时间">
                                     </el-date-picker>
                                 </el-form-item>
                             </div>
@@ -223,7 +222,7 @@
                             </el-select>
                         </el-form-item>
                     </div>
-                    <div class="mainSearchBtnBox">
+                    <div class="mainSearchBtnBox" :class="{'rowMore':rowStatus}">
                         <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn">
                             搜索</el-button>
                         <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -456,6 +455,12 @@
     // console.log(merchantUserList,"merchantUserList");
     //  merchantUserList=[{id:"1",name:"张三"},{id:"2",name:"李四"}];
     // proSelect=[{id:"1",projectName:"项目一"},{id:"1",projectName:"项目二"}];
+    var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -483,7 +488,11 @@
                 proSelect: proSelect,//考察项目
                 clueId: '',//资源cusName
                 getCusName: '',
-                colorStatus:false,
+                colorStatus: false,
+                skinVal: getCookieVal("skinVal"),
+                fullWidth: document.documentElement.clientWidth,
+                rowStatus: false,
+                minStatus: false,
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -592,18 +601,20 @@
                 window.location.href = "/clueInfo/init/" + clueId;
             },
             resetFormResource(formName) {
+                this.skinVal = getCookieVal("skinVal");
+                console.log(this.skinVal, "new");
                 if (this.$refs[formName]) {
                     this.$refs[formName].resetFields();
                     this.$set(this.form, 'searchStartTime', '');
                     this.$set(this.form, 'searchEndTime', '');
                 }
             },
-            changeNameFun(){
-                console.log(this.colorStatus,99);
-                this.colorStatus=false;
+            changeNameFun() {
+                console.log(this.colorStatus, 99);
+                this.colorStatus = false;
             },
-            setColor(){
-                this.colorStatus=true;
+            setColor() {
+                this.colorStatus = true;
             },
             // 获取时间
             getTime(cid) {
@@ -1027,8 +1038,33 @@
                     ocmVM.districtArr = null;
                 }
             },
+            handleResize(event) {
+                this.fullWidth = document.documentElement.clientWidth;
+                console.log(this.fullWidth, "this.fullWidth");
+                let that = this;
+                this.$nextTick(() => {
+                    let childrenLength = that.$refs.itemBox.children.length;
+                    if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+                        that.rowStatus = true;
+                        that.minStatus = false;
+                    }
+                    else if (that.fullWidth <= 1400 && childrenLength > 4) {
+                        that.rowStatus = true;
+                        that.minStatus = true;
+                    }
+                    else {
+                        that.rowStatus = false;
+                        that.minStatus = false;
+                    }
+                    console.log(that.rowStatus, "that.rowStatus");
+                })
+            },
+
         },
         created() {
+            console.log(this.skinVal, "this.skinVal");
+
+
             var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
             if (localVal) {
                 this.pager.pageSize = localVal;
@@ -1075,10 +1111,25 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 ocmVM.customerStatusSubArr = response.data.data;
             });
+            window.addEventListener('resize', this.handleResize)
+            this.handleResize();
+            //监听父窗口信息
+            // 接受父页面发来的信息
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
+
+
         },
         mounted() {
             document.getElementById('optimizeClueManagement').style.display = 'block';
-        }
+        },
     })
 </script>
 

@@ -140,8 +140,10 @@ public class BusinessSignController {
     JSONResult<List<OrganizationRespDTO>> dxList =
         organizationFeignClient.queryOrgByParam(orgDto);
 
-    // 查询项目列表
-    JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+    // 查询所有签约项目
+    ProjectInfoPageParam param=new ProjectInfoPageParam();
+    param.setIsNotSign(1);
+    JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
     // 获取省份
     List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
 

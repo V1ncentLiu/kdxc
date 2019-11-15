@@ -171,6 +171,7 @@
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
+                <el-table-column align="center" prop="bearAmount" label="承担金额"></el-table-column>
              <!--    <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column> -->
                 <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
                 <el-table-column align="center" prop="" label="退款图片" width="100">
@@ -236,7 +237,7 @@
         </el-row>
     </div>
     <!-- 驳回编辑 -->
-    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px">
+    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" v-dialog-drag>
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
             <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="person">
                 {{dialogForm.auditUserName}}
@@ -293,16 +294,16 @@
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
-    <el-dialog title="驳回原因" :visible.sync="reasonDialog">           
+    <el-dialog title="驳回原因" :visible.sync="reasonDialog" v-dialog-drag>           
         <div class="fs16 marginB20" >{{rejectReason}}</div>
     </el-dialog>
     <!-- 返款原因 -->
-    <el-dialog title="退款原因" :visible.sync="reasonDialog1">           
+    <el-dialog title="退款原因" :visible.sync="reasonDialog1" v-dialog-drag>           
         <div class="fs16 marginB20" >{{reason}}</div>
     </el-dialog>
     
     <!-- 下载图片 dialog 开始 -->
-        <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
+        <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px" v-dialog-drag>
            <ol>
              <li v-for="(item,index) in imgList"  style="margin-bottom:8px">
               <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
@@ -312,7 +313,7 @@
     <!-- 下载图片dialog 结束 -->
     
      <!-- 驳回处理 -->
-    <el-dialog title="提示" :visible.sync="rejectRefundDialogVisible">
+    <el-dialog title="提示" :visible.sync="rejectRefundDialogVisible" v-dialog-drag>
         <el-form :model="rejectRefundDialogForm" ref="rejectRefundDialogForm" :rules="rejectRefundDialogRules">            
             <div class="fs16 marginB20">确定要将此【{{sigNoTitle}}】退款申请驳回吗？</div>
             <el-form-item label="驳回原因：" label-width="100px" prop="rejectReason">
@@ -333,7 +334,7 @@
     </el-dialog>
     <!-- 驳回处理结束 -->
     <!-- 付款明细 -->
-    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px" v-dialog-drag>
         <el-table
             ref="recordTable" 
             tooltip-effect="dark"
