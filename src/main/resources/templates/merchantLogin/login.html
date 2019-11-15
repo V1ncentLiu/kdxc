@@ -33,19 +33,22 @@
 </head>
 
 <body>
-    <div id="Loading">
-        <div class="loader-inner ball-beat">
-            <div style="background: rgba(75, 128, 255, 1)"></div>
-            <div style="background: rgba(75, 128, 255, 1)"></div>
-            <div style="background: rgba(75, 128, 255, 1)"></div>
-        </div>
+<div id="Loading">
+    <div class="loader-inner ball-beat">
+        <div style="background: rgba(75, 128, 255, 1)"></div>
+        <div style="background: rgba(75, 128, 255, 1)"></div>
+        <div style="background: rgba(75, 128, 255, 1)"></div>
     </div>
+</div>    
+<div id="loginbox" style="height: 100%;">    
     <div id="header_top">
-        <div class="headerimage"><img th:src="@{/images/merchantlogo.png}" alt=""></div>
-        <!-- <div class="headerimage"><img th:src="@{/images/skin1/merchantlogo1.png}" alt=""></div> -->
+        <div class="headerimage">
+            <img v-if="skinVal==1" th:src="@{/images/merchantlogo.png}" alt="">
+            <img v-if="skinVal==2" th:src="@{/images/skin1/merchantlogo1.png}" alt="">
+        </div>
         <!-- <span>汇聚系统</span> -->
     </div>
-    <div id="loginbox" class="loginbox loginboxbar">
+    <div class="loginbox loginboxbar">
         <div class="control-group normal_text">
             <!-- <img src="images/loginLogo.png" alt="Logo">                 -->
             <span>商机盒子商家版</span>
@@ -142,6 +145,7 @@
         <p><span>关于我们</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<span>业务介绍</span></p>
         <p>版权所有: 北京快道网络有限公司 京ICP备14037633号</p>
     </div>
+</div>
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -153,6 +157,7 @@
     var vm = new Vue({
         el: '#loginbox',
         data: {
+            skinVal: getLocalStore("skinVal") ? getLocalStore("skinVal") : 1,//1蓝色 //2白色 皮肤切换
             labelPosition: 'right',
             formLabelAlign: {
                 name: '',
@@ -381,16 +386,12 @@
             }
         },
         created() {
-            
-            if(window.sessionStorage.getItem("skinVal")){
-               var skinVal= window.sessionStorage.getItem("skinVal")
-               oLink['href'] = "/css/custom/merchantlogin/login" + skinVal + ".css";
+            if(getLocalStore("skinVal")){               
+               oLink['href'] = "/css/custom/merchantlogin/login" + getLocalStore("skinVal") + ".css";
             }else{
                 oLink['href'] = "/css/custom/merchantlogin/login1.css";
             }
 
-            
-            document.body.removeChild(document.getElementById('Loading'));
             var isShowLogoutBox = [[${ isShowLogoutBox }]];
             if ("1" == isShowLogoutBox) {
                 $("#logoutBoxDiv").removeClass("f-dn");
@@ -401,13 +402,14 @@
             }
             if (!verificationCodeShow) {
                 this.verificationCodeShow = false;
-
             }
             this.checkLogin('loginForm');
             //初始化页面跳转，为了防止从iframe跳转到login页面直接在iframe中显示login页面
             if (window.top != window.self) {
                 top.location.href = location.href;
             }
+
+            document.body.removeChild(document.getElementById('Loading'));
         }
     })
 </script>
