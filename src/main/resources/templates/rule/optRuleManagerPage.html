@@ -222,6 +222,18 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="周期内有效日：" :label-width="formLabelWidth">
+                            {{dialogForm.days}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="有效日内时间范围：" :label-width="formLabelWidth">
+                            {{dialogForm.dayTimeStart}}-{{dialogForm.dayTimeEnd}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </div>
         </el-form>
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
@@ -284,6 +296,9 @@
                   notProvince:'',
                   startTime:'',
                   endTime:'',
+                  days:"",
+                  dayTimeStart:"",
+                  dayTimeEnd:"",
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -512,15 +527,18 @@
             rowDblClick(row, column, event){//双击查看详情
                 this.dialogFormVisible = true;
                 this.dialogForm.ruleName = row.ruleName;
-                this.dialogForm.category =this.transformCategory(null,null,row.category);;
-                this.dialogForm.source = this.transformSource(null,null,row.source);;
-                this.dialogForm.industryCategory = this.transformIndustry(null,null,row.industryCategory);;
+                this.dialogForm.category =this.transformCategory(null,null,row.category);
+                this.dialogForm.source = this.transformSource(null,null,row.source);
+                this.dialogForm.industryCategory = this.transformIndustry(null,null,row.industryCategory);
                 this.dialogForm.searchWord = row.searchWord;
                 this.dialogForm.notSearchWord = row.notSearchWord;
-                this.dialogForm.province = row.province;;
+                this.dialogForm.province = row.province;
                 this.dialogForm.notProvince = row.notProvince;
                 this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
-                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);;
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                this.dialogForm.days = this.daysFormat(null,null,row.days);
+                this.dialogForm.dayTimeStart = row.dayTimeStart;
+                this.dialogForm.dayTimeEnd = row.dayTimeEnd;
                 this.dialogTableData=row.assignRuleTeamList;
             },
             addFun(){
@@ -589,6 +607,38 @@
                  return "";
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //星期和美天数据格式化方法
+            daysFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                var cellValueArr=[];
+                var cellValueNew="";
+                if(cellValue){
+                    cellValueArr=cellValue.split(",");
+                    for(var i=0;i<cellValueArr.length;i++){
+                        if(cellValueArr[i]=="0"){
+                            cellValueArr[i]="每天"
+                        }else if(cellValueArr[i]=="1"){
+                            cellValueArr[i]="星期日"
+                        }else if(cellValueArr[i]=="2"){
+                            cellValueArr[i]="星期一"
+                        }else if(cellValueArr[i]=="3"){
+                            cellValueArr[i]="星期二"
+                        }else if(cellValueArr[i]=="4"){
+                            cellValueArr[i]="星期三"
+                        }else if(cellValueArr[i]=="5"){
+                            cellValueArr[i]="星期四"
+                        }else if(cellValueArr[i]=="6"){
+                            cellValueArr[i]="星期五"
+                        }else if(cellValueArr[i]=="7"){
+                            cellValueArr[i]="星期六"
+                        }
+                        cellValueNew+=cellValueArr[i]+",";
+                    }                    
+                }
+                return (cellValueNew.substring(0, cellValueNew.lastIndexOf(',')));
             },
           //媒介转换方法
             transformSource(row, column, cellValue, index) {
