@@ -1,11 +1,17 @@
 package com.kuaidao.manageweb.controller.client;
 
+import com.kuaidao.callcenter.dto.HeliClientInsertReq;
+import com.kuaidao.callcenter.dto.RonglianClientDTO;
+import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
+import com.kuaidao.callcenter.dto.seatmanager.HeliClientReq;
+import com.kuaidao.common.entity.IdListLongReq;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.common.util.JSONUtil;
+import javax.validation.Valid;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -19,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -273,6 +280,51 @@ public class HeliClientController {
         ResponseEntity<byte[]> responseEntity = restTemplate.exchange(decodeUrl,HttpMethod.GET,new HttpEntity<>(header),byte[].class);
         return responseEntity;
     }
-    
+
+    /**
+     * 添加坐席
+     *
+     * @return
+     */
+    @RequiresPermissions("callCenter:heliClient:add")
+    @PostMapping("/insertHeliClient")
+    @ResponseBody
+    public JSONResult insertHeliClient(@RequestBody HeliClientInsertReq reqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        reqDTO.setCreateUser(curLoginUser.getId());
+        return heliClientFeignClient.saveHeliClient(reqDTO);
+    }
+
+    /**
+     * 修改坐席
+     *
+     * @return
+     */
+    @RequiresPermissions("callCenter:heliClient:edit")
+    @PostMapping("/updateHeliClient")
+    @ResponseBody
+    public JSONResult updateHeliClient(@RequestBody HeliClientReq reqDTO) {
+        Long id = reqDTO.getId();
+        if(null == id){
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        return heliClientFeignClient.updateHeliClient(reqDTO);
+    }
+
+    /**
+     * 删除坐席
+     * @param idListLongReq
+     * @return
+     */
+    @RequiresPermissions("callCenter:heliClient:delete")
+    @PostMapping("/deleteClientByIdList")
+    @ResponseBody
+    public JSONResult deleteClientByIdList(@RequestBody IdListLongReq idListLongReq){
+        List<Long> idList = idListLongReq.getIdList();
+        if(CollectionUtils.isEmpty(idList)){
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        return  heliClientFeignClient.deleteHeliClient(idListLongReq);
+    }
 
 }

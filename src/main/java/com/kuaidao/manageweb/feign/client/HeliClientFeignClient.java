@@ -1,5 +1,10 @@
 package com.kuaidao.manageweb.feign.client;
 
+import com.kuaidao.callcenter.dto.HeliClientInsertReq;
+import com.kuaidao.callcenter.dto.RonglianClientDTO;
+import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
+import com.kuaidao.callcenter.dto.seatmanager.HeliClientReq;
+import com.kuaidao.common.entity.IdListLongReq;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +73,30 @@ public interface HeliClientFeignClient {
      */
     @PostMapping("/listClientByParams")
     public JSONResult<List<HeliClientRespDTO>> listClientByParams(@RequestBody HeliClientReqDTO heliClientReqDTO);
+
+    /**
+     * 添加坐席
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/saveHeliClient")
+    public JSONResult<Boolean> saveHeliClient(@RequestBody HeliClientInsertReq reqDTO);
+
+    /**
+     * 更新坐席
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/updateHeliClient")
+    public JSONResult<Boolean> updateHeliClient(@RequestBody HeliClientReq reqDTO);
+
+    /**
+     * 根据idList删除容联坐席
+     * @param idListLongReq
+     * @return
+     */
+    @PostMapping("/deleteHeliClient")
+    public JSONResult<Boolean> deleteHeliClient(@RequestBody IdListLongReq idListLongReq);
     
     @Component
     static   class HystrixClientFallback implements HeliClientFeignClient {
@@ -105,7 +134,21 @@ public interface HeliClientFeignClient {
                 HeliClientReqDTO heliClientReqDTO) {
             return fallBackError("查询坐席相关信息");
         }
-        
+
+        @Override
+        public JSONResult<Boolean> saveHeliClient(HeliClientInsertReq reqDTO) {
+            return fallBackError("添加合力坐席");
+        }
+
+        @Override
+        public JSONResult<Boolean> updateHeliClient(HeliClientReq reqDTO) {
+            return fallBackError("更新合力坐席");
+        }
+
+        @Override
+        public JSONResult<Boolean> deleteHeliClient(IdListLongReq idListLongReq) {
+            return fallBackError("删除合力坐席");
+        }
     }
 
 
