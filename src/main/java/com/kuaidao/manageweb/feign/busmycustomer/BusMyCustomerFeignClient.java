@@ -4,6 +4,7 @@ import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -15,6 +16,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  *  商务 - 我的客户
@@ -38,7 +41,9 @@ public interface BusMyCustomerFeignClient {
 
     @PostMapping("/notVisitReason")
     public JSONResult<ClueBasicDTO> notVisitReason(@RequestBody IdEntityLong idEntityLong);
-    
+
+    @RequestMapping(method = RequestMethod.POST, value = "/createCustomerClue")
+    JSONResult<Boolean> createCustomerClue(ClueDTO dto);
     /**
      * 商务经理控制台  待处理邀约来访记录
      * @param param
@@ -77,6 +82,11 @@ public interface BusMyCustomerFeignClient {
         @Override
         public JSONResult<ClueBasicDTO> notVisitReason(IdEntityLong idEntityLong) {
             return fallBackError("查看未到访原因");
+        }
+
+        @Override
+        public JSONResult<Boolean> createCustomerClue(ClueDTO dto) {
+            return fallBackError("商务-创建资源");
         }
 
         @Override

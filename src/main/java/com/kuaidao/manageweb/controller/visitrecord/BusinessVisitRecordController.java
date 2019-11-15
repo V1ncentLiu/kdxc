@@ -280,9 +280,11 @@ public class BusinessVisitRecordController {
                 recordRespDTO.setVistitTime(arrDate);
                 recordRespDTO.setCustomerName((String) data.get("cusName"));
                 String tasteProjectId = (String) data.get("tasteProjectId");
-                String[] split = tasteProjectId.split(",");
-                if (split.length > 0 && !"".equals(split[0])) {
-                    recordRespDTO.setProjectId(Long.valueOf(split[0]));
+                if(tasteProjectId!=null){
+                    String[] split = tasteProjectId.split(",");
+                    if (split.length > 0 && !"".equals(split[0])) {
+                        recordRespDTO.setProjectId(Long.valueOf(split[0]));
+                    }
                 }
                 recordRespDTO.setSignProvince((String) data.get("signProvince"));
                 recordRespDTO.setSignCity((String) data.get("signCity"));

@@ -137,6 +137,8 @@
                 <el-table-column align="center" prop="projectId" label="资源项目" :formatter="transformProject"  width="120"></el-table-column>
                 <el-table-column align="center" prop="searchWord" label="包含搜索词"></el-table-column>
                 <el-table-column align="center" prop="notSearchWord" label="不包含搜索词"></el-table-column>
+                <el-table-column align="center" prop="province" label="包含省份" width="90"></el-table-column>
+                <el-table-column align="center" prop="notProvince" label="不包含省份" width="90" ></el-table-column>
                 <el-table-column align="center" prop="updateTime" label="最后编辑时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="startTime" label="规则有效开始时间"  :formatter="dateFormat" width="130"></el-table-column>
@@ -213,6 +215,18 @@
                 </el-row>
                 <el-row>
                     <el-col :span="12">
+                        <el-form-item label="包含省份：" :label-width="formLabelWidth">
+                            {{dialogForm.province}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="不包含省份：" :label-width="formLabelWidth">
+                            {{dialogForm.notProvince}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
                         <el-form-item label="生效开始时间：" :label-width="formLabelWidth">
                             {{dialogForm.startTime}}
                         </el-form-item>
@@ -220,6 +234,18 @@
                     <el-col :span="12">
                         <el-form-item label="生效结束时间：" :label-width="formLabelWidth">
                             {{dialogForm.endTime}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="周期内有效日：" :label-width="formLabelWidth">
+                            {{dialogForm.days}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="有效日内时间范围：" :label-width="formLabelWidth">
+                            {{dialogForm.dayTimeStart}}-{{dialogForm.dayTimeEnd}}
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -285,8 +311,13 @@ var queryOrg=[[${queryOrg}]];//电销组
                      projectId:'',
                      searchWord:'',
                      notSearchWord:'',
+                     province:'',
+                     notProvince:'',
                      startTime:'',
                      endTime:'',
+                     days:"",
+                    dayTimeStart:"",
+                    dayTimeEnd:"",
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -524,15 +555,20 @@ var queryOrg=[[${queryOrg}]];//电销组
             rowDblClick(row, column, event){//双击查看详情
                 this.dialogFormVisible = true;
                 this.dialogForm.ruleName = row.ruleName;
-                this.dialogForm.category =this.transformCategory(null,null,row.category);;
-                this.dialogForm.source = this.transformSource(null,null,row.source);;
-                this.dialogForm.type = this.transformType(null,null,row.type);;
-                this.dialogForm.sourceType = this.transformSourceType(null,null,row.sourceType);;
-                this.dialogForm.projectId = this.transformProject(null,null,row.projectId);;
+                this.dialogForm.category =this.transformCategory(null,null,row.category);
+                this.dialogForm.source = this.transformSource(null,null,row.source);
+                this.dialogForm.type = this.transformType(null,null,row.type);
+                this.dialogForm.sourceType = this.transformSourceType(null,null,row.sourceType);
+                this.dialogForm.projectId = this.transformProject(null,null,row.projectId);
                 this.dialogForm.searchWord = row.searchWord;
                 this.dialogForm.notSearchWord = row.notSearchWord;
+                this.dialogForm.province = row.province;
+                this.dialogForm.notProvince = row.notProvince;
                 this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
-                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);;
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                this.dialogForm.days = this.daysFormat(null,null,row.days);
+                this.dialogForm.dayTimeStart = row.dayTimeStart;
+                this.dialogForm.dayTimeEnd = row.dayTimeEnd;
                 this.dialogTableData=row.assignRuleTeamList;
             },
             addFun(){
@@ -601,6 +637,38 @@ var queryOrg=[[${queryOrg}]];//电销组
                  return "";
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //星期和美天数据格式化方法
+            daysFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                var cellValueArr=[];
+                var cellValueNew="";
+                if(cellValue){
+                    cellValueArr=cellValue.split(",");
+                    for(var i=0;i<cellValueArr.length;i++){
+                        if(cellValueArr[i]=="0"){
+                            cellValueArr[i]="每天"
+                        }else if(cellValueArr[i]=="1"){
+                            cellValueArr[i]="星期日"
+                        }else if(cellValueArr[i]=="2"){
+                            cellValueArr[i]="星期一"
+                        }else if(cellValueArr[i]=="3"){
+                            cellValueArr[i]="星期二"
+                        }else if(cellValueArr[i]=="4"){
+                            cellValueArr[i]="星期三"
+                        }else if(cellValueArr[i]=="5"){
+                            cellValueArr[i]="星期四"
+                        }else if(cellValueArr[i]=="6"){
+                            cellValueArr[i]="星期五"
+                        }else if(cellValueArr[i]=="7"){
+                            cellValueArr[i]="星期六"
+                        }
+                        cellValueNew+=cellValueArr[i]+",";
+                    }                    
+                }
+                return (cellValueNew.substring(0, cellValueNew.lastIndexOf(',')));
             },
           //媒介转换方法
             transformSource(row, column, cellValue, index) {

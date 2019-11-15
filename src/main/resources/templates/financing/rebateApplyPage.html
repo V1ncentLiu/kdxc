@@ -174,6 +174,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="cusAmount" label="返款客户金额"></el-table-column>
+                <el-table-column align="center" prop="bearAmount" label="承担金额"></el-table-column>
                <!--  <el-table-column align="center" prop="companyAmount" label="返换餐饮公司金额"></el-table-column> -->
                 <el-table-column align="center" prop="refundTime" label="返款时间"></el-table-column>
                 <el-table-column align="center" prop="" label="返款图片" width="100">
@@ -240,7 +241,7 @@
         </el-row>
     </div>
     <!-- 驳回编辑 -->
-    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" @close="closeEditRebateDialog">
+    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" @close="closeEditRebateDialog" v-dialog-drag>
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
             <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="person">
                 {{dialogForm.auditUserName}}
@@ -320,16 +321,16 @@
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
-    <el-dialog title="驳回原因" :visible.sync="reasonDialog">           
+    <el-dialog title="驳回原因" :visible.sync="reasonDialog" v-dialog-drag>           
         <div class="fs16 marginB20" >{{rejectReason}}</div>
     </el-dialog>
     <!-- 返款原因 -->
-    <el-dialog title="返款原因" :visible.sync="reasonDialog1">           
+    <el-dialog title="返款原因" :visible.sync="reasonDialog1" v-dialog-drag>           
         <div class="fs16 marginB20" >{{reason}}</div>
     </el-dialog>
     
     <!-- 下载图片 dialog 开始 -->
-        <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
+        <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px" v-dialog-drag>
             <ol>
                 <li v-for="(item,index) in imgList" style="margin-bottom:8px">
                  <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
@@ -340,7 +341,7 @@
     <!-- 下载图片dialog 结束 -->
     
         <!-- 付款明细 -->
-    <el-dialog :title="signNoPayDetailTitle" :visible.sync="payDetailDialogVisible">
+    <el-dialog :title="signNoPayDetailTitle" :visible.sync="payDetailDialogVisible" v-dialog-drag>
            <div v-show="signNoShow">
             <div class="fs16 marginB20">签约单基本信息</div>
             <el-table
@@ -477,7 +478,7 @@
         </div>
     </el-dialog>
     <!-- 付款明细 -->
-    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="1000px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="1000px" v-dialog-drag>
         <el-table
             ref="recordTableDetail" 
             tooltip-effect="dark"
@@ -507,7 +508,7 @@
     </el-dialog>
     <!-- 关联签约单 -->
     <!-- dialog -->
-    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible">      
+    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible" v-dialog-drag>      
         <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
             <el-form :inline="true" :model="dialogFormChoose" ref="dialogFormChoose">
               <el-form-item class="formItem" label="签约时间：">

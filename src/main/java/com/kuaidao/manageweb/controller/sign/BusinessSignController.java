@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
@@ -140,8 +141,10 @@ public class BusinessSignController {
     JSONResult<List<OrganizationRespDTO>> dxList =
         organizationFeignClient.queryOrgByParam(orgDto);
 
-    // 查询项目列表
-    JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+    // 查询所有签约项目
+    ProjectInfoPageParam param=new ProjectInfoPageParam();
+    param.setIsNotSign(AggregationConstant.NO);
+    JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
     // 获取省份
     List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
 
@@ -386,12 +389,14 @@ public class BusinessSignController {
         if (flag&&signFlag) {// 没有到访记录
           // signDTO.setSignCompanyId((Long) data.get("busCompany"));
           String tasteProjectId = (String) data.get("tasteProjectId");
-          String[] split = tasteProjectId.split(",");
-          if (split.length > 0 && !"".equals(split[0])) {
-//            signDTO.setSignProjectId();
-            Long signProjectId =Long.valueOf(split[0]);
-            signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
+          if(tasteProjectId!=null){
+            String[] split = tasteProjectId.split(",");
+            if (split.length > 0 && !"".equals(split[0])) {
+              Long signProjectId =Long.valueOf(split[0]);
+              signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
+            }
           }
+
           signDTO.setSignProvince((String) data.get("signProvince"));
           signDTO.setSignCity((String) data.get("signCity"));
           signDTO.setSignDictrict((String) data.get("signDistrict"));

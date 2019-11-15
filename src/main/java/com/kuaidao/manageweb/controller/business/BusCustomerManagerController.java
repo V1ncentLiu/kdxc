@@ -4,16 +4,28 @@
 package com.kuaidao.manageweb.controller.business;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
+import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.clue.BusVisitPerDTO;
+import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
+import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,10 +38,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -157,8 +172,10 @@ public class BusCustomerManagerController {
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
-        // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();

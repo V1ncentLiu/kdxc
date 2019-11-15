@@ -1,3 +1,9 @@
+var oLink = document.getElementById("skinCss");
+if (getCookieVal("skinVal")) {
+  oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+} else {
+  oLink['href'] = "/css/common/merchant_base1.css";
+}
 var myCallRecordVm = new Vue({
   el: '#myCallRecordVm',
   data: {
@@ -48,7 +54,10 @@ var myCallRecordVm = new Vue({
     isActive2: false,
     isActive3: false,
     isActive4: false,
-    colorStatus: false
+    colorStatus: false,
+    rowStatus: false,
+    minStatus: false,
+    fullWidth: document.documentElement.clientWidth,
   },
   methods: {
     transCusPhone(row) {
@@ -349,14 +358,30 @@ var myCallRecordVm = new Vue({
         this.isShow = true
       }
     },
-    // clearTeleGroupList(selectedValue) {
-    //   this.teleGroupList = [];
-    //   this.tmList = [];
-    //   this.searchForm.accountId = '';
-    //   this.searchForm.teleGroupId = '';
-    // }
-
-
+    handleResize(event) {
+      this.fullWidth = document.documentElement.clientWidth;
+      console.log(this.fullWidth, "this.fullWidth");
+      let that = this;
+      this.$nextTick(() => {
+        let childrenLength = that.$refs.itemBox.children.length;
+        if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+          that.rowStatus = true;
+          that.minStatus = false;
+        }
+        else if (that.fullWidth <= 1400 && childrenLength >= 4) {
+          that.rowStatus = true;
+          that.minStatus = true;
+        }
+        else if (that.fullWidth > 1400 && that.fullWidth < 1500 && childrenLength <= 4) {
+          that.rowStatus = true;
+          that.minStatus = true;
+        }
+        else {
+          that.rowStatus = false;
+          that.minStatus = false;
+        }
+      })
+    }
   },
   created() {
     var a = new Date();
@@ -366,6 +391,17 @@ var myCallRecordVm = new Vue({
     this.searchForm.startTime = year + "-" + (month + 1) + "-" + date + " 00:00:00";
     this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
     this.searchYesterday();
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize();
+    window.addEventListener("message", function (event) {
+      var data = event.data;
+      switch (data.cmd) {
+        case 'getFormJson':
+          oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+          // 处理业务逻辑
+          break;
+      }
+    });
   },
   mounted() {
     document.getElementById('myCallRecordVm').style.display = 'block';

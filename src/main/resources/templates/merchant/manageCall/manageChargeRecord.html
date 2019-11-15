@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-<head th:include="_header_include::frag(~{::title},~{::link},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>通话费用</title>
+    <meta charset="UTF-8">
     <link th:href="@{'/font-awesome-4.7.0/css/font-awesome.css'}" rel="stylesheet">
-    <!-- <link th:href="@{'/css/custom/callrecord/simpleAudio.css'}" rel="stylesheet"> -->
-    <link rel="stylesheet" href="/css/common/merchant_base.css">
+    <link rel="stylesheet" href="" id="skinCss">
 </head>
 <style>
     .call-menu {
@@ -21,27 +21,16 @@
         border-radius: 0;
     }
 
-    .call-menu .el-button:hover {
-        background: #FFFFFF;
-        color: #4B80FF;
-    }
 
     .call-search-box {
         margin-bottom: 0;
     }
 
-    .el-button.call-button-active {
-        background: #FFFFFF;
-        color: #4B80FF;
-    }
 
     .callLogBox {
         margin-top: 30px;
     }
 
-    .call-time-long {
-        color: #4E82FF;
-    }
 
     .call-money {
         margin-left: 30px;
@@ -51,10 +40,6 @@
         display: inline;
         color: #000000;
         font-size: 14px;
-    }
-
-    .call-money span {
-        color: #4D81FF;
     }
 
     .mainSearchFormBox {
@@ -107,8 +92,9 @@
         </el-row>
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
-                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="searchForm" ref="searchForm">
-                    <div class="main-search-box">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="searchForm" ref="searchForm"
+                    :class="{'rowMore':rowStatus,'minMore':minStatus}">
+                    <div class="main-search-box" ref="itemBox" :class="{'rowMore':rowStatus}">
                         <el-form-item label="商家账户:" prop="businessAccount">
                             <el-select v-model="searchForm.businessAccount" placeholder="商家账户" value-key="id" clearable>
                                 <el-option v-for="item in userInfoList" :key="item.id" :label="item.name"
@@ -120,12 +106,14 @@
                             <div class="get-time">消费时间段:</div>
                             <div class="time-style" :class="{'selectActive':colorStatus}">
                                 <el-form-item prop="startTime" class="call-time">
-                                    <el-date-picker v-model="searchForm.startTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun"  placeholder="选择开始日期"
+                                    <el-date-picker v-model="searchForm.startTime" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择开始日期"
                                         value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="endTime">
-                                    <el-date-picker v-model="searchForm.endTime" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择结束日期"
+                                    <el-date-picker v-model="searchForm.endTime" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择结束日期"
                                         value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
                                     </el-date-picker>
                                 </el-form-item>
@@ -140,7 +128,7 @@
                         </el-form-item>
 
                     </div>
-                    <div class="mainSearchBtnBox">
+                    <div class="mainSearchBtnBox" :class="{'rowMore':rowStatus}">
                         <el-button icon="el-icon-search" type="primary" @click="initCallRecordData('1')"
                             class="searchBtn">搜索</el-button>
                         <el-button @click="resetForm('searchForm')">重置</el-button>
@@ -155,10 +143,10 @@
                 </el-table-column>
                 <el-table-column align="center" prop="businessAccountName" label="商家账户" width="140"></el-table-column>
                 <el-table-column align="center" prop="bindAccountName" label="绑定账户" width="145"></el-table-column>
-                <el-table-column align="center" prop="seatNumber" label="坐席编号" ></el-table-column>
+                <el-table-column align="center" prop="seatNumber" label="坐席编号"></el-table-column>
                 <el-table-column align="center" prop="seatPhone" label="坐席电话" width="140"></el-table-column>
-                <el-table-column align="center" prop="monthRent" label="月租(元)" ></el-table-column>
-                <el-table-column align="center" prop="cost" label="日常消费(元)" ></el-table-column>
+                <el-table-column align="center" prop="monthRent" label="月租(元)"></el-table-column>
+                <el-table-column align="center" prop="cost" label="日常消费(元)"></el-table-column>
                 <el-table-column align="center" prop="callNumber" label="通话次数" width="120"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="initCallRecordData"></table-pagination>
@@ -169,7 +157,19 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var userInfoList = [[${ userInfoList }]];
-  //userInfoList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
+    var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
+   // console.log(oLink,"oLink");
+//     if (getCookieVal("skinVal")) {
+//         oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+//     } else {
+//         oLink['href'] = "/css/common/merchant_base1.css";
+//     }
+//   //userInfoList = [{ id: "1", name: "张三" }, { id: "2", name: "李四" }];
 </script>
 <!-- 当前页面的js -->
 <script th:src="@{/js/custom/callrecord/merchantManageCallCost.js}"></script>
