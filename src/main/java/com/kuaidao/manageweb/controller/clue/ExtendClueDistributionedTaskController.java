@@ -365,16 +365,31 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSourcetwo()); // 所属组
                 curList.add(taskDTO.getIndustryCategoryName()); // 行业类别
                 curList.add(taskDTO.getRemark()); // 备注
+                curList.add(taskDTO.getTeleCompanyName()); // 电销分公司
                 curList.add(taskDTO.getTeleDirectorName()); // 电销组总监
+
                 curList.add(taskDTO.getTeleGorupName()); // 电销组
-                // String flag = null;
-                // if (taskDTO.getIsRepeatPhone() != null) {
-                // if (taskDTO.getIsRepeatPhone() == 0) {
-                // flag = "否";
-                // } else {
-                // flag = "是";
-                // }
-                // }
+                // 这两个要进行转换
+                String isCall = null;
+                if (taskDTO.getIsCall() != null) {
+                    if (taskDTO.getIsCall() == 1) {
+                        isCall = "是";
+                    } else {
+                        isCall = "否";
+                    }
+                }
+                // 是否接通
+                curList.add(isCall);
+                String status = null;
+                if (taskDTO.getStatus() != null) {
+                    if (taskDTO.getStatus() == 1) {
+                        status = "是";
+                    } else {
+                        status = "否";
+                    }
+                }
+                // 是否有效
+                curList.add(status);
                 // 只要下发的肯定都是否（产品定的，都是否）
                 curList.add("否"); // 是否重复
                 // 是否自建
@@ -522,6 +537,8 @@ public class ExtendClueDistributionedTaskController {
                 List<Object> curList = new ArrayList<>();
                 // 资源ID
                 curList.add(taskDTO.getClueId());
+                // 客户级别
+                curList.add(taskDTO.getCusLevelName());
                 // 创建时间
                 curList.add(taskDTO.getCreateTime());
                 // 资源类别
@@ -607,6 +624,7 @@ public class ExtendClueDistributionedTaskController {
     private List<Object> getCommunicateRecordsHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("资源ID");
+        headTitleList.add("客户级别");
         headTitleList.add("创建时间");
         headTitleList.add("资源类别");
         headTitleList.add("媒介");
@@ -662,8 +680,11 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("所属组");
         headTitleList.add("行业类别");
         headTitleList.add("备注");
+        headTitleList.add("电销组分公司");
         headTitleList.add("电销组总监");
         headTitleList.add("电销组");
+        headTitleList.add("是否接通");
+        headTitleList.add("是否有效");
         headTitleList.add("是否重复");
         headTitleList.add("是否自建");
         headTitleList.add("首次分配话务组");

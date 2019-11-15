@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
 import com.github.pagehelper.util.StringUtil;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.*;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.manageweb.constant.Constants;
@@ -428,8 +429,10 @@ public class SignRecordController {
     @RequestMapping("/queryProjectList")
     @ResponseBody
     public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
-        // 签约项目
-        return projectInfoFeignClient.allProject();
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
+        return projectInfoFeignClient.queryBySign(param);
     }
 
 

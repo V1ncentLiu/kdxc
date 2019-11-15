@@ -190,12 +190,15 @@
         </el-row>
     </div>
     <!-- dialog -->
-    <el-dialog  :title="refundTitle"  :visible.sync="allocationVisible" width="540px">
+    <el-dialog  :title="refundTitle"  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
               <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                  <el-input v-model="allocationForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
+                  <el-input @input="allCalAmount" v-model="allocationForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
               </el-form-item>
+            <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
+                <el-input v-model="allocationForm.bearAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
+            </el-form-item>
              <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
                   <span style="color:red;">当前项目为给品牌商结算</span>
               </el-form-item>
@@ -247,7 +250,7 @@
         </template>
     </el-dialog>
     <!-- dialog -->
-    <el-dialog  :title="rebateTitle"  :visible.sync="transferVisible" width="540px">
+    <el-dialog  :title="rebateTitle"  :visible.sync="transferVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
               <el-form-item label="" :label-width="formLabelWidth" prop="">
@@ -264,8 +267,11 @@
                 <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
               </el-form-item>
             	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                <el-input v-model="transferForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width: 290px;"></el-input>
+                <el-input @input="transferCalAmount" v-model="transferForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width: 290px;"></el-input>
               </el-form-item>
+                <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
+                    <el-input v-model="transferForm.bearAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
+                </el-form-item>
               <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
                   <span style="color:red;">当前项目为给品牌商结算</span>
               </el-form-item>
@@ -318,7 +324,7 @@
     </el-dialog>
     <!-- dialog -->
     <!-- 付款明细 -->
-    <el-dialog :title="payTitle" :visible.sync="recordDialog" width="1000px">
+    <el-dialog :title="payTitle" :visible.sync="recordDialog" width="1000px" v-dialog-drag>
         <el-table
             ref="recordTable" 
             tooltip-effect="dark"
@@ -350,7 +356,7 @@
     </el-dialog>
     <!-- 关联签约单 -->
     <!-- dialog -->
-    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible" width="1000px">      
+    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible" width="1000px" v-dialog-drag>      
       <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
         <el-form :inline="true" :model="dialogFormChoose" ref="dialogFormChoose">
           <el-form-item class="formItem" label="签约时间：">
@@ -447,6 +453,7 @@ var clueVM = new Vue({
           	reason:'',
             refundTime:'',
             cusAmount:'',
+              bearAmount:'',
             fileList: [],
           },
           transferForm: {
@@ -455,6 +462,7 @@ var clueVM = new Vue({
               reason:'',
               refundTime:'',
               cusAmount:'',
+              bearAmount:'',
               signProjectId:'',
               signProvince:'',
               fileList: [],
@@ -530,6 +538,19 @@ var clueVM = new Vue({
 
                 }, trigger: 'blur'}
             ],
+             bearAmount: [
+                  { required: true, message: '请输入承担金额', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                          var reg =  /^[0-9]+[0-9]*]*$/ ;
+                          if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                              callback(new Error("请输入正整数"));
+                              return;
+                          }else{
+                              callback();
+                          }
+
+                      }, trigger: 'blur'}
+              ],
             fileList: [
                 { required: true, message: '请上传图片', trigger: 'change' }
             ],
@@ -557,6 +578,19 @@ var clueVM = new Vue({
 
                 }, trigger: 'blur'}
             ],
+              bearAmount: [
+                  { required: true, message: '请输入承担金额', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                          var reg =  /^[0-9]+[0-9]*]*$/ ;
+                          if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                              callback(new Error("请输入正整数"));
+                              return;
+                          }else{
+                              callback();
+                          }
+
+                      }, trigger: 'blur'}
+              ],
             fileList: [
                 { required: true, message: '请上传图片', trigger: 'change' }
             ],
@@ -610,6 +644,24 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+            //计算退款的承担金额
+            allCalAmount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(rows[0].ratio/100);
+                var atwo = parseFloat(this.allocationForm.cusAmount);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.allocationForm.bearAmount = (aone * atwo) + "";
+            },
+            //计算返款的承担金额
+            transferCalAmount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(rows[0].ratio/100);
+                var atwo = parseFloat(this.transferForm.cusAmount);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.transferForm.bearAmount = (aone * atwo) + "";
+            },
         	getUploadParam(){
                 var signUrl = this.ossUrl+"?serviceType=aggregation";
                 var param={};
@@ -1112,6 +1164,7 @@ var clueVM = new Vue({
                     param.reason=this.allocationForm.reason;
                     param.refundTime=this.allocationForm.refundTime;
                     param.cusAmount=this.allocationForm.cusAmount;
+                    param.bearAmount = this.allocationForm.bearAmount;
                     param.imgList=this.fileList;
                     this.btnDisabled=true;
                         axios.post('/financing/refundRebate/applyRefund',param)
@@ -1199,6 +1252,7 @@ var clueVM = new Vue({
                         param.reason=this.transferForm.reason;
                         param.refundTime=this.transferForm.refundTime;
                         param.cusAmount=this.transferForm.cusAmount;
+                        param.bearAmount = this.transferForm.bearAmount;
                         param.signNoList=this.transferForm.dynamicTags;
                         param.imgList=this.fileList;
                         this.btnDisabled1=true;

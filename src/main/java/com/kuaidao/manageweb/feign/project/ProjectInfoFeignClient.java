@@ -112,6 +112,13 @@ public interface ProjectInfoFeignClient {
     public JSONResult<PageBean<BrandListDTO>> getBrandList(
             @RequestBody BrandListPageParam pageParam);
 
+    /**
+     * 根据签约状态查询项
+     * @param dto
+     * @return
+     */
+    @PostMapping("/queryBySign")
+    public JSONResult<List<ProjectInfoDTO>> queryBySign(@RequestBody ProjectInfoPageParam dto);
 
     @Component
     static class HystrixClientFallback implements ProjectInfoFeignClient {
@@ -173,6 +180,10 @@ public interface ProjectInfoFeignClient {
             return fallBackError("查询品牌库列表");
         }
 
+        @Override
+        public JSONResult<List<ProjectInfoDTO>> queryBySign(ProjectInfoPageParam dto) {
+            return fallBackError("查询签约项目列表");
+        }
 
 
     }
