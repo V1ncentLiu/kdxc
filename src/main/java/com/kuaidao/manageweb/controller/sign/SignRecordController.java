@@ -431,7 +431,7 @@ public class SignRecordController {
     public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
         // 查询所有签约项目
         ProjectInfoPageParam param=new ProjectInfoPageParam();
-        param.setIsNotSign(1);
+        param.setIsNotSign(AggregationConstant.NO);
         return projectInfoFeignClient.queryBySign(param);
     }
 
