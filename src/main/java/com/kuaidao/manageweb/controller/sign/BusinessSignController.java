@@ -389,12 +389,14 @@ public class BusinessSignController {
         if (flag&&signFlag) {// 没有到访记录
           // signDTO.setSignCompanyId((Long) data.get("busCompany"));
           String tasteProjectId = (String) data.get("tasteProjectId");
-          String[] split = tasteProjectId.split(",");
-          if (split.length > 0 && !"".equals(split[0])) {
-//            signDTO.setSignProjectId();
-            Long signProjectId =Long.valueOf(split[0]);
-            signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
+          if(tasteProjectId!=null){
+            String[] split = tasteProjectId.split(",");
+            if (split.length > 0 && !"".equals(split[0])) {
+              Long signProjectId =Long.valueOf(split[0]);
+              signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
+            }
           }
+
           signDTO.setSignProvince((String) data.get("signProvince"));
           signDTO.setSignCity((String) data.get("signCity"));
           signDTO.setSignDictrict((String) data.get("signDistrict"));
