@@ -165,7 +165,7 @@ public class VisitRecordController {
 
         // 查询所有签约项目
         ProjectInfoPageParam param=new ProjectInfoPageParam();
-        param.setIsNotSign(1);
+        param.setIsNotSign(AggregationConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // request.setAttribute("busManagerList",busManagerList);
