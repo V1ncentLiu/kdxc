@@ -4,7 +4,7 @@
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <link rel="stylesheet" href="" id="skinCss">    
     <style>    
     .merchantMainBox{margin: 0;
     max-width: 100%;
@@ -21,7 +21,7 @@
 
     /*线下支付*/
     .paymentOffline{color:#57586c;}
-    .paymentOffline .btnNum{ margin:0 10px 0 0;background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));width: 20px;height: 20px;line-height: 20px;border-radius: 50%;text-align: center;color: #fff;display: inline-block;font-size: 14px;}   
+    .paymentOffline .btnNum{ margin:0 10px 0 0;/*background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1));*/width: 20px;height: 20px;line-height: 20px;border-radius: 50%;text-align: center;color: #fff;display: inline-block;font-size: 14px;}   
     </style>
 </head>
 <body>
@@ -34,18 +34,18 @@
         
         
         <div class="merchantGreyBox">
-            <div class="mgB20 title18"><em class="btnNum">1</em>打款至北京快道网络有限公司指定收款账号</div>
+            <div class="mgB20 title18"><em class="btnNum blueColorBg">1</em>打款至北京快道网络有限公司指定收款账号</div>
             <p>转账途径银行柜台转账、微信支付、网上银行、支付宝；</p><br>
             <p>收款户名：北京快道网络有限公司</p><br>
             <p>收款银行：北京招商银行 富力城支行</p><br>
             <p>收款账号：110918854710802</p>
         </div>
         <div class="merchantGreyBox">
-            <div class="mgB20 title18"><em class="btnNum">2</em>提交汇款信息</div>
+            <div class="mgB20 title18"><em class="btnNum blueColorBg">2</em>提交汇款信息</div>
             <p>打款至北京快道网络有限公司账号后，联系客户顾问提交您的汇款信息</p>
         </div>
         <div class="merchantGreyBox">
-            <div class="mgB20 title18"><em class="btnNum">3</em>汇款结果反馈</div>
+            <div class="mgB20 title18"><em class="btnNum blueColorBg">3</em>汇款结果反馈</div>
             <p>确定打款操作后，可以在充值记录页面查看汇款进度</p>
         </div>
         <div class="merchantGreyBox">
@@ -62,7 +62,13 @@
 
 <!-- import common js-->
 <script th:inline="javascript">  
-    var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息  
+    var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息 
+    var oLink = document.getElementById("skinCss"); 
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#paymentOffline',
         data: function() {
@@ -74,7 +80,17 @@
             
         },
         created(){
-            
+            //监听父窗口信息
+            // 接受父页面发来的信息
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
         },
         mounted(){
             document.getElementById('paymentOffline').style.display = 'block';

@@ -151,6 +151,11 @@
     //当前用户信息
     var user = [[${ user }]];
     var oLink =  document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var resourceApplyVm = new Vue({
         el: '#resourceApply',
         data: function () {
@@ -331,16 +336,17 @@
             console.info("create method");
 
             this.getByUserId();
+            //监听父窗口信息
+            // 接受父页面发来的信息
             window.addEventListener("message", function (event) {
                 var data = event.data;
                 switch (data.cmd) {
                     case 'getFormJson':
                         oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
-                        // 处理业务逻辑
+                        // 处理业务逻辑
                         break;
                 }
             });
-            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
         },
         mounted() {
             document.getElementById('resourceApply').style.display = 'block';

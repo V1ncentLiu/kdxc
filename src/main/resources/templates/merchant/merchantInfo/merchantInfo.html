@@ -4,7 +4,7 @@
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <style>  
     /*公共样式*/
     .merchantMainBox{margin: 0;
@@ -42,14 +42,14 @@
                 <img v-if="merchantIconShow" th:src="@{/images/header.jpg}" alt="">
                 <img else :src="merchantIcon" alt="">
             </div>
-            <el-button type="text" class="changeHeaderImg" @click="openWechat">更改头像</el-button>
+            <el-button type="text" class="changeHeaderImg blueColorT" @click="openWechat">更改头像</el-button>
         </el-col>
         <el-col :span="24" class="marginB50">
             <span class="labelWidth">账号</span><span class="rightContent">{{userName}}</span>            
         </el-col>
         <el-col :span="24" class="marginB50">
             <span class="labelWidth">密码</span>
-            <span class="marginR10 rightContent">******</span><span class="fs16 bluecolorM cursorP" @click="changePassword">更改密码</span>            
+            <span class="marginR10 rightContent">******</span><span class="fs16 bluecolorM blueColorT cursorP" @click="changePassword">更改密码</span>            
         </el-col>
         <el-col :span="24" class="marginB50">
             <span class="labelWidth">联系人</span><span class="rightContent">{{linkName}}</span>            
@@ -122,6 +122,12 @@
 <script th:inline="javascript">
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var userId = [[${userId}]];//用户信息
+    var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function() {
@@ -396,6 +402,17 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
+            //监听父窗口信息
+            // 接受父页面发来的信息
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
             
         },
         mounted(){
