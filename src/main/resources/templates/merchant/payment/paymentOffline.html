@@ -64,6 +64,11 @@
 <script th:inline="javascript">  
     var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息 
     var oLink = document.getElementById("skinCss"); 
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#paymentOffline',
         data: function() {
@@ -75,16 +80,17 @@
             
         },
         created(){
+            //监听父窗口信息
+            // 接受父页面发来的信息
             window.addEventListener("message", function (event) {
                 var data = event.data;
                 switch (data.cmd) {
                     case 'getFormJson':
                         oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
-                        // 处理业务逻辑
+                        // 处理业务逻辑
                         break;
                 }
             });
-            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css"
         },
         mounted(){
             document.getElementById('paymentOffline').style.display = 'block';

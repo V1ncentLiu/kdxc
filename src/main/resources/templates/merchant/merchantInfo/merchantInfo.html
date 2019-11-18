@@ -123,6 +123,11 @@
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var userId = [[${userId}]];//用户信息
     var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function() {
@@ -397,16 +402,17 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
+            //监听父窗口信息
+            // 接受父页面发来的信息
             window.addEventListener("message", function (event) {
                 var data = event.data;
                 switch (data.cmd) {
                     case 'getFormJson':
                         oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
-                        // 处理业务逻辑
+                        // 处理业务逻辑
                         break;
                 }
             });
-            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css"
             
         },
         mounted(){
