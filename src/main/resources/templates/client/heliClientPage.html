@@ -1,287 +1,335 @@
 <!DOCTYPE html>
 <html>
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>合力坐席管理</title>
-     <style>
-        .trClientManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
-        .trClientManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        .trClientManage .leftTree{padding:10px;}
-        .trClientManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        .el-message-box__btns {text-align: center;}
-        .el-message-box__btns button:nth-child(2){margin-right: -125px;}
-    </style>
+  <title>合力坐席管理</title>
+  <style>
+    .trClientManage .leftBox { /*width: 200px;*/
+      height: auto;
+      border: 1px solid #ebeef5;
+      min-height: 480px;
+    }
+
+    .trClientManage .leftTitle {
+      background: #ebeef5;
+      text-indent: 20px;
+      height: 40px;
+      line-height: 40px;
+    }
+
+    .trClientManage .leftTree {
+      padding: 10px;
+    }
+
+    .trClientManage .rightTitle {
+      background: #ebeef5;
+      text-indent: 20px;
+      height: 40px;
+      line-height: 40px;
+    }
+
+    .el-message-box__btns {
+      text-align: center;
+    }
+
+    .el-message-box__btns button:nth-child(2) {
+      margin-right: -125px;
+    }
+  </style>
 </head>
 <body>
-<div id="trClientManage" class="trClientManage mainPadding" style="display:none">  
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item>合力坐席管理</el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-row class="marginB20">
-         <!-- <shiro:hasPermission name="aggregation:trClient:add">
-             <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i>添加坐席</el-button>
-         </shiro:hasPermission>
-         <shiro:hasPermission name="aggregation:trClient:edit">
-           <el-button type="success" @click="modifyClientDialog"><i class="el-icon-edit"></i>编辑坐席</el-button>
-         </shiro:hasPermission>
-         <shiro:hasPermission name="aggregation:trClient:delete">
-            <el-button type="danger" @click="deleteClientDialog"><i class="el-icon-delete"></i>删除坐席</el-button>
-         </shiro:hasPermission>
-        <shiro:hasPermission name="aggregation:trClient:import">
-            <el-button type="warning" @click="addBatchClient"><i class="el-icon-download"></i>导入坐席</el-button>
-        </shiro:hasPermission> -->
-        <!--  <el-button type="success" @click="trCall"><i class="el-icon-edit"></i>外呼</el-button> -->
-    </el-row>
-    <div class="mainSearchBg">        
-        <div class="mainSearchFormBox">
-          <el-form :inline="true" class="demo-form-inline mainSearchForm">
-            <el-form-item label="所在组织:" label-width="55px">        
-              <el-select v-model="searchForm.orgId" placeholder="请选择所在组织"  clearable filterable  value-key="value" >
-                <el-option
-                    v-for="item in orgList"
-                    :key="item.id"
-                    :label="item.name"
-                    :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="坐席编号:" label-width="90px">
-              <el-input placeholder="请输入坐席编号"  v-model="searchForm.clientNo"></el-input>
-            </el-form-item>
-         <!--    <el-form-item label="A(呼叫号):" label-width="90px">
-              <el-input placeholder="A(呼叫号)"  v-model="searchForm.bindPhone"></el-input>
-            </el-form-item>
-            <el-form-item label="外显手机号:" label-width="90px" style="margin-right: 10px;">
-              <el-input placeholder="外显手机号"  v-model="searchForm.displayPhone"></el-input>
-            </el-form-item> -->
-            <el-form-item label="">
-              <el-button icon="el-icon-search" type="primary" @click="initClientData" >搜索</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-        <el-row>
-            <el-table 
-                ref="multipleTable"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                 @selection-change="handleSelectionChange"
-                :data="clientData" 
-                >
-                <el-table-column align="center" type="selection" width="55"></el-table-column>
-                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
-                <el-table-column align="center" prop="loginName" label="登录名"></el-table-column>
-                <el-table-column align="center" prop="secret" label="秘钥"></el-table-column>
-                <el-table-column align="center" prop="account" label="用户账户编号"></el-table-column>
-                <el-table-column align="center" prop="integratedId" label="登录账户名"></el-table-column>
-                <el-table-column align="center" prop="appid" label="APPID"></el-table-column>
-                <!-- <el-table-column align="center" prop="phoneMark" label="外显号标记记录 (类型+次数)"></el-table-column> -->
-                <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
-               <!--  <el-table-column align="center" label="回呼配置" >
-                    <template slot-scope="scope">
-                        <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a>
-                        <el-input v-model="scope.row.callbackPhone" style="width:130px;" maxlength="11"></el-input>
-                        &nbsp;
-                        <el-button type="primary" @click="updateCallbackPhone(scope.row.id,scope.row.callbackPhone)">确定</el-button>
-                    </template>
-                </el-table-column> -->
-                
-            </el-table>
-            <table-pagination :pager="pager" @change="initClientData"></table-pagination>
-        </el-row>
+<div id="trClientManage" class="trClientManage mainPadding" style="display:none">
+  <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <el-breadcrumb-item>Home</el-breadcrumb-item>
+    <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+    <el-breadcrumb-item>合力坐席管理</el-breadcrumb-item>
+  </el-breadcrumb>
+  <el-row class="marginB20">
+    <shiro:hasPermission name="aggregation:heliClient:add">
+      <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i>添加坐席
+      </el-button>
+    </shiro:hasPermission>
+    <shiro:hasPermission name="aggregation:heliClient:edit">
+      <el-button type="success" @click="modifyClientDialog"><i class="el-icon-edit"></i>编辑坐席
+      </el-button>
+    </shiro:hasPermission>
+    <shiro:hasPermission name="aggregation:heliClient:delete">
+      <el-button type="danger" @click="deleteClientDialog"><i class="el-icon-delete"></i>删除坐席
+      </el-button>
+    </shiro:hasPermission>
+    <!--<shiro:hasPermission name="aggregation:trClient:import">-->
+    <!--<el-button type="warning" @click="addBatchClient"><i class="el-icon-download"></i>导入坐席</el-button>-->
+    <!--</shiro:hasPermission>-->
+    <!--  <el-button type="success" @click="trCall"><i class="el-icon-edit"></i>外呼</el-button> -->
+  </el-row>
+  <div class="mainSearchBg">
+    <div class="mainSearchFormBox">
+      <el-form :inline="true" class="demo-form-inline mainSearchForm">
+        <el-form-item label="所在组织:" label-width="55px">
+          <el-select v-model="searchForm.orgId" placeholder="请选择所在组织" clearable filterable
+                     value-key="value">
+            <el-option
+                v-for="item in orgList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="坐席编号:" label-width="90px">
+          <el-input placeholder="请输入坐席编号" v-model="searchForm.clientNo"></el-input>
+        </el-form-item>
+        <!--    <el-form-item label="A(呼叫号):" label-width="90px">
+             <el-input placeholder="A(呼叫号)"  v-model="searchForm.bindPhone"></el-input>
+           </el-form-item>
+           <el-form-item label="外显手机号:" label-width="90px" style="margin-right: 10px;">
+             <el-input placeholder="外显手机号"  v-model="searchForm.displayPhone"></el-input>
+           </el-form-item> -->
+        <el-form-item label="">
+          <el-button icon="el-icon-search" type="primary" @click="initClientData">搜索</el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog" :close-on-click-modal="false" width="540px">
-        <el-form :model="form" ref="clientForm" :rules="rules">
-            <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
-                <el-input v-model="form.clientNo" autocomplete="off"  maxlength="50" style="width:310px;"></el-input>
-            </el-form-item>
-            <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="attribution">
-                <el-input v-model="form.attribution" autocomplete="off"  maxlength="50" style="width:310px;"></el-input>
-            </el-form-item>
-            <el-form-item label="A(呼叫号)：" :label-width="formLabelWidth" prop="bindPhone">
-                <el-input v-model="form.bindPhone" autocomplete="off"  maxlength="11" style="width:310px;"></el-input>
-            </el-form-item>
-            <el-form-item label="外显手机号：" :label-width="formLabelWidth" prop="displayPhone">
-                <el-input v-model="form.displayPhone" autocomplete="off"  maxlength="11" style="width:310px;"></el-input>
-            </el-form-item>
-            <!-- <el-row :gutter="20"> -->
-                <!-- <el-col :span="12">
-                  <el-form-item label="所在组织：" :label-width="formLabelWidth" prop="orgName">
-	                <el-input v-model="form.orgName" autocomplete="off"  maxlength="50" :disabled="true" ></el-input>
-	            </el-form-item>
-                </el-col>
-                 <el-col :span="12">
-                     <el-button @click="selectOrg">选择组织</el-button>
-                </el-col> -->
-              <el-form-item label="所在组织：" :label-width="formLabelWidth" prop="orgName">
-	                <el-input v-model="form.orgName" autocomplete="off"  maxlength="50" :disabled="true" style="width:200px;margin-right: 10px;"></el-input>
-	                <el-button type="primary" @click="selectOrg">选择组织</el-button>
-	            </el-form-item>
-           <!--  </el-row> -->
-          
-         <!--      <el-form-item label="回呼配置：" :label-width="formLabelWidth" prop="callbackPhone">
-                <el-input v-model="form.callbackPhone" autocomplete="off"   maxlength="11"></el-input>
-            </el-form-item> -->
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="saveClient('clientForm')" :disabled="confirmBtnDisabled">提交</el-button>
-            <el-button @click="cancelForm('clientForm')">取 消</el-button>
-        </div>
-    </el-dialog>
-    
-    <el-dialog
-	  title="选择组织"
-	  :visible.sync="orgDialogVisible" :close-on-click-modal="false"
-	  width="30%">
-	  
-        <el-tree
-             ref="orgTree"
-             :data="orgTreeData"              
-             node-key="id"
-             v-loading="orgTreeLoading"
-             show-checkbox
-             default-expand-all
-             highlight-current
-             check-strictly
-             @check="selecedNode"
-             class="leftTree">
-         </el-tree>
+    <el-row>
+      <el-table
+          ref="multipleTable"
+          tooltip-effect="dark"
+          style="width: 100%"
+          border
+          @selection-change="handleSelectionChange"
+          :data="clientData"
+      >
+        <el-table-column align="center" type="selection" width="55"></el-table-column>
+        <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+        <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
+        <el-table-column align="center" prop="loginName" label="登录名"></el-table-column>
+        <el-table-column align="center" prop="secret" label="秘钥"></el-table-column>
+        <el-table-column align="center" prop="account" label="用户账户编号"></el-table-column>
+        <el-table-column align="center" prop="integratedId" label="登录账户名"></el-table-column>
+        <el-table-column align="center" prop="appid" label="APPID"></el-table-column>
+        <!-- <el-table-column align="center" prop="phoneMark" label="外显号标记记录 (类型+次数)"></el-table-column> -->
+        <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
+        <!--  <el-table-column align="center" label="回呼配置" >
+             <template slot-scope="scope">
+                 <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a>
+                 <el-input v-model="scope.row.callbackPhone" style="width:130px;" maxlength="11"></el-input>
+                 &nbsp;
+                 <el-button type="primary" @click="updateCallbackPhone(scope.row.id,scope.row.callbackPhone)">确定</el-button>
+             </template>
+         </el-table-column> -->
 
-	  
-	</el-dialog>
+      </el-table>
+      <table-pagination :pager="pager" @change="initClientData"></table-pagination>
+    </el-row>
+  </div>
+  <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible"
+             @close="closeAddClientDialog" :close-on-click-modal="false" width="540px">
+    <el-form :model="form" ref="clientForm" :rules="rules">
+      <el-form-item label="坐席登录名：" :label-width="formLabelWidth" prop="loginName">
+        <el-input v-model="form.loginName" autocomplete="off" maxlength="50"
+                  style="width:310px;"></el-input>
+      </el-form-item>
+      <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
+        <el-input v-model="form.clientNo" autocomplete="off" maxlength="50"
+                  style="width:310px;"></el-input>
+      </el-form-item>
+      <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="secret">
+        <el-input v-model="form.secret" autocomplete="off" maxlength="11"
+                  style="width:310px;"></el-input>
+      </el-form-item>
+      <el-form-item label="用户唯一凭证：" :label-width="formLabelWidth" prop="appid">
+        <el-input v-model="form.appid" autocomplete="off" maxlength="11"
+                  style="width:310px;"></el-input>
+      </el-form-item>
+      <el-form-item label="用户账户编号：" :label-width="formLabelWidth" prop="account">
+        <el-input v-model="form.account" autocomplete="off" maxlength="11"
+                  style="width:310px;"></el-input>
+      </el-form-item>
+      <el-form-item label="登录账户名：" :label-width="formLabelWidth" prop="integratedId">
+        <el-input v-model="form.integratedId" autocomplete="off" maxlength="11"
+                  style="width:310px;"></el-input>
+      </el-form-item>
+      <el-form-item label="所在组织：" :label-width="formLabelWidth" prop="orgName">
+        <el-input v-model="form.orgName" autocomplete="off" maxlength="50" :disabled="true"
+                  style="width:200px;margin-right: 10px;"></el-input>
+        <el-button type="primary" @click="selectOrg">选择组织</el-button>
+      </el-form-item>
 
-     <!-- 批量添加 自定义字段弹窗 start -->
-            <el-dialog title="导入天润坐席" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" :close-on-click-modal="false" width="540px">
-               <el-row class="marginB20">
-                                 <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
-                                 下载批量上传模版：<a href="/excel-templates/tr-client-template.xlsx" download="天润坐席导入模板"><span style="color:#409EFF">天润坐席导入模板</span></a>
-               
-               </el-row>
-               <el-row>
-                  <el-upload
-                      class="upload-demo"
-                      ref="upload"
-                      :multiple="false"
-                      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                      action="/client/client/uploadTrClient"
-                      :file-list="fileList"
-                      :on-change="handleChange"
-                      :before-upload="beforeUpload"
-                      :on-success="uploadSuccess"
-                     :on-error="uploadError"
-                      :auto-upload="false">
-                      <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件</el-button>
-                      <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
-                    </el-upload>
-               
-               
-               </el-row>
-              <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="submitUpload">确 定</el-button>
-                <el-button @click="dialogBatchVisible = false">取 消</el-button>
-              </div>
-            </el-dialog>
-      
-            <!-- 批量添加 自定义字段弹窗 end -->
+      <el-form-item label="坐席登录方式：" :label-width="formLabelWidth">
+        <el-select v-model="form.extenType"  value-key="value" style="width: 290px;" filterable >
+          <el-option
+              v-for="item in extenTypes"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <!--  </el-row> -->
 
-      <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible" :close-on-click-modal="false">
-          预览数据 共{{uploadNum}}条资源    
-           <el-table
-		    :data="uploadClientData"
-		    height="250"
-		    border
-		    style="width: 100%">
-		    <el-table-column
-		      prop="clientNo"
-		      label="坐席号"
-		      width="180">
-		    </el-table-column>
-            <el-table-column
-              prop="attribution"
-              label="坐席归属地"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="orgName"
-              label="电销组"
-              width="180">
-            </el-table-column>
-		    <el-table-column
-		      prop="bindPhone"
-		      label="TELA(绑定电话)"
-		      width="180">
-		    </el-table-column>
-		    <el-table-column
-		      prop="displayPhone"
-		      label="TELX(回显号)">
-		    </el-table-column>
-		      <el-table-column
-              prop="callbackPhone"
-              label="回呼号码">
-            </el-table-column>
-		  </el-table>
-           
-            <span slot="footer" class="dialog-footer">
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="saveClient('clientForm')" :disabled="confirmBtnDisabled">
+        提交
+      </el-button>
+      <el-button @click="cancelForm('clientForm')">取 消</el-button>
+    </div>
+  </el-dialog>
+
+  <el-dialog
+      title="选择组织"
+      :visible.sync="orgDialogVisible" :close-on-click-modal="false"
+      width="30%">
+
+    <el-tree
+        ref="orgTree"
+        :data="orgTreeData"
+        node-key="id"
+        v-loading="orgTreeLoading"
+        show-checkbox
+        default-expand-all
+        highlight-current
+        check-strictly
+        @check="selecedNode"
+        class="leftTree">
+    </el-tree>
+
+
+  </el-dialog>
+
+  <!-- 批量添加 自定义字段弹窗 start -->
+  <el-dialog title="导入天润坐席" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog"
+             :close-on-click-modal="false" width="540px">
+    <el-row class="marginB20">
+      <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
+      下载批量上传模版：<a href="/excel-templates/tr-client-template.xlsx" download="天润坐席导入模板"><span
+        style="color:#409EFF">天润坐席导入模板</span></a>
+
+    </el-row>
+    <el-row>
+      <el-upload
+          class="upload-demo"
+          ref="upload"
+          :multiple="false"
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          action="/client/client/uploadTrClient"
+          :file-list="fileList"
+          :on-change="handleChange"
+          :before-upload="beforeUpload"
+          :on-success="uploadSuccess"
+          :on-error="uploadError"
+          :auto-upload="false">
+        <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件
+        </el-button>
+        <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
+      </el-upload>
+
+
+    </el-row>
+    <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="submitUpload">确 定</el-button>
+      <el-button @click="dialogBatchVisible = false">取 消</el-button>
+    </div>
+  </el-dialog>
+
+  <!-- 批量添加 自定义字段弹窗 end -->
+
+  <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible" :close-on-click-modal="false">
+    预览数据 共{{uploadNum}}条资源
+    <el-table
+        :data="uploadClientData"
+        height="250"
+        border
+        style="width: 100%">
+      <el-table-column
+          prop="clientNo"
+          label="坐席号"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="attribution"
+          label="坐席归属地"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="orgName"
+          label="电销组"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="bindPhone"
+          label="TELA(绑定电话)"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="displayPhone"
+          label="TELX(回显号)">
+      </el-table-column>
+      <el-table-column
+          prop="callbackPhone"
+          label="回呼号码">
+      </el-table-column>
+    </el-table>
+
+    <span slot="footer" class="dialog-footer">
 			    <el-button type="primary" @click="submitUploadClient" :disabled="uploadBtnDisabled">{{uploadBtnText}}</el-button>
-			  </span>  
-     </el-dialog>
+			  </span>
+  </el-dialog>
 
-      <el-dialog title="部分导入失败" :visible.sync="uploadErrorDialogVisible" :show-close=false :close-on-click-modal="false">
-           以下内容导入失败，请重新导入    
-           <el-table
-            :data="uploadErrorData"
-            height="250"
-            border
-            
-            style="width: 100%">
-              <el-table-column
-			      type="index"
-			      label="序号"
-			      width="50">
-			    </el-table-column>
-            <el-table-column
-              prop="clientNo"
-              label="坐席号"
-              width="180">
-            </el-table-column>
-           <el-table-column
-               prop="attribution"
-               label="坐席归属地"
-               width="180">
-           </el-table-column>
-             <el-table-column
-              prop="orgName"
-              label="电销组"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="bindPhone"
-              label="TELA(绑定电话)"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="displayPhone"
-              label="TELX(回显号)">
-            </el-table-column>
-              <el-table-column
-              prop="callbackPhone"
-              label="回呼号码">
-            </el-table-column>
-          </el-table>
-          
-          <span slot="footer" class="dialog-footer">
+  <el-dialog title="部分导入失败" :visible.sync="uploadErrorDialogVisible" :show-close=false
+             :close-on-click-modal="false">
+    以下内容导入失败，请重新导入
+    <el-table
+        :data="uploadErrorData"
+        height="250"
+        border
+
+        style="width: 100%">
+      <el-table-column
+          type="index"
+          label="序号"
+          width="50">
+      </el-table-column>
+      <el-table-column
+          prop="clientNo"
+          label="坐席号"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="attribution"
+          label="坐席归属地"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="orgName"
+          label="电销组"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="bindPhone"
+          label="TELA(绑定电话)"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="displayPhone"
+          label="TELX(回显号)">
+      </el-table-column>
+      <el-table-column
+          prop="callbackPhone"
+          label="回呼号码">
+      </el-table-column>
+    </el-table>
+
+    <span slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="clickMeKown">知道了</el-button>
-              </span>  
-     </el-dialog>
+              </span>
+  </el-dialog>
 
 </div>
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var orgList = [[${orgList}]];
+  var orgList = [[${orgList}]];
 </script>
 
 <!-- 当前页面的js -->

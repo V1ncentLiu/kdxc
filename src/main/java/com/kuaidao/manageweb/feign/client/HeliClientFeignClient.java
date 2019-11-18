@@ -4,6 +4,7 @@ import com.kuaidao.callcenter.dto.HeliClientInsertReq;
 import com.kuaidao.callcenter.dto.RonglianClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
 import com.kuaidao.callcenter.dto.seatmanager.HeliClientReq;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListLongReq;
 import java.util.List;
 import org.slf4j.Logger;
@@ -75,6 +76,12 @@ public interface HeliClientFeignClient {
     public JSONResult<List<HeliClientRespDTO>> listClientByParams(@RequestBody HeliClientReqDTO heliClientReqDTO);
 
     /**
+     * 根据Id 查询合力坐席
+     */
+    @PostMapping("/queryHeliClientById")
+    public JSONResult<HeliClientRespDTO> queryHeliClientById(@RequestBody IdEntity idEntity);
+
+    /**
      * 添加坐席
      * @param reqDTO
      * @return
@@ -97,7 +104,7 @@ public interface HeliClientFeignClient {
      */
     @PostMapping("/deleteHeliClient")
     public JSONResult<Boolean> deleteHeliClient(@RequestBody IdListLongReq idListLongReq);
-    
+
     @Component
     static   class HystrixClientFallback implements HeliClientFeignClient {
 
@@ -136,6 +143,11 @@ public interface HeliClientFeignClient {
         }
 
         @Override
+        public JSONResult<HeliClientRespDTO> queryHeliClientById(IdEntity idEntity) {
+            return fallBackError("根据Id 查询合力坐席");
+        }
+
+        @Override
         public JSONResult<Boolean> saveHeliClient(HeliClientInsertReq reqDTO) {
             return fallBackError("添加合力坐席");
         }
@@ -150,6 +162,4 @@ public interface HeliClientFeignClient {
             return fallBackError("删除合力坐席");
         }
     }
-
-
 }

@@ -59,7 +59,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
- * 合力 坐席 
+ * 合力 坐席
  * @author  Devin.Chen
  * @date 2019-08-08 13:41:28
  * @version V1.0
@@ -67,22 +67,22 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 @Controller
 @RequestMapping("/client/heliClient")
 public class HeliClientController {
-    
+
     private static Logger logger = LoggerFactory.getLogger(HeliClientController.class);
-    
+
     @Autowired
     HeliClientFeignClient heliClientFeignClient;
-    
+
     @Autowired
     ClientFeignClient clientFeignClient;
-    
+
     @Autowired
     OrganizationFeignClient organizationFeignClient;
-    
+
     @Autowired
     RestTemplate restTemplate;
-    
-    
+
+
     /**
      * 跳转 合力坐席管理页面
     * @return
@@ -117,11 +117,11 @@ public class HeliClientController {
         }
         return "client/heliClientPage";
     }
-    
-    
+
+
     /**
      * 坐席登录
-     * 
+     *
      * @param heLiClientOutboundReqDTO
      * @return
      */
@@ -181,8 +181,8 @@ public class HeliClientController {
         heLiClientOutboundReqDTO.setOrgId(orgId);
         return heliClientFeignClient.logout(heLiClientOutboundReqDTO);
     }
-    
-    
+
+
     /**
      * 坐席外呼
     * @param heLiClientOutboundReqDTO
@@ -206,7 +206,7 @@ public class HeliClientController {
         logger.info("合力坐席外呼,请求实体:{}",JSONUtil.toJSon(heLiClientOutboundReqDTO));
         return heliClientFeignClient.outbound(heLiClientOutboundReqDTO);
     }
-    
+
     /**
      * 查询坐席列表
     * @param heliClientReqDTO
@@ -217,7 +217,7 @@ public class HeliClientController {
     public JSONResult<PageBean<HeliClientRespDTO>> listClientsPage(@RequestBody HeliClientReqDTO heliClientReqDTO){
         return heliClientFeignClient.listClientsPage(heliClientReqDTO);
     }
-    
+
     /**
      * 获取当前 orgId所在的组织
      * @param orgId
@@ -235,8 +235,8 @@ public class HeliClientController {
         }
         return orgJr.getData();
     }
-    
-    
+
+
     /**
      * 根据坐席号查询坐席信息
     * @param heliClientReqDTO
@@ -263,10 +263,10 @@ public class HeliClientController {
         if (CollectionUtils.isEmpty(data)) {
             isBelongToSelf = false;
         }
-        
+
         return new JSONResult<Boolean>().success(isBelongToSelf);
     }
-    
+
     /**
      * 下载合力坐席通话录音
     * @param url  录音文件地址
@@ -289,7 +289,11 @@ public class HeliClientController {
     @RequiresPermissions("callCenter:heliClient:add")
     @PostMapping("/insertHeliClient")
     @ResponseBody
-    public JSONResult insertHeliClient(@RequestBody HeliClientInsertReq reqDTO) {
+    public JSONResult insertHeliClient(@Valid @RequestBody HeliClientInsertReq reqDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            logger.error("insert heli client ,param {{}}", reqDTO);
+            return CommonUtil.getParamIllegalJSONResult();
+        }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setCreateUser(curLoginUser.getId());
         return heliClientFeignClient.saveHeliClient(reqDTO);
@@ -301,9 +305,9 @@ public class HeliClientController {
      * @return
      */
     @RequiresPermissions("callCenter:heliClient:edit")
-    @PostMapping("/updateHeliClient")
+    @PostMapping("/updateRonglianClient")
     @ResponseBody
-    public JSONResult updateHeliClient(@RequestBody HeliClientReq reqDTO) {
+    public JSONResult updateRonglianClient(@RequestBody HeliClientReq reqDTO) {
         Long id = reqDTO.getId();
         if(null == id){
             return CommonUtil.getParamIllegalJSONResult();
@@ -327,4 +331,15 @@ public class HeliClientController {
         return  heliClientFeignClient.deleteHeliClient(idListLongReq);
     }
 
+    /**
+     * 根据id查询坐席
+     *
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/queryById")
+    @ResponseBody
+    public JSONResult<HeliClientRespDTO> queryById(@RequestBody IdEntity idEntity) {
+        return heliClientFeignClient.queryHeliClientById(idEntity);
+    }
 }
