@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head  th:include="_header_include::frag(~{::title},~{},~{})">
+<title>添加资源</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div  v-loading="loading" id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>新建客户资源</el-breadcrumb-item>
+    </el-breadcrumb> 
+    
+    <el-row class="borderbox">
+        <div class="inforTitle">新建客户资源</div>
+        <el-form :model="form" :rules="rules" ref="form" class="padding20">
+            <div class="marginB20 fs16 paddingT20">资源信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            <el-select v-model="form.resource" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in typeArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            <el-select v-model="form.resourceType" placeholder="请选择" style="width: 200px;"  @change="categoryChange">
+                                <el-option
+                                    v-for="item in categoryArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="广告位：" :label-width="formLabelWidth">
+                            <el-select v-model="form.adPosition" placeholder="请选择" style="width: 200px;" :disabled="sourceTypeDisabled">
+                                <el-option
+                                    v-for="item in adsenseArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                            <el-select v-model="form.media" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in mediumArry"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                           <el-input v-model="form.searchWord" autocomplete="off" maxlength="50" style="width: 200px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            <el-select v-model="form.project" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in projectSelect"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                         <el-date-picker
+                                style="width: 200px;"
+                                v-model="form.feedbackTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            <el-input v-model="form.feedbackPoint" autocomplete="off"  maxLength="300" style="width: 200px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">客户基本信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth">
+                           <el-input v-model="form.customerName" autocomplete="off" maxLength="20" style="width: 200px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="联系电话：" prop="linkPhone" :label-width="formLabelWidth">
+                            <el-input v-model="form.linkPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number" maxlength="20"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="邀约来访时间：" prop="reserveTime" :label-width="formLabelWidth">
+                         <el-date-picker
+                                style="width: 200px;"
+                                v-model="form.reserveTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
+                        <el-input v-model="form.wechat" autocomplete="off" style="width: 200px;margin-right: 10px;" maxLength="20"></el-input>
+                        <span v-if="form.wechat2 == '' && form.wechatUrl=='' ">
+	                           <el-button type="primary"  @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
+                            </span>
+                        <span v-else="">
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth">
+                           <el-select v-model="form.experience" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in CateringExperienceArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="性别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in optsex"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="年龄：" :label-width="formLabelWidth" prop="customerAge" >
+                           <el-input type="number" min="1" v-model="form.customerAge" autocomplete="off" maxLength="3" @keyup.native="agenumber" style="width: 200px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="职业：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerJob" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in occupationArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="合伙人：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerPartner" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in partnerArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="选址情况：" :label-width="formLabelWidth">
+                           <el-select v-model="form.address" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in optionAddressArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth">
+                          <span>   
+                           <el-date-picker
+                                style="width: 200px;"
+                                v-model="form.urgency"
+                                type="month"
+                                placeholder="选择月">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in customerLevelArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                           <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 200px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">投资意向信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="投资金额：" :label-width="formLabelWidth">
+                           <el-select v-model="form.money" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in ussmArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="店面大小：" :label-width="formLabelWidth">
+                           <el-select v-model="form.area" placeholder="请选择" style="width: 200px;">
+                                <el-option
+                                    v-for="item in StorefrontAreaArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="意向品类：" :label-width="formLabelWidth">
+                           <el-select v-model="form.intentionCategory" filterable  placeholder="请选择" style="width: 200px;" @change="projectChangeSelect" clearable>
+                                <el-option
+                                    v-for="item in IntentionalCategoryArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="意向项目：" :label-width="formLabelWidth" prop="insideProject">
+                            <!--<el-radio v-model="form.radioProject" label="1" @change="projectChange" style="margin-right: 10px;">内部项目</el-radio>-->
+                            <el-select v-model="form.insideProject" v-show="insideProjectShow" placeholder="请选择" style="width: 200px;" clearable filterable>
+                                <el-option
+                                    v-for="item in proSelect"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                            <!--<el-radio v-model="form.radioProject" label="2" @change="projectChange" style="margin-right: 10px;">外部项目</el-radio>-->
+                            <el-input v-model="form.outsideProject" v-show="outsideProjectShow" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth" prop="province" style="float: left;margin-right: 10px;">
+                           <el-select filterable v-model="form.province" placeholder="省" style="width: 200px;"  @change="currentProvince">
+                                <el-option
+                                    v-for="item in provinceArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="" style="float: left;" prop="city">
+                           <el-select filterable v-model="form.city" placeholder="市" style="width: 200px;margin-right: 10px;" @change="currentCity" >
+                                <el-option
+                                    v-for="item in cityArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="" style="float: left;" prop="district">
+                           <el-select filterable v-model="form.district" placeholder="区/县" style="width: 200px;">
+                                <el-option
+                                    v-for="item in districtArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="是否在考虑同行业：" :label-width="formLabelWidth1" style="width: 270px;float: left;">
+                            <el-radio v-model="form.radioSelect" label="0" @change="professionChange">否</el-radio>
+                            <el-radio v-model="form.radioSelect" label="1" @change="professionChange">是</el-radio>
+                        </el-form-item>
+                        <span v-if="domainShow">
+                            <el-form-item
+                                    style="width: 270px;float: left;margin-right: 10px;"
+                                    v-for="(domain, index) in form.domains"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.value'"
+                                    :rules='rules.domainsValue'
+                            >
+                                <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15"
+                                          style="width: 210px;float: left;"></el-input><el-button
+                                    @click.prevent="removeProjectDomain(domain)" type="danger">删除</el-button>
+                            </el-form-item>
+                            <el-button type="primary" @click="addProjectDomain" style="margin-top: 5px;"><i class="el-icon-plus"></i></el-button>
+                            </el-input>
+                        </span>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    
+                </el-row>
+            </div>
+            <div class="padding20 f-tac">            
+                <el-button type="primary" @click="submitForm('form')"  :disabled="confirmBtnDisabled" >提交客户资源</el-button>
+                <el-button  @click="rebackMV">取 消</el-button>
+            </div> 
+        </el-form> 
+    </el-row>
+
+  <!-- dialog -->
+  <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
+    <template>
+      <el-form :model="wechatForm" ref="wechatForm" >
+        <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+          <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
+          <el-upload
+              class="upload-demo"
+              :action="uploadOssHost"
+              ref="refundApplyImgUpload"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :on-success="handleSuccess"
+              :on-error="handleError"
+              :before-upload="handleBefore"
+              accept=".jpg,.png"
+              multiple
+              :data="uploadParamData"
+              :limit='1'
+              :on-change="selectFile"
+              :on-exceed="handleExceed"
+              :auto-upload="false"
+              :file-list="fileList">
+            <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="" :label-width="formLabelWidth1" >
+          <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
+        <el-button  @click="wechatVisible=false">取 消</el-button>
+      </div>
+    </template>
+  </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+  //下拉项目数据
+  var proSelect=[[${proSelect}]];
+  var purProSelect=[[${proSelect}]];
+  var ossUrl = [[${ossUrl}]];//上传文件地址
+  var optList = [[${optList}]];//优化资源类别
+  var notOptList = [[${notOptList}]];//非优化资源类别
+  var opt=[];
+  var notOpt=[];
+  if(optList){
+  	opt=optList.split(',');
+  }
+  if(notOptList){
+  	notOpt=notOptList.split(',');
+  }
+  var addCustomerVM=   new Vue({
+        el: '#addCustomer',
+        data: function() {
+            return {
+                isDisabled:true,//默认不可点击  
+                insideProjectShow:true,//内部项目默认显示
+                outsideProjectShow:false,//外部项目默认不显示
+                dialogFormVisible: false,//新增手机号
+                buttonType: 'A',//添加手机号按钮形式
+                deleteShow:false,//删除新增手机号输入框
+                sourceTypeDisabled:false,//广告位是否可选  
+                wechatVisible: false,//新增微信号
+                loading:false,
+                confirmBtnDisabled:false,//提交按钮 是否禁用
+                domainShow: false,//默认不显示输入同行品牌名称
+                form: {
+                    domains: [{
+                        value: '',
+                        key: Date.now()
+                    }],
+                    radioProject:'1',//意向项目单选默认选项
+                    radioSelect:'0',//是否考虑同行业单选默认选项
+                    resource:'',
+                    resourceType:'',
+                    adPosition:'',
+                    media:'',
+                    searchWord:'',
+                    project:'',
+                    feedbackTime:'',
+                    feedbackPoint:'',
+                    customerName:'',                    
+                    customerSex:'',
+                    wechat:'',
+                    wechat2:'',
+                    wechatUrl:'',
+                    experience:'',
+                    customerAge:'',
+                    customerJob:'',
+                    customerPartner:'',
+                    address:'',
+                    urgency:'',
+                    customerLevel:'',
+                    qq:'',
+                    money:'',
+                    area:'',
+                    intentionCategory:'',
+                    insideProject:'',
+                    outsideProject:'',
+                    province:'',
+                    city:'',
+                    district:'',
+                    linkPhone:'',//联系方式
+                    reserveTime:'',//邀约来访时间
+                    province:'',
+                    city:'',
+                    district:'',
+                },
+              wechatForm: {
+                wechat2:'',
+                wechatUrl:'',
+                fileList:[]
+              },
+                categoryArr:[],
+                typeArr:[],
+                mediumArry:[],
+                adsenseArr:[],
+                CateringExperienceArr:[],
+                occupationArr:[],
+                partnerArr:[],
+                optionAddressArr:[],
+                customerLevelArr:[],
+                IntentionalCategoryArr:[],
+                ussmArr:[],
+                StorefrontAreaArr:[],
+                provinceArr:[],
+                cityArr:[],
+                districtArr:[],
+                projectSelect:proSelect,
+                proSelect:purProSelect, 
+                formLabelWidth: '120px',
+                formLabelWidth1: '140px',
+                rules:{
+                     customerName: [
+                         { required: true, message: '客户姓名不能为空', trigger: 'blur' }
+                     ],
+                     customerAge:[
+                    	 { validator:function(rule,value,callback){
+                              var reg =  /^[1-9]+[0-9]*]*$/ ;
+                             if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                 callback(new Error("请输入正整数"));
+                                 addCustomerVM.form.customerAge =null;
+                             }else{
+                                 callback();
+                             } 
+                             
+                         }, trigger: 'change'}
+                    ],
+                    linkPhone: [
+                        { required: true, message: '联系电话不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入数字"));
+                            }else{
+                               callback();
+                            } 
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    reserveTime: [
+                        { required: true, message: '邀约来访时间不能为空', trigger: 'blur' }
+                    ],
+                    insideProject: [
+                        { required: true, message: '请选择意向项目', trigger: 'blur' }
+                    ],
+                    province: [
+                        { required: true, message: '请选择开店区域的省份', trigger: 'blur' }
+                    ],
+                    city: [
+                        { required: true, message: '请选择开店区域的城市', trigger: 'blur' }
+                    ],
+                },
+                dynamicValidateForm: {//新增手机号弹窗数据
+                    domains: [{
+                        value: ''
+                    }]
+                },
+              uploadOssHost:'',
+              uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'',
+                'x:params':'',
+                'realName':''
+              },
+              fileList:[],
+              limit:1,
+              ossUrl:ossUrl,
+                statusOptions: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }],
+                options1: [{
+                    value: '0',
+                    label: '电销组'
+                }, {
+                    value: '1',
+                    label: '媒介'
+                }],
+                optsex: [{
+                    value: '1',
+                    label: '男'
+                }, {
+                    value: '2',
+                    label: '女'
+                }],
+                dialogForm: {
+                    phoneNum:''
+                },
+                dialogRules:{
+                    phoneNum: [
+                        { required: true, message: '请输入手机号码', trigger: 'blur' }
+                    ]
+                },
+            }        	  
+        },
+        methods: {
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              addCustomerVM.uploadParamData= new_multipart_params;
+              addCustomerVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
+          selectFile(file, fileList){
+            addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
+                addCustomerVM.uploadParamData.realName= file.name
+          },
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        //----资源基本信息---//
+                    	var clueBasic={};
+                    	var clueProject={};
+                     	//资源类型
+                    	var resource=this.form.resource;
+                    	clueBasic.type=resource;
+                     	//资源类别
+                    	var resourceType=this.form.resourceType;
+                    	clueBasic.category=resourceType;
+                         //广告位
+                    	var adPosition=this.form.adPosition;
+                    	clueBasic.sourceType=adPosition;
+                         //媒介
+                    	var media=this.form.media;
+                    	clueBasic.source=media;
+                         //搜索词
+                    	var searchWord=this.form.searchWord;
+                    	clueBasic.searchWord=searchWord;
+                         //资源项目
+                    	var project=this.form.project;
+                    	clueProject.projectId=project; 
+                         //留言时间
+                    	var  feedbackTime=this.form.feedbackTime;
+                    	clueBasic.messageTime=feedbackTime;
+                    	 //留言重点
+                    	var  feedbackPoint=this.form.feedbackPoint;
+                    	clueBasic.messagePoint=feedbackPoint;
+                    	 
+                 	    //----客户基本信息---//
+                 	    var  clueCustomer={};
+                      	 //客户姓名
+                    	var  customerName=this.form.customerName;
+                    	clueCustomer.cusName=customerName;
+                   	    //手机号
+                    	var  linkPhone=this.form.linkPhone;
+                    	clueCustomer.linkPhone=linkPhone;
+                        
+                   	    //性别
+                    	var customerSex=this.form.customerSex;
+                    	clueCustomer.sex=customerSex;
+                        //微信
+                        var wechat = this.form.wechat;
+                        clueCustomer.wechat = wechat;
+                        //微信2
+                        var wechat2 = this.form.wechat2;
+                        clueCustomer.wechat2 = wechat2;
+                        //微信二维码
+                        var wechatUrl = this.form.wechatUrl;
+                        clueCustomer.wechatCode = wechatUrl;
+                	    //餐饮经验
+                    	var experience=this.form.experience;
+                    	clueCustomer.hasExperience=experience;
+                	    //年龄
+                    	var customerAge=this.form.customerAge;
+                    	clueCustomer.age=customerAge;
+                	    //职业
+                    	var customerJob=this.form.customerJob;
+                    	clueCustomer.profession=customerJob;
+                	    //合伙人
+                    	var customerPartner=this.form.customerPartner;
+                    	clueCustomer.partnerType=customerPartner;
+                	    //选址情况
+                    	var address=this.form.address;
+                    	clueCustomer.hasAddress=address;
+                	    //开店紧迫性
+                	    var urgency =this.form.urgency;
+                	    clueCustomer.urgentDate=urgency;
+                	    //客户级别
+                	    var customerLevel=this.form.customerLevel;
+                	    clueCustomer.cusLevel=customerLevel;
+                	    //QQ
+                	    var qq=this.form.qq;
+                	    clueCustomer.qq=qq;
+                   	    var phoneArr=this.dynamicValidateForm.domains;
+                	    if(phoneArr.length>0){
+                	        for(var i=0;i<phoneArr.length;i++){
+                	    	 if(i==0)  {
+                	    		 clueCustomer.phone2=phoneArr[i].value;	 
+                	         }
+                	    	 if(i==1)  {
+                	    		 clueCustomer.phone3=phoneArr[i].value;	
+                	         }
+                	    	 if(i==2)  {
+                	    		 clueCustomer.phone4=phoneArr[i].value;	 
+                	         }
+                	    	 if(i==3)  {
+                	    		 clueCustomer.phone5=phoneArr[i].value;	 
+                	         }
+                	        }
+                	    }                	    
+                	    //----投资意向---//
+                	    var  clueIntention={};
+                	    //投资金额
+                	    var  money=this.form.money; 
+                	    clueIntention.advanceAmount=money;
+                	    //店面大小
+                	    var  area= this.form.area;
+                	    clueIntention.area=area;
+                	    //意向品类
+                	    var intentionCategory=this.form.intentionCategory;
+                	    clueIntention.purType=intentionCategory;
+                	    //意向项目
+                	    var radioProject= this.form.radioProject;
+                	    clueIntention.purProjectType=radioProject;
+                	    //意向内部项目
+                	    var  insideProject=this.form.insideProject;
+                	    clueIntention.purInProject=insideProject;
+                	    //意向外部项目
+                	    var  outsideProject= this.form.outsideProject;
+                	    clueIntention.purOutProject=outsideProject;
+                       /* //是否考虑同行
+                        var radioSelect = this.form.radioSelect;
+                        clueIntention.istrade = radioSelect;
+                        //同行业项目
+                        var domains = this.form.domains;
+                        var tradeProjectAry = [];
+                        for (var i = 0; i < domains.length; i++) {
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            tradeProjectAry.push(domains[i].value);//把输入的品牌名称放入一个数组
+                            var s = tradeProjectAry.join(",") + ",";
+                            for (var j = 0; j < tradeProjectAry.length; j++) {
+                                console.log(tradeProjectAry[j])
+                                if (tradeProjectAry[j] != "") {
+                                    if (s.replace(tradeProjectAry[j] + ",", "").indexOf(tradeProjectAry[j] + ",") > -1) {
+                                        this.$message({
+                                            message: '请不要输入相同品牌',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        var  tradeProject = tradeProjectAry.join(',');
+                        clueIntention.tradeProject=tradeProject;*/
+                       //是否考虑同行
+                        var radioSelect = this.form.radioSelect;
+                        clueIntention.istrade = radioSelect;
+                        var  tradeProject;
+                        if (radioSelect == 1) {
+                            //同行业项目
+                            var domains = this.form.domains;
+                            var ary = [];
+                            for (var i = 0; i < domains.length; i++) {
+                                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                                if(domains[i].value != ""){
+                                    //把输入的品牌名称放入一个数组
+                                    ary.push(domains[i].value);
+                                    var s = ary.join(",") + ",";
+                                    for (var j = 0; j < ary.length; j++) {
+                                        console.log(ary[j])
+                                        if (ary[j] != "") {
+                                            if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                                this.$message({
+                                                    message: '请不要输入相同品牌',
+                                                    type: 'warning'
+                                                });
+                                                //保存按钮可点击
+                                                addCustomerVM.confirmBtnDisabled = false;
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            tradeProject = ary.join(',');
+                            clueIntention.tradeProject=tradeProject;
+                        }
+                        if (radioSelect == 1 && tradeProject == "") {
+                            this.$message({
+                                message: '请输入考虑同行业的品牌名称',
+                                type: 'warning'
+                            });
+                            //保存按钮可点击
+                            addCustomerVM.confirmBtnDisabled = false;
+                            return;
+                        }
+
+
+
+
+
+                        //省
+                	    var province= this.form.province;
+                	    clueIntention.province=province;
+                	    //市
+                	    var city=this.form.city;
+                	    clueIntention.city=city
+               	         //区县
+                	    var district= this.form.district;
+                	    clueIntention.district=district;
+               	        var clue={};
+               	        clue.clueCustomer=clueCustomer;
+               	        clue.clueIntention=clueIntention; 
+               	        clue.clueBasic=clueBasic;
+               	        clue.clueProject=clueProject;
+                        //邀约来访时间
+                        var  reserveTime=this.form.reserveTime;
+                        clue.reserveTime=reserveTime;
+               	        addCustomerVM.confirmBtnDisabled=true;//禁用提交按钮
+                        axios.post('/aggregation/businessMyCustomer/saveCreateClue',clue)
+                        .then(function (response) {
+                    	    addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                   		    window.location.href="/aggregation/businessMyCustomer/listPage"; 
+                   		   // addCustomerVM.confirmBtnDisabled=false;
+   		        	    }});
+                    }).catch(function (error) {
+                        addCustomerVM.confirmBtnDisabled=false;
+                    })
+                    .then(function(){
+                 		//addCustomerVM.confirmBtnDisabled=false;//启用提交按钮
+                 		
+                    });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            rebackMV(){
+            	  window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+            },
+            projectChangeSelect(selVal) {
+                var param = {};
+                param.category = selVal;
+                this.form.insideProject=null;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                    addCustomerVM.proSelect = response.data.data;
+                });
+            },
+            // 是否同行业
+            professionChange() {
+                if (this.form.radioSelect == "0") {//否
+                    this.domainShow = false
+                } else if (this.form.radioSelect == "1") {//是
+                    this.domainShow = true
+                }
+            },
+            addProjectDomain() {
+                if (this.form.domains.length > 2) {
+                    this.$message({
+                        message: '最多输入三个品牌',
+                        type: 'warning'
+                    });
+                } else {
+                    this.form.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }
+            },
+            removeProjectDomain(item) {//移除
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                    this.form.domains.splice(index, 1)
+                }
+            },
+            categoryChange(value) {
+        	  	if(opt.indexOf(value)!=-1){
+        	  		this.form.adPosition="1";
+        	  		this.sourceTypeDisabled=true;
+        	  	}else if(notOpt.indexOf(value)!=-1){
+        	  		this.sourceTypeDisabled=false;
+        	  	}
+            },
+            clearDialog(){
+                console.log('清空')
+
+                // 1、数据清空
+                var domains=this.dynamicValidateForm.domains
+                for(var i=0;i<domains.length;i++){
+                    domains[i].value=""
+                }
+                // 2、重置表单
+                this.$refs['dynamicValidateForm'].resetFields()
+                // 3、关闭弹窗
+                this.dialogFormVisible = false;
+                // 4、按钮变化
+                this.buttonType='A';
+            },
+            currentProvince(selVal){
+               param={};
+               param.type="1";
+               param.name=selVal;
+               this.form.district=null;
+               this.form.city=null;
+               this.districtArr =null;
+               axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                 addCustomerVM.cityArr=response.data.data.data;
+               });  	
+            },
+            currentCity(selVal){
+                param={};
+                param.type="2";
+                param.name=selVal;
+                this.form.district=null;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                  addCustomerVM.districtArr=response.data.data.data;
+                });  	
+            },
+            number(){
+    　　　      this.form.linkPhone=this.form.linkPhone.replace(/[^\.\d]/g,'');
+                this.form.linkPhone=this.form.linkPhone.replace('.','');
+        　  },
+            phoneNumber(){
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                    domains[i].value=domains[i].value.replace(/[^\.\d]/g,'');
+                    domains[i].value=domains[i].value.replace('.','');
+                }    　　　                 
+        　　},
+            qqnumber(){
+    　　　     this.form.qq=this.form.qq.replace(/[^\.\d]/g,'');
+               this.form.qq=this.form.qq.replace('.','');
+    　　　  },
+            agenumber(){
+    　　　/*      this.form.customerAge=this.form.customerAge.replace(/[^\.\d]/g,'');
+               this.form.customerAge=this.form.customerAge.replace('.',''); */
+    　　　  },
+          openWechat() {
+            this.wechatVisible = true
+            this.wechatForm.wechat2=this.form.wechat2;
+            this.wechatForm.wechatUrl=this.form.wechatUrl;
+          },
+          wechatSumbit() {
+            this.form.wechat2=this.wechatForm.wechat2;
+            this.form.wechatUrl=this.wechatForm.wechatUrl;
+            addCustomerVM.$message({ message: "提交成功", type: 'success' });
+            this.wechatVisible = false;
+          },
+          submitUpload(){
+            //this.customUpload();
+            this.$refs.refundApplyImgUpload.submit();
+          },
+          handlePreview(file){
+
+          },
+          handleRemove(file,fileList){
+            this.fileList=[];
+            this.wechatForm.fileList=[];
+          },
+          handleExceed(files, fileList) {
+            //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+          },
+          handleSuccess(response, file, fileList){
+            console.info(fileList);
+            console.info(addCustomerVM.fileList);
+            var realName = file.name;
+            var randomName = addCustomerVM.uploadParamData.key;
+            var imgUrl =  addCustomerVM.uploadOssHost+"/"+randomName;
+            this.wechatForm.wechatUrl=imgUrl;
+            this.wechatForm.fileList.push(realName);
+            this.fileList=[];
+            this.wechatForm.fileList=[];
+          },
+          handleError(err, file, fileList){
+            console.info(err);
+          },
+          random_string(len) {
+            len = len || 32;
+            var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+            var maxPos = chars.length;
+            var pwd = '';
+            for (i = 0; i < len; i++) {
+              pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+            }
+            return pwd;
+          },
+          get_suffix(filename) {
+            var pos = filename.lastIndexOf('.')
+            suffix = ''
+            if (pos != -1) {
+              suffix = filename.substring(pos);
+            }
+            return suffix;
+          },
+          handleBefore(file){
+            var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+            if(!isTextComputer){
+              this.fileList=[];
+              this.$message.error('文件格式错误');
+              return false;
+            }
+            if(file.size>2*1024*1024){
+              this.fileList=[];
+              this.$message.error('图片最大为2MB');
+              return false;
+            }
+          },
+            // 单选切换
+            projectChange(){
+                if(this.form.radioProject=="1"){//内部项目
+                    this.insideProjectShow=true;
+                    this.outsideProjectShow=false;
+                    this.form.outsideProject = null;
+                }else if(this.form.radioProject=="2"){//外部项目
+                    this.insideProjectShow=false;
+                    this.outsideProjectShow=true;
+                    this.form.insideProject =null;
+                }
+            }
+        },
+        mounted(){
+            document.getElementById('addCustomer').style.display = 'block';
+         },
+        created(){
+             //初始资源类别数据
+          this.getUploadParam();
+           	var  param={};
+           	param.groupCode="clueCategory";
+             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	 addCustomerVM.categoryArr=response.data.data;
+             });
+           	 //初始化资源类型数据
+        	 param={};
+        	 param.groupCode="clueType";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.typeArr=response.data.data;
+             });
+            
+           //初始化资源类型数据
+       	   param={};
+       	   param.groupCode="clueType";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+             addCustomerVM.typeArr=response.data.data;
+            });
+           //初始化媒介
+     	   param={};
+     	   param.groupCode="medium";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            addCustomerVM.mediumArry=response.data.data;
+          });
+           //广告位
+           param={};
+           param.groupCode="adsense"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.adsenseArr=response.data.data;
+            });
+           
+           //餐饮经验
+           param={};
+           param.groupCode="CateringExperience"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.CateringExperienceArr=response.data.data;
+            });
+           //职业
+           param={};
+           param.groupCode="occupation"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.occupationArr=response.data.data;
+            });
+           
+           //合伙人
+           param={};
+           param.groupCode="partner"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.partnerArr=response.data.data;
+            });
+           
+           //选址情况
+           param={};
+           param.groupCode="optionAddress"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.optionAddressArr=response.data.data;
+            });
+           //客户级别
+           param={};
+           param.groupCode="customerLevel"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.customerLevelArr=response.data.data;
+            });
+           //意向品类
+           param={};
+           param.groupCode="project_category"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.IntentionalCategoryArr=response.data.data;
+            });
+         //投资金额
+           param={};
+           param.groupCode="investmentAmount";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.ussmArr=response.data.data;
+            });
+           //店面大小
+           param={};
+           param.groupCode="StorefrontArea"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.StorefrontAreaArr=response.data.data;
+            });
+           param={};
+           param.type="0";
+           axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+        	   addCustomerVM.provinceArr=response.data.data.data;
+           });
+           
+           
+         }
+    })
+</script>
+</html>

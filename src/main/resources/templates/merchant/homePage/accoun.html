@@ -3,7 +3,7 @@
 
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
     <title>首页</title>
-    <link rel="stylesheet" th:href="@{/css/custom/cheranthomepage/home.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <style>
 
     </style>
@@ -14,7 +14,7 @@
     <div id="merchantHome" style="display: none;">
         <!-- 主账户会显示 -->
         <div class="fatherShow" v-if="fatherShow===2">
-            <el-row type="flex" class="row-bg marginB20" justify="start">
+            <el-row type="flex" class="row-bg" justify="start">
                 <el-col :span="12">
                     <div class="name">
                         <b><span class="first">{{merchantName}}</span><span class="last">, 您好:</span></b>
@@ -29,7 +29,7 @@
                     </div>
                 </el-col>
                 <el-col :span="12">
-                    <div class="name">
+                    <div class="name other">
                         <b><span class="last">账户余额：</span></b>
                         <p class="noMonth">
                             <b class="noMonthmoney" v-if="countBlance">{{countBlance}}.00</b>
@@ -109,7 +109,8 @@
                 <el-col :span="8">
                     <div class="content other">
                         <div class="top">
-                            <img th:src="@{/images/cumulative.png}" alt="">
+                            <img v-if="imgIcon == 1" th:src="@{/images/cumulative.png}" alt="">
+                            <img v-else-if="imgIcon == 2" th:src="@{/images/cumulative2.png}" alt="">
                             <span>累计获取资源数</span>
                         </div>
                         <p>{{countSources.allCount}}</p>
@@ -133,6 +134,12 @@
         var merchantName = [[${ merchantName }]];
         var packageName = [[${ packageName }]];
         var countSources = [[${ countSources }]];
+        var oLink = document.getElementById("skinCss");
+        if (getCookieVal("skinVal")) {
+            oLink['href'] = "/css/custom/cheranthomepage/home" + getCookieVal("skinVal") + ".css";
+        } else {
+            oLink['href'] = "/css/custom/cheranthomepage/home1.css";
+        }
         var merchantHomeDivVM = new Vue({
             el: '#merchantHome',
             data: {
@@ -145,13 +152,14 @@
                 fatherShow: userType,//userType
                 merchantName: merchantName,
                 countBlance: countBlance,
-                packageName:packageName,
+                packageName: packageName,
                 buyedFlag: buyedFlag,
                 showButton: 1,
                 options: '',
                 defaultValue: '',
                 // 今日获取资源
                 countSources: countSources,
+                imgIcon:getCookieVal("skinVal")?getCookieVal("skinVal"):1,
                 // 指定图表的配置项和数据
                 option: {
                     title: {
@@ -159,7 +167,7 @@
                     },
                     grid: {
                         left: '70',
-                        right: '70'
+                        right: '100'
                     },
                     tooltip: {
                         formatter: function (param) {
@@ -473,9 +481,20 @@
                 }
             },
             created() {
-                this.daysAge(6)
-                this.axiosData()
-                this.isProhibit(true, false, false, true, '天')
+                this.daysAge(6);
+                this.axiosData();
+                this.isProhibit(true, false, false, true, '天');
+                let that = this;
+                window.addEventListener("message", function (event) {
+                    var data = event.data;
+                    switch (data.cmd) {
+                        case 'getFormJson':
+                            oLink['href'] = "/css/custom/cheranthomepage/home" + event.data.params.data + ".css";
+                            that.imgIcon=event.data.params.data;
+                            // 处理业务逻辑
+                            break;
+                    }
+                });
             },
             mounted() {
                 document.getElementById('merchantHome').style.display = 'block';

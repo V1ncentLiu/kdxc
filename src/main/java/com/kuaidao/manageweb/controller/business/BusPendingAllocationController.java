@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -87,8 +90,11 @@ public class BusPendingAllocationController {
         // 查询所有电销组
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
-        // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
+
         request.setAttribute("projectList", allProject.getData());
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();

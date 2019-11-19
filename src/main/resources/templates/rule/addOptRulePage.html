@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
-<head th:replace="_header_include::frag(~{::title},~{},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
 	<title>后台管理系统</title>
     <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dayTimeEnd .el-form-item__label:before{display: none;}
+        .days .el-form-item__error{padding-left: 165px;}
+        .timeToLine{display: block;float: left;margin-right: 2px;height: 34px;line-height: 34px;}
+        .el-form-item{margin-bottom: 15px;}
+    </style>
 </head>
 <body>
 <div id="addOptimizeRule" class="addOptimizeRule mainPadding" style="display: none;">  
@@ -45,6 +48,32 @@
                 <el-col :span="12">
                     <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
                         <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
+                <el-col :span="12">                    
+                    <el-form-item label="周期内设定有效日：" prop="days" :label-width="formLabelWidth" class="days">
+                        <em class="requiredRed" style="left: -120px;">*</em>
+                        <el-radio v-model="form.radio" label="0" @change="changeDays">每天</el-radio>
+                        <el-radio v-model="form.radio" label="1" @change="changeDays" style="margin: 0 10px 0 15px;">特殊设定</el-radio>
+                        <el-select v-model="form.days" v-show="showDays" filterable  multiple placeholder="请选择" style="width: 135px;">
+                            <el-option
+                                v-for="item in weeksOptions"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="有效日内时间范围：" prop="dayTimeStart" :label-width="formLabelWidth" style="width: 318px;float: left;">
+                        <el-time-picker type="datetime" placeholder="选择时间" v-model="form.dayTimeStart" style="width: 135px;" format="HH:mm:ss" value-format="HH:mm:ss"></el-time-picker>
+                    </el-form-item>
+                    <span class="timeToLine">——</span>
+                    <el-form-item label="" prop="dayTimeEnd" class="dayTimeEnd" style="width: 175px;float: left;">
+                        <el-time-picker type="datetime" placeholder="选择时间" v-model="form.dayTimeEnd" style="width: 135px;" format="HH:mm:ss" value-format="HH:mm:ss"></el-time-picker>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -176,7 +205,7 @@
                     </el-select>
                 </el-form-item>
             </el-row>   
-            <el-form-item label="选择电销组：" prop="chooseTeam" :label-width="formLabelWidth">
+            <el-form-item label="选择电销组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
                 <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
                 <el-button type="primary" @click="addDomain">添加电销组</el-button>
             </el-form-item>
@@ -250,7 +279,7 @@
                     </template>
             	</el-table-column>
             </el-table>
-            <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth">
+            <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
                 <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
                 <el-button type="primary" @click="addDomainTraffic">添加话务组</el-button>
             </el-form-item>
@@ -363,8 +392,35 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         //      unlimitedVal:'',//不限-1取值
                         //      unlimitedShow:false,//是否显示不限input
                         // }
-                    ]
+                    ],                                      
+                    radio:"0",//默认选每天
+                    days:[],
+                    dayTimeStart:"00:00:00",
+                    dayTimeEnd:"23:59:59",
                 },
+                weeksOptions:[{
+                    value: "2",
+                    name: '星期一'
+                },{
+                    value: "3",
+                    name: '星期二'
+                },{
+                    value: "4",
+                    name: '星期三'
+                },{
+                    value: "5",
+                    name: '星期四'
+                },{
+                    value: "6",
+                    name: '星期五'
+                },{
+                    value: "7",
+                    name: '星期六'
+                },{
+                    value: "1",
+                    name: '星期日'
+                }],
+                showDays:false,//默认不显示星期  
                 formLabelWidth: '180px',
                 rules:{
                     ruleName: [
@@ -425,6 +481,21 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                             callback();
                         }, trigger: 'change'}
                     ],
+                    days: [
+                        { validator:function(rule,value,callback){
+                            if(aorVM.form.radio!=="0"&&aorVM.form.days.length==0){
+                               callback(new Error("请选择星期"));
+                            }else{
+                               callback();
+                            } 
+                        }, trigger: 'change'}
+                    ],
+                    dayTimeStart: [
+                        { required: true, message: '请选择有效日内时间范围', trigger: 'blur' }
+                    ],
+                    dayTimeEnd: [
+                        { required: true, message: '请选择有效日内时间范围', trigger: 'blur' }
+                    ],
                 },
                 submitDisabled:false,
                 trafficOptions:trafficList,
@@ -453,6 +524,14 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             }        	  
         },
         methods: {
+            changeDays(val){
+                console.log(val)
+                if(val=="0"){
+                    this.showDays=false;
+                }else{
+                    this.showDays=true;
+                }
+            },
             unlimitedBtn(index, rows){                
                 rows[index].unlimitedShow=true; 
                 rows[index].unlimited="不限";
@@ -473,18 +552,29 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
+                    // 开始时间不能大于结束时间
+                    var startTime=this.form.startTime;
+                    var endTime=this.form.endTime;
+                    if(endTime && startTime>endTime){
+                        this.$message({
+                            message: '结束时间不允许选择早于开始时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    // 开始时间不能大于结束时间
+                    var dayTimeStart=this.form.dayTimeStart;
+                    var dayTimeEnd=this.form.dayTimeEnd;
+                    if(dayTimeEnd && dayTimeStart>dayTimeEnd){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     if (valid) {
                     	var form = JSON.parse(JSON.stringify(this.form)); 
-                        // 开始时间不能大约结束时间
-                        var startTime=form.startTime;
-                        var endTime=form.endTime;
-                        if(endTime && startTime>endTime){
-                            this.$message({
-                                message: '结束时间不允许选择早于开始时间',
-                                type: 'warning'
-                            });
-                            return;
-                        }
+                        
                         // 不能选择重复电销组
                         var orgIdChoose=form.teleRuleTeamList; 
                         var ary=[];                   
@@ -531,6 +621,13 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.ruleName=form.ruleName;
                         param.startTime=form.startTime;
                         param.endTime=form.endTime;
+                        if(form.radio=="0"){
+                            param.days="0"
+                        }else{
+                            param.days=this.form.days.join(',');
+                        }
+                        param.dayTimeStart=form.dayTimeStart;
+                        param.dayTimeEnd=form.dayTimeEnd;
                         param.status=form.status;
                         param.teleList=form.teleRuleTeamList;
                         param.trafficList=form.trafficRuleTeamList;
@@ -540,7 +637,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.searchWord=this.tags1.join(',');
                         param.notSearchWord=this.tags2.join(',');
                         param.province=this.tags3.join(',');
-                        param.notProvince=this.tags4.join(',');
+                        param.notProvince=this.tags4.join(',');                        
                         aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/optRule/save', param)
 	       	            .then(function (response) {

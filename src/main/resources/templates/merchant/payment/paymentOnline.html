@@ -1,164 +1,271 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
-    <style>  
-    /*公共样式*/
-    .merchantMainBox{margin: 0;
-        max-width: 100%;
-        padding: 10px 17px 20px;
-        flex-direction: row;
-        background: #fff;
-        margin-bottom: 15px;
-        box-shadow: 9px 11px 33px 7px rgba(73, 126, 250, 0.1);
-        border-radius: 8px;}
-    .mgB20{margin-bottom: 20px;}
-    .w100{width: 100px;}
-    .title18{font-size: 18px;color: #000;}
-    .merchantGreyBox{background: #eff2f9;padding:30px 18px;border-radius: 4px;margin-bottom: 35px; }
+    <link rel="stylesheet" href="" id="skinCss">
+    <style>
+        /*公共样式*/
+        .merchantMainBox {
+            margin: 0;
+            max-width: 100%;
+            padding: 10px 17px 20px;
+            flex-direction: row;
+            background: #fff;
+            margin-bottom: 15px;
+            box-shadow: 9px 11px 33px 7px rgba(73, 126, 250, 0.1);
+            border-radius: 8px;
+        }
 
-    /*支付页面*/
-    .paymentOnline ul{overflow: hidden;width: 1065px;background: #f2f5fc;}
-    .paymentOnline ul li{float: left;width: 50%;font-size: 16px;color: #666;}
-    .paymentOnline ul li p{border-right: 1px solid #ecedf2;border-bottom: 1px solid #e6eaf4;padding:12px 0 12px 25px;}
-    .paymentOnline ul li:nth-of-type(even) p{border-right: none;}
-    .paymentOnline ul li span{display: inline-block;}
-    .paymentOnline ul li span em{display: inline-block;}   
-    .paymentBtnType span{display:inline-block;width: 100px;height: 35px;line-height: 35px;text-align: center;background: #c3c5d4;color: #fff;}  
-    .paymentBtnType span a{color: #fff;}
-    .paymentBtnType span.current{background: #5c6be8;}
-    .paymentImg .f-fl{margin-right: 50px;}
-    .paymentImg img{width: 250px;}
-    .rechargeMoney .el-form-item__error{padding-left: 72px;}
-    .preferentialH{max-height: 91px;}
-    .el-form-item__label,.el-form-item__content{font-size: 14px;} 
-    .paymentTitle{font-size: 14px;}  
-    .el-input__inner{height: 36px;}   
+        .mgB20 {
+            margin-bottom: 20px;
+        }
+
+        .w100 {
+            width: 100px;
+        }
+
+        .title18 {
+            font-size: 18px;
+            color: #000;
+        }
+
+        .merchantGreyBox {
+            background: #eff2f9;
+            padding: 30px 18px;
+            border-radius: 4px;
+            margin-bottom: 35px;
+        }
+
+        /*支付页面*/
+        .paymentOnline ul {
+            overflow: hidden;
+            width: 1065px;
+            background: #f2f5fc;
+        }
+
+        .paymentOnline ul li {
+            float: left;
+            width: 50%;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .paymentOnline ul li p {
+            border-right: 1px solid #ecedf2;
+            border-bottom: 1px solid #e6eaf4;
+            padding: 12px 0 12px 25px;
+        }
+
+        .paymentOnline ul li:nth-of-type(even) p {
+            border-right: none;
+        }
+
+        .paymentOnline ul li span {
+            display: inline-block;
+        }
+
+        .paymentOnline ul li span em {
+            display: inline-block;
+        }
+
+        .paymentBtnType span {
+            display: inline-block;
+            width: 100px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            background: #c3c5d4;
+            color: #fff;
+        }
+
+        .paymentBtnType span a {
+            color: #fff;
+        }
+
+        .paymentBtnType span.current {
+            background: #5c6be8;
+        }
+
+        .paymentImg .f-fl {
+            margin-right: 50px;
+        }
+
+        .paymentImg img {
+            width: 250px;
+        }
+
+        .rechargeMoney .el-form-item__error {
+            padding-left: 83px;
+        }
+
+        .preferentialH {
+            max-height: 91px;
+        }
+
+        .el-form-item__label,
+        .el-form-item__content {
+            font-size: 14px;
+        }
+
+        .paymentTitle {
+            font-size: 14px;
+        }
+
+        .el-input__inner {
+            height: 36px;
+        }
     </style>
 </head>
+
 <body>
-<div id="paymentOnline" class="paymentOnline mainPadding" style="display: none;"> 
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>费用管理</el-breadcrumb-item>
-        <el-breadcrumb-item>在线充值</el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-form :model="form" ref="form" label-width="73px" class="demo-dynamic" :rules="rules">
-        <el-row class="merchantMainBox mgB20" style="padding: 20px 40px 50px;"> 
-            <div class="title18 mgB20">充值优惠</div>
-            <ul :class="{preferentialH:isClass}">                
-                <li v-for="item in preferentialDTOList" :key="item.id"><p><span>充值：<em class="w100 f-tac">{{item.rechargeAmount}}</em><em style="margin-right: 30px;">+</em></span><span>送：<em class="w100 f-tac">{{item.givenAmount}}</em><em style="margin-right: 40px;">=</em></span><span>得：<em class="w100 f-tac">{{item.totalAmount}}</em></span></p></li>
-            </ul>
-            <div class="f-tac" style="width: 1085px;padding-top: 10px;" v-show="isShowMore">
-                <span style="color: #3a84f4;cursor: pointer;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-            </div>
-        </el-row>        
-        <el-row class="merchantMainBox padding20 marginB20" v-if="paymentIsShow">
-            <div style="text-align: center;margin: 50px auto 40px;width: 950px;"><img th:src="@{/images/step1.jpg}" alt=""> </div>
-            <div style="width: 540px;margin:0 auto 40px">
-                <el-row style="margin-bottom: 40px;"> 
-                    <el-form-item label="当前余额：" label-width="84px">
-                         <span>{{merchantUserAccountDTO.totalAmounts}}</span>
-                    </el-form-item>
-                    <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney" class="rechargeMoney">
-                        <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;" maxLength="7" @keyup.native="number"></el-input>元
-                    </el-form-item>
-                </el-row>            
-                <div class="paymentTitle marginB20"><span class="redcolor" style="margin-right: 5px;">*</span>选择支付方式：<span style="padding:0px 40px 0px 20px;">线上支付</span><span><a href="/merchant/merchantRechargePreferential/initOfflinePayment" style="color: #4d81ff;text-decoration: underline;">线下支付</a></span></div> 
-                <el-form-item label="" label-width="auto">  
-                    <el-radio v-model="form.rechargeWay" label="1" style="margin-right: 125px;">支付宝</el-radio>
-                    <el-radio v-model="form.rechargeWay" label="2">微信支付</el-radio>
-                </el-form-item>
-                <div class="paymentImg clearFix" style="margin-bottom: 30px;">
-                    <div class="f-fl"><img th:src="@{/images/iconPayment.png}" alt="" style="width: 175px;"></div>
-                    <div class="f-fl"><img th:src="@{/images/iconPayment1.png}" alt="" style="width: 175px;"></div>
+    <div id="paymentOnline" class="paymentOnline mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>费用管理</el-breadcrumb-item>
+            <el-breadcrumb-item>在线充值</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-form :model="form" ref="form" label-width="73px" class="demo-dynamic" :rules="rules">
+            <el-row class="merchantMainBox mgB20" style="padding: 20px 40px 50px;">
+                <div class="title18 mgB20">充值优惠</div>
+                <ul :class="{preferentialH:isClass}">
+                    <li v-for="item in preferentialDTOList" :key="item.id">
+                        <p><span>充值：<em class="w100 f-tac">{{item.rechargeAmount}}</em><em
+                                    style="margin-right: 30px;">+</em></span><span>送：<em
+                                    class="w100 f-tac">{{item.givenAmount}}</em><em
+                                    style="margin-right: 40px;">=</em></span><span>得：<em
+                                    class="w100 f-tac">{{item.totalAmount}}</em></span></p>
+                    </li>
+                </ul>
+                <div class="f-tac" style="width: 1085px;padding-top: 10px;" v-show="isShowMore">
+                    <span class="blueColorT" style="cursor: pointer;" @click="toogleClick"><span
+                            v-if="isShow">收起</span><span v-else>展开更多</span><i
+                            :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
-                <el-button type="primary" @click="submitForm('form')" style="width:114px;height: 36px;">下一步</el-button>
+            </el-row>
+            <el-row class="merchantMainBox padding20 marginB20" v-if="paymentIsShow">
+                <div class="stepBox1">
+                    <!-- <img th:src="@{/images/step1.jpg}" alt="">  -->
+                </div>
+                <div style="width: 540px;margin:0 auto 40px">
+                    <el-row style="margin-bottom: 40px;">
+                        <el-form-item label="当前余额：" label-width="84px">
+                            <span>{{merchantUserAccountDTO.totalAmounts}}</span>
+                        </el-form-item>
+                        <el-form-item label="充值金额：" label-width="auto" prop="rechargeMoney" class="rechargeMoney">
+                            <el-input v-model="form.rechargeMoney" style="width: 200px;margin-right: 10px;"
+                                maxLength="7" @keyup.native="number"></el-input>元
+                        </el-form-item>
+                    </el-row>
+                    <div class="paymentTitle marginB20"><span class="redcolor"
+                            style="margin-right: 5px;">*</span>选择支付方式：<span
+                            style="padding:0px 40px 0px 20px;">线上支付</span><span><a
+                                href="/merchant/merchantRechargePreferential/initOfflinePayment"
+                                style="text-decoration: underline;" class="blueColorT">线下支付</a></span></div>
+                    <el-form-item label="" label-width="auto">
+                        <el-radio v-model="form.rechargeWay" label="1" style="margin-right: 125px;">支付宝</el-radio>
+                        <el-radio v-model="form.rechargeWay" label="2">微信支付</el-radio>
+                    </el-form-item>
+                    <div class="paymentImg clearFix" style="margin-bottom: 30px;">
+                        <div class="f-fl"><img th:src="@{/images/iconPayment.png}" alt="" style="width: 175px;"></div>
+                        <div class="f-fl"><img th:src="@{/images/iconPayment1.png}" alt="" style="width: 175px;"></div>
+                    </div>
+                    <el-button type="primary" @click="submitForm('form')" style="width:114px;height: 36px;">下一步
+                    </el-button>
+                </div>
+            </el-row>
+        </el-form>
+        <el-row class="borderbox padding20 marginB20" v-show="codeIsShow">            
+            <div class="stepBox2"></div>
+            <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
+                <p style="margin-bottom: 30px;">支付金额<span
+                        style="color: #3a84f4;">￥{{rechargeMoneyWx}}</span>，请使用微信扫描下方二维码完成支付</p>
+                <div id="qrCode" ref="qrCodeDiv" style="margin: 0 auto 15px;width: 120px;"></div>
+                <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
+                <el-button type="primary" style="width:114px;height: 36px;" @click="goback">上一步</el-button>
             </div>
-        </el-row>        
-    </el-form>
-    <el-row class="borderbox padding20 marginB20" v-show="codeIsShow">
-        <div style="text-align: center;margin: 50px auto 80px;width: 950px;"><img th:src="@{/images/step2.jpg}" alt=""> </div>
-        <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
-            <p style="margin-bottom: 30px;">支付金额<span style="color: #3a84f4;">￥{{rechargeMoneyWx}}</span>，请使用微信扫描下方二维码完成支付</p>
-            <div id="qrCode" ref="qrCodeDiv" style="margin: 0 auto 15px;width: 120px;"></div>
-            <p style="margin-bottom: 40px;font-size: 14px;">请于15分钟内扫码完成支付</p>
-            <el-button type="primary" style="width:114px;height: 36px;" @click="goback">上一步</el-button>
-        </div>
-    </el-row>
-    
-</div>
+        </el-row>
+
+    </div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script type="text/javascript" src="/js/common/qrcode.min.js"></script>
 <!-- import common js-->
 <script th:inline="javascript">
-    var merchantUserList=[[${merchantUserList}]];//商户集合
-    var rechargeAccountDTO=[[${rechargeAccountDTO}]];
-    var merchantUserAccountDTO=[[${merchantUserAccountDTO}]];//账户余额
-    var preferentialDTOList=[[${preferentialDTOList}]];//优惠 信息
+    var merchantUserList = [[${ merchantUserList }]];//商户集合
+    var rechargeAccountDTO = [[${ rechargeAccountDTO }]];
+    var merchantUserAccountDTO = [[${ merchantUserAccountDTO }]];//账户余额
+    var preferentialDTOList = [[${ preferentialDTOList }]];//优惠 信息
+    var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#paymentOnline',
-        data: function() {
-            return { 
-                isShowMore:false,
-                isClass:true,
-                isShow:false,
-                paymentIsShow:true, 
-                codeIsShow:false,
-                merchantUserAccountDTO:merchantUserAccountDTO,
-                preferentialDTOList:preferentialDTOList,
-                form:{
-                    rechargeMoney:'',
-                    rechargeWay:'1'
+        data: function () {
+            return {
+                isShowMore: false,
+                isClass: true,
+                isShow: false,
+                paymentIsShow: true,
+                codeIsShow: false,
+                merchantUserAccountDTO: merchantUserAccountDTO,
+                preferentialDTOList: preferentialDTOList,
+                form: {
+                    rechargeMoney: '',
+                    rechargeWay: '1'
                 },
-                rules:{
+                rules: {
                     rechargeMoney: [
                         { required: true, message: '充值金额不能为空', trigger: 'blur' },
-                        { validator:function(rule,value,callback){
-                            // var reg =  /^[0-9]+[0-9]*]*$/ ;
-                            var reg =  /^\+?[1-9][0-9]*$/ ;
-                            if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                callback(new Error("请输入整数的充值金额"));
-                                return;
-                            }else{
-                                callback();
-                            }
-                        }, trigger: 'blur'}
+                        {
+                            validator: function (rule, value, callback) {
+                                // var reg =  /^[0-9]+[0-9]*]*$/ ;
+                                var reg = /^\+?[1-9][0-9]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入整数的充值金额"));
+                                    return;
+                                } else {
+                                    callback();
+                                }
+                            }, trigger: 'blur'
+                        }
                     ],
                 },
-                rechargeMoneyWx:'',
-                payUrl:'',
-                timeName:null//定时器名称
-            }              
+                rechargeMoneyWx: '',
+                payUrl: '',
+                timeName: null//定时器名称
+            }
         },
         methods: {
             bindQRCode() {
                 new QRCode(this.$refs.qrCodeDiv, {
-                  text: this.payUrl,
-                  width: 120,
-                  height: 120,
-                  colorDark: "#000", //二维码颜色
-                  colorLight: "#ffffff", //二维码背景色
-                  correctLevel: QRCode.CorrectLevel.L//容错率，L/M/H
+                    text: this.payUrl,
+                    width: 120,
+                    height: 120,
+                    colorDark: "#000", //二维码颜色
+                    colorLight: "#ffffff", //二维码背景色
+                    correctLevel: QRCode.CorrectLevel.L//容错率，L/M/H
                 })
             },
-            number(){
-            　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
-                this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
+            number() {
+                this.form.rechargeMoney = this.form.rechargeMoney.replace(/[^\.\d]/g, '');
+                this.form.rechargeMoney = this.form.rechargeMoney.replace('.', '');
             },
-            toogleClick(){
-                if(this.isShow){
-                    this.isShow=false
-                    this.isClass=true
-                }else{
-                    this.isShow=true
-                    this.isClass=false
-                }          
+            toogleClick() {
+                if (this.isShow) {
+                    this.isShow = false
+                    this.isClass = true
+                } else {
+                    this.isShow = true
+                    this.isClass = false
+                }
             },
             submitForm(form) {
                 // this.paymentIsShow=false
@@ -170,115 +277,127 @@
                 // }) 
                 this.$refs[form].validate((valid) => {
                     if (valid) {
-                        var param ={};   
+                        var param = {};
                         param.rechargeMoney = this.form.rechargeMoney;
-                        param.rechargeWay = this.form.rechargeWay; 
+                        param.rechargeWay = this.form.rechargeWay;
                         console.log(param)
-                        
-                        axios.post('/merchant/merchantOnlineRecharge/getWeChatAndAlipayCode', param)
-                        .then(function (response) {
-                            console.log(response)
-                            var result =  response.data;
-                            if(result.code=="0"){
-                                if(param.rechargeWay=="1"){//支付宝跳转
-                                    var resultData=result.data;
-                                    console.log(resultData)
-                                    if(resultData){
-                                        // 轮询检查支付状态
-                                        var serialNumber=resultData.serialNumber;
-                                        // console.log(serialNumber)
-                                        ocmVM.checkIsPay(serialNumber,1);
-                                        // 测试
-                                        // ocmVM.testFun(serialNumber);
-                                        // 打开支付宝支付页面
-                                        window.parent.open(result.data.payUrl)
-                                    } 
-                                }else{//微信展示二维码
-                                    var resultData=result.data;
-                                    if(resultData){
-                                        ocmVM.paymentIsShow=false;//隐藏充值
-                                        ocmVM.codeIsShow=true;//显示二维码
-                                        ocmVM.rechargeMoneyWx=ocmVM.form.rechargeMoney;
-                                        ocmVM.payUrl=result.data.payUrl;
-                                        document.getElementById("qrCode").innerHTML = "";
-                                        ocmVM.$nextTick(function () {
-                                            ocmVM.bindQRCode();
-                                        })
-                                        
-                                        // 轮询检查支付状态
-                                        var serialNumber=resultData.serialNumber;
-                                        // console.log(serialNumber)
-                                        ocmVM.checkIsPay(serialNumber,2);
 
-                                        // 测试
-                                        // ocmVM.testFun(serialNumber);
-                                    }                                    
+                        axios.post('/merchant/merchantOnlineRecharge/getWeChatAndAlipayCode', param)
+                            .then(function (response) {
+                                console.log(response)
+                                var result = response.data;
+                                if (result.code == "0") {
+                                    if (param.rechargeWay == "1") {//支付宝跳转
+                                        var resultData = result.data;
+                                        console.log(resultData)
+                                        if (resultData) {
+                                            // 轮询检查支付状态
+                                            var serialNumber = resultData.serialNumber;
+                                            // console.log(serialNumber)
+                                            ocmVM.checkIsPay(serialNumber, 1);
+                                            // 测试
+                                            // ocmVM.testFun(serialNumber);
+                                            // 打开支付宝支付页面
+                                            window.parent.open(result.data.payUrl)
+                                        }
+                                    } else {//微信展示二维码
+                                        var resultData = result.data;
+                                        if (resultData) {
+                                            ocmVM.paymentIsShow = false;//隐藏充值
+                                            ocmVM.codeIsShow = true;//显示二维码
+                                            ocmVM.rechargeMoneyWx = ocmVM.form.rechargeMoney;
+                                            ocmVM.payUrl = result.data.payUrl;
+                                            document.getElementById("qrCode").innerHTML = "";
+                                            ocmVM.$nextTick(function () {
+                                                ocmVM.bindQRCode();
+                                            })
+
+                                            // 轮询检查支付状态
+                                            var serialNumber = resultData.serialNumber;
+                                            // console.log(serialNumber)
+                                            ocmVM.checkIsPay(serialNumber, 2);
+
+                                            // 测试
+                                            // ocmVM.testFun(serialNumber);
+                                        }
+                                    }
+                                } else {
+                                    ocmVM.$message.error(result.msg);
                                 }
-                            }else{
-                                ocmVM.$message.error(result.msg);
-                            }                            
-                        })
-                        .catch(function (error) {
-                             console.log(error);
-                        });
-                        
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
                 });
             },
-            goback(){
-                clearInterval(this.timeName)       
-                this.paymentIsShow=true
-                this.codeIsShow=false 
+            goback() {
+                clearInterval(this.timeName)
+                this.paymentIsShow = true
+                this.codeIsShow = false
             },
-            checkIsPay(serialNumber,type){
-                this.timeName= setInterval(()=>{
-                    console.log('5秒钟执行一次'+serialNumber)
-                    var param={}
-                    param.serialNumber=serialNumber
+            checkIsPay(serialNumber, type) {
+                this.timeName = setInterval(() => {
+                    console.log('5秒钟执行一次' + serialNumber)
+                    var param = {}
+                    param.serialNumber = serialNumber
                     axios.post('/merchant/merchantOnlineRecharge/checkPayStatus', param)
-                    .then(function (response) {
-                        console.log(response)
-                        var result =  response.data.data;
-                        console.log("支付状态: "+result);
-                        if(result== 1){
-                            if(type==1){
-                                //支付宝跳道充值记录
-                                // window.location.href="/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness"
-                                //支付宝也跳到完成页
-                                window.location.href="/merchant/merchantOnlineRecharge/toWechatPage"
-                            }else{//微信跳到完成页
-                                window.location.href="/merchant/merchantOnlineRecharge/toWechatPage"
-                            }                            
-                        }else{
-                            ocmVM.$message.error(result.msg);
-                        }                            
-                    })
-                    .catch(function (error) {
-                         console.log(error);
-                    });
-                },5000)
+                        .then(function (response) {
+                            console.log(response)
+                            var result = response.data.data;
+                            console.log("支付状态: " + result);
+                            if (result == 1) {
+                                if (type == 1) {
+                                    //支付宝跳道充值记录
+                                    // window.location.href="/merchant/merchantRechargeRecordBusiness/initRechargeRecordBusiness"
+                                    //支付宝也跳到完成页
+                                    window.location.href = "/merchant/merchantOnlineRecharge/toWechatPage"
+                                } else {//微信跳到完成页
+                                    window.location.href = "/merchant/merchantOnlineRecharge/toWechatPage"
+                                }
+                            } else {
+                                ocmVM.$message.error(result.msg);
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }, 5000)
             },
-            testFun(serialNumber){                
-                this.timeName= setInterval(()=>{
-                    console.log('5秒钟执行一次'+serialNumber)
+            testFun(serialNumber) {
+                this.timeName = setInterval(() => {
+                    console.log('5秒钟执行一次' + serialNumber)
                     // window.location.href="/merchant/merchantOnlineRecharge/toWechatPage"
-                },5000)
+                }, 5000)
             },
         },
-        created(){
+        created() {
             console.log(preferentialDTOList)
-            if(preferentialDTOList&&preferentialDTOList.length>4){
-                this.isShowMore=true;
-            }else{
-                this.isShowMore=false;
+            if (preferentialDTOList && preferentialDTOList.length > 4) {
+                this.isShowMore = true;
+            } else {
+                this.isShowMore = false;
             }
+            //监听父窗口信息
+            // 接受父页面发来的信息
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
         },
-        mounted(){
+        mounted() {
             document.getElementById('paymentOnline').style.display = 'block';
         }
-  })
+    })
 </script>
+
 </html>
