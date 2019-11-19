@@ -13,7 +13,7 @@
         }
 
         .button-menu {
-            padding-top: 10px;
+            /*padding-top: 10px;*/
         }
     </style>
 </head>
@@ -87,6 +87,11 @@
 <script th:inline="javascript">
     var merchantUserList = [[${ userList }]];//商户集合
     var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -183,16 +188,17 @@
             },
         },
         created() {
+            //监听父窗口信息
+            // 接受父页面发来的信息
             window.addEventListener("message", function (event) {
                 var data = event.data;
                 switch (data.cmd) {
                     case 'getFormJson':
                         oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
-                        // 处理业务逻辑
+                        // 处理业务逻辑
                         break;
                 }
             });
-            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
             var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
             if (localVal) { this.pager.pageSize = localVal; }
             // console.info("create method");
