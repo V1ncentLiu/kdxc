@@ -700,7 +700,7 @@ var mainDivVM = new Vue({
             if(value==1){
                 valText="一次性全款";
             }else if(value==2){
-                valText="先交订金";
+                valText="先交定金";
             }
             return valText;
         },

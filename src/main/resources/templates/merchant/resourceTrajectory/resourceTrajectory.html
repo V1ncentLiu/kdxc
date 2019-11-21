@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
   <title>后台管理系统</title>
   <meta charset="UTF-8">
   <!-- import CSS -->
   <link rel="stylesheet" href="css/element-ui.css">
   <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="" id="skinCss">
   <style>
     .optimizeClueManagement {
       font-size: 14px;
@@ -33,11 +33,6 @@
 
     .fontColor1 {
       color: #57586C
-    }
-
-    .fontColor2 {
-      color: #3A84F4;
-      font-weight: normal;
     }
 
     .fontColor3 {
@@ -102,14 +97,6 @@
       border-radius: 8px;
     }
 
-    .resourse-ad-box {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      border-left: 4px dotted #3A84F4;
-      margin-bottom: 30px;
-    }
-
     .resourse-entry {
       display: flex;
       flex-direction: column;
@@ -155,34 +142,26 @@
     .resourse-ad-link {
       display: block;
       margin-top: 26px;
+      width: 429px;
+      line-height: 46px;
     }
 
     a.resourse-ad-link img {
       border-radius: 6px;
+      width: 100%;
+      height: 100%;
     }
 
     .resorse-ad-time div {
       width: 44px;
       height: 43px;
       background: #fff;
-      margin-left: -22px;
-      padding: 11px 0 0 10px;
+      margin-left: -32px;
+      padding: 3px 0 0 10px;
 
     }
 
-    .resorse-ad-time div span {
-      display: block;
-      color: #fff;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      line-height: 20px;
-      text-align: center;
-      background: linear-gradient(119deg, rgba(140, 171, 249, 1), rgba(76, 131, 255, 1));
-      box-shadow: 0px 9px 14px 2px rgba(78, 130, 255, 0.39);
-      border-radius: 50%;
-      text-indent: -9999px;
-    }
+
 
     .resourse-online-more {
       text-align: center;
@@ -209,16 +188,9 @@
       padding: 0
     }
 
-    .el-dialog__title:before {}
 
     .el-dialog__header {
       background: #fff;
-    }
-
-    .el-dialog__headerbtn .el-dialog__close {
-      color: #fff;
-      background: #3A84F4;
-      border-radius: 50%
     }
 
     .el-dialog__header:before {
@@ -325,6 +297,10 @@
     .resourse-info-box .row-bg {
       padding: 30px;
     }
+
+    h3 {
+      /* margin-top: 7px; */
+    }
   </style>
 </head>
 
@@ -340,7 +316,8 @@
     </h3> -->
     <div class="row-bg el-row--flex" justify="space-around">
       <div class="grid-content">
-        <img th:src="@{/images/user_photo.png}" class="resourse-user-photo marign30" />
+        <img v-if="usrIcon==1" th:src="@{/images/user_photo.png}" class="resourse-user-photo marign30" />
+        <img v-else-if="usrIcon==2" th:src="@{/images/user_photo2.png}" class="resourse-user-photo marign30" />
         <ul class="resourse-user-info">
           <li>
             <span>地域：</span><span class="fontColor1"> {{initResourcesObj.area}} </span>
@@ -385,18 +362,22 @@
     <div class="row-bg">
       <div class="resourse-ad-box">
         <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
+          <div><span>
+              {{initResourcesObj.putTime}}
+            </span></div>
         </div>
         <div class="resourse-ad-main">
           <h3>广告投放落地页</h3>
           <a class="resourse-ad-link" :href="initResourcesObj.url" target="_blank">
-            <img :src="initResourcesObj.imageUrl">
+            <!-- <img :src="initResourcesObj.imageUrl"> -->
+            <!-- <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1572510650804&di=644c8892cd40032b80d52a13b92ffec9&imgtype=0&src=http%3A%2F%2Fe.hiphotos.baidu.com%2Fimage%2Fpic%2Fitem%2F359b033b5bb5c9eac1754f45df39b6003bf3b396.jpg" alt=""> -->
+            <b class="fontColor5">点击</b>查看广告落地页
           </a>
         </div>
       </div>
       <div class="resourse-ad-box">
         <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
+          <div><span>{{initResourcesObj.putTime}}</span></div>
         </div>
         <div class="resourse-ad-main">
           <h3>广告投放渠道</h3>
@@ -417,7 +398,7 @@
       </div>
       <div class="resourse-ad-box">
         <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
+          <div><span>{{initResourcesObj.consultTime}}</span></div>
         </div>
         <div class="resourse-ad-main">
           <h3>客户咨询详情</h3>
@@ -465,7 +446,7 @@
       </div>
       <div class="resourse-ad-box">
         <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
+          <div><span>{{initResourcesObj.createTime}}</span></div>
         </div>
         <div class="resourse-ad-main">
           <h3>客户详情信息</h3>
@@ -473,11 +454,11 @@
             <div class="resourse-online-log fontColor3">线索ID：{{clueId}}</div>
             <ul class="resourse-user-info">
               <li>
-                <span>资源信息</span>
+                <span style="text-align: left">资源信息</span>
               </li>
             </ul>
             <div class="resourse-info-box">
-              <div class="row-bg row-nopadding  el-row--flex">
+              <div class="row-bg row-nopadding  el-row--flex" style="box-shadow: none">
                 <div class="grid-content bg-purple-light resourse-mbox">
                   <ul class="resourse-user-info">
                     <li class="resourse-message">
@@ -546,7 +527,7 @@
       </div>
       <div class="resourse-ad-box">
         <div class="resorse-ad-time">
-          <div><span>8.19</span></div>
+          <div><span>{{initResourcesObj.assignTime}}</span></div>
         </div>
         <div class="resourse-ad-main">
           <h3>资源分发到商家</h3>
@@ -606,7 +587,12 @@
 <!-- import common js-->
 <script th:inline="javascript">
 
-
+  var oLink = document.getElementById("skinCss");
+  if (getCookieVal("skinVal")) {
+    oLink['href'] = "/css/common/resource" + getCookieVal("skinVal") + ".css";
+  } else {
+    oLink['href'] = "/css/common/resource1.css";
+  }
   function getQueryString(name) {//获取url地址栏参数的方法
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
     var r = window.location.search.substr(1).match(reg);
@@ -621,23 +607,6 @@
     el: '#optimizeClueManagement',
     data: function () {
       return {
-        // area: '', // 地域
-        // terminal: '',// 终端
-        // phone: '',
-        // cusName: '',
-        // qq: '', // qq
-        // sex: '',  // 性别
-        // wechat: '', // 微信
-        // email: '', // 邮箱
-        // age: '',  // 年龄
-        // imageUrl: '',// 图片链接
-        // Aource: '',// 媒介
-        // category: '',// 资源类别
-        // messageTime: '',// 留言时间
-        // messagePoint: '',// 留言重点
-        // searchWord: '',// 搜索词
-        // projectName: '', // 资源项目
-        // chatList: [], // 聊天记录
         initResourcesObj: {},
         wechatVisible: false,//查看微信二维码
         dialogFormVisible: false,
@@ -645,11 +614,31 @@
         isActive: false,
         clueId: clueId,
         isShowOnlineRecordBtn: false,
-        onlineRecordData: []
+        onlineRecordData: [],
+        usrIcon: getCookieVal("skinVal") ? getCookieVal("skinVal") : 2
 
       }
     },
     methods: {
+      add0(m) { return m < 10 ? '0' + m : m },
+      format(shijianchuo) {
+        //shijianchuo是整数，否则要parseInt转换
+        if (shijianchuo) {
+          var time = new Date(shijianchuo);
+          console.log(time, shijianchuo);
+
+          var y = time.getFullYear();
+          var m = time.getMonth() + 1;
+          var d = time.getDate();
+          var h = time.getHours();
+          var mm = time.getMinutes();
+          var s = time.getSeconds();
+          // return this.add0(m) + '.' + this.add0(d) ;
+          return m + '.' + d;
+        } else {
+          return ''
+        }
+      },
       initResources() {
         // this.initResourcesObj = {
         //   area: '北京', // 地域
@@ -682,6 +671,12 @@
             var result = response.data;
             if (result.code == '0') {
               ocmVM.initResourcesObj = result.data
+              console.log(ocmVM.format(result.data.putTime));
+
+              ocmVM.initResourcesObj.putTime = ocmVM.format(result.data.putTime)
+              ocmVM.initResourcesObj.consultTime = ocmVM.format(result.data.consultTime)
+              ocmVM.initResourcesObj.createTime = ocmVM.format(result.data.createTime)
+              ocmVM.initResourcesObj.assignTime = ocmVM.format(result.data.assignTime)
               if (phone == "***") {
                 ocmVM.initResourcesObj.phone = phone;
                 if (ocmVM.initResourcesObj.phone2) {
@@ -694,7 +689,7 @@
                   ocmVM.initResourcesObj.phone4 = phone;
                 }
                 if (ocmVM.initResourcesObj.phone5) {
-                  ocmVM.initResourcesObj.phone6 = phone;
+                  ocmVM.initResourcesObj.phone5 = phone;
                 }
 
               }
@@ -772,6 +767,17 @@
     created() {
       this.initResources();
       this.initData();
+      let that = this;
+      window.addEventListener("message", function (event) {
+        var data = event.data;
+        switch (data.cmd) {
+          case 'getFormJson':
+            oLink['href'] = "/css/common/resource" + event.data.params.data + ".css";
+            that.usrIcon = event.data.params.data;
+            // 处理业务逻辑
+            break;
+        }
+      });
     }
   })
 </script>

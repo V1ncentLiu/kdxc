@@ -1,44 +1,12 @@
 package com.kuaidao.manageweb.controller.financing;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -72,6 +40,29 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 退返款
@@ -154,9 +145,14 @@ public class BalanceAccountController {
         Long teleSaledate = System.currentTimeMillis();
         logger.info("所有电销创业顾问查询时间" + (teleSaledate - busSaledate));
 
-        // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
+        // 查询所有项目
+//        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+//        request.setAttribute("projectList", allProject.getData());
         Long allProjectdate = System.currentTimeMillis();
         logger.info("查询所有项目查询时间" + (allProjectdate - teleSaledate));
         // 查询所有省
@@ -806,6 +802,15 @@ public class BalanceAccountController {
         map.put("teleSaleList", teleSaleList);
         map.put("teleCompanyList", teleCompanyList);
         return map;
+    }
+
+    /**
+     * 校验（提交对账时增加约束）
+     */
+    @RequestMapping("/validateBalance")
+    @ResponseBody
+    public JSONResult<String> validateBalance(@RequestBody ReconciliationConfirmReq req){
+        return reconciliationConfirmFeignClient.validateBalance(req);
     }
 
 

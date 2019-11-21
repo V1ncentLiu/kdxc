@@ -41,17 +41,29 @@ var myCallRecordVm = new Vue({
       seatPhone: '',
       startTime: '',
       endTime: '',
-      searchType:"1"
+      searchType: "1"
     },
     userInfoList: userInfoList,//绑定账户
-    isActive1:false,
-    isActive2:false,
-    isActive3:false,
-    isActive4:false,
-    totalCost:0
-    
+    isActive1: false,
+    isActive2: false,
+    isActive3: false,
+    isActive4: false,
+    totalCost: 0,
+    colorStatus: false,
+    rowStatus: false,
+    minStatus: false,
+    fullWidth: document.documentElement.clientWidth,
+
+
+
   },
   methods: {
+    changeNameFun() {
+      this.colorStatus = false;
+    },
+    setColor() {
+      this.colorStatus = true;
+    },
     transCusPhone(row) {
       var text = "";
       if (row.clueId && (row.phase == 7 || row.phase == 8 || (roleCode == 'DXZJ' && orgId != (row.teleGorupId + "")))) {
@@ -61,106 +73,82 @@ var myCallRecordVm = new Vue({
       }
       return text;
     },
-
-    // _initData() {
-    //   this.callRecordData = [{
-    //     costMonth: "客户姓名",
-    //     businessAccountName:"zahng",
-    //     bindAccountName: "客户电话",
-    //     seatNumber: "电话归属地",
-    //     seatPhone: "热线号码",
-    //     monthRent: "拨打账户",
-    //     cost: "坐席电话",
-    //     callNumber: "开始服务时间",
-    //   },
-    //   {
-    //     costMonth: "客户姓名",
-    //     businessAccountName:"zahng",
-    //     bindAccountName: "客户电话",
-    //     seatNumber: "电话归属地",
-    //     seatPhone: "热线号码",
-    //     monthRent: "拨打账户",
-    //     cost: "坐席电话",
-    //     callNumber: "开始服务时间",
-    //   }]
-
-    // },
     initCallRecordData(val) {
-      if(val&&val=="1"){
-        this.isActive1=false;
-        this.isActive2=false;
-        this.isActive3=false;
-        this.isActive4=false;
-        this.$set(this.searchForm,'searchType',"1");
+      if (val && val == "1") {
+        this.isActive1 = false;
+        this.isActive2 = false;
+        this.isActive3 = false;
+        this.isActive4 = false;
+        this.$set(this.searchForm, 'searchType', "1");
       }
       // this._initData();
-       var startTime = this.searchForm.startTime;
-       var endTime = this.searchForm.endTime;
-       var startTimestamp = Date.parse(new Date(startTime));
-       if(endTime){
-      	 var endTimestamp = new Date(endTime);
-      		 if(startTimestamp> endTimestamp){
-      			 this.$message({
-                       message: '开始时间必须小于结束时间',
-                       type: 'warning'
-                     });
-                   return;
-               }
+      var startTime = this.searchForm.startTime;
+      var endTime = this.searchForm.endTime;
+      var startTimestamp = Date.parse(new Date(startTime));
+      if (endTime) {
+        var endTimestamp = new Date(endTime);
+        if (startTimestamp > endTimestamp) {
+          this.$message({
+            message: '开始时间必须小于结束时间',
+            type: 'warning'
+          });
+          return;
+        }
 
-       }
-       var callStatus = this.searchForm.callStatus;
-       if(callStatus=='-1'){
-      	 this.searchForm.callStatus='';
-       }
-       var callType = this.searchForm.callType;
-       if(callType=='-1'){
-      	 this.searchForm.callType='';
-       }
-       var param = this.searchForm;
-       var accountId =this.searchForm.accountId;
-       if(accountId){
-      	 var accountIdArr = new Array();
-      	 accountIdArr.push(accountId);
-      	 param.accountIdList=accountIdArr;
-       }else{
-      	 param.accountIdList=[];
-       }
-      	 param.beginCostTime=new Date(this.searchForm.startTime)&&this.searchForm.startTime!=null?new Date(this.searchForm.startTime):'';
-      	 param.endCostTime=new Date(this.searchForm.endTime)&&this.searchForm.endTime!=null?new Date(this.searchForm.endTime):'';
-      	 param.pageNum=this.pager.currentPage;
-      	 param.pageSize=this.pager.pageSize;
-      	 axios.post('/merchant/manageCallCost/getManageCallCostList',param)
-           .then(function (response) {
-          	 var data =  response.data;
-               if(data.code=='0'){
-                 var resData = data.data;
-                 var callRecordData = resData.data;
-                 myCallRecordVm.callRecordData = callRecordData.data;
-                 console.log(myCallRecordVm.callRecordData,"myCallRecordVm.callRecordData")
-                //3.分页组件
+      }
+      var callStatus = this.searchForm.callStatus;
+      if (callStatus == '-1') {
+        this.searchForm.callStatus = '';
+      }
+      var callType = this.searchForm.callType;
+      if (callType == '-1') {
+        this.searchForm.callType = '';
+      }
+      var param = this.searchForm;
+      var accountId = this.searchForm.accountId;
+      if (accountId) {
+        var accountIdArr = new Array();
+        accountIdArr.push(accountId);
+        param.accountIdList = accountIdArr;
+      } else {
+        param.accountIdList = [];
+      }
+      param.beginCostTime = new Date(this.searchForm.startTime) && this.searchForm.startTime != null ? new Date(this.searchForm.startTime) : '';
+      param.endCostTime = new Date(this.searchForm.endTime) && this.searchForm.endTime != null ? new Date(this.searchForm.endTime) : '';
+      param.pageNum = this.pager.currentPage;
+      param.pageSize = this.pager.pageSize;
+      axios.post('/merchant/manageCallCost/getManageCallCostList', param)
+        .then(function (response) {
+          var data = response.data;
+          if (data.code == '0') {
+            var resData = data.data;
+            var callRecordData = resData.data;
+            myCallRecordVm.callRecordData = callRecordData.data;
+            console.log(myCallRecordVm.callRecordData, "myCallRecordVm.callRecordData")
+            //3.分页组件
 
-                console.log(resData.total,"resData.total");
-                myCallRecordVm.totalCost=resData.totalCost;
-               	myCallRecordVm.pager.total= callRecordData.total;
-               	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
-               	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
+            console.log(resData.total, "resData.total");
+            myCallRecordVm.totalCost = resData.totalCost;
+            myCallRecordVm.pager.total = callRecordData.total;
+            myCallRecordVm.pager.currentPage = callRecordData.currentPage;
+            myCallRecordVm.pager.pageSize = callRecordData.pageSize;
 
-               }else{
-              	 myCallRecordVm.$message({message:data.msg,type:'error'});
-               	 console.error(data);
-               }
+          } else {
+            myCallRecordVm.$message({ message: data.msg, type: 'error' });
+            console.error(data);
+          }
 
-           })
-           .catch(function (error) {
-                console.log(error);
-           }).then(function(){
-           });
+        })
+        .catch(function (error) {
+          console.log(error);
+        }).then(function () {
+        });
     },
     resetForm(formName) {
       if (this.$refs[formName]) {
         this.$refs[formName].resetFields();
-        this.$set(this.searchForm,'startTime','');
-        this.$set(this.searchForm,'endTime','');
+        this.$set(this.searchForm, 'startTime', '');
+        this.$set(this.searchForm, 'endTime', '');
       }
     },
     getCallTypeText(row, column, value, index) {
@@ -238,11 +226,11 @@ var myCallRecordVm = new Vue({
     },
 
     searchYesterday() {
-      this.isActive1=true;
-      this.isActive2=false;
-      this.isActive3=false;
-      this.isActive4=false;
-      this.$set(this.searchForm,'searchType',"1");
+      this.isActive1 = true;
+      this.isActive2 = false;
+      this.isActive3 = false;
+      this.isActive4 = false;
+      this.$set(this.searchForm, 'searchType', "1");
       var today = new Date();
       today.setTime(today.getTime() - 24 * 60 * 60 * 1000);
       var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + " 00:00:00";
@@ -252,11 +240,11 @@ var myCallRecordVm = new Vue({
       this.initCallRecordData();
     },
     searchWeek() {
-      this.isActive2=true;
-      this.isActive1=false;
-      this.isActive3=false;
-      this.isActive4=false;
-      this.$set(this.searchForm,'searchType',"1");
+      this.isActive2 = true;
+      this.isActive1 = false;
+      this.isActive3 = false;
+      this.isActive4 = false;
+      this.$set(this.searchForm, 'searchType', "1");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -271,11 +259,11 @@ var myCallRecordVm = new Vue({
       this.initCallRecordData();
     },
     searchMonth() {
-      this.isActive3=true;
-      this.isActive1=false;
-      this.isActive2=false;
-      this.isActive4=false;
-      this.$set(this.searchForm,'searchType',"1");
+      this.isActive3 = true;
+      this.isActive1 = false;
+      this.isActive2 = false;
+      this.isActive4 = false;
+      this.$set(this.searchForm, 'searchType', "1");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -290,12 +278,12 @@ var myCallRecordVm = new Vue({
       this.searchForm.endTime = year + "-" + (month + 1) + "-" + date + " 23:59:59";
       this.initCallRecordData();
     },
-    searchMonthHistory(){
-      this.isActive4=true;
-      this.isActive1=false;
-      this.isActive2=false;
-      this.isActive3=false;
-      this.$set(this.searchForm,'searchType',"2");
+    searchMonthHistory() {
+      this.isActive4 = true;
+      this.isActive1 = false;
+      this.isActive2 = false;
+      this.isActive3 = false;
+      this.$set(this.searchForm, 'searchType', "2");
       var a = new Date();
       var year = a.getFullYear();
       var month = a.getMonth();
@@ -388,13 +376,30 @@ var myCallRecordVm = new Vue({
         this.isShow = true
       }
     },
-    // clearTeleGroupList(selectedValue) {
-    //   this.teleGroupList = [];
-    //   this.tmList = [];
-    //   this.searchForm.accountId = '';
-    //   this.searchForm.teleGroupId = '';
-    // }
-
+    handleResize(event) {
+      this.fullWidth = document.documentElement.clientWidth;
+      console.log(this.fullWidth, "this.fullWidth");
+      let that = this;
+      this.$nextTick(() => {
+        let childrenLength = that.$refs.itemBox.children.length;
+        if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+          that.rowStatus = true;
+          that.minStatus = false;
+        }
+        else if (that.fullWidth <= 1400 && childrenLength >= 4) {
+          that.rowStatus = true;
+          that.minStatus = true;
+        }
+        else if (that.fullWidth > 1400 && that.fullWidth < 1500 && childrenLength <= 4) {
+          that.rowStatus = true;
+          that.minStatus = true;
+        }
+        else {
+          that.rowStatus = false;
+          that.minStatus = false;
+        }
+      })
+    }
 
   },
   created() {
@@ -412,6 +417,19 @@ var myCallRecordVm = new Vue({
     // });
     //电销总监电销组筛选按钮不可点击
     this.searchYesterday();
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize();
+    //监听父窗口信息
+    // 接受父页面发来的信息
+    window.addEventListener("message", function (event) {
+      var data = event.data;
+      switch (data.cmd) {
+        case 'getFormJson':
+          oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+          // 处理业务逻辑
+          break;
+      }
+    });
   },
   mounted() {
     document.getElementById('myCallRecordVm').style.display = 'block';

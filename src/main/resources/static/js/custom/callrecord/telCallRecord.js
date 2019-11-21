@@ -1,6 +1,12 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
+        fieldFrom: {
+            type: [],
+        },
+        dialogChooseList:false,//自定义列
+        allTableColums:[],
+        tableColums:[],
         audioShow:false,
         isShow:false,
       isDXZDisabled:false,
@@ -53,6 +59,68 @@ var myCallRecordVm = new Vue({
         
     },
     methods:{
+        sortNumber(a,b) {
+            //对数组中元素，按照数字 从小到大 排序
+            return a.split("_")[0] - b.split("_")[0];
+        },
+        confirmColumn(){
+            this.dialogChooseList = false;
+            //处理用户选择的列
+            if(this.fieldFrom.type.length==0){
+                this.$message({
+                    message: "请至少保留一列",
+                    type: 'error'
+                });
+                return;
+            }
+            var customerShowColun = [];
+            var customerColumn = this.fieldFrom.type;
+            customerColumn.sort(this.sortNumber);//对选择的列排序
+            var idList=[];
+            for(var i=0;i<customerColumn.length;i++){
+                var curItem = customerColumn[i];
+                var itemArr = curItem.split("_");
+                var obj = {};
+                obj.fieldCode=itemArr[1];
+                obj.displayName=itemArr[2];
+                obj.width=itemArr[4];
+                customerShowColun.push(obj);
+                idList.push(itemArr[3])
+            }
+            this.tableColums = customerShowColun;
+            var param ={};
+            param.fieldIdList = idList;
+            param.menuCode = "aggregation:telCallRecord";
+            if(idList.length!=0){
+                axios.post('/customfield/customField/saveUserField', param)
+                    .then(function (response) {
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+        },
+        initColumn(){
+            //初始化table 列 和 用户自定义列
+            this.allTableColums = fieldList;
+            if(userFieldList.length!=0){
+                var type=[];
+                for(var i=0;i<userFieldList.length;i++){
+                    type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
+                }
+                this.fieldFrom.type = type;
+                this.confirmColumn();
+            }else{
+                var type=[];
+                for(var i=0;i<fieldList.length;i++){
+                    type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
+                }
+                this.fieldFrom.type = type;
+                this.confirmColumn();
+            }
+
+        },
       transCusPhone(row) {
         var text="";
         if(row.clueId &&(row.phase ==7 || row.phase == 8 || (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) )){
@@ -276,10 +344,14 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-                		 if(callSource=='3'){
-                			 var decodeUrl = encodeURI(url);
-                			 url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                		 }
+                         var decodeUrl = "";
+                         if(callSource == 4){
+                             decodeUrl = encodeURI(fileName.substring(0,fileName.lastIndexOf("/")));
+                           url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                         }else if(callSource=='3'  ||callSource =='5'){
+                             decodeUrl = encodeURI(url);
+                           url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                         }
             			 var x=new XMLHttpRequest();
              			x.open("GET", url, true);
              			x.responseType = 'blob';
@@ -308,6 +380,14 @@ var myCallRecordVm = new Vue({
                 window.parent.open(url)
     			return;
     		}
+
+            if(callSource == '4'){
+                var realUrl = url.substring(0,url.lastIndexOf("/"));
+                var page = window.open();
+                var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+realUrl+"' controls='controls' autoplay></audio></div></body>";
+                page.document.write(html);
+                return;
+            }
             var newWindow = window.open();
     		 var param = {};
     		 param.id=id;
@@ -395,6 +475,8 @@ var myCallRecordVm = new Vue({
         });
       //电销总监电销组筛选按钮不可点击
       this.initCallRecordData();
+        // 初始化列
+        this.initColumn();
    },
    mounted(){
      	document.getElementById('myCallRecordVm').style.display = 'block';

@@ -38,7 +38,9 @@
                 <span class="messageCenterBtn" @click="openMessageCenter">
                     <img th:src="@{/images/icon_news.png}" alt="">
                     <span id="messageCount"></span>
-                </span>                
+                </span>  
+                <!-- 挂断按钮 -->
+                <el-button type="primary" @click="ketianHangup" class="f-fl headerBtn" v-if="isRingOff">挂断</el-button>
                 <!-- <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">
                     <em style="color: #e37470;" id="messageCount"></em>
                 </el-button> -->  
@@ -128,7 +130,7 @@
  <!-- 退出登录 dialog start -->
  
  <!-- 呼叫中心登录 dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px">
+     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px" v-dialog-drag>
      	<el-button type="text" icon="el-icon-minus" class="minDialog" @click="handleMin"></el-button>
         <el-form :model="loginClientForm" ref="loginClientForm" :rules="clientRules">
             <el-form-item label="选择呼叫中心：" :label-width="formLabelWidth105" prop="clientType">
@@ -148,27 +150,67 @@
 	             <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
 	                <el-input   v-model="loginClientForm.bindPhone" autocomplete="off"  maxlength="11" style="width: 350px;" @keyup.native="bindPhoneNumber"></el-input>
 	            </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
+                       <el-option
+                           v-for="item in bindPhoneTypeOptions"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
+                       </el-option>
+                    </el-select>
+                </el-form-item>
             </template>
             <template v-if="loginClientForm.clientType==2">
                 <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
                     <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
                 </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
+                       <el-option
+                           v-for="item in bindPhoneTypeOptions"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
+                       </el-option>
+                    </el-select>
+                </el-form-item>
             </template>
-              <template v-if="loginClientForm.clientType==3">
+            <template v-if="loginClientForm.clientType==3">
                 <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
                     <el-input   v-model="loginClientForm.cno" autocomplete="off"  maxlength="10" style="width: 350px;" @keyup.native="cnoNumber"></el-input>
                 </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
+                       <el-option
+                           v-for="item in bindPhoneTypeOptions"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
+                       </el-option>
+                    </el-select>
+                </el-form-item>
             </template>
-            <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-               <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
-                   <el-option
-                       v-for="item in bindPhoneTypeOptions"
-                       :key="item.value"
-                       :label="item.label"
-                       :value="item.value">
-                   </el-option>
-               </el-select>
-            </el-form-item>
+            <template v-if="loginClientForm.clientType==4">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
+                </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
+                       <el-option
+                           v-for="item in bindPhoneTypeOptions"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
+                       </el-option>
+                    </el-select>
+                </el-form-item>
+            </template>
+            <template v-if="loginClientForm.clientType==5">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
+                </el-form-item>
+            </template>
             
         </el-form>
         <div slot="footer" class="dialog-footer" center="true">
@@ -185,7 +227,8 @@
              <span v-if="loginClientForm.clientType==1">已登录天润呼叫中心</span>
              <span v-if="loginClientForm.clientType==2">已登录七陌呼叫中心</span>
              <span v-if="loginClientForm.clientType==3">已登录合力呼叫中心</span>
-            
+             <span v-if="loginClientForm.clientType==4">已登录科天呼叫中心</span>
+             <span v-if="loginClientForm.clientType==5">已登录容联呼叫中心</span>
             <template v-if="loginClientForm.clientType==1">
                 <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
                     {{loginClientForm.cno}}
@@ -193,23 +236,43 @@
                  <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
                     {{loginClientForm.bindPhone}}
                 </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+                </el-form-item>
             </template>
             <template v-if="loginClientForm.clientType==2">
                 <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
                     {{loginClientForm.loginClient}}
+                </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
                 </el-form-item>
             </template>
              <template v-if="loginClientForm.clientType==3">
                 <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
                     {{loginClientForm.cno}}
                 </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+                </el-form-item>
             </template>
-            
-            
-            <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
-                <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
-            </el-form-item>
+            <template v-if="loginClientForm.clientType==4">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    {{loginClientForm.loginClient}}
+                </el-form-item>
+                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+                </el-form-item>
+            </template>
+            <template v-if="loginClientForm.clientType==5">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    {{loginClientForm.loginClient}}
+                </el-form-item>
+            </template>            
             
         </el-form>
         <div slot="footer" class="dialog-footer" center="true">
@@ -218,7 +281,7 @@
     </el-dialog>
  <!-- 呼叫中心退出  dialog end -->
   <!--外呼 dialog start -->
-     <el-dialog title="主动外呼" :visible.sync="dialogOutboundVisible" :close-on-click-modal="false" class="callCenterDialog1" @close="closeOutboundDialog" width="540px">
+     <el-dialog title="主动外呼" :visible.sync="dialogOutboundVisible" :close-on-click-modal="false" class="callCenterDialog1" @close="closeOutboundDialog" width="540px" v-dialog-drag>
         <el-button type="text" icon="el-icon-minus" class="minDialog1" @click="outboundMin"></el-button>
         <el-form>
             <el-form-item  label-width="35px">
@@ -232,13 +295,22 @@
     </el-dialog> 
  <!-- 外呼 dialog end -->
  <!-- 外呼 dialog start 其他页面使用 -->
-	 <el-dialog  title="主动外呼" :visible.sync="tmOutboundCallDialogVisible" width="540px" :close-on-click-modal="false" class="callCenterDialog1" @close="closeTmOutboundDialog" >
+	 <el-dialog  title="主动外呼" :visible.sync="tmOutboundCallDialogVisible" width="540px" :close-on-click-modal="false" class="callCenterDialog1" @close="closeTmOutboundDialog" v-dialog-drag>
 	   <!--  <input  type="hidden" id="tmOutboundCallStartTime"/> -->
 	    <div id="tmOutboundCallTimeDiv" class="outboundCallTimeDiv"><img th:src="@{/images/icon_clock.png}" alt="" class="headIco">本次通话时长：<span id="tmOutboundCallTime"></span></div> 
 	    <div class="outboundCallTimeDiv">归属地：<span id="tmOutboundPhoneLocaleArea"></span></div>
 	</el-dialog>
  
  <!-- 外呼 dialog end 其他页面使用 -->
+    <!-- 科天外呼挂断弹窗 dialog start -->
+     <el-dialog title="提示" :visible.sync="ringOffdialogVisible" width="350px" :close-on-click-modal="false">
+        <p style="text-align: center;">{{ketianInBoundPhone}}</p>
+        <span slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="ketianConnection">接通</el-button>
+            <el-button @click="ketianHangup">挂断</el-button>
+        </span>
+    </el-dialog>
+    <!-- 科天外呼挂断弹窗 dialog start -->
 </div>
 
 <div id="anndialog">
@@ -425,7 +497,7 @@
 
 </script>
 
-<script th:src="@{/js/custom/homepage/index.js?v=1.0.11}"></script>
+<script th:src="@{/js/custom/homepage/index.js}"></script>
 <script th:src="@{/js/rabbitmq/stomp.js}"></script>
 <script th:src="@{/js/rabbitmq/sockjs.js}"></script>
 
@@ -517,9 +589,11 @@
 <script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/rtCall.js?v=1.0.11}"></script>
+<script th:src="@{/js/custom/call/rtCall.js?v=1.0.12}"></script>
 <!-- 播放錄音 js -->
 <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
 <!-- 导出方法 js-->
 <script th:src="@{/js/custom/exportexcel/exportexcel.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/call/ctibar-0.0.1.min.js}"></script>
+<script th:src="@{/js/custom/call/ketianToolbar.js}"></script>
 </html>

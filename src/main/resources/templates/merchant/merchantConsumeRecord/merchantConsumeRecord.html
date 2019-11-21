@@ -2,17 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
     xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 
-<head th:include="_header_include::frag(~{::title},~{::link},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{::link})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="" id="skinCss">
     <style>
         .el-date-picker__time-header {
             display: none;
         }
 
         .button-menu {
-            padding-top: 10px;
+            /*padding-top: 10px;*/
         }
     </style>
 </head>
@@ -30,15 +31,17 @@
                     <div class="main-search-box">
                         <div class="get-search-time">
                             <div class="get-time">时间:</div>
-                            <div class="time-style">
+                            <div class="time-style" :class="{'selectActive':colorStatus}">
                                 <el-form-item label-width="auto" class="call-time" prop="createDateStart">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.createDateStart" type="datetime" placeholder="选择开始时间">
+                                        v-model="form.createDateStart" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择开始时间">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="createDateEnd">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.createDateEnd" type="datetime" placeholder="选择结束时间">
+                                        v-model="form.createDateEnd" type="datetime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" placeholder="选择结束时间">
                                     </el-date-picker>
                                 </el-form-item>
                             </div>
@@ -83,6 +86,12 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList = [[${ userList }]];//商户集合
+    var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -101,6 +110,7 @@
                 formLabelWidth: '120px',
                 dataTable: [],
                 merchantUserListOptions: merchantUserList,
+                colorStatus: false
             }
         },
         methods: {
@@ -116,6 +126,12 @@
             },
             handleForbid(index, row) {
                 console.log(index, row);
+            },
+            changeNameFun() {
+                this.colorStatus = false;
+            },
+            setColor() {
+                this.colorStatus = true;
             },
             searchTable() {
                 var startTime = this.form.createDateStart;
@@ -172,6 +188,17 @@
             },
         },
         created() {
+            //监听父窗口信息
+            // 接受父页面发来的信息
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
             var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
             if (localVal) { this.pager.pageSize = localVal; }
             // console.info("create method");

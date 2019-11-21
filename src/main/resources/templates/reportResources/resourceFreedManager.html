@@ -62,9 +62,9 @@
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -87,15 +87,15 @@
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="dateId" :formatter="dateFormat" label="日期">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.days!='99999'">{{scope.row.dateId|dateFormatFilter}}</span>
-                        <span v-else>合计</span>
+                        <span v-if="scope.row.teleGroupId!='99999'">{{scope.row.dateId|dateFormatFilter}}</span>
+                        <span v-else>{{scope.row.orgName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="unfollowCount" label="不跟进释放公共资源数"></el-table-column>
-                <el-table-column prop="otherCount" label="其他释放公共资源数"></el-table-column>
-                <el-table-column prop="uselessCount" label="无效释放数"></el-table-column>
-                <el-table-column prop="totalFreeCount" label="总释放数"></el-table-column>
-                <el-table-column prop="teleSaleCount" label="顾问领取数"></el-table-column>
+                <el-table-column prop="unfollowCount" label="不跟进释放公共资源数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="otherCount" label="其他释放公共资源数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="uselessCount" label="无效释放数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="totalFreeCount" label="总释放数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="teleSaleCount" label="顾问领取数" :formatter="format_number"></el-table-column>
                 <el-table-column prop="freeRate" label="释放/领取比例"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -109,7 +109,7 @@
     .el-table tr:nth-of-type(1) td:nth-of-type(n+1) {font-weight: bold;}
 </style>
 <script th:inline="javascript">
-    var parentParam=[[${receptionVisitQueryDto}]];
+    var parentParam=[[${resourceFreeReceiveQueryDto}]];
     var deptList=[[${deptList}]];// 事业部
     var clueCategoryList=[[${clueCategoryList}]];// 资源类别
     var curDeptId =[[${deptId}]]; // 当前用户事业部Id
@@ -161,7 +161,34 @@
                 return oYear+"-"+oMonth+"-"+oDay; 
           },
         },
-        methods: {    
+        methods: {
+            format_number(row, column){ // 千分位数字格式化
+                var nStr = row[column.property];
+                if('--'==nStr){
+                    return nStr;
+                }
+                nStr += '';
+                if(nStr.indexOf('.') == -1){
+                    var x1 = nStr;
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1;
+                }else{
+                    var x = nStr.split('.');
+                    x1 = x[0];
+                    if(!x[1]){
+                        x[1] = '00';
+                    }
+                    x2 = x.length > 1 ? '.' + x[1] : '';
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1 + x2;
+                }
+            },
             centerStyle(){
                 return "text-align:center"
             }, 

@@ -27,6 +27,9 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="notVisit">标记未到访</el-button>
+        <shiro:hasPermission name="businessMyCustomer:add">
+            <el-button type="warning" @click="createClueData">新建客户资源</el-button>
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
@@ -2283,6 +2286,9 @@
             }
         },
         methods: {
+            createClueData(){
+                window.location.href='/aggregation/businessMyCustomer/createClue';
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -3149,8 +3155,8 @@
                 // this.dialogFormSigningVisible = true;
                 this.resetForm('formSigning')
                 this.isAllMoney = false;
-                this.suppWrap = false;
-                this.shouAddVisitButton = true;
+                this.suppWrap = true;
+                this.shouAddVisitButton = false;
                 //ainDivVM.formSigning.payModes = [];
                 var param = {};
                 param.id = row.clueId;
@@ -3216,7 +3222,8 @@
                             var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
                             mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                         }
-                        mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                        // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                        mainDivVM.suppUpdateShow() // 默认隐藏 到访记录关联
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                     }
                 })

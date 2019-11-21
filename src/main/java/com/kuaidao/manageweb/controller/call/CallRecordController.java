@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -74,6 +79,8 @@ public class CallRecordController {
     
     @Value("${missedCall.business}")
     private String missedCallBusiness;
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
     /**
      * 记录拨打时间
      */
@@ -172,7 +179,25 @@ public class CallRecordController {
         if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
             request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(BusinessLineConstant.XIAOWUZHONG));
         }
-
+        //监察-查询业务线对应下的电销组
+        if(RoleCodeEnum.JC.name().equals(roleCode)){
+            request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(curLoginUser.getBusinessLine()));
+        }
+    // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("aggregation:telCallRecord");
+        queryFieldByRoleAndMenuReq.setId(curLoginUser.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(curLoginUser.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(curLoginUser.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("aggregation:telCallRecord");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
@@ -388,6 +413,19 @@ public class CallRecordController {
                    List<Long> idList=new ArrayList<>();
                    if(userJr.getData()!=null && !userJr.getData().isEmpty()){
                         idList = userJr.getData().parallelStream().map(user -> user.getId())
+                               .collect(Collectors.toList());
+                   }
+                   myCallRecordReqDTO.setAccountIdList(idList);
+               }else if(RoleCodeEnum.JC.name().equals(roleCode)){
+                   //监察角色查看该业务线下所有的通话记录
+                   //总裁办文员
+                   UserOrgRoleReq req = new UserOrgRoleReq();
+                   req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                   req.setBusinessLine(curLoginUser.getBusinessLine());
+                   JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                   List<Long> idList=new ArrayList<>();
+                   if(userJr.getData()!=null && !userJr.getData().isEmpty()){
+                       idList = userJr.getData().parallelStream().map(user -> user.getId())
                                .collect(Collectors.toList());
                    }
                    myCallRecordReqDTO.setAccountIdList(idList);

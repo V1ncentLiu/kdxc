@@ -6,26 +6,14 @@
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/element-ui.css}">
-    <link rel="stylesheet" th:href="@{/css/base.css}">
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <style>
         .el-date-picker__time-header {
             display: none;
         }
 
-        .el-button--primary {
-            background: linear-gradient(-90deg, rgba(75, 128, 255, 1), rgba(118, 157, 248, 1)) !important;
-            box-shadow: 0px 13px 21px 0px rgba(76, 129, 255, 0.53);
-            border-radius: 6px;
-        }
-
-        .el-button--primary:hover {
-            opacity: 0.9;
-        }
-
         .button-menu {
-            padding-top: 10px;
+            /*padding-top: 10px;*/
         }
     </style>
 </head>
@@ -39,19 +27,22 @@
         </el-breadcrumb>
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
-                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                    <div class="main-search-box">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form"
+                    :class="{'rowMore':rowStatus,'minMore':minStatus}">
+                    <div class="main-search-box" ref="itemBox" :class="{'rowMore':rowStatus}">
                         <div class="get-search-time">
                             <div class="get-time">充值时间:</div>
-                            <div class="time-style">
+                            <div class="time-style" :class="{'selectActive':colorStatus}">
                                 <el-form-item label-width="auto" class="call-time" prop="rechargeBeginTime">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.rechargeBeginTime" type="datetime" placeholder="选择开始时间">
+                                        v-model="form.rechargeBeginTime" v-on:focus="setColor"
+                                          v-on:blur="changeNameFun" type="datetime" placeholder="选择开始时间">
                                     </el-date-picker>
                                 </el-form-item>
                                 <el-form-item label="—" class="widthauto" prop="rechargeEndTime">
                                     <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.rechargeEndTime" type="datetime" placeholder="选择结束时间">
+                                        v-model="form.rechargeEndTime" v-on:focus="setColor"   v-on:blur="changeNameFun"
+                                        type="datetime" placeholder="选择结束时间">
                                     </el-date-picker>
                                 </el-form-item>
                             </div>
@@ -64,7 +55,7 @@
                             </el-select>
                         </el-form-item>
                     </div>
-                    <div class="mainSearchBtnBox">
+                    <div class="mainSearchBtnBox" :class="{'rowMore':rowStatus}">
                         <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
                             style="margin-left: 10px;">搜索</el-button>
                         <el-button @click="resetFormResource('form')">重置</el-button>
@@ -150,6 +141,12 @@
 <script th:inline="javascript">
     var merchantUserList = [[${ merchantUserList }]];//商户集合
     var rechargeAccountDTO = [[${ rechargeAccountDTO }]];
+    var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -170,26 +167,10 @@
                     invoiceStatus: ''
                 },
                 formLabelWidth: '120px',
-                dataTable: [
-                    // {
-                    //     createTime:'1',
-                    //     serialNumber:'1',
-                    //     rechargeMoney:1,
-                    //     givenAmount:'1',
-                    //     rechargeWay:'1',
-                    //     rechargeType:'1',
-                    //     invoiceStatus:'0',
-                    // },
-                    // {
-                    //     createTime:'1',
-                    //     serialNumber:'1',
-                    //     rechargeMoney:2,
-                    //     givenAmount:'1',
-                    //     rechargeWay:'1',
-                    //     rechargeType:'1',
-                    //     invoiceStatus:'0',
-                    // }
-                ],
+                dataTable: [],
+                rowStatus: false,
+                minStatus: false,
+                fullWidth: document.documentElement.clientWidth,
                 merchantUserListOptions: merchantUserList,
                 statusOptions: [{
                     value: "",
@@ -212,6 +193,7 @@
                     name: '',
                     invoiceAmount: 0,
                 },
+                colorStatus: false,
                 rules: {
                     invoiceHeader: [
                         { required: true, message: '发票抬头不能为空', trigger: 'blur' },
@@ -314,6 +296,12 @@
             handleSelectionChange(val) {//选择节点的事件
                 console.log(val)
                 this.multipleSelection = val;
+            },
+            changeNameFun() {
+                this.colorStatus = false;
+            },
+            setColor() {
+                this.colorStatus = true;
             },
             handleStart(index, row) {
                 console.log(index, row);
@@ -444,12 +432,48 @@
                     }
                 });
             },
+            handleResize(event) {
+                this.fullWidth = document.documentElement.clientWidth;
+                console.log(this.fullWidth, "this.fullWidth");
+                let that = this;
+                this.$nextTick(() => {
+                    let childrenLength = that.$refs.itemBox.children.length;
+                    if (that.fullWidth > 1400 && that.fullWidth < 1920 && childrenLength > 5) {
+                        that.rowStatus = true;
+                        that.minStatus = false;
+                    }
+                    else if (that.fullWidth <= 1400 && childrenLength >= 4) {
+                        that.rowStatus = true;
+                        that.minStatus = true;
+                    }
+                    else if (that.fullWidth > 1400 && that.fullWidth < 1500 && childrenLength == 4) {
+                        that.rowStatus = true;
+                        that.minStatus = true;
+                    }
+                    else {
+                        that.rowStatus = false;
+                        that.minStatus = false;
+                    }
+                    console.log(that.rowStatus, "that.rowStatus");
+                })
+            },
         },
         created() {
             var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
             if (localVal) { this.pager.pageSize = localVal; }
             // console.info("create method");
             this.searchTable();
+            window.addEventListener('resize', this.handleResize)
+            this.handleResize();
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
         },
         mounted() {
             document.getElementById('optimizeClueManagement').style.display = 'block';

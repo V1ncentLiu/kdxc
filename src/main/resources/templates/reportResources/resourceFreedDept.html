@@ -51,9 +51,9 @@
                     <el-select v-model="form.category" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueCategoryList"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -80,13 +80,13 @@
                         <span v-else>{{scope.row.orgName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="unfollowCount" label="不跟进释放公共资源数"></el-table-column>
-                <el-table-column prop="otherCount" label="其他释放公共资源数"></el-table-column>
-                <el-table-column prop="uselessCount" label="无效释放数"></el-table-column>
-                <el-table-column prop="totalFreeCount" label="总释放数"></el-table-column>
-                <el-table-column prop="teleManagerCount" label="总监领取数"></el-table-column>
-                <el-table-column prop="teleSaleCount" label="顾问领取数"></el-table-column>
-                <el-table-column prop="totalReceiveCount" label="总领取数"></el-table-column>
+                <el-table-column prop="unfollowCount" label="不跟进释放公共资源数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="otherCount" label="其他释放公共资源数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="uselessCount" label="无效释放数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="totalFreeCount" label="总释放数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="teleManagerCount" label="总监领取数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="teleSaleCount" label="顾问领取数" :formatter="format_number"></el-table-column>
+                <el-table-column prop="totalReceiveCount" label="总领取数" :formatter="format_number"></el-table-column>
                 <el-table-column prop="freeRate" label="释放/领取比例"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -111,7 +111,6 @@
                 loading: false,
                 isDisabled: false,
                 isDisabledOrgId: false,
-                isDisabledUserId: false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -138,7 +137,34 @@
                 clueCategoryList: clueCategoryList
             }             
         },
-        methods: {    
+        methods: {
+            format_number(row, column){ // 千分位数字格式化
+                var nStr = row[column.property];
+                if('--'==nStr){
+                    return nStr;
+                }
+                nStr += '';
+                if(nStr.indexOf('.') == -1){
+                    var x1 = nStr;
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1;
+                }else{
+                    var x = nStr.split('.');
+                    x1 = x[0];
+                    if(!x[1]){
+                        x[1] = '00';
+                    }
+                    x2 = x.length > 1 ? '.' + x[1] : '';
+                    var rgx = /(\d+)(\d{3})/;
+                    while (rgx.test(x1)) {
+                        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                    }
+                    return x1 + x2;
+                }
+            },
             centerStyle(){
                 return "text-align:center"
             },
@@ -319,7 +345,7 @@
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(teleGroupId){
-                    window.location.href="/freedReport/groupList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/freedReport/groupList?teleDeptId=" + teleDeptId + "&teleGroupId="+ teleGroupId + "&category="+ category +"&startTime=" + startTime + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -418,10 +444,10 @@
                 this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.form.teleGroupId = curOrgId; 
-                    this.isDisabledUserId = true;
+                    this.isDisabledOrgId = true;
+                    this.export.teleGroupId = this.form.teleGroupId;       
                 }
-                this.export.teleDeptId = this.form.teleDeptId; 
-                this.export.teleGroupId = this.form.teleGroupId; 
+                this.export.teleDeptId = this.form.teleDeptId;       
             }
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);

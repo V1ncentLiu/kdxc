@@ -11,6 +11,7 @@
         .input75 .el-input{width: 70%;}
         .openWechatbtn{position: absolute;top: 5px;left: 73%;}
         .tableDataC2 .el-form-item{margin-bottom: 13px;}
+        .tableDataC2 .el-table__body-wrapper{padding-bottom: 20px;}
         #container .btn{    
             background: linear-gradient(-90deg,rgba(75,128,255,1),rgba(118,157,248,1));
             box-shadow: 0px 10px 28px 4px rgba(72,125,247,0.47);
@@ -18,7 +19,7 @@
         .el-button--default{
             box-shadow: 0px 5px 15px 3px rgba(187, 187, 187, 0.48);
          }
-         .mainSearchFormBox{padding: 30px 17px 20px;}
+         .mainSearchFormBox{padding: 30px 17px 10px!important;}
         @media screen and (max-width: 1367px) {
             .openWechatbtn{position: relative;top: auto;left: auto;}
         }        
@@ -95,7 +96,7 @@
                 </el-col>
             </el-row>
         </div>
-        <div class="marginB20 fs16 paddingT20">基本信息</div>
+        <div class="marginB20 fs16">基本信息</div>
         <div class="mainSearchFormBox padding20 input75">
             <el-row>
                 <el-col :span="8">
@@ -114,7 +115,8 @@
                 <el-col :span="8">
                     <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                         <el-input v-model.trim="form.phone" maxLength="30" style="width: 70%;" v-show="isshowPhone"></el-input>
-                        <span style="height: 37px;display: block;float: left;">{{form.customerPhone}}</span>
+                        <span v-if="cpoolReceive == 0" style="height: 37px;display: block;float: left;">{{form.customerPhone}}</span>
+                        <span v-else style="height: 37px;display: block;float: left;">***</span>
                         <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:25px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-button type="primary" size="mini" @click="showAddDomain" v-show="showAddDomainBtn" style="padding: 7px 2px 7px 7px;"><i class="el-icon-plus"></i></el-button>
                         <el-button type="primary" size="mini" @click="addDomain" v-show="phoneShow" style="padding: 7px 2px 7px 7px;margin: 0;"><i class="el-icon-plus"></i></el-button>
@@ -243,7 +245,7 @@
                 </el-col>
             </el-row>
         </div>
-        <div class="marginB20 fs16 paddingT20">跟进记录</div>
+        <div class="marginB20 fs16">跟进记录</div>
         <el-row class="marginB10">
             <el-col :span="16">
                 <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
@@ -755,7 +757,7 @@
     var repeatClueStatus = [[${repeatClueStatus}]];
     var projectId = base.projectId;//项目id
     console.log(projectId)
-
+    var cpoolReceiveFlag = base.cpoolReceiveFlag !=null ? base.cpoolReceiveFlag : 0;//公有池领取标识
     var repeatStatus =false;
     var editPhone = 1;
     if(repeatClueStatus == 1 ){
@@ -772,6 +774,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                cpoolReceive:cpoolReceiveFlag,
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
@@ -2471,7 +2474,7 @@
 
                 if (customer.phone2) {
                     var phone2 = {};
-                    phone2.value = customer.phone2;
+                    phone2.value = customer.phone2;                   
                     phone2.key = customer.phone2CreateTime;
                     if(editPhone == 1){
                         phone2.edit = 0;

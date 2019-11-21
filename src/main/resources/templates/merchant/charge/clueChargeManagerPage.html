@@ -1,189 +1,217 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        .chargeBox .el-form-item__content{margin-left: 0!important;}
-        .chargeBox .el-input__inner{width: 50%;margin: 0 auto;}
-        .chargeBox.el-form-item{margin-bottom: 13px;}
-        .chargeBox .el-form-item__error{width: 100%;}
+        .chargeBox .el-form-item__content {
+            margin-left: 0 !important;
+        }
+
+        .chargeBox .el-input__inner {
+            width: 50%;
+            margin: 0 auto;
+        }
+
+        .chargeBox.el-form-item {
+            margin-bottom: 13px;
+        }
+
+        .chargeBox .el-form-item__error {
+            width: 100%;
+        }
+
+        @media screen and (min-width: 1659px) {
+            .el-table__body-wrapper {
+                max-height: 800px;
+                overflow-y: auto
+            }
+        }
     </style>
 </head>
+
 <body>
-<div id="clueChargeManage" class="clueChargeManage mainPadding" style="display: none;">  
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>费用设置</el-breadcrumb-item>
-        <el-breadcrumb-item>资源资费设置</el-breadcrumb-item>
-    </el-breadcrumb>
-	  <div class="mainSearchBg">
-      <el-form :inline="true" :model="clueChargeSearchForm" class="demo-form-inline" ref="clueChargeSearchForm">               
-          <el-form-item label="资源类别：" label-width="auto">
-              <el-select v-model="clueChargeSearchForm.category" filterable  clearable placeholder="选择资源类别">
-                  <el-option
-                      v-for="item in categoryOptions"
-                      :key="item.value"
-                      :label="item.name"
-                      :value="item.value">
-                  </el-option>
-              </el-select>
-          </el-form-item>
-          <el-form-item label=""> 
-              <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
-          </el-form-item>    
-      </el-form>
-      <el-row>
-          <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" label-width="100px" class="demo-dynamic">
-              <el-table  ref="multipleTable" tooltip-effect="dark" border 
-                  style="width: 100%"  :data="dynamicValidateForm.dataTable" >
-                  <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                  <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
-                  <el-table-column align="center" prop="" label="价格（元）/条">
-                      <template slot-scope="scope">
-                          <el-form-item :prop="'dataTable.' + scope.$index + '.charge'" :rules='rules.charge' class="chargeBox">
-                              <el-input v-model="scope.row.charge" :disabled="scope.row.disabled" maxLength="10" @keyup.native.prevent="number(scope.$index, dynamicValidateForm.dataTable)"></el-input>
-                          </el-form-item>
-                      </template>
-                  </el-table-column>
-                  <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat" ></el-table-column>
-                  <el-table-column align="center" prop="updateUserName" label="操作人员" ></el-table-column>
-                  <el-table-column align="center" prop="" label="操作">
-                      <template slot-scope="scope">
-                          <el-button v-if="scope.row.editShow==true" size="mini" type="primary" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                          <el-button v-else="scope.row.editShow==false" size="mini" type="success" @click="handleSave(scope.$index, scope.row)">保存</el-button>
-                      </template>
-                    </el-table-column>
-              </el-table>
-          </el-form>
-      </el-row>
+    <div id="clueChargeManage" class="clueChargeManage mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>费用设置</el-breadcrumb-item>
+            <el-breadcrumb-item>资源资费设置</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="mainSearchBg">
+            <el-form :inline="true" :model="clueChargeSearchForm" class="demo-form-inline" ref="clueChargeSearchForm">
+                <el-form-item label="资源类别：" label-width="auto">
+                    <el-select v-model="clueChargeSearchForm.category" filterable clearable placeholder="选择资源类别">
+                        <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索
+                    </el-button>
+                </el-form-item>
+            </el-form>
+            <el-row>
+                <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" label-width="100px"
+                    class="demo-dynamic">
+                    <el-table ref="multipleTable" tooltip-effect="dark" border style="width: 100%"
+                        :data="dynamicValidateForm.dataTable">
+                        <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                        <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
+                        <el-table-column align="center" prop="" label="价格（元）/条">
+                            <template slot-scope="scope">
+                                <el-form-item :prop="'dataTable.' + scope.$index + '.charge'" :rules='rules.charge'
+                                    class="chargeBox">
+                                    <el-input v-model="scope.row.charge" :disabled="scope.row.disabled" maxLength="10"
+                                        @keyup.native.prevent="number(scope.$index, dynamicValidateForm.dataTable)">
+                                    </el-input>
+                                </el-form-item>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat">
+                        </el-table-column>
+                        <el-table-column align="center" prop="updateUserName" label="操作人员"></el-table-column>
+                        <el-table-column align="center" prop="" label="操作">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.editShow==true" size="mini" type="primary"
+                                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                                <el-button v-else="scope.row.editShow==false" size="mini" type="success"
+                                    @click="handleSave(scope.$index, scope.row)">保存</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-form>
+            </el-row>
+        </div>
     </div>
-</div>
-<!-- import common js-->
-<div th:include="_footer_include :: #jsLib"></div>
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-var categoryList=[[${categoryList}]];//资费类别
-var clueChargeVM = new Vue({
+    var categoryList = [[${ categoryList }]];//资费类别
+    var clueChargeVM = new Vue({
         el: '#clueChargeManage',
-        data: {            
-        		clueChargeSearchForm: {
-	        		  category: ''
+        data: {
+            clueChargeSearchForm: {
+                category: ''
             },
-            dynamicValidateForm:{
-              dataTable:[]
+            dynamicValidateForm: {
+                dataTable: []
             },
             dialogFormVisible: false,
             submitDisabled: false,
-            multipleSelection:[],
-            categoryOptions:categoryList,
+            multipleSelection: [],
+            categoryOptions: categoryList,
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
-            rules:{
-              charge: [
-                  { required: true, message: '请输入价格', trigger: 'blur'},
-                  // { validator:function(rule,value,callback){               
-                  //     if(/^[0-9]*$/.test(value) == false){
-                  //        callback(new Error("请输入整数"));
-                  //     }else{
-                  //        callback();
-                  //     } 
-                  //     callback();
-                  // }, trigger: 'change'}
-              ],
+            rules: {
+                charge: [
+                    { required: true, message: '请输入价格', trigger: 'blur' },
+                    // { validator:function(rule,value,callback){               
+                    //     if(/^[0-9]*$/.test(value) == false){
+                    //        callback(new Error("请输入整数"));
+                    //     }else{
+                    //        callback();
+                    //     } 
+                    //     callback();
+                    // }, trigger: 'change'}
+                ],
             }
         },
         methods: {
-        	searchTable() {
-                var param ={};
+            searchTable() {
+                var param = {};
                 param.category = this.clueChargeSearchForm.category;
                 // console.info(param);
                 axios.post('/merchant/clueChargeManager/listNoPage', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      // console.info(result);
-                      clueChargeVM.dynamicValidateForm.dataTable= result.data;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-                
-              },
-              //选择行
-              handleSelectionChange(val) {
-                  this.multipleSelection = val;
-              },
+                    .then(function (response) {
+                        var result = response.data;
+                        // console.info(result);
+                        clueChargeVM.dynamicValidateForm.dataTable = result.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            //选择行
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
             //日期数据格式化方法
-              dateFormat( row, column, cellValue, index) {
-                if (cellValue == undefined) {
-                   return "";
-                }
-                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-              },
-              handleEdit(index, row) {
+            dateFormat(row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            handleEdit(index, row) {
                 console.log(index, row);
-                row.disabled=false;
-                row.editShow=false;
-              },
-              handleSave(index, row) {
-                var chargeVal=row.charge;
-                if(!chargeVal){
+                row.disabled = false;
+                row.editShow = false;
+            },
+            handleSave(index, row) {
+                var chargeVal = row.charge;
+                if (!chargeVal) {
                     this.$message({
-                      message: '价格不能为空',
-                      type: 'warning'
+                        message: '价格不能为空',
+                        type: 'warning'
                     });
                     return;
                 }
                 var reg = /^[\u0391-\uFFE5A-Za-z]+$/;//如果是中文或者英文提示不能提交
                 if (reg.test(chargeVal)) {
                     this.$message({
-                      message: '请输入数字',
-                      type: 'warning'
+                        message: '请输入数字',
+                        type: 'warning'
                     });
                     return;
-                } 
-                row.disabled=true;
-                row.editShow=true;
+                }
+                row.disabled = true;
+                row.editShow = true;
 
-                var param ={};
+                var param = {};
                 param.id = row.id;
                 param.category = row.category;
                 param.charge = chargeVal;
                 console.info(param);
                 axios.post('/merchant/clueChargeManager/saveClueCharge', param)
-                .then(function (response) {
-                      console.info(response);
-                      // init表格
-                      clueChargeVM.searchTable();
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-                
-              },
-              number(index, rows){
-                  // rows[index].charge=rows[index].charge.replace(/[^\.\d]/g,'');
-                  // rows[index].charge=rows[index].charge.replace('.','');
-                  rows[index].charge = rows[index].charge.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
-                  rows[index].charge = rows[index].charge.replace(/^\./g, ""); //验证第一个字符是数字
-                  rows[index].charge = rows[index].charge.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
-                  rows[index].charge = rows[index].charge.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
-                  rows[index].charge = rows[index].charge.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数           
-          　　},
+                    .then(function (response) {
+                        console.info(response);
+                        // init表格
+                        clueChargeVM.searchTable();
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            number(index, rows) {
+                // rows[index].charge=rows[index].charge.replace(/[^\.\d]/g,'');
+                // rows[index].charge=rows[index].charge.replace('.','');
+                rows[index].charge = rows[index].charge.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
+                rows[index].charge = rows[index].charge.replace(/^\./g, ""); //验证第一个字符是数字
+                rows[index].charge = rows[index].charge.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
+                rows[index].charge = rows[index].charge.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+                rows[index].charge = rows[index].charge.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数           
+            },
         },
-        created(){
+        created() {
             // 取页数存储
             //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             //if(localVal){this.pager.pageSize = localVal;}
-            
+
             // console.info("create method");
             this.searchTable();
-           
+
         },
-        mounted(){
-           // console.info("mounted method");
-           document.getElementById('clueChargeManage').style.display = 'block';
+        mounted() {
+            // console.info("mounted method");
+            document.getElementById('clueChargeManage').style.display = 'block';
         }
     })
-    
+
 </script>
+
 </html>

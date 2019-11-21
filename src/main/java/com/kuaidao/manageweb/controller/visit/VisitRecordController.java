@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.visit;
 
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.entity.IdEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,9 +130,7 @@ public class VisitRecordController {
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         Long orgId = curLoginUser.getOrgId();
-        // 签约项目
-        List<ProjectInfoDTO> projectList = getProjectList();
-        // 商务小组
+//        List<ProjectInfoDTO> projectList = getProjectList();
 //        List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId, OrgTypeConstant.SWZ);
         // 商务经理
         List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name());
@@ -164,7 +163,11 @@ public class VisitRecordController {
             request.setAttribute("orgSelect", orgJson.getData());
         }
 
-        request.setAttribute("projectList", projectList);
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
+        request.setAttribute("projectList", allProject.getData());
         // request.setAttribute("busManagerList",busManagerList);
         // request.setAttribute("businessGroupList",businessGroupList);
         request.setAttribute("proviceList", proviceJr.getData());

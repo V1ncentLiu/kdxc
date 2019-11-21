@@ -56,15 +56,15 @@
                 <div class="main-search-box">
                     <div class="get-search-time">
                         <div class="get-time">时间:</div>
-                        <div class="time-style">
+                        <div class="time-style" :class="{'selectActive':colorStatus}">
                             <el-form-item label-width="auto" class="call-time" prop="createDateStart">
                                 <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                    v-model="form.createDateStart" type="datetime" placeholder="选择开始时间">
+                                    v-model="form.createDateStart" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun" placeholder="选择开始时间">
                                 </el-date-picker>
                             </el-form-item>
                             <el-form-item label="—" class="widthauto" prop="createDateEnd">
                                 <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                    v-model="form.createDateEnd" type="datetime" placeholder="选择结束时间">
+                                    v-model="form.createDateEnd" type="datetime" v-on:focus="setColor"  v-on:blur="changeNameFun"  placeholder="选择结束时间">
                                 </el-date-picker>
                             </el-form-item>
                         </div>
@@ -129,6 +129,7 @@
                 formLabelWidth: '120px',
                 dataTable: [],
                 merchantUserListOptions:merchantUserList,
+                colorStatus:false
             }             
         },
         methods: {            
@@ -139,6 +140,12 @@
                     this.$set(this.form, 'createDateEnd ', '');
                 }
             },
+            changeNameFun(){
+                this.colorStatus=false;
+            },
+            setColor(){
+                this.colorStatus=true;
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
