@@ -92,198 +92,103 @@
                 </div>
             </div>
             <el-row class="marginB20" v-loading="loading">
-                <el-tabs type="card" v-model="tableActive" @tab-click="handleClick('tab')">
-                    <el-tab-pane label="资源有效" name="0">
-                        <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData" :span-method="arraySpanMethod">
-                            <el-table-column  prop="orgName" align="center" label="电销组" width="130">
-                                <template slot-scope="scope">
-                                  <span class="act">{{scope.row.orgName}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceCategoryName" align="center" label="资源类别" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceMediumName" align="center" label="媒介" width="80">
-                            </el-table-column>
-                            <el-table-column prop="projectTypeName" align="center" label="资源项目" width="80">
-                            </el-table-column>
-                            <el-table-column prop="issuedResources" align="center" label="下发资源量" width="80">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.issuedResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="followResources" align="center" label="跟访资源量" width="80">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="firstResources" align="center" label="首次接通资源量" width="110">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.firstResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectResources" align="center" label="接通资源量" width="80">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="notConnectResources" align="center" label="未接通资源量" width="90">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectEffectiveResources" align="center" label="接通有效资源量" width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.connectEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectNotEffectiveResources" align="center" label="接通无效资源量" width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.connectNotEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="notConnectEffectiveResources" align="center" label="未接通有效资源量" width="120">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="notConnectNotEffectiveResources" align="center" label="未接通无效资源量" width="120">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectNotEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.followRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="firstRate" align="center" label="首次接通率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.firstRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="assignedConnectedRate" align="center" label="下发接通率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedConnectedRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                             <el-table-column prop="assignedValidRate" align="center" label="下发有效率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedValidRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceConnectRate" align="center" label="跟进接通率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceConnectRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceEffectiveRate" align="center" label="跟进有效率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceEffectiveRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectionRate" align="center" label="接通有效率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.connectionRate | perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                        <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
-                    </el-tab-pane>
-                    <el-tab-pane label="首日资源有效" name="1">
-                        <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData" :span-method="arraySpanMethod">
-                            <el-table-column  prop="orgName" align="center" label="电销组" width="130">
-                                <template slot-scope="scope">
-                                    <span class="act">{{scope.row.orgName}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceCategoryName" align="center" label="资源类别" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">
-                                    {{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}
-                                  </span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceMediumName" align="center" label="媒介" width="80">
-                            </el-table-column>
-                            <el-table-column prop="projectTypeName" align="center" label="资源项目" width="80">
-                            </el-table-column>
-                            <el-table-column prop="issuedResources" align="center" label="下发资源量" width="80">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.issuedResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="followResources" align="center" label="首日跟访资源量" width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectResources" align="center" label="首日接通资源量" width="110">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="notConnectResources" align="center" label="首日未接通资源量" width="120">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectEffectiveResources" align="center" label="首日接通有效资源量" width="140">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.connectEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectNotEffectiveResources" align="center" label="首日接通无效资源量" width="140">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.connectNotEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="notConnectEffectiveResources" align="center" label="首日未接通有效资源量" width="150">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="notConnectNotEffectiveResources" align="center" label="首日未接通无效资源量" width="150">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectNotEffectiveResources}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="followRate" align="center" label="首日跟访率" :formatter="percentFormat" width="80">
-                                <template slot-scope="scope">
-                                    <span :class="{'act':scope.row.total != ''}">{{scope.row.followRate|perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                              <el-table-column prop="assignedConnectedRate" align="center" label="首日下发接通率" :formatter="percentFormat"  width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedConnectedRate|perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="assignedValidRate" align="center" label="首日下发有效率" :formatter="percentFormat"  width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedValidRate|perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceConnectRate" align="center" label="首日跟进接通率" :formatter="percentFormat"  width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceConnectRate|perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="resourceEffectiveRate" align="center" label="首日跟进有效率" :formatter="percentFormat" width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceEffectiveRate|perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="connectionRate" align="center" label="首日接通有效率" :formatter="percentFormat" width="110">
-                                <template slot-scope="scope">
-                                  <span :class="{'act':scope.row.total != ''}">{{scope.row.connectionRate|perFormat}}</span>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                        <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
-                    </el-tab-pane>
-                </el-tabs>
+                <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData" :span-method="arraySpanMethod">
+                    <el-table-column  prop="orgName" align="center" label="电销组" width="130">
+                        <template slot-scope="scope">
+                          <span class="act">{{scope.row.orgName}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="resourceCategoryName" align="center" label="资源类别" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="resourceMediumName" align="center" label="媒介" width="80">
+                    </el-table-column>
+                    <el-table-column prop="projectTypeName" align="center" label="资源项目" width="80">
+                    </el-table-column>
+                    <el-table-column prop="issuedResources" align="center" label="下发资源量" width="80">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.issuedResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="followResources" align="center" label="跟访资源量" width="80">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="firstResources" align="center" label="首次接通资源量" width="110">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.firstResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="connectResources" align="center" label="接通资源量" width="80">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="notConnectResources" align="center" label="未接通资源量" width="90">
+                        <template slot-scope="scope">
+                            <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="connectEffectiveResources" align="center" label="接通有效资源量" width="110">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectEffectiveResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="connectNotEffectiveResources" align="center" label="接通无效资源量" width="110">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectNotEffectiveResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="notConnectEffectiveResources" align="center" label="未接通有效资源量" width="120">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectEffectiveResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="notConnectNotEffectiveResources" align="center" label="未接通无效资源量" width="120">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectNotEffectiveResources}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.followRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="firstRate" align="center" label="首次接通率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.firstRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="assignedConnectedRate" align="center" label="下发接通率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedConnectedRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                     <el-table-column prop="assignedValidRate" align="center" label="下发有效率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedValidRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="resourceConnectRate" align="center" label="跟进接通率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceConnectRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="resourceEffectiveRate" align="center" label="跟进有效率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceEffectiveRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="connectionRate" align="center" label="接通有效率" :formatter="percentFormat" width="80">
+                        <template slot-scope="scope">
+                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectionRate | perFormat}}</span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
             </el-row>
         </div>
     </div>
