@@ -99,7 +99,7 @@
         }
 
         .rechargeMoney .el-form-item__error {
-            padding-left: 72px;
+            padding-left: 83px;
         }
 
         .preferentialH {
@@ -141,14 +141,14 @@
                     </li>
                 </ul>
                 <div class="f-tac" style="width: 1085px;padding-top: 10px;" v-show="isShowMore">
-                    <span style="color: #3a84f4;cursor: pointer;" @click="toogleClick"><span
+                    <span class="blueColorT" style="cursor: pointer;" @click="toogleClick"><span
                             v-if="isShow">收起</span><span v-else>展开更多</span><i
                             :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
             </el-row>
             <el-row class="merchantMainBox padding20 marginB20" v-if="paymentIsShow">
-                <div style="text-align: center;margin: 50px auto 40px;width: 950px;">
-                    <img th:src="@{/images/step1.jpg}" alt=""> 
+                <div class="stepBox1">
+                    <!-- <img th:src="@{/images/step1.jpg}" alt="">  -->
                 </div>
                 <div style="width: 540px;margin:0 auto 40px">
                     <el-row style="margin-bottom: 40px;">
@@ -164,7 +164,7 @@
                             style="margin-right: 5px;">*</span>选择支付方式：<span
                             style="padding:0px 40px 0px 20px;">线上支付</span><span><a
                                 href="/merchant/merchantRechargePreferential/initOfflinePayment"
-                                style="color: #4d81ff;text-decoration: underline;">线下支付</a></span></div>
+                                style="text-decoration: underline;" class="blueColorT">线下支付</a></span></div>
                     <el-form-item label="" label-width="auto">
                         <el-radio v-model="form.rechargeWay" label="1" style="margin-right: 125px;">支付宝</el-radio>
                         <el-radio v-model="form.rechargeWay" label="2">微信支付</el-radio>
@@ -178,9 +178,8 @@
                 </div>
             </el-row>
         </el-form>
-        <el-row class="borderbox padding20 marginB20" v-show="codeIsShow">
-            <div style="text-align: center;margin: 50px auto 80px;width: 950px;"><img th:src="@{/images/step2.jpg}"
-                    alt=""> </div>
+        <el-row class="borderbox padding20 marginB20" v-show="codeIsShow">            
+            <div class="stepBox2"></div>
             <div style="width: 540px;margin:0 auto 40px;text-align: center;font-size: 16px;">
                 <p style="margin-bottom: 30px;">支付金额<span
                         style="color: #3a84f4;">￥{{rechargeMoneyWx}}</span>，请使用微信扫描下方二维码完成支付</p>
@@ -202,6 +201,11 @@
     var merchantUserAccountDTO = [[${ merchantUserAccountDTO }]];//账户余额
     var preferentialDTOList = [[${ preferentialDTOList }]];//优惠 信息
     var oLink = document.getElementById("skinCss");
+    if (getCookieVal("skinVal")) {
+        oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css";
+    } else {
+        oLink['href'] = "/css/common/merchant_base1.css";
+    }
     var ocmVM = new Vue({
         el: '#paymentOnline',
         data: function () {
@@ -378,16 +382,17 @@
             } else {
                 this.isShowMore = false;
             }
+            //监听父窗口信息
+            // 接受父页面发来的信息
             window.addEventListener("message", function (event) {
                 var data = event.data;
                 switch (data.cmd) {
                     case 'getFormJson':
                         oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
-                        // 处理业务逻辑
+                        // 处理业务逻辑
                         break;
                 }
             });
-            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css"
         },
         mounted() {
             document.getElementById('paymentOnline').style.display = 'block';

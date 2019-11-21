@@ -4,7 +4,7 @@
     <title>后台管理系统</title>
     <meta charset="UTF-8">
     <!-- import CSS -->
-    <link rel="stylesheet" th:href="@{/css/common/merchant_base.css}">
+    <link rel="stylesheet" href="" id="skinCss">
     <style> 
       .test td {
         background: #e1e3e8!important;
@@ -17,11 +17,11 @@
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>云呼叫</el-breadcrumb-item>
     </el-breadcrumb>     
-    <el-row class="padding20" style="padding-left: 0;">         
+    <el-row style="padding-bottom: 15px;padding-top: 5px;">         
         <el-row class="marginB10">
-            <p style="color: #333;font-size: 16px;margin-bottom: 10px;">服务套餐项目</p>
+            <p style="color: #333;font-size: 16px;">服务套餐项目</p>
         </el-row>
-        <el-row class="marginB20 fs14">已购买套餐，再次变更套餐需要在第二个月生效</el-row>
+        <el-row class="fs14">已购买套餐，再次变更套餐需要在第二个月生效</el-row>
     </el-row> 
     <el-row>
         <el-table 
@@ -55,7 +55,7 @@
                     <!-- </div>              -->
                 <!-- </template> -->
             <!-- </el-table-column> -->
-            <el-table-column label="选择服务" width="120" align="center">
+            <el-table-column label="选择服务" width="130" align="center">
                 <template scope="scope">
                     <!-- 是否已购买1是，0否 -->
                     <!-- <el-radio v-if="scope.row.status==1" @change="showRow(scope.row)" v-model="radio" :label="scope.$index">&nbsp;</el-radio>
@@ -128,6 +128,7 @@
     // console.log(userId)
     // console.log(originPackageId)
     // console.log(oldBuyCount)
+    var oLink = document.getElementById("skinCss");
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -447,6 +448,16 @@
             },
         },
         created(){ 
+            window.addEventListener("message", function (event) {
+                var data = event.data;
+                switch (data.cmd) {
+                    case 'getFormJson':
+                        oLink['href'] = "/css/common/merchant_base" + event.data.params.data + ".css";
+                        // 处理业务逻辑
+                        break;
+                }
+            });
+            oLink['href'] = "/css/common/merchant_base" + getCookieVal("skinVal") + ".css"
             this.init(); 
             this.searchTable();  
         },

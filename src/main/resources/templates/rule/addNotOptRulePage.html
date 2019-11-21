@@ -3,11 +3,11 @@
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
 	<title>后台管理系统</title>
     <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
     <style>
         .dayTimeEnd .el-form-item__label:before{display: none;}
+        .days .el-form-item__error{padding-left: 165px;}
+        .timeToLine{display: block;float: left;margin-right: 2px;height: 34px;line-height: 34px;}
+        .el-form-item{margin-bottom: 15px;}
     </style>
 </head>
 <body>
@@ -53,10 +53,13 @@
             </el-row>
             <el-row>                
                 <el-col :span="12">
-                    <el-form-item label="周期内设定有效日：" :label-width="formLabelWidth">
+                    <el-form-item label="周期内设定有效日：" :label-width="formLabelWidth" class="days" style="float: left;">
+                        <em class="requiredRed" style="left: -120px;">*</em>
                         <el-radio v-model="form.radio" label="0" @change="changeDays">每天</el-radio>
                         <el-radio v-model="form.radio" label="1" @change="changeDays" style="margin: 0 10px 0 15px;">特殊设定</el-radio>
-                        <el-select v-model="form.days" v-show="showDays" filterable  multiple placeholder="请选择" style="width: 135px;">
+                    </el-form-item>             
+                    <el-form-item label="" prop="days" :label-width="0" v-show="showDays" style="float: left;">
+                        <el-select v-model="form.days"  filterable  multiple placeholder="请选择" style="width: 135px;">
                             <el-option
                                 v-for="item in weeksOptions"
                                 :key="item.value"
@@ -70,7 +73,8 @@
                     <el-form-item label="有效日内时间范围：" prop="dayTimeStart" :label-width="formLabelWidth" style="width: 318px;float: left;">
                         <el-time-picker type="datetime" placeholder="选择时间" v-model="form.dayTimeStart" style="width: 135px;" format="HH:mm:ss" value-format="HH:mm:ss"></el-time-picker>
                     </el-form-item>
-                    <el-form-item label="——" prop="dayTimeEnd" class="dayTimeEnd" style="width: 175px;float: left;">
+                    <span class="timeToLine">——</span>
+                    <el-form-item label="" prop="dayTimeEnd" class="dayTimeEnd" style="width: 175px;float: left;">
                         <el-time-picker type="datetime" placeholder="选择时间" v-model="form.dayTimeEnd" style="width: 135px;" format="HH:mm:ss" value-format="HH:mm:ss"></el-time-picker>
                     </el-form-item>
                 </el-col>
@@ -229,7 +233,7 @@
                     </el-select>
                 </el-form-item>
             </el-row>   
-            <el-form-item label="选择电销组：" prop="chooseTeam" :label-width="formLabelWidth">
+            <el-form-item label="选择电销组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
                 <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
                 <el-button type="primary" @click="addDomain">添加电销组</el-button>
             </el-form-item>
@@ -303,7 +307,7 @@
                     </template>
             	</el-table-column>
             </el-table>
-            <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth">
+            <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
                 <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
                 <el-button type="primary" @click="addDomainTraffic">添加话务组</el-button>
             </el-form-item>
@@ -495,6 +499,15 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                             callback();
                         }, trigger: 'change'}
                     ],
+                    days: [
+                        { validator:function(rule,value,callback){
+                            if(aorVM.form.radio!=="0"&&aorVM.form.days.length==0){
+                               callback(new Error("请选择星期"));
+                            }else{
+                               callback();
+                            } 
+                        }, trigger: 'change'}
+                    ],
                     dayTimeStart: [
                         { required: true, message: '请选择有效日内时间范围', trigger: 'blur' }
                     ],
@@ -628,7 +641,6 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         param.ruleName=form.ruleName;
                         param.startTime=form.startTime;
                         param.endTime=form.endTime;
-                        debugger
                         if(form.radio=="0"){
                             param.days="0"
                         }else{
