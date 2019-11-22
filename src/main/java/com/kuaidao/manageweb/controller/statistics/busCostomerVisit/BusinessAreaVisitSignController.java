@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @RequestMapping("/businessAreaBisitSign")
 @Controller
-public class BusinessAreaBisitSignController {
+public class BusinessAreaVisitSignController {
 
     @RequiresPermissions("businessAreaBisitSign:initBusinessAreaBisitSign:view")
     @RequestMapping("/initBusinessAreaBisitSign")
