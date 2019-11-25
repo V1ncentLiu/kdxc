@@ -839,14 +839,20 @@
                     return;
                   }
                   var resobj = response.data;
-                  if (!resobj) {
+                  if (resobj.code == '21917') {
+                    wdrVM.$message({
+                      message: resobj.msg,
+                      type: 'warning'
+                    });
+                    return;
+                  }else if (resobj.code != '0') {
                     wdrVM.$message({
                       message: "接口调用失败",
                       type: 'error'
                     });
                     return;
                   }
-                  if (resobj.code != '0') {
+                  if (!resobj) {
                     wdrVM.$message({
                       message: "接口调用失败",
                       type: 'error'
