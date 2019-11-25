@@ -9,7 +9,7 @@
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>次日邀约统计表</el-breadcrumb-item>
-    </el-breadcrumb>
+    </el-breadcrumb>    
     <el-row class="marginB20">
         <!-- <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
@@ -17,10 +17,11 @@
         <shiro:hasPermission name="statistics:businessVisitTable:export">
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
         </shiro:hasPermission>
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form"> 
                 <el-form-item label="日期:">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
@@ -58,7 +59,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
+                    <el-button icon="el-icon-search" class="searchBtn"  type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -74,12 +75,8 @@
                 :header-cell-style="centerStyle"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="projectName" label="来访项目">
-                    <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="scope.row.projectId!='99999'" @click="gotoTeam(scope.row)">{{scope.row.projectName}}</el-button>
-                        <span v-else>{{scope.row.projectName}}</span>
-                    </template>
-                </el-table-column>
+                <el-table-column prop="reserveTime" label="日期" :formatter="dateFormat"></el-table-column>
+                <el-table-column prop="projectName" label="来访项目"></el-table-column>
                 <el-table-column prop="invitationNum" label="正常邀约数"></el-table-column>
                 <el-table-column prop="cancelInvitationNum" label="取消邀约数"></el-table-column>
                 <el-table-column prop="deleteInvitationNum" label="删除邀约数"></el-table-column>
@@ -103,14 +100,14 @@
     }
 </style>
 <script th:inline="javascript">
+    var parentParam=[[${appointmentVisitQueryDto}]];
     var orgIdList=[[${teleGroupList}]];// 电销组
-    var projectList=[[${projectList}]];// 来访项目
+    var projectList=[[${projectList}]];// 来访项目 
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading:false,
-                // isDisabled:false,
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -144,12 +141,28 @@
         methods: {    
             centerStyle(){
                 return "text-align:center"
-            },
+            },  
             currentTelSale(seleVal){ // 根据电销组选择电销顾问
                 if(seleVal==null||seleVal==""){
                     return ;
                 }
                 this.form.userId = '';
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            curTelSale(seleVal){ // 根据电销组选择电销顾问
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
@@ -213,7 +226,7 @@
                 param.userId = this.form.userId;
                 param.projectId = this.form.projectId;
                 this.loading = true; 
-                axios.post('/statistics/appointmentVisit/getGroupPageList',param).then(function (response) {
+                axios.post('/statistics/appointmentVisit/getGroupDayPageList',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -280,29 +293,18 @@
                     return end;
                 }
             },
-            gotoTeam(row){
-                var projectId = row.projectId;
-                var userId = this.export.userId;// 话务专员id
-                var orgId = this.export.orgId;// 话务组id
-                // var projectId = this.export.projectId;
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                if(projectId){
-                    window.location.href="/statistics/appointmentVisit/businessVisitTableTeam?orgId=" + orgId + "&userId="+ userId +"&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
-                }
+            goback () {
+                window.history.go(-1);
             },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
-                }
-            },
-            indexFun (index) { // 表格序号
-                return index;
-            },
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay; 
+            }, 
             numFormat(row, column){
                 var percent = row[column.property];
                 if(percent){
@@ -324,6 +326,30 @@
                 minRes = minRes < 10 ?  "0" + minRes : minRes;                
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
+            },
+            dateTimeFormat (dt) { 
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            },
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [0, 0];
+                    }else if (columnIndex === 2) {
+                        return [1, 3];
+                    }
+                }
+            },
+            indexFun (index) { // 表格序号
+                return index;
             },
             searchYesterday(){ // 昨天
                var today = new Date();
@@ -368,7 +394,7 @@
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId; 
                 param.projectId =  this.export.projectId; 
-                axios.post('/statistics/appointmentVisit/exportGroupList',param,{responseType:'blob'})
+                axios.post('/statistics/appointmentVisit/exportGroupDayList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -382,17 +408,25 @@
                     });
             }
         },
-        created(){     
-            // 默认进入显示当天时间
-            var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            this.form.startTime=startTime;
-            this.form.endTime=endTime;  
+        created(){ 
+            // 接收参数
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);
+            this.form.orgId=parentParam.orgId;
+            this.form.userId=parentParam.userId;
+            this.form.projectId=parentParam.projectId;
+
+            this.export.startTime=parentParam.startTime;
+            this.export.endTime=parentParam.endTime;
+            this.export.orgId=this.form.orgId;
+            this.export.userId=this.form.orgId;
+            this.export.projectId=this.form.projectId;
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
+            if(this.export.orgId){
+                this.curTelSale(this.export.orgId);
+            }
             this.searchTable();
         },
         mounted(){
