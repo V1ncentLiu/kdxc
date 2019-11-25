@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,8 @@ public class NextInvitationController extends BaseStatisticsController {
     @Autowired
     private NextInvitationFeignClient nextInvitationFeignClient;
 
+
+    @RequestMapping("/list")
     public String deptList(HttpServletRequest request){
         initSaleDept(request);
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
@@ -64,11 +67,12 @@ public class NextInvitationController extends BaseStatisticsController {
         //签约集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
-        return "";
+        return "reportformsBusiness/morrowBusinessVisitTable";
     }
 
 
-    public String  groupList(HttpServletRequest request, @RequestBody Long companyId,Long busAreaId,Long busGroupId,Long deptGroupId,
+    @RequestMapping("/groupList")
+    public String groupList(HttpServletRequest request, @RequestBody Long companyId,Long busAreaId,Long busGroupId,Long deptGroupId,
     Long teleGroupId,Long dateTime){
         initSaleDept(request);
         initBaseDto(request,dateTime,busAreaId,busGroupId,companyId,deptGroupId,teleGroupId);
@@ -80,7 +84,7 @@ public class NextInvitationController extends BaseStatisticsController {
         //签约集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
-        return "";
+        return "reportformsBusiness/morrowBusinessVisitTableTeam";
     }
 
     /**
@@ -183,50 +187,46 @@ public class NextInvitationController extends BaseStatisticsController {
     /**
      * 参数控制权限-已经显示结果
      * 一级列表所有权限筛选由 组id控制
-     * @param baseQueryDto
+     * @param dto
      */
-    public void initParams(BaseQueryDto baseQueryDto){
+    public void initParams(BaseQueryDto dto){
         //筛选组
-        if(null!=baseQueryDto.getTeleGroupId()){
-            List<Long> ids= Arrays.asList(baseQueryDto.getTeleGroupId());
-            baseQueryDto.setTeleGroupIds(ids);
+        if(null!=dto.getTeleDeptId()){
+            List<Long> ids= Arrays.asList(dto.getTeleGroupId());
+            dto.setTeleDeptIds(ids);
             return ;
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         //电销组
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
 
-        queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
-            //如果有事业部筛选
-            if(null!=baseQueryDto.getTeleDeptId()){
-                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
-            }else{
+            if(null!=dto.getTeleDeptId()){
+                dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
+            }else {
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                //总监理查看下属所有事业部
+                queryDTO.setOrgType(OrgTypeConstant.DZSYB);
                 queryDTO.setParentId(curLoginUser.getOrgId());
+                JSONResult<List<OrganizationRespDTO>> result =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                List<Long> ids = result.getData().stream().map(c -> c.getId()).collect(Collectors.toList());
+                dto.setTeleDeptIds(ids);
             }
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
-            queryDTO.setParentId(curLoginUser.getOrgId());
-            if(null!=baseQueryDto.getTeleDeptId()){
-                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
-            }
+            //副总查看当前事业部
+            dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(curLoginUser.getOrgId())));
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
-            baseQueryDto.setTeleGroupIds(Arrays.asList(curLoginUser.getOrgId()));
-            return;
+            //总监查看自己组
+            dto.setTeleGroupId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.DXZC.name().equals(roleCode)){
             //管理员可以查看全部
-            queryDTO.setParentId(curLoginUser.getOrgId());
-            if(null!=baseQueryDto.getTeleDeptId()){
-                queryDTO.setParentId(baseQueryDto.getTeleDeptId());
+            if(null!=dto.getTeleDeptId()){
+                dto.setTeleDeptIds(new ArrayList<>(Arrays.asList(dto.getTeleDeptId())));
             }
         }else{
-            //other 没权限
-            queryDTO.setId(curLoginUser.getOrgId());
-        }
-        JSONResult<List<OrganizationDTO>> json= organizationFeignClient.listDescenDantByParentId(queryDTO);
-        if("0".equals(json.getCode())){
-            List<Long> orgids=json.getData().stream().map(c->c.getId()).collect(Collectors.toList());
-            baseQueryDto.setTeleGroupIds(orgids);
+            //other
+            dto.setTeleGroupId(curLoginUser.getOrgId());
         }
     }
 
