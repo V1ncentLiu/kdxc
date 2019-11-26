@@ -172,7 +172,7 @@ public class NextInvitationController extends BaseStatisticsController {
                             Long deptGroupId,Long teleGroupId){
         BaseQueryDto dto=new BaseQueryDto();
         dto.setTeleDeptId(deptGroupId);
-        dto.setTeleGroupId(groupId);
+        dto.setTeleGroupId(teleGroupId);
         dto.setDateTimes(dateTime);
         dto.setCompanyId(companyId);
         dto.setBusAreaId(busAreaId);
