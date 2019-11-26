@@ -69,9 +69,9 @@ public class NextInvitationController extends BaseStatisticsController {
 
     @RequestMapping("/groupList")
     public String groupList(HttpServletRequest request,Long companyId,Long busAreaId,Long busGroupId,Long deptGroupId,
-    Long teleGroupId,Long dateTime){
+    Long teleGroupId,Long dateTimes){
         initSaleDept(request);
-        initBaseDto(request,dateTime,busAreaId,busGroupId,companyId,deptGroupId,teleGroupId);
+        initBaseDto(request,dateTimes,busAreaId,busGroupId,companyId,deptGroupId,teleGroupId);
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setOrgType(OrgTypeConstant.SWZ);
         JSONResult<List<OrganizationRespDTO>> json =
@@ -104,7 +104,7 @@ public class NextInvitationController extends BaseStatisticsController {
     public @ResponseBody JSONResult<Map<String,Object>> queryDeptByPage(@RequestBody BaseQueryDto baseQueryDto){
         //权限控制
         initParams(baseQueryDto);
-        return nextInvitationFeignClient.queryDeptPage(baseQueryDto);
+        return nextInvitationFeignClient.queryAreaPage(baseQueryDto);
     }
 
 
@@ -146,7 +146,7 @@ public class NextInvitationController extends BaseStatisticsController {
     public @ResponseBody void deptExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
-            JSONResult<List<NextInvitationDto>> json= nextInvitationFeignClient.queryDeptList(baseQueryDto);
+            JSONResult<List<NextInvitationDto>> json= nextInvitationFeignClient.queryAreaList(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 NextInvitationDto[] dtos = json.getData().isEmpty()?new NextInvitationDto[]{}:json.getData().toArray(new NextInvitationDto[0]);
                 String[] keys = {"deptGroupName","teleGroupName","invitationCount"};
