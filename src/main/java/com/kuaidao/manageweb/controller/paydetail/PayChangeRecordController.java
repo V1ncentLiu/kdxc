@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.paydetail;
 
+import com.kuaidao.manageweb.feign.paydetail.PayChangeRecordFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ import com.kuaidao.common.entity.PageBean;
 public class PayChangeRecordController {
 
     @Autowired
-
+    private PayChangeRecordFeignClient payChangeRecordFeignClient;
     /**
      * 付款明细操作记录列表
      * 
@@ -30,7 +31,7 @@ public class PayChangeRecordController {
      **/
     @PostMapping("/getPageList")
     public JSONResult<PageBean<PayChangeRecordDTO>> getPageList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO) {
-
-        return new JSONResult<PageBean<PayChangeRecordDTO>>().success(pageBean);
+        JSONResult<PageBean<PayChangeRecordDTO>> jsonResult =  payChangeRecordFeignClient.getPageList(payChangRecordParamDTO);
+        return new JSONResult<PageBean<PayChangeRecordDTO>>().success(jsonResult);
     }
 }
