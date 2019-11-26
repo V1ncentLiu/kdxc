@@ -11,15 +11,11 @@ import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.nextDayInvitation.NextInvitationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
-import com.kuaidao.stastics.dto.dupOrder.DupOrderQueryDto;
 import com.kuaidao.stastics.dto.invitation.NextInvitationDto;
-import com.kuaidao.stastics.dto.performance.PerformanceDto;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -146,7 +142,7 @@ public class NextInvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
-    @RequestMapping("/invitationExport")
+    @RequestMapping("/areaExport")
     public @ResponseBody void deptExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
@@ -177,7 +173,7 @@ public class NextInvitationController extends BaseStatisticsController {
         BaseQueryDto dto=new BaseQueryDto();
         dto.setTeleDeptId(deptGroupId);
         dto.setTeleGroupId(groupId);
-        dto.setDateTime(dateTime);
+        dto.setDateTimes(dateTime);
         dto.setCompanyId(companyId);
         dto.setBusAreaId(busAreaId);
         dto.setBusGroupId(groupId);
