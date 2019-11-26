@@ -510,8 +510,8 @@
     <!-- dialog -->
     <el-dialog title="分配判单" :visible.sync="distributionPdzySyc" width="540px">
         <el-form :model="pdzyform" ref="pdzyform" :rules="pdzyrules">
-            <el-form-item label="判单专员：" :label-width="formLabelWidth"  prop="pdUser">
-                <el-select filterable v-model="pdzyform.pdUser" placeholder="组内判单专员" style="width:80%;">
+            <el-form-item label="判单专员：" :label-width="formLabelWidth"  prop="pdUsers">
+                <el-select filterable v-model="pdzyform.pdUsers" placeholder="组内判单专员" style="width:80%;" multiple>
                     <el-option
                             v-for="item in userInfoList"
                             :key="item.id"
@@ -539,7 +539,7 @@ var userInfoList = [[${userInfoList}]];
         data: {
             distributionPdzySyc:false,
             pdzyform:{
-                pdUser:""
+                pdUsers:[]
             },
             userInfoList:userInfoList,
             isShowSearch:false,
@@ -627,7 +627,7 @@ var userInfoList = [[${userInfoList}]];
                 repeadclue:''
             },
             pdzyrules:{
-                pdUser: [
+                pdUsers: [
                     { required: true, message: '请选择判单专员', trigger: 'blur' },
                 ]
             },
@@ -1319,7 +1319,7 @@ var userInfoList = [[${userInfoList}]];
                             idList.push(rows[i].repeatId)
                         }
                         param.idList = idList;
-                        param.pdUser = this.pdzyform.pdUser;
+                        param.pdUsers = this.pdzyform.pdUsers;
                         axios.post('/clue/cluerepetition/distributionPdUser', param).then(function (response) {
                             if(response.data.data){
                                 orgVM.distributionPdzySyc = false;
