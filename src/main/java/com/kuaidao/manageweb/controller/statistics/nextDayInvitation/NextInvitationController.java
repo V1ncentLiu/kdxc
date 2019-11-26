@@ -68,7 +68,7 @@ public class NextInvitationController extends BaseStatisticsController {
 
 
     @RequestMapping("/groupList")
-    public String groupList(HttpServletRequest request, @RequestBody Long companyId,Long busAreaId,Long busGroupId,Long deptGroupId,
+    public String groupList(HttpServletRequest request,Long companyId,Long busAreaId,Long busGroupId,Long deptGroupId,
     Long teleGroupId,Long dateTime){
         initSaleDept(request);
         initBaseDto(request,dateTime,busAreaId,busGroupId,companyId,deptGroupId,teleGroupId);
