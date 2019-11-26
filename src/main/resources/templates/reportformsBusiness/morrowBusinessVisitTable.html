@@ -22,35 +22,42 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="日期:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" v-model="form.dateTimes" type="datetime" value-format="yyyyMMdd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="来访项目:">  
-                    <el-select v-model="form.projectId" placeholder="全部" style="width: 100%;" clearable filterable>
+                <el-form-item label="餐饮集团:">  
+                    <el-select v-model="form.companyId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in projectArr"
+                            v-for="item in companyList"
                             :key="item.id"
-                            :label="item.projectName"
+                            :label="item.groupName"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="全部" style="width: 100%;" clearable filterable @change="currentTelSale">
+                <el-form-item label="商务组:">  
+                    <el-select v-model="form.busGroupId" placeholder="全部" style="width: 100%;" filterable clearable>
                         <el-option
-                            v-for="item in orgTeleArr"
+                            v-for="item in busList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.userId" placeholder="全部" style="width: 100%;" filterable clearable>
+                <el-form-item label="事业部:">  
+                    <el-select v-model="form.deptGroupId" placeholder="全部" style="width: 100%;" filterable clearable @change="curTelGroupSale">
                         <el-option
-                            v-for="item in busSaleArr"
+                            v-for="item in deptList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -94,8 +101,9 @@
     }
 </style>
 <script th:inline="javascript">
-    var orgIdList=[[${teleGroupList}]];// 电销组
-    var projectList=[[${projectList}]];// 来访项目
+    var companyList=[[${companyList}]];// 集团
+    var busList=[[${busList}]];// 商务组
+    var deptList=[[${deptList}]];// 事业部
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -108,23 +116,24 @@
                     pageSize: 20,
                 },
                 form: {
-                    startTime:'',
-                    endTime:'',
-                    orgId: '',
-                    userId: '',
-                    projectId: ''
+                    dateTimes:'',
+                    companyId:'',
+                    busGroupId:'',
+                    deptGroupId:'',
+                    teleGroupId:'',
                 },
                 export: {
-                    startTime:'',
-                    endTime:'',
-                    orgId: '',
-                    userId: '',
-                    projectId: ''
+                    dateTimes:'',
+                    companyId:'',
+                    busGroupId:'',
+                    deptGroupId:'',
+                    teleGroupId:'',
                 },
                 tableData: [],
-                orgTeleArr: orgIdList, // 电销组
-                busSaleArr: '', // 电销顾问
-                projectArr: projectList, // 来访项目
+                companyList:companyList,//餐饮集团
+                busList:busList,//商务组
+                deptList:deptList,//事业部
+                orgTeleArr: '', // 电销组
                 // pickerOptions0: {
                 //   disabledDate(time) {
                 //     return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
@@ -136,73 +145,19 @@
             centerStyle(){
                 return "text-align:center"
             },
-            currentTelSale(seleVal){ // 根据电销组选择电销顾问
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.form.userId = '';
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/statistics/appointmentVisit/getSaleList' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                }).catch(function (error) {
-                     mainDivVM.$message({
-                        message: "电销顾问请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
-            searchTable(firstPage) { 
-                var startTime = this.form.startTime;
-                var endTime = this.form.endTime;
-                if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
-                    endTime = new Date(this.form.endTime);
-                    if(startTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                    // var currentDateRes = new Date(currentDate);
-                    var beforeSixMonthRes = new Date(beforeSixMonth);
-                    // if(startTime < beforeSixMonthRes || endTime > currentDateRes){
-                    if(startTime < beforeSixMonthRes){
-                        this.$message({
-                            message: '开始时间请选择近6个月内的时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                    startTime = this.limitTime(startTime, null);
-                    endTime = this.limitTime(null, endTime);
-                }else{
-                    this.$message({
-                        message: '请选择起止时间',
-                        type: 'warning'
-                    });
-                    return;
-                }   
-    
-                var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
-                param.pageSize = this.pager.pageSize;
-  
+            searchTable(firstPage) {     
+                var param = {};                
+                param.pageSize = this.pager.pageSize;  
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId;
-                param.userId = this.form.userId;
-                param.projectId = this.form.projectId;
+                param.dateTimes = this.form.dateTimes;
+                param.companyId = this.form.companyId;
+                param.busGroupId = this.form.busGroupId;
+                param.deptGroupId = this.form.deptGroupId;
+                param.teleGroupId = this.form.teleGroupId;
                 this.loading = true; 
                 axios.post('/nextInvitation/queryPage',param).then(function (response) {
                     console.log(response)
@@ -232,16 +187,17 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
-                        mainDivVM.export.userId = mainDivVM.form.userId;
-                        mainDivVM.export.projectId = mainDivVM.form.projectId;
+                        mainDivVM.export.dateTimes = mainDivVM.form.dateTimes;
+                        mainDivVM.export.companyId = mainDivVM.form.companyId;
+                        mainDivVM.export.busGroupId = mainDivVM.form.busGroupId;
+                        mainDivVM.export.deptGroupId = mainDivVM.form.deptGroupId;
+                        mainDivVM.export.teleGroupId = mainDivVM.form.teleGroupId;
        
                     }else{
                         mainDivVM.loading = false;
                     }
                 }).catch(function (error) {
+                    console.log(error)
                     mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
@@ -318,51 +274,15 @@
                 minRes = minRes < 10 ?  "0" + minRes : minRes;                
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
-            },
-            searchYesterday(){ // 昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
-            },
-            searchWeek(){ // 近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable(1);
-            },
-            searchMonth(){ // 本月 
-                var a = new Date();
-                var year = a.getFullYear();
-                var month = a.getMonth();
-                var date = a.getDate();
-                var b = new Date(year,month,date);
-                var f= new Date(year,month,01);
-                var c = f.valueOf();
-                var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable(1);
-            },
+            },            
             exportRs(){
                 var param = {};
-                param.startTime = this.export.startTime;
-                param.endTime = this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                param.userId =  this.export.userId; 
-                param.projectId =  this.export.projectId; 
-                axios.post('/statistics/appointmentVisit/exportGroupList',param,{responseType:'blob'})
+                param.dateTimes = this.export.dateTimes;
+                param.companyId = this.export.companyId;
+                param.busGroupId =  this.export.busGroupId; 
+                param.deptGroupId =  this.export.deptGroupId; 
+                param.teleGroupId =  this.export.teleGroupId; 
+                axios.post('/nextInvitation/invitationExport',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -374,20 +294,44 @@
                             type: "error"
                         });
                     });
-            }
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.teleGroupId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                if(!seleVal){return;}
+                param={};
+                param.parentId=seleVal;
+                param.orgType=1;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
         },
         created(){     
             // 默认进入显示当天时间
             var today = new Date();
             today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            this.form.startTime=startTime;
-            this.form.endTime=endTime;  
+            var startTime = today.getFullYear()+""+ (today.getMonth()+1) + "" + today.getDate();
+            this.form.dateTimes=startTime; 
 
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
+
+
+            console.log(companyList)
+            console.log(busList)
+            console.log(deptList)
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
