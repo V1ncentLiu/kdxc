@@ -123,7 +123,7 @@ public class NextInvitationController extends BaseStatisticsController {
                 String[] keys = {"companyName","busGroupName","invitationCount"};
                 String[] hader = {"餐饮集团","商务组","次日邀约数"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
-                String name = MessageFormat.format("次日邀约统计表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
+                String name = MessageFormat.format("次日邀约统计表_{0}.xlsx",  baseQueryDto.getDateTimes() + "");
                 response.addHeader("Content-Disposition",
                         "attachment;filename=\"" + name + "\"");
                 response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -152,7 +152,7 @@ public class NextInvitationController extends BaseStatisticsController {
                 String[] keys = {"deptGroupName","teleGroupName","invitationCount"};
                 String[] hader = {"事业部","电销组","次日邀约数"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
-                String name = MessageFormat.format("大区次日邀约统计表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
+                String name = MessageFormat.format("大区次日邀约统计表_{0}.xlsx",baseQueryDto.getDateTimes() + "");
                 response.addHeader("Content-Disposition",
                         "attachment;filename=\"" + name + "\"");
                 response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
