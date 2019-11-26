@@ -238,7 +238,7 @@ public class ApplyController {
                 curList.add(applyDTO.getBirthday());
                 curList.add(getPhone(applyDTO.getPhone()));
                 curList.add(getMarriage(applyDTO.getMarriage()));
-                curList.add(applyDTO.getFamilyPhone());
+                curList.add(getPhone(applyDTO.getFamilyPhone()));
                 curList.add(applyDTO.getFamilyAddress());
                 curList.add(applyDTO.getEstimateShopArea());
                 curList.add(applyDTO.getAlternateShopArea());
