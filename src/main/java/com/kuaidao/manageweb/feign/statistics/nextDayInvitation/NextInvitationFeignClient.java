@@ -3,9 +3,7 @@ package com.kuaidao.manageweb.feign.statistics.nextDayInvitation;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.statistics.invitation.InvitationFeignClient;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
-import com.kuaidao.stastics.dto.invitation.InvitationDto;
 import com.kuaidao.stastics.dto.invitation.NextInvitationDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
