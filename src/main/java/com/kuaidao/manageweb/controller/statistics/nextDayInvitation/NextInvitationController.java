@@ -100,7 +100,7 @@ public class NextInvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
-    @RequestMapping("/queryDeptPage")
+    @RequestMapping("/queryAreaPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryDeptByPage(@RequestBody BaseQueryDto baseQueryDto){
         //权限控制
         initParams(baseQueryDto);
