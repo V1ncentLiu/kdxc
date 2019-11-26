@@ -27,12 +27,12 @@ public interface NextInvitationFeignClient {
     public JSONResult<List<NextInvitationDto>> queryListByParams(@RequestBody BaseQueryDto baseQueryDto);
 
 
-    @RequestMapping("/queryDeptPage")
-    public JSONResult<Map<String,Object>> queryDeptPage(@RequestBody BaseQueryDto baseQueryDto);
+    @RequestMapping("/queryAreaPage")
+    public JSONResult<Map<String,Object>> queryAreaPage(@RequestBody BaseQueryDto baseQueryDto);
 
 
-    @RequestMapping("/queryDeptList")
-    public JSONResult<List<NextInvitationDto>> queryDeptList(@RequestBody BaseQueryDto baseQueryDto);
+    @RequestMapping("/queryAreaList")
+    public JSONResult<List<NextInvitationDto>> queryAreaList(@RequestBody BaseQueryDto baseQueryDto);
 
     @Component
     class HystrixClientFallback implements NextInvitationFeignClient {
@@ -56,12 +56,12 @@ public interface NextInvitationFeignClient {
         }
 
         @Override
-        public JSONResult<Map<String, Object>> queryDeptPage(BaseQueryDto baseQueryDto) {
+        public JSONResult<Map<String, Object>> queryAreaPage(BaseQueryDto baseQueryDto) {
             return fallBackError("次日邀约统计表-电销组分页查询");
         }
 
         @Override
-        public JSONResult<List<NextInvitationDto>> queryDeptList(BaseQueryDto baseQueryDto) {
+        public JSONResult<List<NextInvitationDto>> queryAreaList(BaseQueryDto baseQueryDto) {
             return fallBackError("次日邀约统计表-电销组导出excel查询");
         }
     }
