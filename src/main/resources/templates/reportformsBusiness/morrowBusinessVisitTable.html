@@ -82,7 +82,11 @@
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="companyName" label="餐饮集团"></el-table-column>
-                <el-table-column prop="busGroupName" label="商务组"></el-table-column>
+                <el-table-column prop="busGroupName" label="商务组">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.busGroupName}}</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="invitationCount" label="次日邀约数"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -229,14 +233,15 @@
                 }
             },
             gotoTeam(row){
-                var projectId = row.projectId;
-                var userId = this.export.userId;// 话务专员id
-                var orgId = this.export.orgId;// 话务组id
-                // var projectId = this.export.projectId;
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                if(projectId){
-                    window.location.href="/nextInvitation/queryPage?orgId=" + orgId + "&userId="+ userId +"&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime;
+                var busGroupId = row.busGroupId;
+                var dateTimes = this.export.dateTimes;
+                var companyId = this.export.companyId;
+                var deptGroupId = this.export.deptGroupId;
+                var teleGroupId = this.export.teleGroupId;
+                if(busGroupId!=99999){
+                    window.location.href="/nextInvitation/groupList?companyId=" + companyId + "&busGroupId="+ busGroupId +"&deptGroupId="+ deptGroupId +"&teleGroupId=" + teleGroupId + "&dateTimes=" + dateTimes;
+                }else{//合计
+                    window.location.href="/nextInvitation/groupList?companyId=" + companyId + "&deptGroupId="+ deptGroupId +"&teleGroupId=" + teleGroupId + "&dateTimes=" + dateTimes;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -327,7 +332,6 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
-
 
             console.log(companyList)
             console.log(busList)
