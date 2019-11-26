@@ -80,12 +80,9 @@
                         <span v-else>{{scope.row.projectName}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="invitationNum" label="正常邀约数"></el-table-column>
-                <el-table-column prop="cancelInvitationNum" label="取消邀约数"></el-table-column>
-                <el-table-column prop="deleteInvitationNum" label="删除邀约数"></el-table-column>
-                <el-table-column prop="invitationFrequency" label="正常邀约次数"></el-table-column>
-                <el-table-column prop="cancelInvitationFrequency" label="取消邀约次数"></el-table-column>
-                <el-table-column prop="deleteInvitationFrequency" label="删除邀约次数"></el-table-column>
+                <el-table-column prop="companyName" label="餐饮集团"></el-table-column>
+                <el-table-column prop="busGroupName" label="商务组"></el-table-column>
+                <el-table-column prop="invitationCount" label="次日邀约数"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -213,7 +210,7 @@
                 param.userId = this.form.userId;
                 param.projectId = this.form.projectId;
                 this.loading = true; 
-                axios.post('/statistics/appointmentVisit/getGroupPageList',param).then(function (response) {
+                axios.post('/nextInvitation/queryPage',param).then(function (response) {
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -288,7 +285,7 @@
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 if(projectId){
-                    window.location.href="/statistics/appointmentVisit/businessVisitTableTeam?orgId=" + orgId + "&userId="+ userId +"&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/nextInvitation/queryPage?orgId=" + orgId + "&userId="+ userId +"&projectId="+ projectId +"&startTime=" + startTime + "&endTime=" + endTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
