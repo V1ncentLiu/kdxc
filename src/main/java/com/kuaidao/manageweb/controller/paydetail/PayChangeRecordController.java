@@ -32,6 +32,6 @@ public class PayChangeRecordController {
     @PostMapping("/getPageList")
     public JSONResult<PageBean<PayChangeRecordDTO>> getPageList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO) {
         JSONResult<PageBean<PayChangeRecordDTO>> jsonResult =  payChangeRecordFeignClient.getPageList(payChangRecordParamDTO);
-        return new JSONResult<PageBean<PayChangeRecordDTO>>().success(jsonResult);
+        return jsonResult;
     }
 }
