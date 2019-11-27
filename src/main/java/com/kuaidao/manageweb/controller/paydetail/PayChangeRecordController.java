@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,7 @@ public class PayChangeRecordController {
     public void exportPayChangRecord(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO, HttpServletResponse response) throws Exception {
         JSONResult<List<PayChangeRecordDTO>> listNoPage = payChangeRecordFeignClient.getPayChangRecordList(payChangRecordParamDTO);
         List<List<Object>> dataList = new ArrayList<>();
+        dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && CollectionUtils.isNotEmpty(listNoPage.getData())) {
             List<PayChangeRecordDTO> resultList = listNoPage.getData();
             int size = resultList.size();
@@ -117,7 +119,21 @@ public class PayChangeRecordController {
         } else {
             log.error("exportPayChangRecord rule_report res{{}}", listNoPage);
         }
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        // 创建一个工作薄
+        XSSFWorkbook workBook = new XSSFWorkbook();
+        // 创建一个工作薄对象sheet
+        XSSFSheet sheet = workBook.createSheet();
+        // 设置宽度
+        sheet.setColumnWidth(1, 6000);
+        sheet.setColumnWidth(2, 6000);
+        sheet.setColumnWidth(3, 4000);
+        sheet.setColumnWidth(4, 4000);
+        sheet.setColumnWidth(5, 4000);
+        sheet.setColumnWidth(6, 4000);
+        sheet.setColumnWidth(7, 4000);
+        sheet.setColumnWidth(8, 4000);
+        sheet.setColumnWidth(9, 10000);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook,dataList);
         String name = "更改付款记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -137,7 +153,7 @@ public class PayChangeRecordController {
      * @Date: 2019/11/27 10:16
      * @since: 1.0.0
      **/
-    private List<Object> getPayChangRecordHeadTitleList() {
+    private List<Object> getHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("变更时间");
