@@ -23,64 +23,46 @@
         </el-row>
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
-
                 <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form1">
-
-                    <el-form-item label="资源类别:">
-                        <el-select v-model="form.resourceId" placeholder="资源类别" style="width: 100%;" clearable
-                            filterable>
-                            <el-option v-for="item in resourceClassList" :key="item.id" :label="item.name"
-                                :value="item.value">
+                    <el-form-item label="统计日期:">
+                        <el-date-picker format="yyyy-MM-dd" v-model="form.startTime" type="datetime"
+                            placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="datetime"
+                            placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="商务大区:">  
+                        <el-select v-model="form.busAreaId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
+                            <el-option
+                                v-for="item in areaList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                             </el-option>
                         </el-select>
-                    </el-form-item>
-                    <el-form-item label="媒介:">
-                        <el-select v-model="form.mediumId" placeholder="媒介" style="width: 100%;" clearable filterable>
-                            <el-option v-for="item in mediumList" :key="item.id" :label="item.name" :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源项目:">
-                        <el-select v-model="form.resourceProjectId" placeholder="资源项目" style="width: 100%;" clearable
-                            filterable>
-                            <el-option v-for="item in resourceItemList" :key="item.id" :label="item.projectName"
+                    </el-form-item>                   
+                    <el-form-item label="餐饮集团:">  
+                        <el-select v-model="form.companyId" placeholder="全部" style="width: 100%;" clearable filterable>
+                            <el-option
+                                v-for="item in companyList"
+                                :key="item.id"
+                                :label="item.groupName"
                                 :value="item.id">
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="起止时间:">
-                        <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime"
-                            placeholder="选择日期" value-format="yyyy-MM-dd HH:mm"></el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime"
-                            placeholder="选择日期" value-format="yyyy-MM-dd HH:mm"></el-date-picker>
-                    </el-form-item>
                     <el-row v-show="isShow">
-                        <!-- <el-form-item label="电销分公司:">
-                            <el-select v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)"
-                                style="width: 100%;" clearable filterable>
-                                <el-option v-for="item in dxBusinessList" :key="item.id" :label="item.name"
+                        <el-form-item label="商务组:">  
+                            <el-select v-model="form.busGroupId" placeholder="全部" style="width: 100%;" filterable clearable>
+                                <el-option
+                                    v-for="item in orgTeleArr"
+                                    :key="item.id"
+                                    :label="item.name"
                                     :value="item.id">
                                 </el-option>
                             </el-select>
-                        </el-form-item>
-                        <el-form-item label="电销事业部:">
-                            <el-select v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)"
-                                style="width: 100%;" clearable filterable>
-                                <el-option v-for="item in dxCauseBList" :key="item.id" :label="item.name"
-                                    :value="item.id">
-                                </el-option>
-                            </el-select>
-                        </el-form-item> -->
-                        <el-form-item label="电销组:">
-                            <el-select v-model="form.teleGorupId" placeholder="电销组" style="width: 100%;" clearable
-                                filterable :disabled="isDisabled">
-                                <el-option v-for="item in saleGroupList" :key="item.id" :label="item.name"
-                                    :value="item.id">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
+                        </el-form-item>                        
                     </el-row>
                 </el-form>
                 <div class="mainSearchBtnBox">
@@ -93,98 +75,44 @@
             </div>
             <el-row class="marginB20" v-loading="loading">
                 <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData" :span-method="arraySpanMethod">
-                    <el-table-column  prop="orgName" align="center" label="电销组" width="130">
+                    <el-table-column  prop="orgName" align="center" label="商务大区">
                         <template slot-scope="scope">
                           <span class="act">{{scope.row.orgName}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="resourceCategoryName" align="center" label="资源类别" width="80">
+                    <el-table-column prop="resourceCategoryName" align="center" label="商务组">
                         <template slot-scope="scope">
                           <span :class="{'act':scope.row.total != ''}">{{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="resourceMediumName" align="center" label="媒介" width="80">
-                    </el-table-column>
-                    <el-table-column prop="projectTypeName" align="center" label="资源项目" width="80">
-                    </el-table-column>
-                    <el-table-column prop="issuedResources" align="center" label="下发资源量" width="80">
+                    <el-table-column prop="issuedResources" align="center" label="首访数" width="80">
                         <template slot-scope="scope">
                             <span :class="{'act':scope.row.total != ''}">{{scope.row.issuedResources}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="followResources" align="center" label="跟访资源量" width="80">
+                    <el-table-column prop="followResources" align="center" label="签约数" width="80">
                         <template slot-scope="scope">
                             <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="firstResources" align="center" label="首次接通资源量" width="110">
+                    <el-table-column prop="firstResources" align="center" label="净业绩金额" width="110">
                         <template slot-scope="scope">
                             <span :class="{'act':scope.row.total != ''}">{{scope.row.firstResources}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="connectResources" align="center" label="接通资源量" width="80">
-                        <template slot-scope="scope">
-                            <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="notConnectResources" align="center" label="未接通资源量" width="90">
-                        <template slot-scope="scope">
-                            <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectResources}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="connectEffectiveResources" align="center" label="接通有效资源量" width="110">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectEffectiveResources}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="connectNotEffectiveResources" align="center" label="接通无效资源量" width="110">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectNotEffectiveResources}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="notConnectEffectiveResources" align="center" label="未接通有效资源量" width="120">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectEffectiveResources}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="notConnectNotEffectiveResources" align="center" label="未接通无效资源量" width="120">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.notConnectNotEffectiveResources}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat" width="80">
+                    <el-table-column prop="followRate" align="center" label="签约率" :formatter="percentFormat" width="80">
                         <template slot-scope="scope">
                           <span :class="{'act':scope.row.total != ''}">{{scope.row.followRate | perFormat}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="firstRate" align="center" label="首次接通率" :formatter="percentFormat" width="80">
+                    <el-table-column prop="firstRate" align="center" label="单笔签约" :formatter="percentFormat" width="80">
                         <template slot-scope="scope">
                           <span :class="{'act':scope.row.total != ''}">{{scope.row.firstRate | perFormat}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="assignedConnectedRate" align="center" label="下发接通率" :formatter="percentFormat" width="80">
+                    <el-table-column prop="assignedConnectedRate" align="center" label="单笔来访" :formatter="percentFormat" width="80">
                         <template slot-scope="scope">
                           <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedConnectedRate | perFormat}}</span>
-                        </template>
-                    </el-table-column>
-                     <el-table-column prop="assignedValidRate" align="center" label="下发有效率" :formatter="percentFormat" width="80">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.assignedValidRate | perFormat}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="resourceConnectRate" align="center" label="跟进接通率" :formatter="percentFormat" width="80">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceConnectRate | perFormat}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="resourceEffectiveRate" align="center" label="跟进有效率" :formatter="percentFormat" width="80">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.resourceEffectiveRate | perFormat}}</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="connectionRate" align="center" label="接通有效率" :formatter="percentFormat" width="80">
-                        <template slot-scope="scope">
-                          <span :class="{'act':scope.row.total != ''}">{{scope.row.connectionRate | perFormat}}</span>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -204,11 +132,8 @@
   }
 </style>
 <script th:inline="javascript">
-    var resourceClassList = [[${clueCategoryList}]]; // 资源类别
-    var mediumList = [[${mediumList}]]; //媒介
-    var resourceItemList = [[${projectList}]]; //资源项目
-    var saleGroupList = [[${saleGroupList}]]; //电销组
-    var orgId = [[${curOrgId}]]; //电销组id
+    var companyList = [[${companyList}]]; // 餐饮集团
+    var areaList = [[${areaList}]]; // 商务大区
 
     function List() {
         this.dataStore = [];
@@ -280,10 +205,6 @@
             return {
                 tableActive: 0, //tab切换
                 isDisabled: false, //是否禁用电销组
-                saleGroupList: saleGroupList, //电销组List
-                resourceClassList: resourceClassList, //资源类别List
-                mediumList: mediumList, //媒介List
-                resourceItemList: resourceItemList, //资源项目
                 isShow: false,
                 loading: false,
                 form: {
@@ -292,12 +213,10 @@
                     resourceId: '', //资源类别
                     mediumId: '', //媒介
                     resourceProjectId: '', //资源项目
-                    teleGorupId: orgId, //电销组id
                 },
                 export: {
                     startTime: '',
                     endTime: '',
-                    orgId: ''
                 },
                 tableData: [],
                 pager: {
@@ -310,7 +229,11 @@
                 resourceClassIdEnd: '',
                 mediumIdEnd: '',
                 resourceProjectIdEnd: '',
-                orgIdEnd: ''
+                orgIdEnd: '',
+
+                companyList:companyList,// 餐饮集团
+                areaList:areaList,// 商务大区
+                orgTeleArr: '', // 商务组
             }
         },
         methods: {
@@ -667,7 +590,28 @@
                             type: "error"
                         });
                     });
-            }
+            },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.businessGroupId = '';
+                this.form.businessManagerId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                param={};
+                param.parentId=seleVal;
+                param.orgType=2;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                        mainDivVM.$message({
+                        message: "商务组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
         },
         created() {
             // 默认进入显示当天时间
@@ -676,9 +620,7 @@
             var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() +
                 " 00:00";
             var endTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + " 23:59";
-            if (orgId) {
-                this.isDisabled = true;
-            }
+            
             this.form.startTime = startTime;
             this.form.endTime = endTime;
             this.startTimeEnd = this.form.startTime;
