@@ -11,6 +11,7 @@ import com.kuaidao.aggregation.dto.paydetail.PayChangeRecordParamDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import java.util.List;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/payChangRecord", fallback = PayChangeRecordFeignClient.HystrixClientFallback.class)
 public interface PayChangeRecordFeignClient {
@@ -19,6 +20,8 @@ public interface PayChangeRecordFeignClient {
     @PostMapping("/getPageList")
     JSONResult<PageBean<PayChangeRecordDTO>> getPageList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO);
 
+    @PostMapping("/getPayChangRecordList")
+    JSONResult<List<PayChangeRecordDTO>> getPayChangRecordList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO);
 
     @Component
     static class HystrixClientFallback implements PayChangeRecordFeignClient {
@@ -30,9 +33,13 @@ public interface PayChangeRecordFeignClient {
         }
 
         @Override
-        public JSONResult<PageBean<PayChangeRecordDTO>> getPageList( PayChangeRecordParamDTO payChangRecordParamDTO) {
+        public JSONResult<PageBean<PayChangeRecordDTO>> getPageList(PayChangeRecordParamDTO payChangRecordParamDTO) {
             return fallBackError("付款明细修改记录列表");
         }
 
+        @Override
+        public JSONResult<List<PayChangeRecordDTO>> getPayChangRecordList(PayChangeRecordParamDTO payChangRecordParamDTO) {
+            return fallBackError("付款明细修改记录");
+        }
     }
 }
