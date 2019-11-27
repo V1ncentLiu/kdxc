@@ -30,7 +30,7 @@
                     <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
                 </el-form-item>
                 <el-form-item label="商务组:">
-                    <el-select v-model="form.businessGroupId" placeholder="商务组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.busGroupId" placeholder="商务组" style="width: 100%;" clearable filterable>
                         <el-option
                                 v-for="item in businessGroupList"
                                 :key="item.id"
@@ -51,14 +51,14 @@
                 </el-form-item>
                 <el-form-item label="变更时间:">
                     <el-date-picker
-                            v-model="form.signStartTime"
+                            v-model="form.startTime"
                             type="datetime"
                             placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                            v-model="form.signEndTime"
+                            v-model="form.endTime"
                             type="datetime"
                             placeholder="选择日期时间">
                     </el-date-picker>
@@ -79,15 +79,15 @@
                 @selection-change="handleSelectionChange">
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="months" label="变更时间" :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="teleGroupName" label="签约单编号"  width="150"></el-table-column>
-                <el-table-column align="center" prop="projectNames" label="付款类型" width="130"></el-table-column>
-                <el-table-column align="center" prop="projectType" label="结算单编号"  width="150"></el-table-column>
-                <el-table-column align="center" prop="biddingPrice" label="商务经理"  width="120"></el-table-column>
-                <el-table-column align="center" prop="optimization" label="商务组"  width="120"></el-table-column>
-                <el-table-column align="center" prop="information" label="变更人"  width="120"></el-table-column>
-                <el-table-column align="center" prop="information" label="操作类型"  width="120"></el-table-column>
-                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="变更时间" :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="signNo" label="签约单编号"  width="150"></el-table-column>
+                <el-table-column align="center" prop="payTypeName" label="付款类型" width="130"></el-table-column>
+                <el-table-column align="center" prop="statementNo" label="结算单编号"  width="150"></el-table-column>
+                <el-table-column align="center" prop="businessManagerName" label="商务经理"  width="120"></el-table-column>
+                <el-table-column align="center" prop="businessGroupName" label="商务组"  width="120"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="变更人"  width="120"></el-table-column>
+                <el-table-column align="center" prop="operationTypeName" label="操作类型"  width="120"></el-table-column>
+                <el-table-column align="center" prop="remark" label="备注"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -116,9 +116,11 @@
                   pageSize: 20,
                 },
                 form: {
-                    month:'',
-                    teleDeptId:'',
-                    teleGroupId:''
+                    signNo:'',
+                    busGroupId:'',
+                    businessManagerId:'',
+                    startTime:'',
+                    endTime:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -141,11 +143,23 @@
             handleForbid(index, row) {
                 console.log(index, row);
             },            
-            searchTable() {
+            searchTable() {                
+                var startTime= this.form.startTime;              
+                var endTime= this.form.endTime;
+                var assignName= this.form.assignName;
+                if(endTime){
+                  if(endTime<startTime){
+                      this.$message({
+                          type: 'warning',
+                          message: '结束时间不能早于开始时间'
+                      });
+                      return ;
+                  } 
+                }  
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
-                axios.post('/requirment/queryPage', param)
+                param.pageNum = this.pager.currentPage; 
+                axios.post('/payChangRecord/getPageList', param)
                 .then(function (response) {
                     var result =  response.data;
                     console.info(result);
