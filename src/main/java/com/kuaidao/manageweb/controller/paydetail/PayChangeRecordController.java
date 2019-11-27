@@ -98,8 +98,7 @@ public class PayChangeRecordController {
                 // 签约单编号
                 curList.add(dto.getSignNo());
                 // 付款类型
-                String payType =  PayDetailConstant.PayType.getMessageByCode(Integer.parseInt(dto.getPayType()));
-                curList.add(payType);
+                curList.add(dto.getPayTypeName());
                 // 结算单编号
                 curList.add(dto.getStatementNo());
                 // 商务经理
@@ -109,8 +108,7 @@ public class PayChangeRecordController {
                 // 变更人
                 curList.add(dto.getCreateUserName());
                 //操作类型
-                String operationType= PayDetailConstant.OperationType.getMessageByCode(dto.getOperationType());
-                curList.add(operationType);
+                curList.add(dto.getOperationTypeName());
                 // 备注信息
                 curList.add(dto.getRemark());
                 dataList.add(curList);
