@@ -27,6 +27,7 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.paydetail.PayChangeRecordFeignClient;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 修改付款明细操作记录 Created on 2019-11-25 16:45:56
@@ -64,6 +65,7 @@ public class PayChangeRecordController {
      * @Date: 2019/11/26 15:37
      * @since: 1.0.0
      **/
+    @ResponseBody
     @PostMapping("/getPageList")
     public JSONResult<PageBean<PayChangeRecordDTO>> getPageList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO) {
         JSONResult<PageBean<PayChangeRecordDTO>> jsonResult = payChangeRecordFeignClient.getPageList(payChangRecordParamDTO);
