@@ -45,7 +45,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="事业部:">  
-                    <el-select v-model="form.deptGroupId" placeholder="全部" style="width: 100%;" filterable clearable @change="curTelGroupSale">
+                    <el-select v-model="form.deptGroupId" placeholder="全部" style="width: 100%;" filterable clearable @change="curTelGroupSale" :disabled="isDeptId">
                         <el-option
                             v-for="item in deptList"
                             :key="item.id"
@@ -55,7 +55,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleGroupId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isTeleGroupId">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -108,6 +108,10 @@
     var companyList=[[${companyList}]];// 集团
     var busList=[[${busList}]];// 商务组
     var deptList=[[${deptList}]];// 事业部
+    var deptId=[[${deptId}]];//当前用户 事业部id
+    // var deptId="915319636068969";//当前用户 事业部id
+    var teleGroupId=[[${teleGroupId}]];//当前用户电销组id
+    // var teleGroupId="915319637549027";//当前用户电销组id
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -143,6 +147,8 @@
                 //     return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
                 //   }
                 // },
+                isDeptId:false,
+                isTeleGroupId:false,
             }             
         },
         methods: {    
@@ -313,6 +319,7 @@
                 param.parentId=seleVal;
                 param.orgType=1;
                 axios.post('/base/getGroupList',param).then(function (response) {
+                    console.log(response)
                     mainDivVM.orgTeleArr=response.data.data;
                 }).catch(function (error) {
                         mainDivVM.$message({
@@ -333,9 +340,20 @@
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
 
-            console.log(companyList)
-            console.log(busList)
-            console.log(deptList)
+            // console.log(companyList)
+            // console.log(busList)
+            // console.log(deptList)
+
+            if(deptId){
+                this.form.deptGroupId=deptId;
+                this.isDeptId=true;
+                this.getTelGroupSale(deptId);
+            }
+            if(teleGroupId){
+                this.form.teleGroupId=teleGroupId;
+                this.isTeleGroupId=true;
+            }
+
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
