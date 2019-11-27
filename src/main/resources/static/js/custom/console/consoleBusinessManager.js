@@ -768,6 +768,18 @@ var mainDivVM = new Vue({
                 resVal='未到访';
             }else  if(row.visitStatus==1){
                 resVal='已到访';
+                var visitNum = row.auditVisitNum;
+                if(visitNum == 1){
+                    resVal = '首次到访';
+                }else if(visitNum == 2){
+                    resVal = '2次到访';
+                }else if(visitNum == 3){
+                    resVal = '3次到访';
+                } else if(visitNum == 4){
+                    resVal = '4次到访';
+                }else if(visitNum == 5){
+                    resVal = '5次到访';
+                }
             }
             return resVal;
         },
