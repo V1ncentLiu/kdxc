@@ -100,8 +100,6 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var businessGroupList = [[${businessGroupList}]];
-
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -124,7 +122,7 @@
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
-                businessGroupList:businessGroupList,
+                businessGroupList:[],
                 busManagerList: [],
                
             }        	  
@@ -177,20 +175,11 @@
                 });
                 
             },
-            toggleSelection(rows) { // table select 默认选中fn
-                if (rows) {
-                    rows.forEach(row => {
-                        this.$refs.multipleTable.toggleRowSelection(row,true);
-                    });
-                } else {
-                    this.$refs.multipleTable.clearSelection();
-                }
-            },
             exportFun(){
                 var param = this.form;
                 param.pageNum='';
                 param.pageSize='';
-                axios.post('/requirment/export',param,{responseType:'blob'})
+                axios.post('/payChangRecord/exportPayChangRecord',param,{responseType:'blob'})
                 .then(function (response) {
                     console.log(response)
                     var data =  response.data;
@@ -212,46 +201,22 @@
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
         //       return moment(cellValue).format("YYYY-MM");
             },
-            curTelGroupSale(seleVal){
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.form.teleGroupId = '';
-                this.form.teleSaleId = '';
-                this.getTelGroupSale(seleVal);
-            },
-            curTelSale(seleVal){
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.form.teleSaleId = '';
-                this.getTelSale(seleVal);
-            },
-            getTelGroupSale(seleVal){
-                param={};
-                param.parentId=seleVal;
-                param.orgType=1;
-                axios.post('/base/getGroupList',param).then(function (response) {
-                    ocmVM.orgTeleArr=response.data.data;
-                }).catch(function (error) {
-                        ocmVM.$message({
-                        message: "电销组请求失败，请稍后重试",
-                        type: "error"
+            queryBusGroupList() {//根据组织机构Id查询所有商务经理
+                axios.post('/organization/organization/queryBusGroupList', {})
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            var table = result.data;
+                            ocmVM.businessGroupList = table;
+                        } else {
+                            console.error(response);
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
                     });
-                });
-            },
-            getTelSale(seleVal){
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/base/getSaleList' ,param).then(function (response) {  
-                    ocmVM.busSaleArr=response.data.data;
-                }).catch(function (error) {
-                        ocmVM.$message({
-                        message: "电销顾问请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
+
             },
             queryBusManagerByOrgId() {//获取所有商务经理
                 axios.post('/sign/signRecord/queryBusManagerByOrgId', {})
@@ -259,7 +224,7 @@
                         var result = response.data;
                         if (result.code == '0') {
                             var table = result.data;
-                            signRecordVM.busManagerList = table;
+                            ocmVM.busManagerList = table;
                         } else {
                             console.error(response);
                         }
@@ -277,6 +242,8 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
+            this.queryBusGroupList();
+            this.queryBusManagerByOrgId();
             this.searchTable();
         },
         mounted(){
