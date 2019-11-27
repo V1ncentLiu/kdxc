@@ -3,6 +3,8 @@ package com.kuaidao.manageweb.controller.paydetail;
 import javax.validation.Valid;
 import com.kuaidao.aggregation.constant.PayDetailConstant;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +74,10 @@ public class PayDetaiController {
     /**
      * 更新签约单和付款明细
      */
-    @RequestMapping("/payOrSignUpdate")
     @ResponseBody
+    @RequestMapping("/payOrSignUpdate")
+    @LogRecord(operationType = LogRecord.OperationType.UPDATE, description = "编辑付款明细",
+            menuName = MenuEnum.PAYANDSIGN_CHANGE)
     public JSONResult<Boolean> payOrSignUpdate(@RequestBody BusSignInsertOrUpdateDTO dto) throws Exception {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());

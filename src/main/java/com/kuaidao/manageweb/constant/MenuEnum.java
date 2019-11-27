@@ -56,6 +56,11 @@ public enum MenuEnum {
 
     OUTBOUND_PACKAGE("服务费用设置"),MERCHANT_CLIENT_LOGIN("坐席自动登录"),
     /**
+     * 付款明细修改
+     */
+    PAYANDSIGN_CHANGE("签约来访"),
+
+    /**
      * 报表（商务模块）
      */
     VISIT_SIGN("签约来访");
