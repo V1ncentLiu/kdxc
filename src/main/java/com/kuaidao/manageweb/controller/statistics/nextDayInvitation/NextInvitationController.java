@@ -16,6 +16,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,7 +52,7 @@ public class NextInvitationController extends BaseStatisticsController {
     @Autowired
     private NextInvitationFeignClient nextInvitationFeignClient;
 
-
+    @RequiresPermissions("statistics:nextInvitation:view")
     @RequestMapping("/list")
     public String deptList(HttpServletRequest request){
         initSaleDept(request);
@@ -67,6 +68,7 @@ public class NextInvitationController extends BaseStatisticsController {
     }
 
 
+    @RequiresPermissions("statistics:nextInvitation:view")
     @RequestMapping("/groupList")
     public String groupList(HttpServletRequest request,Long companyId,Long busAreaId,Long busGroupId,Long deptGroupId,
     Long teleGroupId,Long dateTimes){
@@ -88,6 +90,7 @@ public class NextInvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:nextInvitation:view")
     @RequestMapping("/queryPage")
     public @ResponseBody  JSONResult<Map<String,Object>> queryByPage(@RequestBody BaseQueryDto baseQueryDto){
       //权限控制
@@ -100,6 +103,7 @@ public class NextInvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @return
      */
+    @RequiresPermissions("statistics:nextInvitation:view")
     @RequestMapping("/queryAreaPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryDeptByPage(@RequestBody BaseQueryDto baseQueryDto){
         //权限控制
@@ -113,6 +117,7 @@ public class NextInvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:nextInvitation:export")
     @RequestMapping("/invitationExport")
     public @ResponseBody void invitationExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
@@ -142,6 +147,7 @@ public class NextInvitationController extends BaseStatisticsController {
      * @param baseQueryDto
      * @param response
      */
+    @RequiresPermissions("statistics:nextInvitation:export")
     @RequestMapping("/areaExport")
     public @ResponseBody void deptExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
