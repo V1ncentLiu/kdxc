@@ -199,7 +199,7 @@ public class BusinessAreaVisitSignController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         //TODO 后边修改为商务总经理
-        if(RoleCodeEnum.SWZJ.name().equals(roleCode)){
+        if(RoleCodeEnum.SWZJL.name().equals(roleCode)){
             busAreaId = String.valueOf(curLoginUser.getOrgId());
             busGroupReqDTO.setParentId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
@@ -243,33 +243,9 @@ public class BusinessAreaVisitSignController {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setOrgType(OrgTypeConstant.SWDQ);
 //        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
-        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
+        if(RoleCodeEnum.SWZJL.name().equals(roleCode)){
             queryDTO.setId(curLoginUser.getOrgId());
             request.setAttribute("areaId",curLoginUser.getOrgId()+"");
-        }else if(RoleCodeEnum.SWJL.name().equals(roleCode) || RoleCodeEnum.SWZJ.name().equals(roleCode)){
-            if(RoleCodeEnum.SWJL.name().equals(roleCode)){
-                request.setAttribute("managerId",curLoginUser.getId()+"");
-            }
-            OrganizationQueryDTO org = new OrganizationQueryDTO();
-            org.setId(curLoginUser.getOrgId());
-            request.setAttribute("busId",curLoginUser.getOrgId()+"");
-            JSONResult<List<OrganizationRespDTO>> json =
-                    organizationFeignClient.queryOrgByParam(org);
-            if("0".equals(json.getCode())){
-                Long parentId= json.getData().get(0).getParentId();
-                queryDTO.setId(parentId);
-
-                JSONResult<List<OrganizationRespDTO>> areajson=
-                        organizationFeignClient.queryOrgByParam(queryDTO);
-                if(areajson.getData().isEmpty()){
-                    request.setAttribute("areaList",json.getData());
-                    request.setAttribute("areaId",curLoginUser.getOrgId()+"");
-                }else{
-                    request.setAttribute("areaList",areajson.getData());
-                    request.setAttribute("areaId",parentId+"");
-                }
-            }
-            return ;
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员查询全部
         }else{
