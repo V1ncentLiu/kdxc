@@ -244,15 +244,14 @@ function getPhoneLocale(phone, callSource) {
 			if (data.code == '0') {
 				console.info(data);
 				var resData = data.data;
-				var result = resData.result;
-				if (result == "0") {
-					var phoneArea = resData.data;
-					if (callSource == 1) {
-						$('#outboundPhoneLocaleArea').html(phoneArea.province + "," + phoneArea.city);
-					} else if (callSource == 2) {
-						$('#tmOutboundPhoneLocaleArea').html(phoneArea.province + "," + phoneArea.city);
-					}
-				} else {
+        if(resData){
+          var area = resData.area;
+          if(callSource==1){
+            $('#outboundPhoneLocaleArea').html(area);
+          }else if(callSource==2){
+            $('#tmOutboundPhoneLocaleArea').html(area);
+          }
+        } else {
 					console.error(resData);
 					homePageVM.$message({ message: "查询手机归属地 " + resData.description, type: 'error' });
 				}
