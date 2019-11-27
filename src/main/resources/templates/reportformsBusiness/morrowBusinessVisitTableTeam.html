@@ -169,7 +169,14 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.dateTimes = this.minuteFormat(this.form.dateTimes);
+
+                var dateTimes=this.form.dateTimes;
+                if(dateTimes.length>8){
+                    dateTimes=this.minuteFormat(this.form.dateTimes);
+                }else{
+                    dateTimes=this.form.dateTimes;
+                }
+                param.dateTimes = dateTimes;
                 param.companyId = this.form.companyId;
                 param.busGroupId = this.form.busGroupId;
                 param.deptGroupId = this.form.deptGroupId;
@@ -203,7 +210,7 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.dateTimes = mainDivVM.form.dateTimes;
+                        mainDivVM.export.dateTimes = dateTimes;
                         mainDivVM.export.companyId = mainDivVM.form.companyId;
                         mainDivVM.export.busGroupId = mainDivVM.form.busGroupId;
                         mainDivVM.export.deptGroupId = mainDivVM.form.deptGroupId;
@@ -282,11 +289,11 @@
             },            
             exportRs(){
                 var param = {};
-                param.dateTimes = this.minuteFormat(this.form.dateTimes);
-                param.companyId = this.form.companyId;
-                param.busGroupId = this.form.busGroupId;
-                param.deptGroupId = this.form.deptGroupId;
-                param.teleGroupId = this.form.teleGroupId;
+                param.dateTimes = this.export.dateTimes;
+                param.companyId = this.export.companyId;
+                param.busGroupId = this.export.busGroupId;
+                param.deptGroupId = this.export.deptGroupId;
+                param.teleGroupId = this.export.teleGroupId;
                 axios.post('/nextInvitation/areaExport',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
