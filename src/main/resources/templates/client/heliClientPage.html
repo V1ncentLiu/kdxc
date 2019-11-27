@@ -44,21 +44,21 @@
     <el-breadcrumb-item>合力坐席管理</el-breadcrumb-item>
   </el-breadcrumb>
   <el-row class="marginB20">
-    <shiro:hasPermission name="aggregation:heliClient:add">
+    <shiro:hasPermission name="callCenter:heliClient:add">
       <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i>添加坐席
       </el-button>
     </shiro:hasPermission>
-    <shiro:hasPermission name="aggregation:heliClient:edit">
+    <shiro:hasPermission name="callCenter:heliClient:edit">
       <el-button type="success" @click="modifyClientDialog"><i class="el-icon-edit"></i>编辑坐席
       </el-button>
     </shiro:hasPermission>
-    <shiro:hasPermission name="aggregation:heliClient:delete">
+    <shiro:hasPermission name="callCenter:heliClient:delete">
       <el-button type="danger" @click="deleteClientDialog"><i class="el-icon-delete"></i>删除坐席
       </el-button>
     </shiro:hasPermission>
-    <!--<shiro:hasPermission name="aggregation:trClient:import">-->
-    <!--<el-button type="warning" @click="addBatchClient"><i class="el-icon-download"></i>导入坐席</el-button>-->
-    <!--</shiro:hasPermission>-->
+    <shiro:hasPermission name="callCenter:heliClient:import">
+      <el-button type="warning" @click="addBatchClient"><i class="el-icon-download"></i>导入坐席</el-button>
+    </shiro:hasPermission>
     <!--  <el-button type="success" @click="trCall"><i class="el-icon-edit"></i>外呼</el-button> -->
   </el-row>
   <div class="mainSearchBg">
@@ -125,7 +125,7 @@
              @close="closeAddClientDialog" :close-on-click-modal="false" width="540px">
     <el-form :model="form" ref="clientForm" :rules="rules">
       <el-form-item label="坐席登录名：" :label-width="formLabelWidth" prop="loginName">
-        <el-input v-model="form.loginName" autocomplete="off" maxlength="50"
+        <el-input v-model="form.loginName" autocomplete="off" maxlength="100"
                   style="width:310px;"></el-input>
       </el-form-item>
       <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
@@ -133,28 +133,28 @@
                   style="width:310px;"></el-input>
       </el-form-item>
       <el-form-item label="秘钥：" :label-width="formLabelWidth" prop="secret">
-        <el-input v-model="form.secret" autocomplete="off" maxlength="11"
+        <el-input v-model="form.secret" autocomplete="off" maxlength="100"
                   style="width:310px;"></el-input>
       </el-form-item>
-      <el-form-item label="用户唯一凭证：" :label-width="formLabelWidth" prop="appid">
-        <el-input v-model="form.appid" autocomplete="off" maxlength="11"
+      <el-form-item label="APPID：" :label-width="formLabelWidth" prop="appid">
+        <el-input v-model="form.appid" autocomplete="off" maxlength="100"
                   style="width:310px;"></el-input>
       </el-form-item>
       <el-form-item label="用户账户编号：" :label-width="formLabelWidth" prop="account">
-        <el-input v-model="form.account" autocomplete="off" maxlength="11"
+        <el-input v-model="form.account" autocomplete="off" maxlength="50"
                   style="width:310px;"></el-input>
       </el-form-item>
       <el-form-item label="登录账户名：" :label-width="formLabelWidth" prop="integratedId">
-        <el-input v-model="form.integratedId" autocomplete="off" maxlength="11"
+        <el-input v-model="form.integratedId" autocomplete="off" maxlength="100"
                   style="width:310px;"></el-input>
       </el-form-item>
-      <el-form-item label="所在组织：" :label-width="formLabelWidth" prop="orgName">
+      <el-form-item label="电销组：" :label-width="formLabelWidth" prop="orgName">
         <el-input v-model="form.orgName" autocomplete="off" maxlength="50" :disabled="true"
                   style="width:200px;margin-right: 10px;"></el-input>
         <el-button type="primary" @click="selectOrg">选择组织</el-button>
       </el-form-item>
 
-      <el-form-item label="坐席登录方式：" :label-width="formLabelWidth">
+      <el-form-item label="坐席登录方式：" :label-width="formLabelWidth" prop="extenType">
         <el-select v-model="form.extenType"  value-key="value" style="width: 290px;" filterable >
           <el-option
               v-for="item in extenTypes"
@@ -197,12 +197,9 @@
   </el-dialog>
 
   <!-- 批量添加 自定义字段弹窗 start -->
-  <el-dialog title="导入天润坐席" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog"
-             :close-on-click-modal="false" width="540px">
+  <el-dialog title="导入合力坐席" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" :close-on-click-modal="false" width="540px">
     <el-row class="marginB20">
-      <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
-      下载批量上传模版：<a href="/excel-templates/tr-client-template.xlsx" download="天润坐席导入模板"><span
-        style="color:#409EFF">天润坐席导入模板</span></a>
+      下载批量上传模版：<a href="/excel-templates/heli-client-template.xlsx" download="合力坐席导入模板"><span style="color:#409EFF">合力坐席导入模板</span></a>
 
     </el-row>
     <el-row>
@@ -211,15 +208,14 @@
           ref="upload"
           :multiple="false"
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          action="/client/client/uploadTrClient"
+          action="/client/heliClient/uploadHeliClient"
           :file-list="fileList"
           :on-change="handleChange"
           :before-upload="beforeUpload"
           :on-success="uploadSuccess"
           :on-error="uploadError"
           :auto-upload="false">
-        <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件
-        </el-button>
+        <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件</el-button>
         <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
       </el-upload>
 
@@ -243,30 +239,38 @@
       <el-table-column
           prop="clientNo"
           label="坐席号"
+          width="120">
+      </el-table-column>
+      <el-table-column
+          prop="loginName"
+          label="登录名"
+          width="120">
+      </el-table-column>
+      <el-table-column
+          prop="secret"
+          label="秘钥"
           width="180">
       </el-table-column>
       <el-table-column
-          prop="attribution"
-          label="坐席归属地"
+          prop="account"
+          label="用户账户编号"
           width="180">
+      </el-table-column>
+      <el-table-column
+          prop="integratedId"
+          label="登录账户名">
+      </el-table-column>
+      <el-table-column
+          prop="appid"
+          label="APPID">
+      </el-table-column>
+      <el-table-column
+          prop="extenType"
+          label="呼叫方式">
       </el-table-column>
       <el-table-column
           prop="orgName"
-          label="电销组"
-          width="180">
-      </el-table-column>
-      <el-table-column
-          prop="bindPhone"
-          label="TELA(绑定电话)"
-          width="180">
-      </el-table-column>
-      <el-table-column
-          prop="displayPhone"
-          label="TELX(回显号)">
-      </el-table-column>
-      <el-table-column
-          prop="callbackPhone"
-          label="回呼号码">
+          label="电销组">
       </el-table-column>
     </el-table>
 
@@ -292,30 +296,38 @@
       <el-table-column
           prop="clientNo"
           label="坐席号"
+          width="120">
+      </el-table-column>
+      <el-table-column
+          prop="loginName"
+          label="登录名"
+          width="120">
+      </el-table-column>
+      <el-table-column
+          prop="secret"
+          label="秘钥"
           width="180">
       </el-table-column>
       <el-table-column
-          prop="attribution"
-          label="坐席归属地"
+          prop="account"
+          label="用户账户编号"
           width="180">
+      </el-table-column>
+      <el-table-column
+          prop="integratedId"
+          label="登录账户名">
+      </el-table-column>
+      <el-table-column
+          prop="appid"
+          label="APPID">
+      </el-table-column>
+      <el-table-column
+          prop="extenType"
+          label="呼叫方式">
       </el-table-column>
       <el-table-column
           prop="orgName"
-          label="电销组"
-          width="180">
-      </el-table-column>
-      <el-table-column
-          prop="bindPhone"
-          label="TELA(绑定电话)"
-          width="180">
-      </el-table-column>
-      <el-table-column
-          prop="displayPhone"
-          label="TELX(回显号)">
-      </el-table-column>
-      <el-table-column
-          prop="callbackPhone"
-          label="回呼号码">
+          label="电销组">
       </el-table-column>
     </el-table>
 

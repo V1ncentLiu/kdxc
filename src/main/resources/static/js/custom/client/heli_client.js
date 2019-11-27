@@ -35,7 +35,9 @@ var clientVm = new Vue({
       appid: '',
       account: '',
       extenType: '',
-      integratedId: ''
+      integratedId: '',
+      extenTypeName: '',
+      orgName:''
     },
     searchForm: {//搜索form
       orgId: '',
@@ -105,13 +107,21 @@ var clientVm = new Vue({
         {required: true, message: '秘钥不能为空'},
       ],
       appid: [
-        {required: true, message: '用户唯一凭证不能为空'},
+        {required: true, message: 'APPID不能为空'},
       ],
       account: [
         {required: true, message: '用户账户编号不能为空'},
 
       ],
-      extenType: [
+      orgName: [
+        {required: true, message: '电销组不能为空'},
+
+      ],
+      integratedId: [
+        {required: true, message: '登录账户名不能为空'},
+
+      ],
+      extenTypeName: [
         {required: true, message: '坐席登录方式不能为空'},
 
       ],
@@ -172,7 +182,7 @@ var clientVm = new Vue({
         type: 'warning'
       }).then(() => {
         var param = {idList: rowIds};
-        axios.post('/client/heliClient/multipleSelection', param)
+        axios.post('/client/heliClient/deleteClientByIdList', param)
         .then(function (response) {
           var resData = response.data;
           if (resData.code == '0') {
@@ -287,7 +297,7 @@ var clientVm = new Vue({
           //fieldMenuVM.$refs.confirmBtn.disabled=true;
           clientVm.confirmBtnDisabled = true;//禁用提交按钮
           var param = this.form;
-          axios.post('/client/client/' + this.submitClientUrl, param)
+          axios.post('/client/heliClient/' + this.submitClientUrl, param)
           .then(function (response) {
             var resData = response.data;
             if (resData.code == '0') {
@@ -452,7 +462,7 @@ var clientVm = new Vue({
         this.uploadBtnDisabled = true;
         this.uploadBtnText = '导入中';
 
-        axios.post('/client/client/submitTrClientData', {})
+        axios.post('/client/heliClient/submitHeliClientData', {})
         .then(function (response) {
           var data = response.data;
           if (data.code == '0') {

@@ -1,13 +1,22 @@
 package com.kuaidao.manageweb.controller.client;
 
+import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
+import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
 import com.kuaidao.callcenter.dto.HeliClientInsertReq;
+import com.kuaidao.callcenter.dto.ImportHeliClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
 import com.kuaidao.callcenter.dto.seatmanager.HeliClientReq;
 import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.IdListReq;
+import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.constant.Constants;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.common.util.JSONUtil;
@@ -20,6 +29,7 @@ import org.apache.shiro.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +40,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
@@ -57,6 +68,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 合力 坐席
@@ -81,6 +93,9 @@ public class HeliClientController {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
 
     /**
@@ -305,9 +320,9 @@ public class HeliClientController {
      * @return
      */
     @RequiresPermissions("callCenter:heliClient:edit")
-    @PostMapping("/updateRonglianClient")
+    @PostMapping("/updateHeliClient")
     @ResponseBody
-    public JSONResult updateRonglianClient(@RequestBody HeliClientReq reqDTO) {
+    public JSONResult updateHeliClient(@RequestBody HeliClientReq reqDTO) {
         Long id = reqDTO.getId();
         if(null == id){
             return CommonUtil.getParamIllegalJSONResult();
@@ -317,18 +332,18 @@ public class HeliClientController {
 
     /**
      * 删除坐席
-     * @param idListLongReq
+     * @param idListReq
      * @return
      */
     @RequiresPermissions("callCenter:heliClient:delete")
     @PostMapping("/deleteClientByIdList")
     @ResponseBody
-    public JSONResult deleteClientByIdList(@RequestBody IdListLongReq idListLongReq){
-        List<Long> idList = idListLongReq.getIdList();
+    public JSONResult deleteClientByIdList(@RequestBody IdListReq idListReq){
+        List<String> idList = idListReq.getIdList();
         if(CollectionUtils.isEmpty(idList)){
             return CommonUtil.getParamIllegalJSONResult();
         }
-        return  heliClientFeignClient.deleteHeliClient(idListLongReq);
+        return  heliClientFeignClient.deleteHeliClient(idListReq);
     }
 
     /**
@@ -341,5 +356,105 @@ public class HeliClientController {
     @ResponseBody
     public JSONResult<HeliClientRespDTO> queryById(@RequestBody IdEntity idEntity) {
         return heliClientFeignClient.queryHeliClientById(idEntity);
+    }
+
+    /***
+     * 上传文件
+     * @return
+     */
+    @RequiresPermissions("callCenter:heliClient:import")
+    @PostMapping("/uploadHeliClient")
+    @ResponseBody
+    public JSONResult uploadHeliClient(@RequestParam("file") MultipartFile file) throws Exception {
+        // 获取当前的用户信息
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        long userId = curLoginUser.getId();
+
+        List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
+        logger.info("userid{{}} heli_client upload size:{{}}", userId, excelDataList.size());
+
+        if (excelDataList == null || excelDataList.size() == 0) {
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
+                SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
+        }
+        if (excelDataList.size() > 1000) {
+            logger.error("上传天润坐席,大于1000条，条数{{}}", excelDataList.size());
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
+                "导入数据过多，已超过1000条！");
+        }
+
+        // 存放合法的数据
+        List<ImportHeliClientDTO> dataList = new ArrayList<ImportHeliClientDTO>();
+        for (int i = 1; i < excelDataList.size(); i++) {
+            List<Object> rowList = excelDataList.get(i);
+            ImportHeliClientDTO rowDto = new ImportHeliClientDTO();
+            if (i == 1) {
+                // 记录上传列数
+                int rowSize = rowList.size();
+                logger.info("upload heli_client,userId{{}},upload rows num{{}}", userId, rowSize);
+            }
+            for (int j = 0; j < rowList.size(); j++) {
+                Object object = rowList.get(j);
+                String value = (String) object;
+
+                if (j == 0) {
+                    // 坐席号
+                    rowDto.setClientNo(value);
+                }else if (j == 1) {
+                    //登录名
+                    rowDto.setLoginName(value);
+                }else if (j == 2) {
+                    //秘钥
+                    rowDto.setSecret(value);
+                }  else if (j == 3) {
+                    // 用户账户编号
+                    rowDto.setAccount(value);
+                } else if (j == 4) {
+                    // 合力7x24平台的登录名
+                    rowDto.setIntegratedId(value);
+                } else if (j == 5) {
+                    // appid
+                    rowDto.setAppid(value);
+                } else if (j == 6) {
+                    // 坐席登录方式  sip:软电话 Local:直线  gateway:语音网关
+                    rowDto.setExtenType(value);
+                } else if (j == 7) {
+                    // 电销组
+                    rowDto.setOrgName(value);
+                }
+            }
+            dataList.add(rowDto);
+        }
+
+        excelDataList = null;
+
+        redisTemplate.opsForValue().set(Constants.HELI_CLIENT_KEY + userId, dataList, 10 * 60,
+            TimeUnit.SECONDS);
+        Map<String, Object> resMap = new HashMap<>();
+        resMap.put("num", dataList.size());
+        resMap.put("data", dataList);
+        return new JSONResult<>().success(resMap);
+    }
+
+    /**
+     *
+     * @return
+     */
+    @RequiresPermissions("callCenter:heliClient:import")
+    @LogRecord(description = "上传合力坐席", operationType = OperationType.IMPORTS,
+        menuName = MenuEnum.HELI_CLIENT_MANAGEMENT)
+    @ResponseBody
+    @PostMapping("/submitHeliClientData")
+    public JSONResult<List<ImportHeliClientDTO>> submitHeliClientData() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        long userId = curLoginUser.getId();
+        List<ImportHeliClientDTO> dataList = (List<ImportHeliClientDTO>) redisTemplate.opsForValue()
+            .get(Constants.HELI_CLIENT_KEY + userId);
+        UploadTrClientDataDTO<ImportHeliClientDTO> reqClientDataDTO =
+            new UploadTrClientDataDTO<ImportHeliClientDTO>();
+        reqClientDataDTO.setCreateUser(userId);
+        reqClientDataDTO.setList(dataList);
+        redisTemplate.delete(Constants.HELI_CLIENT_KEY + userId);
+        return heliClientFeignClient.uploadHeliClientData(reqClientDataDTO);
     }
 }

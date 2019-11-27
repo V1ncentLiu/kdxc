@@ -1,11 +1,14 @@
 package com.kuaidao.manageweb.feign.client;
 
+import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
 import com.kuaidao.callcenter.dto.HeliClientInsertReq;
+import com.kuaidao.callcenter.dto.ImportHeliClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientDTO;
 import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
 import com.kuaidao.callcenter.dto.seatmanager.HeliClientReq;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.IdListReq;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,12 +101,21 @@ public interface HeliClientFeignClient {
     public JSONResult<Boolean> updateHeliClient(@RequestBody HeliClientReq reqDTO);
 
     /**
-     * 根据idList删除容联坐席
-     * @param idListLongReq
+     * 根据idList删除坐席
+     * @param idListReq
      * @return
      */
     @PostMapping("/deleteHeliClient")
-    public JSONResult<Boolean> deleteHeliClient(@RequestBody IdListLongReq idListLongReq);
+    public JSONResult<Boolean> deleteHeliClient(@RequestBody IdListReq idListReq);
+
+    /***
+     * 上传合力数据
+     *
+     * @return
+     */
+    @PostMapping("/uploadHeliClientData")
+    public JSONResult<List<ImportHeliClientDTO>> uploadHeliClientData(
+        @RequestBody UploadTrClientDataDTO<ImportHeliClientDTO> reqDTO);
 
     @Component
     static   class HystrixClientFallback implements HeliClientFeignClient {
@@ -158,8 +170,14 @@ public interface HeliClientFeignClient {
         }
 
         @Override
-        public JSONResult<Boolean> deleteHeliClient(IdListLongReq idListLongReq) {
+        public JSONResult<Boolean> deleteHeliClient(IdListReq idListReq) {
             return fallBackError("删除合力坐席");
+        }
+
+        @Override
+        public JSONResult<List<ImportHeliClientDTO>> uploadHeliClientData(
+            UploadTrClientDataDTO<ImportHeliClientDTO> reqDTO) {
+            return fallBackError("导入合力坐席");
         }
     }
 }

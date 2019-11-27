@@ -40,7 +40,7 @@ public interface RoleManagerFeignClient {
 
 	/**
 	 * 删除角色时判断是否有用户关联
-	 * 
+	 *
 	 * @param roleDTO
 	 * @return
 	 */
@@ -56,7 +56,7 @@ public interface RoleManagerFeignClient {
 		private JSONResult fallBackError(String name) {
 			logger.error(name + "接口调用失败：无法获取目标服务");
 			return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-					SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+				SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -110,8 +110,8 @@ public interface RoleManagerFeignClient {
 			// TODO Auto-generated method stub
 			return fallBackError("查询角色数据失败");
 		}
-		
-		
+
+
 
 	}
 
