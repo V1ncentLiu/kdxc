@@ -198,7 +198,6 @@ public class BusinessAreaVisitSignController {
         //商务组
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-        //TODO 后边修改为商务总经理
         if(RoleCodeEnum.SWZJL.name().equals(roleCode)){
             busAreaId = String.valueOf(curLoginUser.getOrgId());
             busGroupReqDTO.setParentId(curLoginUser.getOrgId());
@@ -213,7 +212,6 @@ public class BusinessAreaVisitSignController {
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
         JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         List<OrganizationRespDTO> data = listJSONResult.getData();
-        //TODO 后边修改为商务总经理
         if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
             busAreaId = String.valueOf(data.get(0).getParentId());
         }
