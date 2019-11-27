@@ -1,5 +1,14 @@
 package com.kuaidao.manageweb.feign.client;
 
+import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
+import com.kuaidao.callcenter.dto.HeliClientInsertReq;
+import com.kuaidao.callcenter.dto.ImportHeliClientDTO;
+import com.kuaidao.callcenter.dto.RonglianClientDTO;
+import com.kuaidao.callcenter.dto.RonglianClientInsertReq;
+import com.kuaidao.callcenter.dto.seatmanager.HeliClientReq;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.IdListReq;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +77,46 @@ public interface HeliClientFeignClient {
      */
     @PostMapping("/listClientByParams")
     public JSONResult<List<HeliClientRespDTO>> listClientByParams(@RequestBody HeliClientReqDTO heliClientReqDTO);
-    
+
+    /**
+     * 根据Id 查询合力坐席
+     */
+    @PostMapping("/queryHeliClientById")
+    public JSONResult<HeliClientRespDTO> queryHeliClientById(@RequestBody IdEntity idEntity);
+
+    /**
+     * 添加坐席
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/saveHeliClient")
+    public JSONResult<Boolean> saveHeliClient(@RequestBody HeliClientInsertReq reqDTO);
+
+    /**
+     * 更新坐席
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/updateHeliClient")
+    public JSONResult<Boolean> updateHeliClient(@RequestBody HeliClientReq reqDTO);
+
+    /**
+     * 根据idList删除坐席
+     * @param idListReq
+     * @return
+     */
+    @PostMapping("/deleteHeliClient")
+    public JSONResult<Boolean> deleteHeliClient(@RequestBody IdListReq idListReq);
+
+    /***
+     * 上传合力数据
+     *
+     * @return
+     */
+    @PostMapping("/uploadHeliClientData")
+    public JSONResult<List<ImportHeliClientDTO>> uploadHeliClientData(
+        @RequestBody UploadTrClientDataDTO<ImportHeliClientDTO> reqDTO);
+
     @Component
     static   class HystrixClientFallback implements HeliClientFeignClient {
 
@@ -105,8 +153,31 @@ public interface HeliClientFeignClient {
                 HeliClientReqDTO heliClientReqDTO) {
             return fallBackError("查询坐席相关信息");
         }
-        
+
+        @Override
+        public JSONResult<HeliClientRespDTO> queryHeliClientById(IdEntity idEntity) {
+            return fallBackError("根据Id 查询合力坐席");
+        }
+
+        @Override
+        public JSONResult<Boolean> saveHeliClient(HeliClientInsertReq reqDTO) {
+            return fallBackError("添加合力坐席");
+        }
+
+        @Override
+        public JSONResult<Boolean> updateHeliClient(HeliClientReq reqDTO) {
+            return fallBackError("更新合力坐席");
+        }
+
+        @Override
+        public JSONResult<Boolean> deleteHeliClient(IdListReq idListReq) {
+            return fallBackError("删除合力坐席");
+        }
+
+        @Override
+        public JSONResult<List<ImportHeliClientDTO>> uploadHeliClientData(
+            UploadTrClientDataDTO<ImportHeliClientDTO> reqDTO) {
+            return fallBackError("导入合力坐席");
+        }
     }
-
-
 }
