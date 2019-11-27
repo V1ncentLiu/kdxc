@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.paydetail;
 
 import com.kuaidao.manageweb.feign.paydetail.PayChangeRecordFeignClient;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,8 @@ import com.kuaidao.aggregation.dto.paydetail.PayChangeRecordParamDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 修改付款明细操作记录 Created on 2019-11-25 16:45:56
  */
@@ -20,6 +23,22 @@ public class PayChangeRecordController {
 
     @Autowired
     private PayChangeRecordFeignClient payChangeRecordFeignClient;
+
+
+    /**
+     * 付款明细操作记录列表初始化
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2019/11/26 15:37
+     * @since: 1.0.0
+     **/
+    @RequestMapping("/pageInit")
+    @RequiresPermissions("paydetail:payChangRecord:view")
+    public String balanceAccountPage(HttpServletRequest request) {
+        return "business/busChangePaymentRecord";
+    }
     /**
      * 付款明细操作记录列表
      * 
