@@ -572,12 +572,12 @@
             </el-row>
             </el-form>
             <div class="dialog-footer f-tac">
-                <el-button type="primary" @click="submitUpdateForm('updateFormSigning')" :disabled="updateSignButtonAble">提交</el-button>
+                <!-- <el-button type="primary" @click="submitUpdateForm('updateFormSigning')" :disabled="updateSignButtonAble">提交</el-button> -->
+                <el-button type="primary" @click="submitUpdateForm1('updateFormSigning')">提交</el-button>
                 <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
             </div>
         </template>
-    </el-dialog>
-    
+    </el-dialog>    
     <el-dialog title="添加签约单信息" width="870px" :visible.sync="dialogFormSigningVisible">
         <template>
             <el-form :model="formSigning" ref="formSigning"  :rules="rules">
@@ -1930,7 +1930,7 @@
                 this.updateFormSigning.performanceAmount = (aone + atwo) + ""
             },
             submitUpdateForm(formName) {
-                console.log("点击添加付款")
+                console.log("点击提交添加付款")
                 this.updateFormSigning.amountPerformance = this.updateFormSigning.performanceAmount;
                 var param = this.updateFormSigning;
                 if (param.makeUpTime) {
@@ -1942,13 +1942,6 @@
                 param.clueId= vclueId;
                 param.signId= vsignId;
                 this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
-                var url="";
-                if(false){
-                    url="/businesssign/updateSignDetail"
-                }else{
-                    url="/payDetail/payOrSignUpdate"
-                }
-                console.log(url)
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (mainDivVM.updateSignButtonAble == true) {
@@ -1956,12 +1949,12 @@
                     }
                     if (valid) {
                         mainDivVM.updateSignButtonAble = true;
-                        axios.post(url, param)
+                        axios.post("/businesssign/updateSignDetail", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({
                                         type: 'success', message: '付款明细保存成功!', duration: 2000, onClose: function () {
-                                        	mainDivVM.dialogFormVisible = false;
+                                            mainDivVM.dialogFormVisible = false;
                                             mainDivVM.addPayDetailButtonAble=false;
                                         //  跳转回上一页： /businesssign/visitRecordPage
                                             window.location.href='/businesssign/visitRecordPage?clueId='+vclueId+'&signId='+vsignId+'&readyOnly=1&type=0';
@@ -1975,6 +1968,59 @@
                                 mainDivVM.updateSignButtonAble = false;
                                 console.log(error);
                         });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            submitUpdateForm1(formName) {
+                console.log("点击提交修改付款明细")
+                this.updateFormSigning.amountPerformance = this.updateFormSigning.performanceAmount;
+                var param = this.updateFormSigning;
+                if (param.makeUpTime) {
+                    param.makeUpTime = new Date(param.makeUpTime)
+                }
+                if (param.payTime) {
+                    param.payTime = new Date(param.payTime)
+                }
+                param.clueId= vclueId;
+                param.signId= vsignId;
+                this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
+                // 设置 clueid
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.$prompt('您确认进行修改吗？修改后信息将进行变更，请输入变更备注。', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            inputPattern: /\S/,
+                            inputErrorMessage: '编辑备注不能为空'
+                        }).then(({ value }) => {
+                            console.log(value)
+                            param.remark=value;
+                            axios.post("/payDetail/payOrSignUpdate", param)
+                                .then(function (response) {
+                                    if (response.data.code == 0) {
+                                        mainDivVM.$message({
+                                            type: 'success', message: '付款明细修改成功!', duration: 2000, onClose: function () {
+                                                mainDivVM.dialogFormVisible = false;
+                                                mainDivVM.addPayDetailButtonAble=false;
+                                            //  跳转回上一页： /businesssign/visitRecordPage
+                                                window.location.href='/businesssign/visitRecordPage?clueId='+vclueId+'&signId='+vsignId+'&readyOnly=1&type=0';
+                                            }
+                                        });
+                                    } else {
+                                        mainDivVM.$message.error(response.data.msg);
+                                    }
+                                }).catch(function (error) {
+                                    console.log(error);
+                            });                            
+                        }).catch(() => {
+                            this.$message({
+                                type: 'info',
+                                message: '取消操作'
+                            });       
+                        });
+                            
                     } else {
                         return false;
                     }
