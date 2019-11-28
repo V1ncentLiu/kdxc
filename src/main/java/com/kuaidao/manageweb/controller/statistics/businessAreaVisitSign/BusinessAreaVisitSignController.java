@@ -131,7 +131,6 @@ public class BusinessAreaVisitSignController {
         List<Object> curList = new ArrayList<>();
         curList.add("合计");
         curList.add("");
-        curList.add(ra.getBusinessGroupName());
         curList.add(ra.getFirstVisitNum());
         curList.add(ra.getSignNum());
         curList.add(ra.getAmount());
@@ -143,7 +142,7 @@ public class BusinessAreaVisitSignController {
 
     private void buildList(List<List<Object>> dataList, List<BusAreaVisitSignDto> sourceDataList,List<BusAreaVisitSignDto> sumList,
                            Integer type) {
-        Map<String, BusAreaVisitSignDto> sumMap = sumList.stream().collect(Collectors.toMap(BusAreaVisitSignDto::getGroupId, Function.identity()));
+        Map<String, BusAreaVisitSignDto> sumMap = sumList.stream().collect(Collectors.toMap(BusAreaVisitSignDto::getBusinessAreaId, Function.identity()));
         TreeMap<String, List<BusAreaVisitSignDto>> sourceDataListTreeMap =
                 sourceDataList.stream().collect(Collectors.groupingBy(BusAreaVisitSignDto::getBusinessAreaId, TreeMap::new, Collectors.toList()));
         //添加总合计
