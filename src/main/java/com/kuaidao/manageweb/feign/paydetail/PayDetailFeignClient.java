@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailListDTO;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailPageParam;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
@@ -17,7 +15,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
-@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/paydetail",
+@FeignClient(name = "aggregation-service", path = "/aggregation/paydetail",
         fallback = PayDetailFeignClient.HystrixClientFallback.class)
 public interface PayDetailFeignClient {
 
