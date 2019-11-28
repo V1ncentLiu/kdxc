@@ -109,7 +109,7 @@ public class PayDetaiController {
      */
     @ResponseBody
     @RequestMapping("/payOrSignUpdate")
-    @RequiresPermissions("paydetail:payAndSign:edit")
+    @RequiresPermissions("businessMyCustomer:editPayAndSign")
     @LogRecord(operationType = LogRecord.OperationType.UPDATE, description = "编辑付款明细",
             menuName = MenuEnum.PAYANDSIGN_CHANGE)
     public JSONResult<Boolean> payOrSignUpdate(@RequestBody BusSignInsertOrUpdateDTO dto)
