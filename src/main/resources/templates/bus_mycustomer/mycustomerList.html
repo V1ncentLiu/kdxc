@@ -408,9 +408,17 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="到访城市" :label-width="formLabelWidth" prop="arrVisitCity">
+                    <!--    <el-form-item label="到访城市" :label-width="formLabelWidth" prop="arrVisitCity">
                             <el-input v-model="addVisitRecord.arrVisitCity" autocomplete="off" maxlength="50"></el-input>
+                        </el-form-item>-->
+                        <el-form-item label="到访城市" :label-width="formLabelWidth" prop="arrVisitCity">
+                        <el-select v-model="addVisitRecord.arrVisitCity" placeholder="请选择" clearable
+                                   style="width:100%">
+                            <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                       :value="item.name"></el-option>
+                        </el-select>
                         </el-form-item>
+
                     </el-col>
                 </el-row>
                 <el-row :gutter="20">
@@ -1779,12 +1787,13 @@
             isSignArr: [{value: 0, name: '否'}, {value: 1, name: '是'}],
             visitArr: [{value: '', name: "全部"}, {value: -1, name: '待处理'}, {value: 0, name: '未到访'}, {
                 value: 1,
-                name: '已到访'
-            }],
+                name: '首次到访'
+            }, {value: 2, name: '2次到访'}, {value: 3, name: '3次到访'},{value: 4, name: '4次到访'},{value: 5, name: '5次到访'}],
             visitTypeArr: [{value: 1, name: '预约来访'}, {value: 2, name: '慕名来访'}, {value: 3, name: '临时来访'}],
             option2s: [{value: 1, label: '一次性全款'}, {value: 2, label: '先付定金'}],
             option3s: [],
             payTypeArr: [{value: "1", label: '全款'}, {value: "2", label: '定金'}, {value: "3", label: '追加定金'}, {
+
                 value: "4",
                 label: '尾款'
             }],
@@ -1798,6 +1807,7 @@
             districtArr: [],
             cityArr: [],
             companyArr: [],
+            visitCityArr:[],
             projectArr: proSelect,
             multipleSelection: [],
             notVisitFlagRules: {
@@ -2352,6 +2362,18 @@
                     resVal = '未到访';
                 } else if (row.visitStatus == 1) {
                     resVal = '已到访';
+                    var visitNum = row.auditVisitNum;
+                    if(visitNum == 1){
+                        resVal = '首次到访';
+                    }else if(visitNum == 2){
+                        resVal = '2次到访';
+                    }else if(visitNum == 3){
+                        resVal = '3次到访';
+                    } else if(visitNum == 4){
+                        resVal = '4次到访';
+                    }else if(visitNum == 5){
+                        resVal = '5次到访';
+                    }
                 }
                 return resVal;
             },
@@ -3543,6 +3565,12 @@
             param = {};
             axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
                 mainDivVM.companyArr = response.data.data;
+            });
+            //到访城市
+            param = {};
+            param.groupCode = "visitCity";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.visitCityArr = response.data.data;
             });
 
         },

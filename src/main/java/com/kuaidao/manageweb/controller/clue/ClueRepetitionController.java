@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.common.util.CommonUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -467,6 +469,11 @@ public class ClueRepetitionController {
     @RequestMapping("/distributionPdUser")
     @ResponseBody
     public JSONResult distributionPdUser(@RequestBody ClueRepetitionDTO clueRepetitionDTO){
+        List<String> pdUserList = clueRepetitionDTO.getPdUsers();
+        if (CollectionUtils.isEmpty(pdUserList)) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+
         return clueRepetitionFeignClient.distributionPdUser(clueRepetitionDTO);
     }
 }

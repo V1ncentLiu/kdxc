@@ -277,8 +277,15 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="到访城市："    :label-width="formLabelWidth"  prop="arrVisitCity">
+                            <!--<el-form-item label="到访城市："    :label-width="formLabelWidth"  prop="arrVisitCity">
                                 <el-input v-model="addVisitRecord.arrVisitCity" autocomplete="off"  maxlength="50"    ></el-input>
+                            </el-form-item>-->
+                            <el-form-item label="到访城市" :label-width="formLabelWidth" prop="arrVisitCity">
+                                <el-select v-model="addVisitRecord.arrVisitCity" placeholder="请选择" clearable
+                                           style="width:100%">
+                                    <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                               :value="item.name"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -755,6 +762,7 @@
             districtArr:[],
             cityArr:[],
             companyArr:[],
+            visitCityArr:[],
             projectArr:proSelect,
             isAllMoney: false,
             notEditRebutSign:false,
@@ -1306,6 +1314,13 @@
             param={};
             axios.post('/aggregation/companyManager/listNoPage',param).then(function (response) {
                 mainDivVM.companyArr=response.data.data;
+            });
+
+            //到访城市
+            param = {};
+            param.groupCode = "visitCity";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.visitCityArr = response.data.data;
             });
 
         },
