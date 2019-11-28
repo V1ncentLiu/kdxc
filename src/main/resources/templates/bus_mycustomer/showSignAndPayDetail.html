@@ -569,8 +569,8 @@
             </el-row>
             </el-form>
             <div class="dialog-footer f-tac">
-                <!-- <el-button type="primary" @click="submitUpdateForm('updateFormSigning')" :disabled="updateSignButtonAble">提交</el-button> -->
-                <el-button type="primary" @click="submitUpdateForm1('updateFormSigning')">提交</el-button>
+                <el-button type="primary" v-if="clickVal==0" @click="submitUpdateForm('updateFormSigning')" :disabled="updateSignButtonAble">提交</el-button>
+                <el-button type="success" v-else="clickVal==1" @click="submitUpdateForm1('updateFormSigning')">提交</el-button>
                 <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
             </div>
         </template>
@@ -946,6 +946,7 @@
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+            clickVal:0,//默认是添加付款提交按钮点击
             suppWrapBox:true,//默认显示添加补充到访记录
             type:type,
             signOrderBaseInfo:signData,//签约单基本信息
@@ -1545,6 +1546,7 @@
                 return valText;
             },
             recordDialogClick(type){
+                this.clickVal=0;
                 this.suppWrapBox=true;// 默认显示 到访记录 填写部分
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
@@ -1564,6 +1566,7 @@
                 this.editRebutSign(obj);
             },
             recordDialogClick1(){//点击编辑付款明细
+                this.clickVal=1;
                 this.suppWrapBox =false; // 不显示 到访记录 填写部分
                 this.resetForm('updateFormSigning'); //重置校验状态
                 this.dialogUpdateFormSigningVisible = true;
