@@ -26,7 +26,7 @@
         <div class="marginB10">
             <span class="fs14 marginR10">签约单基本信息</span>  
             <el-button v-show="showSignButtonFlag" type="primary" size="small" @click="editSign()">添加多个签约单</el-button>
-            <el-button  v-show="readonlyFalg&&paymentDetailsShow2" @click="recordDialogClick(1)" type="primary" size="small" >添加付款</el-button>
+            <el-button  @click="recordDialogClick(1)" type="primary" size="small" >添加付款</el-button>
         </div>
         <div class="borderbox padding20 marginB20 borderboxInfo">
             <el-row>
@@ -96,7 +96,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -138,7 +138,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -181,7 +181,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -224,7 +224,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -1572,7 +1572,8 @@
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
             },
-            recordDialogClick1(val){//点击编辑付款明细
+            recordDialogClick1(row,val){//点击编辑付款明细
+                console.log(row)
                 console.log(val)
                 this.clickVal=1;
                 this.suppWrapBox =false; // 不显示 到访记录 填写部分
@@ -2006,7 +2007,7 @@
                         }).then(({ value }) => {
                             // 修改付款明细的备注
                             console.log(value)
-                            param.remark=value;
+                            param.operationRemark=value;
                             axios.post("/payDetail/payOrSignUpdate", param)
                                 .then(function (response) {
                                     if (response.data.code == 0) {
