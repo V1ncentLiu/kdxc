@@ -191,15 +191,11 @@ public class BusinessAreaVisitSignController {
     }
 
     public void initOrgList(HttpServletRequest request){
-        String busAreaId="";// 当前商务大区
-        String businessGroupId ="";//商务组
-        String businessManagerId = "";//商务经理
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         //商务组
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-        if(RoleCodeEnum.SWZJL.name().equals(roleCode)){
-            busAreaId = String.valueOf(curLoginUser.getOrgId());
+        if(RoleCodeEnum.SWZC.name().equals(roleCode)){
             busGroupReqDTO.setParentId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员可以查看全部
@@ -212,19 +208,12 @@ public class BusinessAreaVisitSignController {
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
         JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         List<OrganizationRespDTO> data = listJSONResult.getData();
-        if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
-            busAreaId = String.valueOf(data.get(0).getParentId());
-        }
         request.setAttribute("busGroupList",data);
 
 
         //餐饮集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
-
-        request.setAttribute("busAreaId",busAreaId);
-        request.setAttribute("businessGroupId",businessGroupId);
-        request.setAttribute("businessManagerId",businessManagerId);
 
 
 
@@ -241,7 +230,7 @@ public class BusinessAreaVisitSignController {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setOrgType(OrgTypeConstant.SWDQ);
 //        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
-        if(RoleCodeEnum.SWZJL.name().equals(roleCode)){
+        if(RoleCodeEnum.SWZC.name().equals(roleCode)){
             queryDTO.setId(curLoginUser.getOrgId());
             request.setAttribute("areaId",curLoginUser.getOrgId()+"");
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
