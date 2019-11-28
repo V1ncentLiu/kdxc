@@ -4,6 +4,7 @@ import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -28,10 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -95,6 +93,7 @@ public class NextInvitationController extends BaseStatisticsController {
     public @ResponseBody  JSONResult<Map<String,Object>> queryByPage(@RequestBody BaseQueryDto baseQueryDto){
       //权限控制
       initParams(baseQueryDto);
+      converAddDateTime(baseQueryDto);
       return nextInvitationFeignClient.queryByPage(baseQueryDto);
     }
 
@@ -107,7 +106,9 @@ public class NextInvitationController extends BaseStatisticsController {
     @RequestMapping("/queryAreaPage")
     public @ResponseBody JSONResult<Map<String,Object>> queryDeptByPage(@RequestBody BaseQueryDto baseQueryDto){
         //权限控制
+
         initParams(baseQueryDto);
+        converAddDateTime(baseQueryDto);
         return nextInvitationFeignClient.queryAreaPage(baseQueryDto);
     }
 
@@ -122,6 +123,7 @@ public class NextInvitationController extends BaseStatisticsController {
     public @ResponseBody void invitationExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
+            converAddDateTime(baseQueryDto);
             JSONResult<List<NextInvitationDto>> json= nextInvitationFeignClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 NextInvitationDto[] dtos = json.getData().isEmpty()?new NextInvitationDto[]{}:json.getData().toArray(new NextInvitationDto[0]);
@@ -152,6 +154,7 @@ public class NextInvitationController extends BaseStatisticsController {
     public @ResponseBody void deptExport(@RequestBody BaseQueryDto baseQueryDto, HttpServletResponse response){
         try{
             initParams(baseQueryDto);
+            converAddDateTime(baseQueryDto);
             JSONResult<List<NextInvitationDto>> json= nextInvitationFeignClient.queryAreaList(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 NextInvitationDto[] dtos = json.getData().isEmpty()?new NextInvitationDto[]{}:json.getData().toArray(new NextInvitationDto[0]);
@@ -229,6 +232,19 @@ public class NextInvitationController extends BaseStatisticsController {
         }else{
             //other
             dto.setTeleGroupId(curLoginUser.getOrgId());
+        }
+    }
+
+
+    /**
+     * 时间加一天
+     * @param baseQueryDto
+     */
+    private void converAddDateTime(BaseQueryDto baseQueryDto){
+        if(null!=baseQueryDto.getDateTimes()){
+            Date date=DateUtil.convert2Date(baseQueryDto.getDateTimes()+"","yyyyMMdd");
+            String time= DateUtil.convert2String(new Date(date.getTime()+24*60*60*1000l),"yyyyMMdd");
+            baseQueryDto.setDateTimes(Long.parseLong(time));
         }
     }
 
