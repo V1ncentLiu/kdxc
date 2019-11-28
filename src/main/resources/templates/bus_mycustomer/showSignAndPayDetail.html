@@ -86,10 +86,7 @@
             </el-row>
         </div>
         <div v-show="paymentDetailsShow">
-            <div class="fs14 marginB10">
-                全款付款明细
-                <el-button type="success" size="small" @click="recordDialogClick1()" style="margin-left: 10px;">编辑</el-button>
-            </div>
+            <div class="fs14 marginB10">全款付款明细</div>
             <el-table
                 ref="recordTable"
                 tooltip-effect="dark"
@@ -97,6 +94,11 @@
                 border
                 :data="recordTable"
                 >
+                <el-table-column align="center" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="200" :formatter="getPayModeText"></el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
@@ -126,10 +128,7 @@
             </el-table>
         </div>
         <div v-show="paymentDetailsShow2">
-            <div class="fs14 marginB10">
-                定金付款明细
-                <el-button type="success" size="small" @click="recordDialogClick1()" style="margin-left: 10px;">编辑</el-button>
-            </div>
+            <div class="fs14 marginB10">定金付款明细</div>
             <el-table
                 ref="recordTable2"
                 tooltip-effect="dark"
@@ -137,6 +136,11 @@
                 border
                 :data="recordTable2"
                 >
+                <el-table-column align="center" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式"  width="200"  :formatter="getPayModeText">
                 </el-table-column>
@@ -167,11 +171,7 @@
             </el-table>
         </div>
         <div v-show="paymentDetailsShow3">
-            <div class="fs14 marginB10">
-                追加定金付款明细
-                <!--<el-button @click="recordDialogClick(2)" type="primary" size="small" class="f-fr">添加付款</el-button>-->
-                <el-button type="success" size="small" @click="recordDialogClick1()" style="margin-left: 10px;">编辑</el-button>
-            </div>
+            <div class="fs14 marginB10">追加定金付款明细</div>
             <el-table
                 ref="recordTable3"
                 tooltip-effect="dark"
@@ -179,6 +179,11 @@
                 border
                 :data="recordTable3"
                 >
+                <el-table-column align="center" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="200" :formatter="getPayModeText">
                 </el-table-column>
@@ -209,11 +214,7 @@
             </el-table>
         </div>
         <div v-show="paymentDetailsShow4">
-            <div class="fs16 marginB20">
-                尾款付款明细
-                <!--<el-button @click="recordDialogClick(3)" type="primary" size="small" class="f-fr">添加付款</el-button>-->
-                <el-button type="success" size="small" @click="recordDialogClick1()" style="margin-left: 10px;">编辑</el-button>
-            </div>
+            <div class="fs16 marginB20">尾款付款明细</div>
             <el-table
                 ref="recordTable"
                 tooltip-effect="dark"
@@ -221,6 +222,11 @@
                 border
                 :data="recordTable4"
                 >
+                <el-table-column align="center" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="200" :formatter="getPayModeText">
                 </el-table-column>
@@ -1463,6 +1469,7 @@
             option3s: [],
             payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
             payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
+            payDetailId:'',//选择修改付款明细的id
         },
         computed: {
         },
@@ -1565,13 +1572,16 @@
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
             },
-            recordDialogClick1(){//点击编辑付款明细
+            recordDialogClick1(val){//点击编辑付款明细
+                console.log(val)
                 this.clickVal=1;
                 this.suppWrapBox =false; // 不显示 到访记录 填写部分
                 this.resetForm('updateFormSigning'); //重置校验状态
                 this.dialogUpdateFormSigningVisible = true;
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
+                // 给付款明细id赋值
+                this.payDetailId=val;
                 // 回显付款明细
                 // 1、全款付款明细
 
@@ -1854,13 +1864,10 @@
             editRebutSign(row) {
                 this.resetForm("updateFormSigning");
                 var param = {};
-                console.log(row)
                 param.id = row.signId
                 param.signId = row.signId
                 param.clueId = row.clueId
                 axios.post('/businesssign/querySignById', param).then(function (response) {
-                    debugger
-                    console.log(response)
                     if (null === response || response.data == null || response.data.code != '0') {
                         if (response.data.code != '0') {
                             mainDivVM.$message({message: response.data.msg, type: 'warning'});
@@ -1985,6 +1992,8 @@
                 }
                 param.clueId= vclueId;
                 param.signId= vsignId;
+                // 修改付款明细的id
+                param.payDetailId= this.payDetailId;
                 this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
@@ -1995,6 +2004,7 @@
                             inputPattern: /\S/,
                             inputErrorMessage: '编辑备注不能为空'
                         }).then(({ value }) => {
+                            // 修改付款明细的备注
                             console.log(value)
                             param.remark=value;
                             axios.post("/payDetail/payOrSignUpdate", param)
