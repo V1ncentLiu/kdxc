@@ -27,6 +27,7 @@
             <span class="fs14 marginR10">签约单基本信息</span>  
             <el-button v-show="showSignButtonFlag" type="primary" size="small" @click="editSign()">添加多个签约单</el-button>
             <el-button v-show="readonlyFalg&&paymentDetailsShow2" @click="recordDialogClick(1)" type="primary" size="small" >添加付款</el-button>
+            <!-- <el-button @click="recordDialogClick(1)" type="primary" size="small" >添加付款</el-button> -->
         </div>
         <div class="borderbox padding20 marginB20 borderboxInfo">
             <el-row>
@@ -96,7 +97,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -138,7 +139,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.id)">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -181,7 +182,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.id)">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -224,7 +225,7 @@
                 >
                 <el-table-column align="center" label="操作" width="80">
                     <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
+                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.id)">编辑</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
@@ -1553,7 +1554,7 @@
                 return valText;
             },
             recordDialogClick(type){
-                this.clickVal=0;
+                this.clickVal=0;//添加付款提交按钮点击
                 this.suppWrapBox=true;// 默认显示 到访记录 填写部分
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
@@ -1571,17 +1572,19 @@
                 this.suppWrap = false;
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
+                // 给已选编辑付款明细id赋值
+                this.payDetailId="";
             },
             recordDialogClick1(row,val){//点击编辑付款明细
                 console.log(row)
                 console.log(val)
-                this.clickVal=1;
+                this.clickVal=1;//编辑付款明细提交按钮点击
                 this.suppWrapBox =false; // 不显示 到访记录 填写部分
                 this.resetForm('updateFormSigning'); //重置校验状态
                 this.dialogUpdateFormSigningVisible = true;
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
-                // 给付款明细id赋值
+                // 给已选编辑付款明细id赋值
                 this.payDetailId=val;
                 // 回显付款明细
                 // 1、全款付款明细
