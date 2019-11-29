@@ -92,7 +92,7 @@
                 <el-table-column prop="businessGroupName" label="商务组">
                     <template slot-scope="scope">
                         <span v-if="scope.row.total =='合计'">
-                            <el-button type="text" size="small" v-if="scope.row.groupId==99999" class="act">合计</el-button>
+                            <el-button type="text" size="small" v-if="scope.row.businessAreaId==99999" class="act">合计</el-button>
                             <span class="act" v-else >合计</span>
                         </span>
                         <span v-else>{{scope.row.businessGroupName}}</span>
@@ -129,7 +129,7 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <!-- <table-pagination :pager="pager" @change="searchTable()"></table-pagination> -->
         </el-row>
     </div>
 </div>
@@ -161,7 +161,7 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    businessAreaId: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
                     groupId:'',
@@ -169,7 +169,7 @@
                 export: {
                     startTime:'',
                     endTime:'',
-                    businessAreaId: '',
+                    busAreaId: '',
                     businessGroupId: '',
                     businessManagerId: '',
                     groupId:'',
@@ -295,7 +295,7 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 //商务大区
-                param.businessAreaId = this.form.businessAreaId;
+                param.busAreaId = this.form.busAreaId;
                 //商务组
                 param.businessGroupId = this.form.businessGroupId;
                 //商务经理
@@ -304,6 +304,7 @@
                 param.groupId = this.form.groupId;
                 this.loading = true;
                 axios.post('/businessAreaBisitSign/getBusinessAreaSignList',param).then(function (response) {
+                    console.log(response)
                     if(!response || !response.data){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -322,21 +323,22 @@
                     }else if(resobj.data && resobj.data.tableData){
                         var resobjData = resobj.data;
                         var tableData = resobjData.tableData;
-                        if( tableData.data.length && resobj.data.totalData ){
+                        // if( tableData.data.length && resobj.data.totalData ){
+                        if( resobj.data.totalData ){
                             for (var i = 0; i < resobjData.totalData.length; i++) {
                                 Vue.set(resobjData.totalData[i], 'total', '合计')
                             }
-                            for (var j = 0; j < tableData.data.length; j++) {
-                                Vue.set(tableData.data[j], 'total', '')
+                            for (var j = 0; j < tableData.length; j++) {
+                                Vue.set(tableData[j], 'total', '')
                             }
-                            mainDivVM.summaryFun(resobjData.totalData,tableData.data)
+                            mainDivVM.summaryFun(resobjData.totalData,tableData)
                         }else{
-                            mainDivVM.tableData = tableData.data;
+                            mainDivVM.tableData = tableData;
                         }
                         mainDivVM.loading = false;
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.businessAreaId = mainDivVM.form.businessAreaId;
+                        mainDivVM.export.busAreaId = mainDivVM.form.busAreaId;
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.groupId = mainDivVM.form.groupId;
@@ -356,7 +358,7 @@
             summaryFun(totalData, tableData) {
                 var resultTableData = [] // 新list
                 for(var k=0;k<totalData.length;k++){
-                    if(totalData[k].groupId == 99999){
+                    if(totalData[k].businessAreaId == 99999){
                         resultTableData.push(totalData[k]);
                     }
                 }
@@ -369,7 +371,7 @@
                     for(var i=0;i<totalData.length;i++){
                         var ind = -1;
                         for(var j=0;j<tableData.length;j++){
-                            if(totalData[i].groupId === tableData[j].groupId){
+                            if(totalData[i].businessAreaId === tableData[j].businessAreaId){
                                 ind = i;
                                 resultTableData.push(tableData[j]);
                             }
@@ -463,7 +465,7 @@
                var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.startTime=startTime;
                this.form.endTime=endTime;
-               this.searchTable(1);
+               this.searchTable();
             },
             searchYear(){ // 年
                var today = new Date();
@@ -471,7 +473,7 @@
                var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.startTime=startTime;
                this.form.endTime=endTime;
-               this.searchTable(1);
+               this.searchTable();
             },
             searchMonth(){ // 本月 
                 var a = new Date();
@@ -484,21 +486,21 @@
                 var startTime= new Date(c);
                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
                 this.form.endTime=year+"-"+(month+1)+"-"+date;
-                this.searchTable(1);
+                this.searchTable();
             },
             exportRs(){
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
                 //商务大区
-                param.businessAreaId = this.export.businessAreaId;
+                param.busAreaId = this.export.busAreaId;
                 //商务组
                 param.businessGroupId = this.export.businessGroupId;
                 //商务经理
                 param.businessManagerId = this.export.businessManagerId;
                 //餐饮集团
                 param.groupId = this.export.groupId;
-                axios.post('/busTeleDistribution/exportOneAllList',param,{responseType:'blob'})
+                axios.post('/businessAreaBisitSign/exportAllList',param,{responseType:'blob'})
                 .then(function (response) {
                     var data =  response.data;
                     var fileName = response.headers.filename;
@@ -520,8 +522,8 @@
             this.form.endTime=endTime; 
             if(curDeptId){
                 this.isDisabled = true;
-                this.form.businessAreaId = curDeptId;
-                this.export.businessAreaId = this.form.businessAreaId;
+                this.form.busAreaId = curDeptId;
+                this.export.busAreaId = this.form.busAreaId;
                 this.firstCurTelGroupSale(curDeptId);
                 if(curOrgId){
                     this.isDisabledOrgId = true;
