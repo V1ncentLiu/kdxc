@@ -1032,7 +1032,7 @@
                 isRemoteSign: 0,
 
                 payDetailId: "",
-                payType: '3',
+                payType: '',//去掉默认的3，改成点击添加付款时候是3
                 payName: '',
                 payModes: [],
                 payMode: '',
@@ -1587,10 +1587,12 @@
 
                 return valText;
             },
-            recordDialogClick(type){
-                this.isEditSigning=false;//添加付款
+            recordDialogClick(type){                
+                this.isEditSigning=false;//添加付款，不是编辑
                 this.isEditSigningDisable=true;//添加付款弹窗，签约类型不可选
                 this.clickVal=0;//添加付款提交按钮点击
+                this.updateFormSigning.payType='3';//默认是追加定金
+
                 this.suppWrapBox=true;// 默认显示 到访记录 填写部分
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
@@ -1626,6 +1628,25 @@
                 this.payDetailId=val;
                 // 回显付款明细
                 debugger
+                // 签约类型和付款类型
+                this.updateFormSigning.payType=row.payType;//付款类型
+                if (row.payType > 2) {
+                    if (row.payType == 3) {
+                        mainDivVM.showfalg = true;
+                    } else {
+                        mainDivVM.showfalg = false;
+                    }
+                    this.payTypeSelect = false;
+                    this.payTypeArr = this.payTypeArr1.slice(2, 4)
+                } else {
+                    if (row.payType == 1) {
+                        this.showfalg = false;
+                    } else {
+                        this.showfalg = true;
+                    }
+                    this.payTypeSelect = true;
+                    this.payTypeArr = this.payTypeArr1.slice(0, 2)
+                }
                 // 付款方式
                 if(row.payMode){
                     var modeArr = row.payMode.split(",");
@@ -1983,7 +2004,7 @@
                         mainDivVM.currentProvince(sign.signProvince);
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                         // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
-                        if (sign.signType==1) {
+                        if (sign.signType&&sign.signType==1) {
                             mainDivVM.showfalg=false;
                         }
                     }
