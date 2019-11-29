@@ -539,8 +539,14 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
-                                <el-input  v-model="updateFormSigning.arrVisitCity" maxLength="50" >
-                                </el-input>
+                         <!--       <el-input  v-model="updateFormSigning.arrVisitCity" maxLength="50" >
+                                </el-input>-->
+
+                                <el-select v-model="updateFormSigning.arrVisitCity" placeholder="请选择" clearable
+                                           style="width:100%">
+                                    <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                               :value="item.name"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -714,8 +720,13 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
-                                <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
-                                </el-input>
+                                <!-- -   <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
+                                   </el-input>-->
+                                <el-select v-model="formSigning.arrVisitCity" placeholder="请选择" clearable
+                                           style="width:100%">
+                                    <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                               :value="item.name"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1036,6 +1047,7 @@
             vistitStoreTypeArr:[],
             provinceArr:[],
             districtArr:[],
+            visitCityArr:[],
             cityArr:[],
             companyArr:[],
             projectArr:proSelect,
@@ -2127,6 +2139,12 @@
             param={};
             axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
                 mainDivVM.companyArr=response.data.data;
+            });
+
+            param = {};
+            param.groupCode = "visitCity";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.visitCityArr = response.data.data;
             });
         },
         mounted(){

@@ -81,7 +81,7 @@ public interface HeliClientFeignClient {
     /**
      * 根据Id 查询合力坐席
      */
-    @PostMapping("/queryById")
+    @PostMapping("/queryHeliClientById")
     public JSONResult<HeliClientRespDTO> queryHeliClientById(@RequestBody IdEntity idEntity);
 
     /**
