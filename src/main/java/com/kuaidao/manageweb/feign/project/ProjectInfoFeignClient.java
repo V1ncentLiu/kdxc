@@ -3,7 +3,7 @@ package com.kuaidao.manageweb.feign.project;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/projectInfo",
+@FeignClient(name = "aggregation-service-ooo1", path = "/aggregation/projectInfo",
         fallback = ProjectInfoFeignClient.HystrixClientFallback.class)
 public interface ProjectInfoFeignClient {
     /**

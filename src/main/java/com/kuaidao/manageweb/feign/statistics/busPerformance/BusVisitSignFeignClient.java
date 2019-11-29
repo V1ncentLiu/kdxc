@@ -2,13 +2,11 @@ package com.kuaidao.manageweb.feign.statistics.busPerformance;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.statistics.busTeleDistribution.BusTeleDistributionFeignClient;
 import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
-import com.kuaidao.stastics.dto.busPerformance.BusPerformanceDto;
 import com.kuaidao.stastics.dto.busPerformance.BusVisitSignDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 

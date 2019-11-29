@@ -10,7 +10,7 @@ import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/busvisitrecord", fallback = BusVisitRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ooo1", path = "/aggregation/busvisitrecord", fallback = BusVisitRecordFeignClient.HystrixClientFallback.class)
 public interface BusVisitRecordFeignClient {
 
 	@RequestMapping("/insert")

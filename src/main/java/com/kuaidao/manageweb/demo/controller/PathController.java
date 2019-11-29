@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.rabbitmq.http.client.domain.UserInfo;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,9 +26,6 @@ public class PathController {
 	@RequestMapping("/index")
 	public  String index(HttpServletRequest request) {
 
-		UserInfo userinfo = new UserInfo();
-		userinfo.setName("yangbiao");
-		request.setAttribute("user",userinfo);
 		request.setAttribute("wsUrlHttp",wsUrlHttp);
 		request.setAttribute("mqUserName",mqUserName);
 		request.setAttribute("mqPassword",mqPassword);

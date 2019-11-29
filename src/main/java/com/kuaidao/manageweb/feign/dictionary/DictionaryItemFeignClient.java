@@ -4,7 +4,7 @@ import java.util.List;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +24,7 @@ import feign.hystrix.FallbackFactory;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service", path = "/sys/DictionaryItem",
+@FeignClient(name = "sys-service-ooo1", path = "/sys/DictionaryItem",
         fallbackFactory = DictionaryItemFeignClient.HystrixClientFallback.class)
 public interface DictionaryItemFeignClient {
 

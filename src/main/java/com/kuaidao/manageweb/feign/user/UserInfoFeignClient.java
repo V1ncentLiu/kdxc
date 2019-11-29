@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +24,7 @@ import com.kuaidao.sys.dto.user.*;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/userInfo",
+@FeignClient(name = "sys-service-ooo1", path = "/sys/userInfo",
         fallback = UserInfoFeignClient.HystrixClientFallback.class)
 public interface UserInfoFeignClient {
     /**

@@ -3,7 +3,7 @@ package com.kuaidao.manageweb.feign.merchant.clue;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +24,7 @@ import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
  * @date: 2019年09月06日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service-ooo1", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
 public interface MerchantClueApplyFeignClient {
     @PostMapping("/save")
     JSONResult<Boolean> save(@Valid @RequestBody ClueApplyReqDto reqDto);
