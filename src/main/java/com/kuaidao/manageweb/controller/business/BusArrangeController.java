@@ -128,7 +128,7 @@ public class BusArrangeController {
         String roleCode = roleList.get(0).getRoleCode();
         Long orgId = user.getOrgId();
         if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
-                || RoleCodeEnum.SWZXWY.name().equals(roleCode)) {
+                || RoleCodeEnum.SWZXWY.name().equals(roleCode) || RoleCodeEnum.SWZC.name().equals(roleCode)) {
             UserOrgRoleReq req = new UserOrgRoleReq();
             req.setOrgId(orgId);
             req.setRoleCode(RoleCodeEnum.SWZJ.name());
@@ -338,7 +338,10 @@ public class BusArrangeController {
      */
     private List<OrganizationDTO> getTeleGroupByRoleCode(UserInfoDTO user) {
         List<RoleInfoDTO> roleList = user.getRoleList();
-        if (roleList != null && RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())) {
+        if(roleList == null){
+            return null;
+        }
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode()) ) {
             // 如果是商务大区总监大区下所有商务组
             Long orgId = user.getOrgId();
             OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();

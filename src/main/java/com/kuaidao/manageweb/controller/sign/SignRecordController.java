@@ -114,6 +114,15 @@ public class SignRecordController {
             }
             request.setAttribute("businessGroupList", businessGroupList);
             request.setAttribute("ownOrgId", ownOrgId);
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+            // 查询下级所有商务组
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setParentId(curLoginUser.getOrgId());
+            queryDTO.setOrgType(OrgTypeConstant.SWZ);
+            JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                    organizationFeignClient.queryOrgByParam(queryDTO);
+            List<OrganizationRespDTO> data = queryOrgByParam.getData();
+            request.setAttribute("businessGroupList", data);
         }
         /*
          * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
@@ -226,7 +235,7 @@ public class SignRecordController {
         String roleCode = roleInfoDTO.getRoleCode();
         Long businessGroupId = reqDTO.getBusinessGroupId();
         List<Long> businessGroupIdList = new ArrayList<>();
-        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.SWZC.name().equals(roleCode)) {
             //商务经理外调，发起外调的商务总监进行审核,根据组id查询
             if (businessGroupId != null) {
                 businessGroupIdList.add(businessGroupId);
@@ -255,7 +264,7 @@ public class SignRecordController {
             }
             businessGroupIdList.add(orgId);
             reqDTO.setBusinessGroupIdList(businessGroupIdList);
-        } else {
+        }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
 
