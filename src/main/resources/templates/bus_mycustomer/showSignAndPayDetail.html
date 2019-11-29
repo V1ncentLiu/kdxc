@@ -1943,6 +1943,7 @@
                         return false;
                     } else {
                         //设置显示数据
+                        debugger
                         var sign = response.data.data;
                         mainDivVM.updateFormSigning.customerName = sign.customerName;
                         mainDivVM.updateFormSigning.signNo = sign.signNo;
@@ -1960,9 +1961,13 @@
                          if(response.data.data.payName == null || response.data.data.payName == ''){
                             mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                         } 
-                         mainDivVM.currentCity(sign.signCity);
-                         mainDivVM.currentProvince(sign.signProvince);
+                        mainDivVM.currentCity(sign.signCity);
+                        mainDivVM.currentProvince(sign.signProvince);
                         mainDivVM.dialogUpdateFormSigningVisible = true;
+                        // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
+                        if (sign.signType==1) {
+                            mainDivVM.showfalg=false;
+                        }
                     }
                 })
             },
