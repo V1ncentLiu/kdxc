@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.statistics.businessAreaVisitSign;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.google.common.collect.Maps;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -31,10 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -92,7 +90,7 @@ public class BusinessAreaVisitSignController {
     @RequestMapping("/exportAllList")
     public void exportAllList(HttpServletResponse response, @RequestBody BaseBusQueryDto baseBusQueryDto) throws IOException {
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        dataList.add(getTitleList(1));
+        //dataList.add(getTitleList(1));
         JSONResult<Map<String, Object>> result =   businessAreaVisitSignFeignClient.getBusinessAreaSignList(baseBusQueryDto);
         Map<String, Object> dataMap = result.getData();
         String listTxt = JSONArray.toJSONString(dataMap.get("tableData"));
@@ -101,8 +99,11 @@ public class BusinessAreaVisitSignController {
         //合计
         List<BusAreaVisitSignDto>  sumReadd = JSON.parseArray(totalDataStr, BusAreaVisitSignDto.class);
         buildList(dataList, orderList,sumReadd,1);
-        addSerialNum(dataList);
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        List<Map<String, Object>> data = buildDataMap(dataList);
+        //addSerialNum(dataList);
+        Map<String, List<Map<String, Object>>> map = Maps.newHashMap();
+        map.put("商务大区业绩表", data);
+        XSSFWorkbook wbWorkbook = ExcelUtil.createExcelMerge(getTitle(),map,new int[]{1});
         String name = "商务大区业绩表" +baseBusQueryDto.getStartTime()+"-"+baseBusQueryDto.getEndTime() + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -113,24 +114,16 @@ public class BusinessAreaVisitSignController {
         outputStream.close();
     }
 
-    private List<Object> getTitleList(Integer type) {
-        List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("序号");
-        headTitleList.add("商务大区");
-        headTitleList.add("商务组");
-        headTitleList.add("首访数");
-        headTitleList.add("签约数");
-        headTitleList.add("净业绩金额");
-        headTitleList.add("签约率");
-        headTitleList.add("单笔签约");
-        headTitleList.add("单笔来访");
-        return headTitleList;
+    private String[] getTitle(){
+        String[] titles = new String[]{"序号", "商务大区", "商务组", "首访数", "签约数", "净业绩金额", "签约率", "单笔签约","单笔来访"};
+        return titles;
     }
 
     private void addTotalExportData(BusAreaVisitSignDto ra, List<List<Object>> dataList, Integer type) {
         List<Object> curList = new ArrayList<>();
-        curList.add("合计");
+
         curList.add("");
+        curList.add("合计");
         curList.add(ra.getFirstVisitNum());
         curList.add(ra.getSignNum());
         curList.add(ra.getAmount());
@@ -175,7 +168,25 @@ public class BusinessAreaVisitSignController {
             dataList.add(curList);
         }
     }
-
+    private List<Map<String, Object>> buildDataMap(List<List<Object>> list){
+        List<Map<String, Object>> list1 = new ArrayList<Map<String, Object>>();
+        for(int j = 0; j<list.size(); j++){
+            List raInner = list.get(j);
+            int num = j+1;
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("序号",num+"");
+            dataMap.put("商务大区",raInner.get(0));
+            dataMap.put("商务组",raInner.get(1));
+            dataMap.put("首访数",raInner.get(2));
+            dataMap.put("签约数",raInner.get(3));
+            dataMap.put("净业绩金额",raInner.get(4));
+            dataMap.put("签约率",raInner.get(5));
+            dataMap.put("单笔签约",raInner.get(6));
+            dataMap.put("单笔来访",raInner.get(7));
+            list1.add(dataMap);
+        }
+        return list1;
+    }
     private void addSerialNum(List<List<Object>> dataList){
         int j = 0;
         for(int i=0;i<dataList.size();i++){
