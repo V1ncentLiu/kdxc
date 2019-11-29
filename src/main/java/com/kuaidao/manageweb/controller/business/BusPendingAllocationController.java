@@ -144,6 +144,7 @@ public class BusPendingAllocationController {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
+        pageParam.setOrgId(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
 
