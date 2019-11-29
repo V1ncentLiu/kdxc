@@ -114,7 +114,7 @@ public class TruckingOrderController {
         if (roleList != null && roleList.size() != 0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
             String roleCode = roleInfoDTO.getRoleCode();
-            if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+            if (RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.SWZC.name().equals(roleCode)) {
                 UserOrgRoleReq req = new UserOrgRoleReq();
                 req.setOrgId(orgId);
                 req.setRoleCode(RoleCodeEnum.SWZJ.name());

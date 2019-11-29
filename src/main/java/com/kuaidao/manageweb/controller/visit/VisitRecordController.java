@@ -267,7 +267,7 @@ public class VisitRecordController {
         String roleCode = roleInfoDTO.getRoleCode();
         Long busGroupId = visitRecordReqDTO.getBusGroupId();
         List<Long> busGroupIdList = new ArrayList<>();
-        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.SWZC.name().equals(roleCode)) {
             /*Long busManagerId = visitRecordReqDTO.getBusManagerId();
             if (busManagerId == null) {
                 List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
@@ -337,7 +337,7 @@ public class VisitRecordController {
         String roleCode = roleInfoDTO.getRoleCode();
         List<Long> busGroupIdList = new ArrayList<Long>();
 
-        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.SWZC.name().equals(roleCode)) {
             if(null != visitNoRecordReqDTO.getBusGroupId()){
                 busGroupIdList.add(visitNoRecordReqDTO.getBusGroupId());
             } else {
