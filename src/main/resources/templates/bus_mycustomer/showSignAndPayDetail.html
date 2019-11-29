@@ -383,8 +383,7 @@
                         <el-col :span="12">
                             <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType"
                                           style="width: 100%;">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType"
-                                           @change="selectUpdateSigningType" placeholder="请选择签约类型：" style="width:100%" disabled>
+                                <el-select v-model="updateFormSigning.signType" @change="selectUpdateSigningType" placeholder="请选择签约类型：" style="width:100%" :disabled="isEditSigning">
                                     <el-option
                                         v-for="item in option2s"
                                         :key="item.value"
@@ -961,6 +960,7 @@
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+            isEditSigning:true,//默认是添加付款，签约类型不可点击
             clickVal:0,//默认是添加付款提交按钮点击
             suppWrapBox:true,//默认显示添加补充到访记录
             type:type,
@@ -1562,6 +1562,7 @@
                 return valText;
             },
             recordDialogClick(type){
+                this.isEditSigning=true;//添加付款弹窗，签约类型不可选
                 this.clickVal=0;//添加付款提交按钮点击
                 this.suppWrapBox=true;// 默认显示 到访记录 填写部分
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
@@ -1586,6 +1587,7 @@
             recordDialogClick1(row,val){//点击编辑付款明细
                 console.log(row)
                 console.log(val)
+                this.isEditSigning=false;//编辑付款明细弹窗，签约类型可选
                 this.clickVal=1;//编辑付款明细提交按钮点击
                 this.suppWrapBox =false; // 不显示 到访记录 填写部分
                 this.resetForm('updateFormSigning'); //重置校验状态
@@ -1984,10 +1986,10 @@
                 // this.updateFormSigning.makeUpTime = '';
                 if (pa1 == '1') {
                     this.updateFormSigning.payType = '1';
-                    this.isAllMoney = false;
+                    this.showfalg = false;
                 } else {
                     this.updateFormSigning.payType = '2';
-                    this.isAllMoney = true;
+                    this.showfalg = true;
                 }
             },
             updateFormSigningAmountPerformance() {
