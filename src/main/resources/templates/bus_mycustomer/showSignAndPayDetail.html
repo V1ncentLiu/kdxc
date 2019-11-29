@@ -1602,36 +1602,28 @@
                     this.updateFormSigning.payModes = this.tansPayModeValueToName(modeArr);
                 }
                 // 余款金额
-                if(row.amountBalance){
-                    this.updateFormSigning.amountBalance=row.amountBalance;
-                }
+                this.updateFormSigning.amountBalance=row.amountBalance;
                 // 预计余款补齐时间
                 if(row.makeUpTime){
                     this.updateFormSigning.makeUpTime=row.makeUpTime;
                 }
                 // 实收金额
-                if(row.amountReceived){
-                    this.updateFormSigning.amountReceived=row.amountReceived;
-                }
+                this.updateFormSigning.amountReceived=row.amountReceived;
                 // 业绩金额
-                if(row.amountPerformance){
-                    this.updateFormSigning.performanceAmount=row.amountPerformance;
-                }
+                this.updateFormSigning.performanceAmount=row.amountPerformance;
                 // 路费（报首次）
-                if(row.firstToll){
-                    this.updateFormSigning.firstToll=row.firstToll;
-                }
+                this.updateFormSigning.firstToll=row.firstToll;
                 // 招商政策优惠金额
-                if(row.preferentialAmount){
-                    this.updateFormSigning.preferentialAmount=row.preferentialAmount;
-                }
+                this.updateFormSigning.preferentialAmount=row.preferentialAmount;
                 // 赠送金额
-                if(row.giveAmount){
-                    this.updateFormSigning.giveAmount=row.giveAmount;
-                }
-                // 赠送类型
+                this.updateFormSigning.giveAmount=row.giveAmount;
+                // 赠送类型                
                 if(row.giveType){
-                    this.updateFormSigning.giveType = row.giveType + "";
+                    if(row.giveType ==null || row.giveType =='-1'){
+                        this.updateFormSigning.giveType = null;
+                    }else{
+                        this.updateFormSigning.giveType = row.giveType + "";
+                    }
                 }
                 // 备注
                 if(row.remarks){
@@ -1939,6 +1931,7 @@
                         return false;
                     } else {
                         //设置显示数据
+                        debugger
                         var sign = response.data.data;
                         mainDivVM.updateFormSigning.customerName = sign.customerName;
                         mainDivVM.updateFormSigning.signNo = sign.signNo;
@@ -1956,9 +1949,13 @@
                          if(response.data.data.payName == null || response.data.data.payName == ''){
                             mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                         } 
-                         mainDivVM.currentCity(sign.signCity);
-                         mainDivVM.currentProvince(sign.signProvince);
+                        mainDivVM.currentCity(sign.signCity);
+                        mainDivVM.currentProvince(sign.signProvince);
                         mainDivVM.dialogUpdateFormSigningVisible = true;
+                        // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
+                        if (sign.signType==1) {
+                            mainDivVM.showfalg=false;
+                        }
                     }
                 })
             },
