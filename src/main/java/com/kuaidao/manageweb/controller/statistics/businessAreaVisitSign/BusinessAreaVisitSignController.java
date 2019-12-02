@@ -68,7 +68,7 @@ public class BusinessAreaVisitSignController {
         //商务组
         initOrgList(request);
         //商务大区
-        initBugOrg(request);
+        initSWDQByBusiness(request);
         return "reportformsBusiness/businessAreaVisitSign";
     }
 
@@ -228,26 +228,19 @@ public class BusinessAreaVisitSignController {
      * 按登录用户业务线查询-商务大区
      * @param request
      */
-    protected void initBugOrg(HttpServletRequest request){
+    public void initSWDQByBusiness(HttpServletRequest request){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-
         //查询商务大区
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setOrgType(OrgTypeConstant.SWDQ);
-//        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
-        if(RoleCodeEnum.SWZC.name().equals(roleCode)){
-            queryDTO.setId(curLoginUser.getOrgId());
-            request.setAttribute("areaId",curLoginUser.getOrgId()+"");
-        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
-            //管理员查询全部
-        }else{
-            //other
-            queryDTO.setId(curLoginUser.getOrgId());
-        }
+        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
-        request.setAttribute("areaList",queryOrgByParam.getData());
+        List<OrganizationRespDTO> organizationRespDTOList = queryOrgByParam.getData();
+        List<Long> areaIdList = organizationRespDTOList.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+        request.setAttribute("areaList",organizationRespDTOList);
         request.setAttribute("roleCode",roleCode);
+        request.setAttribute("areaIdList",areaIdList);
     }
 }
