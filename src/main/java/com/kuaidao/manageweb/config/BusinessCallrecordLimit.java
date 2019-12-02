@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import lombok.Data;
+import org.springframework.stereotype.Component;
 
 
 /**
@@ -11,9 +12,10 @@ import lombok.Data;
  * @date 2019-07-11 17:24:03
  * @version V1.0
  */
+@Component
 @Configuration
 @Data
-@ConfigurationProperties(prefix = "callrecord.businessOrgId")
+@ConfigurationProperties(prefix = "callrecord.business-org-id")
 public class BusinessCallrecordLimit {
     /**
      * qhdBusOrgId

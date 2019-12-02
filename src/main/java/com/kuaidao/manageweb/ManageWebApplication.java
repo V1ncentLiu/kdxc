@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 @EnableEurekaClient
 @EnableFeignClients
 @EnableCircuitBreaker
+@EnableConfigurationProperties
 @EnableAsync
 public class ManageWebApplication {
 
