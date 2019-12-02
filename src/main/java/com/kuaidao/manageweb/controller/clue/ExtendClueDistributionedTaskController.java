@@ -557,6 +557,10 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getWechat());
                 // 搜索词
                 curList.add(taskDTO.getSearchWord());
+                // 首次分配电销组
+                curList.add(taskDTO.getFirstAsssignTeleGroupName());
+                // 首次分配电销总监
+                curList.add(taskDTO.getFirstAsssignTeleDirectorName());
                 // 电销组
                 curList.add(taskDTO.getTeleGorupName());
                 // 电销顾问
@@ -634,6 +638,8 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("QQ");
         headTitleList.add("微信");
         headTitleList.add("搜索词");
+        headTitleList.add("首次分配电销组");
+        headTitleList.add("首次分配电销组总监");
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");
         headTitleList.add("是否接通");

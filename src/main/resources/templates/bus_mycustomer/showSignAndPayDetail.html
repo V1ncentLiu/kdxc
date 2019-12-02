@@ -27,6 +27,7 @@
             <span class="fs14 marginR10">签约单基本信息</span>  
             <el-button v-show="showSignButtonFlag" type="primary" size="small" @click="editSign()">添加多个签约单</el-button>
             <el-button v-show="readonlyFalg&&paymentDetailsShow2" @click="recordDialogClick(1)" type="primary" size="small" >添加付款</el-button>
+            <!-- <el-button @click="recordDialogClick(1)" type="primary" size="small" >添加付款</el-button> -->
         </div>
         <div class="borderbox padding20 marginB20 borderboxInfo">
             <el-row>
@@ -94,11 +95,13 @@
                 border
                 :data="recordTable"
                 >
-                <el-table-column align="center" label="操作" width="80">
-                    <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
-                    </template>
-                </el-table-column>
+                <shiro:hasPermission name="business:busCustomerManager:editPayAndSign">
+                    <el-table-column align="center" label="操作" width="80">
+                        <template slot-scope="scope">
+                            <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </shiro:hasPermission>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="200" :formatter="getPayModeText"></el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
@@ -136,11 +139,13 @@
                 border
                 :data="recordTable2"
                 >
-                <el-table-column align="center" label="操作" width="80">
-                    <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
-                    </template>
-                </el-table-column>
+                <shiro:hasPermission name="business:busCustomerManager:editPayAndSign">
+                    <el-table-column align="center" label="操作" width="80">
+                        <template slot-scope="scope">
+                            <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.id)">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </shiro:hasPermission>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式"  width="200"  :formatter="getPayModeText">
                 </el-table-column>
@@ -179,11 +184,13 @@
                 border
                 :data="recordTable3"
                 >
-                <el-table-column align="center" label="操作" width="80">
-                    <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
-                    </template>
-                </el-table-column>
+                <shiro:hasPermission name="business:busCustomerManager:editPayAndSign">
+                    <el-table-column align="center" label="操作" width="80">
+                        <template slot-scope="scope">
+                            <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.id)">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </shiro:hasPermission>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="200" :formatter="getPayModeText">
                 </el-table-column>
@@ -222,11 +229,13 @@
                 border
                 :data="recordTable4"
                 >
-                <el-table-column align="center" label="操作" width="80">
-                    <template slot-scope="scope">
-                        <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.payDetailId)" style="margin-left: 10px;">编辑</el-button>
-                    </template>
-                </el-table-column>
+                <shiro:hasPermission name="business:busCustomerManager:editPayAndSign">
+                    <el-table-column align="center" label="操作" width="80">
+                        <template slot-scope="scope">
+                            <el-button type="success" size="small" @click="recordDialogClick1(scope.row,scope.row.id)">编辑</el-button>
+                        </template>
+                    </el-table-column>
+                </shiro:hasPermission>
                 <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="200" :formatter="getPayModeText">
                 </el-table-column>
@@ -374,8 +383,7 @@
                         <el-col :span="12">
                             <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType"
                                           style="width: 100%;">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType"
-                                           @change="selectUpdateSigningType" placeholder="请选择签约类型：" style="width:100%" disabled>
+                                <el-select v-model="updateFormSigning.signType" @change="selectUpdateSigningType" placeholder="请选择签约类型：" style="width:100%" :disabled="isEditSigningDisable">
                                     <el-option
                                         v-for="item in option2s"
                                         :key="item.value"
@@ -407,12 +415,25 @@
               <div class="paddB20">付款明细</div>
                 <el-row>
                 <el-col :span="12">
-                    <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
+                    <!-- 编辑付款明细 -->
+                    <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType" v-if="isEditSigning">
+                        <el-select v-model="updateFormSigning.payType" :disabled="payTypeSelect"
+                                   placeholder="请选择签约付款类型" @change="changePayType" style="width:100%;">
+                            <el-option
+                                    v-for="item in payTypeArr"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <!-- 添加付款 -->
+                    <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType" v-else="isEditSigning">
                         <el-select v-model="updateFormSigning.payType" placeholder="请选择签约付款类型" @change="payTypeChange" style="width:100%">
                             <el-option label="追加定金" value="3"></el-option>
                             <el-option label="尾款" value="4"></el-option>
                         </el-select>
-                    </el-form-item>
+                    </el-form-item>                    
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="付款人姓名：" :label-width="formLabelWidth" prop="payName">
@@ -531,8 +552,14 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
-                                <el-input  v-model="updateFormSigning.arrVisitCity" maxLength="50" >
-                                </el-input>
+                         <!--       <el-input  v-model="updateFormSigning.arrVisitCity" maxLength="50" >
+                                </el-input>-->
+
+                                <el-select v-model="updateFormSigning.arrVisitCity" placeholder="请选择" clearable
+                                           style="width:100%">
+                                    <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                               :value="item.name"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -706,8 +733,13 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
-                                <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
-                                </el-input>
+                                <!-- -   <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
+                                   </el-input>-->
+                                <el-select v-model="formSigning.arrVisitCity" placeholder="请选择" clearable
+                                           style="width:100%">
+                                    <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                               :value="item.name"></el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -952,6 +984,8 @@
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+            isEditSigning:false,//默认是添加付款，不是编辑付款明细
+            isEditSigningDisable:true,//默认是添加付款，签约类型不可点击
             clickVal:0,//默认是添加付款提交按钮点击
             suppWrapBox:true,//默认显示添加补充到访记录
             type:type,
@@ -998,7 +1032,7 @@
                 isRemoteSign: 0,
 
                 payDetailId: "",
-                payType: '3',
+                payType: '',//去掉默认的3，改成点击添加付款时候是3
                 payName: '',
                 payModes: [],
                 payMode: '',
@@ -1027,6 +1061,7 @@
             vistitStoreTypeArr:[],
             provinceArr:[],
             districtArr:[],
+            visitCityArr:[],
             cityArr:[],
             companyArr:[],
             projectArr:proSelect,
@@ -1552,8 +1587,12 @@
 
                 return valText;
             },
-            recordDialogClick(type){
-                this.clickVal=0;
+            recordDialogClick(type){                
+                this.isEditSigning=false;//添加付款，不是编辑
+                this.isEditSigningDisable=true;//添加付款弹窗，签约类型不可选
+                this.clickVal=0;//添加付款提交按钮点击
+                this.updateFormSigning.payType='3';//默认是追加定金
+
                 this.suppWrapBox=true;// 默认显示 到访记录 填写部分
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
@@ -1571,21 +1610,88 @@
                 this.suppWrap = false;
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
+                // 给已选编辑付款明细id赋值
+                this.payDetailId="";
             },
             recordDialogClick1(row,val){//点击编辑付款明细
                 console.log(row)
                 console.log(val)
-                this.clickVal=1;
+                this.isEditSigning=true;//编辑付款明细
+                this.isEditSigningDisable=false;//编辑付款明细弹窗，签约类型可选
+                this.clickVal=1;//编辑付款明细提交按钮点击
                 this.suppWrapBox =false; // 不显示 到访记录 填写部分
                 this.resetForm('updateFormSigning'); //重置校验状态
                 this.dialogUpdateFormSigningVisible = true;
                 var obj = {clueId:vclueId,signId:vsignId};
                 this.editRebutSign(obj);
-                // 给付款明细id赋值
+                // 给已选编辑付款明细id赋值
                 this.payDetailId=val;
                 // 回显付款明细
-                // 1、全款付款明细
+                debugger
+                // 签约类型和付款类型
+                this.updateFormSigning.payType=row.payType;//付款类型
+                if (row.payType > 2) {
+                    if (row.payType == 3) {
+                        mainDivVM.showfalg = true;
+                    } else {
+                        mainDivVM.showfalg = false;
+                    }
+                    this.payTypeSelect = false;
+                    this.payTypeArr = this.payTypeArr1.slice(2, 4)
+                } else {
+                    if (row.payType == 1) {
+                        this.showfalg = false;
+                    } else {
+                        this.showfalg = true;
+                    }
+                    this.payTypeSelect = true;
+                    this.payTypeArr = this.payTypeArr1.slice(0, 2)
+                }
+                // 付款方式
+                if(row.payMode){
+                    var modeArr = row.payMode.split(",");
+                    this.updateFormSigning.payModes = this.tansPayModeValueToName(modeArr);
+                }
+                // 余款金额
+                this.updateFormSigning.amountBalance=row.amountBalance;
+                // 预计余款补齐时间
+                if(row.makeUpTime){
+                    this.updateFormSigning.makeUpTime=row.makeUpTime;
+                }
+                // 实收金额
+                this.updateFormSigning.amountReceived=row.amountReceived;
+                // 业绩金额
+                this.updateFormSigning.performanceAmount=row.amountPerformance;
+                // 路费（报首次）
+                this.updateFormSigning.firstToll=row.firstToll;
+                // 招商政策优惠金额
+                this.updateFormSigning.preferentialAmount=row.preferentialAmount;
+                // 赠送金额
+                this.updateFormSigning.giveAmount=row.giveAmount;
+                // 赠送类型                
+                if(row.giveType){
+                    if(row.giveType ==null || row.giveType =='-1'){
+                        this.updateFormSigning.giveType = null;
+                    }else{
+                        this.updateFormSigning.giveType = row.giveType + "";
+                    }
+                }
+                // 备注
+                if(row.remarks){
+                    this.updateFormSigning.remarks=row.remarks;
+                }
 
+            },
+            tansPayModeValueToName(payModes){//付款方式转换
+                var payModeArr = [];
+                for(var i = 0 ; i < payModes.length;i++){
+                    for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                        if(payModes[i]== mainDivVM.option3s[j].value){
+                            payModeArr.push( mainDivVM.option3s[j].name);
+                        }
+                    }
+                }
+                return payModeArr;
             },
             payTypeChange(val){
                 if(val==3){
@@ -1876,6 +1982,7 @@
                         return false;
                     } else {
                         //设置显示数据
+                        debugger
                         var sign = response.data.data;
                         mainDivVM.updateFormSigning.customerName = sign.customerName;
                         mainDivVM.updateFormSigning.signNo = sign.signNo;
@@ -1893,9 +2000,13 @@
                          if(response.data.data.payName == null || response.data.data.payName == ''){
                             mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                         } 
-                         mainDivVM.currentCity(sign.signCity);
-                         mainDivVM.currentProvince(sign.signProvince);
+                        mainDivVM.currentCity(sign.signCity);
+                        mainDivVM.currentProvince(sign.signProvince);
                         mainDivVM.dialogUpdateFormSigningVisible = true;
+                        // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
+                        if (sign.signType&&sign.signType==1) {
+                            mainDivVM.showfalg=false;
+                        }
                     }
                 })
             },
@@ -1924,10 +2035,10 @@
                 // this.updateFormSigning.makeUpTime = '';
                 if (pa1 == '1') {
                     this.updateFormSigning.payType = '1';
-                    this.isAllMoney = false;
+                    this.showfalg = false;
                 } else {
                     this.updateFormSigning.payType = '2';
-                    this.isAllMoney = true;
+                    this.showfalg = true;
                 }
             },
             updateFormSigningAmountPerformance() {
@@ -2065,6 +2176,12 @@
             param={};
             axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
                 mainDivVM.companyArr=response.data.data;
+            });
+
+            param = {};
+            param.groupCode = "visitCity";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.visitCityArr = response.data.data;
             });
         },
         mounted(){
