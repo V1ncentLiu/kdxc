@@ -91,6 +91,7 @@ public class BusinessAreaVisitSignController {
      *
      */
     @RequestMapping("/exportAllList")
+    @RequiresPermissions("businessAreaBisitSign:initBusinessAreaBisitSign:export")
     public void exportAllList(HttpServletResponse response, @RequestBody BaseBusQueryDto baseBusQueryDto) throws IOException {
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         //dataList.add(getTitleList(1));
