@@ -238,9 +238,9 @@ public class BusinessAreaVisitSignController {
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> organizationRespDTOList = queryOrgByParam.getData();
-        List<Long> areaIdList = organizationRespDTOList.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+        List<String> areaIdList = organizationRespDTOList.parallelStream().map(p ->p.getId().toString()).collect(Collectors.toList());
         request.setAttribute("areaList",organizationRespDTOList);
         request.setAttribute("roleCode",roleCode);
-        request.setAttribute("areaIdList",areaIdList);
+        request.setAttribute("areaIdList",String.join(",",areaIdList));
     }
 }
