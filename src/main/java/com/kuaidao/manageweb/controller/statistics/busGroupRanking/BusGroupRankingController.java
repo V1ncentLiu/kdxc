@@ -171,6 +171,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
         headTitleList.add("签约率");
         headTitleList.add("净业绩金额");
         headTitleList.add("签约单笔");
+        headTitleList.add("来访单笔");
         return headTitleList;
     }
 
@@ -187,6 +188,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
         curList.add(ra.getSignRate());
         curList.add(ra.getAmount());
         curList.add(ra.getSignSingle());
+        curList.add(ra.getFirstVisitMoney());
         dataList.add(curList);
     }
 
