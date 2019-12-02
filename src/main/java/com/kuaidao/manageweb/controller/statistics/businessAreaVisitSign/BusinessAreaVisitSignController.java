@@ -18,6 +18,7 @@ import com.kuaidao.stastics.dto.busAreaVisitSign.BusAreaVisitSignDto;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -124,7 +125,11 @@ public class BusinessAreaVisitSignController {
     private void addTotalExportData(BusAreaVisitSignDto ra, List<List<Object>> dataList, Integer type) {
         List<Object> curList = new ArrayList<>();
 
-        curList.add("");
+        if(StringUtils.isNotBlank(ra.getBusinessAreaName())){
+            curList.add(ra.getBusinessAreaName());
+        }else {
+            curList.add("");
+        }
         curList.add("合计");
         curList.add(ra.getFirstVisitNum());
         curList.add(ra.getSignNum());
@@ -188,18 +193,6 @@ public class BusinessAreaVisitSignController {
             list1.add(dataMap);
         }
         return list1;
-    }
-    private void addSerialNum(List<List<Object>> dataList){
-        int j = 0;
-        for(int i=0;i<dataList.size();i++){
-            List<Object> objects = dataList.get(i);
-            if(i == 1){
-                objects.add(0,"");
-            }else if(i > 1){
-                j++;
-                objects.add(0,j);
-            }
-        }
     }
 
     public void initOrgList(HttpServletRequest request){
