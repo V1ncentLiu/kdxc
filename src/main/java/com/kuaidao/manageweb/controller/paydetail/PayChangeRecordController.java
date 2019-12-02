@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -74,9 +75,9 @@ public class PayChangeRecordController {
     public JSONResult<PageBean<PayChangeRecordDTO>> getPageList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO) {
         // 获取当前登录人
         UserInfoDTO user = getUser();
-        String roleCode =   user.getRoleCode();
+        List<RoleInfoDTO> roleList = user.getRoleList();
         //管理员查看所有，商务文员查看自己提交的
-        if (null != roleCode && !RoleCodeEnum.GLY.name().equals(roleCode)) {
+        if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             payChangRecordParamDTO.setCreateUser(user.getId());
         }
         JSONResult<PageBean<PayChangeRecordDTO>> jsonResult = payChangeRecordFeignClient.getPageList(payChangRecordParamDTO);
@@ -97,9 +98,9 @@ public class PayChangeRecordController {
     public void exportPayChangRecord(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO, HttpServletResponse response) throws Exception {
         // 获取当前登录人
         UserInfoDTO user = getUser();
-        String roleCode =   user.getRoleCode();
+        List<RoleInfoDTO> roleList = user.getRoleList();
         //管理员查看所有，商务文员查看自己提交的
-        if (null != roleCode && !RoleCodeEnum.GLY.name().equals(roleCode)) {
+        if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             payChangRecordParamDTO.setCreateUser(user.getId());
         }
         JSONResult<List<PayChangeRecordDTO>> listNoPage = payChangeRecordFeignClient.getPayChangRecordList(payChangRecordParamDTO);
