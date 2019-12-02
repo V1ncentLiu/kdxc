@@ -9,9 +9,12 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -69,6 +72,13 @@ public class PayChangeRecordController {
     @ResponseBody
     @PostMapping("/getPageList")
     public JSONResult<PageBean<PayChangeRecordDTO>> getPageList(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO) {
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
+        String roleCode =   user.getRoleCode();
+        //管理员查看所有，商务文员查看自己提交的
+        if (null != roleCode && !RoleCodeEnum.GLY.name().equals(roleCode)) {
+            payChangRecordParamDTO.setCreateUser(user.getId());
+        }
         JSONResult<PageBean<PayChangeRecordDTO>> jsonResult = payChangeRecordFeignClient.getPageList(payChangRecordParamDTO);
         return jsonResult;
     }
@@ -85,6 +95,13 @@ public class PayChangeRecordController {
     @RequestMapping("/exportPayChangRecord")
     @RequiresPermissions("paydetail:payChangRecord:export")
     public void exportPayChangRecord(@RequestBody PayChangeRecordParamDTO payChangRecordParamDTO, HttpServletResponse response) throws Exception {
+        // 获取当前登录人
+        UserInfoDTO user = getUser();
+        String roleCode =   user.getRoleCode();
+        //管理员查看所有，商务文员查看自己提交的
+        if (null != roleCode && !RoleCodeEnum.GLY.name().equals(roleCode)) {
+            payChangRecordParamDTO.setCreateUser(user.getId());
+        }
         JSONResult<List<PayChangeRecordDTO>> listNoPage = payChangeRecordFeignClient.getPayChangRecordList(payChangRecordParamDTO);
         List<List<Object>> dataList = new ArrayList<>();
         dataList.add(getHeadTitleList());
@@ -182,5 +199,15 @@ public class PayChangeRecordController {
             return "";
         }
         return DateUtil.convert2String(date, DateUtil.ymdhms);
+    }
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
     }
 }
