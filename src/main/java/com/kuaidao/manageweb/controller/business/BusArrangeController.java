@@ -343,7 +343,8 @@ public class BusArrangeController {
             return null;
         }
         if (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
-                || RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())) {
+                || RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())
+                || RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())) {
             // 如果是商务大区总监大区下所有商务组
             Long orgId = user.getOrgId();
             OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
