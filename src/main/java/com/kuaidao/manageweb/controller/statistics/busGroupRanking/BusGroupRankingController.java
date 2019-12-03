@@ -207,6 +207,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
             curList.add(ra.getSignRate());
             curList.add(ra.getAmount());
             curList.add(ra.getSignSingle());
+            curList.add(ra.getFirstVisitMoney());
             dataList.add(curList);
         }
     }
