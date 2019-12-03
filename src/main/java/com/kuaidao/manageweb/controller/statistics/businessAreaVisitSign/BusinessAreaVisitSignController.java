@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
@@ -68,7 +69,7 @@ public class BusinessAreaVisitSignController {
         //商务组
         initOrgList(request);
         //商务大区
-        initBugOrg(request);
+        initSWDQByBusiness(request);
         return "reportformsBusiness/businessAreaVisitSign";
     }
 
@@ -82,6 +83,12 @@ public class BusinessAreaVisitSignController {
     @RequestMapping("/getBusinessAreaSignList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getBusinessAreaSignList(@RequestBody BaseBusQueryDto baseBusQueryDto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(!RoleCodeEnum.SWZC.name().equals(roleCode) && !RoleCodeEnum.GLY.name().equals(roleCode)){
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),
+                    "没有查询该报表的数据权限");
+        }
         JSONResult<Map<String, Object>> businessAreaSignList = businessAreaVisitSignFeignClient.getBusinessAreaSignList(baseBusQueryDto);
         return businessAreaSignList;
     }
@@ -212,6 +219,9 @@ public class BusinessAreaVisitSignController {
         }
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+        if(curLoginUser.getBusinessLine() != null){
+            busGroupReqDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        }
         JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         List<OrganizationRespDTO> data = listJSONResult.getData();
         request.setAttribute("busGroupList",data);
@@ -228,26 +238,30 @@ public class BusinessAreaVisitSignController {
      * 按登录用户业务线查询-商务大区
      * @param request
      */
-    protected void initBugOrg(HttpServletRequest request){
+    public void initSWDQByBusiness(HttpServletRequest request){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-
         //查询商务大区
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setOrgType(OrgTypeConstant.SWDQ);
-//        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         if(RoleCodeEnum.SWZC.name().equals(roleCode)){
-            queryDTO.setId(curLoginUser.getOrgId());
-            request.setAttribute("areaId",curLoginUser.getOrgId()+"");
+            queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
-            //管理员查询全部
+            //管理员可以查看全部
+            queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+            logger.info("管理员登录");
         }else{
-            //other
-            queryDTO.setId(curLoginUser.getOrgId());
+            //other 没权限
+            queryDTO.setId(-1L);
         }
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
-        request.setAttribute("areaList",queryOrgByParam.getData());
-        request.setAttribute("roleCode",roleCode);
+        List<OrganizationRespDTO> organizationRespDTOList = queryOrgByParam.getData();
+        if(organizationRespDTOList != null && organizationRespDTOList.size() >0){
+            List<String> areaIdList = organizationRespDTOList.parallelStream().map(p ->p.getId().toString()).collect(Collectors.toList());
+            request.setAttribute("areaList",organizationRespDTOList);
+            request.setAttribute("roleCode",roleCode);
+            request.setAttribute("areaIdList",String.join(",",areaIdList));
+        }
     }
 }

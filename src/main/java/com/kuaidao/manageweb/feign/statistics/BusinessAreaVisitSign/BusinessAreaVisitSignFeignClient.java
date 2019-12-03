@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.Map;
 
 /**
- * 集团项目业绩表
+ * 商务大区业绩表
  */
 @FeignClient(name = "statstics-service", path = "/statstics/businessAreaBisitSign", fallback = BusinessAreaVisitSignFeignClient.HystrixClientFallback.class)
 public interface BusinessAreaVisitSignFeignClient {
 
 
     /**
-     * 一级页面分页查询
+     * 商务大区业绩表无分页查询
      */
     @RequestMapping("/getBusinessAreaSignList")
     JSONResult<Map<String,Object>> getBusinessAreaSignList(@RequestBody BaseBusQueryDto baseBusQueryDto);

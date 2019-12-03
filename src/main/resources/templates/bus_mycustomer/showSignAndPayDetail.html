@@ -11,6 +11,25 @@
         .borderboxInfo .el-row{font-size: 14px;}
         .borderboxInfo .el-row .el-col{margin-bottom: 10px;width: 357px;}
         .borderboxInfo .el-row .el-col span:first-child{width:110px;text-align: right;float: left;}
+        /*编辑备注*/
+        .el-message-box__wrapper[aria-label="编辑备注"] .el-input:after {
+        content: '编辑备注 ：';
+        position: absolute;
+        left: 10px;
+        top: 0;}
+        .el-message-box__wrapper[aria-label="编辑备注"] .el-input:before {
+            content: '*';
+            position: absolute;
+            left: 0;
+            color: red;
+        }
+        .el-message-box__wrapper[aria-label="编辑备注"] .el-input {
+            width: 330px;
+            padding-left: 75px;
+        }
+        .el-message-box__wrapper[aria-label="编辑备注"] .el-message-box__errormsg{
+            padding-left: 75px;
+        }
     </style>
 </head>
 <body>
@@ -1653,21 +1672,46 @@
                     this.updateFormSigning.payModes = this.tansPayModeValueToName(modeArr);
                 }
                 // 余款金额
-                this.updateFormSigning.amountBalance=row.amountBalance;
+                if(row.amountBalance){
+                    this.updateFormSigning.amountBalance=row.amountBalance;
+                }else if(row.amountBalance==0){
+                    this.updateFormSigning.amountBalance=row.amountBalance+"";
+                }
+                
                 // 预计余款补齐时间
                 if(row.makeUpTime){
                     this.updateFormSigning.makeUpTime=row.makeUpTime;
                 }
                 // 实收金额
-                this.updateFormSigning.amountReceived=row.amountReceived;
+                if(row.amountReceived){
+                    this.updateFormSigning.amountReceived=row.amountReceived
+                }else if(row.amountReceived==0){
+                    this.updateFormSigning.amountReceived=row.amountReceived+"";
+                }                
                 // 业绩金额
-                this.updateFormSigning.performanceAmount=row.amountPerformance;
+                if(row.amountPerformance){
+                    this.updateFormSigning.performanceAmount=row.amountPerformance;
+                }else if(row.amountPerformance==0){
+                    this.updateFormSigning.performanceAmount=row.amountPerformance+"";
+                }                
                 // 路费（报首次）
-                this.updateFormSigning.firstToll=row.firstToll;
+                if(row.firstToll){
+                   this.updateFormSigning.firstToll=row.firstToll; 
+                }else if(row.firstToll==0){
+                   this.updateFormSigning.firstToll=row.firstToll+""; 
+                }
                 // 招商政策优惠金额
-                this.updateFormSigning.preferentialAmount=row.preferentialAmount;
+                if(row.preferentialAmount){
+                    this.updateFormSigning.preferentialAmount=row.preferentialAmount;
+                }else if(row.preferentialAmount==0){
+                    this.updateFormSigning.preferentialAmount=row.preferentialAmount+"";
+                }                
                 // 赠送金额
-                this.updateFormSigning.giveAmount=row.giveAmount;
+                if(row.giveAmount){
+                    this.updateFormSigning.giveAmount=row.giveAmount
+                }else if(row.giveAmount==0){
+                    this.updateFormSigning.giveAmount=row.giveAmount+"";
+                }                
                 // 赠送类型                
                 if(row.giveType){
                     if(row.giveType ==null || row.giveType =='-1'){
@@ -2110,11 +2154,13 @@
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        this.$prompt('您确认进行修改吗？修改后信息将进行变更，请输入变更备注。', '提示', {
+                        this.$prompt('您确认进行修改吗？修改后信息将进行变更，请输入变更备注。', '编辑备注', {
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
-                            inputPattern: /\S/,
-                            inputErrorMessage: '编辑备注不能为空'
+                            // inputPattern: /\S/,
+                            inputPattern: /^\S{1,200}$/,
+                            inputErrorMessage: '编辑备注不能为空，且不允许超200字符',
+                            inputPlaceholder:'输入变更备注'
                         }).then(({ value }) => {
                             // 修改付款明细的备注
                             console.log(value)
@@ -2127,7 +2173,8 @@
                                                 mainDivVM.dialogFormVisible = false;
                                                 mainDivVM.addPayDetailButtonAble=false;
                                             //  跳转回上一页： /businesssign/visitRecordPage
-                                                window.location.href='/businesssign/visitRecordPage?clueId='+vclueId+'&signId='+vsignId+'&readyOnly=1&type=0';
+                                                window.location.href='/businesssign/visitRecordPage?clueId='+vclueId+'&signId='+vsignId+'&readyOnly=1&type=0&showSignButton=1';
+                                                // showSignButton=1 表示不展示添加签约单按钮
                                             }
                                         });
                                     } else {
