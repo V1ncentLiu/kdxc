@@ -2080,9 +2080,17 @@
                 if (pa1 == '1') {
                     this.updateFormSigning.payType = '1';
                     this.showfalg = false;
+                    // 如果是一次性付款，全款就锁死
+                    this.payTypeSelect=true;
                 } else {
                     this.updateFormSigning.payType = '2';
                     this.showfalg = true;
+                    // 如果下拉是追加定金和尾款,则放开
+                    for(var i=0;i<this.payTypeArr.length;i++){
+                        if(this.payTypeArr[i].value!="2"){
+                           this.payTypeSelect=false; 
+                        } 
+                    }                                       
                 }
             },
             updateFormSigningAmountPerformance() {
@@ -2158,7 +2166,8 @@
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             // inputPattern: /\S/,
-                            inputPattern: /^\S{1,200}$/,
+                            // inputPattern: /^\S{1,200}$/,
+                            inputPattern: /^(?=.*?\S)[\s\S]{0,200}$/,
                             inputErrorMessage: '编辑备注不能为空，且不允许超200字符',
                             inputPlaceholder:'输入变更备注'
                         }).then(({ value }) => {
