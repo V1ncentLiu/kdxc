@@ -233,14 +233,25 @@ public class BusinessAreaVisitSignController {
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
         //查询商务大区
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setOrgType(OrgTypeConstant.SWDQ);
-        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+            queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            //管理员可以查看全部
+            queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+            logger.info("管理员登录");
+        }else{
+            //other 没权限
+            queryDTO.setId(-1L);
+        }
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> organizationRespDTOList = queryOrgByParam.getData();
-        List<String> areaIdList = organizationRespDTOList.parallelStream().map(p ->p.getId().toString()).collect(Collectors.toList());
-        request.setAttribute("areaList",organizationRespDTOList);
-        request.setAttribute("roleCode",roleCode);
-        request.setAttribute("areaIdList",String.join(",",areaIdList));
+        if(organizationRespDTOList != null && organizationRespDTOList.size() >0){
+            List<String> areaIdList = organizationRespDTOList.parallelStream().map(p ->p.getId().toString()).collect(Collectors.toList());
+            request.setAttribute("areaList",organizationRespDTOList);
+            request.setAttribute("roleCode",roleCode);
+            request.setAttribute("areaIdList",String.join(",",areaIdList));
+        }
     }
 }
