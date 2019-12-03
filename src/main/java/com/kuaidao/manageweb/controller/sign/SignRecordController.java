@@ -114,6 +114,15 @@ public class SignRecordController {
             }
             request.setAttribute("businessGroupList", businessGroupList);
             request.setAttribute("ownOrgId", ownOrgId);
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+            // 查询下级所有商务组
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setParentId(curLoginUser.getOrgId());
+            queryDTO.setOrgType(OrgTypeConstant.SWZ);
+            JSONResult<List<OrganizationDTO>> queryOrgByParam =
+                    organizationFeignClient.listDescenDantByParentId(queryDTO);
+            List<OrganizationDTO> data = queryOrgByParam.getData();
+            request.setAttribute("businessGroupList", data);
         }
         /*
          * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
@@ -247,7 +256,7 @@ public class SignRecordController {
                 reqDTO.setBusinessGroupIdList(businessGroupIdList);
             }
 
-        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+        }else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
             if (CollectionUtils.isEmpty(accountIdList)) {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
@@ -255,7 +264,26 @@ public class SignRecordController {
             }
             businessGroupIdList.add(orgId);
             reqDTO.setBusinessGroupIdList(businessGroupIdList);
-        } else {
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+            if (businessGroupId != null) {
+                businessGroupIdList.add(businessGroupId);
+                reqDTO.setBusinessGroupIdList(businessGroupIdList);
+            } else {
+                // 查询下级所有商务组
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setParentId(orgId);
+                queryDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationDTO>> queryOrgByParam =
+                        organizationFeignClient.listDescenDantByParentId(queryDTO);
+                List<OrganizationDTO> data = queryOrgByParam.getData();
+                if (CollectionUtils.isEmpty(data)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                            "该用户下没有下属");
+                }
+                businessGroupIdList = data.stream().map(OrganizationDTO::getId).collect(Collectors.toList());
+                reqDTO.setBusinessGroupIdList(businessGroupIdList);
+            }
+        }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
 

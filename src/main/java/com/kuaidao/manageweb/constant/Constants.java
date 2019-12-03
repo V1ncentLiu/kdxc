@@ -37,6 +37,8 @@ public class Constants {
     public static String QIMO_CLIENT_KEY = "huiju:aggregation:client:qimo";
     // 天润坐席 reids key
     public static String TR_CLIENT_KEY = "huiju:aggregation:client:tr";
+    // 合力坐席 reids key
+    public static String HELI_CLIENT_KEY = "huiju:aggregation:client:heli";
 
     // 品类字典Code
     public static String PROJECT_CLASSIFICATION = "industryCategory";

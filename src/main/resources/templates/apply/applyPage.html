@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>在线申请表</title>
+    <style>
+    .el-form-item__label{
+    	width:120px;
+    }
+    </style>
+</head>
+<body>
+
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>在线申请表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+		<shiro:hasPermission name="apply:exportApply">
+			<el-button  v-if="importVisitPerFlag" icon="el-icon-download" type="warning" @click="exportApply">导出</el-button>
+			<el-button v-else icon="el-icon-loading" type="warning" disabled>导出中</el-button>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="apply:transferApply">
+			<el-button type="warning" @click="dealButton" >转发给顾问</a></el-button>
+		</shiro:hasPermission>
+
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm">
+				<el-form-item label="所属项目:">
+					<el-input v-model="brandName" maxLength="30" placeholder="所属项目"></el-input>
+				</el-form-item>
+				<el-form-item label="客户姓名:">
+					<el-input v-model="name" maxLength="20" placeholder="客户姓名"  @keyup.native="number"></el-input>
+				</el-form-item>
+				<el-form-item label="提交时间:">
+					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
+					</el-date-picker>
+				</el-form-item>
+				<el-form-item label="—" class="widthauto">
+					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
+					</el-date-picker>
+				</el-form-item>
+				<el-form-item label="">
+					<el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px;">搜索</el-button>
+				</el-form-item>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+				@row-dblclick="rowDblClick"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  @selection-change="handleSelectionChange">
+                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+                 <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="name" label="客户姓名"></el-table-column>
+				<el-table-column align="center" prop="sex" label="性别" :formatter="transformStatus"></el-table-column>
+                <el-table-column align="center"  prop="nativePlace" label="籍贯" ></el-table-column>
+                <el-table-column align="center" prop="brandName" label="所属项目" ></el-table-column>
+                <el-table-column align="center" prop="phone" label="联系方式" :formatter="transformPhone"></el-table-column>
+                <el-table-column align="center" prop="estimateShopArea" label="开店区域" ></el-table-column>
+                <el-table-column align="center" prop="totalMoney" label="投入资金" ></el-table-column>
+                <el-table-column align="center" prop="inspectTime" label="考察日期" ></el-table-column>
+                <el-table-column align="center" prop="createTime" label="提交时间":formatter="dateFormat" ></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="当前转发顾问" ></el-table-column>
+            </el-table>
+             <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+        </el-row>  
+    </div>
+
+
+	<!-- dialog -->
+	<el-dialog title="转发给顾问" :visible.sync="distributionPdzySyc" width="540px">
+		<el-form :model="pdzyform" ref="pdzyform" :rules="pdzyrules">
+			<el-form-item label="电销顾问：" :label-width="formLabelWidth"  prop="pdUser">
+				<el-select filterable v-model="pdzyform.teleSaleId" placeholder="选择组内顾问" style="width:80%;">
+					<el-option
+							v-for="item in userInfoList"
+							:key="item.id"
+							:label="item.name"
+							:value="item.id">
+					</el-option>
+				</el-select>
+			</el-form-item>
+		</el-form>
+		<div slot="footer" style="text-align: center" class="dialog-footer">
+			<el-button type="primary" :disabled="btnDisabled" @click="addbutton('pdzyform')">提交</el-button>
+			<el-button @click="distributionPdzySyc= false">取消</el-button>
+		</div>
+	</el-dialog>
+
+	<!-- dialog -->
+	<el-dialog title="申请详情" :visible.sync="viewFormVisible" width="870px">
+		<el-form :model="viewForm" ref="viewForm" class="marginB20 dialogForm" >
+				<el-row>
+					<el-col :span="8">
+						<el-form-item label="姓名：" :label-width="formLabelWidth"> {{viewForm.name}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="性别：" :label-width="formLabelWidth">{{viewForm.sex==0?"男":"女"}} </el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="出生年月：" :label-width="formLabelWidth">{{viewForm.birthday}} </el-form-item>
+					</el-col>
+
+					<el-col :span="8">
+						<el-form-item label="籍贯：" :label-width="formLabelWidth"> {{viewForm.nativePlace}} </el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="联系方式：" :label-width="formLabelWidth">{{viewForm.phone}} </el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="婚姻状况：" :label-width="formLabelWidth">{{viewForm.marriage==0?"未婚":"已婚"}} </el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="家人联系方式：" :label-width="formLabelWidth">{{viewForm.familyPhone}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="家庭地址：" :label-width="formLabelWidth">{{viewForm.familyAddress}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="预计开店区域：" :label-width="formLabelWidth">{{viewForm.estimateShopArea}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="是否合伙：" :label-width="formLabelWidth">{{viewForm.partnership==0?"否":"是"}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="合伙人联系方式：" :label-width="formLabelWidth">{{viewForm.partnershipPhone}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="备选开店区域：" :label-width="formLabelWidth">{{viewForm.alternateShopArea}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="合作模式：" :label-width="formLabelWidth">{{viewForm.cooperationMode}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="身份证号：" :label-width="formLabelWidth">{{viewForm.idCard}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="最高学历：" :label-width="formLabelWidth">{{viewForm.education}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="预计投入总资金：" :label-width="formLabelWidth">{{viewForm.totalMoney}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="资金来源：" :label-width="formLabelWidth">{{viewForm.moneySource}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="创业经历：" :label-width="formLabelWidth">{{viewForm.entrepreneurshipExperience}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="谁管理店面：" :label-width="formLabelWidth">{{viewForm.management}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="何时开店：" :label-width="formLabelWidth">{{viewForm.openTime}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="工作经历：" :label-width="formLabelWidth">{{viewForm.workExperience}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="预约考察日期：" :label-width="formLabelWidth">{{viewForm.inspectTime}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="考察人数：" :label-width="formLabelWidth">{{viewForm.inspectNum}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="陪同考察人姓名：" :label-width="formLabelWidth">{{viewForm.inspectName}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="陪同考察人联系方式：" :label-width="formLabelWidth">{{viewForm.inspectPhone}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="考察当天是否全款签约：" :label-width="formLabelWidth">{{viewForm.isPayAllMoney==0?"否":"是"}}</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="浅谈运作优势：" :label-width="formLabelWidth">{{viewForm.personalAdvantage}}</el-form-item>
+					</el-col>
+				</el-row>
+		</el-form>
+	</el-dialog>
+</div>
+<input id="addOrUpdate" type="hidden" >
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+	var userInfoList = [[${saleList}]];
+    var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+			confirmBtnDisabled:false,
+			viewFormVisible:false,
+			importVisitPerFlag:true,
+			btnDisabled:false,
+			userInfoList:userInfoList,
+			distributionPdzySyc:false,
+			brandName:"",
+			name:"",
+			beginTime:"",
+			endTime:"",
+			pdzyform:{
+				teleSaleId:""
+			},
+			pdUser:"",
+        	formLabelWidth: '150px',
+        	form:{
+        		dealStatus:"1"
+        	},
+			viewForm:{
+				name:"" ,
+				sex:"" ,
+				birthday:"" ,
+				nativePlace:"" ,
+                phone:"" ,
+				marriage:"" ,
+				familyPhone:"" ,
+				familyAddress:"" ,
+				estimateShopArea:"" ,
+				alternateShopArea:"" ,
+				partnership:"" ,
+				partnershipPhone:"" ,
+				cooperationMode:"" ,
+				idCard:"" ,
+				education:"" ,
+				workExperience:"" ,
+				entrepreneurshipExperience:"" ,
+				totalMoney:"" ,
+				moneySource:"" ,
+				management:"" ,
+				openTime:"" ,
+				inspectTime:"" ,
+				inspectNum:"" ,
+				inspectName:"" ,
+				inspectPhone:"" ,
+				isPayAllMoney:"" ,
+				personalAdvantage:""
+			},
+       	 	dataTable:[],
+       	 	multipleSelection: [],
+
+       	 	valid:"",
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            loading:false,
+            dialogFormVisible: false,
+
+			pdzyrules:{
+				teleSaleId: [
+					{ required: true, message: '请选择电销顾问', trigger: 'blur' },
+				]
+			},
+             
+        },
+        methods: {
+			rowDblClick(row){
+				this.viewFormVisible = true;
+				var param = {};
+				param.id = row.id
+				axios.post('/apply/getApplyDetail',param).then(function (response) {
+					//   console.log(response);
+					if(null===response||response.data==null||response.data.code!='0'){
+						orgVM.$message({
+							message: response.data.msg,
+							type: 'warning'
+						});
+						return ;
+					}else{
+						var apply = response.data.data;
+						orgVM.viewForm = response.data.data;
+						var phone = orgVM.getPhone(apply.phone);
+						var familyPhone = orgVM.getPhone(apply.familyPhone);
+						var partnershipPhone = orgVM.getPhone(apply.partnershipPhone);
+						var inspectPhone = orgVM.getPhone(apply.inspectPhone);
+						orgVM.viewForm.phone = phone;
+						orgVM.viewForm.familyPhone = familyPhone;
+						orgVM.viewForm.partnershipPhone = partnershipPhone;
+						orgVM.viewForm.inspectPhone = inspectPhone;
+					}
+				})
+			},
+			getPhone(phone){
+				var phone =phone.replace(phone.substring(3,7), "****")
+				return phone;
+			},
+			dateFormat:function(row, column) {
+				var date = row[column.property];
+				if (date == undefined) {
+					return "";
+				}
+				return moment(date).format("YYYY-MM-DD HH:mm:ss");
+			},
+        	dealButton(){
+        		var rows = this.multipleSelection;
+        		  if(rows.length <1){
+                      this.$message({
+                         message: '选择要转发的数据',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+				this.pdzyform.teleSaleId="";
+				if (this.$refs['pdzyform']!==undefined) {
+					this.$refs['pdzyform'].resetFields();
+				}
+                this.distributionPdzySyc = true;
+        	},
+        	
+        	transformStatus(row, column) {
+				var sex = row[column.property];
+				var text = "";
+                if(sex=="0"){
+              	  text="男"
+                }else if(sex==1){
+              	  text="女"
+                }
+                return text;
+            },
+			transformPhone(row, column) {
+				var phone = row[column.property];
+				var tel1 =phone.replace(phone.substring(3,7), "****")
+				return tel1;
+			},
+
+            
+        	handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            search(){
+            	this.pager.currentPage = 1;
+            	this.inviteAreaListPage()
+            },
+        	inviteAreaListPage(){//查询按钮
+            	  var param = {}; 
+            	  var pageSize = this.pager.pageSize;
+                  var pageNum = this.pager.currentPage;
+				var startTime = this.beginTime;
+				var endTime = this.endTime;
+				  param.beginTime = this.beginTime;
+				  param.endTime = this.endTime;
+				  param.name = this.name;
+				  param.brandName = this.brandName;
+                  param.pageNum = pageNum;
+                  param.pageSize = pageSize;
+				if(endTime && startTime) {
+					beginTimes = new Date(this.beginTime);
+					endTimes = new Date(this.endTime);
+					if (beginTimes > endTimes) {
+						this.$message({
+							message: '开始时间不能大于结束时间',
+							type: 'warning'
+						});
+						return;
+					}
+				}
+                  axios.post('/apply/findApplyList',param).then(function (response) {
+                  	//   console.log(response);
+                      if(null===response||response.data==null||response.data.code!='0'){
+						  orgVM.$message({
+							  message: response.data.msg,
+							  type: 'warning'
+						  });
+	                  	  return ;
+                     }else{
+                    	 orgVM.dataTable =response.data.data.data; 
+                    	 orgVM.pager.currentPage= response.data.data.currentPage;
+                    	 orgVM.pager.total= response.data.data.total;
+                     } 
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  });  
+                  
+              	} ,
+
+
+			addbutton(formName){
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						var param = {};
+						var idList = [];
+						var rows = this.multipleSelection;
+						for ( var i = 0; i <rows.length; i++){
+							idList.push(rows[i].id)
+						}
+						param.idList = idList;
+						param.teleSaleId = this.pdzyform.teleSaleId;
+						axios.post('/apply/transferApply', param).then(function (response) {
+							if(response.data.code==0){
+								orgVM.distributionPdzySyc = false;
+								orgVM.$message({
+									message: '转发成功',
+									type: 'success'
+								});
+								orgVM.search();
+							}else{
+								orgVM.$message({
+									message: '分配失败请重试',
+									type: 'warning'
+								});
+							}
+
+						});
+					}
+
+
+				})
+			},
+			exportApply(){
+				var param = {};
+				var pageSize = this.pager.pageSize;
+				var pageNum = this.pager.currentPage;
+				var beginTime = this.beginTime;
+				var endTime = this.endTime;
+				param.beginTime = this.beginTime;
+				param.endTime = this.endTime;
+				param.name = this.name;
+				param.brandName = this.brandName;
+				param.pageNum = pageNum;
+				param.pageSize = pageSize;
+				if(endTime && beginTime) {
+					beginTimes = new Date(this.beginTime);
+					endTimes = new Date(this.endTime);
+					if (beginTimes > endTimes) {
+						this.$message({
+							message: '开始时间不能大于结束时间',
+							type: 'warning'
+						});
+						return;
+					}
+				}
+				localStorage.setItem('exportApply','1');
+				this.timedown();
+				axios.post('/apply/exportApply',param,{responseType:'blob'})
+						.then(function (response) {
+							var data =  response.data;
+							var fileName = response.headers.filename;
+							saveAs(data,decodeURI(fileName));
+							orgVM.$notify({type: 'success', title: '提示', message: '在线申请表导出成功', position: 'bottom-right', duration: 0});
+							localStorage.removeItem("exportApply");
+						}).catch(function (error) {
+					orgVM.$notify.error({title: '提示', message: error + ',在线申请表导出导出失败', position: 'bottom-right'});
+					localStorage.removeItem("exportApply");
+				})
+			},
+			timedown(){
+				console.log(0)
+				clearInterval(this.timer);
+				var importVisitPer = localStorage.getItem("exportApply");
+				if(importVisitPer){
+					this.importVisitPerFlag=false;
+				}else{
+					this.importVisitPerFlag=true;
+				}
+				if(importVisitPer){
+					this.timer=setInterval(this.timedown,1000)
+				}else{
+					clearInterval(this.timer)
+				}
+			},
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+        	this.inviteAreaListPage();
+        	document.getElementById('organizationManage').style.display = 'block';
+        }
+    })
+</script>
+</html>

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.role;
 
@@ -57,7 +57,7 @@ public class RoleManagerController {
 	private CustomFieldFeignClient customFieldFeignClient;
 
 	/***
-	 * 
+	 *
 	 * @return
 	 */
 	@RequestMapping("/initRoleInfo")
@@ -67,7 +67,7 @@ public class RoleManagerController {
 
 	/**
 	 * 查询用户集合
-	 * 
+	 *
 	 * @param menuDTO
 	 * @return
 	 */
@@ -80,7 +80,7 @@ public class RoleManagerController {
 
 	/***
 	 * 添加角色
-	 * 
+	 *
 	 * @return
 	 */
 	@RequestMapping("/addRolePre")
@@ -115,7 +115,7 @@ public class RoleManagerController {
 
 	/***
 	 * 修改角色
-	 * 
+	 *
 	 * @return
 	 */
 	@RequestMapping("/updateRolePre")
@@ -183,7 +183,7 @@ public class RoleManagerController {
 
 	/**
 	 * 查询角色列表
-	 * 
+	 *
 	 * @param dto
 	 * @param request
 	 * @param response
@@ -198,7 +198,7 @@ public class RoleManagerController {
 
 	/**
 	 * 查询角色列表
-	 * 
+	 *
 	 * @param dto
 	 * @param request
 	 * @param response
@@ -213,7 +213,7 @@ public class RoleManagerController {
 
 	/**
 	 * 保存角色数据
-	 * 
+	 *
 	 * @param pageNum
 	 * @param pageSize
 	 * @param queryDTO
@@ -230,7 +230,7 @@ public class RoleManagerController {
 
 	/**
 	 * 修改角色数据
-	 * 
+	 *
 	 * @param pageNum
 	 * @param pageSize
 	 * @param queryDTO
@@ -247,7 +247,7 @@ public class RoleManagerController {
 
 	/**
 	 * 删除角色数据
-	 * 
+	 *
 	 * @param pageNum
 	 * @param pageSize
 	 * @param queryDTO
@@ -269,7 +269,7 @@ public class RoleManagerController {
 
 	/**
 	 * 删除角色时判断是否有用户关联
-	 * 
+	 *
 	 * @param roleDTO
 	 * @return
 	 */
@@ -279,5 +279,4 @@ public class RoleManagerController {
 	public JSONResult<List<RoleInfoDTO>> qeuryRoleByUserId(@RequestBody RoleQueryDTO roleDTO) {
 		return roleManagerFeignClient.qeuryRoleByUserId(roleDTO);
 	}
-
 }

@@ -128,12 +128,13 @@ public class BusCustomerManagerController {
         }
         else if (roleList != null
                 && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())
                         || RoleCodeEnum.BUSBIGAREAW.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
+                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))
+                || RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())) {
 
             // 商务中心查询业务线下数据。
-            if( RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())){
+            if( RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())){
                 orgId =null;
             }
 

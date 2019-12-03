@@ -710,7 +710,7 @@ var mainDivVM = new Vue({
           if (cellValue == "1") {
             text = "首次到访"
           } else if (cellValue == "2") {
-            text = "二次到访"
+            text = "2次到访"
           } else {
             text = this.toChinesNum(cellValue) + "次到访"
           }

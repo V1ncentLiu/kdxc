@@ -299,13 +299,12 @@ function getPhoneLocale(phone,callSource){
          var data =  response.data;
          if(data.code=='0'){
     		 var resData = data.data;
-    		 var result = resData.result;
-    		 if(result=="0"){
-    			 var phoneArea = resData.data;
+    		 if(resData){
+    			 var area = resData.area;
     			 if(callSource==1){
-    				 $('#outboundPhoneLocaleArea').html(phoneArea.province+","+phoneArea.city);
+    				 $('#outboundPhoneLocaleArea').html(area);
         		 }else if(callSource==2){
-        			 $('#tmOutboundPhoneLocaleArea').html(phoneArea.province+","+phoneArea.city);
+        			 $('#tmOutboundPhoneLocaleArea').html(area);
         		 } 
     		 }else{
     			 console.error(resData);

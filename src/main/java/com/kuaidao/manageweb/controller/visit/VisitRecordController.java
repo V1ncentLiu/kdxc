@@ -311,7 +311,26 @@ public class VisitRecordController {
             }
             busGroupIdList.add(orgId);
             visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
-        } else {
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+            if (busGroupId == null) {
+                // 查询下级所有商务组
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setParentId(orgId);
+                queryDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationDTO>> queryOrgByParam =
+                        organizationFeignClient.listDescenDantByParentId(queryDTO);
+                List<OrganizationDTO> data = queryOrgByParam.getData();
+                if (CollectionUtils.isEmpty(data)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                            "该用户下没有商务组");
+                }
+                busGroupIdList = data.stream().map(OrganizationDTO::getId).collect(Collectors.toList());
+                visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+            } else {
+                busGroupIdList.add(busGroupId);
+                visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+            }
+        }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
 
@@ -359,6 +378,25 @@ public class VisitRecordController {
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             busGroupIdList.add(orgId);
         } else if (RoleCodeEnum.GLY.name().equals(roleCode)) {
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+            if(null != visitNoRecordReqDTO.getBusGroupId()){
+                busGroupIdList.add(visitNoRecordReqDTO.getBusGroupId());
+            } else {
+                // 查询下级所有商务组
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setParentId(orgId);
+                queryDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationDTO>> queryOrgByParam =
+                        organizationFeignClient.listDescenDantByParentId(queryDTO);
+                List<OrganizationDTO> data = queryOrgByParam.getData();
+                if (CollectionUtils.isEmpty(data)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                            "该用户下没有商务组");
+                }
+                for (OrganizationDTO organizationDTO : data) {
+                    busGroupIdList.add(organizationDTO.getId());
+                }
+            }
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }

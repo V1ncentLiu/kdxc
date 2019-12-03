@@ -161,7 +161,7 @@ public class BaseStatisticsController {
                 request.setAttribute("deptId",jsonResult.getData().getParentId()+"");
             }
             return ;
-        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.DXZC.name().equals(roleCode)){
             //管理员可以查看全部
         }else{
             //other 没权限
