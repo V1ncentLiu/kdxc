@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
@@ -82,6 +83,12 @@ public class BusinessAreaVisitSignController {
     @RequestMapping("/getBusinessAreaSignList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getBusinessAreaSignList(@RequestBody BaseBusQueryDto baseBusQueryDto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        if(!RoleCodeEnum.SWZC.name().equals(roleCode) && !RoleCodeEnum.GLY.name().equals(roleCode)){
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),
+                    "没有查询该报表的数据权限");
+        }
         JSONResult<Map<String, Object>> businessAreaSignList = businessAreaVisitSignFeignClient.getBusinessAreaSignList(baseBusQueryDto);
         return businessAreaSignList;
     }
@@ -212,6 +219,9 @@ public class BusinessAreaVisitSignController {
         }
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+        if(curLoginUser.getBusinessLine() != null){
+            busGroupReqDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        }
         JSONResult<List<OrganizationRespDTO>> listJSONResult = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         List<OrganizationRespDTO> data = listJSONResult.getData();
         request.setAttribute("busGroupList",data);
