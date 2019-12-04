@@ -121,8 +121,8 @@ var clientVm = new Vue({
         {required: true, message: '登录账户名不能为空'},
 
       ],
-      extenTypeName: [
-        {required: true, message: '坐席登录方式不能为空'},
+      extenType: [
+        {required: true, message: '呼叫方式不能为空'},
 
       ],
     }
