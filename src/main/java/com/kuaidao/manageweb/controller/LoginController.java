@@ -218,8 +218,10 @@ public class LoginController {
         // TODO修改错误码
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         // 判断登陆IP限制
+
         if (SysConstant.YES.equals(roleInfoDTO.getIsIpLimit())) {
             List<String> ipList = roleInfoDTO.getIpList();
+            logger.info("login_ip_address{{}},ipList{{}}",ipAddr,ipList);
             if (!ipList.contains(ipAddr)) {
                 return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
                         "当前登录系统IP异常，请联系管理员");
