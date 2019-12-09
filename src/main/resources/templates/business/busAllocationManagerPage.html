@@ -150,7 +150,7 @@
                 	 { required: true, message: '商务经理不能为空'},
                 	]"
                 	>
-                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 240px;margin-right: 10px;" filterable>
+                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 260px;margin-right: 10px;" filterable>
                         <el-option v-for="item in saleOptions" 
                         			:key="item.id" 
                         			:label="item.name" 
@@ -164,7 +164,7 @@
                     </el-button>
                 </el-form-item>
                 <el-form-item label="辅助商务经理:" label-width="100px" prop="" style="margin-bottom: 20px;" v-if="isSaleIdOther">
-                    <el-select v-model="allocationForm.saleIdOther" placeholder="组内商务经理姓名" style="width: 240px;margin-right: 10px;" filterable>
+                    <el-select v-model="allocationForm.saleIdOther" placeholder="组内商务经理姓名" style="width: 260px;margin-right: 10px;" filterable>
                         <el-option v-for="item in saleOptions" :key="item.id" :label="item.name"
                                    :value="item.id"></el-option>
                     </el-select>
@@ -193,13 +193,25 @@
                 	 { required: true, message: '商务经理不能为空'},
                 	]"
                 	>
-                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 350px;" filterable>
+                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 260px;margin-right: 10px;" filterable>
                         <el-option v-for="item in allSaleOptions" 
                         			:key="item.id" 
                         			:label="item.name" 
                         			:value="item.id">
                         </el-option>
                     </el-select>
+                    <el-button type="text" @click="showTransferIdOther" size="mini">
+                        <i v-if="!isTransferIdOther" class="el-icon-plus"/></i>
+                        <i v-if="isTransferIdOther" class="el-icon-minus"/></i>
+                        辅助经理
+                    </el-button>
+                </el-form-item>
+                <el-form-item label="辅助商务经理:" label-width="100px" prop="" style="margin-bottom: 20px;" v-if="isTransferIdOther">
+                    <el-select v-model="transferForm.transferIdOther" placeholder="组内商务经理姓名" style="width: 260px;margin-right: 10px;" filterable>
+                        <el-option v-for="item in saleOptions" :key="item.id" :label="item.name"
+                                   :value="item.id"></el-option>
+                    </el-select>
+                    <p style="position: absolute;bottom: -25px;color: #f56c6c;">增加辅助商务经理后，业绩将进行两人平分</p>
                 </el-form-item>
                 <el-form-item label="备注:" label-width="100px" prop="remark">
 			    	        <el-input type="textarea" v-model="transferForm.remark" class="input-with-select" maxlength="200" style="width: 350px;" :rows="4" placeholder="请输入外调备注"></el-input>
@@ -249,6 +261,7 @@ var clueVM = new Vue({
         el: '#clueManage',
         data: {
             isSaleIdOther:false,
+            isTransferIdOther:false,
             paginationShow: false,
             cancelFormVisible:false,
             isShow:false,
@@ -275,7 +288,8 @@ var clueVM = new Vue({
               transferForm: {
             	saleId:'',
             	remark:'',
-            	message:''
+            	message:'',
+                transferIdOther:'',//辅助商务经理
               },
               cancelDigForm:{
                   cancelReason:'',
@@ -348,6 +362,15 @@ var clueVM = new Vue({
                     this.allocationForm.saleIdOther="";
                 }else{
                     this.isSaleIdOther=true;
+                }
+            },
+            showTransferIdOther(){
+                if(this.isTransferIdOther){
+                    this.isTransferIdOther=false;
+                    // 清空辅助经理的值
+                    this.transferForm.transferIdOther="";
+                }else{
+                    this.isTransferIdOther=true;
                 }
             },
             clickRow(row){//点击单行选中复选框
@@ -705,6 +728,9 @@ var clueVM = new Vue({
 	                   this.allocationForm.message=text;
                    }
                    this.transferVisible = true;
+                   this.isTransferIdOther=false;
+                    // 清空辅助经理的值
+                    this.transferForm.transferIdOther="";
                },
                transferClueCancel(formName){//外调经理取消
             	   this.$refs[formName].resetFields();
