@@ -22,7 +22,7 @@ public enum MenuEnum {
     /**
      * 电销管理 - 电销中心
      */
-    TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), OPT_RULE_MANAGEMENT("优化分配规则管理"), MERCHANT_RULE_MANAGEMENT("商家规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
+    TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), FAIL_CLUE_MANAGEMENT("失败资源列表"), OPT_RULE_MANAGEMENT("优化分配规则管理"), MERCHANT_RULE_MANAGEMENT("商家规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
     /**
      * 总裁办
      *
@@ -51,10 +51,9 @@ public enum MenuEnum {
     /**
      * 商家端
      */
-    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"),CLUE_MANAGEMENT("资源管理列表"),
-    CONSUME_RECORD("消费记录（管理端）"),MERCHANT_OUT_CALL("商家外呼"),
+    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"), CLUE_MANAGEMENT("资源管理列表"), CONSUME_RECORD("消费记录（管理端）"), MERCHANT_OUT_CALL("商家外呼"),
 
-    OUTBOUND_PACKAGE("服务费用设置"),MERCHANT_CLIENT_LOGIN("坐席自动登录"),
+    OUTBOUND_PACKAGE("服务费用设置"), MERCHANT_CLIENT_LOGIN("坐席自动登录"),
     /**
      * 付款明细修改
      */
