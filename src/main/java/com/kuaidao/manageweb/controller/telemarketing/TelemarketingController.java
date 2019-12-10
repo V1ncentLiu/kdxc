@@ -1,24 +1,5 @@
 package com.kuaidao.manageweb.controller.telemarketing;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -29,13 +10,30 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @Auther: admin
@@ -59,10 +57,25 @@ public class TelemarketingController {
 
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+
+    /**
+     * 根据集团Id条件查询集团所属的所有电销组
+     *
+     * @return
+     */
+    @RequestMapping("/getTelemarketingLayoutListByCompanyGroupId")
+    @ResponseBody
+    public JSONResult<List<OrganizationDTO>> getTelemarketingLayoutListByCompanyGroupId(
+            HttpServletRequest request,
+            @RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
+        return telemarketingLayoutFeignClient.getdxListByCompanyGroupId(telemarketingLayoutDTO);
+    }
 
     /**
      * 电销布局列表
-     * 
+     *
      * @return
      */
     @RequestMapping("/telemarketingLayoutList")
@@ -80,12 +93,29 @@ public class TelemarketingController {
         request.setAttribute("categoryList", categoryList);
         request.setAttribute("dzList", dzList.getData());
         request.setAttribute("projectList", allProject.getData());
+
+        //获取集团商家
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoDTO.setStatusList(null);
+        List<UserInfoDTO> userInfoList = getMerchantUser(userInfoDTO);
+        request.setAttribute("userInfoList",userInfoList);
+        //新增修改页面使用，排除禁用商家
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        UserInfoDTO userInfoAddDTO = new UserInfoDTO();
+        userInfoAddDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoAddDTO.setStatusList(statusList);
+        List<UserInfoDTO> userInfoAddList = getMerchantUser(userInfoAddDTO);
+        request.setAttribute("userInfoAddList",userInfoAddList);
+
         return "telemarketing/telemarketingLayoutList";
     }
 
     /**
      * 电销布局列表
-     * 
+     *
      * @return
      */
     @RequestMapping("/getTelemarketingLayoutList")
@@ -98,7 +128,7 @@ public class TelemarketingController {
 
     /**
      * 根据id查询电销布局
-     * 
+     *
      * @return
      */
     @RequestMapping("/findTelemarketingById")
@@ -110,7 +140,7 @@ public class TelemarketingController {
 
     /**
      * 添加电销布局
-     * 
+     *
      * @return
      */
     @RequestMapping("/addTelemarketingLayout")
@@ -128,7 +158,7 @@ public class TelemarketingController {
 
     /**
      * 修改电销布局
-     * 
+     *
      * @return
      */
     @RequestMapping("/updateTelemarketingLayout")
@@ -143,7 +173,7 @@ public class TelemarketingController {
 
     /**
      * 删除电销布局
-     * 
+     *
      * @return
      */
     @RequestMapping("/deleTelemarketingLayout")
@@ -157,7 +187,7 @@ public class TelemarketingController {
 
     /**
      * 预览
-     * 
+     *
      * @param
      * @return
      */
@@ -189,13 +219,15 @@ public class TelemarketingController {
                 String value = (String) object;
                 if (j == 0) {// 序号
                     rowDto.setSerialNumber(value);
-                } else if (j == 1) {// 商务小组
+                } else if (j == 1) {// 电销组
                     rowDto.setTelemarketingTeam(value);
-                } else if (j == 2) {// 区域
+                } else if (j == 2) {// 集团
+                    rowDto.setCompanyGroupName(value);
+                }  else if (j == 3) {// 项目
                     rowDto.setProjects(value);
-                } else if (j == 3) {// 电销组
+                } else if (j == 4) {// 起始时间
                     rowDto.setBeginTime(value);
-                } else if (j == 4) {// 签约项目
+                } else if (j == 5) {// 结束时间
                     rowDto.setEndTime(value);
                 }
             } // inner foreach end
@@ -213,7 +245,7 @@ public class TelemarketingController {
 
     /**
      * 导入电销布局
-     * 
+     *
      * @return
      * @throws Exception
      */
@@ -239,13 +271,37 @@ public class TelemarketingController {
                 organizationFeignClient.queryOrgByParam(orgDto);
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
-
-
+        //获取商家集团账号
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        UserInfoDTO userInfoAddDTO = new UserInfoDTO();
+        userInfoAddDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoAddDTO.setStatusList(statusList);
+        List<UserInfoDTO> userInfoAddList = getMerchantUser(userInfoAddDTO);
+        Map<String, Long> hashMap = new HashMap<String, Long>();
+        // 遍历结果集生成<id,name>map
+        for (UserInfoDTO userInfoDTO : userInfoAddList) {
+            hashMap.put(userInfoDTO.getName(), userInfoDTO.getId());
+        }
         if (list != null && list.size() > 0) {
 
             for (TelemarketingLayoutDTO telemarketingLayoutDTO2 : list) {
                 boolean islegal = true;// true合法 false不合法
                 String projectIds = "";
+                //转换商家集团名称，获取商家集团名称对应Id
+                if (islegal && telemarketingLayoutDTO2.getCompanyGroupName() != null) {
+                    islegal = false;
+                    if(hashMap.containsKey(telemarketingLayoutDTO2.getCompanyGroupName().trim())){
+                        telemarketingLayoutDTO2.setCompanyGroupId(hashMap.get(telemarketingLayoutDTO2.getCompanyGroupName().trim()));
+                        islegal = true;
+                    }else {
+                        islegal = false;
+                    }
+                } else {
+                    islegal = false;
+                }
+                //转换电销组名称，获取电销组Id
                 if (islegal && telemarketingLayoutDTO2.getTelemarketingTeam() != null) {
                     islegal = false;
                     for (OrganizationRespDTO organizationRespDTO : dxList.getData()) {
@@ -260,7 +316,7 @@ public class TelemarketingController {
                 } else {
                     islegal = false;
                 }
-
+                //获取项目对应的项目Id
                 if (islegal && telemarketingLayoutDTO2.getProjects() != null) {
                     String[] projects = telemarketingLayoutDTO2.getProjects().split(",");
                     for (int i = 0; i < projects.length; i++) {
@@ -336,5 +392,30 @@ public class TelemarketingController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+    /**
+     * @Description 查询商家账号
+     * @param userInfoDTO
+     * @Return java.util.List<com.kuaidao.sys.dto.user.UserInfoDTO>
+     * @Author xuyunfeng
+     * @Date 2019/10/15 17:19
+     **/
+    private List<UserInfoDTO> getMerchantUser(UserInfoDTO userInfoDTO) {
+        JSONResult<List<UserInfoDTO>> merchantUserList =
+                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        List<UserInfoDTO> userInfoDTOList = merchantUserList.getData();
+        if(userInfoDTOList != null & userInfoDTOList.size() >0){
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            userInfoDTOList.sort((a1,a2)->{
+                try {
+                    return df.parse(sdf.format(a2.getCreateTime())).compareTo(df.parse(sdf.format(a1.getCreateTime())));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                return 1;
+            });
+        }
+        return userInfoDTOList;
     }
 }
