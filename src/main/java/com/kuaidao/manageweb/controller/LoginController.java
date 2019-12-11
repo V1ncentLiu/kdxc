@@ -234,6 +234,7 @@ public class LoginController {
             if (organizationDTO != null && organizationDTO.getBusinessLine() != null) {
                 user.setBusinessLine(organizationDTO.getBusinessLine());
             }
+            user.setPromotionCompany(organizationDTO.getPromotionCompany());
         }
         Date date = new Date();
         LoginRecordReq loginRecord = new LoginRecordReq();

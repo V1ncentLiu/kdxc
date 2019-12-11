@@ -268,13 +268,6 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
-            // 转换驳回记录里用户信息
-            List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
-            if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
-                handleRejectUserName(rejectRecordList);
-              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
-                data.setSignRejectRecordList(rejectRecordList);
-            }
             IdEntityLong idLong = new IdEntityLong();
             idLong.setId(param.getClueId());
             String linkPhone = linkPhone(idLong);
@@ -816,34 +809,6 @@ public class BusinessSignController {
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
     }
-
-    /**
-     * 处理驳回人员姓名
-     * 
-     * @author: Fanjd
-     * @param rejectRecordList 驳回记录
-     * @return: void
-     * @Date: 2019/6/21 10:08
-     * @since: 1.0.0
-     **/
-    private void handleRejectUserName(List<SignRejectRecordDto> rejectRecordList) {
-        Set<Long> idSet = rejectRecordList.stream().map(SignRejectRecordDto::getCreateUser).collect(Collectors.toSet());
-        List<Long> idList = new ArrayList<>();
-        idList.addAll(idSet);
-        IdListLongReq idListReq = new IdListLongReq();
-        idListReq.setIdList(idList);
-        JSONResult<List<UserInfoDTO>> userResult = userInfoFeignClient.listById(idListReq);
-        if (JSONResult.SUCCESS.equals(userResult.getCode())) {
-            List<UserInfoDTO> userList = userResult.getData();
-          logger.info("根据用户id集合获取用户,id集合:{},查询结果集合:{}",idListReq,userList);
-            Map<Long, UserInfoDTO> userMap = userList.stream().collect(Collectors.toMap(UserInfoDTO::getId, a -> a, (k1, k2) -> k1));
-            for (SignRejectRecordDto dto : rejectRecordList) {
-                UserInfoDTO userInfoDTO = userMap.get(dto.getCreateUser());
-                dto.setCreateUserName(userInfoDTO.getName());
-            }
-
-        }
-    }
     
     /**
      * 查询明细
@@ -857,17 +822,6 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.querySignById(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
-            // 這段是為了顯示
-            // data.setSignProjectId(this.getProjectId());
-
-
-            // 转换驳回记录里用户信息
-            List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
-            if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
-                handleRejectUserName(rejectRecordList);
-              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
-                data.setSignRejectRecordList(rejectRecordList);
-            }
             IdEntityLong idLong = new IdEntityLong();
             idLong.setId(param.getClueId());
             String linkPhone = linkPhone(idLong);
