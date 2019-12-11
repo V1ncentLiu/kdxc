@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.common.constant.*;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
@@ -37,11 +38,6 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
-import com.kuaidao.common.constant.BusinessLineConstant;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RedisConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -183,6 +179,9 @@ public class CallRecordController {
         if(RoleCodeEnum.JC.name().equals(roleCode)){
             request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(curLoginUser.getBusinessLine()));
         }
+        //电销事业部
+        getTeleDeptList(request,roleCode,orgId,curLoginUser.getBusinessLine());
+
     // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:telCallRecord");
@@ -204,7 +203,47 @@ public class CallRecordController {
 
         return "call/telCallRecord";
     }
-    
+
+    /**
+     * 查询电销事业部
+     * @param request
+     * @param roleCode
+     */
+    private void getTeleDeptList(HttpServletRequest request, String roleCode,Long orgId,Integer businessLine) {
+        if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+            busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            busGroupReqDTO.setOrgType(OrgTypeConstant.DZSYB);
+            request.setAttribute("teleDeptList",organizationFeignClient.queryOrgByParam(busGroupReqDTO).getData());
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setId(orgId);
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            JSONResult<List<OrganizationDTO>> orgJr = organizationFeignClient.listParentsUntilOrg(queryDTO);
+            List<OrganizationDTO> orgList = orgJr.getData();
+            List<OrganizationDTO> teleDeptIdList = new ArrayList<>();
+            for (OrganizationDTO organizationDTO : orgList) {
+                if(OrgTypeConstant.DZSYB.equals(organizationDTO.getOrgType())){
+                    teleDeptIdList.add(organizationDTO);
+                    request.setAttribute("curDeptId",String.valueOf(organizationDTO.getId()));
+                    break;
+                }
+            }
+            request.setAttribute("teleDeptList",teleDeptIdList);
+
+        }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
+            IdEntity idEntity = new IdEntity(String.valueOf(orgId));
+            JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+            if (!JSONResult.SUCCESS.equals(orgJr.getCode()) ||  orgJr.getData() == null) {
+                logger.error("organizationFeignClient.queryOrgById(),req{{}},res{{}}",idEntity,orgJr);
+            }
+            List<OrganizationDTO> orgList = new ArrayList<>();
+            orgList.add(orgJr.getData());
+            request.setAttribute("teleDeptList",orgList);
+            request.setAttribute("curDeptId",String.valueOf(orgId));
+        }
+    }
+
     public List<OrganizationDTO> getDescenDantTeleGroupByOrgId(Long parentOrgId){
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(parentOrgId);
@@ -429,6 +468,36 @@ public class CallRecordController {
                                .collect(Collectors.toList());
                    }
                    myCallRecordReqDTO.setAccountIdList(idList);
+               }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   Long reqGroupId = teleGroupId == null ? orgId : teleGroupId;
+                   UserOrgRoleReq req = new UserOrgRoleReq();
+                   req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                   req.setOrgId(reqGroupId);
+                   JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                   if(!JSONResult.SUCCESS.equals(userJr.getCode())){
+                       logger.error("查询电销通过话记录-查询创业顾问 param{{}},res{{}}",req,userJr);
+                       return new JSONResult<Map<String, Object>>().fail(userJr.getCode(),userJr.getMsg());
+                   }
+                   List<UserInfoDTO> userData = userJr.getData();
+                   if(CollectionUtils.isEmpty(userData)){
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList= userData.parallelStream().map(user -> user.getId()).collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
+
+               }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   Long teleDeptId = myCallRecordReqDTO.getTeleDeptId();
+                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : orgId;
+                   List<UserInfoDTO> userList = getTeleSaleByOrgId(reqOrgId);
+                   if (CollectionUtils.isEmpty(userList)) {
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
+
                } else {
                    // 其他角色
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
