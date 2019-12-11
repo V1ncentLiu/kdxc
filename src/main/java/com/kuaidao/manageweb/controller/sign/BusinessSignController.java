@@ -850,17 +850,6 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.querySignById(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
-            // 這段是為了顯示
-            // data.setSignProjectId(this.getProjectId());
-
-
-            // 转换驳回记录里用户信息
-            List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
-            if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
-                handleRejectUserName(rejectRecordList);
-              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
-                data.setSignRejectRecordList(rejectRecordList);
-            }
             IdEntityLong idLong = new IdEntityLong();
             idLong.setId(param.getClueId());
             String linkPhone = linkPhone(idLong);
