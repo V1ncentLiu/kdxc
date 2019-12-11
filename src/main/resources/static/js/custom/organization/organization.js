@@ -1,7 +1,10 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: function() {
-            return {   
+            return {
+                isShowPc:false,
+                isBusinessShow:true,
+                promotionCompanyDisabledSelect:false,
                 expandedKeys:expandedKeys,//树形结构  默认展开的
                 dataTree: orgData,//组织结构tree
                 dataTable:[],//
@@ -20,12 +23,14 @@
                     name: '',
                     remark: '',
                     id:'',
-                    businessLine:''
+                    businessLine:'',
+                    promotionCompany:''
                 },
                 form2:{
                 	parentName:''	
                 },
                 orgTypeList:orgTypeList,
+                promotionCompanyList:promotionCompanyList,
                 businessLineList:businessLineList,
                 staffNumSearch:{//组内组成搜索框
                 	name:'',
@@ -47,6 +52,7 @@
                 selectedNode:null,//当前的orgParentId
                 selectedOrgId:'',//组织列表中，点击的是个组织 
                 rules:{
+                    promotionCompany:[{ required: true, message: '推广所属公司',trigger:'blur'}],
                 	 name: [
                          { required: true, message: '组织名称不能为空',trigger:'blur'},
                          { validator:function(rule,value,callback){
@@ -243,7 +249,6 @@
             },
             addChildOrg(){
             	this.form.id='';
-            
             	var curData = this.selectedNode;
             	if(!curData){
             		this.$message({
@@ -260,6 +265,17 @@
                 	this.businessLineDisabledSelect=true;
                 }else{
                 	this.businessLineDisabledSelect=false;
+                }
+                //所属推广公司 控制显示和隐藏
+                if(level ==0 ){
+                    this.isShowPc = true;
+                }else{
+                    this.isShowPc = false;
+                }
+                if(level!=0){
+                    this.promotionCompanyDisabledSelect=true;
+                }else{
+                    this.promotionCompanyDisabledSelect=false;
                 }
                 //查询业务线
          /*       var param={};
@@ -280,17 +296,26 @@
                 .then(function (response) {
                     var data =  response.data;
                     if(data.code=='0'){
+                        var promotionCompany = data.data.promotionCompany;
+                        if(promotionCompany){
+                            orgVM.form.promotionCompany = promotionCompany+"";
+                        }else{
+                            orgVM.form.promotionCompany = "";
+                        }
                     	var businessLine = data.data.businessLine;
                     	if(businessLine){
                     		if(businessLine==127){
                         		orgVM.tgzxBusinessLine = 127;
                         		businessLine = "";
+                                orgVM.isBusinessShow = false;
                         	}else{
                         		orgVM.form.businessLine= businessLine+"";
+                                orgVM.isBusinessShow = true;
                         	}
                     		
                     	}else{
                     		orgVM.form.businessLine ="";
+                            orgVM.isBusinessShow = true;
                     	}
                     }
                    
@@ -325,7 +350,7 @@
                      if(!businessLine && this.tgzxBusinessLine){
                     	 this.form.businessLine = this.tgzxBusinessLine;
                      }
-                 
+                     param.promotionCompany = this.form.promotionCompany;
                     orgVM.btnDisabled = true;
                       param.source = 1;
                     axios.post('/organization/organization/'+this.submitUrl, param)
@@ -433,6 +458,13 @@
                   */
                   
                  var parentName =  orgVM.form2.parentName;
+                 if(parentName == '根目录'){
+                     this.isShowPc = true;
+                     this.promotionCompanyDisabledSelect = false;
+                 }else{
+                     this.isShowPc = false;
+                     this.promotionCompanyDisabledSelect = true;
+                 }
                   var param={id:rows[0].id};
                   //根据id获取数据
                   axios.post('/organization/organization/queryOrgById',param)
@@ -442,7 +474,10 @@
                     	  if(data.data.businessLine==127){
                     		  data.data.businessLine = "";
                     		  orgVM.tgzxBusinessLine=127;
-                    	  }
+                              orgVM.isBusinessShow = false;
+                    	  }else{
+                              orgVM.isBusinessShow = true;
+                          }
                     	  var orgData = data.data;
                     	  var orgType = orgData.orgType;
                     	  if(orgType){
@@ -456,7 +491,12 @@
                     	  }else{
                     		  orgData.businessLine  = "";
                     	  }
-                    	  
+                    	  var promotionCompany = orgData.promotionCompany;
+                    	  if(promotionCompany || promotionCompany == 0){
+                              orgData.promotionCompany = promotionCompany+"";
+                          }else{
+                              orgData.promotionCompany = "";
+                          }
                           orgVM.form= data.data;
                           orgVM.form2.parentName=parentName;
                           //把当前的值存在临时变量里，当修改时，旧值和新值对比
