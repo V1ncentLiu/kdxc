@@ -809,34 +809,6 @@ public class BusinessSignController {
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
     }
-
-    /**
-     * 处理驳回人员姓名
-     * 
-     * @author: Fanjd
-     * @param rejectRecordList 驳回记录
-     * @return: void
-     * @Date: 2019/6/21 10:08
-     * @since: 1.0.0
-     **/
-    private void handleRejectUserName(List<SignRejectRecordDto> rejectRecordList) {
-        Set<Long> idSet = rejectRecordList.stream().map(SignRejectRecordDto::getCreateUser).collect(Collectors.toSet());
-        List<Long> idList = new ArrayList<>();
-        idList.addAll(idSet);
-        IdListLongReq idListReq = new IdListLongReq();
-        idListReq.setIdList(idList);
-        JSONResult<List<UserInfoDTO>> userResult = userInfoFeignClient.listById(idListReq);
-        if (JSONResult.SUCCESS.equals(userResult.getCode())) {
-            List<UserInfoDTO> userList = userResult.getData();
-          logger.info("根据用户id集合获取用户,id集合:{},查询结果集合:{}",idListReq,userList);
-            Map<Long, UserInfoDTO> userMap = userList.stream().collect(Collectors.toMap(UserInfoDTO::getId, a -> a, (k1, k2) -> k1));
-            for (SignRejectRecordDto dto : rejectRecordList) {
-                UserInfoDTO userInfoDTO = userMap.get(dto.getCreateUser());
-                dto.setCreateUserName(userInfoDTO.getName());
-            }
-
-        }
-    }
     
     /**
      * 查询明细
