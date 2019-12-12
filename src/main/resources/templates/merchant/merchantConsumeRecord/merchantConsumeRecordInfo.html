@@ -46,8 +46,11 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="资源ID:" label-width="55px">
+                    <el-input v-model="form.clueId" placeholder="资源ID"></el-input>
+                </el-form-item>
                 <el-form-item label="">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(null)"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
                 </el-form-item>
             </el-form>
         </div> -->
@@ -98,9 +101,17 @@
                 <el-table-column align="center" prop="orderId" label="订单号"></el-table-column>                
                 <el-table-column align="center" prop="createTime" label="消费时间"  :formatter="dateFormat" width="200"></el-table-column>
                 <el-table-column align="center" prop="userName" label="商家账号"></el-table-column>
+                <el-table-column align="center" prop="clueId" label="资源ID">
+                    <template slot-scope="scope">
+                        <el-button class="fontColor2"  type="text" @click="gotoInfo(scope.row.clueId)">
+                            <span>{{scope.row.clueId}}</span>
+                        </el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
                 <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable(null)"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -111,6 +122,8 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${userList}]];//商户集合
+    var createDate = [[${createDate}]];//消费日期
+    var merchantType = [[${merchantType}]];//消费日期
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -130,9 +143,9 @@
                 dataTable: [],
                 merchantUserListOptions:merchantUserList,
                 colorStatus:false
-            }             
+            }
         },
-        methods: {            
+        methods: {
             resetFormResource(formName) {
                 if (this.$refs[formName]) {
                     this.$refs[formName].resetFields();
@@ -159,7 +172,14 @@
             handleForbid(index, row) {
                 console.log(index, row);
             },
-            searchTable() {
+            gotoInfo(clueId){
+                var url = '/merchant/resourceTrajectory/topage?clueId=' + clueId;
+                if (merchantType == 1) {
+                    url = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId=' + clueId;
+                }
+                window.location.href = url;
+            },
+            searchTable(date) {
                 var startTime=this.form.createDateStart;
                 var endTime=this.form.createDateEnd;
                 if(endTime && startTime>endTime){
@@ -175,7 +195,8 @@
                 param.createDateStart = this.form.createDateStart;
                 param.createDateEnd = this.form.createDateEnd;
                 param.userId = this.form.userId;
-
+                param.clueId = this.form.clueId;
+                param.createDate = date;
                 console.info(param);
                 axios.post('/merchant/merchantConsumeRecord/list', param)
                 .then(function (response) {
@@ -207,7 +228,9 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
-            this.searchTable();
+            //从消费记录过来 默认查询某一天
+            var date = createDate;
+            this.searchTable(date);
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';

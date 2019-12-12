@@ -383,6 +383,8 @@ public class MerchantRuleController {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
         userInfoDTO.setStatusList(arrayList);
+        // 只查外部商家
+        userInfoDTO.setMerchantType(SysConstant.MerchantType.TYPE2);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();

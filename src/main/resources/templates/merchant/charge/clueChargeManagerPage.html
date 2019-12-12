@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
@@ -32,113 +30,439 @@
 </head>
 
 <body>
-    <div id="clueChargeManage" class="clueChargeManage mainPadding" style="display: none;">
-        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <div id="clueChargeManage" class="clueChargeManage mainPadding" style="display: none;padding-left: 25px;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20" style="font-size: 12px;">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
             <el-breadcrumb-item>费用设置</el-breadcrumb-item>
             <el-breadcrumb-item>资源资费设置</el-breadcrumb-item>
         </el-breadcrumb>
         <div class="mainSearchBg">
-            <el-form :inline="true" :model="clueChargeSearchForm" class="demo-form-inline" ref="clueChargeSearchForm">
-                <el-form-item label="资源类别：" label-width="auto">
-                    <el-select v-model="clueChargeSearchForm.category" filterable clearable placeholder="选择资源类别">
-                        <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
+            <!-- <el-form :inline="true" :model="clueChargeSearchForm" class="demo-form-inline" ref="clueChargeSearchForm">
+
                 <el-form-item label="">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索
                     </el-button>
                 </el-form-item>
-            </el-form>
-            <el-row>
-                <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" label-width="100px"
-                    class="demo-dynamic">
-                    <el-table ref="multipleTable" tooltip-effect="dark" border style="width: 100%"
-                        :data="dynamicValidateForm.dataTable">
-                        <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                        <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
-                        <el-table-column align="center" prop="" label="价格（元）/条">
-                            <template slot-scope="scope">
-                                <el-form-item :prop="'dataTable.' + scope.$index + '.charge'" :rules='rules.charge'
-                                    class="chargeBox">
-                                    <el-input v-model="scope.row.charge" :disabled="scope.row.disabled" maxLength="10"
-                                        @keyup.native.prevent="number(scope.$index, dynamicValidateForm.dataTable)">
-                                    </el-input>
-                                </el-form-item>
-                            </template>
-                        </el-table-column>
-                        <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat">
-                        </el-table-column>
-                        <el-table-column align="center" prop="updateUserName" label="操作人员"></el-table-column>
-                        <el-table-column align="center" prop="" label="操作">
-                            <template slot-scope="scope">
-                                <el-button v-if="scope.row.editShow==true" size="mini" type="primary"
-                                    @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                                <el-button v-else="scope.row.editShow==false" size="mini" type="success"
-                                    @click="handleSave(scope.$index, scope.row)">保存</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
+            </el-form> -->
+            <div class="mainSearchFormBox">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="clueChargeSearchForm"
+                    ref="clueChargeSearchForm">
+                    <div class="main-search-box">
+                        <el-form-item label="行业类别：" label-width="auto">
+                            <el-select v-model="clueChargeSearchForm.industryCategory" filterable clearable
+                                placeholder="选择行业类别">
+                                <el-option v-for="item in industryOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="资源类别：" label-width="auto">
+                            <el-select v-model="clueChargeSearchForm.category" filterable clearable
+                                placeholder="选择资源类别">
+                                <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="媒介：" label-width="auto">
+                            <el-select v-model="clueChargeSearchForm.source" filterable clearable placeholder="选择媒介">
+                                <el-option v-for="item in mediumOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="商家所属：" label-width="auto">
+                            <el-select v-model="clueChargeSearchForm.merchantType" filterable clearable
+                                placeholder="选择商家所属">
+                                <el-option v-for="item in merchantOwnedOptions" :key="item.value" :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                    <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" class="searchBtn" @click="searchTable()">
+                            搜索
+                        </el-button>
+                        <el-button @click="inputReset">重置</el-button>
+                    </div>
                 </el-form>
+            </div>
+            <el-row class="marginB20" style="margin: 27px 0 15px 0">
+                <el-button class="btnadd" type="primary" @click="seatOperation('add')">添加</el-button>
+                <el-button class="btnedit" type="success" @click="seatOperation('edit')">编辑</el-button>
+                <el-button class="btnremove" type="danger" @click="seatOperation('delete')">删除</el-button>
             </el-row>
+            <el-row>
+                <div>
+                    <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" label-width="100px"
+                        class="demo-dynamic">
+                        <el-table ref="multipleTable" tooltip-effect="dark" border
+                            @selection-change="handleSelectionChange" style="width: 100%"
+                            :data="dynamicValidateForm.dataTable">
+                            <el-table-column align="center" type="selection" label="序号" width="55"></el-table-column>
+                            <el-table-column align="center" prop="chargeName" label="资费名称" min-width="80">
+                            </el-table-column>
+                            <!-- <el-table-column align="center" prop="id" label="ID" min-width="80">
+                            </el-table-column> -->
+                            <el-table-column align="center" prop="industryCategoryName" label="行业类别" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="categoryName" label="资源类别" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="sourceName" label="资源媒介" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="charge" label="价格（元）/条" min-width="95">
+                                <!-- <template slot-scope="scope">
+                                    <el-form-item :prop="'dataTable.' + scope.$index + '.charge'" :rules='rules.charge'
+                                        class="chargeBox">
+                                        <el-input v-model="scope.row.charge" :disabled="scope.row.disabled" maxLength="10"
+                                            @keyup.native.prevent="number(scope.$index, dynamicValidateForm.dataTable)">
+                                        </el-input>
+                                    </el-form-item>
+                                </template> -->
+                            </el-table-column>
+                            <el-table-column align="center" prop="merchantType" label="商家所属" min-width="80">
+                                <template slot-scope="scope">
+                                    <span v-if="scope.row.merchantType==0">全部商家</span>
+                                    <span v-if="scope.row.merchantType==1">内部商家</span>
+                                    <span v-if="scope.row.merchantType==2">外部商家</span>
+                                </template>
+
+                            </el-table-column>
+                            <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat"
+                                min-width="120">
+                            </el-table-column>
+                            <el-table-column align="center" prop="updateUserName" label="操作人员" min-width="80">
+                            </el-table-column>
+                            <el-table-column align="center" prop="" label="状态" min-width="80">
+                                <template slot-scope="scope">
+                                    <span v-if="scope.row.deleted" style="color: red">已删除</span>
+                                    <span v-else style="color:blue">正常</span>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-form>
+                    <table-pagination :pager="pager" @change="searchTable" style="text-align:center; ">
+                    </table-pagination>
+                </div>
+            </el-row>
+            <!-- 添加编辑坐席弹框 -->
+            <el-dialog :title="title" :visible.sync="centerDialogVisible" width="540px">
+                <el-form :model="subAccountForm" ref="subAccountForm" :rules="rules">
+                    <el-form-item label="资费名称：" :label-width="formLabelWidth" prop="iframeseatNo">
+                        <el-input maxlength="10" v-model="subAccountForm.iframeseatNo" autocomplete="off"
+                            style="width: 290px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="行业类别：" :label-width="formLabelWidth" prop="iframecompany">
+                        <el-select v-model="subAccountForm.iframecompany" clearable placeholder="不限"
+                            style="width: 290px;">
+                            <el-option v-for="item in industryOptions" :key="item.value" :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="iframeaddress">
+                        <el-select v-model="subAccountForm.iframeaddress" clearable placeholder="不限"
+                            style="width: 290px;">
+                            <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源媒介：" :label-width="formLabelWidth" prop="iframeaccountNo">
+                        <el-select v-model="subAccountForm.iframeaccountNo" clearable placeholder="不限"
+                            style="width: 290px;">
+                            <el-option v-for="item in mediumOptions" :key="item.value" :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源定价/条：" :label-width="formLabelWidth" prop="iframesecretKey">
+                        <el-input @keyup.native="inputNumber" maxlength="10" v-model="subAccountForm.iframesecretKey"
+                            autocomplete="off" style="width: 290px;"></el-input>
+                    </el-form-item>
+                    <!-- <el-form-item label="资源定价/条：" :label-width="formLabelWidth" prop="iframesecretKey">
+                        <el-input  maxlength="10" v-model="subAccountForm.iframesecretKey"
+                            autocomplete="off" style="width: 290px;"></el-input>
+                    </el-form-item> -->
+                    <el-form-item label="商家所属：" :label-width="formLabelWidth" prop="iframemerchantType">
+                        <el-select v-model="subAccountForm.iframemerchantType" style="width: 290px;" placeholder="全部商家">
+                            <el-option v-for="item in merchantOwnedOptions" :key="item.value" :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                </el-form>
+                <div slot="footer" class="dialog-footer" style="text-align:center;">
+                    <el-button class="allBtnHover" type="primary" :disabled="submitDisabled"
+                        @click="submitForm('subAccountForm')">
+                        提交</el-button>
+                    <el-button class="cancel" type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
+                </div>
+            </el-dialog>
         </div>
     </div>
     <!-- import common js-->
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var industryCategoryList = [[${ industryCategoryList }]];//行业类别
     var categoryList = [[${ categoryList }]];//资费类别
+    var sourceList = [[${ sourceList }]];//媒介
     var clueChargeVM = new Vue({
         el: '#clueChargeManage',
         data: {
             clueChargeSearchForm: {
-                category: ''
+                industryCategory: '',
+                category: '',
+                source: '',
+                merchantType: '',
             },
+            categoryOptions: categoryList,
+            industryOptions: industryCategoryList,
+            mediumOptions: sourceList,
+            merchantOwnedOptions: [{ name: '内部商家', value: '1' }, { name: '全部商家', value: '0' }, { name: '外部商家', value: '2' }],
+            pager: {
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            subAccountForm: {
+                iframeseatNo: "",
+                iframecompany: '',
+                iframeaddress: '',
+                iframeaccountNo: '',
+                iframesecretKey: '',
+                iframemerchantType: '',
+            },
+            title: '添加',
             dynamicValidateForm: {
-                dataTable: []
+                dataTable: [],
+                // [
+                //     {
+                //         id: '1',
+                //         chargeName: '奥术大师多撒大所大',
+                //         industryCategoryName: '火锅',
+                //         categoryName: '联展',
+                //         sourceName: '58',
+                //         charge: '222',
+                //         updateTime: '3333',
+                //         updateUserName: '444',
+                //         deleted: 1,
+                //         merchantType: '内部商家'
+
+                //     }, {
+                //         id: '1',
+                //         chargeName: '8888',
+                //         industryCategoryName: '火锅',
+                //         categoryName: '联展',
+                //         sourceName: '58',
+                //         charge: '222',
+                //         updateTime: '3333',
+                //         updateUserName: '444',
+                //         deleted: 1,
+                //         merchantType: '内部商家'
+
+                //     }
+                // ]
             },
             dialogFormVisible: false,
+            centerDialogVisible: false,
             submitDisabled: false,
-            multipleSelection: [],
-            categoryOptions: categoryList,
+            multipleSelection:[],
+            categoryOptions:categoryList,
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
             rules: {
-                charge: [
-                    { required: true, message: '请输入价格', trigger: 'blur' },
-                    // { validator:function(rule,value,callback){               
-                    //     if(/^[0-9]*$/.test(value) == false){
-                    //        callback(new Error("请输入整数"));
-                    //     }else{
-                    //        callback();
-                    //     } 
-                    //     callback();
-                    // }, trigger: 'change'}
+                iframeseatNo: [
+                    { required: true, message: '资费名称不能为空', trigger: 'change' },
+                    { max: 20, message: '最大20个字符', trigger: 'blur' },
                 ],
+                iframecompany: [
+                    { required: true, message: '行业类别不能为空', trigger: 'change' },
+                ],
+                iframeaddress: [
+                    { required: true, message: '资源类别不能为空', trigger: 'change' },
+                ],
+                iframeaccountNo: [
+                    { required: true, message: '资源媒介不能为空', trigger: 'change' },
+                ],
+                iframesecretKey: [
+                    { required: true, message: '资源定价不能为空', trigger: 'change' },
+                ],
+                iframemerchantType: [
+                    { required: true, message: '行业类别不能为空', trigger: 'change' },
+                ],
+
             }
         },
         methods: {
+            // 输入非数字 校验
+            inputNumber() {
+                this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
+                this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(/^\./g, ""); //验证第一个字符是数字
+                this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
+                this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+                this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数
+            },
+
+            // 添加编辑删除
+            seatOperation(type) {
+                this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : '' //移除表单验证
+                switch (type) {
+                    case 'add':
+                        this.subAccountForm = {}
+                        this.title = '添加资费设置'
+                        this.centerDialogVisible = true
+                        break;
+                    case 'edit':
+                        this.title = '编辑资费设置'
+                        if (this.multipleSelection.length === 1) {
+                            const { chargeName, categoryName, industryCategoryName, sourceName, charge, merchantType } = this.multipleSelection[0]
+                            this.centerDialogVisible = true
+                            this.subAccountForm.iframeseatNo = chargeName
+                            this.subAccountForm.iframecompany = industryCategoryName
+                            this.subAccountForm.iframeaddress = categoryName
+                            this.subAccountForm.iframeaccountNo = sourceName
+                            this.subAccountForm.iframesecretKey = charge
+                            this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部商家' : '外部商家'
+                        } else {
+                            clueChargeVM.$message.warning('请正确选择');
+                        }
+                        break;
+                    case 'delete':
+                        this.open()
+                        break;
+                    default: return '';
+
+                }
+            },
+
+            // 确认删除弹框
+            open() {
+                var that = this
+                if (this.multipleSelection.length >= 1) {
+                    this.$confirm('是否确认删除?').then(() => {
+                        var idList = []
+                        for (var i = 0; i < that.multipleSelection.length; i++) {
+                            if (that.multipleSelection[i].id) {
+                                idList.push(that.multipleSelection[i].id)
+                            }
+                        }
+                        axios.post('/merchant/clueChargeManager/delete', { idList })
+                            .then(function (response) {
+                                that.$message({
+                                    message: '删除成功',
+                                    type: 'success'
+                                });
+                                that.searchTable()
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                    });
+                } else {
+                    clueChargeVM.$message.warning('请正确选择');
+                }
+            },
+
+            // 提交
+            submitForm(formName) {
+                var that = this
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.chargeName = this.subAccountForm.iframeseatNo
+                        param.industryCategory = this.selectionValue(this.subAccountForm.iframecompany, this.industryOptions)
+                        param.category = this.selectionValue(this.subAccountForm.iframeaddress, this.categoryOptions)
+                        param.source = this.selectionValue(this.subAccountForm.iframeaccountNo, this.mediumOptions)
+                        param.charge = this.subAccountForm.iframesecretKey
+                        param.merchantType = this.selectionValue(this.subAccountForm.iframemerchantType, this.merchantOwnedOptions)
+                        if (this.title === '编辑资费设置') {
+                            param.id = this.multipleSelection[0].id
+                        }
+                        axios.post('/merchant/clueChargeManager/saveClueCharge', param)
+                            .then(function (response) {
+                                var result = response.data;
+                                if (result.code == 0) {
+                                    console.log(result);
+                                    that.searchTable()
+                                    that.centerDialogVisible = false
+                                } else {
+                                    clueChargeVM.$message.error(result.msg);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    } else {
+                        // alert('错误');
+                    }
+                })
+            },
+
+
+            // 取消添加坐席提交
+            cancelClick(formName) {
+                this.centerDialogVisible = false;
+            },
+
+            inputReset() {
+                var newClueChargeSearchForm = {
+                    industryCategory: '',
+                    category: '',
+                    source: '',
+                    merchantType: '',
+                }
+                this.clueChargeSearchForm = newClueChargeSearchForm
+                this.searchTable()
+            },
+
+            // 请求列表数据
             searchTable() {
+                var that = this
                 var param = {};
+                param.pageNum = this.pager.currentPage
+                param.pageSize = this.pager.pageSize;
+                param.industryCategory = this.clueChargeSearchForm.industryCategory;
                 param.category = this.clueChargeSearchForm.category;
+                param.source = this.clueChargeSearchForm.source;
+                param.merchantType = this.clueChargeSearchForm.merchantType;
+
                 // console.info(param);
-                axios.post('/merchant/clueChargeManager/listNoPage', param)
+                axios.post('/merchant/clueChargeManager/queryPage', param)
                     .then(function (response) {
                         var result = response.data;
-                        // console.info(result);
-                        clueChargeVM.dynamicValidateForm.dataTable = result.data;
+                        if (result.code == 0) {
+                            var table = result.data;
+                            console.log(table.data);
+                            that.dynamicValidateForm.dataTable = table.data
+                            that.pager.total = table.total;
+                            that.pager.currentPage = table.currentPage;
+                        } else {
+                            clueChargeVM.$message.error(result.msg);
+                        }
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
 
             },
-            //选择行
+
+            //选择一条数据
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+                console.log(this.multipleSelection);
+
             },
+
             //日期数据格式化方法
             dateFormat(row, column, cellValue, index) {
                 if (cellValue == undefined) {
@@ -146,68 +470,23 @@
                 }
                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
-            handleEdit(index, row) {
-                console.log(index, row);
-                row.disabled = false;
-                row.editShow = false;
-            },
-            handleSave(index, row) {
-                var chargeVal = row.charge;
-                if (!chargeVal) {
-                    this.$message({
-                        message: '价格不能为空',
-                        type: 'warning'
-                    });
-                    return;
-                }
-                var reg = /^[\u0391-\uFFE5A-Za-z]+$/;//如果是中文或者英文提示不能提交
-                if (reg.test(chargeVal)) {
-                    this.$message({
-                        message: '请输入数字',
-                        type: 'warning'
-                    });
-                    return;
-                }
-                row.disabled = true;
-                row.editShow = true;
 
-                var param = {};
-                param.id = row.id;
-                param.category = row.category;
-                param.charge = chargeVal;
-                console.info(param);
-                axios.post('/merchant/clueChargeManager/saveClueCharge', param)
-                    .then(function (response) {
-                        console.info(response);
-                        // init表格
-                        clueChargeVM.searchTable();
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
 
-            },
-            number(index, rows) {
-                // rows[index].charge=rows[index].charge.replace(/[^\.\d]/g,'');
-                // rows[index].charge=rows[index].charge.replace('.','');
-                rows[index].charge = rows[index].charge.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
-                rows[index].charge = rows[index].charge.replace(/^\./g, ""); //验证第一个字符是数字
-                rows[index].charge = rows[index].charge.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
-                rows[index].charge = rows[index].charge.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
-                rows[index].charge = rows[index].charge.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数           
-            },
+            // 选择框转化关系
+            selectionValue(data, allData) {
+                var value = ''
+                for (var i = 0; i < allData.length; i++) {
+                    if (allData[i].name == data || allData[i].value == data) {
+                        value = allData[i].value
+                    }
+                }
+                return value
+            }
         },
         created() {
-            // 取页数存储
-            //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            //if(localVal){this.pager.pageSize = localVal;}
-
-            // console.info("create method");
             this.searchTable();
-
         },
         mounted() {
-            // console.info("mounted method");
             document.getElementById('clueChargeManage').style.display = 'block';
         }
     })
