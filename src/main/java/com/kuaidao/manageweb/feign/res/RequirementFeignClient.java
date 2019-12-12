@@ -1,28 +1,28 @@
 package com.kuaidao.manageweb.feign.res;
 
-import com.kuaidao.aggregation.dto.res.ResQueryDto;
-import com.kuaidao.aggregation.dto.res.ResRequirement;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.feign.releaserecord.ReleaseRecordFeignClient;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
+import com.kuaidao.aggregation.dto.res.ResQueryDto;
+import com.kuaidao.aggregation.dto.res.ResRequirement;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 
 /**
  * 请求资源
  */
-@FeignClient(name = "aggregation-service",path="/aggregation//app/requirment",fallback =RequirementFeignClient.HystrixClientFallback.class )
+@FeignClient(name = "aggregation-service", path = "/aggregation/app/requirment",
+        fallback = RequirementFeignClient.HystrixClientFallback.class)
 public interface RequirementFeignClient {
 
     /**
      * 分页查询
+     * 
      * @param dto
      * @return
      */
@@ -31,6 +31,7 @@ public interface RequirementFeignClient {
 
     /**
      * 查询全部
+     * 
      * @param dto
      * @return
      */
@@ -40,8 +41,9 @@ public interface RequirementFeignClient {
 
 
     @Component
-    static class HystrixClientFallback implements RequirementFeignClient{
-        private static Logger logger = LoggerFactory.getLogger(RequirementFeignClient.HystrixClientFallback.class);
+    static class HystrixClientFallback implements RequirementFeignClient {
+        private static Logger logger =
+                LoggerFactory.getLogger(RequirementFeignClient.HystrixClientFallback.class);
 
         @SuppressWarnings("rawtypes")
         private JSONResult fallBackError(String name) {
