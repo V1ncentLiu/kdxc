@@ -5,17 +5,20 @@ package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.account.dto.consume.CountConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordPageParam;
@@ -40,9 +43,11 @@ public class MerchantConsumeRecordController {
     private MerchantConsumeRecordFeignClient merchantConsumeRecordFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+    @Autowired
+    private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
 
     /***
-     * 消费记录列表页
+     * 消费记录列表页 外部商家-商家账号：当前登录商家主账号加子账号 内部商家-商家账户：电销布局里绑定的电销组
      *
      * @return
      */
@@ -50,7 +55,8 @@ public class MerchantConsumeRecordController {
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
-
+        // 构建商家账户集合
+        List<UserInfoDTO> userList = buildUserList();
         // 当前人员id
         request.setAttribute("userId", user.getId() + "");
         // 当前人员角色code
@@ -58,10 +64,8 @@ public class MerchantConsumeRecordController {
         if (roleList != null && roleList.size() != 0) {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
-        // 商家账号(当前登录商家主账号加子账号)
-        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+
         userList.add(user);
-        userList.addAll(getMerchantUser(user.getId(), null));
         request.setAttribute("userList", userList);
 
         return "merchant/merchantConsumeRecord/merchantConsumeRecord";
@@ -77,8 +81,8 @@ public class MerchantConsumeRecordController {
     @PostMapping("/countListMerchant")
     @ResponseBody
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
-    public JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant(
-            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant(@RequestBody MerchantConsumeRecordPageParam pageParam,
+            HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setMainAccountId(user.getId());
@@ -87,9 +91,17 @@ public class MerchantConsumeRecordController {
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
+        List<UserInfoDTO> userInfoDTOS = buildUserList();
+        userInfoDTOS.add(user);
+        if (CollectionUtils.isNotEmpty(userInfoDTOS)) {
+            // 构建用户id集合
+            List<Long> userIds = userInfoDTOS.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+            pageParam.setUserList(userIds);
+        }
+        // 商家所属
+        pageParam.setMerchantType(user.getMerchantType());
         // 消费记录
-        JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant =
-                merchantConsumeRecordFeignClient.countListMerchant(pageParam);
+        JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant = merchantConsumeRecordFeignClient.countListMerchant(pageParam);
 
         return countListMerchant;
     }
@@ -99,21 +111,24 @@ public class MerchantConsumeRecordController {
      *
      * @return
      */
-    @RequestMapping("/initInfoList")
+    @RequestMapping("/initInfoList/{createDate}")
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
-    public String initInfoList(HttpServletRequest request) {
+    public String initInfoList(HttpServletRequest request, @PathVariable("createDate") String createDate) {
         UserInfoDTO user = getUser();
         // 当前人员id
         request.setAttribute("userId", user.getId() + "");
+        // 消费日期
+        request.setAttribute("createDate", createDate);
+        // 消费日期
+        request.setAttribute("merchantType", user.getMerchantType());
         // 当前人员角色code
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && roleList.size() != 0) {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
         // 商家账号(当前登录商家主账号加子账号)
-        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+        List<UserInfoDTO> userList = buildUserList();
         userList.add(user);
-        userList.addAll(getMerchantUser(user.getId(), null));
         request.setAttribute("userList", userList);
 
         return "merchant/merchantConsumeRecord/merchantConsumeRecordInfo";
@@ -129,8 +144,7 @@ public class MerchantConsumeRecordController {
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
-    public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(
-            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setMainAccountId(user.getId());
@@ -140,8 +154,7 @@ public class MerchantConsumeRecordController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 消费记录
-        JSONResult<PageBean<MerchantConsumeRecordDTO>> list =
-                merchantConsumeRecordFeignClient.list(pageParam);
+        JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
 
         return list;
     }
@@ -149,7 +162,7 @@ public class MerchantConsumeRecordController {
     /**
      * 获取当前登录账号
      *
-     * @param orgDTO
+     * @param
      * @return
      */
     private UserInfoDTO getUser() {
@@ -162,7 +175,7 @@ public class MerchantConsumeRecordController {
     /**
      * 查询商家账号
      *
-     * @param code
+     * @param
      * @return
      */
     private List<UserInfoDTO> getMerchantUser(Long parentId, List<Integer> arrayList) {
@@ -170,8 +183,49 @@ public class MerchantConsumeRecordController {
         userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
         userInfoDTO.setParentId(parentId);
         userInfoDTO.setStatusList(arrayList);
-        JSONResult<List<UserInfoDTO>> merchantUserList =
-                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
+    }
+
+    /**
+     * * 外部商家-商家账号：当前登录商家主账号加子账号 * 内部商家-商家账户：电销布局里绑定的电销组
+     * 
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2019/10/23 10:55
+     * @since: 1.0.0
+     **/
+    private List<UserInfoDTO> buildUserList() {
+        UserInfoDTO user = getUser();
+        List<UserInfoDTO> userList = new ArrayList<>();
+        // 商家所属
+        Integer merchantType = user.getMerchantType();
+        // 内部商家
+        if (SysConstant.MerchantType.TYPE1 == merchantType) {
+            TelemarketingLayoutDTO reqDto = new TelemarketingLayoutDTO();
+            reqDto.setCompanyGroupId(user.getId());
+            JSONResult<List<OrganizationDTO>> result = telemarketingLayoutFeignClient.getdxListByCompanyGroupId(reqDto);
+            List<OrganizationDTO> orgList = result.getData();
+            if (result.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(result.getData())) {
+                for (OrganizationDTO organizationDTO : orgList) {
+                    UserInfoDTO userInfoDTO = new UserInfoDTO();
+                    BeanUtils.copyProperties(organizationDTO,userInfoDTO);
+                }
+
+            }
+        }
+        // 外部商家
+        if (SysConstant.MerchantType.TYPE2 == merchantType) {
+            userList.add(user);
+            // 状态集合
+            List<Integer> status = new ArrayList<>();
+            // 启用
+            status.add(SysConstant.USER_STATUS_ENABLE);
+            // 锁定
+            status.add(SysConstant.USER_STATUS_LOCK);
+            userList = getMerchantUser(user.getId(), status);
+        }
+        return userList;
     }
 }

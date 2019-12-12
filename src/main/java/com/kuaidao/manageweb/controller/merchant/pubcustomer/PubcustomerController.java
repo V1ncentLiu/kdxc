@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.merchant.pubcustomer;
 
-import com.kuaidao.common.constant.ComConstant.USER_STATUS;
+import com.kuaidao.common.constant.ComConstant;
+import com.kuaidao.common.constant.ComConstant.MERCHANTTYPE;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -107,7 +108,13 @@ public class PubcustomerController {
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(
             @RequestBody ClueQueryParamDTO dto) {
        UserInfoDTO user = CommUtil.getCurLoginUser();
-       if(user.getUserType() != null && user.getUserType() ==2){
+
+    Integer merchantType = user.getMerchantType();
+    if(MERCHANTTYPE.TYPE1==merchantType){
+      return new JSONResult<PageBean<PublicCustomerResourcesRespDTO>>().fail("-1","内部商家没有权限访问公海营销");
+    }
+
+    if(user.getUserType() != null && user.getUserType() ==2){
          dto.setBussinessAccount(user.getId());
          dto.setUserType(2); // 主账户
        }else if(user.getUserType() != null && user.getUserType() ==3){

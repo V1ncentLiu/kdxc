@@ -55,7 +55,7 @@ var homePageVM = new Vue({
 			},
 			isLogin: false,//坐席是否登录
 			isTrClient: false,//天润坐席是否登录
-			isQimoClient: false,//七陌坐席是否登录
+			isQimoClient: true,//七陌坐席是否登录
 			isHeliClient: false,//合力坐席是否登录
 			callTitle: '',
 			dialogLoginClientVisible: false,//登录坐席dialog 
@@ -432,6 +432,7 @@ var homePageVM = new Vue({
 						homePageVM.isHeliClient = true;
 						homePageVM.isTrClient = false;
 						homePageVM.isQimoClient = false;
+						isLogin=true
 						//sessionStorage.setItem("loginClient","qimo");
 						//sessionStorage.setItem("accountId",homePageVM.accountId);
 						var clientInfo = {};

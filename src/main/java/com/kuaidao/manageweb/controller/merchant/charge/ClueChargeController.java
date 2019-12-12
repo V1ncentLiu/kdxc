@@ -7,6 +7,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.PageBean;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -36,11 +41,10 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
  * @author zxy
  *
  */
-
+@Slf4j
 @Controller
 @RequestMapping("/merchant/clueChargeManager")
 public class ClueChargeController {
-    private static Logger logger = LoggerFactory.getLogger(ClueChargeController.class);
     @Autowired
     private ClueChargeFeignClient clueChargeFeignClient;
     @Autowired
@@ -54,12 +58,36 @@ public class ClueChargeController {
     @RequestMapping("/initClueChargeList")
     @RequiresPermissions("merchant:clueChargeManager:view")
     public String initClueChargeList(HttpServletRequest request) {
-        request.setAttribute("categoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+        request.setAttribute("categoryList", getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+        request.setAttribute("sourceList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        request.setAttribute("industryCategoryList", getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         return "merchant/charge/clueChargeManagerPage";
     }
 
+    /**
+     * 查询资源资费列表
+     *
+     * @param
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/queryPage")
+    public JSONResult<PageBean<MerchantClueChargeDTO>> queryPage(@RequestBody MerchantClueChargeReq pageParam) {
 
+        return clueChargeFeignClient.queryPage(pageParam);
+
+    }
+    /**
+     * 删除资源费用
+     *
+     * @param idListLongReq
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/delete")
+    public JSONResult<String> delete(@RequestBody IdListLongReq idListLongReq) {
+    return clueChargeFeignClient.delete(idListLongReq);
+    }
 
     /***
      * 资源资费列表(不分页)
@@ -68,12 +96,10 @@ public class ClueChargeController {
      */
     @PostMapping("/listNoPage")
     @ResponseBody
-    public JSONResult<List<MerchantClueChargeDTO>> listNoPage(
-            @RequestBody MerchantClueChargePageParam merchantClueChargePageParam,
+    public JSONResult<List<MerchantClueChargeDTO>> listNoPage(@RequestBody MerchantClueChargePageParam merchantClueChargePageParam,
             HttpServletRequest request) {
 
-        JSONResult<List<MerchantClueChargeDTO>> list =
-                clueChargeFeignClient.listNoPage(merchantClueChargePageParam);
+        JSONResult<List<MerchantClueChargeDTO>> list = clueChargeFeignClient.listNoPage(merchantClueChargePageParam);
 
         return list;
     }
@@ -91,14 +117,13 @@ public class ClueChargeController {
     @PostMapping("/saveClueCharge")
     @ResponseBody
     @RequiresPermissions("merchant:clueChargeManager:edit")
-    @LogRecord(description = "编辑资源资费", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.CLUE_CHARGE_MANAGEMENT)
-    public JSONResult saveClueCharge(
-            @Valid @RequestBody MerchantClueChargeReq merchantClueChargeReq, BindingResult result) {
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
+    @LogRecord(description = "编辑资源资费", operationType = OperationType.UPDATE, menuName = MenuEnum.CLUE_CHARGE_MANAGEMENT)
+    public JSONResult saveClueCharge(@Valid @RequestBody MerchantClueChargeReq merchantClueChargeReq) {
         long userId = getUserId();
+        if (null == merchantClueChargeReq.getId()) {
+            merchantClueChargeReq.setCreateUser(userId);
+
+        }
         merchantClueChargeReq.setUpdateUser(userId);
         return clueChargeFeignClient.insertOrUpdate(merchantClueChargeReq);
     }
@@ -123,10 +148,8 @@ public class ClueChargeController {
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
-        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
-        if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
