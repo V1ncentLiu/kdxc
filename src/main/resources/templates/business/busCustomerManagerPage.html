@@ -2,20 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        button a {
-            color: #fff !important;
-        }
-
-        .lineFeed {
-            width: 230px;
-            word-break: break-all;
-            word-wrap: break-word;
+        .el-table__expand-icon {
+            display: inline-block;
+            width: 20px;
+            line-height: 20px;
+            height: 20px;
             text-align: center;
-            color: #c0c4cc;
-            cursor: not-allowed;
+            margin-right: 3px;
         }
     </style>
 </head>
@@ -164,12 +160,14 @@
         </div>
         <el-row>
             <el-table ref="multipleTable" tooltip-effect="dark"
-                      border @row-dblclick="showCustomerDetail"
-                      @selection-change="handleSelectionChange" style="width: 100%"
-                      :data="dataTable" @sort-change="sort_change">
+                    border @row-dblclick="showCustomerDetail"
+                    @selection-change="handleSelectionChange" style="width: 100%"
+                    :data="dataTable" @sort-change="sort_change"
+                    row-key="appiontmentId"
+                    :tree-props="{children: 'childrens'}">
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>                            
-                <el-table-column align="center" prop="reserveTime" sortable label="邀约来访时间" :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="reserveTime" sortable label="邀约来访时间" :formatter="dateFormat" width="150"></el-table-column>
                 <el-table-column align="center" prop="visitStatus" label="到访状态" :formatter="transformVisit" width="90"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="签约状态" :formatter="transformSign" width="80"></el-table-column>
                 <el-table-column align="center" prop="busSaleName" label="商务经理" width="120"></el-table-column>
@@ -856,6 +854,7 @@
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </body>
 <script th:inline="javascript">
     var busSaleGroupList = [[${busSaleGroupList}]];//搜索商务组
