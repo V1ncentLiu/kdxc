@@ -227,13 +227,19 @@
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
+              //获取url地址栏参数的方法
+              getQueryString(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return unescape(r[2]); return null;
+            },
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             //从消费记录过来 默认查询某一天
-            var date = createDate;
+            var date = this.getQueryString('createDate');
             this.searchTable(date);
         },
         mounted(){

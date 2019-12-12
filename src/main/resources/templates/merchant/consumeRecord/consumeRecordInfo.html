@@ -157,13 +157,20 @@
                  return "";
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-            }
+            },
+             //获取url地址栏参数的方法
+            getQueryString(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return unescape(r[2]); return null;
+            },
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
+            console.log(this.getQueryString('createDate'));
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
