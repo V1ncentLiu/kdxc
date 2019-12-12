@@ -68,6 +68,9 @@ public class AbandonController {
                 return new JSONResult().fail("-1", "创建时间，结束时间不能早于开始时间!");
             }
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        dto.setPromotionCompany(user.getPromotionCompany());
         return abandonFeignClient.queryListPage(dto);
     }
 
