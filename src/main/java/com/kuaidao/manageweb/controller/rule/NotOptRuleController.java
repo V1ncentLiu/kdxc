@@ -222,7 +222,8 @@ public class NotOptRuleController {
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
         pageParam.setOrgId(user.getOrgId());
-
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        pageParam.setPromotionCompany(user.getPromotionCompany());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
 
@@ -259,6 +260,8 @@ public class NotOptRuleController {
         clueAssignRuleReq.setCreateUser(user.getId());
         clueAssignRuleReq.setUpdateUser(user.getId());
         clueAssignRuleReq.setOrgId(user.getOrgId());
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
         // 插入类型为优化
         clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
         return clueAssignRuleFeignClient.create(clueAssignRuleReq);
