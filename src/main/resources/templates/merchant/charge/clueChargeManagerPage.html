@@ -103,6 +103,7 @@
                             @selection-change="handleSelectionChange" style="width: 100%"
                             :data="dynamicValidateForm.dataTable">
                             <el-table-column align="center" type="selection" label="序号" width="55"></el-table-column>
+                            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                             <el-table-column align="center" prop="chargeName" label="资费名称" min-width="80">
                             </el-table-column>
                             <!-- <el-table-column align="center" prop="id" label="ID" min-width="80">
@@ -126,8 +127,8 @@
                             <el-table-column align="center" prop="merchantType" label="商家所属" min-width="80">
                                 <template slot-scope="scope">
                                     <span v-if="scope.row.merchantType==0">全部商家</span>
-                                    <span v-if="scope.row.merchantType==1">内部商家</span>
-                                    <span v-if="scope.row.merchantType==2">外部商家</span>
+                                    <span v-if="scope.row.merchantType==1">内部</span>
+                                    <span v-if="scope.row.merchantType==2">外部</span>
                                 </template>
 
                             </el-table-column>
@@ -224,7 +225,7 @@
             categoryOptions: categoryList,
             industryOptions: industryCategoryList,
             mediumOptions: sourceList,
-            merchantOwnedOptions: [{ name: '全部商家', value: '0' }, { name: '内部商家', value: '1' }, { name: '外部商家', value: '2' }],
+            merchantOwnedOptions: [{ name: '全部商家', value: '0' }, { name: '内部', value: '1' }, { name: '外部', value: '2' }],
             pager: {
                 total: 0,
                 currentPage: 1,
@@ -322,7 +323,7 @@
                         this.subAccountForm.iframeaddress = ''
                         this.subAccountForm.iframeaccountNo = ''
                         this.subAccountForm.iframesecretKey = ''
-                        this.subAccountForm.iframemerchantType = ''
+                        this.subAccountForm.iframemerchantType = '全部商家'
                         this.title = '添加资费设置'
                         this.centerDialogVisible = true
                         break;
@@ -335,10 +336,10 @@
                             this.subAccountForm.iframeaddress = categoryName
                             this.subAccountForm.iframeaccountNo = sourceName
                             this.subAccountForm.iframesecretKey = charge
-                            this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部商家' : '外部商家'
+                            this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部' : '外部'
                             this.centerDialogVisible = true
                         } else {
-                            clueChargeVM.$message.warning('请正确选择');
+                            clueChargeVM.$message.warning('只允许选择一条数据进行编辑');
                         }
                         break;
                     case 'delete':
