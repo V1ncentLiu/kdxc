@@ -11,6 +11,7 @@ import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -111,14 +112,16 @@ public class MerchantConsumeRecordController {
      *
      * @return
      */
-    @RequestMapping("/initInfoList/{createDate}")
+    @RequestMapping("/initInfoList")
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
-    public String initInfoList(HttpServletRequest request, @PathVariable("createDate") String createDate) {
+    public String initInfoList(HttpServletRequest request, @RequestParam("createDate") String createDate) {
         UserInfoDTO user = getUser();
         // 当前人员id
         request.setAttribute("userId", user.getId() + "");
-        // 消费日期
-        request.setAttribute("createDate", createDate);
+        if (StringUtils.isNotBlank(createDate)) {
+            // 消费日期
+            request.setAttribute("createDate", createDate);
+        }
         // 消费日期
         request.setAttribute("merchantType", user.getMerchantType());
         // 当前人员角色code
