@@ -13,6 +13,7 @@
             text-align: center;
             margin-right: 3px;
         }
+        .el-table__row--level-1 .el-checkbox{display: none;}
     </style>
 </head>
 <body>
@@ -166,7 +167,11 @@
                     row-key="appiontmentId"
                     :tree-props="{children: 'childrens'}">
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
-                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>                            
+                <el-table-column align="center" type="index" width="55" label="序号">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.index">{{scope.row.index}}</span>
+                    </template>
+                </el-table-column>                            
                 <el-table-column align="center" prop="reserveTime" sortable label="邀约来访时间" :formatter="dateFormat" width="150"></el-table-column>
                 <el-table-column align="center" prop="visitStatus" label="到访状态" :formatter="transformVisit" width="90"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="签约状态" :formatter="transformSign" width="80"></el-table-column>
@@ -1081,6 +1086,10 @@
                     var result = response.data;
                     console.info(result);
                     var table = result.data;
+                    // 插入序号
+                    for (var i =0;i< table.data.length; i++) {
+                        table.data[i].index=i+1
+                    }
                     if(result.code=="0"){
                         customerVM.dataTable = table.data;
                         customerVM.pager.total = table.total;
