@@ -58,8 +58,11 @@ public class ClueChargeController {
     @RequestMapping("/initClueChargeList")
     @RequiresPermissions("merchant:clueChargeManager:view")
     public String initClueChargeList(HttpServletRequest request) {
+        //资源类别
         request.setAttribute("categoryList", getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+        //资源媒介
         request.setAttribute("sourceList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        //行业类别
         request.setAttribute("industryCategoryList", getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         return "merchant/charge/clueChargeManagerPage";
     }
