@@ -32,8 +32,7 @@
                     <div class="name other">
                         <b><span class="last">账户余额：</span></b>
                         <p class="noMonth">
-                            <b class="noMonthmoney" v-if="countBlance">{{countBlance}}.00</b>
-                            <b class="noMonthmoney" v-else>0.00</b>
+                            <b class="noMonthmoney" >{{countBlance}}</b>
                             <el-button class="titleButton" type="primary" @click="immediateRecharge">立即充值</el-button>
                         </p>
                     </div>
@@ -128,7 +127,16 @@
     <script th:src="@{/js/common/echarts.min.js}"></script>
     <script type="text/javascript" src="/js/common/commonMethod.js"></script>
     <script th:inline="javascript">
-        var countBlance = [[${ countBlance }]];
+        var countBlance = JSON.stringify([[${ countBlance }]]);
+        if(countBlance){
+            if(countBlance.indexOf('.')>-1){
+                countBlance=countBlance
+            }else{
+                countBlance=countBlance+'.00'
+            }
+        }else{
+            countBlance=0.00
+        }
         var buyedFlag = [[${ buyedFlag }]];
         var userType = [[${ userType }]];
         var merchantName = [[${ merchantName }]];
