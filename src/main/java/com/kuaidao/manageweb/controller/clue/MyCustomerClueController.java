@@ -1137,6 +1137,10 @@ public class MyCustomerClueController {
                 if (user.getBusinessLine() != null) {
                     basic.setBusinessLine(user.getBusinessLine());
                 }
+                if (user.getPromotionCompany() != null) {
+                    // 推广所属公司 为当前账号所在机构的推广所属公司
+                    basic.setPromotionCompany(user.getPromotionCompany());
+                }
                 dto.setClueBasic(basic);
             }
             // 电销关联数据

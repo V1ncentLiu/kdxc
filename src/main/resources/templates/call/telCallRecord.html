@@ -21,9 +21,20 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm">
+                <el-form-item label="电销事业部:">
+                    <el-select v-model="searchForm.teleDeptId" placeholder="电销事业部" value-key="id"
+                               filterable clearable @change="changeTeleDept" :disabled="isDXSYBDisabled"  @clear="clearTeleDeptList">
+                        <el-option
+                                v-for="item in teleDeptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="电销组:">
                     <el-select v-model="searchForm.teleGroupId" placeholder="电销组" value-key="id"
-                               filterable clearable @change="changeTeleGroup" :disabled="isDXZDisabled">
+                               filterable clearable @change="changeTeleGroup" :disabled="isDXZDisabled" @clear="clearTeleGroupList">
                        <el-option
                            v-for="item in teleGroupList"
                            :key="item.id"
@@ -48,10 +59,11 @@
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker v-model="searchForm.endTime" type="datetime" placeholder="选择结束日期" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
                 </el-form-item>
-                <el-form-item label="坐席编号:">
-                    <el-input placeholder="坐席编号"  v-model="searchForm.cno"></el-input>
-                </el-form-item>
+
                 <el-row v-show="isShow">
+                    <el-form-item label="坐席编号:">
+                        <el-input placeholder="坐席编号"  v-model="searchForm.cno"></el-input>
+                    </el-form-item>
                     <el-form-item label="坐席电话:">
                         <el-input placeholder="坐席电话"  v-model="searchForm.bindPhone"></el-input>
                     </el-form-item>                
@@ -159,15 +171,17 @@
 <script th:inline="javascript">
    var tmList = [[${tmList}]];
    var teleGroupList = [[${teleGroupList}]];
+   var teleDeptList  = [[${teleDeptList}]];
    var userId = [[${userId}]]+"";
    var roleCode = [[${roleCode}]];
    var orgId = [[${orgId}]]+"";
    var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+   var curDeptId =[[${curDeptId}]];
    var fieldList=[[${fieldList}]];//自定义字段
    var userFieldList=[[${userFieldList}]];//用户自定义字段
 </script>
 <!-- 当前页面的js -->
-<script th:src="@{/js/custom/callrecord/telCallRecord.js?v=1.0.8}"></script>
+<script th:src="@{/js/custom/callrecord/telCallRecord.js?v=1.0.10}"></script>
 <!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
 <script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>

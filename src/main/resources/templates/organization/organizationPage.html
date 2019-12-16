@@ -106,6 +106,18 @@
             <el-form-item label="组织名称：" :label-width="formLabelWidth" prop="name">
                 <el-input v-model="form.name" autocomplete="off" maxlength="30"   placeholder="组织名称" style="width: 90%;"></el-input>
             </el-form-item>
+
+            <el-form-item  label="推广所属公司：" :label-width="formLabelWidth" prop="promotionCompany">
+                <el-select v-model="form.promotionCompany"  value-key="value" clearable placeholder="请选择" style="width: 90%;"
+                           :disabled="promotionCompanyDisabledSelect">
+                    <el-option
+                            v-for="item in promotionCompanyList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
             
                <el-form-item label="部门类型：" :label-width="formLabelWidth" prop="orgType">
                    <el-select v-model="form.orgType"  value-key="value" clearable placeholder="请选择" style="width: 90%;">
@@ -118,7 +130,7 @@
                    </el-select>
                </el-form-item>
                
-               <el-form-item label="所属业务线：" :label-width="formLabelWidth" prop="businessLine">
+               <el-form-item  v-if="isBusinessShow" label="所属业务线：" :label-width="formLabelWidth" prop="businessLine">
                    <el-select v-model="form.businessLine"  value-key="value" clearable placeholder="请选择" style="width: 90%;" 
                    :disabled="businessLineDisabledSelect">
                        <el-option
@@ -197,6 +209,7 @@
 <script th:inline="javascript">
     var orgData=[[${orgData}]];
     var orgTypeList = [[${orgTypeList}]];
+    var promotionCompanyList = [[${promotionCompanyList}]];
     var businessLineList = [[${businessLineList}]];
     
     var expandedKeys =[];//默认展开节点
