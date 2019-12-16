@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.merchant.charge;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -89,7 +90,11 @@ public class ClueChargeController {
     @ResponseBody
     @PostMapping("/delete")
     public JSONResult<String> delete(@RequestBody IdListLongReq idListLongReq) {
-    return clueChargeFeignClient.delete(idListLongReq);
+        MerchantClueChargeReq merchantClueChargeReq = new MerchantClueChargeReq();
+        merchantClueChargeReq.setUpdateUser(getUserId());
+        merchantClueChargeReq.setUpdateTime(new Date());
+        merchantClueChargeReq.setIdList(idListLongReq.getIdList());
+    return clueChargeFeignClient.delete(merchantClueChargeReq);
     }
 
     /***
