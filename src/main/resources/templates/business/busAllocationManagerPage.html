@@ -661,37 +661,47 @@ var clueVM = new Vue({
                           param.idList=idList;
                           param.clueIdList=clueIdList;
                           param.busSaleId=this.allocationForm.saleId;
+                          if(this.allocationForm.saleIdOther){
+                            if(this.allocationForm.saleIdOther==this.allocationForm.saleId){
+                                clueVM.$message({
+                                   message: "辅助经理不能和商务经理相同",
+                                   type: 'error'
+                                }); 
+                                return
+                            }
+                            param.busSale2Id=this.allocationForm.saleIdOther;
+                          }                          
                           param.remark=this.allocationForm.remark;
                           clueVM.submitDisable=true;
-	                             axios.post('/business/busAllocation/busAllocationClue',param)
-	                              .then(function (response) {
-	                                  var data =  response.data;
-	                                  if(data.code=='0'){
-	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
-                                        clueVM.allocationVisible = false;
-                                        clueVM.submitDisable=false;
-	                                  		clueVM.searchTable();
-	                              	    }});
-	                                  }else if(data.code=='21917'){
-                                          clueVM.$message({
-                                              message: "资源已分发",
-                                              type: 'error'
-                                          });
-                                          clueVM.submitDisable=false;
-                                          clueVM.allocationVisible = false;
-                                          clueVM.searchTable();
-                                      } else{
-                                      clueVM.$message({
-                                        message: "接口调用失败",
-                                        type: 'error'
-                                      }); 
-                                      clueVM.submitDisable=false;
-	                                  }
-	                              })
-	                              .catch(function (error) {
-	                            	  clueVM.submitDisable=false;
-	                                console.log(error);
-	                              });
+                          axios.post('/business/busAllocation/busAllocationClue',param)
+                          .then(function (response) {
+                              var data =  response.data;
+                              if(data.code=='0'){
+                              	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+                                clueVM.allocationVisible = false;
+                                clueVM.submitDisable=false;
+                              		clueVM.searchTable();
+                          	    }});
+                              }else if(data.code=='21917'){
+                                  clueVM.$message({
+                                      message: "资源已分发",
+                                      type: 'error'
+                                  });
+                                  clueVM.submitDisable=false;
+                                  clueVM.allocationVisible = false;
+                                  clueVM.searchTable();
+                              } else{
+                              clueVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                              }); 
+                              clueVM.submitDisable=false;
+                              }
+                          })
+                          .catch(function (error) {
+                        	  clueVM.submitDisable=false;
+                            console.log(error);
+                          });
             	            //end
             	          } else {
             	            console.log('error submit!!');
@@ -738,8 +748,7 @@ var clueVM = new Vue({
                },
                transferClue(formName){//外调经理
             	   this.$refs[formName].validate((valid) => {
-            	          if (valid) {
-            	        	  clueVM.submitDisable=true;
+            	          if (valid) {            	        	  
             	        	  var rows = this.multipleSelection;
                               var idList = [];
                               var clueIdList = [];
@@ -753,8 +762,19 @@ var clueVM = new Vue({
                            	  param.type=2;
                           	  param.idList=idList;
                           	  param.clueIdList=clueIdList;
-                          	  param.busSaleId=this.transferForm.saleId;
+                              param.busSaleId=this.transferForm.saleId;
+                              if(this.transferForm.transferIdOther){
+                                if(this.transferForm.transferIdOther==this.transferForm.saleId){
+                                    clueVM.$message({
+                                       message: "辅助经理不能和商务经理相同",
+                                       type: 'error'
+                                    }); 
+                                    return
+                                }
+                                param.busSale2Id=this.transferForm.transferIdOther;              
+                              }                          	  
                           	  param.remark=this.transferForm.remark;
+                              clueVM.submitDisable=true;
                               axios.post('/business/busAllocation/busAllocationClue',param)
                                .then(function (response) {
                                    var data =  response.data;
