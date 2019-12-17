@@ -22,16 +22,14 @@ public interface RequirementFeignClient {
 
     /**
      * 分页查询
-     * 
      * @param dto
      * @return
      */
-    @RequestMapping("/queryPage")
+    @RequestMapping("/querybyPage")
     public JSONResult<PageBean<ResRequirement>> queryPage(@RequestBody ResQueryDto dto);
 
     /**
      * 查询全部
-     * 
      * @param dto
      * @return
      */
