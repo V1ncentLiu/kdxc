@@ -114,6 +114,7 @@ public class BusinessMyCustomerController {
         }
         // 项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proAllSelect", proJson.getData());
