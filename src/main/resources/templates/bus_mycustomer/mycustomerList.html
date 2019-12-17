@@ -1583,7 +1583,6 @@
                                 <el-col :span="12">
                                     <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime" required>
                                         <el-date-picker
-                                                type="date"
                                                 format="yyyy-MM-dd"
                                                 placeholder="选择日期"
                                                 v-model="updateFormSigning.payTime" style="width: 90%;"></el-date-picker>
@@ -1616,7 +1615,6 @@
                                 <el-col :span="12">
                                     <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
                                         <el-date-picker
-                                                type="date"
                                                 format="yyyy-MM-dd"
                                                 placeholder="选择日期"
                                                 v-model="updateFormSigning.makeUpTime"
@@ -2450,7 +2448,7 @@
                 console.log(tab, event);
                 for(var i=0;i< this.responseData.paydetailList.length;i++) {
                     if (this.responseData.paydetailList[i].label === tab.label) {
-                        // this.updateFormSigning.payTime=this.responseData.paydetailList[i].payTime;//付款时间
+                        this.updateFormSigning.payTime=this.responseData.paydetailList[i].payTime;//付款时间
                         //付款方式
                         // var modeArr = this.responseData.paydetailList[i].payMode.split(",");
                         // this.updateFormSigning.payModes = this.tansPayModeValueToName(modeArr);
@@ -2467,7 +2465,7 @@
                         }
                         this.updateFormSigning.remarks = this.responseData.paydetailList[i].remarks;//备注
                         this.updateFormSigning.amountBalance = this.responseData.paydetailList[i].amountBalance;//余款金额
-                        // this.updateFormSigning.makeUpTime = this.responseData.paydetailList[i].makeUpTime;//预计余款补齐时间
+                        this.updateFormSigning.makeUpTime = this.responseData.paydetailList[i].makeUpTime;//预计余款补齐时间
 
                     }
                 }
@@ -3397,64 +3395,65 @@
 
                         
                         
-                        mainDivVM.currentProvince(responseData.paydetailList[0].signProvince)
-                        mainDivVM.currentCity(responseData.paydetailList[0].signCity)
+                        mainDivVM.currentProvince(responseData.signProvince)
+                        mainDivVM.currentCity(responseData.signCity)
                       
 
                         // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
                         mainDivVM.suppUpdateShow() // 默认隐藏 到访记录关联
                         mainDivVM.dialogUpdateFormSigningVisible = true;
 
-                        // 默认显示tab1                        
-                        for(var i=0;i<responseData.paydetailList.length;i++){
-                            if(responseData.paydetailList[i].payType=="1"){
-                                responseData.paydetailList[i].label="全款"
-                            }else if(responseData.paydetailList[i].payType=="2"){
-                                responseData.paydetailList[i].label="定金"
-                            }else if(responseData.paydetailList[i].payType=="3"){
-                                responseData.paydetailList[i].label="追加定金"
-                            }else if(responseData.paydetailList[i].payType=="4"){
-                                responseData.paydetailList[i].label="尾款"
-                            }                            
-                        }
-                        // 付款类型
-                        if (responseData.paydetailList[0].payType > 2) {
-                            if (responseData.paydetailList[0].payType == 3) {
-                                mainDivVM.isAllMoney = true;
-                            } else {
-                                mainDivVM.isAllMoney = false;
+                        // 默认显示tab1
+                        if(responseData.paydetailList){
+                            for(var i=0;i<responseData.paydetailList.length;i++){
+                                if(responseData.paydetailList[i].payType=="1"){
+                                    responseData.paydetailList[i].label="全款"
+                                }else if(responseData.paydetailList[i].payType=="2"){
+                                    responseData.paydetailList[i].label="定金"
+                                }else if(responseData.paydetailList[i].payType=="3"){
+                                    responseData.paydetailList[i].label="追加定金"
+                                }else if(responseData.paydetailList[i].payType=="4"){
+                                    responseData.paydetailList[i].label="尾款"
+                                }                            
                             }
-                            mainDivVM.payTypeSelect = false;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4)
-                        } else {
-                            if (responseData.paydetailList[0].payType == 1) {
-                                mainDivVM.isAllMoney = false;
+                            // 付款类型
+                            if (responseData.paydetailList[0].payType > 2) {
+                                if (responseData.paydetailList[0].payType == 3) {
+                                    mainDivVM.isAllMoney = true;
+                                } else {
+                                    mainDivVM.isAllMoney = false;
+                                }
+                                mainDivVM.payTypeSelect = false;
+                                mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4)
                             } else {
-                                mainDivVM.isAllMoney = true;
+                                if (responseData.paydetailList[0].payType == 1) {
+                                    mainDivVM.isAllMoney = false;
+                                } else {
+                                    mainDivVM.isAllMoney = true;
+                                }
+                                mainDivVM.payTypeSelect = true;
+                                mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0, 2)
                             }
-                            mainDivVM.payTypeSelect = true;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0, 2)
-                        }
-                        // mainDivVM.updateFormSigning.payTime=responseData.paydetailList[0].payTime;//付款时间
-                        //付款方式
-                        var modeArr = responseData.paydetailList[0].payMode.split(",");
-                        mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
-                        mainDivVM.updateFormSigning.amountReceived=responseData.paydetailList[0].amountReceived;//实收金额
-                        mainDivVM.updateFormSigning.amountPerformance=responseData.paydetailList[0].amountPerformance;//业绩金额
-                        mainDivVM.updateFormSigning.preferentialAmount=responseData.paydetailList[0].preferentialAmount;//招商政策金额
-                        mainDivVM.updateFormSigning.firstToll=responseData.paydetailList[0].firstToll;//路费
-                        mainDivVM.updateFormSigning.giveAmount = responseData.paydetailList[0].giveAmount;//赠送金额
-                        // 赠送类型
-                        mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
-                        if(responseData.paydetailList[0].giveType ==null || responseData.paydetailList[0].giveType =='-1'){
-                            mainDivVM.updateFormSigning.giveType = null;
-                        }else{
+                            mainDivVM.updateFormSigning.payTime=responseData.paydetailList[0].payTime;//付款时间
+                            //付款方式
+                            var modeArr = responseData.paydetailList[0].payMode.split(",");
+                            mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
+                            mainDivVM.updateFormSigning.amountReceived=responseData.paydetailList[0].amountReceived;//实收金额
+                            mainDivVM.updateFormSigning.amountPerformance=responseData.paydetailList[0].amountPerformance;//业绩金额
+                            mainDivVM.updateFormSigning.preferentialAmount=responseData.paydetailList[0].preferentialAmount;//招商政策金额
+                            mainDivVM.updateFormSigning.firstToll=responseData.paydetailList[0].firstToll;//路费
+                            mainDivVM.updateFormSigning.giveAmount = responseData.paydetailList[0].giveAmount;//赠送金额
+                            // 赠送类型
                             mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
-                        }
-                        mainDivVM.updateFormSigning.remarks = responseData.paydetailList[0].remarks;//备注
-                        mainDivVM.updateFormSigning.amountBalance = responseData.paydetailList[0].amountBalance;//余款金额
-                        // mainDivVM.updateFormSigning.makeUpTime = responseData.paydetailList[0].makeUpTime;//预计余款补齐时间
-
+                            if(responseData.paydetailList[0].giveType ==null || responseData.paydetailList[0].giveType =='-1'){
+                                mainDivVM.updateFormSigning.giveType = null;
+                            }else{
+                                mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
+                            }
+                            mainDivVM.updateFormSigning.remarks = responseData.paydetailList[0].remarks;//备注
+                            mainDivVM.updateFormSigning.amountBalance = responseData.paydetailList[0].amountBalance;//余款金额
+                            mainDivVM.updateFormSigning.makeUpTime = responseData.paydetailList[0].makeUpTime;//预计余款补齐时间
+                        } 
                         
                     }
                 })
