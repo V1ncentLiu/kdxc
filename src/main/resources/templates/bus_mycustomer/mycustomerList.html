@@ -1344,7 +1344,7 @@
         </template>
     </el-dialog>
 
-    <el-dialog title="编辑签约单" width="870px" :visible.sync="dialogUpdateFormSigningVisible">
+    <el-dialog :title="signTitle" width="870px" :visible.sync="dialogUpdateFormSigningVisible">
         <template>
             <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning">
                 <!-- <div class="borderbox padding20 marginB20" v-for="item in updateFormSigning.signRejectRecordList">
@@ -1358,8 +1358,8 @@
                     <!-- <el-tab-pane :label="item.title" :key="item.name" v-for="(item, index) in form.map" :name="item.name">     -->
                     <!-- <el-tab-pane :label="item.title" v-for="(item, index) in editableTabs" :key="item.name" :name="item.name"> -->
                         <div class="borderbox padding20 marginB20" v-for="item in items.rejectRecordDtoList">
-                            <p class="marginB10"><span>驳回时间：</span><span v-if="item.createTime">{{item.createTime}}</span></p>
                             <p class="marginB10"><span>驳回人员：</span><span v-if="item.createUserName">{{item.createUserName}}</span></p>
+                            <p class="marginB10"><span>驳回时间：</span><span v-if="item.createTime">{{item.createTime}}</span></p>
                             <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;width: 385px;" v-if="item.rejectReason">{{item.rejectReason}}</span></p>
                         </div>
 
@@ -1583,6 +1583,7 @@
                                 <el-col :span="12">
                                     <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime" required>
                                         <el-date-picker
+                                                type="date"
                                                 format="yyyy-MM-dd"
                                                 placeholder="选择日期"
                                                 v-model="updateFormSigning.payTime" style="width: 90%;"></el-date-picker>
@@ -1615,10 +1616,11 @@
                                 <el-col :span="12">
                                     <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
                                         <el-date-picker
-                                                format="yyyy-MM-dd"
-                                                placeholder="选择日期"
-                                                v-model="updateFormSigning.makeUpTime"
-                                                style="width: 90%;"></el-date-picker>
+                                            type="date"
+                                            format="yyyy-MM-dd"
+                                            placeholder="选择日期"
+                                            v-model="updateFormSigning.makeUpTime"
+                                            style="width: 90%;"></el-date-picker>
                                     </el-form-item>
                                 </el-col>
                             </el-row>
@@ -1864,7 +1866,8 @@
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
-        data: {      
+        data: {  
+            signTitle:'',    
             responseData:[],  
             activeNameSigning:'',     
             editRebutNoVisitDialog:false,//编辑驳回未到访弹窗
@@ -2078,8 +2081,8 @@
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
-                makeUpTime: '',
-                payTime: new Date(),
+                makeUpTime: null,
+                payTime: null,
                 amountPerformance: '',
                 performanceAmount: '',
                 payName:''
@@ -2121,8 +2124,8 @@
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
-                makeUpTime: '',
-                payTime: '',
+                makeUpTime: null,
+                payTime: null,
                 amountPerformance: '',
                 performanceAmount: '',
                 remarks: '', //备注
@@ -2314,8 +2317,7 @@
                     {required: true, message: '请输入付款人姓名', trigger: 'blur'}
                 ],
                 payTime: [
-                    // {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
-                    {required: true, message: '请选择时间', trigger: 'change'}
+                    {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
                 ],
                 amountReceived: [
                     {required: true, message: '请输入实收金额', trigger: 'blur'},
@@ -2363,7 +2365,7 @@
                     }
                 ],
                 makeUpTime: [
-                    {required: true, message: '请选择预计余款补齐时间', trigger: 'change'}
+                    {type: 'date',required: true, message: '请选择预计余款补齐时间', trigger: 'change'}
                 ],
                 amountPerformance: [
                     {
@@ -2448,6 +2450,7 @@
                 console.log(tab, event);
                 for(var i=0;i< this.responseData.paydetailList.length;i++) {
                     if (this.responseData.paydetailList[i].label === tab.label) {
+                        this.updateFormSigning.payType=this.responseData.paydetailList[i].payType;//付款类型
                         this.updateFormSigning.payTime=this.responseData.paydetailList[i].payTime;//付款时间
                         //付款方式
                         // var modeArr = this.responseData.paydetailList[i].payMode.split(",");
@@ -3387,21 +3390,19 @@
                         var responseData=response.data.data
                         mainDivVM.updateFormSigning = responseData;
                         mainDivVM.responseData=responseData;
-                        // this.updateFormSigning=this.responseData;
+                        mainDivVM.dialogUpdateFormSigningVisible = true;//打开弹窗
+
+                        mainDivVM.signTitle="编辑驳回签约单(签约单编号"+responseData.signNo+")"
 
                         if(responseData.payName == null || responseData.payName == ''){//付款人姓名
                             mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                         }
-
-                        
                         
                         mainDivVM.currentProvince(responseData.signProvince)
-                        mainDivVM.currentCity(responseData.signCity)
-                      
+                        mainDivVM.currentCity(responseData.signCity)                      
 
                         // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
-                        mainDivVM.suppUpdateShow() // 默认隐藏 到访记录关联
-                        mainDivVM.dialogUpdateFormSigningVisible = true;
+                        mainDivVM.suppUpdateShow() // 默认隐藏 到访记录关联                        
 
                         // 默认显示tab1
                         if(responseData.paydetailList){
@@ -3416,7 +3417,7 @@
                                     responseData.paydetailList[i].label="尾款"
                                 }                            
                             }
-                            // 付款类型
+                            // 付款类型判断
                             if (responseData.paydetailList[0].payType > 2) {
                                 if (responseData.paydetailList[0].payType == 3) {
                                     mainDivVM.isAllMoney = true;
@@ -3434,6 +3435,7 @@
                                 mainDivVM.payTypeSelect = true;
                                 mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0, 2)
                             }
+                            mainDivVM.updateFormSigning.payType=responseData.paydetailList[0].payType;//付款类型
                             mainDivVM.updateFormSigning.payTime=responseData.paydetailList[0].payTime;//付款时间
                             //付款方式
                             var modeArr = responseData.paydetailList[0].payMode.split(",");
