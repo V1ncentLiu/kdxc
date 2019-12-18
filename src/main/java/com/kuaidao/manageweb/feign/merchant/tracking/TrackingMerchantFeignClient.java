@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -35,7 +36,7 @@ public interface TrackingMerchantFeignClient {
     @RequestMapping("/queryList")
     JSONResult<List<TrackingRespDTO>> queryList(@RequestBody TrackingReqDTO dto);
 
-    @RequestMapping("/findByClueId")
+    @PostMapping("/findByClueId")
     JSONResult<List<TrackingRespDTO>> findByClueId(@RequestBody IdListLongReq reqDto);
 
     @Component

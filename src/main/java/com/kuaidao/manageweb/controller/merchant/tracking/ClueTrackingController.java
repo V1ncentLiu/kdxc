@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,7 +64,7 @@ public class ClueTrackingController {
      * @param idEntity
      * @return
      */
-    @RequestMapping("/findByClueId")
+    @PostMapping("/findByClueId")
     public JSONResult<List<TrackingRespDTO>> findByClueId(@RequestBody IdEntityLong idEntity) {
         if (null == idEntity.getId()) {
             return new JSONResult<List<TrackingRespDTO>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
