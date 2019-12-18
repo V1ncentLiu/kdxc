@@ -110,6 +110,18 @@ public class PubcustomerController {
        UserInfoDTO user = CommUtil.getCurLoginUser();
 
     Integer merchantType = user.getMerchantType();
+    // 如果是商家子账户-查询商家主账户ID
+    if(user.getUserType() != null && user.getUserType() ==3){
+      UserInfoReq req = new UserInfoReq();
+         req.setId(user.getParentId());
+         JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
+         if(JSONResult.SUCCESS.equals(jsonResult.getCode())){
+           UserInfoReq userDto = jsonResult.getData();
+           merchantType = userDto.getMerchantType();
+         }
+    }
+
+    // 子账户的内外部账户类型判断通过主账户进行
     if(MERCHANTTYPE.TYPE1==merchantType){
       return new JSONResult<PageBean<PublicCustomerResourcesRespDTO>>().fail("-1","内部商家没有权限访问公海营销");
     }
@@ -118,14 +130,8 @@ public class PubcustomerController {
          dto.setBussinessAccount(user.getId());
          dto.setUserType(2); // 主账户
        }else if(user.getUserType() != null && user.getUserType() ==3){
-//         UserInfoReq req = new UserInfoReq();
-//         req.setId(user.getParentId());
-//         JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
-//         if(JSONResult.SUCCESS.equals(jsonResult.getCode())){
-//           UserInfoReq userDto = jsonResult.getData();
            dto.setBussinessAccount(user.getParentId());
-//         }
-         dto.setUserType(3); // 子账户
+           dto.setUserType(3); // 子账户
        }else {
          dto.setUserType(0); // 默认为超级管理员
          dto.setBussinessAccount(user.getId());
