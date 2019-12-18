@@ -118,13 +118,13 @@ public class PubcustomerController {
          dto.setBussinessAccount(user.getId());
          dto.setUserType(2); // 主账户
        }else if(user.getUserType() != null && user.getUserType() ==3){
-         UserInfoReq req = new UserInfoReq();
-         req.setId(user.getParentId());
-         JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
-         if(JSONResult.SUCCESS.equals(jsonResult.getCode())){
-           UserInfoReq userDto = jsonResult.getData();
-           dto.setBussinessAccount(userDto.getId());
-         }
+//         UserInfoReq req = new UserInfoReq();
+//         req.setId(user.getParentId());
+//         JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(req);
+//         if(JSONResult.SUCCESS.equals(jsonResult.getCode())){
+//           UserInfoReq userDto = jsonResult.getData();
+           dto.setBussinessAccount(user.getParentId());
+//         }
          dto.setUserType(3); // 子账户
        }else {
          dto.setUserType(0); // 默认为超级管理员
