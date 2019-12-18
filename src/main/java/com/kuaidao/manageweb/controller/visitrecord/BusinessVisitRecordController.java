@@ -98,6 +98,9 @@ public class BusinessVisitRecordController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
         dto.setId(null);
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         return visitRecordFeignClient.saveVisitRecord(dto);
     }
 
@@ -114,6 +117,9 @@ public class BusinessVisitRecordController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         return visitRecordFeignClient.updateVisitRecord(dto);
     }
 
