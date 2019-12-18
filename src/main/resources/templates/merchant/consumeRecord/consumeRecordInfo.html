@@ -82,6 +82,10 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList = [[${ userList }]];//商户集合
+    var userList=[]
+    for(var i=0;i<merchantUserList.length;i++){
+        userList.push(merchantUserList[i].id)
+    }
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function () {
@@ -89,6 +93,7 @@
                 pendingReviewNum: '',
                 multipleSelection: [],//选择行
                 merchantUserListOptions: merchantUserList,
+                userList:userList,
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -143,6 +148,7 @@
                 param.createDateEnd = this.form.createDateEnd;
                 param.clueId = this.form.clueId;
                 param.createDate = this.getQueryString('createDate');
+                param.userList =this.userList;
                 console.info(param);
                 axios.post('/merchant/consumeRecord/list', param)
                     .then(function (response) {
@@ -184,6 +190,7 @@
                 this.form.mainAccountId=this.getQueryString('mainAccountId')
             }
             this.searchTable();
+
         },
         mounted() {
             document.getElementById('optimizeClueManagement').style.display = 'block';
