@@ -10,12 +10,18 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,7 +62,8 @@ public class ConsumeRecordController {
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
-
+    @Autowired
+    private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
     /***
      * 消费记录列表页(管理端)
      *
@@ -65,11 +72,14 @@ public class ConsumeRecordController {
     @RequestMapping("/initRecordList")
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initCompanyList(HttpServletRequest request) {
-
-        // 商家账号(当前登录商家主账号加子账号)
-        List<UserInfoDTO> userList = getMerchantUser(null);
+        // 商家账号是所有的商家主账户（商家账户管理里所有非禁用的商家主账号）
+        List<Integer> statusList = new ArrayList<>();
+        // 启用
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        // 锁定
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getMerchantUser(statusList);
         request.setAttribute("userList", userList);
-
         return "merchant/consumeRecord/consumeRecord";
     }
 
@@ -81,11 +91,9 @@ public class ConsumeRecordController {
     @PostMapping("/countList")
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
-    public JSONResult<PageBean<CountConsumeRecordDTO>> countList(
-            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<CountConsumeRecordDTO>> countList(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
         // 消费记录
-        JSONResult<PageBean<CountConsumeRecordDTO>> countList =
-                merchantConsumeRecordFeignClient.countList(pageParam);
+        JSONResult<PageBean<CountConsumeRecordDTO>> countList = merchantConsumeRecordFeignClient.countList(pageParam);
 
         return countList;
     }
@@ -93,15 +101,13 @@ public class ConsumeRecordController {
     /**
      * 消费记录列表(管理端) 导出
      * 
-     * @param reqDTO
+     * @param
      * @return
      */
     @RequiresPermissions("merchant:consumeRecord:export")
     @PostMapping("/countListExport")
-    @LogRecord(description = "导出", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.CONSUME_RECORD)
-    public void export(@RequestBody List<CountConsumeRecordDTO> list, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.CONSUME_RECORD)
+    public void export(@RequestBody List<CountConsumeRecordDTO> list, HttpServletRequest request, HttpServletResponse response) throws Exception {
         logger.debug("list param{}", list);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
@@ -126,9 +132,10 @@ public class ConsumeRecordController {
         } else {
             logger.error("export consume_record_export res{{}}", list);
         }
-
-        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
-        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
+        // 创建一个工作薄
+        XSSFWorkbook workBook = new XSSFWorkbook();
+        // 创建一个工作薄对象sheet
+        XSSFSheet sheet = workBook.createSheet();
         // 设置宽度
         sheet.setColumnWidth(1, 4000);
         sheet.setColumnWidth(2, 4000);
@@ -138,8 +145,7 @@ public class ConsumeRecordController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
         String name = "商家消费记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
@@ -168,11 +174,9 @@ public class ConsumeRecordController {
     @PostMapping("/countNum")
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
-    public JSONResult<ConsumeRecordNumDTO> countNum(
-            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<ConsumeRecordNumDTO> countNum(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
         // 消费记录
-        JSONResult<ConsumeRecordNumDTO> countNum =
-                merchantConsumeRecordFeignClient.countNum(pageParam);
+        JSONResult<ConsumeRecordNumDTO> countNum = merchantConsumeRecordFeignClient.countNum(pageParam);
 
         return countNum;
     }
@@ -185,22 +189,9 @@ public class ConsumeRecordController {
     @RequestMapping("/initSingleMerchant")
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initSingleMerchant(@RequestParam Long mainAccountId, HttpServletRequest request) {
-        JSONResult<UserInfoDTO> jsonResult =
-                userInfoFeignClient.get(new IdEntityLong(mainAccountId));
-        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
-        if (JSONResult.SUCCESS.equals(jsonResult.getCode())) {
-            userList.add(jsonResult.getData());
-        }
-        // 商家账号(当前登录商家主账号加子账号)
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
-        userInfoDTO.setParentId(mainAccountId);
-        JSONResult<List<UserInfoDTO>> merchantUserList =
-                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
-        userList.addAll(merchantUserList.getData());
+        List<UserInfoDTO> userList = getUserListByainAccountId(mainAccountId);
         request.setAttribute("userList", userList);
         request.setAttribute("mainAccountId", mainAccountId + "");
-
         return "merchant/consumeRecord/singleConsumeRecord";
     }
 
@@ -212,11 +203,10 @@ public class ConsumeRecordController {
     @PostMapping("/countListMerchant")
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
-    public JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant(
-            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant(@RequestBody MerchantConsumeRecordPageParam pageParam,
+            HttpServletRequest request) {
         // 消费记录
-        JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant =
-                merchantConsumeRecordFeignClient.countListMerchant(pageParam);
+        JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant = merchantConsumeRecordFeignClient.countListMerchant(pageParam);
 
         return countListMerchant;
     }
@@ -224,15 +214,14 @@ public class ConsumeRecordController {
     /**
      * 单个商家消费记录(管理端) 导出
      * 
-     * @param reqDTO
+     * @param
      * @return
      */
     @RequiresPermissions("merchant:consumeRecord:export")
     @PostMapping("/countListMerchantExport")
-    @LogRecord(description = "导出", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.CONSUME_RECORD)
-    public void countListMerchantExport(@RequestBody List<CountConsumeRecordDTO> list,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.CONSUME_RECORD)
+    public void countListMerchantExport(@RequestBody List<CountConsumeRecordDTO> list, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
         logger.debug("list param{}", list);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitle());
@@ -256,9 +245,10 @@ public class ConsumeRecordController {
         } else {
             logger.error("export consume_record_export res{{}}", list);
         }
-
-        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
-        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
+        // 创建一个工作薄
+        XSSFWorkbook workBook = new XSSFWorkbook();
+        // 创建一个工作薄对象sheet
+        XSSFSheet sheet = workBook.createSheet();
         // 设置宽度
         sheet.setColumnWidth(1, 4000);
         sheet.setColumnWidth(2, 4000);
@@ -267,8 +257,7 @@ public class ConsumeRecordController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
         String name = "商家消费记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
@@ -295,12 +284,9 @@ public class ConsumeRecordController {
      */
     @RequestMapping("/initInfoList")
     @RequiresPermissions("merchant:consumeRecord:view")
-    public String initInfoList(HttpServletRequest request) {
-        // 商家主账号
-        List<UserInfoDTO> userList = getMerchantUser(null);
-
+    public String initInfoList(HttpServletRequest request,@RequestParam Long mainAccountId) {
+        List<UserInfoDTO> userList = getUserListByainAccountId(mainAccountId);
         request.setAttribute("userList", userList);
-
         return "merchant/consumeRecord/consumeRecordInfo";
     }
 
@@ -313,11 +299,9 @@ public class ConsumeRecordController {
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
-    public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(
-            @RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
         // 消费记录
-        JSONResult<PageBean<MerchantConsumeRecordDTO>> list =
-                merchantConsumeRecordFeignClient.list(pageParam);
+        JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
 
         return list;
     }
@@ -325,7 +309,7 @@ public class ConsumeRecordController {
     /**
      * 获取当前登录账号
      *
-     * @param orgDTO
+     * @param
      * @return
      */
     private UserInfoDTO getUser() {
@@ -336,17 +320,100 @@ public class ConsumeRecordController {
 
 
     /**
+     * 根据商家主账户查询所有子账号和本身
+     *
+     * @param
+     * @return
+     */
+    private List<UserInfoDTO> getUserListByainAccountId(Long mainAccountId) {
+        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+        // 主账号空的时候查询所有(是点消费明细按钮进来的)
+        // 内部商家查询所有电销组
+        // 外部商家查询所有主账号和子账号
+        if (null == mainAccountId) {
+            userList = buildUserList();
+            return userList;
+        }
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(mainAccountId));
+
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            userList.add(jsonResult.getData());
+        }
+        // 查询子账号
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+        userInfoDTO.setParentId(mainAccountId);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        userList.addAll(merchantUserList.getData());
+        return userList;
+    }
+    /**
+     * * 外部商家-商家账号：当前登录商家主账号加子账号 * 内部商家-商家账户：电销布局里绑定的电销组
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2019/10/23 10:55
+     * @since: 1.0.0
+     **/
+    private List<UserInfoDTO> buildUserList() {
+        UserInfoDTO user = getUser();
+        List<UserInfoDTO> userList = new ArrayList<>();
+        // 商家所属
+        Integer merchantType = user.getMerchantType();
+        // 内部商家
+        if (SysConstant.MerchantType.TYPE1 == merchantType) {
+            TelemarketingLayoutDTO reqDto = new TelemarketingLayoutDTO();
+            reqDto.setCompanyGroupId(user.getId());
+            JSONResult<List<OrganizationDTO>> result = telemarketingLayoutFeignClient.getdxListByCompanyGroupId(reqDto);
+            List<OrganizationDTO> orgList = result.getData();
+            if (result.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(result.getData())) {
+                for (OrganizationDTO organizationDTO : orgList) {
+                    UserInfoDTO userInfoDTO = new UserInfoDTO();
+                    BeanUtils.copyProperties(organizationDTO,userInfoDTO);
+                }
+
+            }
+        }
+        // 外部商家
+        if (SysConstant.MerchantType.TYPE2 == merchantType) {
+            userList.add(user);
+            // 状态集合
+            List<Integer> status = new ArrayList<>();
+            // 启用
+            status.add(SysConstant.USER_STATUS_ENABLE);
+            // 锁定
+            status.add(SysConstant.USER_STATUS_LOCK);
+            userList = getMerchantUser(user.getId(), status);
+        }
+        return userList;
+    }
+    /**
      * 查询商家账号
      *
-     * @param code
+     * @param
+     * @return
+     */
+    private List<UserInfoDTO> getMerchantUser(Long parentId, List<Integer> arrayList) {
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+        userInfoDTO.setParentId(parentId);
+        userInfoDTO.setStatusList(arrayList);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        return merchantUserList.getData();
+    }
+
+    /**
+     * 查询所有商家账号
+     *
+     * @param
      * @return
      */
     private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
         userInfoDTO.setStatusList(arrayList);
-        JSONResult<List<UserInfoDTO>> merchantUserList =
-                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
     }
 }
