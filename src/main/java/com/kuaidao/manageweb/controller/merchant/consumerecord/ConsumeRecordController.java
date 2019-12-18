@@ -7,13 +7,20 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -63,7 +70,7 @@ public class ConsumeRecordController {
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
     @Autowired
-    private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
+    private OrganizationFeignClient organizationFeignClient;
     /***
      * 消费记录列表页(管理端)
      *
@@ -78,7 +85,7 @@ public class ConsumeRecordController {
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         // 锁定
         statusList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> userList = getMerchantUser(statusList);
+        List<UserInfoDTO> userList = getMerchantUser(SysConstant.USER_TYPE_TWO,statusList);
         request.setAttribute("userList", userList);
         return "merchant/consumeRecord/consumeRecord";
     }
@@ -328,10 +335,9 @@ public class ConsumeRecordController {
     private List<UserInfoDTO> getUserListByainAccountId(Long mainAccountId) {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
         // 主账号空的时候查询所有(是点消费明细按钮进来的)
-        // 内部商家查询所有电销组
-        // 外部商家查询所有主账号和子账号
+        //展示所有的主账号以及子账号和所有的电销组
         if (null == mainAccountId) {
-            userList = buildUserList();
+            userList = buildAllUserList();
             return userList;
         }
         JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(mainAccountId));
@@ -348,7 +354,7 @@ public class ConsumeRecordController {
         return userList;
     }
     /**
-     * * 外部商家-商家账号：当前登录商家主账号加子账号 * 内部商家-商家账户：电销布局里绑定的电销组
+     * * 展示所有的主账号+子账号+电销组
      *
      * @author: Fanjd
      * @param
@@ -356,51 +362,23 @@ public class ConsumeRecordController {
      * @Date: 2019/10/23 10:55
      * @since: 1.0.0
      **/
-    private List<UserInfoDTO> buildUserList() {
-        UserInfoDTO user = getUser();
+    private List<UserInfoDTO> buildAllUserList() {
         List<UserInfoDTO> userList = new ArrayList<>();
-        // 商家所属
-        Integer merchantType = user.getMerchantType();
-        // 内部商家
-        if (SysConstant.MerchantType.TYPE1 == merchantType) {
-            TelemarketingLayoutDTO reqDto = new TelemarketingLayoutDTO();
-            reqDto.setCompanyGroupId(user.getId());
-            JSONResult<List<OrganizationDTO>> result = telemarketingLayoutFeignClient.getdxListByCompanyGroupId(reqDto);
-            List<OrganizationDTO> orgList = result.getData();
-            if (result.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(result.getData())) {
-                for (OrganizationDTO organizationDTO : orgList) {
-                    UserInfoDTO userInfoDTO = new UserInfoDTO();
-                    BeanUtils.copyProperties(organizationDTO,userInfoDTO);
-                }
-
-            }
-        }
-        // 外部商家
-        if (SysConstant.MerchantType.TYPE2 == merchantType) {
-            userList.add(user);
-            // 状态集合
-            List<Integer> status = new ArrayList<>();
-            // 启用
-            status.add(SysConstant.USER_STATUS_ENABLE);
-            // 锁定
-            status.add(SysConstant.USER_STATUS_LOCK);
-            userList = getMerchantUser(user.getId(), status);
-        }
+        // 所有的电销组
+        userList.addAll(getSaleGroupList());
+        // 状态集合
+        List<Integer> status = new ArrayList<>();
+        // 启用
+        status.add(SysConstant.USER_STATUS_ENABLE);
+        // 锁定
+        status.add(SysConstant.USER_STATUS_LOCK);
+        //查询所有主账号
+        List<UserInfoDTO> mainAccountList = getMerchantUser(SysConstant.USER_TYPE_TWO,status);
+        userList.addAll(mainAccountList);
+       //查询所有子账号
+        List<UserInfoDTO> subAccountList = getMerchantUser(SysConstant.USER_TYPE_THREE,status);
+        userList.addAll(subAccountList);
         return userList;
-    }
-    /**
-     * 查询商家账号
-     *
-     * @param
-     * @return
-     */
-    private List<UserInfoDTO> getMerchantUser(Long parentId, List<Integer> arrayList) {
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
-        userInfoDTO.setParentId(parentId);
-        userInfoDTO.setStatusList(arrayList);
-        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
-        return merchantUserList.getData();
     }
 
     /**
@@ -409,11 +387,33 @@ public class ConsumeRecordController {
      * @param
      * @return
      */
-    private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
+    private List<UserInfoDTO> getMerchantUser(Integer userType,List<Integer> arrayList) {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoDTO.setUserType(userType);
         userInfoDTO.setStatusList(arrayList);
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
+    }
+    /**
+     * 获取所有组织组并将电销组id和名字转换成用户的id和名字
+     *
+     * @return
+     */
+    private List<UserInfoDTO> getSaleGroupList() {
+        List<UserInfoDTO> userList = new ArrayList<>();
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.DXZ);
+        // 查询所有组织
+        JSONResult<List<OrganizationRespDTO>> jsonResult = organizationFeignClient.queryOrgByParam(queryDTO);
+        if (jsonResult.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+            List<OrganizationRespDTO> orgList =  jsonResult.getData();
+            for (OrganizationRespDTO org : orgList) {
+                //转换电销组id和名字对应用户的id和名字
+                UserInfoDTO userInfoDTO = new UserInfoDTO();
+                BeanUtils.copyProperties(org,userInfoDTO);
+                userList.add(userInfoDTO);
+            }
+        }
+        return userList;
     }
 }
