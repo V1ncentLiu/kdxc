@@ -1354,7 +1354,7 @@
                 </div>  -->
                 <el-tabs type="card" v-model="activeNameSigning" @tab-click="handleClickSigning">
 
-                    <el-tab-pane :label="items.label" v-for="(items, index) in updateFormSigning.paydetailList">
+                    <el-tab-pane :label="items.label" v-for="(items, index) in updateFormSigning.paydetailList" :key="items.name" :name="items.name">
                     <!-- <el-tab-pane :label="item.title" :key="item.name" v-for="(item, index) in form.map" :name="item.name">     -->
                     <!-- <el-tab-pane :label="item.title" v-for="(item, index) in editableTabs" :key="item.name" :name="item.name"> -->
                         <div class="borderbox padding20 marginB20" v-for="item in items.rejectRecordDtoList">
@@ -3429,17 +3429,34 @@
 
                         // 默认显示tab1
                         if(responseData.paydetailList){
+                            // 显示tab名称
                             for(var i=0;i<responseData.paydetailList.length;i++){
                                 if(responseData.paydetailList[i].payType=="1"){
                                     responseData.paydetailList[i].label="全款"
+                                    responseData.paydetailList[i].name="1"
                                 }else if(responseData.paydetailList[i].payType=="2"){
                                     responseData.paydetailList[i].label="定金"
+                                    responseData.paydetailList[i].name="2"
                                 }else if(responseData.paydetailList[i].payType=="3"){
                                     responseData.paydetailList[i].label="追加定金"
+                                    responseData.paydetailList[i].name="3"
                                 }else if(responseData.paydetailList[i].payType=="4"){
                                     responseData.paydetailList[i].label="尾款"
+                                    responseData.paydetailList[i].name="4"
                                 }                            
                             }
+                            // 判断第一个是几就默认显示那个tab
+                            if(responseData.paydetailList[0].name=="1"){
+                                mainDivVM.activeNameSigning="1";
+                            }else if(responseData.paydetailList[0].name=="2"){
+                                mainDivVM.activeNameSigning="2";
+                            }else if(responseData.paydetailList[0].name=="3"){
+                                mainDivVM.activeNameSigning="3";
+                            }else if(responseData.paydetailList[0].name=="4"){
+                                mainDivVM.activeNameSigning="4";
+                            }    
+
+                            
                             // 付款类型判断
                             if (responseData.paydetailList[0].payType > 2) {
                                 if (responseData.paydetailList[0].payType == 3) {
