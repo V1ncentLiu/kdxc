@@ -304,7 +304,10 @@ public class ConsumeRecordController {
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
-    public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam) {
+        if (null == pageParam.getUserId()) {
+            pageParam.setMerchantUserList(pageParam.getUserList());
+        }
         // 消费记录
         JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
 
