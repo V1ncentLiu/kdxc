@@ -2320,7 +2320,8 @@
                     {required: true, message: '请输入付款人姓名', trigger: 'blur'}
                 ],
                 payTime: [
-                    {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
+                    // {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
+                    { required: true, message: '请选择时间', trigger: 'change'}
                 ],
                 amountReceived: [
                     {required: true, message: '请输入实收金额', trigger: 'blur'},
@@ -2368,7 +2369,8 @@
                     }
                 ],
                 makeUpTime: [
-                    {type: 'date',required: true, message: '请选择预计余款补齐时间', trigger: 'change'}
+                    // {type: 'date',required: true, message: '请选择预计余款补齐时间', trigger: 'change'}
+                    {required: true, message: '请选择预计余款补齐时间', trigger: 'change'}
                 ],
                 amountPerformance: [
                     {
@@ -2453,6 +2455,24 @@
                 console.log(tab, event);
                 for(var i=0;i< this.responseData.paydetailList.length;i++) {
                     if (this.responseData.paydetailList[i].label === tab.label) {
+                        // 付款类型判断
+                        if (this.responseData.paydetailList[i].payType > 2) {
+                            if (this.responseData.paydetailList[i].payType == 3) {
+                                this.isAllMoney = true;
+                            } else {
+                                this.isAllMoney = false;
+                            }
+                            this.payTypeSelect = false;
+                            this.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4)
+                        } else {
+                            if (this.responseData.paydetailList[i].payType == 1) {
+                                this.isAllMoney = false;
+                            } else {
+                                this.isAllMoney = true;
+                            }
+                            this.payTypeSelect = true;
+                            this.payTypeArr = this.payTypeArr1.slice(0, 2)
+                        }
                         this.updateFormSigning.payType=this.responseData.paydetailList[i].payType;//付款类型
                         this.updateFormSigning.payTime=this.responseData.paydetailList[i].payTime;//付款时间
                         //付款方式
