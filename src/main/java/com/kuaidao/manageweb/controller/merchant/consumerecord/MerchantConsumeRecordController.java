@@ -48,6 +48,7 @@ public class MerchantConsumeRecordController {
     private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
 
     /***
+     * 消费记录列表（商家端）
      * 消费记录列表页 外部商家-商家账号：当前登录商家主账号加子账号 内部商家-商家账户：电销布局里绑定的电销组
      *
      * @return
@@ -75,7 +76,7 @@ public class MerchantConsumeRecordController {
 
 
     /***
-     * 消费记录列表
+     * 消费记录列表（商家端）
      *
      * @return
      */
@@ -214,6 +215,7 @@ public class MerchantConsumeRecordController {
                 for (OrganizationDTO organizationDTO : orgList) {
                     UserInfoDTO userInfoDTO = new UserInfoDTO();
                     BeanUtils.copyProperties(organizationDTO,userInfoDTO);
+                    userList.add(userInfoDTO);
                 }
 
             }
