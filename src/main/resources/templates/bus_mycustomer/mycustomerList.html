@@ -1870,7 +1870,6 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {  
-            signTabIndex:"0",//点击编辑签约单tab的index
             signTitle:'',    
             responseData:[],  
             activeNameSigning:'',     
@@ -2495,6 +2494,7 @@
                         this.updateFormSigning.makeUpTime = this.responseData.paydetailList[i].makeUpTime;//预计余款补齐时间
                         // payDetailId赋值
                         this.updateFormSigning.payDetailId = this.responseData.paydetailList[i].id;
+                        this.suppUpdateShow(i) // 默认隐藏 到访记录关联 
                     }
                 }
             },
@@ -2656,15 +2656,15 @@
 
             },
 
-            suppUpdateShow() { //补充到访记录展开
+            suppUpdateShow(index) { //补充到访记录展开
                 this.suppWrap = true;
                 this.shouAddVisitButton = false;
                 var param = {};
-                console.log(mainDivVM.updateFormSigning.visitDetailRecordId)
-                if(!mainDivVM.updateFormSigning.visitDetailRecordId){
+                console.log(mainDivVM.updateFormSigning.paydetailList[index].visitRecordId)
+                if(!mainDivVM.updateFormSigning.paydetailList[index].visitRecordId){
                     return false;
                 }
-                param.id = mainDivVM.updateFormSigning.visitDetailRecordId;
+                param.id = mainDivVM.updateFormSigning.paydetailList[index].visitRecordId;
                 //TODO
                 axios.post('/busVisitRecord/one', param).then(function (response) {
                     var echoData = response.data.data;
@@ -3445,7 +3445,7 @@
                         mainDivVM.currentCity(responseData.signCity)                      
 
                         // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
-                        mainDivVM.suppUpdateShow() // 默认隐藏 到访记录关联                        
+                        mainDivVM.suppUpdateShow(0) // 默认隐藏 到访记录关联                        
 
                         // 默认显示tab1
                         if(responseData.paydetailList){
@@ -3460,20 +3460,9 @@
                                 }else if(responseData.paydetailList[i].payType=="4"){
                                     responseData.paydetailList[i].label="尾款"
                                 }  
-                                responseData.paydetailList[i].name=i+"";
-                                mainDivVM.signTabIndex=i+"";                         
+                                responseData.paydetailList[i].name=i+"";//给tab赋值name
+                                mainDivVM.activeNameSigning=responseData.paydetailList[0].name; //默认显示第一个tab                      
                             }
-                            // 判断第一个是几就默认显示那个tab
-                            if(responseData.paydetailList[0].name=="1"){
-                                mainDivVM.activeNameSigning="1";
-                            }else if(responseData.paydetailList[0].name=="2"){
-                                mainDivVM.activeNameSigning="2";
-                            }else if(responseData.paydetailList[0].name=="3"){
-                                mainDivVM.activeNameSigning="3";
-                            }else if(responseData.paydetailList[0].name=="4"){
-                                mainDivVM.activeNameSigning="4";
-                            }    
-
                             
                             // 付款类型判断
                             if (responseData.paydetailList[0].payType > 2) {
