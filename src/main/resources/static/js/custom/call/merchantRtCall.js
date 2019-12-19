@@ -94,7 +94,9 @@ function outboundCallPhone(outboundInputPhone, callSource, clueId, callback) {
 							homePageVM.tmOutboundCallDialogVisible = true;
 							$("#tmOutboundCallTime").html("");
 							$('#tmOutboundPhoneLocaleArea').html("");
-							intervalTimer("tmOutboundCallTime", 10, 2);
+							setTimeout(()=>{
+								intervalTimer("tmOutboundCallTime", 10, 2);
+							},0)
 							//查询手机号归属地
 							getPhoneLocale(outboundInputPhone, callSource);
 						}

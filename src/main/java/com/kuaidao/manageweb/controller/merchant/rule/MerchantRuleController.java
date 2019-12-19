@@ -82,7 +82,7 @@ public class MerchantRuleController {
 
         // 查询资源类别集合
         request.setAttribute("categoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -116,7 +116,7 @@ public class MerchantRuleController {
         request.setAttribute("userList", userList);
         // 查询字典资源类别集合
         request.setAttribute("categoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -146,7 +146,7 @@ public class MerchantRuleController {
 
         // 查询字典资源类别集合
         request.setAttribute("categoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -383,6 +383,8 @@ public class MerchantRuleController {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
         userInfoDTO.setStatusList(arrayList);
+        // 只查外部商家
+        userInfoDTO.setMerchantType(SysConstant.MerchantType.TYPE2);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();

@@ -19,66 +19,80 @@
 </head>
 
 <body>
-    <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
-        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-            <el-breadcrumb-item>Home</el-breadcrumb-item>
-            <el-breadcrumb-item>费用管理</el-breadcrumb-item>
-            <el-breadcrumb-item>消费记录</el-breadcrumb-item>
-        </el-breadcrumb>
-        <div class="mainSearchBg">
-            <div class="mainSearchFormBox">
-                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                    <div class="main-search-box">
-                        <div class="get-search-time">
-                            <div class="get-time">时间:</div>
-                            <div class="time-style" :class="{'selectActive':colorStatus}">
-                                <el-form-item label-width="auto" class="call-time" prop="createDateStart">
-                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.createDateStart" type="datetime" v-on:focus="setColor"
-                                          v-on:blur="changeNameFun" placeholder="选择开始时间">
-                                    </el-date-picker>
-                                </el-form-item>
-                                <el-form-item label="—" class="widthauto" prop="createDateEnd">
-                                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                        v-model="form.createDateEnd" type="datetime" v-on:focus="setColor"
-                                          v-on:blur="changeNameFun" placeholder="选择结束时间">
-                                    </el-date-picker>
-                                </el-form-item>
-                            </div>
-                        </div>
-                        <el-form-item label="商家账户：" prop="userId">
-                            <el-select v-model="form.userId" filterable clearable placeholder="商家账户名">
-                                <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name"
-                                    :value="item.id">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </div>
-                    <div class="mainSearchBtnBox">
-                        <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
-                            style="margin-left: 10px;">搜索</el-button>
-                        <el-button @click="resetFormResource('form')">重置</el-button>
-                    </div>
-                </el-form>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>费用管理</el-breadcrumb-item>
+        <el-breadcrumb-item>消费记录</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <div class="main-search-box">
+                <el-form-item label="时间：" label-width="auto" class="call-time" prop="createDateStart">
+                    <el-date-picker
+                        format="yyyy-MM-dd"
+                        value-format="yyyy-MM-dd"
+                        v-model="form.createDateStart"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto" prop="createDateEnd">
+                    <el-date-picker
+                        format="yyyy-MM-dd"
+                        value-format="yyyy-MM-dd"
+                        v-model="form.createDateEnd"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="商家账户：" prop="userId">
+                    <el-select v-model="form.userId" filterable  clearable placeholder="商家账户名">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
             </div>
-            <el-row class="marginB20 button-menu">
-                <el-button type="success" @click="gotoInfo">消费明细</el-button>
-            </el-row>
-            <el-row>
-                <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="dataTable"
-                    @selection-change="handleSelectionChange">
-                    <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
-                    <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                    <el-table-column align="center" prop="userName" label="商家账户"></el-table-column>
-                    <el-table-column align="center" prop="createDate" label="日期（天）" :formatter="dateFormat" width="130">
-                    </el-table-column>
-                    <el-table-column align="center" prop="clueNum" label="消费资源数"></el-table-column>
-                    <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
-                </el-table>
-                <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-            </el-row>
+            <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                    <el-button @click="resetFormResource('form')">重置</el-button>
+            </div>
+            </el-form>
         </div>
+        <el-row class="marginB20 button-menu">
+            <el-button type="success" @click="gotoInfo()">消费明细</el-button>
+        </el-row>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="userName" label="商家账户"></el-table-column>
+                <el-table-column align="center" prop="createDate" label="日期（天）"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="clueNum" label="消费资源数">
+                    <template slot-scope="scope">
+                    <el-button class="fontColor2"  type="text" @click="gotoInfo(scope.row.createDate)">
+                        <span>{{scope.row.clueNum}}</span>
+                    </el-button>
+                </template>
+                </el-table-column>
+                <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
     </div>
+</div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -152,21 +166,21 @@
 
                 console.info(param);
                 axios.post('/merchant/merchantConsumeRecord/countListMerchant', param)
-                    .then(function (response) {
-                        console.log(response)
-                        var result = response.data;
-                        if (result.code == 0) {
-                            var table = result.data;
-                            ocmVM.dataTable = table.data;
-                            ocmVM.pager.total = table.total;
-                            ocmVM.pager.currentPage = table.currentPage;
-                        } else {
-                            ocmVM.$message.error(result.msg);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
 
             },
             resetFormResource(formName) {
@@ -183,8 +197,11 @@
                 }
                 return moment(cellValue).format("YYYY-MM-DD");
             },
-            gotoInfo() {
-                window.location.href = '/merchant/merchantConsumeRecord/initInfoList';
+            gotoInfo(createDate){
+                if(!createDate){
+                    createDate=''
+                }
+                window.location.href='/merchant/merchantConsumeRecord/initInfoList?createDate='+createDate;
             },
         },
         created() {

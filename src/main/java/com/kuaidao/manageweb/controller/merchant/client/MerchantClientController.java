@@ -91,23 +91,36 @@ public class MerchantClientController {
                 session.setAttribute("bindType", bindType);
                 session.setAttribute("clientType", reqDTO.getClientType());
 
-                Integer clientType = reqDTO.getClientType();
+
+                ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
+                clientLoginRecord.setAccountId(curLoginUser.getId());
+                clientLoginRecord.setAccountType(reqDTO.getAccountType());
+                clientLoginRecord.setOrgId(curLoginUser.getOrgId());
+                clientLoginRecord.setCno(seatManagerResp.getSeatNo());
+                clientLoginRecord.setClientType(reqDTO.getClientType());
+                clientLoginRecord.setAccountNo(seatManagerResp.getAccountNo());
+                JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
+                if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
+                    logger.error("merchant_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
+                    return  new JSONResult<>().fail(loginRecordJr.getCode(),loginRecordJr.getMsg());
+                }
+
                 //七陌没有绑定电话
                 //String bindPhone = clientLoginRecord.getBindPhone();
-                String cnoPrefix = "";
-                String suffix = "";
-                cnoPrefix = "qimo";
-                suffix = seatManagerResp.getSeatNo() + "_" + seatManagerResp.getAccountNo();
-
-                Map<String, Object> paramMap = new HashMap<>();
-                //paramMap.put("bindPhone", bindPhone);
-                paramMap.put("accountId", accountId + "");
-                paramMap.put("accountType", reqDTO.getAccountType());
-                paramMap.put("orgId", curLoginUser.getOrgId());
-                String keyString =
-                    RedisConstant.CLIENT_USER_PREFIX + cnoPrefix + suffix;
-                // redisTemplate.opsForHash().putAll(keyString,paramMap);
-                redisTemplate.opsForValue().set(keyString, paramMap, 7, TimeUnit.DAYS);
+//                String cnoPrefix = "";
+//                String suffix = "";
+//                cnoPrefix = "qimo";
+//                suffix = seatManagerResp.getSeatNo() + "_" + seatManagerResp.getAccountNo();
+//
+//                Map<String, Object> paramMap = new HashMap<>();
+//                //paramMap.put("bindPhone", bindPhone);
+//                paramMap.put("accountId", accountId + "");
+//                paramMap.put("accountType", reqDTO.getAccountType());
+//                paramMap.put("orgId", curLoginUser.getOrgId());
+//                String keyString =
+//                    RedisConstant.CLIENT_USER_PREFIX + cnoPrefix + suffix;
+//                // redisTemplate.opsForHash().putAll(keyString,paramMap);
+//                redisTemplate.opsForValue().set(keyString, paramMap, 7, TimeUnit.DAYS);
                 return new JSONResult<>().success(true);
             }
         } else {
