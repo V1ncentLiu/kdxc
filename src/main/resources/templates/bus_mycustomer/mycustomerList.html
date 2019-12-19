@@ -1870,6 +1870,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {  
+            signTabIndex:"0",//点击编辑签约单tab的index
             signTitle:'',    
             responseData:[],  
             activeNameSigning:'',     
@@ -2658,11 +2659,11 @@
                 this.suppWrap = true;
                 this.shouAddVisitButton = false;
                 var param = {};
-                console.log(mainDivVM.updateFormSigning.visitDetailRecordId)
-                if(!mainDivVM.updateFormSigning.visitDetailRecordId){
+                console.log(mainDivVM.updateFormSigning.paydetailList[0].visitRecordId)
+                if(!mainDivVM.updateFormSigning.paydetailList[0].visitRecordId){
                     return false;
                 }
-                param.id = mainDivVM.updateFormSigning.visitDetailRecordId;
+                param.id = mainDivVM.updateFormSigning.paydetailList[0].visitRecordId;
                 //TODO
                 axios.post('/busVisitRecord/one', param).then(function (response) {
                     var echoData = response.data.data;
@@ -3450,18 +3451,16 @@
                             // 显示tab名称
                             for(var i=0;i<responseData.paydetailList.length;i++){
                                 if(responseData.paydetailList[i].payType=="1"){
-                                    responseData.paydetailList[i].label="全款"
-                                    responseData.paydetailList[i].name="1"
+                                    responseData.paydetailList[i].label="全款"                                    
                                 }else if(responseData.paydetailList[i].payType=="2"){
                                     responseData.paydetailList[i].label="定金"
-                                    responseData.paydetailList[i].name="2"
                                 }else if(responseData.paydetailList[i].payType=="3"){
                                     responseData.paydetailList[i].label="追加定金"
-                                    responseData.paydetailList[i].name="3"
                                 }else if(responseData.paydetailList[i].payType=="4"){
                                     responseData.paydetailList[i].label="尾款"
-                                    responseData.paydetailList[i].name="4"
-                                }                            
+                                }  
+                                responseData.paydetailList[i].name=i;
+                                mainDivVM.signTabIndex=i;                         
                             }
                             // 判断第一个是几就默认显示那个tab
                             if(responseData.paydetailList[0].name=="1"){
