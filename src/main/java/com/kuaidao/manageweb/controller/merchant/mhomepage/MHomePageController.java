@@ -201,7 +201,7 @@ public class MHomePageController {
             request.setAttribute("packageName", packageName);
         } else {
         }
-        request.setAttribute("userType", curLoginUser.getMerchantType());
+        request.setAttribute("userType", curLoginUser.getUserType());
         request.setAttribute("merchantName", username);
         request.setAttribute("countSources", countSource());
         return "merchant/homePage/accoun";
