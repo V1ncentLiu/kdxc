@@ -355,7 +355,7 @@ public class SignRecordController {
         reqDTO.setUserId(user.getId());
         reqDTO.setOrgId(user.getOrgId());
         reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.REJECT);
-        return signRecordFeignClient.rejectSignOrder(reqDTO);
+        return signRecordFeignClient.rejectSignOrderNew(reqDTO);
     }
 
     /**
@@ -375,7 +375,7 @@ public class SignRecordController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setBusinessLine(curLoginUser.getBusinessLine());
         reqDTO.setOrgId(curLoginUser.getOrgId());
-        return signRecordFeignClient.rejectSignOrder(reqDTO);
+        return signRecordFeignClient.rejectSignOrderNew(reqDTO);
     }
 
     /**
