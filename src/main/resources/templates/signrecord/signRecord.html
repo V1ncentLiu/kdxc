@@ -588,23 +588,24 @@
                         if (rows.length == 0) {
                             rows.push(this.curRow);
                         }
-                        var idArr = new Array();
+                        var payIdArr = new Array();
+                        var signIdArr = new Array();
                         var isPass = true;
                         for (var i = 0; i < rows.length; i++) {
                             var curRow = rows[i];
-                            if (curRow.status != 1) {
+                            if (curRow.payStatus != 1) {
                                 this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                                 isPass = false;
                                 break;
                             }
-                            idArr.push(curRow.id);
+                            signIdArr.push(curRow.id);
+                            payIdArr.push(curRow.payDetailId)
                         }
                         if (!isPass) {
                             return;
                         }
-
-
-                        param.idList = idArr;
+                        param.idList = payIdArr;
+                        param.signIdList = signIdArr;
                         param.rebutReason = this.dialogForm.reason;
                         this.btnDisabled = true; 
                         axios.post('/sign/signRecord/rejectSignOrder', param)
@@ -647,7 +648,7 @@
                 this.paymentDetailsShow4 = false;
                 this.visitRecordShow = false;
                 this.curRow = row;
-                if (row.status == 1) {
+                if (row.payStatus == 1) {
                     this.showbutton = true;
                 } else {
                     this.showbutton = false;
@@ -731,17 +732,19 @@
                     return;
                 }
                 var title = "";
-                var idArr = new Array();
+                var payIdArr = new Array();
+                var signIdArr = new Array();
                 var isPass = true;
                 for (var i = 0; i < rows.length; i++) {
                     var curRow = rows[i];
-                    if (curRow.status != 1) {
+                    if (curRow.payStatus != 1) {
                         this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                         isPass = false;
                         break;
                     }
                     title += "【" + curRow.serialNum + "" + curRow.customerName + "】 ";
-                    idArr.push(curRow.id);
+                    signIdArr.push(curRow.id);
+                    payIdArr.push(curRow.payDetailId)
                 }
                 if (!isPass) {
                     return;
@@ -753,8 +756,8 @@
                     type: 'warning'
                 }).then(() => {
                     var param = {};
-                    param.idList = idArr;
-
+                    param.idList = payIdArr;
+                    param.signIdList = signIdArr;
                     axios.post('/sign/signRecord/passAuditSignOrder', param)
                         .then(function (response) {
                             var resData = response.data;
@@ -787,13 +790,15 @@
             passOne() { //审核通过一条
                 var curRow = this.curRow;
                 var title = "";
-                var idArr = new Array();
+                var payIdArr = new Array();
+                var signIdArr = new Array();
                 var isPass = true;
-                if (curRow.status != 1) {
+                if (curRow.payStatus != 1) {
                     this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                     isPass = false;
                 } else {
-                    idArr.push(curRow.id)
+                    payIdArr.push(curRow.payDetailId);
+                    signIdArr.push(curRow.id);
                 }
                 this.$confirm('确定要将此 ' + title + ' 签约单审核通过吗？', '提示', {
                     confirmButtonText: '确定',
@@ -801,7 +806,8 @@
                     type: 'warning'
                 }).then(() => {
                     var param = {};
-                    param.idList = idArr;
+                    param.idList = payIdArr;
+                    param.signIdList = signIdArr;
                     axios.post('/sign/signRecord/passAuditSignOrder', param)
                         .then(function (response) {
                             var resData = response.data;
@@ -884,7 +890,7 @@
                 var isPass = true;
                 for (var i = 0; i < rows.length; i++) {
                     var curRow = rows[i];
-                    if (curRow.status != 1) {
+                    if (curRow.payStatus != 1) {
                         this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                         isPass = false;
                         break;
@@ -905,7 +911,7 @@
                 var isPass = true;
                 var curRow = this.curRow;
                 this.multipleSelection = [];
-                if (curRow.status != 1) {
+                if (curRow.payStatus != 1) {
                     this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                     isPass = false;
                 }
