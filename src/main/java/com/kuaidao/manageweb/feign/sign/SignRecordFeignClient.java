@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.sign;
 
 import java.util.List;
 
+import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -49,12 +50,12 @@ public interface SignRecordFeignClient {
     JSONResult<Boolean> rejectSignOrder(@RequestBody RejectSignOrderReqDTO reqDTO);
     
     /**
-     * 根據sign_id 查詢 付款明細
-     * @param idListLongReq
+     * 根據pay_id 查詢 付款明細
+     * @param payDetailReqDTO
      * @return
      */
     @PostMapping("/listPayDetailNoPage")
-    JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq);
+    JSONResult<List<PayDetailDTO>> listPayDetailNoPage(@RequestBody PayDetailReqDTO payDetailReqDTO);
     
     /**
      *当月签约数
@@ -95,7 +96,7 @@ public interface SignRecordFeignClient {
         }
 
         @Override
-        public JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq) {
+        public JSONResult<List<PayDetailDTO>> listPayDetailNoPage(PayDetailReqDTO payDetailReqDTO) {
             return fallBackError("根据signID查询付款明细");
         }
 
