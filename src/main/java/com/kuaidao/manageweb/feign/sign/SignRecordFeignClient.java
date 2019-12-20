@@ -54,8 +54,16 @@ public interface SignRecordFeignClient {
      * @param payDetailReqDTO
      * @return
      */
+    @PostMapping("/findPayDetailById")
+    JSONResult<List<PayDetailDTO>> findPayDetailById(@RequestBody PayDetailReqDTO payDetailReqDTO);
+
+    /**
+     * sign_id 查詢 付款明細
+     * @param idListLongReq
+     * @return
+     */
     @PostMapping("/listPayDetailNoPage")
-    JSONResult<List<PayDetailDTO>> listPayDetailNoPage(@RequestBody PayDetailReqDTO payDetailReqDTO);
+    JSONResult<List<PayDetailDTO>> listPayDetailNoPage(@RequestBody IdListLongReq idListLongReq );
     
     /**
      *当月签约数
@@ -96,7 +104,12 @@ public interface SignRecordFeignClient {
         }
 
         @Override
-        public JSONResult<List<PayDetailDTO>> listPayDetailNoPage(PayDetailReqDTO payDetailReqDTO) {
+        public JSONResult<List<PayDetailDTO>> findPayDetailById(PayDetailReqDTO payDetailReqDTO) {
+            return fallBackError("根据payID查询付款明细");
+        }
+
+        @Override
+        public JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq) {
             return fallBackError("根据signID查询付款明细");
         }
 
