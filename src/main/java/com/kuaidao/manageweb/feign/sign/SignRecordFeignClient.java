@@ -48,7 +48,15 @@ public interface SignRecordFeignClient {
      */
     @PostMapping("/rejectSignOrder")
     JSONResult<Boolean> rejectSignOrder(@RequestBody RejectSignOrderReqDTO reqDTO);
-    
+
+    /**
+     * 签约记录驳回
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/rejectSignOrderNew")
+    JSONResult<Boolean> rejectSignOrderNew(@RequestBody RejectSignOrderReqDTO reqDTO);
+
     /**
      * 根據pay_id 查詢 付款明細
      * @param payDetailReqDTO
@@ -93,6 +101,11 @@ public interface SignRecordFeignClient {
         @Override
         public JSONResult<Boolean> rejectSignOrder(RejectSignOrderReqDTO reqDTO) {
             return fallBackError("签约记录驳回");
+        }
+
+        @Override
+        public JSONResult<Boolean> rejectSignOrderNew(RejectSignOrderReqDTO reqDTO) {
+            return fallBackError("签约记录驳回-里程碑11后使用");
         }
 
         @Override
