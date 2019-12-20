@@ -1870,6 +1870,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {  
+            signTabIndex:0,//点击编辑签约单tab的index
             signTitle:'',    
             responseData:[],  
             activeNameSigning:'',     
@@ -2498,7 +2499,8 @@
                         this.updateFormSigning.visitDetailRecordId = this.responseData.paydetailList[i].visitRecordId;
                     }
                 }
-                this.suppUpdateShow(tab.index) // 点击tab切换到访记录关联 
+                this.signTabIndex=parseInt(tab.index);
+                this.suppUpdateShow(tab.index) // 点击tab切换到访记录关联
             },
             createClueData(){
                 window.location.href='/aggregation/businessMyCustomer/createClue';
@@ -2661,6 +2663,7 @@
             suppUpdateShow(index) { //补充到访记录展开
                 this.suppWrap = true;
                 this.shouAddVisitButton = false;
+                index=this.signTabIndex;
                 var param = {};
                 console.log(mainDivVM.updateFormSigning.paydetailList[index].visitRecordId)
                 if(!mainDivVM.updateFormSigning.paydetailList[index].visitRecordId){
@@ -3447,7 +3450,8 @@
                         mainDivVM.currentCity(responseData.signCity)                      
 
                         // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
-                        mainDivVM.suppUpdateShow(0) // 默认隐藏 到访记录关联                        
+                        mainDivVM.suppUpdateShow() // 默认隐藏 到访记录关联 
+                        mainDivVM.signTabIndex=0;                     
 
                         // 默认显示tab1
                         if(responseData.paydetailList){
