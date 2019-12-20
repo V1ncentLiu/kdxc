@@ -1,12 +1,5 @@
 package com.kuaidao.manageweb.controller.sign;
 
-import com.github.pagehelper.util.StringUtil;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.common.constant.*;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,15 +25,21 @@ import com.kuaidao.aggregation.dto.busmycustomer.RejectSignOrderReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
+import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
+import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -48,6 +47,7 @@ import com.kuaidao.manageweb.feign.sign.SignRecordFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
@@ -105,33 +105,31 @@ public class SignRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+        if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             ownOrgId = String.valueOf(curLoginUser.getOrgId());
-            //商务总监查他自己的组
+            // 商务总监查他自己的组
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
-            if(curOrgGroupByOrgId!=null) {
+            if (curOrgGroupByOrgId != null) {
                 businessGroupList.add(curOrgGroupByOrgId);
             }
             request.setAttribute("businessGroupList", businessGroupList);
             request.setAttribute("ownOrgId", ownOrgId);
-        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+        } else if (RoleCodeEnum.SWZC.name().equals(roleCode)) {
             // 查询下级所有商务组
             OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
             queryDTO.setParentId(curLoginUser.getOrgId());
             queryDTO.setOrgType(OrgTypeConstant.SWZ);
-            JSONResult<List<OrganizationDTO>> queryOrgByParam =
-                    organizationFeignClient.listDescenDantByParentId(queryDTO);
+            JSONResult<List<OrganizationDTO>> queryOrgByParam = organizationFeignClient.listDescenDantByParentId(queryDTO);
             List<OrganizationDTO> data = queryOrgByParam.getData();
             request.setAttribute("businessGroupList", data);
         }
         /*
-         * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
-         * curLoginUser.getOrgId(); // 签约项目 List<ProjectInfoDTO> projectList = getProjectList(); //
-         * 商务小组 List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId,
-         * OrgTypeConstant.SWZ); // 电销组 List<OrganizationRespDTO> teleGroupList =
-         * getTeleGroupList(OrgTypeConstant.DXZ); // 商务经理 List<UserInfoDTO> busManagerList =
-         * getUserInfo(orgId, RoleCodeEnum.SWJL.name()); // 电销人员 // List<UserInfoDTO> teleSaleList =
-         * getUserInfo(null, RoleCodeEnum.DXCYGW.name());
+         * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId = curLoginUser.getOrgId(); //
+         * 签约项目 List<ProjectInfoDTO> projectList = getProjectList(); // 商务小组 List<OrganizationDTO>
+         * businessGroupList = getBusinessGroupList(orgId, OrgTypeConstant.SWZ); // 电销组
+         * List<OrganizationRespDTO> teleGroupList = getTeleGroupList(OrgTypeConstant.DXZ); // 商务经理
+         * List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name()); // 电销人员 //
+         * List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
          *
          * request.setAttribute("projectList", projectList); request.setAttribute("busManagerList",
          * busManagerList); request.setAttribute("businessGroupList", businessGroupList);
@@ -166,9 +164,7 @@ public class SignRecordController {
         req.setRoleCode(roleName);
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-            logger.error(
-                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
-                    req, userJr);
+            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}", req, userJr);
             return null;
         }
         return userJr.getData();
@@ -186,8 +182,7 @@ public class SignRecordController {
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setParentId(orgId);
         busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationDTO>> orgJr =
-                organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+        JSONResult<List<OrganizationDTO>> orgJr = organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
         if (orgJr == null || !JSONResult.SUCCESS.equals(orgJr.getCode())) {
             logger.error("query org list res{{}}", orgJr);
             return null;
@@ -206,8 +201,7 @@ public class SignRecordController {
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationRespDTO>> orgJr =
-                organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         if (orgJr == null || !JSONResult.SUCCESS.equals(orgJr.getCode())) {
             logger.error("query org list res{{}}", orgJr);
             return null;
@@ -225,8 +219,7 @@ public class SignRecordController {
     @PostMapping("/listSignRecord")
     @ResponseBody
     @RequiresPermissions("aggregation:signRecord:view")
-    public JSONResult<PageBean<SignRecordRespDTO>> listSignRecord(
-            @RequestBody SignRecordReqDTO reqDTO) {
+    public JSONResult<PageBean<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
         handleReqParam(reqDTO);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
@@ -236,7 +229,7 @@ public class SignRecordController {
         Long businessGroupId = reqDTO.getBusinessGroupId();
         List<Long> businessGroupIdList = new ArrayList<>();
         if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
-            //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+            // 商务经理外调，发起外调的商务总监进行审核,根据组id查询
             if (businessGroupId != null) {
                 businessGroupIdList.add(businessGroupId);
                 reqDTO.setBusinessGroupIdList(businessGroupIdList);
@@ -245,26 +238,23 @@ public class SignRecordController {
                 OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
                 queryDTO.setParentId(orgId);
                 queryDTO.setOrgType(OrgTypeConstant.SWZ);
-                JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                        organizationFeignClient.queryOrgByParam(queryDTO);
+                JSONResult<List<OrganizationRespDTO>> queryOrgByParam = organizationFeignClient.queryOrgByParam(queryDTO);
                 List<OrganizationRespDTO> data = queryOrgByParam.getData();
                 if (CollectionUtils.isEmpty(data)) {
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                            "该用户下没有下属");
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该用户下没有下属");
                 }
                 businessGroupIdList = data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
                 reqDTO.setBusinessGroupIdList(businessGroupIdList);
             }
 
-        }else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
             if (CollectionUtils.isEmpty(accountIdList)) {
-                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                        "该用户下没有下属");
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该用户下没有下属");
             }
             businessGroupIdList.add(orgId);
             reqDTO.setBusinessGroupIdList(businessGroupIdList);
-        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){
+        } else if (RoleCodeEnum.SWZC.name().equals(roleCode)) {
             if (businessGroupId != null) {
                 businessGroupIdList.add(businessGroupId);
                 reqDTO.setBusinessGroupIdList(businessGroupIdList);
@@ -273,22 +263,20 @@ public class SignRecordController {
                 OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
                 queryDTO.setParentId(orgId);
                 queryDTO.setOrgType(OrgTypeConstant.SWZ);
-                JSONResult<List<OrganizationDTO>> queryOrgByParam =
-                        organizationFeignClient.listDescenDantByParentId(queryDTO);
+                JSONResult<List<OrganizationDTO>> queryOrgByParam = organizationFeignClient.listDescenDantByParentId(queryDTO);
                 List<OrganizationDTO> data = queryOrgByParam.getData();
                 if (CollectionUtils.isEmpty(data)) {
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                            "该用户下没有下属");
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该用户下没有下属");
                 }
                 businessGroupIdList = data.stream().map(OrganizationDTO::getId).collect(Collectors.toList());
                 reqDTO.setBusinessGroupIdList(businessGroupIdList);
             }
-        }else {
+        } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
 
-        if(StringUtils.isEmpty(reqDTO.getQueryType())) {
-            reqDTO.setStatus(1); //  待审核
+        if (StringUtils.isEmpty(reqDTO.getQueryType())) {
+            reqDTO.setStatus(1); // 待审核
         }
 
         logger.info("listSignRecord{{}}", reqDTO.toString());
@@ -308,15 +296,12 @@ public class SignRecordController {
         req.setRoleCode(roleCode);
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-            logger.error(
-                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
-                    req, userJr);
+            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}", req, userJr);
             return null;
         }
         List<UserInfoDTO> userInfoDTOList = userJr.getData();
         if (userInfoDTOList != null && userInfoDTOList.size() != 0) {
-            List<Long> idList =
-                    userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+            List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
             return idList;
         }
         return null;
@@ -360,11 +345,9 @@ public class SignRecordController {
      */
     @PostMapping("/rejectSignOrder")
     @RequiresPermissions("aggregation:signRecord:reject")
-    @LogRecord(description = "签约单驳回", operationType = LogRecord.OperationType.UPDATE,
-            menuName = MenuEnum.SIGN_ORDER)
+    @LogRecord(description = "签约单驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.SIGN_ORDER)
     @ResponseBody
-    public JSONResult<Boolean> rejectSignOrder(@Valid @RequestBody RejectSignOrderReqDTO reqDTO,
-            BindingResult result) {
+    public JSONResult<Boolean> rejectSignOrder(@Valid @RequestBody RejectSignOrderReqDTO reqDTO, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -382,11 +365,9 @@ public class SignRecordController {
      */
     @PostMapping("/passAuditSignOrder")
     @RequiresPermissions("aggregation:signRecord:pass")
-    @LogRecord(description = "签约单审核通过", operationType = LogRecord.OperationType.UPDATE,
-            menuName = MenuEnum.SIGN_ORDER)
+    @LogRecord(description = "签约单审核通过", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.SIGN_ORDER)
     @ResponseBody
-    public JSONResult<Boolean> passAuditSignOrder(@Valid @RequestBody RejectSignOrderReqDTO reqDTO,
-            BindingResult result) {
+    public JSONResult<Boolean> passAuditSignOrder(@Valid @RequestBody RejectSignOrderReqDTO reqDTO, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -398,16 +379,15 @@ public class SignRecordController {
     }
 
     /**
-     * 根据sign_Id 查询 付款明细
+     *付款明细 查询 付款明细
      *
-     * @param idListLongReq
+     * @param payDetailReqDTO
      * @return
      */
-    @PostMapping("/listPayDetailNoPage")
+    @PostMapping("/findPayDetailById")
     @ResponseBody
-    public JSONResult listPayDetailNoPage(@RequestBody IdListLongReq idListLongReq) {
-        JSONResult<List<PayDetailDTO>> payDetailListJr =
-                signRecordFeignClient.listPayDetailNoPage(idListLongReq);
+    public JSONResult listPayDetailNoPage(@RequestBody PayDetailReqDTO payDetailReqDTO) {
+        JSONResult<List<PayDetailDTO>> payDetailListJr = signRecordFeignClient.findPayDetailById(payDetailReqDTO);
         if (payDetailListJr == null || !JSONResult.SUCCESS.equals(payDetailListJr.getCode())) {
             return payDetailListJr;
         }
@@ -415,8 +395,7 @@ public class SignRecordController {
         if (data == null) {
             return payDetailListJr;
         }
-        Map payDetailMap = data.stream()
-                .collect(Collectors.groupingBy(PayDetailDTO::getPayType, Collectors.toList()));
+        Map payDetailMap = data.stream().collect(Collectors.groupingBy(PayDetailDTO::getPayType, Collectors.toList()));
 
 
         List<Long> idList = new ArrayList<>();
@@ -429,8 +408,7 @@ public class SignRecordController {
             // 查询关联的全部到访记录
             IdListLongReq visitIds = new IdListLongReq();
             visitIds.setIdList(idList);
-            JSONResult<List<BusVisitRecordRespDTO>> visitListResult =
-                    visitRecordFeignClient.findByIds(visitIds);
+            JSONResult<List<BusVisitRecordRespDTO>> visitListResult = visitRecordFeignClient.findByIds(visitIds);
             payDetailMap.put("visitRecord", visitListResult.getData());
         }
         return new JSONResult().success(payDetailMap);
@@ -445,8 +423,7 @@ public class SignRecordController {
     @PostMapping("/listPayDetail")
     @ResponseBody
     public JSONResult listPayDetail(@RequestBody IdListLongReq idListLongReq) {
-        JSONResult<List<PayDetailDTO>> payDetailListJr =
-                signRecordFeignClient.listPayDetailNoPage(idListLongReq);
+        JSONResult<List<PayDetailDTO>> payDetailListJr = signRecordFeignClient.listPayDetailNoPage(idListLongReq);
         return payDetailListJr;
     }
 
@@ -458,7 +435,7 @@ public class SignRecordController {
     @ResponseBody
     public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
         // 查询所有签约项目
-        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(AggregationConstant.NO);
         return projectInfoFeignClient.queryBySign(param);
     }
@@ -480,27 +457,27 @@ public class SignRecordController {
         return userInfoFeignClient.listByOrgAndRole(req);
     }
 
-  /**
-   * 根据签约单id获取退款信息
-   */
-  @PostMapping("/getRefundInfo")
-  @ResponseBody
-  public JSONResult<RefundRebateDTO> getRefundInfo(@RequestBody String params) {
-    JSONObject jsonObject = JSONObject.parseObject(params);
-    String signStatus = jsonObject.getString("signStatus");
-    String signId = jsonObject.getString("signId");
-    Map map = new HashMap();
-    map.put("signId", signId);
-    map.put("type", 1);
-    if ("4".equals(signStatus)) {
-      map.put("status", 3);
+    /**
+     * 根据签约单id获取退款信息
+     */
+    @PostMapping("/getRefundInfo")
+    @ResponseBody
+    public JSONResult<RefundRebateDTO> getRefundInfo(@RequestBody String params) {
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        String signStatus = jsonObject.getString("signStatus");
+        String signId = jsonObject.getString("signId");
+        Map map = new HashMap();
+        map.put("signId", signId);
+        map.put("type", 1);
+        if ("4".equals(signStatus)) {
+            map.put("status", 3);
+        }
+        if ("6".equals(signStatus)) {
+            map.put("status", 4);
+        }
+        JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
+        return refundRebateDTOs;
     }
-    if ("6".equals(signStatus)) {
-      map.put("status", 4);
-    }
-    JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
-    return refundRebateDTOs;
-  }
 
     /**
      * 查询字典表
@@ -509,10 +486,8 @@ public class SignRecordController {
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
-        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-            dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
-        if (queryDicItemsByGroupCode != null
-            && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
@@ -520,6 +495,7 @@ public class SignRecordController {
 
     /**
      * 获取当前 orgId所在的组织
+     * 
      * @param orgId
      * @param
      * @return
@@ -527,10 +503,10 @@ public class SignRecordController {
     private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
         // 电销组
         IdEntity idEntity = new IdEntity();
-        idEntity.setId(orgId+"");
+        idEntity.setId(orgId + "");
         JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
-        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
-            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+        if (!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}", idEntity, orgJr);
             return null;
         }
         return orgJr.getData();

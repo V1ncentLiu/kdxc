@@ -162,12 +162,13 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>                
-                <el-table-column align="center" prop="status" label="签约单状态" width="90">
+                <el-table-column align="center" prop="payStatus" label="付款明细状态" width="90">
+
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.status===0" size="mini" @click="reasonClick(scope.row)" type="text">
+                        <el-button v-if="scope.row.payStatus==0" size="mini" @click="reasonClick(scope.row)" type="text">
                             <span style="color: #555555">驳回&nbsp;</span><span style="color: blue">驳回原因</span>
                         </el-button>
-                        <span v-else-if="scope.row.status===1">
+                        <span v-else-if="scope.row.payStatus===1">
                             待审核 <span v-if="scope.row.payType ==1">
                                       (全款)
                                    </span>
@@ -181,7 +182,7 @@
                                        (尾款)
                                    </span>
                         </span>
-                        <span v-else-if="scope.row.status===2 && scope.row.signStatus !=4 && scope.row.signStatus !=6">
+                        <span v-else-if="scope.row.payStatus===2 && scope.row.signStatus !=4 && scope.row.signStatus !=6">
                              有效  <span v-if="scope.row.payType ==1">
                                      (全款)
                                    </span>
@@ -196,7 +197,7 @@
                                    </span>
                         </span>
                         <el-button
-                                v-else-if="scope.row.status===2 && (scope.row.signStatus === 4 || scope.row.signStatus === 6)"
+                                v-else-if="scope.row.payStatus===2 && (scope.row.signStatus === 4 || scope.row.signStatus === 6)"
                                 size="mini" @click="refundClick(scope.row)" type="text">
                             <span style="color: #555555">已退款&nbsp;</span><span style="color: red">退款信息</span>
                         </el-button>
@@ -583,7 +584,6 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var param = {};
-                        debugger;
                         var rows = this.multipleSelection;
                         if (rows.length == 0) {
                             rows.push(this.curRow);
@@ -654,13 +654,13 @@
                 }
                 // row.signNo;
                 var param = {};
-                param.idList = [row.id];
-                axios.post('/sign/signRecord/listPayDetailNoPage', param)
+                param.id = row.payDetailId;
+                param.signId = row.id;
+                axios.post('/sign/signRecord/findPayDetailById', param)
                     .then(function (response) {
                         var resData = response.data;
                         console.log(resData.data)
                         if (resData.code == '0') {
-                            debugger;
                             var payDetailData = resData.data;
                             if (payDetailData[1]) {
                                 signRecordVM.paymentDetailsShow = true;
