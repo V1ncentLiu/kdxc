@@ -1053,8 +1053,10 @@ public class ExtendClueAgendaTaskController {
                                 String.valueOf(clueAgendaTaskDTOReq.getAccountNameVaule()));
                     }
                     pushClueReq.setUrlAddress(clueAgendaTaskDTOReq.getUrlAddress());
-                    pushClueReq.setIndustryCategory(
-                            String.valueOf(clueAgendaTaskDTOReq.getIndustryCategory()));
+                    if (clueAgendaTaskDTOReq.getIndustryCategory() != null) {
+                        pushClueReq.setIndustryCategory(
+                                String.valueOf(clueAgendaTaskDTOReq.getIndustryCategory()));
+                    }
                     pushClueReq.setProjectId(clueAgendaTaskDTOReq.getProjectId());
                     pushClueReq.setProjectName(clueAgendaTaskDTOReq.getProjectName());
                     pushClueReq.setCreateUser(user.getId());
@@ -1099,8 +1101,10 @@ public class ExtendClueAgendaTaskController {
                                 .setSourceName(sourceMap2.get(pushClueReq.getSource()));
                         clueAgendaTaskDTOReponse
                                 .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
-                        clueAgendaTaskDTOReponse.setIndustryCategoryName(
-                                industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        if (pushClueReq.getIndustryCategory() != null) {
+                            clueAgendaTaskDTOReponse.setIndustryCategoryName(
+                                    industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        }
                         clueAgendaTaskDTOReponse.setCusName(pushClueReq.getCusName());
                         clueAgendaTaskDTOReponse.setPhone(pushClueReq.getPhone());
                         clueAgendaTaskDTOReponse.setPhone2(pushClueReq.getPhone2());
