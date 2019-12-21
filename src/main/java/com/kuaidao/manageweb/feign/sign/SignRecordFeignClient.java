@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.sign;
 
 import java.util.List;
 
+import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -47,14 +48,30 @@ public interface SignRecordFeignClient {
      */
     @PostMapping("/rejectSignOrder")
     JSONResult<Boolean> rejectSignOrder(@RequestBody RejectSignOrderReqDTO reqDTO);
-    
+
     /**
-     * 根據sign_id 查詢 付款明細
+     * 签约记录驳回
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/rejectSignOrderNew")
+    JSONResult<Boolean> rejectSignOrderNew(@RequestBody RejectSignOrderReqDTO reqDTO);
+
+    /**
+     * 根據pay_id 查詢 付款明細
+     * @param payDetailReqDTO
+     * @return
+     */
+    @PostMapping("/findPayDetailById")
+    JSONResult<List<PayDetailDTO>> findPayDetailById(@RequestBody PayDetailReqDTO payDetailReqDTO);
+
+    /**
+     * sign_id 查詢 付款明細
      * @param idListLongReq
      * @return
      */
     @PostMapping("/listPayDetailNoPage")
-    JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq);
+    JSONResult<List<PayDetailDTO>> listPayDetailNoPage(@RequestBody IdListLongReq idListLongReq );
     
     /**
      *当月签约数
@@ -92,6 +109,16 @@ public interface SignRecordFeignClient {
         @Override
         public JSONResult<Boolean> rejectSignOrder(RejectSignOrderReqDTO reqDTO) {
             return fallBackError("签约记录驳回");
+        }
+
+        @Override
+        public JSONResult<Boolean> rejectSignOrderNew(RejectSignOrderReqDTO reqDTO) {
+            return fallBackError("签约记录驳回-里程碑11后使用");
+        }
+
+        @Override
+        public JSONResult<List<PayDetailDTO>> findPayDetailById(PayDetailReqDTO payDetailReqDTO) {
+            return fallBackError("根据payID查询付款明细");
         }
 
         @Override
