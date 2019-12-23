@@ -66,7 +66,8 @@ var mainDivVM = new Vue({
         allocationForm: {
             saleId:'',
             remark:'',
-            message:''
+            message:'',
+            saleIdOther:'',//辅助商务经理
         },
         cancelDigForm:{
             cancelReason:'',
@@ -128,9 +129,19 @@ var mainDivVM = new Vue({
         multipleSelection3:[],
         dialogFormVisibleUnVisit:false,
         confirmBtnDisabled:false,//提交按钮 禁用
+        isSaleIdOther:false,//是否展示辅助经理
 
     },
     methods: {
+        showSaleIdOther(){
+            if(this.isSaleIdOther){
+                this.isSaleIdOther=false;
+                // 清空辅助经理的值
+                this.allocationForm.saleIdOther="";
+            }else{
+                this.isSaleIdOther=true;
+            }
+        },
       formatNum(value) {
         if(!value&&value!==0) return 0;
 
@@ -390,7 +401,11 @@ var mainDivVM = new Vue({
                 this.allocationForm.message=text;
             }
            
-           this.allocationVisible = true;
+            this.allocationVisible = true;
+            // 默认不显示辅助商务经理
+            this.isSaleIdOther=false;
+            // 清空辅助经理的值
+            this.allocationForm.saleIdOther="";
         },
         // 提交分发资源
         allocationClue(formName){//分发资源                   
@@ -411,6 +426,16 @@ var mainDivVM = new Vue({
                     param.idList=idList;
                     param.clueIdList=clueIdList;
                     param.busSaleId=this.allocationForm.saleId;
+                    if(this.allocationForm.saleIdOther){
+                        if(this.allocationForm.saleIdOther==this.allocationForm.saleId){
+                            mainDivVM.$message({
+                               message: "辅助经理不能和商务经理相同",
+                               type: 'error'
+                            }); 
+                            return
+                        }
+                        param.busSale2Id=this.allocationForm.saleIdOther;
+                    }    
                     param.remark=this.allocationForm.remark;
                     axios.post('/business/busAllocation/busAllocationClue',param)
                     .then(function (response) {
