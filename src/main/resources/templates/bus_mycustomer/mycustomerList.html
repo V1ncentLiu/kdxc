@@ -2405,13 +2405,13 @@
                     {required: true, message: '请选择到访时间', trigger: 'change'}
                 ],
                 arrVisitCity: [ //请填写到访城市
-                    {required: true, message: '请填写到访城市', trigger: 'change'}
+                    {required: true, message: '请填写到访城市', trigger: 'blur'}
                 ],
                 visitType: [ //请选择到访类型
                     {required: true, message: '请选择到访类型', trigger: 'change'}
                 ],
                 visitShopType: [ //请选择到访店铺类型
-                    {required: true, message: '请选择到访店铺类型', trigger: 'change'}
+                    {required: true, message: '请选择到访店铺类型', trigger: 'blur'}
                 ],
                 visitNum: [ //请填写到访人数
                     {required: true, message: '请填写到访人数', trigger: 'blur'},
@@ -2428,7 +2428,7 @@
                             } else {
                                 callback();
                             }
-                        }, trigger: 'change'
+                        }, trigger: 'blur'
                     }
                 ],
                 visitPeopleNum: [ //请填写到访人数
@@ -2673,8 +2673,12 @@
                 var param = {};
                 console.log(mainDivVM.updateFormSigning.paydetailList[index].visitRecordId)
                 if(!mainDivVM.updateFormSigning.paydetailList[index].visitRecordId){
-                    // 如果没有驳回到访记录则隐藏
-                    this.suppUpdateHide(index);
+                    //清空补充到访记录数据
+                    this.updateFormSigning.arrVisitCity = '';
+                    this.updateFormSigning.visitNum = '';
+                    this.updateFormSigning.visitShopType = '';
+                    this.updateFormSigning.visitTime = new Date();;
+                    this.updateFormSigning.visitType = 1;
                     return false;
                 }
                 param.id = mainDivVM.updateFormSigning.paydetailList[index].visitRecordId;
@@ -3519,6 +3523,12 @@
 
                             mainDivVM.signTabIndex=0;//点击编辑签约单tab的index为0
                             if(!mainDivVM.updateFormSigning.paydetailList[0].visitRecordId){
+                                //清空补充到访记录数据
+                                mainDivVM.updateFormSigning.arrVisitCity = '';
+                                mainDivVM.updateFormSigning.visitNum = '';
+                                mainDivVM.updateFormSigning.visitShopType = '';
+                                mainDivVM.updateFormSigning.visitTime = new Date();;
+                                mainDivVM.updateFormSigning.visitType = 1;
                                 return false;
                             }
                             // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
