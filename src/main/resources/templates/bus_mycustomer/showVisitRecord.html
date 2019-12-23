@@ -736,6 +736,7 @@
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
     var clueId = [[${clueId}]];
+    var busGroupId = '[[${busGroupId}]]';
     var visitStatus = [[${visitStatus}]];
     var signAuditStatus = [[${signAuditStatus}]];
     var proSelect=[[${proSelect}]];
@@ -1002,6 +1003,13 @@
                 });
             },
             saveVisitRecord(){
+
+                if(this.addVisitRecord.isSign==0&&!this.addVisitRecord.notSignReason){
+                    mainDivVM.$message({
+                        type: 'error', message: '请填写未签约原因！'});
+                    return false;
+                }
+
                 var param = this.addVisitRecord;
                 param.vistitTime = new Date( param.vistitTime)
                 param.rebutTime = new Date( param.rebutTime)
@@ -1012,7 +1020,7 @@
                         axios.post("/busVisitRecord/insert", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
-                                    mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
+                                    mainDivVM.$message({type: 'success', message: '来访记录提交成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
                                             // mainDivVM.addVisitAble = false;//允许按钮点击
@@ -1233,6 +1241,7 @@
             initList(){
                 var param = {};
                 param.clueId = clueId
+                param.busGroupId = busGroupId
                 axios.post('/busVisitRecord/queryList',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){

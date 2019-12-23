@@ -552,7 +552,8 @@ var mainDivVM = new Vue({
             }
             
             var title = "";
-            var idArr = new Array();
+            var payIdArr = new Array();
+            var signIdArr = new Array();
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
@@ -562,7 +563,8 @@ var mainDivVM = new Vue({
                     break;
                 }
                 title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
-                idArr.push(curRow.id);
+                signIdArr.push(curRow.id);
+                payIdArr.push(curRow.payDetailId)
             }
             if(!isPass){
                 return;
@@ -574,7 +576,8 @@ var mainDivVM = new Vue({
                 type: 'warning'
             }).then(() => {
                 var param={};
-                param.idList = idArr;               
+                param.idList = payIdArr;
+                param.signIdList = signIdArr;
                 axios.post('/sign/signRecord/passAuditSignOrder', param)
                 .then(function (response) {
                     var resData = response.data;
@@ -640,15 +643,16 @@ var mainDivVM = new Vue({
                 this.paymentDetailsShow4=false;
                 this.visitRecordShow=false;
                 this.curRow = row;
-                if(row.status==1){
+                if(row.payStatus==1){
                     this.showbutton = true;
                 }else{
                     this.showbutton = false;
                 }
                 // row.signNo;
                 var param = {};
-                param.idList = [row.id];
-                axios.post('/sign/signRecord/listPayDetailNoPage', param)
+                param.id = row.payDetailId;
+                param.signId = row.id;
+                axios.post('/sign/signRecord/findPayDetailById', param)
                 .then(function (response) {
                     var resData = response.data;
                     console.log(resData.data)
@@ -794,7 +798,8 @@ var mainDivVM = new Vue({
                     if(rows.length==0){
                         rows.push(this.curRow);
                     }
-                    var idArr = new Array();
+                    var payIdArr = new Array();
+                    var signIdArr = new Array();
                     var isPass = true;
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];
@@ -803,14 +808,16 @@ var mainDivVM = new Vue({
                             isPass=false;
                             break;
                         }
-                       idArr.push(curRow.id);
+                        signIdArr.push(curRow.id);
+                        payIdArr.push(curRow.payDetailId)
                     }
                     if(!isPass){
                         return;
                     }
-                    
-                    
-                    param.idList = idArr;
+
+
+                    param.idList = payIdArr;
+                    param.signIdList = signIdArr;
                     param.rebutReason = this.dialogForm.reason;
                     this.btnDisabled = true;
                     axios.post('/sign/signRecord/rejectSignOrder', param)
@@ -869,15 +876,17 @@ var mainDivVM = new Vue({
             var title = "";
             var idArr = new Array();
             var isPass = true;
-            if(curRow.status!=1){
+            if(curRow.payStatus!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
                 isPass=false;
             }else{
-                idArr.push(curRow.id)
+                payIdArr.push(curRow.payDetailId);
+                signIdArr.push(curRow.id);
             }
             this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
                 var param={};
-                param.idList = idArr;
+                param.idList = payIdArr;
+                param.signIdList = signIdArr;
                 axios.post('/sign/signRecord/passAuditSignOrder', param)
                     .then(function (response) {
                         var resData = response.data;
@@ -993,7 +1002,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.status!=1){
+                if(curRow.payStatus!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;

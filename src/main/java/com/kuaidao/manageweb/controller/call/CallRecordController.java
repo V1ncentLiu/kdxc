@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.common.constant.*;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
@@ -37,11 +38,6 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
-import com.kuaidao.common.constant.BusinessLineConstant;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RedisConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -129,9 +125,10 @@ public class CallRecordController {
         Long curOrgId = curLoginUser.getOrgId();
         Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
         if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
-            Integer businessLine = curLoginUser.getBusinessLine();  
+            Integer businessLine = curLoginUser.getBusinessLine();
             isBusinessAcademy  = true;
             request.setAttribute("teleGroupList", getTeleGroupByBusinessLine(businessLine));
+            request.setAttribute("teleDeptList",getTeleDeptByBusinessLine(businessLine));
         }
        //郑州商学院
         if(!isBusinessAcademy) {
@@ -139,7 +136,9 @@ public class CallRecordController {
             if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
-                request.setAttribute("teleGroupList", getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
+                long paramOrgId = Long.parseLong(orgIdList.get(1));
+                request.setAttribute("teleGroupList", getDescenDantTeleGroupByOrgId(paramOrgId));
+                request.setAttribute("teleDeptList",getTeleDeptByOrgId(paramOrgId).getData());
             }
         }
         
@@ -150,7 +149,9 @@ public class CallRecordController {
             if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
-                request.setAttribute("teleGroupList",  getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
+                long paramOrgId = Long.parseLong(orgIdList.get(1));
+                request.setAttribute("teleGroupList",  getDescenDantTeleGroupByOrgId(paramOrgId));
+                request.setAttribute("teleDeptList",getTeleDeptByOrgId(paramOrgId).getData());
             }
         }
        
@@ -161,7 +162,9 @@ public class CallRecordController {
             if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
-                request.setAttribute("teleGroupList",getDescenDantTeleGroupByOrgId(Long.parseLong(orgIdList.get(1))));
+                long paramOrgId = Long.parseLong(orgIdList.get(1));
+                request.setAttribute("teleGroupList",getDescenDantTeleGroupByOrgId(paramOrgId));
+                request.setAttribute("teleDeptList",getTeleDeptByOrgId(paramOrgId).getData());
             }
         }
          
@@ -178,11 +181,16 @@ public class CallRecordController {
         //总裁办文员-查询所有小物种的电销组
         if(RoleCodeEnum.ZCBWY.name().equals(roleCode)){
             request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(BusinessLineConstant.XIAOWUZHONG));
+            request.setAttribute("teleDeptList",getTeleDeptByBusinessLine(BusinessLineConstant.XIAOWUZHONG));
         }
         //监察-查询业务线对应下的电销组
         if(RoleCodeEnum.JC.name().equals(roleCode)){
             request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(curLoginUser.getBusinessLine()));
+            request.setAttribute("teleDeptList",getTeleDeptByBusinessLine(curLoginUser.getBusinessLine()));
         }
+        //电销事业部
+        getTeleDeptList(request,roleCode,orgId,curLoginUser.getBusinessLine());
+
     // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:telCallRecord");
@@ -204,7 +212,57 @@ public class CallRecordController {
 
         return "call/telCallRecord";
     }
-    
+
+    /**
+     * 根据组织机构查询电销事业部
+     * @param orgId
+     */
+    private  JSONResult<List<OrganizationDTO>> getTeleDeptByOrgId(Long orgId){
+        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(orgId);
+        organizationQueryDTO.setOrgType(OrgTypeConstant.DZSYB);
+        return  organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+    }
+    /**
+     * 查询电销事业部
+     * @param request
+     * @param roleCode
+     */
+    private void getTeleDeptList(HttpServletRequest request, String roleCode,Long orgId,Integer businessLine) {
+        if(RoleCodeEnum.GLY.name().equals(roleCode)){
+            OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+            busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            busGroupReqDTO.setOrgType(OrgTypeConstant.DZSYB);
+            request.setAttribute("teleDeptList",organizationFeignClient.queryOrgByParam(busGroupReqDTO).getData());
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setId(orgId);
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            JSONResult<List<OrganizationDTO>> orgJr = organizationFeignClient.listParentsUntilOrg(queryDTO);
+            List<OrganizationDTO> orgList = orgJr.getData();
+            List<OrganizationDTO> teleDeptIdList = new ArrayList<>();
+            for (OrganizationDTO organizationDTO : orgList) {
+                if(OrgTypeConstant.DZSYB.equals(organizationDTO.getOrgType())){
+                    teleDeptIdList.add(organizationDTO);
+                    request.setAttribute("curDeptId",String.valueOf(organizationDTO.getId()));
+                    break;
+                }
+            }
+            request.setAttribute("teleDeptList",teleDeptIdList);
+
+        }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
+            IdEntity idEntity = new IdEntity(String.valueOf(orgId));
+            JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+            if (!JSONResult.SUCCESS.equals(orgJr.getCode()) ||  orgJr.getData() == null) {
+                logger.error("organizationFeignClient.queryOrgById(),req{{}},res{{}}",idEntity,orgJr);
+            }
+            List<OrganizationDTO> orgList = new ArrayList<>();
+            orgList.add(orgJr.getData());
+            request.setAttribute("teleDeptList",orgList);
+            request.setAttribute("curDeptId",String.valueOf(orgId));
+        }
+    }
+
     public List<OrganizationDTO> getDescenDantTeleGroupByOrgId(Long parentOrgId){
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(parentOrgId);
@@ -230,6 +288,26 @@ public class CallRecordController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         if (!JSONResult.SUCCESS.equals(orgGroupJr.getCode())) {
             logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}", queryDTO, orgGroupJr);
+            return new ArrayList<>();
+        }
+        return orgGroupJr.getData();
+    }
+
+
+    /**
+     * 获取该业务下 的所有电销事业部
+     *
+     * @param businessLine
+     * @return
+     */
+    private List<OrganizationRespDTO> getTeleDeptByBusinessLine(Integer businessLine) {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setBusinessLine(businessLine);
+        queryDTO.setOrgType(OrgTypeConstant.DZSYB);
+        JSONResult<List<OrganizationRespDTO>> orgGroupJr =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        if (!JSONResult.SUCCESS.equals(orgGroupJr.getCode())) {
+            logger.error("getTeleDeptByBusinessLine,param{{}},res{{}}", queryDTO, orgGroupJr);
             return new ArrayList<>();
         }
         return orgGroupJr.getData();
@@ -379,6 +457,8 @@ public class CallRecordController {
            if (isBusLimit) {
                //商学院组织机构
                Long selectTeleGroupId = myCallRecordReqDTO.getTeleGroupId();
+               Long selectedTeleDeptId = myCallRecordReqDTO.getTeleDeptId();
+               selectTeleGroupId = selectTeleGroupId != null ? selectTeleGroupId : selectedTeleDeptId;
                if (selectTeleGroupId!=null) {
                    List<UserInfoDTO> userList = getTeleSaleByOrgId(selectTeleGroupId);
                    if (CollectionUtils.isEmpty(userList)) {
@@ -429,6 +509,36 @@ public class CallRecordController {
                                .collect(Collectors.toList());
                    }
                    myCallRecordReqDTO.setAccountIdList(idList);
+               }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   Long reqGroupId = teleGroupId == null ? orgId : teleGroupId;
+                   UserOrgRoleReq req = new UserOrgRoleReq();
+                   req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                   req.setOrgId(reqGroupId);
+                   JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                   if(!JSONResult.SUCCESS.equals(userJr.getCode())){
+                       logger.error("查询电销通话记录-查询创业顾问 param{{}},res{{}}",req,userJr);
+                       return new JSONResult<Map<String, Object>>().fail(userJr.getCode(),userJr.getMsg());
+                   }
+                   List<UserInfoDTO> userData = userJr.getData();
+                   if(CollectionUtils.isEmpty(userData)){
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList= userData.parallelStream().map(user -> user.getId()).collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
+
+               }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   Long teleDeptId = myCallRecordReqDTO.getTeleDeptId();
+                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : orgId;
+                   List<UserInfoDTO> userList = getTeleSaleByOrgId(reqOrgId);
+                   if (CollectionUtils.isEmpty(userList)) {
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
+
                } else {
                    // 其他角色
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();

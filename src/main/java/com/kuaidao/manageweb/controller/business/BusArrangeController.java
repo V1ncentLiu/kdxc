@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -91,7 +93,9 @@ public class BusArrangeController {
         List<OrganizationRespDTO> dxList = getTeleGroupByBusinessLine(user.getBusinessLine());
 
         // 查询项目列表
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.listNoPage(param);
         // 获取省份
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
 

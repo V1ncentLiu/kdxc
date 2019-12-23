@@ -98,6 +98,9 @@ public class BusinessVisitRecordController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
         dto.setId(null);
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         return visitRecordFeignClient.saveVisitRecord(dto);
     }
 
@@ -114,6 +117,9 @@ public class BusinessVisitRecordController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         return visitRecordFeignClient.updateVisitRecord(dto);
     }
 
@@ -219,9 +225,11 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam String visitStatus, @RequestParam String signAuditStatus)
+            @RequestParam String visitStatus, @RequestParam String signAuditStatus,
+        @RequestParam(required = false) Long busGroupId)
             throws Exception {
         request.setAttribute("clueId", clueId);
+        request.setAttribute("busGroupId", busGroupId);
         request.setAttribute("visitStatus", visitStatus);
         request.setAttribute("signAuditStatus", signAuditStatus);
         // 项目
