@@ -114,7 +114,7 @@
                 <el-table-column align="center" prop="cusName" label="客户姓名" width="120"></el-table-column>
                 <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="90"></el-table-column>
                 <el-table-column align="center" prop="accountPhone" label="电销顾问电话" width="100"></el-table-column>
-                <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformTeleProject" width="100"></el-table-column>
                 <el-table-column align="center" prop="tasteProjectId" label="品尝项目" :formatter="transformProject" width="100"></el-table-column>
                 <el-table-column align="center" prop="province" label="开店省份" width="80"></el-table-column>
                 <el-table-column align="center" prop="city" label="开店城市" width="80"></el-table-column>
@@ -249,7 +249,10 @@
 var allSaleList=[[${allSaleList}]];//所有商务总监
 var busSaleList=[[${busSaleList}]];//商务总监
 var saleGroupList=[[${saleGroupList}]];//电销组
-var projectList=[[${projectList}]];//项目
+//可签约的项目
+var projectList=[[${projectList}]];
+//所有项目
+var teleProjectList=[[${teleProjectList}]];
 var provinceList=[[${provinceList}]];//省份
 var optionAddressList=[[${optionAddressList}]];//选址情况
 var partnerList=[[${partnerList}]];//合伙人
@@ -474,6 +477,26 @@ var clueVM = new Vue({
                  console.log(`当前页: ${val}`);
                  this.initTableData(val);
                },
+
+            //品尝项目转换方法
+            transformTeleProject(row, column, cellValue, index) {
+                var text = "";
+                if (teleProjectList && cellValue) {
+                    var array = cellValue.split(",");
+                    for (var i = 0; i < array.length; i++) {
+                        for (var j = 0; j < teleProjectList.length; j++) {
+                            if (array[i] == teleProjectList[j].id) {
+                                if (i == 0) {
+                                    text = teleProjectList[j].projectName;
+                                } else {
+                                    text = text + "," + teleProjectList[j].projectName;
+                                }
+                            }
+                        }
+                    }
+                }
+                return text;
+            },
                //品尝项目转换方法
                transformProject(row, column, cellValue, index) {
             	   var text="";
