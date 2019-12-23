@@ -92,10 +92,12 @@ public class BusPendingAllocationController {
         request.setAttribute("saleGroupList", saleGroupList);
         // 查询所有签约项目
         ProjectInfoPageParam param=new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
-
-        request.setAttribute("projectList", allProject.getData());
+        request.setAttribute("teleProjectList", allProject.getData());
+        //查询可签约的项目
+        param.setIsNotSign(AggregationConstant.NO);
+        JSONResult<List<ProjectInfoDTO>> project = projectInfoFeignClient.queryBySign(param);
+        request.setAttribute("projectList", project.getData());
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
