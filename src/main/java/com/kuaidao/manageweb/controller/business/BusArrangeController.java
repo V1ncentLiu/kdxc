@@ -94,7 +94,6 @@ public class BusArrangeController {
 
         // 查询项目列表
         ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(-1);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.listNoPage(param);
         // 获取省份
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
