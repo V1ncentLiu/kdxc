@@ -1027,7 +1027,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.payStatus!=1){
+              if(curRow.status!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;
