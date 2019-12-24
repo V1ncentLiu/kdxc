@@ -5,17 +5,13 @@
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        .el-table__expand-icon {
-            display: inline-block;
-            width: 20px;
-            line-height: 20px;
-            height: 20px;
-            text-align: center;
-            margin-right: 3px;
+        .el-table__expand-icon {            
             color: red;
+            float: left;
         }
         .el-table__expand-icon .el-icon-arrow-right:before{
             font-weight: bold;
+            font-size: 18px;
         }
         /*.el-table__row--level-1 .el-checkbox{display: none;}*/
     </style>
@@ -863,7 +859,8 @@
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- <script src="https://unpkg.com/element-ui/lib/index.js"></script> -->
+<script th:src="@{/js/common/element-ui-index.js}"></script>
 </body>
 <script th:inline="javascript">
     var busSaleGroupList = [[${busSaleGroupList}]];//搜索商务组
@@ -1622,6 +1619,7 @@
                 this.showVisitAduitDialogVisible = true;
                 var param = {};
                 param.clueId = row.clueId
+                param.busGroupId = row.busGroupId
                 axios.post('/busVisitRecord/queryList', param).then(function (response) {
                     if (null === response || response.data == null || response.data.code != '0') {
                         if (response.data.code != '0') {
@@ -1650,6 +1648,7 @@
                 this.showHisVisitRecordDialog = true;
                 this.activeName = "0"; // 通过名称设置默认显示
                 param.clueId = row.clueId
+                param.busGroupId = row.busGroupId
                 axios.post('/busVisitRecord/queryHisList', param).then(function (response) {
                     // 动态生成tab
                     var tabs = [];
@@ -1671,7 +1670,7 @@
                     if (customerVM.hisDatas[0][0]) {
                         if (response.data[0][0].isVisit == 0) {
                             customerVM.notVisitData = customerVM.hisDatas[0];
-                            this.showTabNotVisitData = true;
+                            customerVM.showTabNotVisitData = true;
                         } else {
                             customerVM.setVisitRecordData(customerVM.hisDatas[0]);
                             customerVM.showTabNotVisitData = false;
