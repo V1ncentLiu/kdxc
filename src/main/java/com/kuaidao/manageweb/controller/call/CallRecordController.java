@@ -530,7 +530,7 @@ public class CallRecordController {
                }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
                    Long teleDeptId = myCallRecordReqDTO.getTeleDeptId();
-                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : orgId;
+                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : null;
                    List<UserInfoDTO> userList = getTeleSaleByOrgId(reqOrgId);
                    if (CollectionUtils.isEmpty(userList)) {
                        return new JSONResult<Map<String, Object>>().success(null);
