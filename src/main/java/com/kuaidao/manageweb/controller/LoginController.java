@@ -162,10 +162,10 @@ public class LoginController {
         request.setAttribute("verificationCodeShow", verificationCodeShow);
 
         String serverName = request.getServerName();
-        if(serverName.equals(merchantServletName)){
+        if (serverName.equals(merchantServletName)) {
             // 汇聚商家端：跳转
             return "merchantLogin/login";
-        }else{
+        } else {
             // 系统默认 汇聚登录页
             return "login/login";
         }
@@ -173,6 +173,7 @@ public class LoginController {
 
     /***
      * 修改密码页
+     * 
      * @return
      */
     @RequestMapping("/login/resetPwd")
@@ -182,6 +183,7 @@ public class LoginController {
 
     /**
      * 商家版修改密码
+     * 
      * @return
      */
     @RequestMapping("/merchantLogin/resetPwd")
@@ -220,7 +222,7 @@ public class LoginController {
         // 判断登陆IP限制
         if (SysConstant.YES.equals(roleInfoDTO.getIsIpLimit())) {
             List<String> ipList = roleInfoDTO.getIpList();
-            logger.info("login_ip_address{{}},ipList{{}}",ipAddr,ipList);
+            logger.info("login_ip_address{{}},ipList{{}}", ipAddr, ipList);
             if (!ipList.contains(ipAddr)) {
                 return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
                         "当前登录系统IP异常，请联系管理员");
@@ -255,7 +257,7 @@ public class LoginController {
             JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
             if (!JSONResult.SUCCESS.equals(result.getCode())) {
                 flag = false;
-                logger.error(result.getMsg());
+                logger.warn(result.getMsg());
                 errorMessage = "验证码错误";
                 loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
             }
