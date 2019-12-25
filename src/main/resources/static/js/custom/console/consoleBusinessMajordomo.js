@@ -899,7 +899,8 @@ var mainDivVM = new Vue({
         passOne(){ //审核通过一条
             var curRow = this.curRow;
             var title = "";
-            var idArr = new Array();
+            var payIdArr = new Array();
+            var signIdArr = new Array();
             var isPass = true;
             if(curRow.payStatus!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
