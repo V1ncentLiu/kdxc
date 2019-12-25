@@ -582,7 +582,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.status!=1){
+                if(curRow.payStatus!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;
@@ -646,7 +646,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.status!=1){
+                if(curRow.payStatus!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;
@@ -828,7 +828,7 @@ var mainDivVM = new Vue({
                     var isPass = true;
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];
-                        if(curRow.status!=1){
+                        if(curRow.payStatus!=1){
                             this.$message({message:'只允许审核待审核的数据',type:'warning'});
                             isPass=false;
                             break;
@@ -885,7 +885,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             var curRow = this.curRow;
             this.multipleSelection4 = [];
-            if(curRow.status!=1){
+            if(curRow.payStatus!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
                 isPass=false;
             }
@@ -899,7 +899,8 @@ var mainDivVM = new Vue({
         passOne(){ //审核通过一条
             var curRow = this.curRow;
             var title = "";
-            var idArr = new Array();
+            var payIdArr = new Array();
+            var signIdArr = new Array();
             var isPass = true;
             if(curRow.payStatus!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
