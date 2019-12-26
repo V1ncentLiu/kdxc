@@ -133,7 +133,7 @@ public class CallRecordController {
        //郑州商学院
         if(!isBusinessAcademy) {
             String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
-            if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
+            if (StringUtils.isNotBlank(zzBusOrgId) &&  containsOrgId(zzBusOrgId,orgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
                 long paramOrgId = Long.parseLong(orgIdList.get(1));
@@ -146,7 +146,7 @@ public class CallRecordController {
         //石家庄商学院
         if(!isBusinessAcademy) {
             String sjzBusOrgId = businessCallrecordLimit.getSjzBusOrgId();
-            if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
+            if (StringUtils.isNotBlank(sjzBusOrgId) && containsOrgId(sjzBusOrgId,curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
                 long paramOrgId = Long.parseLong(orgIdList.get(1));
@@ -159,7 +159,7 @@ public class CallRecordController {
         //合肥商学院 
         if(!isBusinessAcademy) {
             String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
-            if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
+            if (StringUtils.isNotBlank(hfBusOrgId)  && containsOrgId(hfBusOrgId,curOrgId+"")) {
                 isBusinessAcademy  = true;
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
                 long paramOrgId = Long.parseLong(orgIdList.get(1));
@@ -530,9 +530,10 @@ public class CallRecordController {
                }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
                    Long teleDeptId = myCallRecordReqDTO.getTeleDeptId();
-                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : orgId;
+                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : null;
                    List<UserInfoDTO> userList = getTeleSaleByOrgId(reqOrgId);
                    if (CollectionUtils.isEmpty(userList)) {
+                       logger.warn("顾问通话记录-管理员查询所有的电销顾问，返回数据为null，param[{}] ",reqOrgId);
                        return new JSONResult<Map<String, Object>>().success(null);
                    }
                    List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
@@ -567,6 +568,20 @@ public class CallRecordController {
         return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
 
     }
+
+    /**
+     * 检查当前组织机构是否在指定的文件中
+     * @param sourceStr
+     * @param orgId
+     * @return
+     */
+    private boolean containsOrgId(String sourceStr,String orgId){
+        String[] idArr = sourceStr.split(",");
+        if(idArr[0].equals(orgId)){
+            return true;
+        }
+        return false;
+    }
     
     /**
      * 商学院逻辑处理
@@ -587,7 +602,7 @@ public class CallRecordController {
        //郑州商学院 听郑州
         if (!isBusinessAcademy) {
             String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
-            if (StringUtils.isNotBlank(zzBusOrgId) && zzBusOrgId.startsWith(curOrgId+"")) {
+            if (StringUtils.isNotBlank(zzBusOrgId) && containsOrgId(zzBusOrgId,curOrgId+"")) {
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(zzBusOrgId);
                 userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
                 isBusinessAcademy = true;
@@ -597,7 +612,7 @@ public class CallRecordController {
         if (!isBusinessAcademy) {
             //石家庄商学院 听石家庄
             String sjzBusOrgId = businessCallrecordLimit.getSjzBusOrgId();
-            if (StringUtils.isNotBlank(sjzBusOrgId) && sjzBusOrgId.startsWith(curOrgId+"")) {
+            if (StringUtils.isNotBlank(sjzBusOrgId) && containsOrgId(sjzBusOrgId,curOrgId+"")) {
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(sjzBusOrgId);
                 userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
                 isBusinessAcademy = true;
@@ -607,7 +622,7 @@ public class CallRecordController {
         if (!isBusinessAcademy) {
             //合肥商学院 听合肥的
              String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
-            if (StringUtils.isNotBlank(hfBusOrgId) && hfBusOrgId.startsWith(curOrgId+"")) {
+            if (StringUtils.isNotBlank(hfBusOrgId) &&  containsOrgId(hfBusOrgId,curOrgId+"")) {
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
                 userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
                 isBusinessAcademy = true;
