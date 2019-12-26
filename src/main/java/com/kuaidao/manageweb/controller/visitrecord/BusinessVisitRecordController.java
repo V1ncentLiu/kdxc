@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -269,7 +270,10 @@ public class BusinessVisitRecordController {
                 data.setNotSignReason(null);
                 data.setIsSign(1);
                 data.setVisitPeopleNum(null);
-                return new JSONResult<BusVisitRecordRespDTO>().success(data);
+                data.setVistitStoreType(null);
+                data.setProjectId(null);
+                BeanUtils.copyProperties(data,recordRespDTO);
+             //   return new JSONResult<BusVisitRecordRespDTO>().success(data);
             }
         }
 
