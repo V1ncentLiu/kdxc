@@ -122,6 +122,13 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="邀约状态:">
+                        <el-select v-model="appiontmentSearchForm.delFalg" placeholder="邀约状态" clearable>
+                            <el-option v-for="item in delFalgArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -487,6 +494,7 @@
       btnDisabled: false,
       isDXZDisabled:false,
       appiontmentSearchForm: {
+        delFalg:"",
         startTime: '',
         endTime: '',
         teleDeptId: '',
@@ -575,6 +583,7 @@
         ]
       },
       isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+      delFalgArr: [{value: '-1', label: '全部'}, {value: '0', label: '正常'}, {value: '1', label: '已删除'}, {value: '2', label: '取消'}],
       isSignOptions: [{
         value: 0,
         name: "未签约"
@@ -609,6 +618,19 @@
         }
         return text;
       },
+        transDelFlag(row) {
+            var text="";
+            if(row.delFlag ==0){
+                text = "正常";
+            }else if(row.delFlag ==1){
+                text = "已删除";
+            }else if(row.delFlag ==2){
+                text = "取消";
+            }
+            return text;
+        },
+
+
       searchTable() {
         var param ={};
 
@@ -639,6 +661,7 @@
         param.isTailMoney = this.appiontmentSearchForm.isTailMoney;
         param.category = this.appiontmentSearchForm.category;
         param.searchWord = this.appiontmentSearchForm.searchWord;
+        param.delFalg = this.appiontmentSearchForm.delFalg;
         console.info(param);
         axios.post('/clue/appiontment/list', param)
         .then(function (response) {
@@ -808,7 +831,7 @@
         }else if(cellValue==1){
           text="已删除"
         }else if(cellValue==2){
-          text="已取消"
+          text="取消"
         }
         return text;
       },
