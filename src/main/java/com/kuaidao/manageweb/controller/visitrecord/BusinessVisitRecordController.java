@@ -299,6 +299,7 @@ public class BusinessVisitRecordController {
                 recordRespDTO.setSignDistrict((String) data.get("signDistrict"));
                 recordRespDTO.setVisitCity((String) data.get("city"));
                 recordRespDTO.setVisitPeopleNum((Integer) data.get("cusNum"));
+                recordRespDTO.setVistitStoreType((String) data.get("shortType"));
                 recordRespDTO.setVisitType(1);
                 recordRespDTO.setIsSign(1);
             }
