@@ -341,8 +341,8 @@ public class BusinessSignController {
       if(data!=null){
         signDTO.setIdCard(data.getIdCard());
         signDTO.setSignCompanyId(data.getSignCompanyId());
-        //Long signProjectId = data.getSignProjectId();
-        signDTO.setSignProjectId(null);
+        Long signProjectId = data.getSignProjectId();
+        signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
         signDTO.setSignProvince(data.getSignProvince());
         signDTO.setSignCity(data.getSignCity());
         signDTO.setSignDictrict(data.getSignDictrict());
@@ -361,12 +361,12 @@ public class BusinessSignController {
       if (data != null) {
         if(signFlag){
           signDTO.setSignCompanyId(data.getCompanyid());
-          //Long signProjectId = data.getProjectId();
-          signDTO.setSignProjectId(null);
+          Long signProjectId = data.getProjectId();
+          signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
           signDTO.setSignProvince(data.getSignProvince());
           signDTO.setSignCity(data.getSignCity());
           signDTO.setSignDictrict(data.getSignDistrict());
-          signDTO.setSignShopType("");
+          signDTO.setSignShopType(data.getVistitStoreType());
           signDTO.setCustomerName(data.getCustomerName());
           signDTO.setPhone(linkPhone);
           signDTO.setSignType(1);
@@ -387,11 +387,6 @@ public class BusinessSignController {
             if (split.length > 0 && !"".equals(split[0])) {
               Long signProjectId =Long.valueOf(split[0]);
               signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
-              signDTO.setSignShopType(getProjectSignShortType(proJson,signProjectId));
-              //到访记录签约店型
-              if(StringUtils.isNotBlank(getProjectSignShortType(proJson,signProjectId))){
-                signDTO.setVisitShopType(Integer.parseInt(getProjectSignShortType(proJson,signProjectId)));
-              }
             }
           }
 
@@ -405,20 +400,6 @@ public class BusinessSignController {
           signDTO.setPayType("1");
           if(data.get("cusNum")!=null){ // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
             signDTO.setVisitNum((Integer)data.get("cusNum"));// 来访人数
-          }
-        }else {
-          String tasteProjectId = (String) data.get("tasteProjectId");
-          if(tasteProjectId!=null){
-            String[] split = tasteProjectId.split(",");
-            if (split.length > 0 && !"".equals(split[0])) {
-              Long signProjectId =Long.valueOf(split[0]);
-              signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
-              signDTO.setSignShopType(getProjectSignShortType(proJson,signProjectId));
-              //到访记录签约店型
-              if(StringUtils.isNotBlank(getProjectSignShortType(proJson,signProjectId))){
-                signDTO.setVisitShopType(Integer.parseInt(getProjectSignShortType(proJson,signProjectId)));
-              }
-            }
           }
         }
         if(data.get("city")!=null){
@@ -464,22 +445,7 @@ public class BusinessSignController {
     }
     return res;
   }
-  private String getProjectSignShortType( JSONResult<List<ProjectInfoDTO>> proJson , Long signProjectId){
 
-    String shortType ="";
-    if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-      List<ProjectInfoDTO> data1 = proJson.getData();
-      for(ProjectInfoDTO projectInfo:data1){
-        if(projectInfo.getId().equals(signProjectId)){
-          if(StringUtils.isNotBlank(projectInfo.getShopType())){
-            shortType = projectInfo.getShopType().split(",")[0];
-          }
-          break;
-        }
-      }
-    }
-    return shortType;
-  }
 
   /**
    * 添加签约单时，到访记录回显
