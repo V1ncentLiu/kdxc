@@ -760,6 +760,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             }else{
                 baseQueryDto.setOrgIdList(Arrays.asList(-1l));
             }
+            return ;
         }else{
             //other 没权限
             queryDTO.setId(curLoginUser.getOrgId());

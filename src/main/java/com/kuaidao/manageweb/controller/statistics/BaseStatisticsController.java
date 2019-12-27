@@ -168,6 +168,7 @@ public class BaseStatisticsController {
             List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
             List<OrganizationRespDTO> list=queryOrgByUserAuth(authList,OrgTypeConstant.DZSYB);
             request.setAttribute("deptList",list);
+            return ;
         }else{
             //other 没权限
             queryDTO.setId(-1l);
