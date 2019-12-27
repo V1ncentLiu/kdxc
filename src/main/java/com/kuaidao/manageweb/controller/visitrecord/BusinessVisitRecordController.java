@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +62,31 @@ public class BusinessVisitRecordController {
     private CompanyInfoFeignClient companyInfoFeignClient;
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
+
+
+    @PostMapping("/getShortTypeByProjectId")
+    @ResponseBody
+    public JSONResult<List<DictionaryItemRespDTO>> getShortTypeByProjectId(@RequestBody IdEntityLong projectId) {
+        List<DictionaryItemRespDTO> shopList = new ArrayList<>();
+        JSONResult<ProjectInfoDTO>  projectInfoDTOJSONResult = projectInfoFeignClient.get(projectId);
+        if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode())){
+            ProjectInfoDTO projectInfoDTO = projectInfoDTOJSONResult.getData();
+            if(projectInfoDTO != null && StringUtils.isNotBlank(projectInfoDTO.getShopType())){
+                String type1 = projectInfoDTO.getShopType();
+                DictionaryItemQueryDTO queryDTO = new DictionaryItemQueryDTO();
+                queryDTO.setGroupCode("vistitStoreType");
+                JSONResult<List<DictionaryItemRespDTO>> result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+                if (JSONResult.SUCCESS.equals(result.getCode())) {
+                    List<DictionaryItemRespDTO> dictionaryItemRespDTOList = result.getData();
+                    shopList = dictionaryItemRespDTOList.stream().filter(a->type1.contains(a.getValue())).collect(Collectors.toList());
+                }
+            }
+        }
+        return new JSONResult<List<DictionaryItemRespDTO>>().success(shopList);
+    }
 
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request, @RequestParam String clueId) {
@@ -303,7 +333,11 @@ public class BusinessVisitRecordController {
                 recordRespDTO.setIsSign(1);
             }
         }
-
+        //getShortTypeByProjectId
+        IdEntityLong projectId = new IdEntityLong();
+        projectId.setId(recordRespDTO.getProjectId());
+        JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
+        recordRespDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
         recordRespDTO.setRebutReason(null);
         recordRespDTO.setRebutTime(null);
         recordRespDTO.setNotSignReason(null);
