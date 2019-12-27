@@ -24,8 +24,10 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import com.rabbitmq.http.client.domain.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,6 +165,11 @@ public class BaseStatisticsController {
             return ;
         }else if(RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.DXZC.name().equals(roleCode)){
             //管理员可以查看全部
+        }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+            //该角色下 查询 授权的业务线数据
+            List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
+            List<OrganizationRespDTO> list=queryOrgByUserAuth(authList,OrgTypeConstant.DZSYB);
+            request.setAttribute("deptList",list);
         }else{
             //other 没权限
             queryDTO.setId(-1l);
@@ -398,6 +405,28 @@ public class BaseStatisticsController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("areaList",queryOrgByParam.getData());
         request.setAttribute("roleCode",roleCode);
+    }
+
+    /**
+     * 根据授权，和组织机构类型查询组织机构
+     * @param authList
+     * @param ortType
+     * @return
+     */
+    protected List<OrganizationRespDTO> queryOrgByUserAuth(List<UserDataAuthReq> authList,Integer ortType){
+        List<OrganizationRespDTO> list=new ArrayList<>();
+        if(null!=authList && authList.size()>0){
+            for(UserDataAuthReq auth:authList){
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setOrgType(ortType);
+                orgDto.setBusinessLine(auth.getBusinessLine());
+                JSONResult<List<OrganizationRespDTO>> json= organizationFeignClient.queryOrgByParam(orgDto);
+                if("0".equals(json.getCode()) && null!=json.getData()){
+                    list.addAll(json.getData());
+                }
+            }
+        }
+        return list;
     }
 
 }
