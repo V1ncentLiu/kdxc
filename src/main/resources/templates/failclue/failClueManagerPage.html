@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+	<title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="failClueManagement" class="failClueManagement mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>失败资源管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+    	<shiro:hasPermission name="aggregation:failClueManager:push">
+        	<el-button type="success" @click="deleteFun"  :disabled="isPush"><i class="el-icon"></i>重新推送</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="状态:">
+                    <el-select v-model="form.failClueStatus" placeholder="状态">
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>                 
+                <el-form-item label="手机号:">
+                    <el-input v-model="form.dianhua" placeholder="手机号"></el-input>
+                </el-form-item>
+                <el-form-item label="推送id:">
+                    <el-input v-model="form.pushId" placeholder="推送Id"></el-input>
+                </el-form-item>
+                <el-form-item label="创建时间:">
+                    <el-date-picker
+                        v-model="form.createTimeStart"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.createTimeEnd"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+	                <el-form-item label="sessionid:">
+	                    <el-input v-model="form.sessionid" placeholder="sessionid"></el-input>
+	                </el-form-item>
+	                <el-form-item label="pvid:">
+	                    <el-input v-model="form.pvid" placeholder="pvid"></el-input>
+	                </el-form-item>
+                   
+                </el-row>
+                <div class="mainSearchBtnBox"> 
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button>  -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div> 
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @row-click="clickRow"
+                @selection-change="handleSelectionChange" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="pushId" label="推送id" width="230"></el-table-column>
+                <el-table-column align="center" prop="xingming" label="客户姓名"  width="100"></el-table-column>
+                <el-table-column align="center" prop="dianhua" label="客户电话"  width="100"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="keywords" label="搜索词"  width="100"></el-table-column>
+                <el-table-column align="center" prop="category" label="资源类别"  width="100"></el-table-column>
+                <el-table-column align="center" prop="rukou" label="资源类型"  width="100"></el-table-column>
+                <el-table-column align="center" prop="sessionid" label="sessionid"  width="100"></el-table-column>
+                <el-table-column align="center" prop="pvid" label="pvid"  width="100"></el-table-column>
+                <el-table-column align="center" prop="wechat" label="微信"  width="100"></el-table-column>
+                <el-table-column align="center" prop="qq" label="qq"  width="100"></el-table-column>
+                <el-table-column align="center" prop="email" label="邮箱"  width="100"></el-table-column>
+                <el-table-column align="center" prop="phone2" label="客户电话2"  width="100"></el-table-column>
+                <el-table-column align="center" prop="phone3" label="客户电话3"  width="100"></el-table-column>
+                <!-- <el-table-column align="center" prop="failClueStatus" label="状态" width="80" :formatter="transformStatus"></el-table-column> -->
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var ocmVM = new Vue({
+        el: '#failClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                isPush:false,
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+                form: {
+                	createTimeStart:'',
+                	createTimeEnd:'',
+                    failClueStatus:1,
+                    sessionid:'',
+                    pvid:'',
+                    pushId:'',
+                    dianhua:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],
+                statusOptions: [{
+                    value: 1,
+                    name: '未重新推送'
+                }, {
+                    value: 2,
+                    name: '重新推送成功'
+                }, {
+                    value: 3,
+                    name: '重新推送失败'
+                }],
+                storeForm: {
+                	createTimeStart:'',
+                	createTimeEnd:'',
+                    failClueStatus:1,
+                    sessionid:'',
+                    pvid:'',
+                    pushId:'',
+                    dianhua:''
+                },
+                storeId: '',
+                scrollTop: 0,
+
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            deleteFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行推送',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+             	   var curRow = rows[i];
+                   rowIds.push(curRow.id);
+                }
+             this.$confirm('确定要重新推送吗？', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //删除
+             	var param  = {idList:rowIds};
+                 axios.post('/failClue/push',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'推送成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            searchTable() {
+            	var startTime=this.form.createTimeStart;
+                var endTime=this.form.createTimeEnd;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/failClue/list', param)
+                .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                        ocmVM.statusChange();
+                        // 取出存储的id
+                        if(!ocmVM.paginationShow){
+                            if(ocmVM.storeId){
+                                ocmVM.$nextTick(function(){
+                                    var storage = [];
+                                    ocmVM.dataTable.forEach(function(item, index){
+                                        if(item.id === ocmVM.storeId ){
+                                            storage.push(ocmVM.dataTable[index]);
+                                        }
+                                    })
+                                    ocmVM.toggleSelection(storage);
+                                    ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                                })
+                            }
+                        }else{
+                            ocmVM.removeSessionStore ("failClueManagerStoreForm");
+                            ocmVM.removeSessionStore ("failClueManagerOtherVal");
+                        }
+                        ocmVM.paginationShow = true;
+                        ocmVM.storeForm = ocmVM.form;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            toogleClick(){
+                if(this.isShow){
+                  this.isShow=false
+                }else{
+                  this.isShow=true
+                }
+            },
+            statusChange(){
+            	var status=this.form.failClueStatus;
+                if(status==1||status==3){
+                  this.isPush=false;
+                }else{
+                  this.isPush=true;
+                }
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
+        },
+        created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("failClueManagerStoreForm");
+                var otherVal = this.getSessionStore("failClueManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+			if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('failClueManagement').style.display = 'block';
+        }
+    })
+</script>
+</html>

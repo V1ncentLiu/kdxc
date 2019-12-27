@@ -14,12 +14,12 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>签约记录</el-breadcrumb-item>
+        <el-breadcrumb-item>签约审核</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
-            <el-tab-pane label="待审核签约记录" name="first"></el-tab-pane>
-            <el-tab-pane label="已审核签约记录" name="second"></el-tab-pane>
+            <el-tab-pane label="待审核签约" name="first"></el-tab-pane>
+            <el-tab-pane label="已审核签约" name="second"></el-tab-pane>
         </el-tabs>
         <shiro:hasPermission name=" aggregation:signRecord:reject">
             <el-button type="danger" @click="OpenRejectSignRecordDialog" v-if="btnIsShow">驳回</el-button>
@@ -162,12 +162,13 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>                
-                <el-table-column align="center" prop="status" label="签约单状态" width="90">
+                <el-table-column align="center" prop="payStatus" label="付款明细状态" width="90">
+
                     <template slot-scope="scope">
-                        <el-button v-if="scope.row.status===0" size="mini" @click="reasonClick(scope.row)" type="text">
+                        <el-button v-if="scope.row.payStatus==0" size="mini" @click="reasonClick(scope.row)" type="text">
                             <span style="color: #555555">驳回&nbsp;</span><span style="color: blue">驳回原因</span>
                         </el-button>
-                        <span v-else-if="scope.row.status===1">
+                        <span v-else-if="scope.row.payStatus===1">
                             待审核 <span v-if="scope.row.payType ==1">
                                       (全款)
                                    </span>
@@ -181,7 +182,7 @@
                                        (尾款)
                                    </span>
                         </span>
-                        <span v-else-if="scope.row.status===2 && scope.row.signStatus !=4 && scope.row.signStatus !=6">
+                        <span v-else-if="scope.row.payStatus===2 && scope.row.signStatus !=4 && scope.row.signStatus !=6">
                              有效  <span v-if="scope.row.payType ==1">
                                      (全款)
                                    </span>
@@ -196,7 +197,7 @@
                                    </span>
                         </span>
                         <el-button
-                                v-else-if="scope.row.status===2 && (scope.row.signStatus === 4 || scope.row.signStatus === 6)"
+                                v-else-if="scope.row.payStatus===2 && (scope.row.signStatus === 4 || scope.row.signStatus === 6)"
                                 size="mini" @click="refundClick(scope.row)" type="text">
                             <span style="color: #555555">已退款&nbsp;</span><span style="color: red">退款信息</span>
                         </el-button>
@@ -583,28 +584,28 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var param = {};
-                        debugger;
                         var rows = this.multipleSelection;
                         if (rows.length == 0) {
                             rows.push(this.curRow);
                         }
-                        var idArr = new Array();
+                        var payIdArr = new Array();
+                        var signIdArr = new Array();
                         var isPass = true;
                         for (var i = 0; i < rows.length; i++) {
                             var curRow = rows[i];
-                            if (curRow.status != 1) {
+                            if (curRow.payStatus != 1) {
                                 this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                                 isPass = false;
                                 break;
                             }
-                            idArr.push(curRow.id);
+                            signIdArr.push(curRow.id);
+                            payIdArr.push(curRow.payDetailId)
                         }
                         if (!isPass) {
                             return;
                         }
-
-
-                        param.idList = idArr;
+                        param.idList = payIdArr;
+                        param.signIdList = signIdArr;
                         param.rebutReason = this.dialogForm.reason;
                         this.btnDisabled = true; 
                         axios.post('/sign/signRecord/rejectSignOrder', param)
@@ -647,20 +648,20 @@
                 this.paymentDetailsShow4 = false;
                 this.visitRecordShow = false;
                 this.curRow = row;
-                if (row.status == 1) {
+                if (row.payStatus == 1) {
                     this.showbutton = true;
                 } else {
                     this.showbutton = false;
                 }
                 // row.signNo;
                 var param = {};
-                param.idList = [row.id];
-                axios.post('/sign/signRecord/listPayDetailNoPage', param)
+                param.id = row.payDetailId;
+                param.signId = row.id;
+                axios.post('/sign/signRecord/findPayDetailById', param)
                     .then(function (response) {
                         var resData = response.data;
                         console.log(resData.data)
                         if (resData.code == '0') {
-                            debugger;
                             var payDetailData = resData.data;
                             if (payDetailData[1]) {
                                 signRecordVM.paymentDetailsShow = true;
@@ -731,17 +732,19 @@
                     return;
                 }
                 var title = "";
-                var idArr = new Array();
+                var payIdArr = new Array();
+                var signIdArr = new Array();
                 var isPass = true;
                 for (var i = 0; i < rows.length; i++) {
                     var curRow = rows[i];
-                    if (curRow.status != 1) {
+                    if (curRow.payStatus != 1) {
                         this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                         isPass = false;
                         break;
                     }
                     title += "【" + curRow.serialNum + "" + curRow.customerName + "】 ";
-                    idArr.push(curRow.id);
+                    signIdArr.push(curRow.id);
+                    payIdArr.push(curRow.payDetailId)
                 }
                 if (!isPass) {
                     return;
@@ -753,8 +756,8 @@
                     type: 'warning'
                 }).then(() => {
                     var param = {};
-                    param.idList = idArr;
-
+                    param.idList = payIdArr;
+                    param.signIdList = signIdArr;
                     axios.post('/sign/signRecord/passAuditSignOrder', param)
                         .then(function (response) {
                             var resData = response.data;
@@ -787,13 +790,15 @@
             passOne() { //审核通过一条
                 var curRow = this.curRow;
                 var title = "";
-                var idArr = new Array();
+                var payIdArr = new Array();
+                var signIdArr = new Array();
                 var isPass = true;
-                if (curRow.status != 1) {
+                if (curRow.payStatus != 1) {
                     this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                     isPass = false;
                 } else {
-                    idArr.push(curRow.id)
+                    payIdArr.push(curRow.payDetailId);
+                    signIdArr.push(curRow.id);
                 }
                 this.$confirm('确定要将此 ' + title + ' 签约单审核通过吗？', '提示', {
                     confirmButtonText: '确定',
@@ -801,7 +806,8 @@
                     type: 'warning'
                 }).then(() => {
                     var param = {};
-                    param.idList = idArr;
+                    param.idList = payIdArr;
+                    param.signIdList = signIdArr;
                     axios.post('/sign/signRecord/passAuditSignOrder', param)
                         .then(function (response) {
                             var resData = response.data;
@@ -884,7 +890,7 @@
                 var isPass = true;
                 for (var i = 0; i < rows.length; i++) {
                     var curRow = rows[i];
-                    if (curRow.status != 1) {
+                    if (curRow.payStatus != 1) {
                         this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                         isPass = false;
                         break;
@@ -905,7 +911,7 @@
                 var isPass = true;
                 var curRow = this.curRow;
                 this.multipleSelection = [];
-                if (curRow.status != 1) {
+                if (curRow.payStatus != 1) {
                     this.$message({message: '只允许审核待审核的数据', type: 'warning'});
                     isPass = false;
                 }

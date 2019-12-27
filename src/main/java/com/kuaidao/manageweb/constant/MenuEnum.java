@@ -18,11 +18,11 @@ public enum MenuEnum {
     /**
      * 电销管理 -业务设置
      */
-    TR_CLIENT_MANAGEMENT("天润坐席管理"), KETIAN_CLIENT_MANAGEMENT("科天坐席管理"), HELI_CLIENT_MANAGEMENT("合力坐席管理"), QIMO_CLIENT_MANAGEMENT("七陌坐席管理"), CLUE_CHARGE_MANAGEMENT("资源资费管理"), COMPANY_MANAGEMENT("公司管理"), PROJECT_MANAGEMENT("项目管理"), ABNORMALUSER_MANAGENT("标记异常客户"), DEPTCALLSET_MANAGENT("部门呼叫设置"), ASSIGNRULE_INFO("信息流分配规则"), ASSIGNRULE_TELE("电销分配规则"), APPIONTMENT_MANAGEMENT("预约来访记录"), PENDING_ALLOCATION_CLUE("待分配资源"), BUS_ALLOCATION_CLUE("待分配来访记录"), BUS_CUSTOMER_MANAGER("商务客户管理"), FINANCELAYOUT("财务电销布局"), TM_MY_CUSTOMER("我的客户(电销)"), BUS_MY_CUSTOMER("我的客户(商务)"), TRUCKING_ORDER_PAGE("邀约来访派车单"), TELE_CUSTOMER_MANAGER("电销客户管理"), CUSTOMER_INFO("客户详情"),
+    TR_CLIENT_MANAGEMENT("天润坐席管理"), KETIAN_CLIENT_MANAGEMENT("科天坐席管理"), HELI_CLIENT_MANAGEMENT("合力坐席管理"), QIMO_CLIENT_MANAGEMENT("七陌坐席管理"), CLUE_CHARGE_MANAGEMENT("资源资费管理"), COMPANY_MANAGEMENT("公司管理"), PROJECT_MANAGEMENT("项目管理"), ABNORMALUSER_MANAGENT("标记异常客户"), DEPTCALLSET_MANAGENT("部门呼叫设置"), ASSIGNRULE_INFO("信息流分配规则"), ASSIGNRULE_TELE("电销分配规则"), APPIONTMENT_MANAGEMENT("预约来访记录"), PENDING_ALLOCATION_CLUE("待分配资源"), BUS_ALLOCATION_CLUE("待分配来访记录"), BUS_CUSTOMER_MANAGER("商务客户管理"), FINANCELAYOUT("财务电销布局"), TM_MY_CUSTOMER("我的客户(电销)"), BUS_MY_CUSTOMER("我的客户(商务)"), TRUCKING_ORDER_PAGE("邀约来访派车单"), TELE_CUSTOMER_MANAGER("电销客户管理"), CUSTOMER_INFO("客户详情"), TELE_CUSTOMER_APPLY("在线申请表"),
     /**
      * 电销管理 - 电销中心
      */
-    TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), OPT_RULE_MANAGEMENT("优化分配规则管理"), MERCHANT_RULE_MANAGEMENT("商家规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
+    TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), FAIL_CLUE_MANAGEMENT("失败资源列表"), OPT_RULE_MANAGEMENT("优化分配规则管理"), MERCHANT_RULE_MANAGEMENT("商家规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
     /**
      * 总裁办
      *
@@ -51,10 +51,14 @@ public enum MenuEnum {
     /**
      * 商家端
      */
-    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"),CLUE_MANAGEMENT("资源管理列表"),
-    CONSUME_RECORD("消费记录（管理端）"),MERCHANT_OUT_CALL("商家外呼"),
+    AUDIT_PASS("资源需求申请审核通过"), AUDIT_REJECT("资源需求申请审核驳回"), CLUE_MANAGEMENT("资源管理列表"), CONSUME_RECORD("消费记录（管理端）"), MERCHANT_OUT_CALL("商家外呼"),
 
-    OUTBOUND_PACKAGE("服务费用设置"),MERCHANT_CLIENT_LOGIN("坐席自动登录"),
+    OUTBOUND_PACKAGE("服务费用设置"), MERCHANT_CLIENT_LOGIN("坐席自动登录"),
+    /**
+     * 付款明细修改
+     */
+    PAYANDSIGN_CHANGE("签约来访"),
+
     /**
      * 报表（商务模块）
      */

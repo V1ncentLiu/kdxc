@@ -101,7 +101,6 @@ public class BaseStatisticsController {
             }
             return list;
         }catch (Exception e){
-            e.printStackTrace();
             logger.error(e.getMessage(),e);
         }
         return new JSONResult<List<OrganizationRespDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"系统繁忙，请稍后再试");
@@ -120,7 +119,6 @@ public class BaseStatisticsController {
                     dwOrganizationFeignClient.getDwOrganization(dto);
             return list;
         }catch (Exception e){
-            e.printStackTrace();
             logger.error(e.getMessage(),e);
         }
         return new JSONResult<List<OrganizationRespDTO>>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(),"系统繁忙，请稍后再试");
@@ -161,7 +159,7 @@ public class BaseStatisticsController {
                 request.setAttribute("deptId",jsonResult.getData().getParentId()+"");
             }
             return ;
-        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
+        }else if(RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.DXZC.name().equals(roleCode)){
             //管理员可以查看全部
         }else{
             //other 没权限
@@ -231,7 +229,7 @@ public class BaseStatisticsController {
                     request.setAttribute("areaId",parentId+"");
                 }
             }
-          return ;
+            return ;
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员查询全部
         }else{

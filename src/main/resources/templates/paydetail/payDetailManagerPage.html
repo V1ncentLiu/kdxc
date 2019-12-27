@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+</head>
+<body>
+<div id="payDetailManage" class="payDetailManage mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>付款信息</el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <el-row class="marginB20">
+        <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="payDetailSearchForm" class="demo-form-inline mainSearchForm" ref="payDetailSearchForm">
+            	<el-form-item label="签约项目:" class="formItem"  prop="signProjectId">
+                        <el-select v-model="payDetailSearchForm.signProjectId" clearable placeholder="签约项目" filterable>
+                            <el-option
+                                v-for="item in projectOptions"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                <el-form-item label="商务小组:" class="formItem"  prop="busGroupId">
+                    <el-select v-model="payDetailSearchForm.busGroupId" clearable @change="getBusSaleList" placeholder="商务小组" filterable >
+                        <el-option
+                            v-for="item in busGroupOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="商务经理:" class="formItem"  prop="busSaleId">
+                    <el-select v-model="payDetailSearchForm.busSaleId" clearable placeholder="商务经理" filterable>
+                        <el-option
+                            v-for="item in busSaleOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="签约时间:">
+                    <el-date-picker v-model="payDetailSearchForm.signCreateTimeStart" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="payDetailSearchForm.signCreateTimeEnd" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+            <el-row v-show="isShow">
+                    
+                <el-form-item label="电销组:" class="formItem"  prop="teleGroupId">
+                    <el-select v-model="payDetailSearchForm.teleGroupId" clearable @change="getSaleList" placeholder="电销组" filterable >
+                        <el-option
+                            v-for="item in teleGroupOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:" class="formItem"  prop="teleSaleId">
+                    <el-select v-model="payDetailSearchForm.teleSaleId" clearable placeholder="电销顾问" filterable>
+                        <el-option
+                            v-for="item in teleSaleOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="付款类型:" class="formItem"  prop="payType">
+                    <el-select v-model="payDetailSearchForm.payType" clearable placeholder="付款类型" filterable>
+                        <el-option
+                            v-for="item in payTypeOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="付款时间:">
+                    <el-date-picker v-model="payDetailSearchForm.payTimeStart" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="payDetailSearchForm.payTimeEnd" format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="客户姓名:" class="formItem" prop="customerName">
+                    <el-input v-model="payDetailSearchForm.customerName" placeholder="请输入客户姓名" class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="签约单编号:" class="formItem" prop="signNo">
+                    <el-input v-model="payDetailSearchForm.signNo" placeholder="请输入签约单编号" class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="客户联系方式:" class="formItem" prop="phone">
+                    <el-input v-model="payDetailSearchForm.phone" placeholder="请输入客户联系方式" class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="资源ID:">
+                    <el-input v-model="payDetailSearchForm.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                </el-form-item>
+            </el-row>
+            <div class="mainSearchBtnBox">
+                <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+            </div>
+        </el-form>
+    </div>
+    <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+                       style="width: 100%"  :data="dataTable" >
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center"  v-for="(item,key,index) in tableColums"  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width">
+                </el-table-column>
+
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+
+    <el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
+        <el-form :model="form">
+            <el-form-item label="" prop="type">
+                <el-checkbox-group v-model="form.type">
+                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        {{item.displayName}}
+                    </el-checkbox>
+                </el-checkbox-group>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="confirmColumn">确 定</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+  var projectList=[[${projectList}]];//签约项目
+  var shopTypeList=[[${shopTypeList}]];//店铺类型
+  var giveTypeList=[[${giveTypeList}]];//赠送类型
+  var teleGroupList=[[${teleGroupList}]];//电销组
+  var teleSaleList=[[${teleSaleList}]];//电销顾问
+  var busGroupList=[[${busGroupList}]];//商务组
+  var busSaleList=[[${busSaleList}]];//商务经理
+  var fieldList=[[${fieldList}]];//自定义字段
+  var userFieldList=[[${userFieldList}]];//用户自定义字段
+  //var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+  var payDetailVM = new Vue({
+    el: '#payDetailManage',
+    data: {
+      paginationShow: false,
+      isShow:false,
+      btnDisabled: false,
+      payDetailSearchForm: {
+        signProjectId: '',
+        payTimeStart: '',
+        payTimeEnd: '',
+        signCreateTimeStart: '',
+        signCreateTimeEnd: '',
+        busGroupId:'',
+        busSaleId: '',
+        teleGroupId:'',
+        teleSaleId: '',
+        payType: '',
+        searchWord:'',
+        customerName: '',
+        phone:'',
+        clueId:'',
+        signNo:"",
+      },
+      dataTable:[],
+      loading: true,
+      allTableColums:[],
+      tableColums:[],
+      dialogFormVisible: false,
+      cancelFormVisible:false,
+      dailogTitleType:'',
+      form: {
+        type: [],
+      },
+      projectOptions:projectList,
+      busGroupOptions:busGroupList,
+      busSaleOptions:busSaleList,
+      teleGroupOptions:teleGroupList,
+      teleSaleOptions:teleSaleList,
+      payTypeOptions: [{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
+      payDetailFormVisible: false,
+      recordDialog:false,
+      repeatPhonesDialog:false,
+      pager:{
+        total: 0,
+        currentPage: 1,
+        pageSize: 20,
+      },
+      multipleSelection:[],
+      formLabelWidth: '120px',
+      formLabelWidth1: '150px',
+      storeForm: {
+    	  signProjectId: '',
+          payTimeStart: '',
+          payTimeEnd: '',
+          signCreateTimeStart: '',
+          signCreateTimeEnd: '',
+          busGroupId:'',
+          busSaleId: '',
+          teleGroupId:'',
+          teleSaleId: '',
+          payType: '',
+          searchWord:'',
+          customerName: '',
+          phone:'',
+          clueId:'',
+          signNo:"",
+      },
+      storeId: '',
+      scrollTop: 0,
+    },
+    methods: {
+      searchTable() {
+        var param ={};
+
+        var signCreateTimeStart = this.payDetailSearchForm.signCreateTimeStart;
+        var signCreateTimeEnd = this.payDetailSearchForm.signCreateTimeEnd;
+        if(signCreateTimeStart&&signCreateTimeEnd&&signCreateTimeStart> signCreateTimeEnd){
+          this.$message({
+            message: '开始时间不能大于结束时间',
+            type: 'warning'
+          });
+          return;
+        }
+        param.signCreateTimeStart = signCreateTimeStart;
+        param.signCreateTimeEnd = signCreateTimeEnd;
+        var payTimeStart = this.payDetailSearchForm.payTimeStart;
+        var payTimeEnd = this.payDetailSearchForm.payTimeEnd;
+        if(payTimeStart&&payTimeEnd&&payTimeStart> payTimeEnd){
+          this.$message({
+            message: '开始时间不能大于结束时间',
+            type: 'warning'
+          });
+          return;
+        }
+        param.payTimeStart = payTimeStart;
+        param.payTimeEnd = payTimeEnd;
+        param.pageSize = this.pager.pageSize;
+        param.pageNum = this.pager.currentPage;
+        param.teleGroupId = this.payDetailSearchForm.teleGroupId;
+        param.teleSaleId = this.payDetailSearchForm.teleSaleId;
+        param.busGroupId = this.payDetailSearchForm.busGroupId;
+        param.busSaleId = this.payDetailSearchForm.busSaleId;
+        param.signProjectId = this.payDetailSearchForm.signProjectId;
+        param.payType = this.payDetailSearchForm.payType;
+        
+        param.customerName = this.payDetailSearchForm.customerName;
+        param.phone = this.payDetailSearchForm.phone;
+        param.clueId = this.payDetailSearchForm.clueId;
+        param.signNo = this.payDetailSearchForm.signNo;
+        console.info(param);
+        axios.post('/payDetail/list', param)
+        .then(function (response) {
+          var result =  response.data;
+          console.info(result);
+          var table=result.data;
+          var data= table.data;
+          for(var i=0;i<data.length;i++){
+            data[i].signProjectId=payDetailVM.transformProject(data[i].signProjectId);
+            data[i].signCreateTime=payDetailVM.dateFormat(data[i].signCreateTime);
+            data[i].payTime=payDetailVM.dateFormat(data[i].payTime);
+            data[i].makeUpTime=payDetailVM.dateFormat(data[i].makeUpTime);
+            data[i].signShopType=payDetailVM.transformShopType(data[i].signShopType);
+            data[i].payType=payDetailVM.transformPayType(data[i].payType);
+            data[i].signType=payDetailVM.transformSignType(data[i].signType);
+            data[i].giveType=payDetailVM.transformGiveType(data[i].giveType);
+            data[i].status=payDetailVM.transformStatus(data[i].status);
+            data[i].isRemoteSign=payDetailVM.transform(data[i].isRemoteSign);
+          }
+          payDetailVM.dataTable= data;
+          payDetailVM.pager.total =  table.total;
+          payDetailVM.pager.currentPage = table.currentPage;
+
+          // 取出存储的id
+          if(!payDetailVM.paginationShow){
+            if(payDetailVM.storeId){
+              payDetailVM.$nextTick(function(){
+                var storage = [];
+                payDetailVM.dataTable.forEach(function(item, index){
+                  if(item.clueId === payDetailVM.storeId ){
+                    storage.push(payDetailVM.dataTable[index]);
+                  }
+                })
+                payDetailVM.toggleSelection(storage);
+
+                payDetailVM.$el.querySelector('.el-table__body-wrapper').scrollTop = payDetailVM.scrollTop;
+
+              })
+            }
+          }else{
+            removeSessionStore ("payDetailManagerStoreForm");
+            removeSessionStore ("payDetailManagerOtherVal");
+          }
+          payDetailVM.paginationShow = true;
+          payDetailVM.storeForm = payDetailVM.payDetailSearchForm;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+      },
+      toggleSelection(rows) { // table select 默认选中fn
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row,true);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      //选择行
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      handleSizeChange(val) {
+        //下拉框  每页 10,20条切换 调用
+        console.log(`每页 ${val} 条`);
+        this.pageSize = val;
+        this.initTableData(1);
+      },
+      handleCurrentChange(val) {
+        //点击 页码
+        console.log(`当前页: ${val}`);
+        this.initTableData(val);
+      },
+      cancelForm(formName) {
+        if (this.$refs[formName]!==undefined) {
+          this.$refs[formName].resetFields();
+        }
+        this.payDetailFormVisible = false;
+      },
+      //日期数据格式化方法
+      dateFormat(cellValue) {
+        if (cellValue == undefined) {
+          return "";
+        }
+        return moment(cellValue).format("YYYY-MM-DD HH:mm");
+      },
+      //到访情况转换方法
+      transformPayType(cellValue) {
+        var text="";
+        if(cellValue==1){
+          text="全款"
+        }else if(cellValue==2){
+          text="定金"
+        }else if(cellValue==3){
+          text="追加定金"
+        }else if(cellValue==4){
+          text="尾款"
+        }
+        return text;
+      },
+      //签约类型
+      transformSignType(cellValue) {
+        var text="";
+        if(cellValue==1){
+          text="一次性全款"
+        }else if(cellValue==2){
+          text="先交订金"
+        }
+        return text;
+      },
+      //付款状态
+      transformStatus(cellValue) {
+        var text="";
+        if(cellValue==0){
+          text="无效"
+        }else if(cellValue==1){
+          text="审核中"
+        }else if(cellValue==2){
+          text="有效"
+        }
+        return text;
+      },
+      //是否转换方法
+      transform(cellValue) {
+        var text="";
+        if(cellValue==0){
+          text="否"
+        }else if(cellValue==1){
+          text="是"
+        }
+        return text;
+      },
+      //签约项目转换方法
+      transformProject(cellValue) {
+          var text="";
+          if(projectList){
+              for(var i=0;i<projectList.length;i++){
+                  if(cellValue==projectList[i].id){
+                      text=projectList[i].projectName;
+                  }
+              }
+          }
+          return text;
+      },
+      //店型转换方法
+      transformShopType(cellValue) {
+          var text="";
+          if(shopTypeList){
+              for(var i=0;i<shopTypeList.length;i++){
+                  if(cellValue==shopTypeList[i].value){
+                      text=shopTypeList[i].name;
+                  }
+              }
+          }
+          return text;
+      },
+      //店型转换方法
+      transformGiveType(cellValue) {
+          var text="";
+          if(giveTypeList){
+              for(var i=0;i<giveTypeList.length;i++){
+                  if(cellValue==giveTypeList[i].value){
+                      text=giveTypeList[i].name;
+                  }
+              }
+          }
+          return text;
+      },
+      //查询商务总监
+      currentBusSale(seleVal){
+        param={};
+        param.orgId=seleVal;
+        axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
+          payDetailVM.busDirectorOptions=response.data.data;
+        });
+      },
+      //根据电销组查询电销顾问
+      getSaleList() {
+        var param ={};
+        var orgId=this.payDetailSearchForm.teleGroupId
+        if(orgId){
+          param.orgId = orgId;
+          param.roleCode = 'DXCYGW';
+          console.info(param);
+          axios.post('/payDetail/getSaleList', param)
+          .then(function (response) {
+            var result =  response.data;
+            console.info(result);
+            var table=result.data;
+            payDetailVM.teleSaleOptions= table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }else{
+          this.teleSaleOptions=[];
+        }
+
+      },
+      //根据商务组查询商务经理
+      getBusSaleList() {
+        var param ={};
+        var orgId=this.payDetailSearchForm.busGroupId
+        if(orgId){
+          param.orgId = orgId;
+          param.roleCode = 'SWJL';
+          console.info(param);
+          axios.post('/payDetail/getSaleList', param)
+          .then(function (response) {
+            var result =  response.data;
+            console.info(result);
+            var table=result.data;
+            payDetailVM.busSaleOptions= table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }else{
+          this.busSaleOptions=[];
+        }
+
+      },
+      confirmColumn(){
+        //处理用户选择的列
+        console.info(this.form.type);
+        if(this.form.type.length==0){
+          this.$message({
+            message: "请至少保留一列",
+            type: 'error'
+          });
+          return;
+        }
+        this.dialogFormVisible = false;
+        var customerShowColun = [];
+        var customerColumn = this.form.type;
+        customerColumn.sort(this.sortNumber);//对选择的列排序
+        var idList=[];
+        for(var i=0;i<customerColumn.length;i++){
+          var curItem = customerColumn[i];
+          var itemArr = curItem.split("_");
+          var obj = {};
+          obj.fieldCode=itemArr[1];
+          obj.displayName=itemArr[2];
+          obj.width=itemArr[4];
+          customerShowColun.push(obj);
+          idList.push(itemArr[3])
+        }
+        this.tableColums = customerShowColun;
+        var param ={};
+        param.fieldIdList = idList;
+        param.menuCode = "aggregation:payDetailManager";
+        console.info(param);
+        if(idList.length!=0){
+          axios.post('/customfield/customField/saveUserField', param)
+          .then(function (response) {
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }
+      },
+      initColumn(){
+        //初始化table 列 和 用户自定义列
+        this.allTableColums = fieldList;
+        if(userFieldList.length!=0){
+          var type=[];
+          for(var i=0;i<userFieldList.length;i++){
+            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
+          }
+          this.form.type = type;
+          this.confirmColumn();
+        }else{
+          var type=[];
+          for(var i=0;i<fieldList.length;i++){
+            type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
+          }
+          this.form.type = type;
+          this.confirmColumn();
+        }
+
+      },
+      sortNumber(a,b) {
+        //对数组中元素，按照数字 从小到大 排序
+        return a.split("_")[0] - b.split("_")[0];
+      },
+      toogleClick(){
+        if(this.isShow){
+          this.isShow=false
+        }else{
+          this.isShow=true
+        }
+      },
+    },
+    created(){
+      console.info("create method");
+      // 进入页面判断有是否有存储值
+      if(!this.paginationShow){
+        var storeVal = getSessionStore("payDetailManagerStoreForm");
+        var otherVal = getSessionStore("payDetailManagerOtherVal");
+        if(storeVal && otherVal){
+          this.payDetailSearchForm = storeVal;
+          this.$set(this.pager,"currentPage",otherVal.currentPage);
+          this.storeId = otherVal.clueId;
+          this.scrollTop = otherVal.scrollTop;
+        }
+      };
+      // 取页数存储
+      var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+      if(localVal){this.pager.pageSize = localVal;}
+     
+      this.initColumn();
+      this.searchTable();
+    },
+    mounted(){
+      console.info("mounted method");
+      document.getElementById('payDetailManage').style.display = 'block';
+    }
+  })
+
+</script>
+</html>

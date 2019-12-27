@@ -1,458 +1,521 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
-    <title>后台管理系统</title>
-    <style>
-        .userManage .mainWhitePadding{
-            padding:30px 10% 30px 10% ;
-        }
-        .userManage .mainWhitePadding .el-input{
-            width: 290px;
-        }
-        .dataPermissionTable .el-checkbox{margin-right: 20px;margin-bottom: 5px;}
-        .dataPermissionTable .el-checkbox+.el-checkbox{margin-left: 0;}
-        .dataPermissionTable thead th{text-align: center;}
-    </style>
+  <title>后台管理系统</title>
+  <style>
+    .userManage .mainWhitePadding {
+      padding: 30px 10% 30px 10%;
+    }
+
+    .userManage .mainWhitePadding .el-input {
+      width: 290px;
+    }
+
+    .dataPermissionTable .el-checkbox {
+      margin-right: 20px;
+      margin-bottom: 5px;
+    }
+
+    .dataPermissionTable .el-checkbox + .el-checkbox {
+      margin-left: 0;
+    }
+
+    .dataPermissionTable thead th {
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-<div id="userManage" class="userManage mainPadding" style="display: none;">  
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-row class="mainWhiteBg">
-        <div class="inforTitle">编辑用户</div>
-        <el-row :gutter="20">
-            <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="姓名：" :label-width="formLabelWidth1" prop="name">
-                            <el-input v-model.trim="form.name" maxlength="30" autocomplete="off"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="登录用户名：" :label-width="formLabelWidth1" prop="username">
-                            <el-input v-model="form.username" maxlength="30" autocomplete="off" :disabled="true"></el-input>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="手机号：" :label-width="formLabelWidth1" prop="phone">
-                            <el-input v-model="form.phone" maxlength="11" autocomplete="off"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleName">
-                            <el-input v-model="form.roleName" autocomplete="off" style="width:185px;margin-right: 6px;"></el-input>
-                            <el-button type="primary" size="small" @click="dialogFormChooseRole = true">选择角色</el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgName">
-                            <el-input v-model="form.orgName" autocomplete="off" style="width:185px;margin-right: 6px;"></el-input>
-                            <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="用户状态：" :label-width="formLabelWidth1" prop="status">
-                            <el-select v-model="form.status" placeholder="请选择">
-                                <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row v-show="isShow">
-                    <el-col :span="12">
-                        <el-form-item  label="用户资源处理：" :label-width="formLabelWidth1">
-                            <el-radio v-model="statusRadio" label="0">不带资源走</el-radio>
-                            <el-radio v-model="statusRadio" label="1">带资源走</el-radio>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row v-show="isAuth">
-                    <p class="fs16 marginB20">设定查看已分发资源数据权限：</p>
-                    <el-table 
-                        ref="multipleTable"
-                        tooltip-effect="dark"
-                        style="width: 100%"
-                        border
-                        :data="dataTableCheckbox"
-                        highlight-current-row
-                        class="marginB20 dataPermissionTable"
-                        >
-                        <el-table-column align="center" width="55" label="序号" type="index"></el-table-column>
-                        <el-table-column width="200" label="业务线">
-                            <template slot-scope="{ row, index }">
-                                <el-checkbox :indeterminate="row.isIndeterminate" v-model="row.checkAll" @change="handleCheckAllChange(row,index)">{{row.name}}</el-checkbox>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="本业务线下的可查看资源类别">
-                            <template slot-scope="{ row, index }">
-                                <el-checkbox-group v-model="row.checkedCities"
-                                    @change="handleCheckedCitiesChange(row,index)">
-                                    <el-checkbox v-for="item in row.categoryList" :label="item.value"  :key="item.value">{{item.label}}
-                                    </el-checkbox>
-                                </el-checkbox-group>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-row>
-                <el-row style="margin-top: 10px;">
-                    <el-form-item class="f-tac">
-                        <el-button type="primary" :disabled="btnDisabled" @click="onSubmit('form')">提交</el-button>
-                        <el-button @click="goBack()">取消</el-button>
-                    </el-form-item>
-                </el-row>
-            </el-form>
+<div id="userManage" class="userManage mainPadding" style="display: none;">
+  <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <el-breadcrumb-item>Home</el-breadcrumb-item>
+    <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+    <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+  </el-breadcrumb>
+  <el-row class="mainWhiteBg">
+    <div class="inforTitle">编辑用户</div>
+    <el-row :gutter="20">
+      <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="姓名：" :label-width="formLabelWidth1" prop="name">
+              <el-input v-model.trim="form.name" maxlength="30" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="登录用户名：" :label-width="formLabelWidth1" prop="username">
+              <el-input v-model="form.username" maxlength="30" autocomplete="off"
+                        :disabled="true"></el-input>
+            </el-form-item>
+          </el-col>
         </el-row>
-    </el-row>
-    <el-dialog title="选择角色" :visible.sync="dialogFormChooseRole"s>
-        <el-form :model="form">
-            <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            :data="dataTableRole"
-            highlight-current-row
-            @current-change="handleCurrentChange"
-            >
-            <el-table-column align="center" width="55" label="选择">
-                <template scope="scope">
-                    <el-radio :label="scope.row.id" v-model="tableRadio"  @change="selectRole(scope.row.id,scope.row.roleName,scope.row.roleCode)">&nbsp;</el-radio>
-                </template>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="手机号：" :label-width="formLabelWidth1" prop="phone">
+              <el-input v-model="form.phone" maxlength="11" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleName">
+              <el-input v-model="form.roleName" autocomplete="off"
+                        style="width:185px;margin-right: 6px;"></el-input>
+              <el-button type="primary" size="small" @click="openRoleList">选择角色</el-button>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgName">
+              <el-input v-model="form.orgName" autocomplete="off"
+                        style="width:185px;margin-right: 6px;"></el-input>
+              <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="用户状态：" :label-width="formLabelWidth1" prop="status">
+              <el-select v-model="form.status" placeholder="请选择">
+                <el-option
+                    v-for="item in statusOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row v-show="isShow">
+          <el-col :span="12">
+            <el-form-item label="用户资源处理：" :label-width="formLabelWidth1">
+              <el-radio v-model="statusRadio" label="0">不带资源走</el-radio>
+              <el-radio v-model="statusRadio" label="1">带资源走</el-radio>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row v-show="isAuth">
+          <p class="fs16 marginB20">设定查看已分发资源数据权限：</p>
+          <el-table
+              ref="multipleTable"
+              tooltip-effect="dark"
+              style="width: 100%"
+              border
+              :data="dataTableCheckbox"
+              highlight-current-row
+              class="marginB20 dataPermissionTable"
+          >
+            <el-table-column align="center" width="55" label="序号" type="index"></el-table-column>
+            <el-table-column width="200" label="业务线">
+              <template slot-scope="{ row, index }">
+                <el-checkbox :indeterminate="row.isIndeterminate" v-model="row.checkAll"
+                             @change="handleCheckAllChange(row,index)">{{row.name}}
+                </el-checkbox>
+              </template>
             </el-table-column>
-            <el-table-column align="center" prop="roleName" label="角色名称"></el-table-column>
-            <el-table-column align="center" prop="description" label="角色描述"></el-table-column>
-        </el-table>
-        </el-form>        
-    </el-dialog>
-    <el-dialog title="选择组织" :visible.sync="dialogFormChooseOrg" append-to-body>
-        <el-form :model="form">
-            <el-tree
-                :data="dataTree"              
-                :default-expanded-keys="expandedKeys"
-                ref="tree"
-                highlight-current
-                @node-click="clickOrgNode"
-                class="leftTree">
-            </el-tree>
-        </el-form>        
-    </el-dialog>
+            <el-table-column label="本业务线下的可查看资源类别">
+              <template slot-scope="{ row, index }">
+                <el-checkbox-group v-model="row.checkedCities"
+                                   @change="handleCheckedCitiesChange(row,index)">
+                  <el-checkbox v-for="item in row.categoryList" :label="item.value"
+                               :key="item.value">{{item.label}}
+                  </el-checkbox>
+                </el-checkbox-group>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-row>
+        <el-row style="margin-top: 10px;">
+          <el-form-item class="f-tac">
+            <el-button type="primary" :disabled="btnDisabled" @click="onSubmit('form')">提交
+            </el-button>
+            <el-button @click="goBack()">取消</el-button>
+          </el-form-item>
+        </el-row>
+      </el-form>
+    </el-row>
+  </el-row>
+  <el-dialog title="选择角色" :visible.sync="dialogFormChooseRole" s>
+    <el-col class="marginB20">
+      <el-dialog-item label="" class="f-fr">
+        <el-button icon="el-icon-search" type="primary" @click="selectRoleList">搜索</el-button>
+      </el-dialog-item>
+      <el-dialog-item label="角色名称" label-width="formLabelWidth1" class="f-fr" style="width: 200px;margin-right: 10px;">
+        <el-input placeholder="输入角色名称" v-model="searchForm.roleName" maxLength="20"></el-input>
+      </el-dialog-item>
+
+    </el-col>
+    <el-form :model="form">
+      <el-table
+          ref="multipleTable"
+          tooltip-effect="dark"
+          style="width: 100%"
+          border
+          :data="dataTableRole"
+          highlight-current-row
+          @current-change="handleCurrentChange"
+      >
+        <el-table-column align="center" width="55" label="选择">
+          <template scope="scope">
+            <el-radio :label="scope.row.id" v-model="tableRadio"
+                      @change="selectRole(scope.row.id,scope.row.roleName,scope.row.roleCode)">
+              &nbsp;
+            </el-radio>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="roleName" label="角色名称"></el-table-column>
+        <el-table-column align="center" prop="description" label="角色描述"></el-table-column>
+      </el-table>
+    </el-form>
+  </el-dialog>
+  <el-dialog title="选择组织" :visible.sync="dialogFormChooseOrg" append-to-body>
+    <el-form :model="form">
+      <el-tree
+          :data="dataTree"
+          :default-expanded-keys="expandedKeys"
+          ref="tree"
+          highlight-current
+          @node-click="clickOrgNode"
+          class="leftTree">
+      </el-tree>
+    </el-form>
+  </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-var orgData=[[${orgData}]];
-var dataList=[[${dataList}]];
+  var orgData = [[${orgData}]];
+  var dataList = [[${dataList}]];
 
-var expandedKeys =[];//默认展开节点
-for(var i=0;i<orgData.length;i++){
-	var curNode = orgData[i];
-	expandedKeys.push(curNode.id);
-	var childs = curNode.children;
-	if(childs){
-		for(var j=0;j<childs.length;j++){
-			var curChildNode = childs[j];
-			expandedKeys.push(curChildNode.id);
-		}
-	}
-	
-}
-var roleList=[[${roleList}]];//当前字段所属的菜单组
-var user=[[${user}]];//当前字段所属的菜单组
-var roleId="";
-var roleName="";
-var roleCode = "";
-if (user.roleList && user.roleList.length > 0) {
+  var expandedKeys = [];//默认展开节点
+  for (var i = 0; i < orgData.length; i++) {
+    var curNode = orgData[i];
+    expandedKeys.push(curNode.id);
+    var childs = curNode.children;
+    if (childs) {
+      for (var j = 0; j < childs.length; j++) {
+        var curChildNode = childs[j];
+        expandedKeys.push(curChildNode.id);
+      }
+    }
+
+  }
+  var roleList = [[${roleList}]];//当前字段所属的菜单组
+  var user = [[${user}]];//当前字段所属的菜单组
+  var roleId = "";
+  var roleName = "";
+  var roleCode = "";
+  if (user.roleList && user.roleList.length > 0) {
     roleId = user.roleList[0].id;
     roleName = user.roleList[0].roleName;
     roleCode = user.roleList[0].roleCode;
-}
-var updateUserVm= new Vue({
-        el: '#userManage',
-        data: function() {
-            return {
-                btnDisabled: false,
-                statusRadio:'0',
-                isShow:false,
-                tableRadio:roleId,
-                dialogFormChooseRole: false,
-                dialogFormChooseOrg: false,
-                isAuth: false,
-                form: {
-                	name: user.name,
-                    username: user.username,
-                    phone: user.phone,
-                    roleId: roleId,
-                    roleName: roleName,
-                    roleCode: roleCode,
-                    orgId: user.orgId,
-                    orgName: user.orgName,
-                    status: user.status
-                },
-                rules: {
-                	name: [
-                      { required: true, message: '姓名不能为空', trigger: 'blur' },
-                      {  max: 30, message: '最大30个字符', trigger: 'blur' },
-                      { validator:function(rule,value,callback){
-                            if(/^[A-Za-z0-9\u4e00-\u9fa5\d-\s]+$/.test(value) == false){
-                               callback(new Error("请输入汉字、字母或数字"));
-                            }else{
-                               callback();
-                            } 
-                            callback();                              
-                        }, trigger: 'change'}
-                    ],
-                    username: [
-                      { required: true, message: '登录用户名不能为空', trigger: 'blur' },
-                      {  max: 30, message: '最大30个字符', trigger: 'blur' }
-                    ],
-                    phone: [
-                      { required: true, message: '手机号不能为空', trigger: 'change' },
-                      {  max: 30, message: '最大30个字符', trigger: 'blur' },
-                      { validator:function(rule,value,callback){                 
-                            if(/^1[3456789]\d{9}$/.test(value) == false){
-                                callback(new Error("请输入正确格式的手机号"));
-                            }else{
-                                callback();
-                            }                       
-                            callback();                      
-                        }, trigger: 'change'}
-                    ],
-                    password: [
-                      { required: true, message: '密码不能为空', trigger: 'change' },
-                      { min:6 , max: 30, message: '最大30个字符', trigger: 'blur' },
-                      { validator:function(rule,value,callback){
-                            if(/^[A-Za-z0-9]+$/.test(value) == false){
-                                callback(new Error("请输入数字和字母"));
-                            }else{
-                                callback();
-                            } 
-                            callback();                              
-                        }, trigger: 'change'}
-                    ],
-                    orgName: [
-                      { required: true, message: '组织不能为空', trigger: 'change' }
-                    ],
-                    status: [
-                      { required: true, message: '状态不能为空', trigger: 'change' }
-                    ],
-                    roleName: [
-                      { required: true, message: '角色不能为空', trigger: 'change' }
-                    ]
-                  },
-                formLabelWidth: '250px',
-                formLabelWidth1: '120px',
-                expandedKeys:expandedKeys,//树形结构  默认展开的
-                dataTree: orgData,
-                dataTableRole:roleList,
-                statusOptions: [{
-                    value: 1,
-                    label: '启用'
-                }, {
-                    value: 2,
-                    label: '禁用'
-                },{
-                    value: 3,
-                    label: '锁定'
-                }],
-                dataTableCheckbox: dataList
-            }        	  
+  }
+  var updateUserVm = new Vue({
+    el: '#userManage',
+    data: function () {
+      return {
+        btnDisabled: false,
+        statusRadio: '0',
+        isShow: false,
+        tableRadio: roleId,
+        dialogFormChooseRole: false,
+        dialogFormChooseOrg: false,
+        isAuth: false,
+        form: {
+          name: user.name,
+          username: user.username,
+          phone: user.phone,
+          roleId: roleId,
+          roleName: roleName,
+          roleCode: roleCode,
+          orgId: user.orgId,
+          orgName: user.orgName,
+          status: user.status
         },
-        methods: {
-            //row-click    当某一行被点击时会触发该事件 row, event, column
-            showRow(row){
-            //赋值给radio
-                this.radio = this.dataTableRole.indexOf(row);
-            },
-            /* urrent-change    当表格的当前行发生变化的时候会触发该事件，如果要高亮当前行，请打开表格的 highlight-current-row 属性    currentRow, oldCurrentRow */
-            handleCurrentChange(val,index) {
-                this.currentRow = val;
-                this.$emit('data',val.pkg);
-            },
-            getCurrentRow(val){
-                console.log(val)
-            },
-          //选择角色
-            selectRole(id,name,roleCode){
-            	updateUserVm.form.roleId=id;
-            	updateUserVm.form.roleName=name;
-                updateUserVm.form.roleCode=roleCode;
-            	updateUserVm.dialogFormChooseRole=false;
-                var roleCode = updateUserVm.form.roleCode;
-            	if(roleCode != "DXCYGW"){
-                    updateUserVm.isShow = false;
-                }
-            },
-            //选择机构
-            clickOrgNode(data,node,obj){//点击左侧节点
-                var oldOrgId = user.orgId;
-                var newOrgId = data.id;
-                updateUserVm.form.orgId = data.id;
-                updateUserVm.form.orgName = data.label;
-                var roleCode = updateUserVm.form.roleCode;
-                if (oldOrgId != newOrgId && roleCode == "DXCYGW") {
-                    updateUserVm.isShow = true;
+        searchForm: {//搜索form
+          roleName: '',
+        },
+        rules: {
+          name: [
+            {required: true, message: '姓名不能为空', trigger: 'blur'},
+            {max: 30, message: '最大30个字符', trigger: 'blur'},
+            {
+              validator: function (rule, value, callback) {
+                if (/^[A-Za-z0-9\u4e00-\u9fa5\d-\s]+$/.test(value) == false) {
+                  callback(new Error("请输入汉字、字母或数字"));
                 } else {
-                    updateUserVm.isShow = false;
+                  callback();
                 }
-
-                	var param = {};
-                    param.id = data.id;
-                    //根据id获取数据
-                    axios.post('/organization/organization/queryOrgById',param)
-                    .then(function (response) {
-                        var data =  response.data;
-                        if(data.code=='0'){
-                        	var businessLine = data.data.businessLine;
-                        	if(businessLine&&businessLine==127){
-                        		updateUserVm.isAuth=true;
-                        	}else{
-                       			updateUserVm.isAuth=false;
-                       		}
-                        }
-                       
-                    })
-                	updateUserVm.dialogFormChooseOrg=false;
-            },
-            //返回
-            goBack(){//点击左侧节点
-            	document.location.href='/user/userManager/initUserList';
-            },
-            onSubmit(formName) {
-            	 this.$refs[formName].validate((valid) => {
-          	       if (valid) {
-                       var formData = updateUserVm.form;
-                       var param = {};
-                       param.id = user.id;
-                       param.name = formData.name;
-                       param.username = formData.username;
-                       param.password = formData.password;
-                       param.phone = formData.phone;
-                       param.status = formData.status;
-                       param.orgId = formData.orgId;
-                       param.takeAwayClue = updateUserVm.statusRadio;
-                       var takeAwayClueShow = updateUserVm.isShow;
-                       param.takeAwayClueShow = takeAwayClueShow;
-                       var roleCode = updateUserVm.form.roleCode;
-                       var oldOrgId = user.orgId;
-                       param.oldOrgId = oldOrgId;
-                       if (oldOrgId != formData.orgId && roleCode == "DXCYGW" && takeAwayClueShow == false) {
-                           updateUserVm.$message({
-                               message: '请重新选择所属组织',
-                               type: 'warning'
-                           });
-                           return false;
-                       }
-
-
-       	          if(this.isAuth){
-	       	             var list = [];
-	       	             var dataTableCheckbox=this.dataTableCheckbox;
-		       	         for(i=0;i<dataTableCheckbox.length;i++){
-		       	        	 if(dataTableCheckbox[i].checkedCities.length!=0){
-		       	        		 var userDataAuth={};
-		       	        		 userDataAuth.businessLine=dataTableCheckbox[i].value;
-		       	        		 userDataAuth.dicCode=dataTableCheckbox[i].dicCode;
-		       	        		 userDataAuth.dicValue=dataTableCheckbox[i].checkedCities.join(',');
-			       	        	 list.push(userDataAuth);
-		       	        	 }
-		                 }
-	       	             param.userDataAuthList = list;
-    	             }
-       	            //  console.info(param);
-       	             var roleList=new Array();
-       	          	 roleList.push(formData.roleId);
-                    param.roleList=roleList;
-                    updateUserVm.btnDisabled = true;
-       	            axios.post("/user/userManager/updateUser", param)
-       	            .then(function (response) {
-       	            	// console.info(response);
-       	            	var data =response.data;
-       	            	if(data.code!="0"){
-                            var message = "修改失败";
-                            if (data.code = '100011') {
-                                message = data.msg;
-                            }
-                            updateUserVm.$message({
-                                message: message,
-                                type: 'warning'
-                            });
-                            updateUserVm.btnDisabled = false;
-       	            	}else{
-                            updateUserVm.$message('修改成功');
-                            updateUserVm.btnDisabled = false;
-       	                	document.location.href='/user/userManager/initUserList';
-       	            	}
-       	            })
-       	            .catch(function (error) {
-                        updateUserVm.btnDisabled = false;
-                        console.log(error);
-       	            });
-       	             
-          	          } else {
-          	        	console.log('数据未通过校验！');
-          	            return false;
-          	          }
-          	        });
-            },
-            simpleClone(data) {
-                return JSON.parse(JSON.stringify(data));
-            },
-            handleCheckAllChange(item,index) {
-                var tabledata = item.categoryList;
-                var tabledata1=[]
-                for(i=0;i<tabledata.length;i++){
-                    tabledata1.push(tabledata[i].value)
+                callback();
+              }, trigger: 'change'
+            }
+          ],
+          username: [
+            {required: true, message: '登录用户名不能为空', trigger: 'blur'},
+            {max: 30, message: '最大30个字符', trigger: 'blur'}
+          ],
+          phone: [
+            {required: true, message: '手机号不能为空', trigger: 'change'},
+            {max: 30, message: '最大30个字符', trigger: 'blur'},
+            {
+              validator: function (rule, value, callback) {
+                if (/^1[3456789]\d{9}$/.test(value) == false) {
+                  callback(new Error("请输入正确格式的手机号"));
+                } else {
+                  callback();
                 }
-                if(item.checkAll){
-                	item.checkedCities=this.simpleClone(tabledata1);
-                }else{
-                	item.checkedCities=[];
+                callback();
+              }, trigger: 'change'
+            }
+          ],
+          password: [
+            {required: true, message: '密码不能为空', trigger: 'change'},
+            {min: 6, max: 30, message: '最大30个字符', trigger: 'blur'},
+            {
+              validator: function (rule, value, callback) {
+                if (/^[A-Za-z0-9]+$/.test(value) == false) {
+                  callback(new Error("请输入数字和字母"));
+                } else {
+                  callback();
                 }
-                item.isIndeterminate=false;
-            },
-            handleCheckedCitiesChange(item,index) {
-                var tabledata = item.categoryList;
-                var tabledata1=[]
-                for(i=0;i<tabledata.length;i++){
-                    tabledata1.push(tabledata[i].value)
-                }
-                var checkedCount = item.checkedCities.length;
-                item.checkAll = checkedCount === tabledata1.length;
-                item.isIndeterminate = (checkedCount > 0) && (checkedCount < tabledata1.length);
-            },
+                callback();
+              }, trigger: 'change'
+            }
+          ],
+          orgName: [
+            {required: true, message: '组织不能为空', trigger: 'change'}
+          ],
+          status: [
+            {required: true, message: '状态不能为空', trigger: 'change'}
+          ],
+          roleName: [
+            {required: true, message: '角色不能为空', trigger: 'change'}
+          ]
         },
-        mounted(){
-            document.getElementById('userManage').style.display = 'block';
-            var param = {};
-            param.id = user.orgId;
-            //根据id获取数据
-            axios.post('/organization/organization/queryOrgById',param)
-            .then(function (response) {
-                var data =  response.data;
-                if(data.code=='0'){
-                	var businessLine = data.data.businessLine;
-                	if(businessLine&&businessLine==127){
-                		updateUserVm.isAuth=true;
-                	}else{
-               			updateUserVm.isAuth=false;
-               		}
-                }
-               
-            })
+        formLabelWidth: '250px',
+        formLabelWidth1: '120px',
+        expandedKeys: expandedKeys,//树形结构  默认展开的
+        dataTree: orgData,
+        dataTableRole: roleList,
+        statusOptions: [{
+          value: 1,
+          label: '启用'
+        }, {
+          value: 2,
+          label: '禁用'
+        }, {
+          value: 3,
+          label: '锁定'
+        }],
+        dataTableCheckbox: dataList
+      }
+    },
+    methods: {
+      //row-click    当某一行被点击时会触发该事件 row, event, column
+      showRow(row) {
+        //赋值给radio
+        this.tableRadio = addUserVm.form.roleId;
+      },
+      /* urrent-change    当表格的当前行发生变化的时候会触发该事件，如果要高亮当前行，请打开表格的 highlight-current-row 属性    currentRow, oldCurrentRow */
+      handleCurrentChange(val, index) {
+        this.currentRow = val;
+        this.$emit('data', val.pkg);
+      },
+      getCurrentRow(val) {
+        console.log(val)
+      },
+      //选择角色
+      selectRole(id, name, roleCode) {
+        updateUserVm.form.roleId = id;
+        updateUserVm.form.roleName = name;
+        updateUserVm.form.roleCode = roleCode;
+        updateUserVm.dialogFormChooseRole = false;
+        var roleCode = updateUserVm.form.roleCode;
+        if (roleCode != "DXCYGW") {
+          updateUserVm.isShow = false;
         }
-    })
+      },
+      //选择机构
+      clickOrgNode(data, node, obj) {//点击左侧节点
+        var oldOrgId = user.orgId;
+        var newOrgId = data.id;
+        updateUserVm.form.orgId = data.id;
+        updateUserVm.form.orgName = data.label;
+        var roleCode = updateUserVm.form.roleCode;
+        if (oldOrgId != newOrgId && roleCode == "DXCYGW") {
+          updateUserVm.isShow = true;
+        } else {
+          updateUserVm.isShow = false;
+        }
+
+        var param = {};
+        param.id = data.id;
+        //根据id获取数据
+        axios.post('/organization/organization/queryOrgById', param)
+        .then(function (response) {
+          var data = response.data;
+          if (data.code == '0') {
+            var businessLine = data.data.businessLine;
+            if (businessLine && businessLine == 127) {
+              updateUserVm.isAuth = true;
+            } else {
+              updateUserVm.isAuth = false;
+            }
+          }
+
+        })
+        updateUserVm.dialogFormChooseOrg = false;
+      },
+      //返回
+      goBack() {//点击左侧节点
+        document.location.href = '/user/userManager/initUserList';
+      },
+      onSubmit(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            var formData = updateUserVm.form;
+            var param = {};
+            param.id = user.id;
+            param.name = formData.name;
+            param.username = formData.username;
+            param.password = formData.password;
+            param.phone = formData.phone;
+            param.status = formData.status;
+            param.orgId = formData.orgId;
+            param.takeAwayClue = updateUserVm.statusRadio;
+            var takeAwayClueShow = updateUserVm.isShow;
+            param.takeAwayClueShow = takeAwayClueShow;
+            var roleCode = updateUserVm.form.roleCode;
+            var oldOrgId = user.orgId;
+            param.oldOrgId = oldOrgId;
+            if (oldOrgId != formData.orgId && roleCode == "DXCYGW" && takeAwayClueShow == false) {
+              updateUserVm.$message({
+                message: '请重新选择所属组织',
+                type: 'warning'
+              });
+              return false;
+            }
+
+            if (this.isAuth) {
+              var list = [];
+              var dataTableCheckbox = this.dataTableCheckbox;
+              for (i = 0; i < dataTableCheckbox.length; i++) {
+                if (dataTableCheckbox[i].checkedCities.length != 0) {
+                  var userDataAuth = {};
+                  userDataAuth.businessLine = dataTableCheckbox[i].value;
+                  userDataAuth.dicCode = dataTableCheckbox[i].dicCode;
+                  userDataAuth.dicValue = dataTableCheckbox[i].checkedCities.join(',');
+                  list.push(userDataAuth);
+                }
+              }
+              param.userDataAuthList = list;
+            }
+            //  console.info(param);
+            var roleList = new Array();
+            roleList.push(formData.roleId);
+            param.roleList = roleList;
+            updateUserVm.btnDisabled = true;
+            axios.post("/user/userManager/updateUser", param)
+            .then(function (response) {
+              // console.info(response);
+              var data = response.data;
+              if (data.code != "0") {
+                var message = "修改失败";
+                if (data.code = '100011') {
+                  message = data.msg;
+                }
+                updateUserVm.$message({
+                  message: message,
+                  type: 'warning'
+                });
+                updateUserVm.btnDisabled = false;
+              } else {
+                updateUserVm.$message('修改成功');
+                updateUserVm.btnDisabled = false;
+                document.location.href = '/user/userManager/initUserList';
+              }
+            })
+            .catch(function (error) {
+              updateUserVm.btnDisabled = false;
+              console.log(error);
+            });
+
+          } else {
+            console.log('数据未通过校验！');
+            return false;
+          }
+        });
+      },
+      simpleClone(data) {
+        return JSON.parse(JSON.stringify(data));
+      },
+      handleCheckAllChange(item, index) {
+        var tabledata = item.categoryList;
+        var tabledata1 = []
+        for (i = 0; i < tabledata.length; i++) {
+          tabledata1.push(tabledata[i].value)
+        }
+        if (item.checkAll) {
+          item.checkedCities = this.simpleClone(tabledata1);
+        } else {
+          item.checkedCities = [];
+        }
+        item.isIndeterminate = false;
+      },
+      handleCheckedCitiesChange(item, index) {
+        var tabledata = item.categoryList;
+        var tabledata1 = []
+        for (i = 0; i < tabledata.length; i++) {
+          tabledata1.push(tabledata[i].value)
+        }
+        var checkedCount = item.checkedCities.length;
+        item.checkAll = checkedCount === tabledata1.length;
+        item.isIndeterminate = (checkedCount > 0) && (checkedCount < tabledata1.length);
+      },
+      selectRoleList() {
+        var param = this.searchForm;
+        axios.post('/role/roleManager/queryRoleList', param)
+        .then(function (response) {
+          var data = response.data
+          if (data.code == '0') {
+            var roleList = data.data;
+            updateUserVm.dataTableRole = roleList;
+            updateUserVm.searchForm.roleName = "";
+          } else {
+            updateUserVm.$message({message: '查询角色列表错误', type: 'error'});
+            console.error(data);
+          }
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        }).then(function () {
+        });
+      },
+      openRoleList() {
+        //每次打开重新赋值
+        updateUserVm.dataTableRole = roleList;
+        updateUserVm.dialogFormChooseRole = true;
+      },
+    },
+    mounted() {
+      document.getElementById('userManage').style.display = 'block';
+      var param = {};
+      param.id = user.orgId;
+      //根据id获取数据
+      axios.post('/organization/organization/queryOrgById', param)
+      .then(function (response) {
+        var data = response.data;
+        if (data.code == '0') {
+          var businessLine = data.data.businessLine;
+          if (businessLine && businessLine == 127) {
+            updateUserVm.isAuth = true;
+          } else {
+            updateUserVm.isAuth = false;
+          }
+        }
+
+      })
+    }
+  })
 </script>
 </html>

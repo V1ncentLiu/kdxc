@@ -225,6 +225,8 @@ public class ExtendClueAgendaTaskController {
             @RequestBody PushClueReq pushClueReq) {
         UserInfoDTO user = getUser();
         pushClueReq.setCreateUser(user.getId());
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        pushClueReq.setPromotionCompany(user.getPromotionCompany());
         JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
 
         return clueInfo;
@@ -254,6 +256,8 @@ public class ExtendClueAgendaTaskController {
             @RequestBody ClueAgendaTaskQueryDTO queryDto) {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        queryDto.setPromotionCompany(user.getPromotionCompany());
         List<Long> idList = new ArrayList<Long>();
         // 推广总监，优化主管，优化文员，内勤经理可以在查看待分配资源列表中资源专员为管理员的数据
         if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
@@ -1053,14 +1057,18 @@ public class ExtendClueAgendaTaskController {
                                 String.valueOf(clueAgendaTaskDTOReq.getAccountNameVaule()));
                     }
                     pushClueReq.setUrlAddress(clueAgendaTaskDTOReq.getUrlAddress());
-                    pushClueReq.setIndustryCategory(
-                            String.valueOf(clueAgendaTaskDTOReq.getIndustryCategory()));
+                    if (clueAgendaTaskDTOReq.getIndustryCategory() != null) {
+                        pushClueReq.setIndustryCategory(
+                                String.valueOf(clueAgendaTaskDTOReq.getIndustryCategory()));
+                    }
                     pushClueReq.setProjectId(clueAgendaTaskDTOReq.getProjectId());
                     pushClueReq.setProjectName(clueAgendaTaskDTOReq.getProjectName());
                     pushClueReq.setCreateUser(user.getId());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getAge1())) {
                         pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTOReq.getAge1()));
                     }
+                    // 推广所属公司 为当前账号所在机构的推广所属公司
+                    pushClueReq.setPromotionCompany(user.getPromotionCompany());
                     list1.add(pushClueReq);
                 } else {
                     clueAgendaTaskDTOReq.setImportFailReason(failReason.toString());
@@ -1099,8 +1107,10 @@ public class ExtendClueAgendaTaskController {
                                 .setSourceName(sourceMap2.get(pushClueReq.getSource()));
                         clueAgendaTaskDTOReponse
                                 .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
-                        clueAgendaTaskDTOReponse.setIndustryCategoryName(
-                                industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        if (pushClueReq.getIndustryCategory() != null) {
+                            clueAgendaTaskDTOReponse.setIndustryCategoryName(
+                                    industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        }
                         clueAgendaTaskDTOReponse.setCusName(pushClueReq.getCusName());
                         clueAgendaTaskDTOReponse.setPhone(pushClueReq.getPhone());
                         clueAgendaTaskDTOReponse.setPhone2(pushClueReq.getPhone2());

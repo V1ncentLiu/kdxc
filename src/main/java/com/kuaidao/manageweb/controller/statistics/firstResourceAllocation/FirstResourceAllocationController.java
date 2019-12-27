@@ -78,7 +78,7 @@ public class FirstResourceAllocationController {
             }
         }
         logger.info(
-            "首次分配组查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
+                "首次分配组查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
     }
 
@@ -155,7 +155,7 @@ public class FirstResourceAllocationController {
             }
         }
         logger.info(
-            "首次分配个人查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
+                "首次分配个人查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
         return firstResourceAllocationFeignClient
                 .getFirstResourceAllocationPagePersion(firstResourceAllocationQueryDto);
     }
@@ -292,12 +292,12 @@ public class FirstResourceAllocationController {
 
     /**
      * 组
-     * 
+     *
      * @return
      */
     @RequestMapping("/firstRATable")
     public String firstRATable(Long orgId, Long startTime, Long endTime, Integer isTransfer,
-            HttpServletRequest request) {
+                               HttpServletRequest request) {
         FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
         fraQueryDto.setOrgId(orgId);
         fraQueryDto.setStartTime(startTime);
@@ -350,12 +350,12 @@ public class FirstResourceAllocationController {
 
     /**
      * 合计
-     * 
+     *
      * @return
      */
     @RequestMapping("/firstRATableSum")
     public String firstRATableSum(Long orgId, Long startTime, Long endTime, Integer isTransfer,
-            HttpServletRequest request) {
+                                  HttpServletRequest request) {
         FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
         fraQueryDto.setOrgId(orgId);
         fraQueryDto.setStartTime(startTime);
@@ -389,12 +389,12 @@ public class FirstResourceAllocationController {
 
     /**
      * 组
-     * 
+     *
      * @return
      */
     @RequestMapping("/firstRATableTeam")
     public String firstRATableTeam(Long orgId, Long startTime, Long endTime, Integer isTransfer,
-            HttpServletRequest request) {
+                                   HttpServletRequest request) {
         FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
         fraQueryDto.setOrgId(orgId);
         fraQueryDto.setStartTime(startTime);
@@ -430,12 +430,12 @@ public class FirstResourceAllocationController {
 
     /**
      * 个人
-     * 
+     *
      * @return
      */
     @RequestMapping("/firstRATablePerson")
     public String firstRATablePerson(Long orgId, Long startTime, Long endTime, Integer isTransfer,
-            Long userId, HttpServletRequest request) {
+                                     Long userId, HttpServletRequest request) {
         FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
         fraQueryDto.setOrgId(orgId);
         fraQueryDto.setStartTime(startTime);
@@ -600,7 +600,7 @@ public class FirstResourceAllocationController {
 
     /**
      * 获取当前 orgId所在的组织
-     * 
+     *
      * @param orgId
      * @param
      * @return
@@ -620,7 +620,7 @@ public class FirstResourceAllocationController {
 
     /**
      * 获取当前 orgId 下的 电销组
-     * 
+     *
      * @param orgId
      * @param orgType
      * @return
@@ -670,7 +670,7 @@ public class FirstResourceAllocationController {
     }
 
     private void addTotalTexportData(FirstResourceAllocationDto resTotal,
-            List<List<Object>> dataList) {
+                                     List<List<Object>> dataList) {
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
         totalList.add("合计");

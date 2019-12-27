@@ -25,20 +25,32 @@
 		        <el-button type="danger" @click="deleteCompany"><i class="el-icon-delete"></i>删除</el-button>
 		    </shiro:hasPermission>
       </el-col>
-      <el-col :span="12" style="text-align: right;">
-        <el-form :inline="true" :model="companySearchForm" class="demo-form-inline" ref="companySearchForm">               
-          <el-form-item label="公司名称:" prop="companyName" style="margin-right: 10px;">
+    </el-row>
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+        <el-form :inline="true" :model="companySearchForm " class="demo-form-inline mainSearchForm mainSearchForm" ref="companySearchForm">
+            <el-form-item label="集团名称:" prop="companyGroupId" >
+                <el-select v-model="companySearchForm.companyGroupId" filterable clearable placeholder="选择所属集团">
+                    <el-option
+                            v-for="item in userInfoList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="公司名称:" prop="companyName" style="margin-right: 10px;">
             <el-input v-model="companySearchForm.companyName" placeholder="公司名称" class="input-with-select"></el-input>
           </el-form-item>
           <el-form-item label="联系电话:" prop="phoneNumber" style="margin-right: 10px;">
             <el-input v-model="companySearchForm.phoneNumber" placeholder="联系电话" class="input-with-select"></el-input>
-          </el-form-item> 
+          </el-form-item>
           <el-form-item label=""> 
               <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
           </el-form-item>    
         </el-form>
-      </el-col>
-	</el-row>
+</div>
+</div>
 	  <div class="mainSearchBg">
       <el-row>
           <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
@@ -61,8 +73,15 @@
             <el-form-item label="公司名称：" :label-width="formLabelWidth" prop="companyName">
                 <el-input v-model="companyForm.companyName" autocomplete="off"  maxlength="50" style="width: 290px;"></el-input>
             </el-form-item>
-            <el-form-item label="集团名称：" :label-width="formLabelWidth" prop="groupName">
-                <el-input v-model="companyForm.groupName" autocomplete="off"  maxlength="50" style="width: 290px;"></el-input>
+            <el-form-item label="集团名称：" prop="companyGroupId" :label-width="formLabelWidth">
+                <el-select v-model="companyForm.companyGroupId"  filterable clearable placeholder="选择所属集团" style="width: 290px;">
+                    <el-option
+                            v-for="item in userInfoAddList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                    </el-option>
+                </el-select>
             </el-form-item>
             <el-form-item label="公司地址：" :label-width="formLabelWidth" prop="companyAddress">
                 <el-input v-model="companyForm.companyAddress" autocomplete="off"  maxlength="100" style="width: 290px;"></el-input>
@@ -84,12 +103,17 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var userInfoList = [[${ userInfoList }]];
+    var userInfoAddList = [[${ userInfoAddList }]];
 var companyVM = new Vue({
         el: '#companyManage',
         data: {
+                userInfoList:userInfoList,
+            userInfoAddList:userInfoAddList,
         		companySearchForm: {
 	        		companyName: '',
-	        		phoneNumber: ''
+	        		phoneNumber: '',
+                    companyGroupId:''
 	            },
 	            companyForm: {
 	            	id:'',
@@ -97,7 +121,8 @@ var companyVM = new Vue({
 	            	groupName:'',
                 	companyAddress:'',
                     phoneNumber:'',
-                    website:''
+                    website:'',
+                    companyGroupId:''
                 },
 	            dataTable:[],
 	            dialogFormVisible: false,
@@ -115,8 +140,8 @@ var companyVM = new Vue({
                 	companyName: [
                       { required: true, message: '公司名称不能为空', trigger: 'blur' }
                     ],
-                    groupName: [
-                      { required: true, message: '集团名称不能为空', trigger: 'blur' }
+                    companyGroupId: [
+                      { required: true, message: '请选择所属集团', trigger: 'change' }
                     ],
                     companyAddress: [
                       { required: true, message: '公司地址不能为空', trigger: 'blur' }
@@ -131,6 +156,7 @@ var companyVM = new Vue({
                 param.pageNum = this.pager.currentPage;
                 param.companyName = this.companySearchForm.companyName;
                 param.phoneNumber = this.companySearchForm.phoneNumber;
+                param.companyGroupId = this.companySearchForm.companyGroupId;
                 console.info(param);
                 axios.post('/aggregation/companyManager/list', param)
                 .then(function (response) {

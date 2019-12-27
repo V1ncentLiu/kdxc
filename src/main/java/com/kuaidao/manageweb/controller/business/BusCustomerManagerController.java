@@ -128,12 +128,13 @@ public class BusCustomerManagerController {
         }
         else if (roleList != null
                 && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())
                         || RoleCodeEnum.BUSBIGAREAW.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
+                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))
+                || RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())) {
 
             // 商务中心查询业务线下数据。
-            if( RoleCodeEnum.BUSCENTERW.name().equals(roleList.get(0).getRoleCode())){
+            if( RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())){
                 orgId =null;
             }
 
@@ -165,7 +166,15 @@ public class BusCustomerManagerController {
                     busSaleGroupList.add(organizationRespDTO);
                 }
             }
+
             request.setAttribute("busSaleGroupList", busSaleGroupList);
+
+            if( RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())){
+                List<OrganizationDTO> busGroupList = getBusGroupList(user.getOrgId(),
+                    OrgTypeConstant.SWZ);
+                request.setAttribute("busSaleGroupList", busGroupList);
+            }
+
             request.setAttribute("ownOrgId", ownOrgId);
         }
 
@@ -270,6 +279,23 @@ public class BusCustomerManagerController {
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }
+
+    /**
+     * 获取所有组织组
+     *
+     * @return
+     */
+    private List<OrganizationDTO> getBusGroupList(Long parentId, Integer type) {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setParentId(parentId);
+        queryDTO.setOrgType(type);
+        // 查询所有组织
+        JSONResult<List<OrganizationDTO>> queryOrgByParam =
+            organizationFeignClient.listDescenDantByParentId(queryDTO);
+        List<OrganizationDTO> data = queryOrgByParam.getData();
+        return data;
+    }
+
 
     /**
      * 获取所有商务经理（组织名-大区名）

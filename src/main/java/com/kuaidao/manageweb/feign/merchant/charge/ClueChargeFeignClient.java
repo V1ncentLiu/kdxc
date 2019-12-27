@@ -1,6 +1,10 @@
 package com.kuaidao.manageweb.feign.merchant.charge;
 
 import java.util.List;
+
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -21,33 +25,44 @@ import feign.hystrix.FallbackFactory;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchantClueCharge",
-        fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/merchantClueCharge", fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
 public interface ClueChargeFeignClient {
-
+    /***
+     * 资源资费列表页
+     *
+     * @return
+     */
+    @PostMapping("/queryPage")
+    JSONResult<PageBean<MerchantClueChargeDTO>> queryPage(@RequestBody MerchantClueChargeReq pageParam);
 
     /**
      * 查询资源资费集合
      * 
-     * @param menuDTO
+     * @param param
      * @return
      */
     @PostMapping("/listNoPage")
-    public JSONResult<List<MerchantClueChargeDTO>> listNoPage(
-            @RequestBody MerchantClueChargePageParam param);
+    public JSONResult<List<MerchantClueChargeDTO>> listNoPage(@RequestBody MerchantClueChargePageParam param);
 
 
 
     /**
      * 新增或修改资源资费
      * 
-     * @param idEntity
+     * @param req
      * @return
      */
     @PostMapping("/insertOrUpdate")
     public JSONResult<String> insertOrUpdate(@RequestBody MerchantClueChargeReq req);
 
-
+    /**
+     * 删除资源费用
+     *
+     * @param merchantClueChargeReq
+     * @return
+     */
+    @PostMapping("/delete")
+    JSONResult<String> delete(@RequestBody MerchantClueChargeReq merchantClueChargeReq);
 
     @Component
     static class HystrixClientFallback implements FallbackFactory<ClueChargeFeignClient> {
@@ -62,8 +77,7 @@ public interface ClueChargeFeignClient {
                     logger.error("接口调用失败");
                     logger.error("接口名{}", name);
                     logger.error("失败原因{}", cause);
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                            SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
                 }
 
 
@@ -73,11 +87,18 @@ public interface ClueChargeFeignClient {
                 }
 
                 @Override
-                public JSONResult<List<MerchantClueChargeDTO>> listNoPage(
-                        @RequestBody MerchantClueChargePageParam param) {
+                public JSONResult<List<MerchantClueChargeDTO>> listNoPage(@RequestBody MerchantClueChargePageParam param) {
                     return fallBackError("查询资源资费集合");
                 }
 
+                @Override
+                public JSONResult<PageBean<MerchantClueChargeDTO>> queryPage(MerchantClueChargeReq pageParam) {
+                    return fallBackError("查询资源资费列表");
+                }
+                @Override
+                public JSONResult<String> delete( MerchantClueChargeReq merchantClueChargeReq){
+                    return fallBackError("删除资费");
+                }
             };
         }
 

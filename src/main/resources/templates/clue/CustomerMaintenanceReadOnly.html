@@ -124,7 +124,7 @@
                         <el-form-item label="客户级别：" :label-width="formLabelWidth120">
                             <span>
                                 {{form.customerLevel}}
-                            </el-button>
+                            </span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -275,7 +275,7 @@
                     </el-col>
                 </el-row>
                 <el-row>
-                    <el-col :span="8">
+                    <el-col :span="8"  v-show="form.qq !=null && form.qq !=''">
                         <el-form-item label="QQ：" :label-width="formLabelWidth120" >
                             <div v-if="showPhone">
                                 <span>{{form.qq}}</span>
@@ -284,8 +284,27 @@
                                 <span>{{(form.qq==null||form.qq=='')?'':'***'}}</span>
                             </div>
                         </el-form-item>
+
+                        <el-form-item label="QQ创建:" prop="QQ" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.qqCreateUserRoleMame}}</font>
+                                <font v-show="form.qqCreateUser !=null && form.qqCreateUser !=''">[{{form.qqCreateUserName}}]</font>
+                                <font >{{formatTimeFn(form.qqCreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.qqUpdateUser !=null && form.qqUpdateUser !=''">
+                            <el-form-item label="QQ修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.qqUpdateUserRoleMame}}</font>
+                                <font >[{{form.qqUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.qqUpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
+
                     </el-col>
-                    <el-col :span="8">
+                    <el-col :span="8" v-show="form.wechat !=null && form.wechat !=''">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth120">
                             <div v-if="showPhone">
                                 <span>{{form.wechat}}</span>
@@ -297,8 +316,27 @@
                                 <span>{{(form.wechat==null||form.wechat=='')?'':'***'}}</span>
                             </div>
                         </el-form-item>
+
+                        <el-form-item label="微信创建:" prop="wechat" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.wechatCreateUserRoleMame}}</font>
+                                <font v-show="form.wechatCreateUser !=null && form.wechatCreateUser !=''">[{{form.wechatCreateUserName}}]</font>
+                                <font >{{formatTimeFn(form.wechatCreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.wechatUpdateUser !=null && form.wechatUpdateUser !=''">
+                            <el-form-item label="微信修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.wechatUpdateUserRoleMame}}</font>
+                                <font >[{{form.wechatUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.wechatUpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
+
                     </el-col>
-                    <el-col :span="8">
+                    <el-col :span="8" v-show="form.customerEmail !=null && form.customerEmail !=''">
                         <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth120">
                             <div v-if="showPhone">
                                 <span>{{form.customerEmail}}</span>
@@ -307,6 +345,24 @@
                                 <span>{{(form.customerEmail==null||form.customerEmail=='')?'':'***'}}</span>
                             </div>
                         </el-form-item>
+
+                        <el-form-item label="邮箱创建:" prop="email" :label-width="formLabelWidth120" >
+                            <div v-show="showPhone">
+                                <font >{{form.emailCreateUserRoleMame}}</font>
+                                <font v-show="form.emailCreateUser !=null && form.emailCreateUser !=''">[{{form.emailCreateUserName}}]</font>
+                                <font >{{formatTimeFn(form.emailCreateTime)}}</font>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+                        </el-form-item>
+                        <div v-show="form.emailUpdateUser !=null && form.emailUpdateUser !=''">
+                            <el-form-item label="邮箱修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.emailUpdateUserRoleMame}}</font>
+                                <font >[{{form.emailUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.emailUpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
                     </el-col>
                 </el-row>
                 <el-row>
@@ -622,9 +678,43 @@
                     <!--<el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>-->
                     <el-button type="text" disabled>{{wechatForm.wechat2}}</el-button>
                 </el-form-item>
+                <el-form-item label="微信2创建:" prop="wechat2" v-show="wechatForm.wechat2 !=null && wechatForm.wechat2 !=''" :label-width="formLabelWidth120" >
+                    <div v-show="showPhone">
+                        <font >{{form.wechat2CreateUserRoleMame}}</font>
+                        <font v-show="form.wechat2CreateUser !=null && form.wechat2CreateUser !=''">[{{form.wechat2CreateUserName}}]</font>
+                        <font >{{formatTimeFn(form.wechat2CreateTime)}}</font>
+                    </div>
+                    <div v-show="!showPhone">
+                        <font color="red">领取后显示</font>
+                    </div>
+                </el-form-item>
+                <div v-show="form.wechat2UpdateUser !=null && form.wechat2UpdateUser !=''">
+                    <el-form-item label="微信2修改:" :label-width="formLabelWidth120" >
+                        <font >{{form.wechat2UpdateUserRoleMame}}</font>
+                        <font >[{{form.wechat2UpdateUserName}}]</font>
+                        <font >{{formatTimeFn(form.wechat2UpdateTime)}}</font>
+                    </el-form-item>
+                </div>
                 <el-form-item label="微信二维码" :label-width="formLabelWidth1" >
                     <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
                 </el-form-item>
+                <el-form-item label="微信二维码创建:" prop="wechatCode" v-show="wechatForm.wechatUrl !=null && wechatForm.wechatUrl !=''" :label-width="formLabelWidth120" >
+                    <div v-show="showPhone">
+                        <font >{{form.wechatCodeCreateUserRoleMame}}</font>
+                        <font v-show="form.wechatCodeCreateUser !=null && form.wechatCodeCreateUser !=''">[{{form.wechatCodeCreateUserName}}]</font>
+                        <font >{{formatTimeFn(form.wechatCodeCreateTime)}}</font>
+                    </div>
+                    <div v-show="!showPhone">
+                        <font color="red">领取后显示</font>
+                    </div>
+                </el-form-item>
+                <div v-show="form.wechatCodeUpdateUser !=null && form.wechatCodeUpdateUser !=''">
+                    <el-form-item label="微信二维码修改:" :label-width="formLabelWidth120" >
+                        <font >{{form.wechatCodeUpdateUserRoleMame}}</font>
+                        <font >[{{form.wechatCodeUpdateUserName}}]</font>
+                        <font >{{formatTimeFn(form.wechatCodeUpdateTime)}}</font>
+                    </el-form-item>
+                </div>
             </el-form>
         </template>
     </el-dialog>
@@ -1100,7 +1190,47 @@ if(customer==null){
             decisionMakerOther: '',//其它决策人的姓名及联系方式
             customerPartnerDetail: '',//合伙人姓名及联系方式
             istrade: '',
-            tradeProject: ''
+            tradeProject: '',
+        wechatCreateUser:'',
+        wechatCreateUserName:'',
+        wechatCreateUserRoleMame:'',
+        wechatCreateTime:'',
+        wechat2CreateUser:'',
+        wechat2CreateUserName:'',
+        wechat2CreateUserRoleMame:'',
+        wechat2CreateTime:'',
+        wechatUpdateUser:'',
+        wechatUpdateUserName:'',
+        wechatUpdateUserRoleMame:'',
+        wechatUpdateTime:'',
+        wechat2UpdateUser:'',
+        wechat2UpdateUserName:'',
+        wechat2UpdateUserName:'',
+        wechat2UpdateTime:'',
+        qqCreateUser:'',
+        qqCreateUserName:'',
+        qqCreateUserRoleMame:'',
+        qqCreateTime:'',
+        qqUpdateUser:'',
+        qqUpdateUserName:'',
+        qqUpdateUserRoleMame:'',
+        qqUpdateTime:'',
+        emailCreateUser:'',
+        emailCreateUserName:'',
+        emailCreateUserRoleMame:'',
+        emailCreateTime:'',
+        emailUpdateUser:'',
+        emailUpdateUserName:'',
+        emailUpdateUserRoleMame:'',
+        emailUpdateTime:'',
+        wechatCodeCreateUser:'',
+        wechatCodeCreateUserName:'',
+        wechatCodeCreateUserRoleMame:'',
+        wechatCodeCreateTime:'',
+        wechatCodeUpdateUser:'',
+        wechatCodeUpdateUserName:'',
+        wechatCodeUpdateUserRoleMame:'',
+        wechatCodeUpdateTime:''
     };
 }else{
 
@@ -1196,8 +1326,48 @@ if(customer==null){
         phone5UpdateTime:customer.phone5UpdateTime,
         customerPhone5UpdateUser:customer.phone5UpdateUser,
         customerPhone5UpdateUserRoleMame:customer.phone5UpdateUserRoleMame,
-        customerPhone5UpdateUserName:customer.phone5UpdateUserName
+        customerPhone5UpdateUserName:customer.phone5UpdateUserName,
 
+        wechatCreateUser:customer.wechatCreateUser,
+        wechatCreateUserName:customer.wechatCreateUserName,
+        wechatCreateUserRoleMame:customer.wechatCreateUserRoleMame,
+        wechatCreateTime:customer.wechatCreateTime,
+        wechat2CreateUser:customer.wechat2CreateUser,
+        wechat2CreateUserName:customer.wechat2CreateUserName,
+        wechat2CreateUserRoleMame:customer.wechat2CreateUserRoleMame,
+        wechat2CreateTime:customer.wechat2CreateTime,
+        wechatUpdateUser:customer.wechatUpdateUser,
+        wechatUpdateUserName:customer.wechatUpdateUserName,
+        wechatUpdateUserRoleMame:customer.wechatUpdateUserRoleMame,
+        wechatUpdateTime:customer.wechatUpdateTime,
+        wechat2UpdateUser:customer.wechat2UpdateUser,
+        wechat2UpdateUserName:customer.wechat2UpdateUserName,
+        wechat2UpdateUserName:customer.wechat2UpdateUserName,
+        wechat2UpdateTime:customer.wechat2UpdateTime,
+        qqCreateUser:customer.qqCreateUser,
+        qqCreateUserName:customer.qqCreateUserName,
+        qqCreateUserRoleMame:customer.qqCreateUserRoleMame,
+        qqCreateTime:customer.qqCreateTime,
+        qqUpdateUser:customer.qqUpdateUser,
+        qqUpdateUserName:customer.qqUpdateUserName,
+        qqUpdateUserRoleMame:customer.qqUpdateUserRoleMame,
+        qqUpdateTime:customer.qqUpdateTime,
+        emailCreateUser:customer.emailCreateUser,
+        emailCreateUserName:customer.emailCreateUserName,
+        emailCreateUserRoleMame:customer.emailCreateUserRoleMame,
+        emailCreateTime:customer.emailCreateTime,
+        emailUpdateUser:customer.emailUpdateUser,
+        emailUpdateUserName:customer.emailUpdateUserName,
+        emailUpdateUserRoleMame:customer.emailUpdateUserRoleMame,
+        emailUpdateTime:customer.emailUpdateTime,
+        wechatCodeCreateUser:customer.wechatCodeCreateUser,
+        wechatCodeCreateUserName:customer.wechatCodeCreateUserName,
+        wechatCodeCreateUserRoleMame:customer.wechatCodeCreateUserRoleMame,
+        wechatCodeCreateTime:customer.wechatCodeCreateTime,
+        wechatCodeUpdateUser:customer.wechatCodeUpdateUser,
+        wechatCodeUpdateUserName:customer.wechatCodeUpdateUserName,
+        wechatCodeUpdateUserRoleMame:customer.wechatCodeUpdateUserRoleMame,
+        wechatCodeUpdateTime:customer.wechatCodeUpdateTime
 
     }
     if(customer.wechatCode !=null && customer.wechatCode!=''){

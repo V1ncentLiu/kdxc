@@ -26,7 +26,7 @@
         <el-button type="warning" @click="exportFun">导出消费记录</el-button>
     </shiro:hasPermission>
     <shiro:hasPermission name="merchant:consumeRecord:view">
-        <el-button type="success" @click="gotoInfo">商家消费明细</el-button>
+        <el-button type="success" @click="gotoInfo()">商家消费明细</el-button>
     </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
@@ -80,15 +80,19 @@
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 
-                <el-table-column align="center" prop="mainAccountName" label="消费商家名称">
+                <el-table-column align="center" prop="userName" label="消费商家名称">
                     <template slot-scope="scope">
-                        <el-button size="mini" type="text" @click="gotoSingle(scope.row.mainAccountId)">{{scope.row.mainAccountName}}</el-button>
+                        <el-button size="mini" type="text" @click="gotoSingle(scope.row.mainAccountId)">{{scope.row.userName}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="dateNum" label="消费数（天）" width="200"></el-table-column>
                 <el-table-column align="center" prop="amount" label="消费金额(元)" width="200"></el-table-column>                
                 <el-table-column align="center" prop="createDate" label="最新消费日期"  :formatter="dateFormat" width="200"></el-table-column>
-                <el-table-column align="center" prop="clueNum" label="总获取资源数（条）" width="200"></el-table-column>
+                <el-table-column align="center" prop="clueNum" label="总获取资源数（条）" width="200">
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="text" @click="gotoInfo(scope.row)">{{scope.row.clueNum}}</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -327,8 +331,12 @@
             gotoSingle(id){
                 window.location.href='/merchant/consumeRecord/initSingleMerchant?mainAccountId='+id;
             },
-            gotoInfo(){
-                window.location.href='/merchant/consumeRecord/initInfoList';
+            gotoInfo(data){
+                if(!data){
+                    window.location.href='/merchant/consumeRecord/initInfoList?createDate=&mainAccountId=';
+                }else{
+                    window.location.href='/merchant/consumeRecord/initInfoList?createDate='+data.createDate+'&mainAccountId='+data.mainAccountId;
+                }
             },
             exportFun(){
                 var rows = this.multipleSelection;

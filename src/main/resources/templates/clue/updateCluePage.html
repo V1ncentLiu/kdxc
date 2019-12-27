@@ -1058,22 +1058,25 @@
                 var phoneArr=this.dynamicValidateForm.domains;
               if(phoneArr.length>0){
                 for(var i=0;i<phoneArr.length;i++){
-                  if(i==0)  {
-                    param.phone2=phoneArr[i].value;
-                    param.phone2CreateTime = phoneArr[i].key;
-                  }
-                  if(i==1)  {
-                    param.phone3=phoneArr[i].value;
-                    param.phone3CreateTime = phoneArr[i].key;
-                  }
-                  if(i==2)  {
-                    param.phone4=phoneArr[i].value;
-                    param.phone4CreateTime = phoneArr[i].key;
-                  }
-                  if(i==3)  {
-                    param.phone5=phoneArr[i].value;
-                    param.phone5CreateTime = phoneArr[i].key;
-                  }
+                	if(phoneArr[i].value !=""){
+                		if(i==0)  {
+                            param.phone2=phoneArr[i].value;
+                            param.phone2CreateTime = phoneArr[i].key;
+                          }
+                          if(i==1)  {
+                            param.phone3=phoneArr[i].value;
+                            param.phone3CreateTime = phoneArr[i].key;
+                          }
+                          if(i==2)  {
+                            param.phone4=phoneArr[i].value;
+                            param.phone4CreateTime = phoneArr[i].key;
+                          }
+                          if(i==3)  {
+                            param.phone5=phoneArr[i].value;
+                            param.phone5CreateTime = phoneArr[i].key;
+                          }
+                	}
+                  
                 }
               }
                 addClueVM.confirmBtnDisabled=true;//禁用提交按钮
@@ -1088,9 +1091,13 @@
                             return ;
                         }
                         if(response.data.code!='0'){
+                        	var type= 'error';
+                        	if(response.data.code=='21917'){
+                        		type='warning'
+                        	}
                             addClueVM.$message({
                                 message:response.data.msg,
-                                type: 'error',duration:2000,onClose:function(){
+                                type: type,duration:2000,onClose:function(){
                                     addClueVM.confirmBtnDisabled=false;
                                     window.location.href="/exetend/agendaTaskManager/waitDistributResource";
                                     return;

@@ -116,6 +116,7 @@
 <script th:inline="javascript">
 var dxList=[[${dxList}]];//电销组
 var projectList=[[${projectList}]];//项目
+var teleProjectList=[[${teleProjectList}]];//项目
 var swList = [[${swList}]];//商务组
 var ownOrgId=[[${ownOrgId}]];//商务总监商务组
 var clueVM = new Vue({
@@ -169,8 +170,10 @@ var clueVM = new Vue({
           },
           exportFun(){
             var param ={};
-            var startReserveTime = this.searchForm.startReserveTime;
-            var endReserveTime = this.searchForm.endReserveTime;
+            // var startReserveTime = this.searchForm.startReserveTime;
+            // var endReserveTime = this.searchForm.endReserveTime;
+            var startReserveTime = new Date(this.searchForm.startReserveTime);
+            var endReserveTime = new Date(this.searchForm.endReserveTime);
             var vilad=false;
             if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
               vilad=true;
@@ -182,8 +185,10 @@ var clueVM = new Vue({
               });
               return;
             }
-            param.startReserveTime = new Date(startReserveTime);
-            param.endReserveTime = new Date(endReserveTime);
+            // param.startReserveTime = new Date(startReserveTime);
+            // param.endReserveTime = new Date(endReserveTime);
+            param.startReserveTime = startReserveTime;
+            param.endReserveTime = endReserveTime;
             param.pageSize = this.pager.pageSize;
             param.pageNum = this.pager.currentPage;
             param.teleGorupId = this.searchForm.teleGorupId;
@@ -277,18 +282,18 @@ var clueVM = new Vue({
                  console.log(`当前页: ${val}`);
                  this.initTableData(val);
                },
-               //品尝项目转换方法
+               //电销组项目转换方法
                transformProject(row, column, cellValue, index) {
             	   var text="";
-              	   if(projectList&&cellValue){
+              	   if(teleProjectList&&cellValue){
 	            	   var array=cellValue.split(",");
 	                   for(var i=0;i<array.length;i++){
-	                	   for(var j=0;j<projectList.length;j++){
-	 	                		if(array[i]==projectList[j].id){
+	                	   for(var j=0;j<teleProjectList.length;j++){
+	 	                		if(array[i]==teleProjectList[j].id){
 	 	                			if(i==0){
-		 	                			text=projectList[j].projectName;
+		 	                			text=teleProjectList[j].projectName;
 	 	                			}else{
-		 	                			text=text+","+projectList[j].projectName;
+		 	                			text=text+","+teleProjectList[j].projectName;
 	 	                			}
 	 	                		}
 	 	                	}

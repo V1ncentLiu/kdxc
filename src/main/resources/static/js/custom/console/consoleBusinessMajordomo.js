@@ -66,7 +66,8 @@ var mainDivVM = new Vue({
         allocationForm: {
             saleId:'',
             remark:'',
-            message:''
+            message:'',
+            saleIdOther:'',//辅助商务经理
         },
         cancelDigForm:{
             cancelReason:'',
@@ -128,9 +129,19 @@ var mainDivVM = new Vue({
         multipleSelection3:[],
         dialogFormVisibleUnVisit:false,
         confirmBtnDisabled:false,//提交按钮 禁用
+        isSaleIdOther:false,//是否展示辅助经理
 
     },
     methods: {
+        showSaleIdOther(){
+            if(this.isSaleIdOther){
+                this.isSaleIdOther=false;
+                // 清空辅助经理的值
+                this.allocationForm.saleIdOther="";
+            }else{
+                this.isSaleIdOther=true;
+            }
+        },
       formatNum(value) {
         if(!value&&value!==0) return 0;
 
@@ -390,7 +401,11 @@ var mainDivVM = new Vue({
                 this.allocationForm.message=text;
             }
            
-           this.allocationVisible = true;
+            this.allocationVisible = true;
+            // 默认不显示辅助商务经理
+            this.isSaleIdOther=false;
+            // 清空辅助经理的值
+            this.allocationForm.saleIdOther="";
         },
         // 提交分发资源
         allocationClue(formName){//分发资源                   
@@ -411,6 +426,16 @@ var mainDivVM = new Vue({
                     param.idList=idList;
                     param.clueIdList=clueIdList;
                     param.busSaleId=this.allocationForm.saleId;
+                    if(this.allocationForm.saleIdOther){
+                        if(this.allocationForm.saleIdOther==this.allocationForm.saleId){
+                            mainDivVM.$message({
+                               message: "辅助经理不能和商务经理相同",
+                               type: 'error'
+                            }); 
+                            return
+                        }
+                        param.busSale2Id=this.allocationForm.saleIdOther;
+                    }    
                     param.remark=this.allocationForm.remark;
                     axios.post('/business/busAllocation/busAllocationClue',param)
                     .then(function (response) {
@@ -552,17 +577,19 @@ var mainDivVM = new Vue({
             }
             
             var title = "";
-            var idArr = new Array();
+            var payIdArr = new Array();
+            var signIdArr = new Array();
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.status!=1){
+                if(curRow.payStatus!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;
                 }
                 title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
-                idArr.push(curRow.id);
+                signIdArr.push(curRow.id);
+                payIdArr.push(curRow.payDetailId)
             }
             if(!isPass){
                 return;
@@ -574,7 +601,8 @@ var mainDivVM = new Vue({
                 type: 'warning'
             }).then(() => {
                 var param={};
-                param.idList = idArr;               
+                param.idList = payIdArr;
+                param.signIdList = signIdArr;
                 axios.post('/sign/signRecord/passAuditSignOrder', param)
                 .then(function (response) {
                     var resData = response.data;
@@ -618,7 +646,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.status!=1){
+                if(curRow.payStatus!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;
@@ -640,15 +668,16 @@ var mainDivVM = new Vue({
                 this.paymentDetailsShow4=false;
                 this.visitRecordShow=false;
                 this.curRow = row;
-                if(row.status==1){
+                if(row.payStatus==1){
                     this.showbutton = true;
                 }else{
                     this.showbutton = false;
                 }
                 // row.signNo;
                 var param = {};
-                param.idList = [row.id];
-                axios.post('/sign/signRecord/listPayDetailNoPage', param)
+                param.id = row.payDetailId;
+                param.signId = row.id;
+                axios.post('/sign/signRecord/findPayDetailById', param)
                 .then(function (response) {
                     var resData = response.data;
                     console.log(resData.data)
@@ -710,7 +739,7 @@ var mainDivVM = new Vue({
           if (cellValue == "1") {
             text = "首次到访"
           } else if (cellValue == "2") {
-            text = "二次到访"
+            text = "2次到访"
           } else {
             text = this.toChinesNum(cellValue) + "次到访"
           }
@@ -794,23 +823,26 @@ var mainDivVM = new Vue({
                     if(rows.length==0){
                         rows.push(this.curRow);
                     }
-                    var idArr = new Array();
+                    var payIdArr = new Array();
+                    var signIdArr = new Array();
                     var isPass = true;
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];
-                        if(curRow.status!=1){
+                        if(curRow.payStatus!=1){
                             this.$message({message:'只允许审核待审核的数据',type:'warning'});
                             isPass=false;
                             break;
                         }
-                       idArr.push(curRow.id);
+                        signIdArr.push(curRow.id);
+                        payIdArr.push(curRow.payDetailId)
                     }
                     if(!isPass){
                         return;
                     }
-                    
-                    
-                    param.idList = idArr;
+
+
+                    param.idList = payIdArr;
+                    param.signIdList = signIdArr;
                     param.rebutReason = this.dialogForm.reason;
                     this.btnDisabled = true;
                     axios.post('/sign/signRecord/rejectSignOrder', param)
@@ -853,7 +885,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             var curRow = this.curRow;
             this.multipleSelection4 = [];
-            if(curRow.status!=1){
+            if(curRow.payStatus!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
                 isPass=false;
             }
@@ -867,17 +899,20 @@ var mainDivVM = new Vue({
         passOne(){ //审核通过一条
             var curRow = this.curRow;
             var title = "";
-            var idArr = new Array();
+            var payIdArr = new Array();
+            var signIdArr = new Array();
             var isPass = true;
-            if(curRow.status!=1){
+            if(curRow.payStatus!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
                 isPass=false;
             }else{
-                idArr.push(curRow.id)
+                payIdArr.push(curRow.payDetailId);
+                signIdArr.push(curRow.id);
             }
             this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
                 var param={};
-                param.idList = idArr;
+                param.idList = payIdArr;
+                param.signIdList = signIdArr;
                 axios.post('/sign/signRecord/passAuditSignOrder', param)
                     .then(function (response) {
                         var resData = response.data;
@@ -993,7 +1028,7 @@ var mainDivVM = new Vue({
             var isPass = true;
             for(var i=0;i<rows.length;i++){
                 var curRow = rows[i];
-                if(curRow.status!=1){
+              if(curRow.status!=1){
                     this.$message({message:'只允许审核待审核的数据',type:'warning'});
                     isPass=false;
                     break;
