@@ -23,6 +23,7 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -623,6 +624,10 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             if("0".equals(json.getCode())){
                 teleGroupList=json.getData();
             }
+        }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+            //该角色下 查询 授权的业务线数据
+            List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
+            teleGroupList=queryOrgByUserAuth(authList,OrgTypeConstant.DXZ);
         }else{
             teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
         }
@@ -745,14 +750,26 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             if(null!=baseQueryDto.getDeptId()){
                 queryDTO.setParentId(baseQueryDto.getDeptId());
             }
+        }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+            //该角色下 查询 授权的业务线数据
+            List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
+            List<OrganizationRespDTO> list=queryOrgByUserAuth(authList,OrgTypeConstant.DXZ);
+            if(!list.isEmpty()){
+                List<Long> orgids=list.stream().map(c->c.getId()).collect(Collectors.toList());
+                baseQueryDto.setOrgIdList(orgids);
+            }else{
+                baseQueryDto.setOrgIdList(Arrays.asList(-1l));
+            }
         }else{
             //other 没权限
             queryDTO.setId(curLoginUser.getOrgId());
         }
         JSONResult<List<OrganizationRespDTO>> json= organizationFeignClient.queryOrgByParam(queryDTO);
-        if("0".equals(json.getCode())){
+        if("0".equals(json.getCode()) && null!=json.getData() && json.getData().size()>0){
             List<Long> orgids=json.getData().stream().map(c->c.getId()).collect(Collectors.toList());
             baseQueryDto.setOrgIdList(orgids);
+        }else{
+            baseQueryDto.setOrgIdList(Arrays.asList(-1l));
         }
     }
 
