@@ -310,6 +310,9 @@ public class BusinessVisitRecordController {
                 projectId.setId(data.getProjectId());
                 JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
                 data.setVistitStoreTypeArr(vistitStoreJson.getData());
+                if(!checkShopType(data.getVistitStoreType(),vistitStoreJson.getData())){
+                    data.setVistitStoreType(null);
+                }
                 return new JSONResult<BusVisitRecordRespDTO>().success(data);
             }
         }
@@ -348,12 +351,31 @@ public class BusinessVisitRecordController {
         projectId.setId(recordRespDTO.getProjectId());
         JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
         recordRespDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+        if(!checkShopType(recordRespDTO.getVistitStoreType(),vistitStoreJson.getData())){
+            recordRespDTO.setVistitStoreType(null);
+        }
         recordRespDTO.setRebutReason(null);
         recordRespDTO.setRebutTime(null);
         recordRespDTO.setNotSignReason(null);
         return new JSONResult<BusVisitRecordRespDTO>().success(recordRespDTO);
     }
 
+    private Boolean checkShopType(String type,List<DictionaryItemRespDTO> itemList){
+        Boolean flag = false;
+        if(!StringUtils.isNotBlank(type)){
+            flag = false;
+        }else if(itemList != null && itemList.size() >0){
+            String shopType = itemList.stream().map(a->a.getValue()).collect(Collectors.joining(","));
+            if(shopType.contains(type)){
+                flag = true;
+            }else {
+                flag = false;
+            }
+        }else {
+            flag = false;
+        }
+        return flag;
+    }
     /**
      * 未到访原因查看
      */
