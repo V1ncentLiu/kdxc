@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "account-service-wyp", path = "/account/monthConsumeStatistics",
+@FeignClient(name = "account-service", path = "/account/monthConsumeStatistics",
         fallbackFactory = MonthConsumeStatisticsFeignClient.HystrixClientFallback.class)
 public interface MonthConsumeStatisticsFeignClient {
 
