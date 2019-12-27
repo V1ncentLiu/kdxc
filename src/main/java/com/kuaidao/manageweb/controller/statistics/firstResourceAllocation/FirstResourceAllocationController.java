@@ -23,6 +23,7 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -624,13 +625,9 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                 teleGroupList=json.getData();
             }
         }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
-            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
-            queryDTO.setOrgType(OrgTypeConstant.DXZ);
-            JSONResult<List<OrganizationRespDTO>> json= organizationFeignClient.queryOrgByParam(queryDTO);
-            if("0".equals(json.getCode())){
-                teleGroupList=json.getData();
-            }
+            //该角色下 查询 授权的业务线数据
+            List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
+            teleGroupList=queryOrgByUserAuth(authList,OrgTypeConstant.DXZ);
         }else{
             teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
         }
@@ -754,7 +751,15 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                 queryDTO.setParentId(baseQueryDto.getDeptId());
             }
         }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
-            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+            //该角色下 查询 授权的业务线数据
+            List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
+            List<OrganizationRespDTO> list=queryOrgByUserAuth(authList,OrgTypeConstant.DXZ);
+            if(!list.isEmpty()){
+                List<Long> orgids=list.stream().map(c->c.getId()).collect(Collectors.toList());
+                baseQueryDto.setOrgIdList(orgids);
+            }else{
+                baseQueryDto.setOrgIdList(Arrays.asList(-1l));
+            }
         }else{
             //other 没权限
             queryDTO.setId(curLoginUser.getOrgId());
