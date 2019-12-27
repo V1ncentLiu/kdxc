@@ -168,6 +168,7 @@ public class BaseStatisticsController {
             List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
             List<OrganizationRespDTO> list=queryOrgByUserAuth(authList,OrgTypeConstant.DZSYB);
             request.setAttribute("deptList",list);
+            return ;
         }else{
             //other 没权限
             queryDTO.setId(-1l);
@@ -367,7 +368,6 @@ public class BaseStatisticsController {
         request.setAttribute("busAreaId",busAreaId);
         request.setAttribute("businessGroupId",businessGroupId);
         request.setAttribute("businessManagerId",businessManagerId);
-
 
         OrganizationQueryDTO busGroupReqDTO1 = new OrganizationQueryDTO();
         busGroupReqDTO1.setSystemCode(SystemCodeConstant.HUI_JU);
