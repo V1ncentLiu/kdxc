@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.common.util.JSONUtil;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,7 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.core.util.JsonUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -689,6 +691,8 @@ public class BusinessSignController {
     paramDTO.setSignId(Long.valueOf(signId));
     JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
 
+    logger.info("queryOne,busSign:{}",busSign);
+
     BusSignRespDTO sign = busSign.getData();
     List<BusSignRespDTO> signData = new ArrayList();
     signData.add(sign);
@@ -713,6 +717,7 @@ public class BusinessSignController {
       JSONResult<List<PayDetailRespDTO>> resListJson =
           payDetailFeignClient.queryList(detailReqDTO);
       if (JSONResult.SUCCESS.equals(resListJson.getCode())) {
+        logger.info("resListJson:{}",resListJson);
         List<PayDetailRespDTO> list = resListJson.getData();
         // 定金
         List<PayDetailRespDTO> one = new ArrayList();
@@ -735,7 +740,7 @@ public class BusinessSignController {
         request.setAttribute("threeData", three);
       }
     }
-
+    logger.info("sign:{}", JSONUtil.toJSon(sign));
     // 查询签约单退款信息
     if (sign.getSignStatus() == 2 && (sign.getRefundStatus() == 4 || sign.getRefundStatus() == 6)) {
       Map map = new HashMap();
