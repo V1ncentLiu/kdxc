@@ -599,6 +599,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         return firstResourceAllocationDto;
     }
 
+
     private Map<String, Object> getOrgList() {
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();

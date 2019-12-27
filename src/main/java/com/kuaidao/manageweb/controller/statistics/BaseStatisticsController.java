@@ -369,7 +369,6 @@ public class BaseStatisticsController {
         request.setAttribute("businessGroupId",businessGroupId);
         request.setAttribute("businessManagerId",businessManagerId);
 
-
         OrganizationQueryDTO busGroupReqDTO1 = new OrganizationQueryDTO();
         busGroupReqDTO1.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO1.setOrgType(OrgTypeConstant.DZSYB);
