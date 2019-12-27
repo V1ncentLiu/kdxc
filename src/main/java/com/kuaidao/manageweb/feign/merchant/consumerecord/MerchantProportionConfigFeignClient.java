@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@FeignClient(name = "account-service-wyp", path = "/account/merchantProportionConfig",
+@FeignClient(name = "account-service", path = "/account/merchantProportionConfig",
         fallbackFactory = MerchantProportionConfigFeignClient.HystrixClientFallback.class)
 public interface MerchantProportionConfigFeignClient {
 
