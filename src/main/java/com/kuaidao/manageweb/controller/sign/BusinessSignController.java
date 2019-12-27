@@ -414,6 +414,9 @@ public class BusinessSignController {
     //获取签约店型
     JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(signDTO.getSignProjectId());
     signDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+    if(!checkShopType(signDTO.getSignShopType(),vistitStoreJson.getData())){
+      signDTO.setSignShopType(null);
+    }
     if(StringUtils.isBlank(signDTO.getSignProvince())){
       signDTO.setSignProvince("");
     }
@@ -426,7 +429,22 @@ public class BusinessSignController {
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
 
-
+  private Boolean checkShopType(String type,List<DictionaryItemRespDTO> itemList){
+    Boolean flag = false;
+    if(!StringUtils.isNotBlank(type)){
+      flag = false;
+    }else if(itemList != null && itemList.size() >0){
+      String shopType = itemList.stream().map(a->a.getValue()).collect(Collectors.joining(","));
+      if(shopType.contains(type)){
+        flag = true;
+      }else {
+        flag = false;
+      }
+    }else {
+      flag = false;
+    }
+    return flag;
+  }
   private Long getProjectId( JSONResult<List<ProjectInfoDTO>> proJson , Long signProjectId){
 
     Long res =null;
