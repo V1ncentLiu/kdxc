@@ -297,7 +297,7 @@
                     var data =  response.data;
                     if(data.code=='0'){
                         var promotionCompany = data.data.promotionCompany;
-                        if(promotionCompany){
+                        if(promotionCompany || promotionCompany == 0){
                             orgVM.form.promotionCompany = promotionCompany+"";
                         }else{
                             orgVM.form.promotionCompany = "";
