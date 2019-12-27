@@ -5,11 +5,9 @@ import com.kuaidao.account.dto.consume.MonthConsumeStatisticsDTO;
 import com.kuaidao.account.dto.consume.MonthConsumeStatisticsReq;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantProportionConfigFeignClient;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MonthConsumeStatisticsFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
@@ -17,7 +15,7 @@ import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -131,6 +132,32 @@ public class MonthConsumeStatisticsController {
         return merchantProportionConfigFeignClient.saveOrUpdate(merchantProportionConfigDTO);
     }
 
+
+    @RequestMapping("/exportExcel")
+    public void exportExcel(HttpServletRequest request,
+                            HttpServletResponse response, @RequestBody MonthConsumeStatisticsReq monthConsumeStatisticsReq){
+        try{
+            List<MonthConsumeStatisticsDTO> list = new ArrayList<>();
+            MonthConsumeStatisticsDTO dto = new MonthConsumeStatisticsDTO();
+            dto.setCompanyNames("1,2,3");
+            dto.setMerchantUserName("集团名称");
+            list.add(dto);
+            MonthConsumeStatisticsDTO [] dtos=list.toArray(new MonthConsumeStatisticsDTO[0]);
+            String [] keys={"companyNames","merchantUserName"};
+            String [] hader={"分公司名称","集团名称"};
+            Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
+            String name = "商家月消费记录统计表";
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=\"" + name+"\"");
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ServletOutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            outputStream.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     /**
      * 获取集团商家
      */
