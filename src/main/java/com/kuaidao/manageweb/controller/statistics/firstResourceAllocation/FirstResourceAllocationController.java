@@ -623,6 +623,14 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             if("0".equals(json.getCode())){
                 teleGroupList=json.getData();
             }
+        }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+            queryDTO.setOrgType(OrgTypeConstant.DXZ);
+            JSONResult<List<OrganizationRespDTO>> json= organizationFeignClient.queryOrgByParam(queryDTO);
+            if("0".equals(json.getCode())){
+                teleGroupList=json.getData();
+            }
         }else{
             teleGroupList = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
         }
@@ -745,14 +753,18 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             if(null!=baseQueryDto.getDeptId()){
                 queryDTO.setParentId(baseQueryDto.getDeptId());
             }
+        }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         }else{
             //other 没权限
             queryDTO.setId(curLoginUser.getOrgId());
         }
         JSONResult<List<OrganizationRespDTO>> json= organizationFeignClient.queryOrgByParam(queryDTO);
-        if("0".equals(json.getCode())){
+        if("0".equals(json.getCode()) && null!=json.getData() && json.getData().size()>0){
             List<Long> orgids=json.getData().stream().map(c->c.getId()).collect(Collectors.toList());
             baseQueryDto.setOrgIdList(orgids);
+        }else{
+            baseQueryDto.setOrgIdList(Arrays.asList(-1l));
         }
     }
 
