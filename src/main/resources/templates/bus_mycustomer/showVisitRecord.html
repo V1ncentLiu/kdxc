@@ -246,7 +246,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="到访店铺类型："    :label-width="formLabelWidth"  prop="vistitStoreType">
-                                <el-select v-model="addVisitRecord.vistitStoreType" placeholder="请选择"  clearable >
+                                <el-select v-model="addVisitRecord.vistitStoreType" placeholder="请选择"  clearable @change="getShopType">
                                     <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -644,20 +644,20 @@
                     <div>
                         <el-row>
                             <el-col :span="10">
-                                <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
-                                    <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" @change="changePayType">
-                                        <!-- <el-option  key="1" label="全款" value="1"></el-option>
-                                         <el-option  key="2" label="定金" value="2"></el-option>
-                                         <el-option  key="3" label="追加定金" value="3"></el-option>
-                                         <el-option  key="4" label="尾款" value="4"></el-option>-->
-                                        <el-option
-                                                v-for="item in payTypeArr"
-                                                :key="item.value"
-                                                :label="item.label"
-                                                :value="item.value">
-                                        </el-option>
-                                    </el-select>
-                                </el-form-item>
+<!--                                <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">-->
+<!--                                    <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" >-->
+<!--                                        &lt;!&ndash; <el-option  key="1" label="全款" value="1"></el-option>-->
+<!--                                         <el-option  key="2" label="定金" value="2"></el-option>-->
+<!--                                         <el-option  key="3" label="追加定金" value="3"></el-option>-->
+<!--                                         <el-option  key="4" label="尾款" value="4"></el-option>&ndash;&gt;-->
+<!--                                        <el-option-->
+<!--                                                v-for="item in payTypeArr"-->
+<!--                                                :key="item.value"-->
+<!--                                                :label="item.label"-->
+<!--                                                :value="item.value">-->
+<!--                                        </el-option>-->
+<!--                                    </el-select>-->
+<!--                                </el-form-item>-->
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
@@ -950,8 +950,15 @@
             },
         },
         methods: {
-
-
+            getShopType(value){
+                var param = {};
+                param.id = value;
+                axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                    console.log("###"+response.data.data.vistitStoreTypeArr);
+                    mainDivVM.vistitStoreTypeArr= response.data.data;
+                    mainDivVM.addVisitRecord.vistitStoreType =''
+                });
+            },
             formatVisitTime(row){
 
                 function dateFtt(fmt,date)
@@ -987,6 +994,7 @@
                     mainDivVM.currentProvince(mainDivVM.addVisitRecord.signProvince)
                     mainDivVM.currentCity(mainDivVM.addVisitRecord.signCity)
                     mainDivVM.showNotSignReason(mainDivVM.addVisitRecord.isSign);
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                 });
             },
             editSign(row){
@@ -1305,11 +1313,11 @@
         created(){
             this.initList();
             //  到访店铺类型 vistitStoreTypeArr
-            var param={};
-            param.groupCode="vistitStoreType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                mainDivVM.vistitStoreTypeArr=response.data.data;
-            });
+            // var param={};
+            // param.groupCode="vistitStoreType";
+            // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            //     mainDivVM.vistitStoreTypeArr=response.data.data;
+            // });
 
             //初始化省份
             param={};

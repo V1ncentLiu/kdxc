@@ -341,8 +341,8 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                                <el-select :disabled="notEditRebutSign" clearable filterable v-model="updateFormSigning.signProjectId"
-                                           placeholder="请选择" style="width:100%;">
+                                <el-select :disabled="notEditRebutSign" clearable filterable @change="getShopType" v-model="updateFormSigning.signProjectId"
+                                           placeholder="请选择" style="width:100%;" >
                                     <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName"
                                                :value="item.id"></el-option>
                                 </el-select>
@@ -661,7 +661,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                                <el-select v-model="formSigning.signProjectId"  clearable filterable  placeholder="请选择" style="width: 100%;">
+                                <el-select v-model="formSigning.signProjectId"  clearable filterable @change="getShopType" placeholder="请选择" style="width: 100%;">
                                     <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -1528,6 +1528,18 @@
         computed: {
         },
         methods: {
+            getShopType(value){
+                var param = {};
+                param.id = value;
+                axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                    console.log("###"+response.data.data.vistitStoreTypeArr);
+                    mainDivVM.vistitStoreTypeArr= response.data.data;
+                    mainDivVM.formSigning.signShopType =''
+                    mainDivVM.formSigning.visitShopType =''
+                    mainDivVM.updateFormSigning.signShopType =''
+                    mainDivVM.updateFormSigning.visitShopType =''
+                });
+            },
             formatTypeFn(value){//
                 if(value=="1"){
                     value="一次性全款"
@@ -1770,9 +1782,10 @@
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.formSigning.clueId=vclueId;
                     mainDivVM.dialogFormSigningVisible = true;
-                    mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
-                    mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+                    mainDivVM.currentProvince(mainDivVM.formSigning.signProvince);
+                    mainDivVM.currentCity(mainDivVM.formSigning.signCity);
                     mainDivVM.formSigning.payName = response.data.data.customerName;
+                    mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
                 });
             },
             currentProvince(selVal){
@@ -2211,11 +2224,11 @@
         created(){
             // this.initList();
             //  到访店铺类型 vistitStoreTypeArr
-            var param={};
-            param.groupCode="vistitStoreType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                mainDivVM.vistitStoreTypeArr=response.data.data;
-            });
+            // var param={};
+            // param.groupCode="vistitStoreType";
+            // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            //     mainDivVM.vistitStoreTypeArr=response.data.data;
+            // });
 
             param = {};
             param.groupCode = "payMode";

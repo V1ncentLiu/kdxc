@@ -75,7 +75,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="考察项目:">
-                        <el-select v-model="queryForm.tasteProjectId" placeholder="考察项目" clearable filterable>
+                        <el-select v-model="queryForm.tasteProjectId" placeholder="考察项目" clearable filterable @change="getShopType">
                             <el-option v-for="item in tasteProArr" :key="item.id" :label="item.projectName"
                                        :value="item.id"></el-option>
                         </el-select>
@@ -345,7 +345,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察项目" :label-width="formLabelWidth" prop="projectId">
                             <el-select v-model="addVisitRecord.projectId" placeholder="请选择" clearable filterable
-                                       style="width:100%">
+                                       style="width:100%" @change="getShopType">
                                 <el-option
                                         v-for="item in tasteProArr"
                                         :key="item.id"
@@ -506,7 +506,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察项目" :label-width="formLabelWidth" prop="projectId">
                             <el-select v-model="updateVisitRecord.projectId" placeholder="请选择" clearable filterable
-                                       style="width:100%">
+                                       style="width:100%" @change="getShopType">
                                 <el-option
                                         v-for="item in tasteProArr"
                                         :key="item.id"
@@ -853,7 +853,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                                <el-select v-model="formSigning.signProjectId" clearable filterable  placeholder="请选择" style="width:100%">
+                                <el-select v-model="formSigning.signProjectId" clearable filterable  placeholder="请选择" style="width:100%" @change="getShopType">
                                     <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName"
                                                :value="item.id"></el-option>
                                 </el-select>
@@ -1406,7 +1406,7 @@
                                 </el-col>
                                 <el-col :span="12">
                                     <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                                        <el-select clearable filterable v-model="updateFormSigning.signProjectId" placeholder="请选择" style="width:100%;">
+                                        <el-select clearable filterable v-model="updateFormSigning.signProjectId" placeholder="请选择" style="width:100%;" @change="getShopType">
                                             <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName"
                                                        :value="item.id"></el-option>
                                         </el-select>
@@ -3014,11 +3014,27 @@
                 axios.post('/busVisitRecord/echo', param).then(function (response) {
                     mainDivVM.addVisitRecord = response.data.data;
                     mainDivVM.addVisitRecord.clueId = row.clueId;
-                    mainDivVM.addVisitRecord.vistitTime = new Date()
+                    mainDivVM.addVisitRecord.vistitTime = new Date();
                     mainDivVM.addVisitRecordDialogVisible = true;
-                    mainDivVM.currentProvince(mainDivVM.addVisitRecord.signProvince)
-                    mainDivVM.currentCity(mainDivVM.addVisitRecord.signCity)
-                    mainDivVM.showNotSignReason(mainDivVM.addVisitRecord.isSign);
+                    mainDivVM.currentProvince(mainDivVM.addVisitRecord.signProvince);
+                    mainDivVM.currentCity(mainDivVM.addVisitRecord.signCity);
+                    //mainDivVM.showNotSignReason(mainDivVM.addVisitRecord.isSign);
+                    console.log("###"+response.data.data.vistitStoreTypeArr);
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                });
+            },
+            getShopType(value){
+                var param = {};
+                param.id = value;
+                axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                    console.log("###"+response.data.data.vistitStoreTypeArr);
+                    mainDivVM.vistitStoreTypeArr= response.data.data;
+                    mainDivVM.addVisitRecord.vistitStoreType =''
+                    mainDivVM.updateVisitRecord.vistitStoreType =''
+                    mainDivVM.formSigning.signShopType =''
+                    mainDivVM.formSigning.visitShopType =''
+                    mainDivVM.updateFormSigning.signShopType =''
+                    mainDivVM.updateFormSigning.visitShopType =''
                 });
             },
             showNotVisitReason(row) {
@@ -3413,6 +3429,7 @@
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                     mainDivVM.formSigning.payName = response.data.data.customerName;
+                    mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr
                 });
             },
             showSignDetail(row) {
@@ -3826,11 +3843,11 @@
             });
             //初始化数据列表
             this.initList();
-            //  到访店铺类型 vistitStoreTypeArr
-            param.groupCode = "vistitStoreType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                mainDivVM.vistitStoreTypeArr = response.data.data;
-            });
+            // //  到访店铺类型 vistitStoreTypeArr
+            // param.groupCode = "vistitStoreType";
+            // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            //     mainDivVM.vistitStoreTypeArr = response.data.data;
+            // });
 
             param = {};
             param.groupCode = "payMode";
