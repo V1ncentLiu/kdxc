@@ -1,21 +1,20 @@
 package com.kuaidao.manageweb.feign.merchant.consumerecord;
 
+import com.kuaidao.account.dto.consume.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.account.dto.consume.ConsumeRecordNumDTO;
-import com.kuaidao.account.dto.consume.CountConsumeRecordDTO;
-import com.kuaidao.account.dto.consume.MerchantConsumeRecordDTO;
-import com.kuaidao.account.dto.consume.MerchantConsumeRecordPageParam;
-import com.kuaidao.account.dto.consume.MerchantConsumeRecordReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import feign.hystrix.FallbackFactory;
+
+import java.util.List;
 
 /**
  * 消费记录
@@ -30,7 +29,6 @@ public interface MerchantConsumeRecordFeignClient {
     /**
      * 新增消费记录
      * 
-     * @param queryDTO
      * @return
      */
     @PostMapping("/create")
@@ -41,7 +39,6 @@ public interface MerchantConsumeRecordFeignClient {
     /**
      * 根据id查询消费记录信息
      * 
-     * @param menuDTO
      * @return
      */
     @PostMapping("/get")
@@ -51,7 +48,6 @@ public interface MerchantConsumeRecordFeignClient {
     /**
      * 查询消费明细
      * 
-     * @param menuDTO
      * @return
      */
     @PostMapping("/list")
@@ -61,7 +57,6 @@ public interface MerchantConsumeRecordFeignClient {
     /**
      * 查询消费记录（商家端）
      * 
-     * @param menuDTO
      * @return
      */
     @PostMapping("/countListMerchant")
@@ -71,7 +66,6 @@ public interface MerchantConsumeRecordFeignClient {
     /**
      * 查询消费记录（管理端）
      * 
-     * @param menuDTO
      * @return
      */
     @PostMapping("/countList")
@@ -81,12 +75,17 @@ public interface MerchantConsumeRecordFeignClient {
     /**
      * 查询今日、昨日消费统计（管理端）
      * 
-     * @param menuDTO
      * @return
      */
     @PostMapping("/countNum")
     public JSONResult<ConsumeRecordNumDTO> countNum(
             @RequestBody MerchantConsumeRecordPageParam pageParam);
+
+    /**
+     * 导出分公司消费记录
+     */
+    @PostMapping("/exportCompanyConsumeRecord")
+    public JSONResult<List<CompanyConsumeRecordDTO>> exportCompanyConsumeRecord(@RequestBody CompanyConsumeRecordReq req);
 
 
     @Component
@@ -139,6 +138,11 @@ public interface MerchantConsumeRecordFeignClient {
                 public JSONResult<ConsumeRecordNumDTO> countNum(
                         MerchantConsumeRecordPageParam pageParam) {
                     return fallBackError("查询今日、昨日消费统计（管理端）");
+                }
+
+                @Override
+                public JSONResult<List<CompanyConsumeRecordDTO>> exportCompanyConsumeRecord(CompanyConsumeRecordReq req) {
+                    return fallBackError("导出分公司消费记录");
                 }
 
             };

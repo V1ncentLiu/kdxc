@@ -1,13 +1,13 @@
 package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
 import com.kuaidao.account.dto.config.MerchantProportionConfigDTO;
-import com.kuaidao.account.dto.consume.MonthConsumeStatisticsDTO;
-import com.kuaidao.account.dto.consume.MonthConsumeStatisticsReq;
+import com.kuaidao.account.dto.consume.*;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantConsumeRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantProportionConfigFeignClient;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MonthConsumeStatisticsFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
@@ -27,6 +27,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -54,6 +55,8 @@ public class MonthConsumeStatisticsController {
     private MonthConsumeStatisticsFeignClient monthConsumeStatisticsFeignClient;
     @Autowired
     private MerchantProportionConfigFeignClient merchantProportionConfigFeignClient;
+    @Autowired
+    private MerchantConsumeRecordFeignClient merchantConsumeRecordFeignClient;
 
 
     /**
@@ -135,18 +138,15 @@ public class MonthConsumeStatisticsController {
 
     @RequestMapping("/exportExcel")
     public void exportExcel(HttpServletRequest request,
-                            HttpServletResponse response, @RequestBody MonthConsumeStatisticsReq monthConsumeStatisticsReq){
+                            HttpServletResponse response, @RequestBody CompanyConsumeRecordReq companyConsumeRecordReq){
         try{
-            List<MonthConsumeStatisticsDTO> list = new ArrayList<>();
-            MonthConsumeStatisticsDTO dto = new MonthConsumeStatisticsDTO();
-            dto.setCompanyNames("1,2,3");
-            dto.setMerchantUserName("集团名称");
-            list.add(dto);
-            MonthConsumeStatisticsDTO [] dtos=list.toArray(new MonthConsumeStatisticsDTO[0]);
-            String [] keys={"companyNames","merchantUserName"};
-            String [] hader={"分公司名称","集团名称"};
+            JSONResult<List<CompanyConsumeRecordDTO>> listJSONResult =
+                    merchantConsumeRecordFeignClient.exportCompanyConsumeRecord(companyConsumeRecordReq);
+            MonthConsumeStatisticsDTO [] dtos=listJSONResult.getData().toArray(new MonthConsumeStatisticsDTO[0]);
+            String [] keys={"companyName","createTime","clueId","amount"};
+            String [] hader={"分公司名称","消费时间","消费资源ID","消费金额（元）"};
             Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
-            String name = "商家月消费记录统计表";
+            String name = MessageFormat.format("商家月消费记录统计表{0}.xlsx","_"+System.currentTimeMillis());
             response.addHeader("Content-Disposition",
                     "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
