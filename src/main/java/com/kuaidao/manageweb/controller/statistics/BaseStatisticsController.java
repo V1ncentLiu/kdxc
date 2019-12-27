@@ -163,6 +163,8 @@ public class BaseStatisticsController {
             return ;
         }else if(RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.DXZC.name().equals(roleCode)){
             //管理员可以查看全部
+        }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+            queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         }else{
             //other 没权限
             queryDTO.setId(-1l);
