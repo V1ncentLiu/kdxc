@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>公司占比设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <div class="mainSearchBg">
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="applyUserName" label="商家名称"></el-table-column>    
+                <el-table-column align="center" prop="invoiceOrderNum" label="分公司"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="消费占比">
+                    <template slot-scope="scope">
+                        
+                        <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">修改比例</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList1=[[${userList}]];//商户集合
+    var merchantUserList=merchantUserList1.data;
+    console.log(merchantUserList)
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                pendingReviewNum:'',
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  applyUserId:'',
+                  createStartTime:'',
+                  createEndTime:'',
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                merchantUserListOptions:merchantUserList,
+            }        	  
+        },
+        methods: {
+            gotoSetting(){
+                window.location.href='/merchant/consumeRecord/initSingleMerchant?mainAccountId';
+            },
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            }, 
+            //审核
+            updateStatus(id) {
+                debugger
+                var param = {};
+                param.id=id; 
+                // this.$confirm('确认审核通过吗？', '提示', {
+                //     confirmButtonText: '确定',
+                //     cancelButtonText: '取消',
+                //     type: 'warning'
+                // }).then(() => {
+                    axios.post('/merchant/merchantApplyInvoice/markInvoiceIssued', param)
+                    .then(function (response) {
+                        var result =  response.data;
+                        if (result.code == "0") {
+                            ocmVM.$message({
+                                message: '操作成功', type: 'success', duration: 1000, onClose: function () {
+                                    ocmVM.searchTable();
+                                }
+                            });
+                        }else{
+                        	  ocmVM.$message.error("操作失败");
+                        }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    });
+                // }).catch(() => {
+                //     console.log(error);
+                // });
+            },
+            searchTable() {
+            	var startTime=this.form.createStartTime;
+                var endTime=this.form.createEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.applyUserId = this.form.applyUserId;
+                param.createStartTime = this.form.createStartTime;
+                param.createEndTime = this.form.createEndTime;
+                console.info(param);
+                axios.post('/merchant/merchantApplyInvoice/findMerchantApplyInvoiceList', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }                    
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
