@@ -6,46 +6,36 @@
     </style>
 </head>
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>首次资源分配表</el-breadcrumb-item>
-    </el-breadcrumb>    
+    </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" :disabled="btnDisabled" @click="searchYesterday">昨天</el-button>
         <el-button type="success" :disabled="btnDisabled" @click="searchWeek">近七天</el-button>
         <el-button type="warning" :disabled="btnDisabled" @click="searchMonth">本月</el-button>
         <shiro:hasPermission name="statistics:firstResourceAllocation:export">
-        <el-button type="danger"  @click="exportRs">导出Excel报表</el-button>
+            <el-button type="danger"  @click="exportRs">导出Excel报表</el-button>
         </shiro:hasPermission>
     </el-row>
-    <div class="mainSearchBg">        
+    <div class="mainSearchBg">
         <div class="mainSearchFormBox">
-           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
+            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="起止时间:">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="事业部:">
-                    <el-select v-model="form.deptId" placeholder="事业部" @change="curTelGroupSale" style="width: 100%;" clearable filterable :disabled="isDeptDisabled">
-                        <el-option
-                            v-for="item in deptList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">
                     <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -57,19 +47,19 @@
                 </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="btnDisabled" class="searchBtn">搜索</el-button>
-                </div>  
+                </div>
             </el-form>
         </div>
         <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                :data="tableData"
-                v-loading="loading"
-                :span-method="arraySpanMethod"
-                >
+            <el-table
+                    ref="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="tableData"
+                    v-loading="loading"
+                    :span-method="arraySpanMethod"
+            >
                 <el-table-column align="center" type="index" label="序号"  width="55" :index="indexFun"></el-table-column>
                 <!-- 组列 -->
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgName'" :width="item.width">
@@ -89,20 +79,17 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var deptList=[[${deptList}]];
     var queryOrg=[[${saleGroupList}]];//电销组
     var fieldList=[[${fieldList}]];//表头list
     var curOrgId = [[${curOrgId}]];
-    var curDeptId=[[${deptId}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
                 isDisabled: false,
-                isDeptDisabled: false,
                 btnDisabled: false,
-                pager:{ 
+                pager:{
                     total: 0,
                     currentPage: 1,
                     pageSize: 20
@@ -110,25 +97,22 @@
                 form: {
                     startTime: '',
                     endTime: '',
-                    deptId:curDeptId,
                     orgId: curOrgId,
                     isTransfer: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    deptId:curDeptId,
                     orgId: curOrgId,
-                    isTransfer: ''                    
+                    isTransfer: ''
                 },
                 tableData: [],//表格数据
                 tableColums: fieldList,//表头list
-                orgTeleArr: "",//电销组
-                deptList: deptList,//电销组
+                orgTeleArr: queryOrg,//电销组
             }
         },
-        methods: { 
-            searchTable(firstPage) {   
+        methods: {
+            searchTable(firstPage) {
                 // this.tableColums= fieldList;
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -164,8 +148,8 @@
                         type: 'warning'
                     });
                     return;
-                }   
-                
+                }
+
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
@@ -176,7 +160,6 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 param.orgId =  this.form.orgId; // 电销组
-                param.deptId=this.form.deptId;
                 param.isTransfer = this.form.isTransfer;
                 this.loading = true;
                 this.btnDisabled = true;
@@ -189,7 +172,7 @@
                         mainDivVM.loading=false;
                         mainDivVM.btnDisabled=false;
                         return ;
-                    } 
+                    }
                     var resobj= response.data;
                     if(!resobj){
                         mainDivVM.$message({
@@ -208,10 +191,10 @@
                         mainDivVM.loading=false;
                         mainDivVM.btnDisabled=false;
                         return ;
-                    }  
-                    var resobjData=resobj.data.data;                 
-                    // 表格数据渲染     
-                    mainDivVM.tableData=resobjData;       
+                    }
+                    var resobjData=resobj.data.data;
+                    // 表格数据渲染
+                    mainDivVM.tableData=resobjData;
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
@@ -267,12 +250,12 @@
                             type: 'error'
                         });
                         return ;
-                    }  
+                    }
                     var resobjData=resobj.data;
                     // 插入合计一行
-                    mainDivVM.tableData.unshift(resobjData[0]);  
+                    mainDivVM.tableData.unshift(resobjData[0]);
                     // loading
-                    mainDivVM.loading=false;                   
+                    mainDivVM.loading=false;
                 });
             },
             limitTime (start, end) {
@@ -293,7 +276,7 @@
                     var e = endTime.slice(0,8);
                     if(e < data){
                         this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
-                        return this.form.endTime;                        
+                        return this.form.endTime;
                     }
                     return end;
                 }
@@ -304,7 +287,7 @@
                         return [0, 0];
                     } else if (columnIndex === 1) {
                         return [1, 2];
-                    }  
+                    }
                 }
             },
             indexFun (index) { // 表格序号
@@ -319,7 +302,7 @@
                 if(orgId === "0" && orgName === "合计"){
                     window.location.href=" /statistics/firstResourceAllocation/firstRATableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime + "&isTransfer=" + isTransfer;
                 }else if(orgId){
-                    window.location.href=" /statistics/firstResourceAllocation/firstRATableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime+ "&isTransfer=" + isTransfer; 
+                    window.location.href=" /statistics/firstResourceAllocation/firstRATableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime+ "&isTransfer=" + isTransfer;
                 }
             },
             minuteFormat (m) {
@@ -329,38 +312,38 @@
                 var monthRea = timeStr.getMonth()+1;
                 monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
                 var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;
                 var hoursRes = timeStr.getHours();
-                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;
                 var minRes = timeStr.getMinutes();
-                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                minRes = minRes < 10 ?  "0" + minRes : minRes;
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
             searchYesterday(){ // 昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
+                var today = new Date();
+                today.setTime(today.getTime()-24*60*60*1000);
+                var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+                this.form.startTime=startTime;
+                this.form.endTime=endTime;
+                this.searchTable(1);
             },
             searchWeek(){ // 近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable(1);
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var c = b.valueOf()-6*24*60*60*1000;
+                var d = b.valueOf();
+                var startTime= new Date(c);
+                var endTime = new Date(d);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                this.searchTable(1);
             },
-            searchMonth(){ // 本月 
+            searchMonth(){ // 本月
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -373,39 +356,11 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
             },
-            curTelGroupSale(seleVal){
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.form.orgId = '';
-                this.getTelGroupSale(seleVal);
-            },
-            getTelGroupSale(seleVal){
-                if(!seleVal){return;}
-                param={};
-                param.parentId=seleVal;
-                param.orgType=1;
-                axios.post('/base/getGroupList',param).then(function (response) {
-                    mainDivVM.orgTeleArr=response.data.data;
-                }).catch(function (error) {
-                    mainDivVM.$message({
-                        message: "电销组请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
-            firstCurTelGroupSale(seleVal){
-                if(seleVal==null||seleVal==""){
-                    return ;
-                }
-                this.getTelGroupSale(seleVal);
-            },
             exportRs(){
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId;
-                param.deptId=this.export.deptId;
                 param.isTransfer = this.export.isTransfer;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationPage',param,{responseType:'blob'})
                     .then(function (response) {
@@ -429,30 +384,17 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime;
-
-            if(curDeptId){
-                this.isDeptDisabled = true;
-                this.form.deptId = curDeptId;
-                this.export.deptId = this.form.deptId;
-                this.firstCurTelGroupSale(curDeptId);
-                if(curOrgId){
-                    this.isDisabled = true;
-                    this.form.orgId = curOrgId;
-                    this.export.orgId = this.form.orgId;
-                }
-            }
-
-            // if(curOrgId){this.isDisabled= true;}
+            if(curOrgId){this.isDisabled= true;}
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
         },
-        mounted(){            
+        mounted(){
             document.getElementById('maindiv').style.display = 'block';
         }
     })
-    
+
 </script>
 </html>
