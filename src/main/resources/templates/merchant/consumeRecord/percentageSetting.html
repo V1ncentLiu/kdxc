@@ -98,16 +98,24 @@
                 param.companyIds=row.companyIds; //分公司Id               
                 param.companyNames=row.companyNames;//分公司名称
                 if(row.inputValArr.length>0){
-                    var proportionVal="";
+                    var proportionStr="";
+                    var proportionVal=null;
                     for(var i=0;i<row.inputValArr.length;i++){
                         if(row.inputValArr[i].val){
-                           proportionVal=row.inputValArr[i].val+"," 
+                           proportionStr+=row.inputValArr[i].val+","; 
+                           proportionVal+=parseInt(row.inputValArr[i].val); 
                        }                     
-                    }       
-                    if(proportionVal) {
-                        param.proportion=proportionVal.substring(0,proportionVal.length-1);//分公司占比
+                    }     
+                    if(proportionVal>100){
+                        ocmVM.$message.error("消费占比总数不能大于100");
+                        return;
+                    }  
+                    if(proportionStr) {
+                        param.proportion=proportionStr.substring(0,proportionStr.length-1);//分公司占比
                     }else{
-                        param.proportion=""
+                        param.proportion="";
+                        ocmVM.$message.error("消费占比不能为空");
+                        return;
                     } 
                 }                
                 console.log(param)

@@ -118,7 +118,13 @@
             exportExcel(id) {
                 var param = {};
                 // 搜索条件
-                param.month = this.form.month;
+                var month=this.form.month;
+                if(month&&month.length>6){
+                    month=this.minuteFormat(this.form.month);
+                }else{
+                    month=this.form.month;
+                }
+                param.month = month;
                 param.merchantUserId =  this.form.merchantUserId;
                 axios.post('/merchant/monthConsumeStatistics/exportExcel',param,{responseType:'blob'})
                     .then(function (response) {
