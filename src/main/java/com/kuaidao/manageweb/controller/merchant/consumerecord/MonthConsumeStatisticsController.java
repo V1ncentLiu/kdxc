@@ -143,7 +143,7 @@ public class MonthConsumeStatisticsController {
             JSONResult<List<CompanyConsumeRecordDTO>> listJSONResult =
                     merchantConsumeRecordFeignClient.exportCompanyConsumeRecord(companyConsumeRecordReq);
             MonthConsumeStatisticsDTO [] dtos=listJSONResult.getData().toArray(new MonthConsumeStatisticsDTO[0]);
-            String [] keys={"companyName","createTime","clueId","amount"};
+            String [] keys={"companyName","createTimeStr","clueId","amount"};
             String [] hader={"分公司名称","消费时间","消费资源ID","消费金额（元）"};
             Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
             String name = MessageFormat.format("商家月消费记录统计表{0}.xlsx","_"+System.currentTimeMillis());
