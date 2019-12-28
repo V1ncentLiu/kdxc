@@ -18,7 +18,7 @@
     </el-breadcrumb>  
     <div class="mainSearchBg">
         <el-row>
-            <el-form :model="form" label-width="100px" class="demo-dynamic">
+            <el-form :model="form">
                 <el-table
                     ref="multipleTable"
                     tooltip-effect="dark"
@@ -31,10 +31,10 @@
                     <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                     <el-table-column align="center" prop="merchantUserName" label="商家名称"></el-table-column>    
                     <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
-                    <el-table-column align="center" label="消费占比">
+                    <el-table-column align="center" label="消费占比%">
                         <template slot-scope="scope">
-                            <el-form-item v-for="item in scope.row.inputValArr" style="width: 50px;float: left;margin-right: 10px;">
-                                <el-input v-model="item.val" maxLength="3" style="width: 40px;float: left;margin-right: 7px;"></el-input><span>{{item.index}}</span>
+                            <el-form-item v-for="item in scope.row.inputValArr" style="display: inline-block;width: 50px;margin-right: 10px;">
+                                <el-input v-model="item.val" maxLength="3" style="width: 40px;margin-right: 7px;"></el-input><span>{{item.index}}</span>
                             </el-form-item>
                             <el-button size="mini" type="success" @click="update(scope.row,scope.row.id)" v-if="scope.row.isShowBtn">修改比例</el-button>
                         </template>
@@ -57,9 +57,9 @@
             return {                
                 multipleSelection: [],//选择行
                 pager:{
-                  total: 0,
-                  currentPage: 1,
-                  pageSize: 20,
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
                 },
                 form: {
                     dataTable: [],
@@ -89,70 +89,108 @@
             //修改比例
             update(row,id) {
                 console.log(row)
-                
+                var param={}
+                if(row.id){
+                    param.id=row.id;  
+                }                
+                param.merchantUserId=row.merchantUserId;
+                param.merchantUserName=row.merchantUserName;
+                param.companyIds=row.companyIds; //分公司Id               
+                param.companyNames=row.companyNames;//分公司名称
+                if(row.inputValArr.length>0){
+                    var proportionVal="";
+                    for(var i=0;i<row.inputValArr.length;i++){
+                        if(row.inputValArr[i].val){
+                           proportionVal=row.inputValArr[i].val+"," 
+                       }                     
+                    }       
+                    if(proportionVal) {
+                        param.proportion=proportionVal.substring(0,proportionVal.length-1);//分公司占比
+                    }else{
+                        param.proportion=""
+                    } 
+                }                
+                console.log(param)
+                axios.post('/merchant/monthConsumeStatistics/saveOrUpdate', param)
+                .then(function (response) {
+                    console.log(response)
+                    var responseData = response.data;
+                    if (responseData.code == "0") {
+                        var result =  responseData.data;
+                        ocmVM.$message.success("设置成功！")
+                    }else {
+                        ocmVM.$message.error(responseData.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }); 
             },
             searchTable() {
             	var param ={};
                 axios.post('/merchant/monthConsumeStatistics/getPercentageSettingList', param)
                 .then(function (response) {
                     console.log(response)
-                    var result =  response.data.data;
-                    console.log(result)
-                    function getValList(item) {
-                        var name1List = item.companyNames;
-                        if(name1List){
-                            name1List=name1List.split(",");                        
-                        }else{
-                            name1List=[];
-                        }
-                        var inputValList = item.proportion
-                        if(inputValList){
-                        inputValList=inputValList.split(",");
-                        }else{
-                            inputValList=[]
-                        }
-                        return name1List.map((item, index) => {
-                            var obj = {};
-                            obj.name = item;
-                            if(inputValList.length>0){
-                                obj.val = inputValList[index]; 
+                    var responseData = response.data;
+                    if (responseData.code == "0") {
+                        var result =  responseData.data;
+                        console.log(result)
+                        function getValList(item) {
+                            var name1List = item.companyNames;
+                            if(name1List){
+                                name1List=name1List.split(",");                        
                             }else{
-                                obj.val=""
+                                name1List=[];
                             }
-                        
-                            if(name1List.length>index+1){
-                                obj.index = ":";
+                            var inputValList = item.proportion
+                            if(inputValList){
+                            inputValList=inputValList.split(",");
                             }else{
-                                obj.index = "";
-                            }                        
-                            return obj;
-                      });
-                    }
-                    function handleData(dataTable) {
-                      // var res = JSON.parse(JSON.stringify(dataTable));
-                      // res.forEach(item => {
-                      dataTable.forEach(item => {  
-                        item.inputValArr = getValList(item)
-                      });
-                      // return res;
-                      return dataTable;
-                    }
-                    console.log(handleData(result))
-                    ocmVM.form.dataTable=handleData(result);
-                    // 有分公司显示修改比例
-                    for(i=0;i<ocmVM.form.dataTable.length;i++){
-                        ocmVM.form.dataTable[i].isShowBtn=false;
-                        if(ocmVM.form.dataTable[i].companyNames){
-                            ocmVM.form.dataTable[i].isShowBtn=true;
+                                inputValList=[]
+                            }
+                            return name1List.map((item, index) => {
+                                var obj = {};
+                                obj.name = item;
+                                if(inputValList.length>0){
+                                    obj.val = inputValList[index]; 
+                                }else{
+                                    obj.val=""
+                                }
+                            
+                                if(name1List.length>index+1){
+                                    obj.index = ":";
+                                }else{
+                                    obj.index = "";
+                                }                        
+                                return obj;
+                          });
                         }
+                        function handleData(dataTable) {
+                            // var res = JSON.parse(JSON.stringify(dataTable));
+                            // res.forEach(item => {
+                            dataTable.forEach(item => {  
+                                item.inputValArr = getValList(item)
+                            });
+                            // return res;
+                            return dataTable;
+                        }
+                        console.log(handleData(result))
+                        ocmVM.form.dataTable=handleData(result);
+                        // 有分公司显示修改比例
+                        for(i=0;i<ocmVM.form.dataTable.length;i++){
+                            ocmVM.form.dataTable[i].isShowBtn=false;
+                            if(ocmVM.form.dataTable[i].companyNames){
+                                ocmVM.form.dataTable[i].isShowBtn=true;
+                            }
+                        }
+                    }else {
+                        ocmVM.$message.error(responseData.msg);
                     }
                 })
                 .catch(function (error) {
                      console.log(error);
-                });
-                
+                });                
             },
-
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
