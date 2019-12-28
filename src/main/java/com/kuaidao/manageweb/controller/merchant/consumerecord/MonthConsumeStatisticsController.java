@@ -120,6 +120,7 @@ public class MonthConsumeStatisticsController {
                     List<MerchantProportionConfigDTO> merchantProportionConfigDTOS = proportionMap.get(userInfoDTO.getId());
                     if(CollectionUtils.isNotEmpty(merchantProportionConfigDTOS)){
                         merchantProportionConfigDTO.setProportion(merchantProportionConfigDTOS.get(0).getProportion());
+                        merchantProportionConfigDTO.setId(merchantProportionConfigDTOS.get(0).getId());
                     }
                 }
                 list.add(merchantProportionConfigDTO);
