@@ -158,8 +158,9 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                 return new JSONResult<PageBean<FirstResourceAllocationDto>>()
                         .success(emptyDataPageBean);
             }
+        }else{
+            firstResourceAllocationQueryDto.setOrgIdList(Arrays.asList(orgId));
         }
-        firstResourceAllocationQueryDto.setOrgIdList(Arrays.asList(orgId));
         logger.info(
                 "首次分配个人查询参数" + com.alibaba.fastjson.JSON.toJSONString(firstResourceAllocationQueryDto));
         return firstResourceAllocationFeignClient
@@ -236,6 +237,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                 return new JSONResult<PageBean<FirstResourceAllocationDto>>()
                         .success(emptyDataPageBean);
             }
+        }else{
+            firstResourceAllocationQueryDto.setOrgIdList(Arrays.asList(orgId));
         }
         return firstResourceAllocationFeignClient
                 .getFirstResourceAllocationDayPagePersion(firstResourceAllocationQueryDto);
@@ -393,7 +396,10 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        List<CustomFieldQueryDTO> listField=queryFieldByRoleAndMenu.getData();
+        listField.removeIf(s -> s.getFieldCode().equals("orgName"));
+        listField.removeIf(s -> s.getFieldCode().equals("deptName"));
+        request.setAttribute("fieldList", listField);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
@@ -710,11 +716,23 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         if (null == orgId) {
             logger.info("查询默认组");
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-            List<OrganizationRespDTO> orgGroupByOrgId =
-                    getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
-            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId)
-                    .collect(Collectors.toList());
-            firstResourceAllocationQueryDto.setOrgIdList(orgIdList);
+            String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+            if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
+                List<UserDataAuthReq> authList = curLoginUser.getUserDataAuthList();
+                List<OrganizationRespDTO> list = queryOrgByUserAuth(authList, OrgTypeConstant.DXZ);
+                if (!list.isEmpty()) {
+                    List<Long> orgids = list.stream().map(c -> c.getId()).collect(Collectors.toList());
+                    firstResourceAllocationQueryDto.setOrgIdList(orgids);
+                } else {
+                    firstResourceAllocationQueryDto.setOrgIdList(Arrays.asList(-1l));
+                }
+            }else {
+                List<OrganizationRespDTO> orgGroupByOrgId =
+                        getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+                List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId)
+                        .collect(Collectors.toList());
+                firstResourceAllocationQueryDto.setOrgIdList(orgIdList);
+            }
         }else{
             firstResourceAllocationQueryDto.setOrgIdList(Arrays.asList(orgId));
         }
