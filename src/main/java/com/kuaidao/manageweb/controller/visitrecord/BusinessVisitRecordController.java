@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +62,38 @@ public class BusinessVisitRecordController {
     private CompanyInfoFeignClient companyInfoFeignClient;
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
+
+
+    /**
+    * @Description 根据项目ID获取项目对应的到访店铺类型集合
+    * @param projectId
+    * @Return com.kuaidao.common.entity.JSONResult<java.util.List<com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO>>
+    * @Author xuyunfeng
+    * @Date 19-12-27 下午4:05
+    **/
+    @PostMapping("/getShortTypeByProjectId")
+    @ResponseBody
+    public JSONResult<List<DictionaryItemRespDTO>> getShortTypeByProjectId(@RequestBody IdEntityLong projectId) {
+        List<DictionaryItemRespDTO> shopList = new ArrayList<>();
+        JSONResult<ProjectInfoDTO>  projectInfoDTOJSONResult = projectInfoFeignClient.get(projectId);
+        if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode())){
+            ProjectInfoDTO projectInfoDTO = projectInfoDTOJSONResult.getData();
+            if(projectInfoDTO != null && StringUtils.isNotBlank(projectInfoDTO.getShopType())){
+                String type1 = projectInfoDTO.getShopType();
+                DictionaryItemQueryDTO queryDTO = new DictionaryItemQueryDTO();
+                queryDTO.setGroupCode("vistitStoreType");
+                JSONResult<List<DictionaryItemRespDTO>> result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+                if (JSONResult.SUCCESS.equals(result.getCode())) {
+                    List<DictionaryItemRespDTO> dictionaryItemRespDTOList = result.getData();
+                    shopList = dictionaryItemRespDTOList.stream().filter(a->type1.contains(a.getValue())).collect(Collectors.toList());
+                }
+            }
+        }
+        return new JSONResult<List<DictionaryItemRespDTO>>().success(shopList);
+    }
 
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request, @RequestParam String clueId) {
@@ -269,6 +306,13 @@ public class BusinessVisitRecordController {
                 data.setNotSignReason(null);
                 data.setIsSign(1);
                 data.setVisitPeopleNum(null);
+                IdEntityLong projectId = new IdEntityLong();
+                projectId.setId(data.getProjectId());
+                JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
+                data.setVistitStoreTypeArr(vistitStoreJson.getData());
+                if(!checkShopType(data.getVistitStoreType(),vistitStoreJson.getData())){
+                    data.setVistitStoreType(null);
+                }
                 return new JSONResult<BusVisitRecordRespDTO>().success(data);
             }
         }
@@ -303,13 +347,35 @@ public class BusinessVisitRecordController {
                 recordRespDTO.setIsSign(1);
             }
         }
-
+        IdEntityLong projectId = new IdEntityLong();
+        projectId.setId(recordRespDTO.getProjectId());
+        JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
+        recordRespDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+        if(!checkShopType(recordRespDTO.getVistitStoreType(),vistitStoreJson.getData())){
+            recordRespDTO.setVistitStoreType(null);
+        }
         recordRespDTO.setRebutReason(null);
         recordRespDTO.setRebutTime(null);
         recordRespDTO.setNotSignReason(null);
         return new JSONResult<BusVisitRecordRespDTO>().success(recordRespDTO);
     }
 
+    private Boolean checkShopType(String type,List<DictionaryItemRespDTO> itemList){
+        Boolean flag = false;
+        if(!StringUtils.isNotBlank(type)){
+            flag = false;
+        }else if(itemList != null && itemList.size() >0){
+            String shopType = itemList.stream().map(a->a.getValue()).collect(Collectors.joining(","));
+            if(shopType.contains(type)){
+                flag = true;
+            }else {
+                flag = false;
+            }
+        }else {
+            flag = false;
+        }
+        return flag;
+    }
     /**
      * 未到访原因查看
      */

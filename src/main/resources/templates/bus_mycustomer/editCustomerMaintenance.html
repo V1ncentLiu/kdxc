@@ -421,114 +421,63 @@
             </el-row>
 
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
-            <!--  
-            <el-row>
-                <el-col :span="16" class="paddingTB">
-                    <el-button size="small" type="danger" @click="deteleTracking">删除</el-button>
-                    <el-button size="small" type="info" @click="editRecord">编辑</el-button>
+            <el-row class="marginB10">
+                <el-col :span="16">
+                    <el-button size="small" type="primary" @click="editRecord">编辑
+                    </el-button>
                 </el-col>
                 <el-col :span="4" :offset="4" class="f-tar">
-                    <el-button size="small" type="primary" @click="lineFormShow=true">添加</el-button>
+                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
+                    </el-button>
                 </el-col>
             </el-row>
-            -->
             <el-row>
-                <el-table
-                    ref="multipleTable"
-                    :data="tableDataC2"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    border
-                    @selection-change="handleTrackingSelection"
-                 >
-                    <el-table-column
-                            type="index" label="序号"
-                            header-align="center" align="center" width="100">
+                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
+                    <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
+                    <el-table-column prop="callTime" label="跟进时间" align="center" min-width="12%">
                     </el-table-column>
-                    <el-table-column
-                      prop="callTime"
-                      label="拨打时间"
-                      align="center">
+                    <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="20%">
                     </el-table-column>
-                    <el-table-column
-                      prop="customerStatusName"
-                      label="客户状态"
-                      align="center">
+                    <el-table-column min-width="10%" prop="isCall" label="是否接通" align="center">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.isCall === 0">未接通</div>
+                            <div v-else-if="scope.row.isCall ===1">已接通</div>
+                        </template>
                     </el-table-column>
-                    <el-table-column
-                      prop="isCall"
-                      label="是否接通"
-                      align="center">
-                     <template slot-scope="scope">
-                      <div v-if="scope.row.isCall === 0">
-                                                                                未接通
-                      </div>
-                       <div v-else-if="scope.row.isCall ===1">
-                                                                                已接通
-                       </div>
-                     </template>
+                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
+                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="12%">
                     </el-table-column>
-                    <el-table-column
-                      prop="focusPoint"
-                      label="客户关注点"
-                      align="center">
+                    <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
                     </el-table-column>
-                    <el-table-column
-                      prop="nextVisitTime"
-                      label="下次回访时间"
-                      align="center">
-                    </el-table-column>
-                    <el-table-column
-                      prop="createUserName"
-                      label="创建人"
-                      align="center">
-                    </el-table-column>
-                    <div slot="append" v-show="lineFormShow">
-                      <el-form :inline="true" :model="formInline" class="demo-form-inline">
-                        <el-row class="paddingL55">
-                              <el-date-picker
-                                v-model="formInline.callTime"
-                                type="datetime"
-                                size="mini"
-                                placeholder="选择日期时间">
-                              </el-date-picker>
-                              <el-form-item label="" size="mini">
-                                <el-select v-model="formInline.customerStatus" placeholder="客户状态">
-                                 <el-option
-			                        v-for="item in cusStatusArr"
-			                        :key="item.value"
-			                        :label="item.name"
-			                        :value="item.value">
-			                    </el-option>
+                    <div slot="append" v-show="lineFormShow" class="lineFormShow">
+                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
+                            <div style="float: left; width: 48px;">&nbsp;</div>
+                            <!-- :picker-options="expireTimeOption" -->
+                            <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;padding-left: 3%">
+                                <el-date-picker v-model="formInline.callTime" :disabled="isDisabledCustomer" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 100%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
+                            </el-form-item>
+                            <div style="width: 20%;float: left;text-align: center;">
+                                <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
+                                    <el-select v-model="formInline.customerStatus"  :disabled="isDisabledCustomerInfo" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                        <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </div>
+                            <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;padding-left: 3%" >
+                                <el-select v-model="formInline.isCall" placeholder="是否接通" :disabled="isDisabledCustomer" style="width: 90%;display: block;margin:0 auto;" clearable>
+                                    <el-option label="是" value="1"></el-option>
+                                    <el-option label="否" value="0"></el-option>
                                 </el-select>
-                              </el-form-item>
-                              <el-form-item label="" size="mini">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通">
-                                  <el-option label="是" value="1"></el-option>
-                                  <el-option label="否" value="0"></el-option>
-                                </el-select>
-                              </el-form-item>
-                              <el-form-item label="" size="mini">
-                                <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
-                                  <el-option label="无效资源" value="0"></el-option>
-                                  <el-option label="有效资源" value="1"></el-option>
-                                </el-select>
-                              </el-form-item>
-                              <el-form-item label="" size="mini">
-                                <el-input v-model="formInline.focusPoint" size="mini" placeholder="客户关注点" maxlength="1000"></el-input>
-                              </el-form-item>
-                              <el-date-picker
-                                v-model="formInline.nextVisitTime"
-                                type="datetime"
-                                format="yyyy-MM-dd HH:mm"
-                                size="mini"
-                                placeholder="选择日期时间">
-                              </el-date-picker>
-                                  <el-form-item  class="lineInherit">
-                                <el-button type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button>
-                              </el-form-item>
-                        </el-row>
-                      </el-form>
+                            </el-form-item>
+                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 18%;float: left;padding-left: 4%">
+                                <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
+                                <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
+                            </el-form-item>
+                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
+                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;" @change="chooseTodayAfter">
+                                </el-date-picker>
+                            </el-form-item>
+                        </el-form>
                     </div>
                 </el-table>
             </el-row>
@@ -676,6 +625,7 @@
 		.lineFeed2 { width: 530px; }
         .paddingTB { padding: 4px 0px; }
         .paddingL55 { padding-left: 55px; }
+        .paddingL55-datetime { width: 15% !important; }
         .el-form-item.lineInherit .el-form-item__content{ line-height: inherit!important; }
         @media screen and (width:1920px) {
             .paddingL55 .el-date-editor.el-input { width: 218px; }
@@ -765,6 +715,9 @@ var loginUserId=[[${loginUserId}]];
         el: '#addCustomer',
         data: function() {
             return {
+                addButtons:true,
+                isDisabledCustomer:false,
+                isDisabledCustomerInfo:false,
                 audioShow:false,//播放器默认不显示
                 btnDisabled: false,    
                 clueId:clueId,
@@ -777,6 +730,7 @@ var loginUserId=[[${loginUserId}]];
                 outsideProjectShow:false,//外部项目默认不显示
                 dialogFormVisible: false,
                 dialogFormImg:false,
+                timeDefaultShow:new Date(),
 //                showwchatcode:'',
 //                showWxCodeFalg:false,
                 form: {
@@ -915,7 +869,7 @@ var loginUserId=[[${loginUserId}]];
                 	isCall:'',
                 	resourceStatus:'',
                 	focusPoint:'',
-                	visitStatus:'是',
+                	visitStatus:'1',
                 	nextVisitTime:'',
                 },
               uploadOssHost:'',
@@ -966,6 +920,47 @@ var loginUserId=[[${loginUserId}]];
             addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
                 addCustomerVM.uploadParamData.realName= file.name
           },
+            chooseToday(val){
+                var dateNow=new Date();
+                dateToday = moment(dateNow).format("YYYY-MM-DD");
+                valToday = moment(val).format("YYYY-MM-DD");
+                if(dateToday!==valToday){
+                    this.formInline.callTime="";
+                    this.$message({
+                        message: '请选择当天日期',
+                        type: 'warning'
+                    });
+                }
+            },
+            chooseTodayAfter(val){
+                var dateNow=new Date();
+                dateToday = moment(dateNow).format("YYYY-MM-DD HHmm");
+                valToday = moment(val).format("YYYY-MM-DD HHmm");
+                console.log(dateToday)
+                console.log(valToday)
+                if(dateToday>valToday){
+                    this.formInline.nextVisitTime="";
+                    this.$message({
+                        message: '请选择此时及以后的日期时间',
+                        type: 'warning'
+                    });
+                }
+            },
+            lineFormShowFun() {
+                this.isDisabledCustomer = false;
+                this.isDisabledCustomerInfo = true;
+                console.log(this.timeDefaultShow)
+                if(this.lineFormShow){
+                    this.lineFormShow = false
+                }else{
+                    this.lineFormShow = true
+                }
+                this.addButtons = true;
+                // 跟进记录初始化
+                this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
+                this.formInline.customerStatus = '2';
+                this.formInline.callTime =new Date();
+            },
         	formatTimeFn(date) {
         	    if(date){
                     var dateNew = new Date( date );
@@ -1091,6 +1086,12 @@ var loginUserId=[[${loginUserId}]];
             },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
+                    //跟进记录校验
+                    if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
+                        this.$refs['LineRuleForm'].validate((error) => {
+                            valid = error;
+                        });
+                    }
                     if (valid) {
                        //----客户基本信息---//
                       var clueCustomer={};
@@ -1270,16 +1271,20 @@ var loginUserId=[[${loginUserId}]];
                             addCustomerVM.btnDisabled = false;
                             return;
                         }
+                        var tracking = {};
+                        tracking = this.onConfirmAdd();
                         var clue={};
+                        clue.tracking = tracking;
               	        clue.clueId=clueId;
                         clue.clueCustomer=clueCustomer;
                         clue.clueIntention=clueIntention;
                         addCustomerVM.btnDisabled = true;
+
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                               addCustomerVM.btnDisabled = false;
-                    		  window.location.href="/aggregation/businessMyCustomer/listPage"; 
+                    		  window.location.href="/aggregation/businessMyCustomer/listPage";
     		        	}});
                       });
                     } else {
@@ -1362,29 +1367,10 @@ var loginUserId=[[${loginUserId}]];
             handleTrackingSelection(val){
                this.multipleTrackingSelection=val;
             },
-  /*           handleRemove(file, fileList) {
-                console.log(file, fileList);
+
+            handleTrackingSelection(val) {
+                this.multipleTrackingSelection = val;
             },
-            handlePreview(file) {
-              console.log(file);
-            },
-            handleExceed(files, fileList) {
-              this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
-            },
-            beforeRemove(file, fileList) {
-              return this.$confirm(`确定移除 ${ file.name }？`);
-            },
-            beforeFormUpload(file) { //上传格式大小的限制
-                const isJPG = file.type === 'image/jpeg';
-                const isPNG = file.type === 'image/png';
-                const isMP3 = file.type === 'audio/mp3';
-                const isLt200 = file.size / 1024 < 200; //200k;
-                if( !isJPG || !isPNG || !isMP3 ){
-                    this.$message.error('上传文件只能是 JPG/PNG/mp3 格式!');
-                }
-                return (isJPG || isPNG || isMP3) && isLt200;           
-            }, */
- 
             editRecord() {
               var rows=this.multipleTrackingSelection;
               if(rows.length!=1){
@@ -1396,6 +1382,16 @@ var loginUserId=[[${loginUserId}]];
                       return;
                   }
               }
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].createUser != this.loginUserId) {
+                        this.$message({message: '选中数据存在他人数据，不能进行编辑操作', type: 'warning'});
+                        return;
+                    }
+                }
+                this.addButtons = false;
+                this.isDisabledCustomer = true;
+                this.isDisabledCustomerInfo = true;
+
                 this.lineFormShow = true;
                 this.formInline.id=rows[0].id;
                 this.formInline.callTime=rows[0].callTime;
@@ -1407,7 +1403,15 @@ var loginUserId=[[${loginUserId}]];
                 this.formInline.nextVisitTime=rows[0].nextVisitTime;
                 isEdit=true;
             },
-            onConfirmAdd(index ,row) { 
+            onConfirmAdd(index ,row) {
+                var flag = false;
+                this.$refs['LineRuleForm'].validate((valid) => {
+                    flag = valid;
+                })
+
+                if (!flag) {
+                    return null;
+                }
              //跟进记录保存
              var param={};
              param.clueId=clueId;
@@ -1415,10 +1419,8 @@ var loginUserId=[[${loginUserId}]];
              if(typeof(callTime)=='string'){
             	  param.callTime=new Date(Date.parse(callTime.replace(/-/g, "/")));
              }else{
-                 param.callTime=this.formInline.callTime; 
+                 param.callTime=this.formInline.callTime;
              }
-       
-             param.customerStatus=this.formInline.customerStatus;
              param.isCall=this.formInline.isCall;
              param.resourceStatus=this.formInline.resourceStatus;
              param.focusPoint=this.formInline.focusPoint;
@@ -1428,31 +1430,24 @@ var loginUserId=[[${loginUserId}]];
              if(typeof(nextVisitTime)=='string'){
               	  param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
              }else{
-                 param.nextVisitTime=this.formInline.nextVisitTime; 
+                 param.nextVisitTime=this.formInline.nextVisitTime;
              }
              //如果是编辑跟进记录
-             if( isEdit){
-                 param.id=this.formInline.id;
-            	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                 .then(function (response) {
-               	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-               	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                    .then(function (response) {
-                    	addCustomerVM.tableDataC2=response.data.data;
-                     }); 
-    	          }}); 	 
-                 });
-             }else{
-                 axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                 .then(function (response) {
-               	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-               	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                    .then(function (response) {
-                    	 addCustomerVM.tableDataC2=response.data.data;
-                     }); 
-    	          }}); 
-               }); 
-             }
+                if (this.formInline.nextVisitTime) {
+                    var nextVisitTime = this.formInline.nextVisitTime;
+                    if (typeof(nextVisitTime) == 'string') {
+                        param.nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                    } else {
+                        param.nextVisitTime = this.formInline.nextVisitTime;
+                    }
+                }
+                param.stage = 4;
+                if (isEdit) {
+                    param.id = this.formInline.id;
+                } else {
+                    param.customerStatus = 2;
+                }
+             return param;
             },
              //上传文件
             introPicClick() {

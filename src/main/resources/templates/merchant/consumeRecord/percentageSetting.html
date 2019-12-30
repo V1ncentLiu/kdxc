@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>公司占比设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <div class="mainSearchBg">
+        <el-row>
+            <el-form :model="form">
+                <el-table
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="form.dataTable"
+                    @selection-change="handleSelectionChange"
+                >
+                    <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                    <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                    <el-table-column align="center" prop="merchantUserName" label="商家名称"></el-table-column>    
+                    <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
+                    <el-table-column align="center" label="消费占比%">
+                        <template slot-scope="scope">
+                            <el-form-item v-for="item in scope.row.inputValArr" style="display: inline-block;width: 50px;margin-right: 10px;">
+                                <el-input v-model="item.val" maxLength="3" style="width: 40px;margin-right: 7px;"></el-input><span>{{item.index}}</span>
+                            </el-form-item>
+                            <el-button size="mini" type="success" @click="update(scope.row,scope.row.id)" v-if="scope.row.isShowBtn">修改比例</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-form>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList=[[${groupList}]];//商户集合
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {                
+                multipleSelection: [],//选择行
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                form: {
+                    dataTable: [],
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                merchantUserListOptions:merchantUserList,
+            }        	  
+        },
+        methods: {
+            gotoSetting(){
+                window.location.href='/merchant/consumeRecord/initSingleMerchant?mainAccountId';
+            },
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            }, 
+            //修改比例
+            update(row,id) {
+                console.log(row)
+                var param={}
+                if(row.id){
+                    param.id=row.id;  
+                }                
+                param.merchantUserId=row.merchantUserId;
+                param.merchantUserName=row.merchantUserName;
+                param.companyIds=row.companyIds; //分公司Id               
+                param.companyNames=row.companyNames;//分公司名称
+                if(row.inputValArr.length>0){
+                    var proportionStr="";
+                    var proportionVal=null;
+                    for(var i=0;i<row.inputValArr.length;i++){
+                        if(row.inputValArr[i].val){
+                           proportionStr+=row.inputValArr[i].val+","; 
+                           proportionVal+=parseInt(row.inputValArr[i].val); 
+                       }                     
+                    }     
+                    if(proportionVal>100){
+                        ocmVM.$message.error("消费占比总数不能大于100");
+                        return;
+                    }  
+                    if(proportionStr) {
+                        param.proportion=proportionStr.substring(0,proportionStr.length-1);//分公司占比
+                    }else{
+                        param.proportion="";
+                        ocmVM.$message.error("消费占比不能为空");
+                        return;
+                    } 
+                }                
+                console.log(param)
+                axios.post('/merchant/monthConsumeStatistics/saveOrUpdate', param)
+                .then(function (response) {
+                    console.log(response)
+                    var responseData = response.data;
+                    if (responseData.code == "0") {
+                        ocmVM.searchTable();
+                        ocmVM.$message.success("设置成功！")
+                    }else {
+                        ocmVM.$message.error(responseData.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }); 
+            },
+            searchTable() {
+            	var param ={};
+                axios.post('/merchant/monthConsumeStatistics/getPercentageSettingList', param)
+                .then(function (response) {
+                    console.log(response)
+                    var responseData = response.data;
+                    if (responseData.code == "0") {
+                        var result =  responseData.data;
+                        console.log(result)
+                        function getValList(item) {
+                            var name1List = item.companyNames;
+                            if(name1List){
+                                name1List=name1List.split(",");                        
+                            }else{
+                                name1List=[];
+                            }
+                            var inputValList = item.proportion
+                            if(inputValList){
+                            inputValList=inputValList.split(",");
+                            }else{
+                                inputValList=[]
+                            }
+                            return name1List.map((item, index) => {
+                                var obj = {};
+                                obj.name = item;
+                                if(inputValList.length>0){
+                                    obj.val = inputValList[index]; 
+                                }else{
+                                    obj.val=""
+                                }
+                            
+                                if(name1List.length>index+1){
+                                    obj.index = ":";
+                                }else{
+                                    obj.index = "";
+                                }                        
+                                return obj;
+                          });
+                        }
+                        function handleData(dataTable) {
+                            // var res = JSON.parse(JSON.stringify(dataTable));
+                            // res.forEach(item => {
+                            dataTable.forEach(item => {  
+                                item.inputValArr = getValList(item)
+                            });
+                            // return res;
+                            return dataTable;
+                        }
+                        console.log(handleData(result))
+                        ocmVM.form.dataTable=handleData(result);
+                        // 有分公司显示修改比例
+                        for(i=0;i<ocmVM.form.dataTable.length;i++){
+                            ocmVM.form.dataTable[i].isShowBtn=false;
+                            if(ocmVM.form.dataTable[i].companyNames){
+                                ocmVM.form.dataTable[i].isShowBtn=true;
+                            }
+                        }
+                    }else {
+                        ocmVM.$message.error(responseData.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });                
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>

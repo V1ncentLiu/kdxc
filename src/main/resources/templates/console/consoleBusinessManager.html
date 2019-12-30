@@ -477,9 +477,10 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column  prop="tasteProjectName" label="品尝项目" align="center"></el-table-column>
+                <el-table-column  prop="tasteProjectName" label="考察项目" align="center"></el-table-column>
                 <el-table-column  prop="signShopTypeName" label="签约店型" align="center" width="100"></el-table-column>
                 <el-table-column  prop="province" label="开店省份" align="center" width="100"></el-table-column>
+                <el-table-column  prop="anotherBusSale" label="辅助商务经理" align="center" width="120"></el-table-column>
                 <el-table-column  prop="teleSaleName" label="电销顾问" align="center" width="120"></el-table-column>
                 <el-table-column  prop="accountPhone" label="电销顾问电话" align="center" width="100"></el-table-column>
                 <el-table-column  prop="teleGorupName" label="电销组" align="center"></el-table-column>
@@ -548,7 +549,7 @@
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
-                            <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable style="width:100%">
+                            <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable filterable style="width:100%">
                                 <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
@@ -569,7 +570,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="考察项目"    :label-width="formLabelWidth"  prop="projectId">
-                            <el-select v-model="addVisitRecord.projectId" placeholder="请选择"  clearable style="width:100%">
+                            <el-select v-model="addVisitRecord.projectId" placeholder="请选择"  clearable filterable style="width:100%">
                                 <el-option
                                         v-for="item in projectArr"
                                         :key="item.id"
@@ -600,14 +601,14 @@
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-form-item label="签约省份"  :label-width="formLabelWidth"  prop="signProvince"  >
-                            <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="changeVisitProvince" clearable style="width:100%">
+                            <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="changeVisitProvince" clearable filterable style="width:100%">
                                 <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约城市"    :label-width="formLabelWidth"  prop="signCity" clearable style="width:100%">
-                            <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="changeVisitCity" style="width:100%">
+                            <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="changeVisitCity" style="width:100%" clearable filterable>
                                 <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -616,7 +617,7 @@
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-form-item label="签约区/县"  :label-width="formLabelWidth"  prop="signDistrict">
-                            <el-select v-model="addVisitRecord.signDistrict" placeholder="请选择" clearable style="width:100%">
+                            <el-select v-model="addVisitRecord.signDistrict" placeholder="请选择" clearable style="width:100%"  filterable>
                                 <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -1146,7 +1147,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
-                            <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司" style="width:100%">
+                            <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司" style="width:100%" clearable filterable>
                                 <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
@@ -1155,14 +1156,14 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                            <el-select v-model="formSigning.signProjectId"  clearable filterable  placeholder="请选择" style="width:100%">
+                            <el-select v-model="formSigning.signProjectId"  clearable filterable  placeholder="请选择" style="width:100%" @change="getShopType">
                                 <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
-                            <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="changeSignProvince" style="width:100%">
+                            <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="changeSignProvince" style="width:100%" clearable filterable>
                                 <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -1171,14 +1172,14 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
-                            <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  clearable @change="changeSignCity" style="width:100%">
+                            <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  clearable filterable @change="changeSignCity" style="width:100%">
                                 <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
-                            <el-select v-model="formSigning.signDictrict" clearable placeholder="请选择签约区/县" style="width:100%">
+                            <el-select v-model="formSigning.signDictrict" clearable filterable placeholder="请选择签约区/县" style="width:100%">
                                 <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -1463,7 +1464,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                            <el-select :disabled="notEditRebutSign"  clearable filterable  v-model="updateFormSigning.signProjectId" placeholder="请选择" style="width:100%;">
+                            <el-select :disabled="notEditRebutSign"  clearable filterable  v-model="updateFormSigning.signProjectId" placeholder="请选择" style="width:100%;" @change="getShopType">
                                 <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
