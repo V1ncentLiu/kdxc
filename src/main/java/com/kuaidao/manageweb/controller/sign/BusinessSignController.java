@@ -15,6 +15,7 @@ import javax.validation.Valid;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.lang3.StringUtils;
@@ -25,10 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
@@ -118,7 +116,6 @@ public class BusinessSignController {
   PayDetailFeignClient payDetailFeignClient;
   @Autowired
   private DictionaryItemFeignClient dictionaryItemFeignClient;
-
 
   /**
    * 有效性签约单确认列表页面
@@ -416,6 +413,12 @@ public class BusinessSignController {
     signDTO.setRebutReason(null);
     signDTO.setRebutTime(null);
     signDTO.setAmountReceived(null);
+    //获取签约店型
+    JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(signDTO.getSignProjectId());
+    signDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+    if(!checkShopType(signDTO.getSignShopType(),vistitStoreJson.getData())){
+      signDTO.setSignShopType(null);
+    }
     if(StringUtils.isBlank(signDTO.getSignProvince())){
       signDTO.setSignProvince("");
     }
@@ -428,7 +431,22 @@ public class BusinessSignController {
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
 
-
+  private Boolean checkShopType(String type,List<DictionaryItemRespDTO> itemList){
+    Boolean flag = false;
+    if(!StringUtils.isNotBlank(type)){
+      flag = false;
+    }else if(itemList != null && itemList.size() >0){
+      String shopType = itemList.stream().map(a->a.getValue()).collect(Collectors.joining(","));
+      if(shopType.contains(type)){
+        flag = true;
+      }else {
+        flag = false;
+      }
+    }else {
+      flag = false;
+    }
+    return flag;
+  }
   private Long getProjectId( JSONResult<List<ProjectInfoDTO>> proJson , Long signProjectId){
 
     Long res =null;
@@ -891,5 +909,26 @@ public class BusinessSignController {
   @ResponseBody
   public JSONResult distributionPdUser(@RequestBody BusinessSignDTO businessSignDTO){
     return businessSignFeignClient.distributionPdUser(businessSignDTO);
+  }
+
+  public JSONResult<List<DictionaryItemRespDTO>> getShortTypeByProjectId(@RequestBody Long projectId) {
+    List<DictionaryItemRespDTO> shopList = new ArrayList<>();
+    IdEntityLong idEntityLong = new IdEntityLong();
+    idEntityLong.setId(projectId);
+    JSONResult<ProjectInfoDTO>  projectInfoDTOJSONResult = projectInfoFeignClient.get(idEntityLong);
+    if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode())){
+      ProjectInfoDTO projectInfoDTO = projectInfoDTOJSONResult.getData();
+      if(projectInfoDTO != null && StringUtils.isNotBlank(projectInfoDTO.getShopType())){
+        String type1 = projectInfoDTO.getShopType();
+        DictionaryItemQueryDTO queryDTO = new DictionaryItemQueryDTO();
+        queryDTO.setGroupCode("vistitStoreType");
+        JSONResult<List<DictionaryItemRespDTO>> result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+        if (JSONResult.SUCCESS.equals(result.getCode())) {
+          List<DictionaryItemRespDTO> dictionaryItemRespDTOList = result.getData();
+          shopList = dictionaryItemRespDTOList.stream().filter(a->type1.contains(a.getValue())).collect(Collectors.toList());
+        }
+      }
+    }
+    return new JSONResult<List<DictionaryItemRespDTO>>().success(shopList);
   }
 }
