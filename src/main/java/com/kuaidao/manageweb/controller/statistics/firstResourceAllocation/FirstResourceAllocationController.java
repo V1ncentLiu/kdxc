@@ -581,6 +581,11 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         Long netizensMissed = list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
         // 品牌
         Long brand = list.stream().mapToLong(FirstResourceAllocationDto::getBrand).sum();
+
+        Long callCounts=list.stream().mapToLong(FirstResourceAllocationDto::getCallCounts).sum();
+
+        Long trackCounts=list.stream().mapToLong(FirstResourceAllocationDto::getTrackCounts).sum();
+
         // 商机盒子
         Long sjhz = list.stream().mapToLong(FirstResourceAllocationDto::getSjhz).sum();
         firstResourceAllocationDto.setOrgId(0L);
@@ -595,6 +600,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         firstResourceAllocationDto.setBrand(brand);
         firstResourceAllocationDto.setSjhz(sjhz);
         firstResourceAllocationDto.setOther(other);
+        firstResourceAllocationDto.setTrackCounts(trackCounts);
+        firstResourceAllocationDto.setCallCounts(callCounts);
         firstResourceAllocationDto.setNetizensMissed(netizensMissed);
         return firstResourceAllocationDto;
     }
@@ -752,16 +759,21 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                 queryDTO.setParentId(baseQueryDto.getDeptId());
             }
         }else if(RoleCodeEnum.TGZJ.name().equals(roleCode) || RoleCodeEnum.NQJL.name().equals(roleCode) || RoleCodeEnum.NQZG.name().equals(roleCode)){
-            //该角色下 查询 授权的业务线数据
-            List<UserDataAuthReq> authList=curLoginUser.getUserDataAuthList();
-            List<OrganizationRespDTO> list=queryOrgByUserAuth(authList,OrgTypeConstant.DXZ);
-            if(!list.isEmpty()){
-                List<Long> orgids=list.stream().map(c->c.getId()).collect(Collectors.toList());
-                baseQueryDto.setOrgIdList(orgids);
-            }else{
-                baseQueryDto.setOrgIdList(Arrays.asList(-1l));
+            //有条件筛选
+            if(null!=baseQueryDto.getDeptId()){
+                queryDTO.setParentId(baseQueryDto.getDeptId());
+            }else {
+                //该角色下 查询 授权的业务线数据
+                List<UserDataAuthReq> authList = curLoginUser.getUserDataAuthList();
+                List<OrganizationRespDTO> list = queryOrgByUserAuth(authList, OrgTypeConstant.DXZ);
+                if (!list.isEmpty()) {
+                    List<Long> orgids = list.stream().map(c -> c.getId()).collect(Collectors.toList());
+                    baseQueryDto.setOrgIdList(orgids);
+                } else {
+                    baseQueryDto.setOrgIdList(Arrays.asList(-1l));
+                }
+                return;
             }
-            return ;
         }else{
             //other 没权限
             queryDTO.setId(curLoginUser.getOrgId());
@@ -780,6 +792,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
         totalList.add("合计");
+        totalList.add(resTotal.getCallCounts());
+        totalList.add(resTotal.getTrackCounts());
         totalList.add(resTotal.getAssignClueCount());
         totalList.add(resTotal.getCallRate());
         totalList.add(resTotal.getTrackRate());
