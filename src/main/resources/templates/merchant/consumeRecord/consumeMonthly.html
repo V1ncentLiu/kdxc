@@ -63,7 +63,7 @@
                 <el-table-column align="center" prop="proportion" label="消费占比"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="150">
                     <template slot-scope="scope">
-                        <el-button size="mini" type="success" @click="exportExcel(scope.row.id)">导出分公司记录</el-button>
+                        <el-button size="mini" type="success" @click="exportExcel(scope.row)">导出分公司记录</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -115,7 +115,8 @@
                 console.log(index, row);
             }, 
             //下载
-            exportExcel(id) {
+            exportExcel(row) {
+                console.log(row)
                 var param = {};
                 // 搜索条件
                 var month=this.form.month;
@@ -125,7 +126,7 @@
                     month=this.form.month;
                 }
                 param.month = month;
-                param.merchantUserId =  this.form.merchantUserId;
+                param.merchantUserId =  row.merchantUserId;
                 axios.post('/merchant/monthConsumeStatistics/exportExcel',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
