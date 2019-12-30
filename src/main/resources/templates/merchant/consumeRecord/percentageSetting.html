@@ -18,26 +18,29 @@
     </el-breadcrumb>  
     <div class="mainSearchBg">
         <el-row>
-            <el-table
-                ref="multipleTable"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                :data="dataTable"
-                @selection-change="handleSelectionChange"
-            >
-                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
-                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="applyUserName" label="商家名称"></el-table-column>    
-                <el-table-column align="center" prop="invoiceOrderNum" label="分公司"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="消费占比">
-                    <template slot-scope="scope">
-                        
-                        <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">修改比例</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <el-form :model="form">
+                <el-table
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="form.dataTable"
+                    @selection-change="handleSelectionChange"
+                >
+                    <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                    <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                    <el-table-column align="center" prop="merchantUserName" label="商家名称"></el-table-column>    
+                    <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
+                    <el-table-column align="center" label="消费占比%">
+                        <template slot-scope="scope">
+                            <el-form-item v-for="item in scope.row.inputValArr" style="display: inline-block;width: 50px;margin-right: 10px;">
+                                <el-input v-model="item.val" maxLength="3" style="width: 40px;margin-right: 7px;"></el-input><span>{{item.index}}</span>
+                            </el-form-item>
+                            <el-button size="mini" type="success" @click="update(scope.row,scope.row.id)" v-if="scope.row.isShowBtn">修改比例</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-form>
         </el-row>
     </div>
 </div>
@@ -47,24 +50,19 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var merchantUserList1=[[${userList}]];//商户集合
-    var merchantUserList=merchantUserList1.data;
-    console.log(merchantUserList)
+    var merchantUserList=[[${groupList}]];//商户集合
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
-            return {
-                pendingReviewNum:'',
+            return {                
                 multipleSelection: [],//选择行
                 pager:{
-                  total: 0,
-                  currentPage: 1,
-                  pageSize: 20,
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
                 },
                 form: {
-                  applyUserId:'',
-                  createStartTime:'',
-                  createEndTime:'',
+                    dataTable: [],
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -88,79 +86,119 @@
             handleForbid(index, row) {
                 console.log(index, row);
             }, 
-            //审核
-            updateStatus(id) {
-                debugger
-                var param = {};
-                param.id=id; 
-                // this.$confirm('确认审核通过吗？', '提示', {
-                //     confirmButtonText: '确定',
-                //     cancelButtonText: '取消',
-                //     type: 'warning'
-                // }).then(() => {
-                    axios.post('/merchant/merchantApplyInvoice/markInvoiceIssued', param)
-                    .then(function (response) {
-                        var result =  response.data;
-                        if (result.code == "0") {
-                            ocmVM.$message({
-                                message: '操作成功', type: 'success', duration: 1000, onClose: function () {
-                                    ocmVM.searchTable();
-                                }
-                            });
-                        }else{
-                        	  ocmVM.$message.error("操作失败");
-                        }
-                    })
-                    .catch(function (error) {
-                      console.log(error);
-                    });
-                // }).catch(() => {
-                //     console.log(error);
-                // });
-            },
-            searchTable() {
-            	var startTime=this.form.createStartTime;
-                var endTime=this.form.createEndTime;
-                if(endTime && startTime>endTime){
-                    this.$message({
-                        message: '结束时间不允许选择早于开始时间',
-                        type: 'warning'
-                    });
-                    return;
-                }
-                var param =this.form;
-                param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
-                param.applyUserId = this.form.applyUserId;
-                param.createStartTime = this.form.createStartTime;
-                param.createEndTime = this.form.createEndTime;
-                console.info(param);
-                axios.post('/merchant/merchantApplyInvoice/findMerchantApplyInvoiceList', param)
+            //修改比例
+            update(row,id) {
+                console.log(row)
+                var param={}
+                if(row.id){
+                    param.id=row.id;  
+                }                
+                param.merchantUserId=row.merchantUserId;
+                param.merchantUserName=row.merchantUserName;
+                param.companyIds=row.companyIds; //分公司Id               
+                param.companyNames=row.companyNames;//分公司名称
+                if(row.inputValArr.length>0){
+                    var proportionStr="";
+                    var proportionVal=null;
+                    for(var i=0;i<row.inputValArr.length;i++){
+                        if(row.inputValArr[i].val){
+                           proportionStr+=row.inputValArr[i].val+","; 
+                           proportionVal+=parseInt(row.inputValArr[i].val); 
+                       }                     
+                    }     
+                    if(proportionVal>100){
+                        ocmVM.$message.error("消费占比总数不能大于100");
+                        return;
+                    }  
+                    if(proportionStr) {
+                        param.proportion=proportionStr.substring(0,proportionStr.length-1);//分公司占比
+                    }else{
+                        param.proportion="";
+                        ocmVM.$message.error("消费占比不能为空");
+                        return;
+                    } 
+                }                
+                console.log(param)
+                axios.post('/merchant/monthConsumeStatistics/saveOrUpdate', param)
                 .then(function (response) {
                     console.log(response)
-                    var result =  response.data;
-                    if(result.code==0){
-                        var table=result.data;
-                        ocmVM.dataTable= table.data;
-                        ocmVM.pager.total =  table.total;
-                        ocmVM.pager.currentPage = table.currentPage;
-                    }else{
-                        ocmVM.$message.error(result.msg);
-                    }                    
+                    var responseData = response.data;
+                    if (responseData.code == "0") {
+                        ocmVM.searchTable();
+                        ocmVM.$message.success("设置成功！")
+                    }else {
+                        ocmVM.$message.error(responseData.msg);
+                    }
                 })
                 .catch(function (error) {
                      console.log(error);
-                });
-                
+                }); 
             },
-          //日期数据格式化方法
-            dateFormat( row, column, cellValue, index) {
-                if (cellValue == undefined) {
-                    return "";
-                }
-                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            searchTable() {
+            	var param ={};
+                axios.post('/merchant/monthConsumeStatistics/getPercentageSettingList', param)
+                .then(function (response) {
+                    console.log(response)
+                    var responseData = response.data;
+                    if (responseData.code == "0") {
+                        var result =  responseData.data;
+                        console.log(result)
+                        function getValList(item) {
+                            var name1List = item.companyNames;
+                            if(name1List){
+                                name1List=name1List.split(",");                        
+                            }else{
+                                name1List=[];
+                            }
+                            var inputValList = item.proportion
+                            if(inputValList){
+                            inputValList=inputValList.split(",");
+                            }else{
+                                inputValList=[]
+                            }
+                            return name1List.map((item, index) => {
+                                var obj = {};
+                                obj.name = item;
+                                if(inputValList.length>0){
+                                    obj.val = inputValList[index]; 
+                                }else{
+                                    obj.val=""
+                                }
+                            
+                                if(name1List.length>index+1){
+                                    obj.index = ":";
+                                }else{
+                                    obj.index = "";
+                                }                        
+                                return obj;
+                          });
+                        }
+                        function handleData(dataTable) {
+                            // var res = JSON.parse(JSON.stringify(dataTable));
+                            // res.forEach(item => {
+                            dataTable.forEach(item => {  
+                                item.inputValArr = getValList(item)
+                            });
+                            // return res;
+                            return dataTable;
+                        }
+                        console.log(handleData(result))
+                        ocmVM.form.dataTable=handleData(result);
+                        // 有分公司显示修改比例
+                        for(i=0;i<ocmVM.form.dataTable.length;i++){
+                            ocmVM.form.dataTable[i].isShowBtn=false;
+                            if(ocmVM.form.dataTable[i].companyNames){
+                                ocmVM.form.dataTable[i].isShowBtn=true;
+                            }
+                        }
+                    }else {
+                        ocmVM.$message.error(responseData.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });                
             },
-
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';

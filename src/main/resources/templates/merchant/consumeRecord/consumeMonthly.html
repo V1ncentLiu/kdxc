@@ -23,7 +23,7 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
                 <el-form-item label="消费集团商家:" label-width="auto">
-                    <el-select v-model="form.applyUserId" filterable  clearable placeholder="消费集团商家">
+                    <el-select v-model="form.merchantUserId" filterable  clearable placeholder="消费集团商家">
                         <el-option
                             v-for="item in merchantUserListOptions"
                             :key="item.id"
@@ -34,8 +34,9 @@
                 </el-form-item>
                 <el-form-item label="消费月份:">
                     <el-date-picker
-                        v-model="form.createStartTime"
-                        type="datetime"
+                        v-model="form.month"
+                        type="month"
+                        value-format="yyyyMM"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
@@ -55,14 +56,14 @@
             >
                 <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="applyUserName" label="商家集团名称"></el-table-column>    
-                <el-table-column align="center" prop="invoiceAmount" label="消费总金额（元）"></el-table-column>
-                <el-table-column align="center" prop="invoiceOrderNum" label="消费资源数"></el-table-column>
-                <el-table-column align="center" prop="invoiceOrderNum" label="分公司"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="消费占比"></el-table-column>
+                <el-table-column align="center" prop="merchantUserName" label="商家集团名称"></el-table-column>    
+                <el-table-column align="center" prop="totalAmount" label="消费总金额（元）"></el-table-column>
+                <el-table-column align="center" prop="totalNumber" label="消费资源数"></el-table-column>
+                <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
+                <el-table-column align="center" prop="proportion" label="消费占比"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="150">
                     <template slot-scope="scope">
-                        <el-button size="mini" type="success" @click="updateStatus(scope.row.id)">导出分公司记录</el-button>
+                        <el-button size="mini" type="success" @click="exportExcel(scope.row)">导出分公司记录</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -76,14 +77,11 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var merchantUserList1=[[${userList}]];//商户集合
-    var merchantUserList=merchantUserList1.data;
-    console.log(merchantUserList)
+    var merchantUserList=[[${groupList}]];//商户集合
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
-                pendingReviewNum:'',
                 multipleSelection: [],//选择行
                 pager:{
                   total: 0,
@@ -91,9 +89,8 @@
                   pageSize: 20,
                 },
                 form: {
-                  applyUserId:'',
-                  createStartTime:'',
-                  createEndTime:'',
+                  merchantUserId:'',
+                  month:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -102,7 +99,7 @@
         },
         methods: {
             gotoSetting(){
-                window.location.href='/merchant/consumeRecord/initSingleMerchant?mainAccountId';
+                window.location.href='/merchant/monthConsumeStatistics/toPercentageSetting';
             },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
@@ -117,54 +114,44 @@
             handleForbid(index, row) {
                 console.log(index, row);
             }, 
-            //审核
-            updateStatus(id) {
-                debugger
+            //下载
+            exportExcel(row) {
+                console.log(row)
                 var param = {};
-                param.id=id; 
-                // this.$confirm('确认审核通过吗？', '提示', {
-                //     confirmButtonText: '确定',
-                //     cancelButtonText: '取消',
-                //     type: 'warning'
-                // }).then(() => {
-                    axios.post('/merchant/merchantApplyInvoice/markInvoiceIssued', param)
+                // 搜索条件
+                var month=this.form.month;
+                if(month&&month.length>6){
+                    month=this.minuteFormat(this.form.month);
+                }else{
+                    month=this.form.month;
+                }
+                param.month = month;
+                param.merchantUserId =  row.merchantUserId;
+                axios.post('/merchant/monthConsumeStatistics/exportExcel',param,{responseType:'blob'})
                     .then(function (response) {
-                        var result =  response.data;
-                        if (result.code == "0") {
-                            ocmVM.$message({
-                                message: '操作成功', type: 'success', duration: 1000, onClose: function () {
-                                    ocmVM.searchTable();
-                                }
-                            });
-                        }else{
-                        	  ocmVM.$message.error("操作失败");
-                        }
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
                     })
                     .catch(function (error) {
-                      console.log(error);
-                    });
-                // }).catch(() => {
-                //     console.log(error);
-                // });
+                        console.log(error);
+                    }).then(function(){
+                });
             },
             searchTable() {
-            	var startTime=this.form.createStartTime;
-                var endTime=this.form.createEndTime;
-                if(endTime && startTime>endTime){
-                    this.$message({
-                        message: '结束时间不允许选择早于开始时间',
-                        type: 'warning'
-                    });
-                    return;
+                var month=this.form.month;
+                if(month&&month.length>6){
+                    month=this.minuteFormat(this.form.month);
+                }else{
+                    month=this.form.month;
                 }
-                var param =this.form;
+                var param ={};
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.applyUserId = this.form.applyUserId;
-                param.createStartTime = this.form.createStartTime;
-                param.createEndTime = this.form.createEndTime;
+                param.merchantUserId = this.form.merchantUserId;
+                param.month = month;
                 console.info(param);
-                axios.post('/merchant/merchantApplyInvoice/findMerchantApplyInvoiceList', param)
+                axios.post('/merchant/monthConsumeStatistics/getConsumeMonthlyList', param)
                 .then(function (response) {
                     console.log(response)
                     var result =  response.data;
@@ -189,13 +176,44 @@
                 }
                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
+            getLastMonth(){//获取上个月日期
+                var date = new Date; 
+                var year = date.getFullYear();
+                var month = date.getMonth();
+                if(month == 0){
+                     year = year -1;
+                     month = 12; 
+                }
+                return year+"-"+month+"";
+            },
+            minuteFormat (m) {
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear()
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                // var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                var timeRes = "" + yearRes + monthRea;
+                return timeRes;
+            },
 
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
+            // 默认月份为上个月
+            console.log(this.getLastMonth());
+            this.form.month=this.getLastMonth();
             this.searchTable();
+
+            console.log(merchantUserList)
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';

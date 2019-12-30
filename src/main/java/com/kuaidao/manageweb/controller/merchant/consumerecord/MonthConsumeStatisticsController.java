@@ -1,6 +1,8 @@
 package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
 import com.kuaidao.account.dto.config.MerchantProportionConfigDTO;
+import com.kuaidao.account.dto.consume.CompanyConsumeRecordDTO;
+import com.kuaidao.account.dto.consume.CompanyConsumeRecordReq;
 import com.kuaidao.account.dto.consume.MonthConsumeStatisticsDTO;
 import com.kuaidao.account.dto.consume.MonthConsumeStatisticsReq;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
@@ -8,14 +10,16 @@ import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantConsumeRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantProportionConfigFeignClient;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MonthConsumeStatisticsFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +31,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -54,6 +59,8 @@ public class MonthConsumeStatisticsController {
     private MonthConsumeStatisticsFeignClient monthConsumeStatisticsFeignClient;
     @Autowired
     private MerchantProportionConfigFeignClient merchantProportionConfigFeignClient;
+    @Autowired
+    private MerchantConsumeRecordFeignClient merchantConsumeRecordFeignClient;
 
 
     /**
@@ -74,6 +81,7 @@ public class MonthConsumeStatisticsController {
     @ResponseBody
     public JSONResult<PageBean<MonthConsumeStatisticsDTO>> getConsumeMonthlyList(@RequestBody MonthConsumeStatisticsReq pageParam,
                                                                                  HttpServletRequest request) {
+        JSONResult<PageBean<MonthConsumeStatisticsDTO>> list = monthConsumeStatisticsFeignClient.list(pageParam);
         return monthConsumeStatisticsFeignClient.list(pageParam);
     }
 
@@ -117,6 +125,7 @@ public class MonthConsumeStatisticsController {
                     List<MerchantProportionConfigDTO> merchantProportionConfigDTOS = proportionMap.get(userInfoDTO.getId());
                     if(CollectionUtils.isNotEmpty(merchantProportionConfigDTOS)){
                         merchantProportionConfigDTO.setProportion(merchantProportionConfigDTOS.get(0).getProportion());
+                        merchantProportionConfigDTO.setId(merchantProportionConfigDTOS.get(0).getId());
                     }
                 }
                 list.add(merchantProportionConfigDTO);
@@ -129,30 +138,35 @@ public class MonthConsumeStatisticsController {
     @PostMapping("/saveOrUpdate")
     @ResponseBody
     public JSONResult saveOrUpdate(@RequestBody MerchantProportionConfigDTO merchantProportionConfigDTO){
+        Long id = merchantProportionConfigDTO.getId();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        if(null != id){
+            merchantProportionConfigDTO.setCreateUserId(curLoginUser.getId());
+        }else{
+            merchantProportionConfigDTO.setUpdateUserId(curLoginUser.getId());
+        }
         return merchantProportionConfigFeignClient.saveOrUpdate(merchantProportionConfigDTO);
     }
 
 
     @RequestMapping("/exportExcel")
     public void exportExcel(HttpServletRequest request,
-                            HttpServletResponse response, @RequestBody MonthConsumeStatisticsReq monthConsumeStatisticsReq){
+                            HttpServletResponse response, @RequestBody CompanyConsumeRecordReq companyConsumeRecordReq){
         try{
-            List<MonthConsumeStatisticsDTO> list = new ArrayList<>();
-            MonthConsumeStatisticsDTO dto = new MonthConsumeStatisticsDTO();
-            dto.setCompanyNames("1,2,3");
-            dto.setMerchantUserName("集团名称");
-            list.add(dto);
-            MonthConsumeStatisticsDTO [] dtos=list.toArray(new MonthConsumeStatisticsDTO[0]);
-            String [] keys={"companyNames","merchantUserName"};
-            String [] hader={"分公司名称","集团名称"};
-            Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
-            String name = "商家月消费记录统计表";
+            JSONResult<List<CompanyConsumeRecordDTO>> listJSONResult =
+                    merchantConsumeRecordFeignClient.exportCompanyConsumeRecord(companyConsumeRecordReq);
+            List<List<Object>> dataList = new ArrayList<List<Object>>();
+            dataList.add(getTitleList());
+            List<CompanyConsumeRecordDTO> data = listJSONResult.getData();
+            buildList(dataList, data);
+            XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+            String name = MessageFormat.format("商家月消费记录统计表{0}.xlsx","_"+System.currentTimeMillis());
             response.addHeader("Content-Disposition",
                     "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ServletOutputStream outputStream = response.getOutputStream();
-            wb.write(outputStream);
+            wbWorkbook.write(outputStream);
             outputStream.close();
         }catch (Exception e){
             e.printStackTrace();
@@ -167,5 +181,28 @@ public class MonthConsumeStatisticsController {
         userInfoDTO.setUserType(USER_TYPE);
         JSONResult<List<UserInfoDTO>> listJSONResult = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return listJSONResult.getData();
+    }
+
+
+    private void buildList(List<List<Object>> dataList, List<CompanyConsumeRecordDTO> orderList) {
+        for(int i = 0; i<orderList.size(); i++){
+            CompanyConsumeRecordDTO ra = orderList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            curList.add(ra.getCompanyName());
+            curList.add(ra.getCreateTimeStr());
+            curList.add(ra.getClueId());
+            curList.add(ra.getAmount());
+            dataList.add(curList);
+        }
+    }
+    private List<Object> getTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("分公司名称");
+        headTitleList.add("消费时间");
+        headTitleList.add("消费资源ID");
+        headTitleList.add("消费金额（元）");
+        return headTitleList;
     }
 }
