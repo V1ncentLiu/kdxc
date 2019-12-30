@@ -1,7 +1,10 @@
 package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
 import com.kuaidao.account.dto.config.MerchantProportionConfigDTO;
-import com.kuaidao.account.dto.consume.*;
+import com.kuaidao.account.dto.consume.CompanyConsumeRecordDTO;
+import com.kuaidao.account.dto.consume.CompanyConsumeRecordReq;
+import com.kuaidao.account.dto.consume.MonthConsumeStatisticsDTO;
+import com.kuaidao.account.dto.consume.MonthConsumeStatisticsReq;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.common.entity.JSONResult;
@@ -12,10 +15,11 @@ import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantProportionConf
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MonthConsumeStatisticsFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,6 +81,7 @@ public class MonthConsumeStatisticsController {
     @ResponseBody
     public JSONResult<PageBean<MonthConsumeStatisticsDTO>> getConsumeMonthlyList(@RequestBody MonthConsumeStatisticsReq pageParam,
                                                                                  HttpServletRequest request) {
+        JSONResult<PageBean<MonthConsumeStatisticsDTO>> list = monthConsumeStatisticsFeignClient.list(pageParam);
         return monthConsumeStatisticsFeignClient.list(pageParam);
     }
 
@@ -133,6 +138,13 @@ public class MonthConsumeStatisticsController {
     @PostMapping("/saveOrUpdate")
     @ResponseBody
     public JSONResult saveOrUpdate(@RequestBody MerchantProportionConfigDTO merchantProportionConfigDTO){
+        Long id = merchantProportionConfigDTO.getId();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        if(null != id){
+            merchantProportionConfigDTO.setCreateUserId(curLoginUser.getId());
+        }else{
+            merchantProportionConfigDTO.setUpdateUserId(curLoginUser.getId());
+        }
         return merchantProportionConfigFeignClient.saveOrUpdate(merchantProportionConfigDTO);
     }
 
@@ -143,17 +155,18 @@ public class MonthConsumeStatisticsController {
         try{
             JSONResult<List<CompanyConsumeRecordDTO>> listJSONResult =
                     merchantConsumeRecordFeignClient.exportCompanyConsumeRecord(companyConsumeRecordReq);
-            CompanyConsumeRecordDTO [] dtos=listJSONResult.getData().toArray(new CompanyConsumeRecordDTO[0]);
-            String [] keys={"companyName","createTime","clueId","amount"};
-            String [] hader={"分公司名称","消费时间","消费资源ID","消费金额（元）"};
-            Workbook wb=ExcelUtil.createWorkBook(dtos,keys,hader);
+            List<List<Object>> dataList = new ArrayList<List<Object>>();
+            dataList.add(getTitleList());
+            List<CompanyConsumeRecordDTO> data = listJSONResult.getData();
+            buildList(dataList, data);
+            XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
             String name = MessageFormat.format("商家月消费记录统计表{0}.xlsx","_"+System.currentTimeMillis());
             response.addHeader("Content-Disposition",
                     "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ServletOutputStream outputStream = response.getOutputStream();
-            wb.write(outputStream);
+            wbWorkbook.write(outputStream);
             outputStream.close();
         }catch (Exception e){
             e.printStackTrace();
@@ -168,5 +181,28 @@ public class MonthConsumeStatisticsController {
         userInfoDTO.setUserType(USER_TYPE);
         JSONResult<List<UserInfoDTO>> listJSONResult = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return listJSONResult.getData();
+    }
+
+
+    private void buildList(List<List<Object>> dataList, List<CompanyConsumeRecordDTO> orderList) {
+        for(int i = 0; i<orderList.size(); i++){
+            CompanyConsumeRecordDTO ra = orderList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            curList.add(ra.getCompanyName());
+            curList.add(ra.getCreateTimeStr());
+            curList.add(ra.getClueId());
+            curList.add(ra.getAmount());
+            dataList.add(curList);
+        }
+    }
+    private List<Object> getTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("分公司名称");
+        headTitleList.add("消费时间");
+        headTitleList.add("消费资源ID");
+        headTitleList.add("消费金额（元）");
+        return headTitleList;
     }
 }
