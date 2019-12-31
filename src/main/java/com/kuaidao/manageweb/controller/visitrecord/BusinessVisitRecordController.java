@@ -248,6 +248,10 @@ public class BusinessVisitRecordController {
                 if (JSONResult.SUCCESS.equals(userInfoReslust.getCode()) && userInfoReslust.getData() != null) {
                     //转换用户名
                     busVisitRecordRespDTO.setAuditPersonName(userInfoReslust.getData().getName());
+                    IdEntityLong projectId = new IdEntityLong();
+                    projectId.setId(busVisitRecordRespDTO.getProjectId());
+                    JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
+                    busVisitRecordRespDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
                 }
             }
 

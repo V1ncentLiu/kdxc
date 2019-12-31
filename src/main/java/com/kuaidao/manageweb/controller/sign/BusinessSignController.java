@@ -270,6 +270,9 @@ public class BusinessSignController {
             data.setVisitCity("");
             data.setArrVisitCity("");
             data.setVisitShopType(1);
+          //获取签约店型
+          JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
+          data.setVistitStoreTypeArr(vistitStoreJson.getData());
             res.setData(data);
             data.setPerformanceAmount(data.getAmountPerformance());
         }
