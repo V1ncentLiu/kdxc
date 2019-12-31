@@ -177,7 +177,7 @@ public class MonthConsumeStatisticsController {
      */
     private List<UserInfoDTO> getGroupList(){
         UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setMerchantType(INNER_MERCHANT_TYPE);
+//        userInfoDTO.setMerchantType(INNER_MERCHANT_TYPE);
         userInfoDTO.setUserType(USER_TYPE);
         JSONResult<List<UserInfoDTO>> listJSONResult = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return listJSONResult.getData();
