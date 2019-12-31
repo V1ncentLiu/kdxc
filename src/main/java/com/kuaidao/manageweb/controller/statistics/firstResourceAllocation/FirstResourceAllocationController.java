@@ -273,7 +273,6 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                 str = sb.toString();
             }
             curList.add(str);
-//            curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getTrackRate());
@@ -503,9 +502,9 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("序号");
         headTitleList.add("事业部");
         headTitleList.add("电销组");
-        headTitleList.add("首次资源回访率");
-        headTitleList.add("资源回访率");
         headTitleList.add("首次分配资源数");
+        headTitleList.add("资源回访率");
+        headTitleList.add("首次资源回访率");
         headTitleList.add("联展");
         headTitleList.add("竞价");
         headTitleList.add("优化");
@@ -524,9 +523,9 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("序号");
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");
+        headTitleList.add("首次分配资源数");
         headTitleList.add("首次分源数回访率");
         headTitleList.add("资源回访率");
-        headTitleList.add("首次分配资源数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
         headTitleList.add("优化");
@@ -596,7 +595,10 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         Long sjhz = list.stream().mapToLong(FirstResourceAllocationDto::getSjhz).sum();
         firstResourceAllocationDto.setOrgId(0L);
         firstResourceAllocationDto.setOrgName("合计");
+        firstResourceAllocationDto.setDeptName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
+        firstResourceAllocationDto.setCallCounts(callCounts);
+        firstResourceAllocationDto.setTrackCounts(trackCounts);
         firstResourceAllocationDto.setJointExhibition(jointExhibition);
         firstResourceAllocationDto.setPriceCompetition(priceCompetition);
         firstResourceAllocationDto.setOptimization(optimization);
@@ -810,9 +812,10 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
         totalList.add("合计");
-        totalList.add(resTotal.getCallCounts());
-        totalList.add(resTotal.getTrackCounts());
+        totalList.add("合计");
         totalList.add(resTotal.getAssignClueCount());
+//        totalList.add(resTotal.getCallCounts());
+//        totalList.add(resTotal.getTrackCounts());
         totalList.add(resTotal.getCallRate());
         totalList.add(resTotal.getTrackRate());
         totalList.add(resTotal.getJointExhibition());
