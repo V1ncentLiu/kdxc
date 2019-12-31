@@ -100,6 +100,10 @@ public interface CompanyInfoFeignClient {
     public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO);
 
 
+    @PostMapping("/getCompanyListByParam")
+    public JSONResult<List<CompanyInfoDTO>> getCompanyListByParam(@RequestBody CompanyInfoPageParam param);
+
+
     @Component
     static class HystrixClientFallback implements CompanyInfoFeignClient {
 
@@ -149,7 +153,12 @@ public interface CompanyInfoFeignClient {
             return fallBackError("查询角色列表");
         }
 
-		@Override
+        @Override
+        public JSONResult<List<CompanyInfoDTO>> getCompanyListByParam(CompanyInfoPageParam param) {
+            return fallBackError("根据条件查询公司集合");
+        }
+
+        @Override
 		public JSONResult<List<CompanyInfoDTO>> getCompanyList() {
 			// TODO Auto-generated method stub
 			return fallBackError("查询集团列表失败");

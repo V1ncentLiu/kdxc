@@ -71,8 +71,8 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
-                    <el-form-item label="品尝项目:" class="formItem"  prop="projectId">
-                        <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="品尝项目" filterable>
+                    <el-form-item label="考察项目:" class="formItem"  prop="projectId">
+                        <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="考察项目" filterable>
                             <el-option
                                 v-for="item in projectOptions"
                                 :key="item.id"
@@ -118,6 +118,13 @@
                     <el-form-item label="是否补齐尾款:">
                         <el-select v-model="appiontmentSearchForm.isTailMoney" placeholder="是否补齐尾款" clearable>
                             <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="邀约状态:">
+                        <el-select v-model="appiontmentSearchForm.delFalg" placeholder="邀约状态" clearable>
+                            <el-option v-for="item in delFalgArr" :key="item.value" :label="item.label"
                                        :value="item.value">
                             </el-option>
                         </el-select>
@@ -203,11 +210,11 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="品尝项目：" :label-width="formLabelWidth" >
+            <el-form-item label="考察项目：" :label-width="formLabelWidth" >
                 <el-form-item label="" prop="tasteProjectId">
                     <el-select
                         v-model="appiontmentForm.tasteProjectId"
-                        placeholder="品尝项目"
+                        placeholder="考察项目"
                         style="width: 290px;"
                         multiple
                         filterable
@@ -249,7 +256,7 @@
             :data="recordTable"
         >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="callTime" label="拨打时间" width="150"></el-table-column>
+            <el-table-column align="center" prop="callTime" label="跟进时间" width="150"></el-table-column>
             <el-table-column align="center" prop="customerStatusName" label="客户状态"  width="100"></el-table-column>
             <el-table-column align="center" prop="isCall" label="是否接通" :formatter="transformIsCall" width="90"></el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
@@ -471,7 +478,7 @@
   var deptList=[[${deptList}]];//电销事业部
   var orgList=[[${orgList}]];//电销组
   var userList=[[${userList}]];//电销顾问
-  var projectList=[[${projectList}]];//品尝项目
+  var projectList=[[${projectList}]];//考察项目
   var fieldList=[[${fieldList}]];//自定义字段
   var userFieldList=[[${userFieldList}]];//用户自定义字段
   var clueCategoryList=[[${clueCategoryList}]];//资源类别
@@ -487,6 +494,7 @@
       btnDisabled: false,
       isDXZDisabled:false,
       appiontmentSearchForm: {
+        delFalg:"",
         startTime: '',
         endTime: '',
         teleDeptId: '',
@@ -568,13 +576,14 @@
       },
       appiontmentFormRule:{
         tasteProjectId: [
-          { required: true, message: '品尝项目不能为空', trigger: 'change' }
+          { required: true, message: '考察项目不能为空', trigger: 'change' }
         ],
         reserveTime: [
           { required: true, message: '预约时间不能为空', trigger: 'change' }
         ]
       },
       isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+      delFalgArr: [{value: '-1', label: '全部'}, {value: '0', label: '正常'}, {value: '1', label: '删除'}, {value: '2', label: '取消'}],
       isSignOptions: [{
         value: 0,
         name: "未签约"
@@ -609,6 +618,19 @@
         }
         return text;
       },
+        transDelFlag(row) {
+            var text="";
+            if(row.delFlag ==0){
+                text = "正常";
+            }else if(row.delFlag ==1){
+                text = "删除";
+            }else if(row.delFlag ==2){
+                text = "取消";
+            }
+            return text;
+        },
+
+
       searchTable() {
         var param ={};
 
@@ -639,6 +661,7 @@
         param.isTailMoney = this.appiontmentSearchForm.isTailMoney;
         param.category = this.appiontmentSearchForm.category;
         param.searchWord = this.appiontmentSearchForm.searchWord;
+        param.delFalg = this.appiontmentSearchForm.delFalg;
         console.info(param);
         axios.post('/clue/appiontment/list', param)
         .then(function (response) {
@@ -808,7 +831,7 @@
         }else if(cellValue==1){
           text="已删除"
         }else if(cellValue==2){
-          text="已取消"
+          text="取消"
         }
         return text;
       },
@@ -852,7 +875,7 @@
         }
         return text;
       },
-      //品尝项目转换方法
+      //考察项目转换方法
       transformProject(cellValue) {
         var text="";
         if(projectList&&cellValue){

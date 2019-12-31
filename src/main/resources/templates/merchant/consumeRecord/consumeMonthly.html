@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商家月消费统计</el-breadcrumb-item>
+    </el-breadcrumb>   
+    <el-row class="marginB20">
+        <el-button type="warning" @click="gotoSetting">分公司消费占比设置</el-button>
+    </el-row> 
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                
+                <el-form-item label="消费集团商家:" label-width="auto">
+                    <el-select v-model="form.merchantUserId" filterable  clearable placeholder="消费集团商家">
+                        <el-option
+                            v-for="item in merchantUserListOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="消费月份:">
+                    <el-date-picker
+                        v-model="form.month"
+                        type="month"
+                        value-format="yyyyMM"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange"
+            >
+                <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="merchantUserName" label="商家集团名称"></el-table-column>    
+                <el-table-column align="center" prop="totalAmount" label="消费总金额（元）"></el-table-column>
+                <el-table-column align="center" prop="totalNumber" label="消费资源数"></el-table-column>
+                <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
+                <el-table-column align="center" prop="proportion" label="消费占比%"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="150">
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="success" @click="exportExcel(scope.row)">导出分公司记录</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var merchantUserList=[[${groupList}]];//商户集合
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                  merchantUserId:'',
+                  month:'',
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                merchantUserListOptions:merchantUserList,
+            }        	  
+        },
+        methods: {
+            gotoSetting(){
+                window.location.href='/merchant/monthConsumeStatistics/toPercentageSetting';
+            },
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            }, 
+            //下载
+            exportExcel(row) {
+                console.log(row)
+                var param = {};
+                // 搜索条件
+                var month=this.form.month;
+                if(month&&month.length>6){
+                    month=this.minuteFormat(this.form.month);
+                }else{
+                    month=this.form.month;
+                }
+                param.month = month;
+                param.merchantUserId =  row.merchantUserId;
+                axios.post('/merchant/monthConsumeStatistics/exportExcel',param,{responseType:'blob'})
+                    .then(function (response) {
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                });
+            },
+            searchTable() {
+                var month=this.form.month;
+                if(month&&month.length>6){
+                    month=this.minuteFormat(this.form.month);
+                }else{
+                    month=this.form.month;
+                }
+                var param ={};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.merchantUserId = this.form.merchantUserId;
+                param.month = month;
+                console.info(param);
+                axios.post('/merchant/monthConsumeStatistics/getConsumeMonthlyList', param)
+                .then(function (response) {
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }                    
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            getLastMonth(){//获取上个月日期
+                var date = new Date; 
+                var year = date.getFullYear();
+                var month = date.getMonth();
+                if(month == 0){
+                     year = year -1;
+                     month = 12; 
+                }
+                return year+"-"+month+"";
+            },
+            minuteFormat (m) {
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear()
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                // var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                var timeRes = "" + yearRes + monthRea;
+                return timeRes;
+            },
+
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            // 默认月份为上个月
+            console.log(this.getLastMonth());
+            this.form.month=this.getLastMonth();
+            this.searchTable();
+
+            console.log(merchantUserList)
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
