@@ -594,8 +594,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         // 商机盒子
         Long sjhz = list.stream().mapToLong(FirstResourceAllocationDto::getSjhz).sum();
         firstResourceAllocationDto.setOrgId(0L);
+        firstResourceAllocationDto.setDeptName("");
         firstResourceAllocationDto.setOrgName("合计");
-        firstResourceAllocationDto.setDeptName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
         firstResourceAllocationDto.setCallCounts(callCounts);
         firstResourceAllocationDto.setTrackCounts(trackCounts);
@@ -811,7 +811,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
                                      List<List<Object>> dataList) {
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
-        totalList.add("合计");
+        totalList.add("");
         totalList.add("合计");
         totalList.add(resTotal.getAssignClueCount());
 //        totalList.add(resTotal.getCallCounts());
