@@ -31,12 +31,13 @@
                     <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                     <el-table-column align="center" prop="merchantUserName" label="商家名称"></el-table-column>    
                     <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
-                    <el-table-column align="center" label="消费占比%">
+                    <el-table-column align="center" label="消费占比（%）">
                         <template slot-scope="scope">
                             <el-form-item v-for="item in scope.row.inputValArr" style="display: inline-block;width: 50px;margin-right: 10px;">
-                                <el-input v-model="item.val" maxLength="3" style="width: 40px;margin-right: 7px;"></el-input><span>{{item.index}}</span>
+                                <el-input v-model="item.val" maxLength="3" :disabled="scope.row.isEdit" style="width: 40px;margin-right: 7px;"></el-input><span>{{item.index}}</span>
                             </el-form-item>
-                            <el-button size="mini" type="success" @click="update(scope.row,scope.row.id)" v-if="scope.row.isShowBtn">修改比例</el-button>
+                            <el-button size="mini" type="success" @click="update(scope.row,scope.row.id)" v-if="scope.row.isShowSave">保存比例</el-button>
+                            <el-button size="mini" type="primary" @click="change(scope.row)" v-if="scope.row.isShowBtn">修改比例</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -89,6 +90,11 @@
             handleForbid(index, row) {
                 console.log(index, row);
             }, 
+            change(row){
+                row.isEdit=false;
+                row.isShowSave=true;
+                row.isShowBtn=false;
+            },
             //修改比例
             update(row,id) {
                 console.log(row)
@@ -126,9 +132,9 @@
                 .then(function (response) {
                     console.log(response)
                     var responseData = response.data;
-                    if (responseData.code == "0") {
-                        ocmVM.searchTable();
-                        ocmVM.$message.success("设置成功！")
+                    if (responseData.code == "0") {                        
+                        ocmVM.$message.success("设置成功！");
+                        window.location.href='/merchant/monthConsumeStatistics/toPercentageSetting';
                     }else {
                         ocmVM.$message.error(responseData.msg);
                     }
@@ -181,6 +187,7 @@
                             // res.forEach(item => {
                             dataTable.forEach(item => {  
                                 item.inputValArr = getValList(item)
+                                item.isEdit=true;//默认不可编辑
                             });
                             // return res;
                             return dataTable;
@@ -192,7 +199,7 @@
                             ocmVM.form.dataTable[i].isShowBtn=false;
                             if(ocmVM.form.dataTable[i].companyNames){
                                 ocmVM.form.dataTable[i].isShowBtn=true;
-                            }
+                            }                            
                         }
                     }else {
                         ocmVM.$message.error(responseData.msg);
