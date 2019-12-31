@@ -17,7 +17,7 @@
         <el-breadcrumb-item>公司占比设置</el-breadcrumb-item>
     </el-breadcrumb>  
     <div class="mainSearchBg">
-        <el-row>
+        <el-row style="margin-bottom: 20px;">
             <el-form :model="form">
                 <el-table
                     ref="multipleTable"
@@ -40,7 +40,10 @@
                         </template>
                     </el-table-column>
                 </el-table>
-            </el-form>
+            </el-form>            
+        </el-row>
+        <el-row style="text-align: center;">
+            <el-button type="primary" @click="goback">返回商家月消费统计</el-button>
         </el-row>
     </div>
 </div>
@@ -70,8 +73,8 @@
             }        	  
         },
         methods: {
-            gotoSetting(){
-                window.location.href='/merchant/consumeRecord/initSingleMerchant?mainAccountId';
+            goback(){
+                window.location.href='/merchant/monthConsumeStatistics/toConsumeMonthly';
             },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
@@ -97,6 +100,7 @@
                 param.merchantUserName=row.merchantUserName;
                 param.companyIds=row.companyIds; //分公司Id               
                 param.companyNames=row.companyNames;//分公司名称
+                param.merchantUserCreateTime = row.merchantUserCreateTime;
                 if(row.inputValArr.length>0){
                     var proportionStr="";
                     var proportionVal=null;
@@ -104,18 +108,17 @@
                         if(row.inputValArr[i].val){
                            proportionStr+=row.inputValArr[i].val+","; 
                            proportionVal+=parseInt(row.inputValArr[i].val); 
-                       }                     
+                        }else if(row.inputValArr[i].val==""){
+                            ocmVM.$message.error("消费占比不能为空");
+                            return;
+                        }                    
                     }     
-                    if(proportionVal>100){
-                        ocmVM.$message.error("消费占比总数不能大于100");
+                    if(proportionVal!=100){
+                        ocmVM.$message.error("消费占比总数必须等于100");
                         return;
                     }  
                     if(proportionStr) {
                         param.proportion=proportionStr.substring(0,proportionStr.length-1);//分公司占比
-                    }else{
-                        param.proportion="";
-                        ocmVM.$message.error("消费占比不能为空");
-                        return;
                     } 
                 }                
                 console.log(param)

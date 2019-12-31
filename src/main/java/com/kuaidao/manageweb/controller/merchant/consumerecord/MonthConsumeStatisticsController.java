@@ -81,7 +81,6 @@ public class MonthConsumeStatisticsController {
     @ResponseBody
     public JSONResult<PageBean<MonthConsumeStatisticsDTO>> getConsumeMonthlyList(@RequestBody MonthConsumeStatisticsReq pageParam,
                                                                                  HttpServletRequest request) {
-        JSONResult<PageBean<MonthConsumeStatisticsDTO>> list = monthConsumeStatisticsFeignClient.list(pageParam);
         return monthConsumeStatisticsFeignClient.list(pageParam);
     }
 
@@ -108,6 +107,7 @@ public class MonthConsumeStatisticsController {
                 MerchantProportionConfigDTO merchantProportionConfigDTO = new MerchantProportionConfigDTO();
                 merchantProportionConfigDTO.setMerchantUserId(userInfoDTO.getId());
                 merchantProportionConfigDTO.setMerchantUserName(userInfoDTO.getName());
+                merchantProportionConfigDTO.setMerchantUserCreateTime(userInfoDTO.getCreateTime());
                 CompanyInfoPageParam companyInfoPageParam = new CompanyInfoPageParam();
                 companyInfoPageParam.setCompanyGroupId(userInfoDTO.getId());
                 JSONResult<List<CompanyInfoDTO>> companyListRes = companyInfoFeignClient.getCompanyListByParam(companyInfoPageParam);
@@ -140,7 +140,7 @@ public class MonthConsumeStatisticsController {
     public JSONResult saveOrUpdate(@RequestBody MerchantProportionConfigDTO merchantProportionConfigDTO){
         Long id = merchantProportionConfigDTO.getId();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        if(null != id){
+        if(null == id){
             merchantProportionConfigDTO.setCreateUserId(curLoginUser.getId());
         }else{
             merchantProportionConfigDTO.setUpdateUserId(curLoginUser.getId());
