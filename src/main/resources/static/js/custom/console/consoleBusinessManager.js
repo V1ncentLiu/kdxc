@@ -1491,6 +1491,7 @@ var mainDivVM = new Vue({
                 mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 mainDivVM.formSigning.payName = response.data.data.customerName;
                 mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
             //  设置默认时间
             //     mainDivVM.formSigning.payTime = new Date()
             //     mainDivVM.formSigning.isRemoteSign = 0;
