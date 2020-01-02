@@ -113,6 +113,11 @@ public class OrganizationController {
                 .queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
         request.setAttribute("businessLineList", businessLineJR.getData());
 
+        //推广所属公司
+        JSONResult<List<DictionaryItemRespDTO>> promotionCompanys = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.PROMOTION_COMPANY.getCode());
+        request.setAttribute("promotionCompanyList", promotionCompanys.getData());
+
         return "organization/organizationPage";
     }
 

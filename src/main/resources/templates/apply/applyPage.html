@@ -35,7 +35,7 @@
 					<el-input v-model="brandName" maxLength="30" placeholder="所属项目"></el-input>
 				</el-form-item>
 				<el-form-item label="客户姓名:">
-					<el-input v-model="name" maxLength="20" placeholder="客户姓名"  @keyup.native="number"></el-input>
+					<el-input v-model="name" maxLength="20" placeholder="客户姓名" ></el-input>
 				</el-form-item>
 				<el-form-item label="提交时间:">
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
@@ -80,7 +80,7 @@
 	<!-- dialog -->
 	<el-dialog title="转发给顾问" :visible.sync="distributionPdzySyc" width="540px">
 		<el-form :model="pdzyform" ref="pdzyform" :rules="pdzyrules">
-			<el-form-item label="电销顾问：" :label-width="formLabelWidth"  prop="pdUser">
+			<el-form-item label="电销顾问：" :label-width="formLabelWidth"  prop="teleSaleId">
 				<el-select filterable v-model="pdzyform.teleSaleId" placeholder="选择组内顾问" style="width:80%;">
 					<el-option
 							v-for="item in userInfoList"
@@ -210,7 +210,7 @@
 			pdzyform:{
 				teleSaleId:""
 			},
-			pdUser:"",
+			teleSaleId:"",
         	formLabelWidth: '150px',
         	form:{
         		dealStatus:"1"
@@ -258,7 +258,7 @@
 
 			pdzyrules:{
 				teleSaleId: [
-					{ required: true, message: '请选择电销顾问', trigger: 'blur' },
+					{ required: true, message: '请选择电销顾问', trigger: 'change' },
 				]
 			},
              
@@ -291,7 +291,7 @@
 				})
 			},
 			getPhone(phone){
-				var phone =phone.replace(phone.substring(3,7), "****")
+				var phone =phone.substring(0,9)+"**";
 				return phone;
 			},
 			dateFormat:function(row, column) {
@@ -329,7 +329,7 @@
             },
 			transformPhone(row, column) {
 				var phone = row[column.property];
-				var tel1 =phone.replace(phone.substring(3,7), "****")
+				var tel1 =phone.substring(0,9)+"**";
 				return tel1;
 			},
 
@@ -421,16 +421,12 @@
 			},
 			exportApply(){
 				var param = {};
-				var pageSize = this.pager.pageSize;
-				var pageNum = this.pager.currentPage;
 				var beginTime = this.beginTime;
 				var endTime = this.endTime;
 				param.beginTime = this.beginTime;
 				param.endTime = this.endTime;
 				param.name = this.name;
 				param.brandName = this.brandName;
-				param.pageNum = pageNum;
-				param.pageSize = pageSize;
 				if(endTime && beginTime) {
 					beginTimes = new Date(this.beginTime);
 					endTimes = new Date(this.endTime);

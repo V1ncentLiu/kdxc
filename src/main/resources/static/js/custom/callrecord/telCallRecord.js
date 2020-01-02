@@ -10,6 +10,7 @@ var myCallRecordVm = new Vue({
         audioShow:false,
         isShow:false,
       isDXZDisabled:false,
+        isDXSYBDisabled:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -52,10 +53,12 @@ var myCallRecordVm = new Vue({
         	bindPhone:'',
         	accountId:'',
         	teleGroupId:ownOrgId,
+            teleDeptId:curDeptId,
             categoryArr:[]
         },
         tmList:tmList,//组内电销顾问
         teleGroupList:teleGroupList,//电销组
+        teleDeptList:teleDeptList
         
     },
     methods:{
@@ -436,11 +439,33 @@ var myCallRecordVm = new Vue({
             });
         },
         clearTeleGroupList(selectedValue){
-        	this.teleGroupList= [];
+        	//this.teleGroupList= [];
         	this.tmList=[];
         	this.searchForm.accountId='';
         	this.searchForm.teleGroupId='';
-        }
+        },
+        changeTeleDept(selectedValue){//电销事业部
+            this.clearTeleDeptList();
+            if(!selectedValue){
+                return;
+            }
+            var param ={};
+            param.id = selectedValue;
+            axios.post('/organization/organization/queryTeleGroupListByParentId', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    var table=result.data;
+                    myCallRecordVm.teleGroupList= table;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        clearTeleDeptList(){
+            this.teleGroupList=[];
+            this.searchForm.teleGroupId='';
+            this.clearTeleGroupList();
+        },
         
     	
     },
@@ -466,6 +491,9 @@ var myCallRecordVm = new Vue({
         .catch(function (error) {
           console.log(error);
         });
+      }
+      if(curDeptId){
+          this.isDXSYBDisabled = true;
       }
         //初始资源类别数据
         param={};

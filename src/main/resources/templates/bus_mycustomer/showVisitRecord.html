@@ -208,7 +208,7 @@
                     <el-row :gutter="20">
                         <el-col :span="10">
                             <el-form-item label="考察公司："  :label-width="formLabelWidth"  prop="companyid">
-                                <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
+                                <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable filterable >
                                     <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -229,7 +229,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="考察项目："    :label-width="formLabelWidth"  prop="projectId">
-                                <el-select v-model="addVisitRecord.projectId" placeholder="请选择"  clearable >
+                                <el-select v-model="addVisitRecord.projectId" placeholder="请选择"  clearable filterable @change="getShopType">
                                     <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -246,7 +246,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="到访店铺类型："    :label-width="formLabelWidth"  prop="vistitStoreType">
-                                <el-select v-model="addVisitRecord.vistitStoreType" placeholder="请选择"  clearable >
+                                <el-select v-model="addVisitRecord.vistitStoreType" placeholder="请选择"  clearable filterable>
                                     <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -255,14 +255,14 @@
                     <el-row :gutter="20">
                         <el-col :span="10">
                             <el-form-item label="签约省份："  :label-width="formLabelWidth"  prop="signProvince"  >
-                                <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="changeVisitProvince" clearable>
+                                <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="changeVisitProvince" clearable filterable>
                                     <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="签约城市："    :label-width="formLabelWidth"  prop="signCity" clearable >
-                                <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="currentCity">
+                            <el-form-item label="签约城市："    :label-width="formLabelWidth"  prop="signCity" >
+                                <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="currentCity" clearable filterable>
                                     <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -271,7 +271,7 @@
                     <el-row :gutter="20">
                         <el-col :span="10">
                             <el-form-item label="签约区/县："  :label-width="formLabelWidth"  prop="signDistrict">
-                                <el-select v-model="addVisitRecord.signDistrict" placeholder="请选择" clearable >
+                                <el-select v-model="addVisitRecord.signDistrict" placeholder="请选择" clearable filterable >
                                     <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -351,7 +351,7 @@
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
-                                    <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                    <el-select v-model="formSigning.signCompanyId" clearable filterable placeholder="请选择签约餐饮公司">
                                         <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                     </el-select>
                                 </el-form-item>
@@ -556,7 +556,7 @@
                         <el-row>
                             <el-col :span="10">
                                 <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
-                                    <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                    <el-select :disabled="notEditRebutSign" clearable filterable v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
                                         <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                     </el-select>
                                 </el-form-item>
@@ -644,20 +644,20 @@
                     <div>
                         <el-row>
                             <el-col :span="10">
-                                <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
-                                    <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" @change="changePayType">
-                                        <!-- <el-option  key="1" label="全款" value="1"></el-option>
-                                         <el-option  key="2" label="定金" value="2"></el-option>
-                                         <el-option  key="3" label="追加定金" value="3"></el-option>
-                                         <el-option  key="4" label="尾款" value="4"></el-option>-->
-                                        <el-option
-                                                v-for="item in payTypeArr"
-                                                :key="item.value"
-                                                :label="item.label"
-                                                :value="item.value">
-                                        </el-option>
-                                    </el-select>
-                                </el-form-item>
+<!--                                <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">-->
+<!--                                    <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" >-->
+<!--                                        &lt;!&ndash; <el-option  key="1" label="全款" value="1"></el-option>-->
+<!--                                         <el-option  key="2" label="定金" value="2"></el-option>-->
+<!--                                         <el-option  key="3" label="追加定金" value="3"></el-option>-->
+<!--                                         <el-option  key="4" label="尾款" value="4"></el-option>&ndash;&gt;-->
+<!--                                        <el-option-->
+<!--                                                v-for="item in payTypeArr"-->
+<!--                                                :key="item.value"-->
+<!--                                                :label="item.label"-->
+<!--                                                :value="item.value">-->
+<!--                                        </el-option>-->
+<!--                                    </el-select>-->
+<!--                                </el-form-item>-->
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
@@ -736,6 +736,7 @@
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
     var clueId = [[${clueId}]];
+    var busGroupId = '[[${busGroupId}]]';
     var visitStatus = [[${visitStatus}]];
     var signAuditStatus = [[${signAuditStatus}]];
     var proSelect=[[${proSelect}]];
@@ -949,8 +950,17 @@
             },
         },
         methods: {
-
-
+            getShopType(value){
+                var param = {};
+                param.id = value;
+                axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                    console.log("###"+response.data.data);
+                    if(mainDivVM.addVisitRecord.vistitStoreType){
+                        mainDivVM.addVisitRecord.vistitStoreType ='';
+                    }
+                    mainDivVM.vistitStoreTypeArr= response.data.data;
+                });
+            },
             formatVisitTime(row){
 
                 function dateFtt(fmt,date)
@@ -983,6 +993,7 @@
                     mainDivVM.addVisitRecord.clueId=clueId
                     mainDivVM.addVisitRecord.vistitTime = new Date()
                     mainDivVM.addVisitRecordDialogVisible = true;
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.currentProvince(mainDivVM.addVisitRecord.signProvince)
                     mainDivVM.currentCity(mainDivVM.addVisitRecord.signCity)
                     mainDivVM.showNotSignReason(mainDivVM.addVisitRecord.isSign);
@@ -1002,6 +1013,13 @@
                 });
             },
             saveVisitRecord(){
+
+                if(this.addVisitRecord.isSign==0&&!this.addVisitRecord.notSignReason){
+                    mainDivVM.$message({
+                        type: 'error', message: '请填写未签约原因！'});
+                    return false;
+                }
+
                 var param = this.addVisitRecord;
                 param.vistitTime = new Date( param.vistitTime)
                 param.rebutTime = new Date( param.rebutTime)
@@ -1012,7 +1030,7 @@
                         axios.post("/busVisitRecord/insert", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
-                                    mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
+                                    mainDivVM.$message({type: 'success', message: '来访记录提交成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
                                             // mainDivVM.addVisitAble = false;//允许按钮点击
@@ -1153,6 +1171,7 @@
                         return false;
                     }else{
                         mainDivVM.updateFormSigning =response.data.data;
+                        mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
                         if( mainDivVM.updateFormSigning){
                             if(mainDivVM.updateFormSigning.payType > 2){
                                 if(mainDivVM.updateFormSigning.payType == 3){
@@ -1233,6 +1252,7 @@
             initList(){
                 var param = {};
                 param.clueId = clueId
+                param.busGroupId = busGroupId
                 axios.post('/busVisitRecord/queryList',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
@@ -1296,11 +1316,11 @@
         created(){
             this.initList();
             //  到访店铺类型 vistitStoreTypeArr
-            var param={};
-            param.groupCode="vistitStoreType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                mainDivVM.vistitStoreTypeArr=response.data.data;
-            });
+            // var param={};
+            // param.groupCode="vistitStoreType";
+            // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            //     mainDivVM.vistitStoreTypeArr=response.data.data;
+            // });
 
             //初始化省份
             param={};

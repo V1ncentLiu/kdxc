@@ -270,7 +270,7 @@ if(orgData !=null){
 var userVM = new Vue({
   el: '#userManage',
   data: {
-    showIsCharge:true,
+      showIsCharge:true,
       merchatName:"",
       subAccountFormTitle:"添加商家子账号",
       dialogsubAccountForm:false,
@@ -503,6 +503,7 @@ var userVM = new Vue({
                   param.userType = 3;
                   param.status = 1;
                   param.parentId= formData.id;
+
                   var roleList=new Array();
                   roleList.push(formData.roleId);
                   param.roleList=roleList;
@@ -712,7 +713,9 @@ var userVM = new Vue({
             this.clueTemplateForm.id ="";
             this.$refs['clueTemplateForm'].resetFields();
         }
-      this.clueTemplateForm.merchantType =2;
+      //TODO
+      this.clueTemplateForm.merchantType =1;
+      this.showIsCharge = true;
       this.clueTemplateForm.isCharge =0;
 
     },
@@ -747,10 +750,10 @@ var userVM = new Vue({
                     userVM.clueTemplateForm.orgName = user.orgName;
                     userVM.clueTemplateForm.isCharge = user.isCharge;
                     userVM.clueTemplateForm.merchantType = user.merchantType;
-                    if( userVM.clueTemplateForm.merchantType === 2){
-                      userVM.showIsCharge = false;
-                    }else{
+                    if( userVM.clueTemplateForm.merchantType === 1){
                       userVM.showIsCharge = true;
+                    }else{
+                      userVM.showIsCharge = false;
                     }
                     userVM.multipleTreeSelection=[];
                     userVM.multipleTreeSelection.push(user.orgId);
@@ -914,10 +917,12 @@ var userVM = new Vue({
       });
     },
     merchantTypeClick(val){
-      if(val==0){
+      if(val==2){
         this.showIsCharge = false;
+        this.clueTemplateForm.isCharge = 1;
       }else{
         this.showIsCharge = true;
+        this.clueTemplateForm.isCharge = 0;
       }
     },
     showDialogFormVisible() {

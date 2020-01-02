@@ -82,7 +82,7 @@
                 <el-table-column align="center" prop="createDate" label="日期（天）"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="clueNum" label="消费资源数">
                     <template slot-scope="scope">
-                    <el-button class="fontColor2"  type="text" @click="gotoInfo(scope.row.createDate)">
+                    <el-button class="fontColor2"  type="text" @click="gotoInfo(scope.row)">
                         <span>{{scope.row.clueNum}}</span>
                     </el-button>
                 </template>
@@ -197,13 +197,13 @@
                 }
                 return moment(cellValue).format("YYYY-MM-DD");
             },
-            gotoInfo(createDate){
-                if(createDate){
-                    window.location.href='/merchant/merchantConsumeRecord/initInfoList/'+createDate;
-                }else{
-                    window.location.href='/merchant/merchantConsumeRecord/initInfoList/';
-                }
-            },
+            gotoInfo(data){
+                if(!data){
+                    window.location.href='/merchant/merchantConsumeRecord/initInfoList?createDate=&userId=';
+                }else {
+                    window.location.href = '/merchant/merchantConsumeRecord/initInfoList?createDate=' + data.createDate + '&userId=' + data.userId;
+                    }
+                },
         },
         created() {
             //监听父窗口信息

@@ -13,7 +13,7 @@
 
     <div id="merchantHome" style="display: none;">
         <!-- 主账户会显示 -->
-        <div class="fatherShow" v-if="fatherShow===2">
+        <div class="fatherShow" v-if="fatherShow!==3">
             <el-row type="flex" class="row-bg" justify="start">
                 <el-col :span="12">
                     <div class="name">
@@ -32,8 +32,7 @@
                     <div class="name other">
                         <b><span class="last">账户余额：</span></b>
                         <p class="noMonth">
-                            <b class="noMonthmoney" v-if="countBlance">{{countBlance}}.00</b>
-                            <b class="noMonthmoney" v-else>0.00</b>
+                            <b class="noMonthmoney" >{{countBlance}}</b>
                             <el-button class="titleButton" type="primary" @click="immediateRecharge">立即充值</el-button>
                         </p>
                     </div>
@@ -129,6 +128,15 @@
     <script type="text/javascript" src="/js/common/commonMethod.js"></script>
     <script th:inline="javascript">
         var countBlance = [[${ countBlance }]];
+        if(countBlance){
+            if(JSON.stringify(countBlance).indexOf('.')>-1){
+                countBlance=countBlance
+            }else{
+                countBlance=countBlance+'.00'
+            }
+        }else{
+            countBlance='0.00'
+        }
         var buyedFlag = [[${ buyedFlag }]];
         var userType = [[${ userType }]];
         var merchantName = [[${ merchantName }]];

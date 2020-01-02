@@ -248,7 +248,7 @@
                <el-table-column align="center" prop="accountPhone" label="电销顾问电话"  width="120"></el-table-column>
                <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject" width="120"></el-table-column>
                <el-table-column align="center" prop="cusName" label="客户姓名" width="130"></el-table-column>
-               <el-table-column align="center" prop="tasteProjectId" label="品尝项目" width="130" :formatter="transformProject"></el-table-column>
+               <el-table-column align="center" prop="tasteProjectId" label="考察项目" width="130" :formatter="transformProject"></el-table-column>
                <!-- <el-table-column align="center" prop="" label="签约店型" :formatter="transformProject"></el-table-column> -->
                <el-table-column align="center" prop="province" label="开店省份" width="100"></el-table-column>
                <el-table-column align="center" prop="hasAddress" label="选址情况" width="100" :formatter="transformAddress"></el-table-column>
@@ -278,6 +278,18 @@
                                 :value="item.id">
                             </el-option>
                         </el-select>
+                        <el-button type="text" @click="showSaleIdOther" size="mini">
+                            <i v-if="!isSaleIdOther" class="el-icon-plus"/></i>
+                            <i v-if="isSaleIdOther" class="el-icon-minus"/></i>
+                            辅助经理
+                        </el-button>
+                    </el-form-item>
+                    <el-form-item label="辅助商务经理:" :label-width="formLabelWidth" prop="" style="margin-bottom: 20px;" v-if="isSaleIdOther">
+                        <el-select v-model="allocationForm.saleIdOther" placeholder="组内商务经理姓名" style="width: 290px;margin-right: 10px;" filterable>
+                            <el-option v-for="item in saleOptions" :key="item.id" :label="item.name"
+                                       :value="item.id"></el-option>
+                        </el-select>
+                        <p style="position: absolute;bottom: -25px;color: #f56c6c;">增加辅助商务经理后，签约后两个商务经理将平分业绩</p>
                     </el-form-item>
                     <el-form-item label="备注：" :label-width="formLabelWidth"  prop="remark">
                         <el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 290px;" :rows="4" placeholder="输入分发备注"></el-input>
@@ -413,7 +425,7 @@
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="cusName" label="客户姓名" width="130"></el-table-column>  
-                <el-table-column align="center" prop="tasteProjectId" label="品尝项目" :formatter="transformProject"></el-table-column>
+                <el-table-column align="center" prop="tasteProjectId" label="考察项目" :formatter="transformProject"></el-table-column>
                 <!-- <el-table-column align="center" prop="companyName" label="签约店型"></el-table-column> -->
                 <el-table-column align="center" prop="createTime" label="提交邀约时间" width="130"></el-table-column>
                 <el-table-column align="center" prop="reserveTime" label="邀约来访时间" width="130"></el-table-column>
@@ -698,6 +710,6 @@ var giveTypeList =[[${giveTypeList}]];
 var payModeItem =[[${payModeItem}]];
 
 </script>
-<script th:src="@{/js/custom/console/consoleBusinessMajordomo.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/console/consoleBusinessMajordomo.js}"></script>
 </body>
 </html>

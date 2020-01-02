@@ -58,11 +58,11 @@ public interface ClueChargeFeignClient {
     /**
      * 删除资源费用
      *
-     * @param idListLongReq
+     * @param merchantClueChargeReq
      * @return
      */
     @PostMapping("/delete")
-    JSONResult<String> delete(@RequestBody IdListLongReq idListLongReq);
+    JSONResult<String> delete(@RequestBody MerchantClueChargeReq merchantClueChargeReq);
 
     @Component
     static class HystrixClientFallback implements FallbackFactory<ClueChargeFeignClient> {
@@ -96,7 +96,7 @@ public interface ClueChargeFeignClient {
                     return fallBackError("查询资源资费列表");
                 }
                 @Override
-                public JSONResult<String> delete( IdListLongReq idListLongReq){
+                public JSONResult<String> delete( MerchantClueChargeReq merchantClueChargeReq){
                     return fallBackError("删除资费");
                 }
             };

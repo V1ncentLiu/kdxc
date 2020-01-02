@@ -1,33 +1,6 @@
 package com.kuaidao.manageweb.controller.sign;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
 import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
@@ -36,21 +9,18 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
-import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
-import com.kuaidao.aggregation.dto.sign.SignParamDTO;
-import com.kuaidao.aggregation.dto.sign.SignRejectRecordDto;
+import com.kuaidao.aggregation.dto.sign.*;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.JSONUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
@@ -70,10 +40,30 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Auther: admin
@@ -116,7 +106,6 @@ public class BusinessSignController {
   PayDetailFeignClient payDetailFeignClient;
   @Autowired
   private DictionaryItemFeignClient dictionaryItemFeignClient;
-
 
   /**
    * 有效性签约单确认列表页面
@@ -268,13 +257,6 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
-            // 转换驳回记录里用户信息
-            List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
-            if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
-                handleRejectUserName(rejectRecordList);
-              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
-                data.setSignRejectRecordList(rejectRecordList);
-            }
             IdEntityLong idLong = new IdEntityLong();
             idLong.setId(param.getClueId());
             String linkPhone = linkPhone(idLong);
@@ -288,6 +270,12 @@ public class BusinessSignController {
             data.setVisitCity("");
             data.setArrVisitCity("");
             data.setVisitShopType(1);
+            //获取签约店型
+            JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
+            data.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(data.getSignShopType(),vistitStoreJson.getData())){
+              data.setSignShopType(null);
+            }
             res.setData(data);
             data.setPerformanceAmount(data.getAmountPerformance());
         }
@@ -421,6 +409,12 @@ public class BusinessSignController {
     signDTO.setRebutReason(null);
     signDTO.setRebutTime(null);
     signDTO.setAmountReceived(null);
+    //获取签约店型
+    JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(signDTO.getSignProjectId());
+    signDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+    if(!checkShopType(signDTO.getSignShopType(),vistitStoreJson.getData())){
+      signDTO.setSignShopType(null);
+    }
     if(StringUtils.isBlank(signDTO.getSignProvince())){
       signDTO.setSignProvince("");
     }
@@ -433,7 +427,22 @@ public class BusinessSignController {
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
 
-
+  private Boolean checkShopType(String type,List<DictionaryItemRespDTO> itemList){
+    Boolean flag = false;
+    if(!StringUtils.isNotBlank(type)){
+      flag = false;
+    }else if(itemList != null && itemList.size() >0){
+      String shopType = itemList.stream().map(a->a.getValue()).collect(Collectors.joining(","));
+      if(shopType.contains(type)){
+        flag = true;
+      }else {
+        flag = false;
+      }
+    }else {
+      flag = false;
+    }
+    return flag;
+  }
   private Long getProjectId( JSONResult<List<ProjectInfoDTO>> proJson , Long signProjectId){
 
     Long res =null;
@@ -696,6 +705,8 @@ public class BusinessSignController {
     paramDTO.setSignId(Long.valueOf(signId));
     JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
 
+    logger.info("queryOne,busSign:{}",busSign);
+
     BusSignRespDTO sign = busSign.getData();
     List<BusSignRespDTO> signData = new ArrayList();
     signData.add(sign);
@@ -720,6 +731,7 @@ public class BusinessSignController {
       JSONResult<List<PayDetailRespDTO>> resListJson =
           payDetailFeignClient.queryList(detailReqDTO);
       if (JSONResult.SUCCESS.equals(resListJson.getCode())) {
+        logger.info("resListJson:{}",resListJson);
         List<PayDetailRespDTO> list = resListJson.getData();
         // 定金
         List<PayDetailRespDTO> one = new ArrayList();
@@ -742,7 +754,7 @@ public class BusinessSignController {
         request.setAttribute("threeData", three);
       }
     }
-
+    logger.info("sign:{}", JSONUtil.toJSon(sign));
     // 查询签约单退款信息
     if (sign.getSignStatus() == 2 && (sign.getRefundStatus() == 4 || sign.getRefundStatus() == 6)) {
       Map map = new HashMap();
@@ -816,34 +828,6 @@ public class BusinessSignController {
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
     }
-
-    /**
-     * 处理驳回人员姓名
-     * 
-     * @author: Fanjd
-     * @param rejectRecordList 驳回记录
-     * @return: void
-     * @Date: 2019/6/21 10:08
-     * @since: 1.0.0
-     **/
-    private void handleRejectUserName(List<SignRejectRecordDto> rejectRecordList) {
-        Set<Long> idSet = rejectRecordList.stream().map(SignRejectRecordDto::getCreateUser).collect(Collectors.toSet());
-        List<Long> idList = new ArrayList<>();
-        idList.addAll(idSet);
-        IdListLongReq idListReq = new IdListLongReq();
-        idListReq.setIdList(idList);
-        JSONResult<List<UserInfoDTO>> userResult = userInfoFeignClient.listById(idListReq);
-        if (JSONResult.SUCCESS.equals(userResult.getCode())) {
-            List<UserInfoDTO> userList = userResult.getData();
-          logger.info("根据用户id集合获取用户,id集合:{},查询结果集合:{}",idListReq,userList);
-            Map<Long, UserInfoDTO> userMap = userList.stream().collect(Collectors.toMap(UserInfoDTO::getId, a -> a, (k1, k2) -> k1));
-            for (SignRejectRecordDto dto : rejectRecordList) {
-                UserInfoDTO userInfoDTO = userMap.get(dto.getCreateUser());
-                dto.setCreateUserName(userInfoDTO.getName());
-            }
-
-        }
-    }
     
     /**
      * 查询明细
@@ -857,23 +841,18 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.querySignById(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
-            // 這段是為了顯示
-            // data.setSignProjectId(this.getProjectId());
-
-
-            // 转换驳回记录里用户信息
-            List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
-            if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
-                handleRejectUserName(rejectRecordList);
-              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
-                data.setSignRejectRecordList(rejectRecordList);
-            }
             IdEntityLong idLong = new IdEntityLong();
             idLong.setId(param.getClueId());
             String linkPhone = linkPhone(idLong);
             data.setPhone(linkPhone);
             if (data.getGiveType() == null) {
                 data.setGiveType(-1);
+            }
+            //获取签约店型
+            JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
+            data.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(data.getSignShopType(),vistitStoreJson.getData())){
+              data.setSignShopType(null);
             }
             res.setData(data);
             data.setPerformanceAmount(data.getAmountPerformance());
@@ -932,5 +911,26 @@ public class BusinessSignController {
   @ResponseBody
   public JSONResult distributionPdUser(@RequestBody BusinessSignDTO businessSignDTO){
     return businessSignFeignClient.distributionPdUser(businessSignDTO);
+  }
+
+  public JSONResult<List<DictionaryItemRespDTO>> getShortTypeByProjectId(@RequestBody Long projectId) {
+    List<DictionaryItemRespDTO> shopList = new ArrayList<>();
+    IdEntityLong idEntityLong = new IdEntityLong();
+    idEntityLong.setId(projectId);
+    JSONResult<ProjectInfoDTO>  projectInfoDTOJSONResult = projectInfoFeignClient.get(idEntityLong);
+    if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode())){
+      ProjectInfoDTO projectInfoDTO = projectInfoDTOJSONResult.getData();
+      if(projectInfoDTO != null && StringUtils.isNotBlank(projectInfoDTO.getShopType())){
+        String type1 = projectInfoDTO.getShopType();
+        DictionaryItemQueryDTO queryDTO = new DictionaryItemQueryDTO();
+        queryDTO.setGroupCode("vistitStoreType");
+        JSONResult<List<DictionaryItemRespDTO>> result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+        if (JSONResult.SUCCESS.equals(result.getCode())) {
+          List<DictionaryItemRespDTO> dictionaryItemRespDTOList = result.getData();
+          shopList = dictionaryItemRespDTOList.stream().filter(a->type1.contains(a.getValue())).collect(Collectors.toList());
+        }
+      }
+    }
+    return new JSONResult<List<DictionaryItemRespDTO>>().success(shopList);
   }
 }

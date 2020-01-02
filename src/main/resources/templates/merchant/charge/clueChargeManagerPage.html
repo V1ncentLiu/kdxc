@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
@@ -101,6 +103,7 @@
                             @selection-change="handleSelectionChange" style="width: 100%"
                             :data="dynamicValidateForm.dataTable">
                             <el-table-column align="center" type="selection" label="序号" width="55"></el-table-column>
+                            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                             <el-table-column align="center" prop="chargeName" label="资费名称" min-width="80">
                             </el-table-column>
                             <!-- <el-table-column align="center" prop="id" label="ID" min-width="80">
@@ -124,8 +127,8 @@
                             <el-table-column align="center" prop="merchantType" label="商家所属" min-width="80">
                                 <template slot-scope="scope">
                                     <span v-if="scope.row.merchantType==0">全部商家</span>
-                                    <span v-if="scope.row.merchantType==1">内部商家</span>
-                                    <span v-if="scope.row.merchantType==2">外部商家</span>
+                                    <span v-if="scope.row.merchantType==1">内部</span>
+                                    <span v-if="scope.row.merchantType==2">外部</span>
                                 </template>
 
                             </el-table-column>
@@ -146,15 +149,15 @@
                     </table-pagination>
                 </div>
             </el-row>
-            <!-- 添加编辑坐席弹框 -->
+            <!-- 添加编辑坐席弹框@close="closeDialog" -->
             <el-dialog :title="title" :visible.sync="centerDialogVisible" width="540px">
                 <el-form :model="subAccountForm" ref="subAccountForm" :rules="rules">
                     <el-form-item label="资费名称：" :label-width="formLabelWidth" prop="iframeseatNo">
-                        <el-input maxlength="10" v-model="subAccountForm.iframeseatNo" autocomplete="off"
+                        <el-input maxlength="20" v-model="subAccountForm.iframeseatNo" autocomplete="off"
                             style="width: 290px;"></el-input>
                     </el-form-item>
                     <el-form-item label="行业类别：" :label-width="formLabelWidth" prop="iframecompany">
-                        <el-select v-model="subAccountForm.iframecompany" clearable placeholder="不限"
+                        <el-select v-model="subAccountForm.iframecompany" clearable placeholder=""
                             style="width: 290px;">
                             <el-option v-for="item in industryOptions" :key="item.value" :label="item.name"
                                 :value="item.value">
@@ -162,7 +165,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="iframeaddress">
-                        <el-select v-model="subAccountForm.iframeaddress" clearable placeholder="不限"
+                        <el-select v-model="subAccountForm.iframeaddress" clearable placeholder=""
                             style="width: 290px;">
                             <el-option v-for="item in categoryOptions" :key="item.value" :label="item.name"
                                 :value="item.value">
@@ -170,7 +173,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源媒介：" :label-width="formLabelWidth" prop="iframeaccountNo">
-                        <el-select v-model="subAccountForm.iframeaccountNo" clearable placeholder="不限"
+                        <el-select v-model="subAccountForm.iframeaccountNo" clearable placeholder=""
                             style="width: 290px;">
                             <el-option v-for="item in mediumOptions" :key="item.value" :label="item.name"
                                 :value="item.value">
@@ -186,7 +189,8 @@
                             autocomplete="off" style="width: 290px;"></el-input>
                     </el-form-item> -->
                     <el-form-item label="商家所属：" :label-width="formLabelWidth" prop="iframemerchantType">
-                        <el-select v-model="subAccountForm.iframemerchantType" style="width: 290px;" placeholder="全部商家">
+                        <el-select v-model="subAccountForm.iframemerchantType" style="width: 290px;" clearable
+                            placeholder="全部商家">
                             <el-option v-for="item in merchantOwnedOptions" :key="item.value" :label="item.name"
                                 :value="item.value">
                             </el-option>
@@ -207,9 +211,10 @@
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var industryCategoryList = [[${ industryCategoryList }]];//行业类别
-    var categoryList = [[${ categoryList }]];//资费类别
-    var sourceList = [[${ sourceList }]];//媒介
+    var industryCategoryList = [{ name: '不限', value: '0' }].concat([[${ industryCategoryList }]]);//行业类别
+    var categoryList = [{ name: '不限', value: '0' }].concat([[${ categoryList }]]);//资费类别
+    var sourceList = [{ name: '不限', value: '0' }].concat([[${ sourceList }]]);//媒介
+
     var clueChargeVM = new Vue({
         el: '#clueChargeManage',
         data: {
@@ -222,7 +227,7 @@
             categoryOptions: categoryList,
             industryOptions: industryCategoryList,
             mediumOptions: sourceList,
-            merchantOwnedOptions: [{ name: '内部商家', value: '1' }, { name: '全部商家', value: '0' }, { name: '外部商家', value: '2' }],
+            merchantOwnedOptions: [{ name: '全部商家', value: '0' }, { name: '内部', value: '1' }, { name: '外部', value: '2' }],
             pager: {
                 total: 0,
                 currentPage: 1,
@@ -270,10 +275,8 @@
             dialogFormVisible: false,
             centerDialogVisible: false,
             submitDisabled: false,
-            multipleSelection:[],
-            categoryOptions:categoryList,
+            multipleSelection: [],
             formLabelWidth: '150px',
-            formLabelWidth1: '120px',
             rules: {
                 iframeseatNo: [
                     { required: true, message: '资费名称不能为空', trigger: 'change' },
@@ -292,7 +295,7 @@
                     { required: true, message: '资源定价不能为空', trigger: 'change' },
                 ],
                 iframemerchantType: [
-                    { required: true, message: '行业类别不能为空', trigger: 'change' },
+                    { required: true, message: '商家所属不能为空', trigger: 'change' },
                 ],
 
             }
@@ -306,29 +309,38 @@
                 this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
                 this.subAccountForm.iframesecretKey = this.subAccountForm.iframesecretKey.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数
             },
-
             // 添加编辑删除
             seatOperation(type) {
-                this.$refs['subAccountForm'] ? this.$refs['subAccountForm'].resetFields() : '' //移除表单验证
+                if (this.$refs['subAccountForm'] !== undefined) {
+                    this.$refs['subAccountForm'].resetFields();
+                }
                 switch (type) {
                     case 'add':
-                        this.subAccountForm = {}
+                        this.subAccountForm.iframeseatNo = ''
+                        this.subAccountForm.iframecompany = '不限'
+                        this.subAccountForm.iframeaddress = '不限'
+                        this.subAccountForm.iframeaccountNo = '不限'
+                        this.subAccountForm.iframesecretKey = ''
+                        this.subAccountForm.iframemerchantType = '全部商家'
                         this.title = '添加资费设置'
                         this.centerDialogVisible = true
                         break;
                     case 'edit':
                         this.title = '编辑资费设置'
                         if (this.multipleSelection.length === 1) {
-                            const { chargeName, categoryName, industryCategoryName, sourceName, charge, merchantType } = this.multipleSelection[0]
-                            this.centerDialogVisible = true
+                            const { chargeName, category, industryCategory, charge, merchantType, source } = this.multipleSelection[0]
                             this.subAccountForm.iframeseatNo = chargeName
-                            this.subAccountForm.iframecompany = industryCategoryName
-                            this.subAccountForm.iframeaddress = categoryName
-                            this.subAccountForm.iframeaccountNo = sourceName
+                            this.subAccountForm.iframecompany = industryCategory
+                            this.subAccountForm.iframeaddress = category
+                            this.subAccountForm.iframeaccountNo = source
                             this.subAccountForm.iframesecretKey = charge
-                            this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部商家' : '外部商家'
+                            this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部' : '外部'
+                            this.centerDialogVisible = true
+                        } else if (this.multipleSelection.length === 0) {
+                            clueChargeVM.$message.warning('请选择一条数据进行修改');
                         } else {
-                            clueChargeVM.$message.warning('请正确选择');
+                            clueChargeVM.$message.warning('只允许选择一条数据进行编辑');
+
                         }
                         break;
                     case 'delete':
@@ -343,7 +355,7 @@
             open() {
                 var that = this
                 if (this.multipleSelection.length >= 1) {
-                    this.$confirm('是否确认删除?').then(() => {
+                    this.$confirm('确认删除所选资费设置吗?').then(() => {
                         var idList = []
                         for (var i = 0; i < that.multipleSelection.length; i++) {
                             if (that.multipleSelection[i].id) {
@@ -375,6 +387,10 @@
 
             // 提交
             submitForm(formName) {
+                console.log(this.subAccountForm);
+                this.$refs[formName].validate((valid) => {
+                    console.log(valid);
+                })
                 var that = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -395,6 +411,9 @@
                                     console.log(result);
                                     that.searchTable()
                                     that.centerDialogVisible = false
+                                    if (this.$refs['subAccountForm'] !== undefined) {
+                                        this.$refs['subAccountForm'].resetFields();
+                                    }
                                 } else {
                                     clueChargeVM.$message.error(result.msg);
                                 }
@@ -412,6 +431,9 @@
             // 取消添加坐席提交
             cancelClick(formName) {
                 this.centerDialogVisible = false;
+                if (this.$refs['subAccountForm'] !== undefined) {
+                    this.$refs['subAccountForm'].resetFields();
+                }
             },
 
             inputReset() {
@@ -474,7 +496,7 @@
 
             // 选择框转化关系
             selectionValue(data, allData) {
-                var value = ''
+                var value = '';
                 for (var i = 0; i < allData.length; i++) {
                     if (allData[i].name == data || allData[i].value == data) {
                         value = allData[i].value

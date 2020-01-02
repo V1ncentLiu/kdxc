@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.merchant.charge;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -58,8 +59,11 @@ public class ClueChargeController {
     @RequestMapping("/initClueChargeList")
     @RequiresPermissions("merchant:clueChargeManager:view")
     public String initClueChargeList(HttpServletRequest request) {
+        //资源类别
         request.setAttribute("categoryList", getDictionaryByCode(DicCodeEnum.CLUECHARGECATEGORY.getCode()));
+        //资源媒介
         request.setAttribute("sourceList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        //行业类别
         request.setAttribute("industryCategoryList", getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         return "merchant/charge/clueChargeManagerPage";
     }
@@ -86,7 +90,11 @@ public class ClueChargeController {
     @ResponseBody
     @PostMapping("/delete")
     public JSONResult<String> delete(@RequestBody IdListLongReq idListLongReq) {
-    return clueChargeFeignClient.delete(idListLongReq);
+        MerchantClueChargeReq merchantClueChargeReq = new MerchantClueChargeReq();
+        merchantClueChargeReq.setUpdateUser(getUserId());
+        merchantClueChargeReq.setUpdateTime(new Date());
+        merchantClueChargeReq.setIdList(idListLongReq.getIdList());
+    return clueChargeFeignClient.delete(merchantClueChargeReq);
     }
 
     /***
