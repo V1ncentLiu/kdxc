@@ -555,7 +555,7 @@ var mainDivVM = new Vue({
             var param = {};
             param.id = value;
             axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
-                console.log("###"+response.data.data.vistitStoreTypeArr);
+                console.log("###"+response.data.data);
                 mainDivVM.vistitStoreTypeArr= response.data.data;
                 mainDivVM.signStoreTypeArr= response.data.data;
                 mainDivVM.addVisitRecord.vistitStoreType =''
