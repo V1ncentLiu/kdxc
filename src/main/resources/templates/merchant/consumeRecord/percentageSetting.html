@@ -34,7 +34,7 @@
                     <el-table-column align="center" label="消费占比（%）">
                         <template slot-scope="scope">
                             <el-form-item v-for="item in scope.row.inputValArr" style="display: inline-block;width: 50px;margin-right: 10px;">
-                                <el-input v-model="item.val" maxLength="3" :disabled="scope.row.isEdit" style="width: 40px;margin-right: 7px;" onkeyup="value=value.replace(/^0(0+)|[^\d]+/g,'')"></el-input><span>{{item.index}}</span>
+                                <el-input v-model="item.val" maxLength="3" :disabled="scope.row.isEdit" style="width: 40px;margin-right: 7px;" onkeyup="value=value.replace(/^0(0+)|[^\d]+/g,'')" min="0" max="100"></el-input><span>{{item.index}}</span>
                             </el-form-item>
                             <el-button size="mini" type="success" @click="update(scope.row,scope.row.id)" v-if="scope.row.isShowSave">保存比例</el-button>
                             <el-button size="mini" type="primary" @click="change(scope.row)" v-if="scope.row.isShowBtn">修改比例</el-button>
@@ -113,6 +113,8 @@
                     var reg=/(^\d$)|(^[1-9]\d$)/;
                     for(var i=0;i<row.inputValArr.length;i++){
                         if(row.inputValArr[i].val){
+                            // 去掉负号
+                            row.inputValArr[i].val=row.inputValArr[i].val.replace(/[^0-9]*/g,"");
                             if(row.inputValArr[i].val!="100"){
                                 if (!reg.test(row.inputValArr[i].val)) {
                                     ocmVM.$message.error("只允许输入0-100的正整数");
