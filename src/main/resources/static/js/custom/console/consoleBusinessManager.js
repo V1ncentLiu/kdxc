@@ -104,6 +104,7 @@ var mainDivVM = new Vue({
         payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         vistitStoreTypeArr:[],
+        signStoreTypeArr: [],
         provinceArr:[],
         districtArr:[],
         cityArr:[],
@@ -1488,7 +1489,7 @@ var mainDivVM = new Vue({
                 mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                 mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 mainDivVM.formSigning.payName = response.data.data.customerName;
-                mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
             //  设置默认时间
             //     mainDivVM.formSigning.payTime = new Date()
             //     mainDivVM.formSigning.isRemoteSign = 0;
@@ -1528,6 +1529,7 @@ var mainDivVM = new Vue({
                     // }
 
                     //设置显示数据
+                    mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateFormSigning =response.data.data;
                     if(response.data.data.payName == null || response.data.data.payName == ''){
                         mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
