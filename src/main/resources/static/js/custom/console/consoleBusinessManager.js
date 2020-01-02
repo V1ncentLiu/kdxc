@@ -556,14 +556,14 @@ var mainDivVM = new Vue({
             param.id = value;
             axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
                 console.log("###"+response.data.data);
+                mainDivVM.addVisitRecord.vistitStoreType ='';
+                mainDivVM.updateVisitRecord.vistitStoreType ='';
+                mainDivVM.formSigning.signShopType ='';
+                mainDivVM.formSigning.visitShopType ='';
+                mainDivVM.updateFormSigning.signShopType ='';
+                mainDivVM.updateFormSigning.visitShopType ='';
                 mainDivVM.vistitStoreTypeArr= response.data.data;
                 mainDivVM.signStoreTypeArr= response.data.data;
-                mainDivVM.addVisitRecord.vistitStoreType =''
-                mainDivVM.updateVisitRecord.vistitStoreType =''
-                mainDivVM.formSigning.signShopType =''
-                mainDivVM.formSigning.visitShopType =''
-                mainDivVM.updateFormSigning.signShopType =''
-                mainDivVM.updateFormSigning.visitShopType =''
             });
         },
     	number3() {//添加签约单业绩金额
