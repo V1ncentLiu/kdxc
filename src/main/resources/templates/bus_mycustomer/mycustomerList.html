@@ -1407,7 +1407,7 @@
                                 </el-col>
                                 <el-col :span="12">
                                     <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                                        <el-select clearable filterable v-model="updateFormSigning.signProjectId" placeholder="请选择" style="width:100%;" @change="getShopType">
+                                        <el-select clearable filterable v-model="updateFormSigning.signProjectId" placeholder="请选择" style="width:100%;" @change="getShopTypeEdit">
                                             <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName"
                                                        :value="item.id"></el-option>
                                         </el-select>
@@ -3038,6 +3038,15 @@
                     mainDivVM.formSigning.visitShopType =''
                     mainDivVM.updateFormSigning.signShopType =''
                     mainDivVM.updateFormSigning.visitShopType =''
+                });
+            },
+            getShopTypeEdit(value){
+                var param = {};
+                param.id = value;
+                axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                    console.log("###"+response.data.data.vistitStoreTypeArr);
+                    mainDivVM.signStoreTypeArr= response.data.data;
+                    mainDivVM.updateFormSigning.signShopType =''
                 });
             },
             showNotVisitReason(row) {
