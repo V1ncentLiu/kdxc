@@ -9,6 +9,7 @@ import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantConsumeRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantProportionConfigFeignClient;
@@ -160,7 +161,7 @@ public class MonthConsumeStatisticsController {
             List<CompanyConsumeRecordDTO> data = listJSONResult.getData();
             buildList(dataList, data);
             XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-            String name = MessageFormat.format("商家月消费记录统计表{0}.xlsx","_"+System.currentTimeMillis());
+            String name = MessageFormat.format("{0}分公司消费记录{1}.xlsx",companyConsumeRecordReq.getMerchantUserName(),"_"+DateUtil.getCurrentDate(DateUtil.ymdhms2));
             response.addHeader("Content-Disposition",
                     "attachment;filename=\"" + name+"\"");
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
