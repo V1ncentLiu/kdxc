@@ -116,14 +116,14 @@ public class ExtendClueAgendaTaskController {
         List<UserInfoDTO> userList = queryUserByRole(user);
         // 查询字典分发失败原因集合
         request.setAttribute("reasonList",
-                getDictionaryByCode(DicCodeEnum.ASSIGN_FAIL_REASON.getCode()));
+            getDictionaryByCode(DicCodeEnum.ASSIGN_FAIL_REASON.getCode()));
         request.setAttribute("userList", userList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("waitDistributResource");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+            customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -131,7 +131,7 @@ public class ExtendClueAgendaTaskController {
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setMenuCode("waitDistributResource");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+            customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "clue/waitDistributResource";
     }
@@ -148,7 +148,7 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("projectList", allProject.getData());
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+            getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
         // 查询字典广告位集合
@@ -157,10 +157,10 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList",
-                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+            getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 查询字典账户名称集合
         request.setAttribute("accountNameList",
-                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+            getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         // 系统参数优化资源类别
         String optList = getSysSetting(SysConstant.OPT_CATEGORY);
         request.setAttribute("optList", optList);
@@ -190,7 +190,7 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("projectList", allProject.getData());
         // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+            getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
         // 查询字典广告位集合
@@ -199,10 +199,10 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList",
-                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+            getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 查询字典账户名称集合
         request.setAttribute("accountNameList",
-                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+            getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         // 系统参数优化资源类别
         String optList = getSysSetting(SysConstant.OPT_CATEGORY);
@@ -220,11 +220,13 @@ public class ExtendClueAgendaTaskController {
     @RequiresPermissions("waitDistributResource:add")
     @ResponseBody
     @LogRecord(description = "新建资源", operationType = OperationType.INSERT,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<String> createClue(HttpServletRequest request,
-            @RequestBody PushClueReq pushClueReq) {
+        @RequestBody PushClueReq pushClueReq) {
         UserInfoDTO user = getUser();
         pushClueReq.setCreateUser(user.getId());
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        pushClueReq.setPromotionCompany(user.getPromotionCompany());
         JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
 
         return clueInfo;
@@ -237,9 +239,9 @@ public class ExtendClueAgendaTaskController {
     @RequiresPermissions("waitDistributResource:edit")
     @ResponseBody
     @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<String> updateClue(HttpServletRequest request,
-            @RequestBody PushClueReq pushClueReq) {
+        @RequestBody PushClueReq pushClueReq) {
         UserInfoDTO user = getUser();
         pushClueReq.setCreateUser(user.getId());
         JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
@@ -251,51 +253,53 @@ public class ExtendClueAgendaTaskController {
     @RequiresPermissions("waitDistributResource:view")
     @ResponseBody
     public JSONResult<PageBean<ClueAgendaTaskDTO>> queryPageAgendaTask(HttpServletRequest request,
-            @RequestBody ClueAgendaTaskQueryDTO queryDto) {
+        @RequestBody ClueAgendaTaskQueryDTO queryDto) {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        queryDto.setPromotionCompany(user.getPromotionCompany());
         List<Long> idList = new ArrayList<Long>();
         // 推广总监，优化主管，优化文员，内勤经理可以在查看待分配资源列表中资源专员为管理员的数据
         if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+            || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
             idList.add(SysConstant.GLY_USER_ID);
         }
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
+            || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
         } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+            || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
         } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+            || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
+            || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -310,7 +314,7 @@ public class ExtendClueAgendaTaskController {
             idList = null;
         } else {
             return new JSONResult<PageBean<ClueAgendaTaskDTO>>()
-                    .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
+                .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
         queryDto.setResourceDirectorList(idList);
         return extendClueFeignClient.queryPageAgendaTask(queryDto);
@@ -323,9 +327,9 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/recallClue")
     @ResponseBody
     @LogRecord(description = "撤回资源", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<String> recallClue(HttpServletRequest request,
-            @RequestBody IdEntityLong idEntityLong) {
+        @RequestBody IdEntityLong idEntityLong) {
 
         JSONResult<String> clueInfo = extendClueFeignClient.recallClue(idEntityLong);
 
@@ -338,9 +342,9 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/deleteResource")
     @ResponseBody
     @LogRecord(description = "删除资源", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<String> deleteResource(HttpServletRequest request,
-            @RequestBody IdListLongReq clueIds) {
+        @RequestBody IdListLongReq clueIds) {
 
         JSONResult<String> clueInfo = extendClueFeignClient.deleteResource(clueIds);
 
@@ -353,9 +357,9 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/recallClues")
     @ResponseBody
     @LogRecord(description = "批量撤回资源", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<String> recallClues(HttpServletRequest request,
-            @RequestBody IdListLongReq clueIds) {
+        @RequestBody IdListLongReq clueIds) {
 
         JSONResult<String> clueInfo = extendClueFeignClient.recallClues(clueIds);
 
@@ -375,8 +379,8 @@ public class ExtendClueAgendaTaskController {
             userList.add(user);
             return userList;
         } else if (RoleCodeEnum.GLY.name().equals(roleCode)
-                || RoleCodeEnum.YWGLY.name().equals(roleCode)
-                || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
+            || RoleCodeEnum.YWGLY.name().equals(roleCode)
+            || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
             userRole.setBusinessLine(BusinessLineConstant.TGZX);
         } else {
             userRole.setOrgId(user.getOrgId());
@@ -390,7 +394,7 @@ public class ExtendClueAgendaTaskController {
         UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
         userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
         JSONResult<List<UserInfoDTO>> userAdminJson =
-                userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
+            userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
         if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
             userAdminList = userAdminJson.getData();
         }
@@ -404,7 +408,7 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/customerInfoView")
     @ResponseBody
     public JSONResult<ClueDTO> customerInfoReadOnly(HttpServletRequest request,
-            @RequestBody ClueAgendaTaskQueryDTO queryDto) {
+        @RequestBody ClueAgendaTaskQueryDTO queryDto) {
 
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
@@ -422,9 +426,9 @@ public class ExtendClueAgendaTaskController {
     @RequiresPermissions("waitDistributResource:distribute")
     @ResponseBody
     @LogRecord(description = "待分发资源自动分配", operationType = OperationType.DISTRIBUTION,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<Integer> autoAllocationTask(HttpServletRequest request,
-            @RequestBody IdListLongReq queryDto) {
+        @RequestBody IdListLongReq queryDto) {
 
         JSONResult<Integer> clueInfo = extendClueFeignClient.autoAllocationTask(queryDto);
 
@@ -445,9 +449,9 @@ public class ExtendClueAgendaTaskController {
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
         JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+            dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
         if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
@@ -465,12 +469,12 @@ public class ExtendClueAgendaTaskController {
 
         if (excelDataList == null || excelDataList.size() == 0) {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
-                    SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
+                SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
         if (excelDataList.size() > 1000) {
             logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
-                    "导入数据过多，已超过1000条！");
+                "导入数据过多，已超过1000条！");
         }
 
         // 存放合法的数据
@@ -552,12 +556,12 @@ public class ExtendClueAgendaTaskController {
     @PostMapping("/importClue")
     @RequiresPermissions("waitDistributResource:importExcel")
     @LogRecord(description = "导入资源", operationType = LogRecord.OperationType.IMPORTS,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
     public JSONResult importClue(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
-            throws Exception {
+        throws Exception {
         UserInfoDTO user =
-                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+            (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
@@ -568,14 +572,14 @@ public class ExtendClueAgendaTaskController {
         // 项目处理
         ProjectInfoPageParam projectInfoPageParam = new ProjectInfoPageParam();
         List<ProjectInfoDTO> proList =
-                projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
+            projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
         Map<String, Long> projectMap = new HashMap<String, Long>();
         Map<Long, String> projectMap2 = new HashMap<Long, String>();
         // 遍历项目list集生成<name,id>map
         if (null != proList && proList.size() > 0) {
             for (ProjectInfoDTO projectInfoDTO : proList) {
                 projectMap.put(projectInfoDTO.getProjectName().toUpperCase(),
-                        projectInfoDTO.getId());
+                    projectInfoDTO.getId());
             }
             // 遍历项目list集生成<id,name>map
             for (ProjectInfoDTO projectInfoDTO : proList) {
@@ -595,40 +599,40 @@ public class ExtendClueAgendaTaskController {
         // 匹配字典数据
         // 资源类型<name,value>
         Map<String, String> typeMap =
-                dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
+            dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
         // 资源类型<value,name>
         Map<String, String> typeMap2 =
-                dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
         // 资源类别<name,value>
         Map<String, String> categoryMap = dicMap(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 资源类型<value,name>
         Map<String, String> categoryMap2 = dicMapTwo(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 广告位<name,value>
         Map<String, String> sourceTypeMap =
-                dicMapUpper(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+            dicMapUpper(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 资源类型<value,name>
         Map<String, String> sourceTypeMap2 =
-                dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 媒介<name,value>
         Map<String, String> sourceMap =
-                dicMapUpper(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+            dicMapUpper(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
         // 资源类型<value,name>
         Map<String, String> sourceMap2 =
-                dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
         // 行业类别<name,value>
         Map<String, String> industryCategoryMap = dicMap(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 资源类型<value,name>
         Map<String, String> industryCategoryMap2 = dicMapTwo(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 账户名称<name,value>
         Map<String, String> accountNameMap = dicMap(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         // 资源类型<value,name>
         Map<String, String> accountNameMap2 = dicMapTwo(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         // 系统参数优化资源类别
         String opt = getSysSetting(SysConstant.OPT_CATEGORY);
         List<String> optList = stringToList(opt);
@@ -647,13 +651,13 @@ public class ExtendClueAgendaTaskController {
                 StringBuilder reasonInTime = new StringBuilder();
                 // 判断时间格式是否正确
                 if (clueAgendaTaskDTOReq.getReserveTime1() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getReserveTime1())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getReserveTime1())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq
-                            .setReserveTime1(clueAgendaTaskDTOReq.getReserveTime1().trim());
+                        .setReserveTime1(clueAgendaTaskDTOReq.getReserveTime1().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getReserveTime1() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getReserveTime1())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getReserveTime1())) {
                         try {
                             Date date = format.parse(clueAgendaTaskDTOReq.getReserveTime1());
                         } catch (ParseException e) {
@@ -682,13 +686,13 @@ public class ExtendClueAgendaTaskController {
                 // }
                 // }
                 if (clueAgendaTaskDTOReq.getMessageTime1() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getMessageTime1())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getMessageTime1())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq
-                            .setMessageTime1(clueAgendaTaskDTOReq.getMessageTime1().trim());
+                        .setMessageTime1(clueAgendaTaskDTOReq.getMessageTime1().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getMessageTime1() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getMessageTime1())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getMessageTime1())) {
                         try {
                             Date date = format.parse(clueAgendaTaskDTOReq.getMessageTime1());
                         } catch (ParseException e) {
@@ -710,12 +714,12 @@ public class ExtendClueAgendaTaskController {
                 // 导入失败原因：字典匹配失败
                 StringBuilder reasonIsNotMatch = new StringBuilder();
                 if (clueAgendaTaskDTOReq.getTypeName() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getTypeName())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getTypeName())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq.setTypeName(clueAgendaTaskDTOReq.getTypeName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getTypeName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getTypeName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getTypeName())) {
                         String type = typeMap.get(clueAgendaTaskDTOReq.getTypeName());
                         if (StringUtils.isNotBlank(type)) {
                             clueAgendaTaskDTOReq.setType(Integer.valueOf(type));
@@ -732,13 +736,13 @@ public class ExtendClueAgendaTaskController {
                     reasonIsNull.append("资源类型");
                 }
                 if (clueAgendaTaskDTOReq.getCategoryName() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getCategoryName())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getCategoryName())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq
-                            .setCategoryName(clueAgendaTaskDTOReq.getCategoryName().trim());
+                        .setCategoryName(clueAgendaTaskDTOReq.getCategoryName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getCategoryName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getCategoryName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getCategoryName())) {
                         String category = categoryMap.get(clueAgendaTaskDTOReq.getCategoryName());
                         if (StringUtils.isNotBlank(category)) {
                             clueAgendaTaskDTOReq.setCategory(Integer.valueOf(category));
@@ -767,15 +771,15 @@ public class ExtendClueAgendaTaskController {
                     }
                 }
                 if (clueAgendaTaskDTOReq.getSourceTypeName() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getSourceTypeName())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getSourceTypeName())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq
-                            .setSourceTypeName(clueAgendaTaskDTOReq.getSourceTypeName().trim());
+                        .setSourceTypeName(clueAgendaTaskDTOReq.getSourceTypeName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getSourceTypeName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getSourceTypeName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getSourceTypeName())) {
                         String sourceType = sourceTypeMap
-                                .get(clueAgendaTaskDTOReq.getSourceTypeName().toUpperCase());
+                            .get(clueAgendaTaskDTOReq.getSourceTypeName().toUpperCase());
                         if (StringUtils.isNotBlank(sourceType)) {
                             clueAgendaTaskDTOReq.setSourceType(Integer.valueOf(sourceType));
                         } else {
@@ -805,14 +809,14 @@ public class ExtendClueAgendaTaskController {
                 // }
                 // }
                 if (clueAgendaTaskDTOReq.getSourceName() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getSourceName())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getSourceName())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq.setSourceName(clueAgendaTaskDTOReq.getSourceName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getSourceName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getSourceName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getSourceName())) {
                         String source =
-                                sourceMap.get(clueAgendaTaskDTOReq.getSourceName().toUpperCase());
+                            sourceMap.get(clueAgendaTaskDTOReq.getSourceName().toUpperCase());
                         if (StringUtils.isNotBlank(source)) {
                             clueAgendaTaskDTOReq.setSource(Integer.valueOf(source));
                         } else {
@@ -843,18 +847,18 @@ public class ExtendClueAgendaTaskController {
                 if (null != clueAgendaTaskDTOReq.getCategory()) {
                     // 判断是否存在该项目
                     if (clueAgendaTaskDTOReq.getProjectName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getProjectName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getProjectName())) {
                         // 去掉前后空格
                         clueAgendaTaskDTOReq
-                                .setProjectName(clueAgendaTaskDTOReq.getProjectName().trim());
+                            .setProjectName(clueAgendaTaskDTOReq.getProjectName().trim());
                         // 去掉前后空格后是否为空
                         if (clueAgendaTaskDTOReq.getProjectName() != null
-                                && !"".equals(clueAgendaTaskDTOReq.getProjectName())) {
+                            && !"".equals(clueAgendaTaskDTOReq.getProjectName())) {
                             // 判断资源是否优化类，优化类则不进行项目匹配
                             if (notOptList
-                                    .contains(String.valueOf(clueAgendaTaskDTOReq.getCategory()))) {
+                                .contains(String.valueOf(clueAgendaTaskDTOReq.getCategory()))) {
                                 clueAgendaTaskDTOReq.setProjectId(projectMap
-                                        .get(clueAgendaTaskDTOReq.getProjectName().toUpperCase()));
+                                    .get(clueAgendaTaskDTOReq.getProjectName().toUpperCase()));
                                 if (clueAgendaTaskDTOReq.getProjectId() == null) {
                                     islegal = false;
                                     if (StringUtils.isBlank(reasonIsNotMatch)) {
@@ -882,18 +886,18 @@ public class ExtendClueAgendaTaskController {
                     }
                 }
                 if (clueAgendaTaskDTOReq.getIndustryCategoryName() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getIndustryCategoryName())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getIndustryCategoryName())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq.setIndustryCategoryName(
-                            clueAgendaTaskDTOReq.getIndustryCategoryName().trim());
+                        clueAgendaTaskDTOReq.getIndustryCategoryName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getIndustryCategoryName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getIndustryCategoryName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getIndustryCategoryName())) {
                         String industryCategory = industryCategoryMap
-                                .get(clueAgendaTaskDTOReq.getIndustryCategoryName());
+                            .get(clueAgendaTaskDTOReq.getIndustryCategoryName());
                         if (StringUtils.isNotBlank(industryCategory)) {
                             clueAgendaTaskDTOReq
-                                    .setIndustryCategory(Integer.valueOf(industryCategory));
+                                .setIndustryCategory(Integer.valueOf(industryCategory));
                         } else {
                             islegal = false;
                             if (StringUtils.isBlank(reasonIsNotMatch)) {
@@ -905,13 +909,13 @@ public class ExtendClueAgendaTaskController {
                     }
                 }
                 if (clueAgendaTaskDTOReq.getAccountName() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getAccountName())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getAccountName())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq
-                            .setAccountName(clueAgendaTaskDTOReq.getAccountName().trim());
+                        .setAccountName(clueAgendaTaskDTOReq.getAccountName().trim());
                     // 去掉前后空格后是否为空
                     if (clueAgendaTaskDTOReq.getAccountName() != null
-                            && !"".equals(clueAgendaTaskDTOReq.getAccountName())) {
+                        && !"".equals(clueAgendaTaskDTOReq.getAccountName())) {
                         String account = accountNameMap.get(clueAgendaTaskDTOReq.getAccountName());
                         if (StringUtils.isNotBlank(account)) {
                             clueAgendaTaskDTOReq.setAccountNameVaule(account);
@@ -934,7 +938,7 @@ public class ExtendClueAgendaTaskController {
 
                 // 判断性别
                 if (clueAgendaTaskDTOReq.getSex1() != null
-                        && !"".equals(clueAgendaTaskDTOReq.getSex1())) {
+                    && !"".equals(clueAgendaTaskDTOReq.getSex1())) {
                     // 去掉前后空格
                     clueAgendaTaskDTOReq.setSex1(clueAgendaTaskDTOReq.getSex1().trim());
                     if ("男".equals(clueAgendaTaskDTOReq.getSex1())) {
@@ -945,23 +949,23 @@ public class ExtendClueAgendaTaskController {
                 }
                 // 判断联系方式
                 if ((StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone())
-                        || (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone())
-                                && StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone().trim())))
-                        && (StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone2()) || (StringUtils
-                                .isNotBlank(clueAgendaTaskDTOReq.getPhone2())
-                                && StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone2().trim())))
-                        && (StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat()) || (StringUtils
-                                .isNotBlank(clueAgendaTaskDTOReq.getWechat())
-                                && StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat().trim())))
-                        && (StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat2()) || (StringUtils
-                                .isNotBlank(clueAgendaTaskDTOReq.getWechat2())
-                                && StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat2().trim())))
-                        && (StringUtils.isBlank(clueAgendaTaskDTOReq.getQq()) || (StringUtils
-                                .isNotBlank(clueAgendaTaskDTOReq.getQq())
-                                && StringUtils.isBlank(clueAgendaTaskDTOReq.getQq().trim())))
-                        && (StringUtils.isBlank(clueAgendaTaskDTOReq.getEmail()) || (StringUtils
-                                .isNotBlank(clueAgendaTaskDTOReq.getEmail())
-                                && StringUtils.isBlank(clueAgendaTaskDTOReq.getEmail().trim())))) {
+                    || (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone())
+                    && StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone().trim())))
+                    && (StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone2()) || (StringUtils
+                    .isNotBlank(clueAgendaTaskDTOReq.getPhone2())
+                    && StringUtils.isBlank(clueAgendaTaskDTOReq.getPhone2().trim())))
+                    && (StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat()) || (StringUtils
+                    .isNotBlank(clueAgendaTaskDTOReq.getWechat())
+                    && StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat().trim())))
+                    && (StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat2()) || (StringUtils
+                    .isNotBlank(clueAgendaTaskDTOReq.getWechat2())
+                    && StringUtils.isBlank(clueAgendaTaskDTOReq.getWechat2().trim())))
+                    && (StringUtils.isBlank(clueAgendaTaskDTOReq.getQq()) || (StringUtils
+                    .isNotBlank(clueAgendaTaskDTOReq.getQq())
+                    && StringUtils.isBlank(clueAgendaTaskDTOReq.getQq().trim())))
+                    && (StringUtils.isBlank(clueAgendaTaskDTOReq.getEmail()) || (StringUtils
+                    .isNotBlank(clueAgendaTaskDTOReq.getEmail())
+                    && StringUtils.isBlank(clueAgendaTaskDTOReq.getEmail().trim())))) {
                     islegal = false;
                     failReason.append("联系方式需至少填写一项；");
                 }
@@ -989,40 +993,40 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setSex(clueAgendaTaskDTOReq.getSex());
                     // 手机号相同则只存储phone1
                     if ((StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone()) && StringUtils
-                            .isNotBlank(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", "")))
-                            && (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone2())
-                                    && StringUtils.isNotBlank(
-                                            clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", "")))
-                            && clueAgendaTaskDTOReq.getPhone().replaceAll(" ", "")
-                                    .equals(clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", ""))) {
+                        .isNotBlank(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", "")))
+                        && (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone2())
+                        && StringUtils.isNotBlank(
+                        clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", "")))
+                        && clueAgendaTaskDTOReq.getPhone().replaceAll(" ", "")
+                        .equals(clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", ""))) {
                         pushClueReq.setPhone(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", ""));
                     } else {
                         if ((StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone()) && StringUtils
-                                .isNotBlank(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", "")))) {
+                            .isNotBlank(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", "")))) {
                             pushClueReq
-                                    .setPhone(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", ""));
+                                .setPhone(clueAgendaTaskDTOReq.getPhone().replaceAll(" ", ""));
                         }
                         if ((StringUtils.isNotBlank(clueAgendaTaskDTOReq.getPhone2())
-                                && StringUtils.isNotBlank(
-                                        clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", "")))) {
+                            && StringUtils.isNotBlank(
+                            clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", "")))) {
                             pushClueReq.setPhone2(
-                                    clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", ""));
+                                clueAgendaTaskDTOReq.getPhone2().replaceAll(" ", ""));
                         }
                     }
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getWechat())
-                            && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getWechat().trim())) {
+                        && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getWechat().trim())) {
                         pushClueReq.setWechat(clueAgendaTaskDTOReq.getWechat().trim());
                     }
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getWechat2())
-                            && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getWechat2().trim())) {
+                        && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getWechat2().trim())) {
                         pushClueReq.setWechat2(clueAgendaTaskDTOReq.getWechat2().trim());
                     }
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getQq())
-                            && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getQq().trim())) {
+                        && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getQq().trim())) {
                         pushClueReq.setQq(clueAgendaTaskDTOReq.getQq().trim());
                     }
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getEmail())
-                            && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getEmail().trim())) {
+                        && StringUtils.isNotBlank(clueAgendaTaskDTOReq.getEmail().trim())) {
                         pushClueReq.setEmail(clueAgendaTaskDTOReq.getEmail().trim());
                     }
                     if (StringUtils.isNotBlank(addressAndRemark)) {
@@ -1033,34 +1037,38 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setSourceName(clueAgendaTaskDTOReq.getSourceName());
                     if (null != clueAgendaTaskDTOReq.getSourceType()) {
                         pushClueReq.setSourceType(
-                                String.valueOf(clueAgendaTaskDTOReq.getSourceType()));
+                            String.valueOf(clueAgendaTaskDTOReq.getSourceType()));
                     }
                     pushClueReq.setType(String.valueOf(clueAgendaTaskDTOReq.getType()));
                     pushClueReq.setMessagePoint(clueAgendaTaskDTOReq.getMessagePoint());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getMessageTime1())) {
 
                         pushClueReq.setMessageTime(DateUtil.convert2Date(
-                                clueAgendaTaskDTOReq.getMessageTime1(), DateUtil.ymdhms));
+                            clueAgendaTaskDTOReq.getMessageTime1(), DateUtil.ymdhms));
                     }
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getReserveTime1())) {
                         pushClueReq.setReserveTime(DateUtil.convert2Date(
-                                clueAgendaTaskDTOReq.getReserveTime1(), DateUtil.ymdhms));
+                            clueAgendaTaskDTOReq.getReserveTime1(), DateUtil.ymdhms));
                     }
                     pushClueReq.setCreateTime(format.format(new Date()));
                     pushClueReq.setInputType(4);
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getAccountNameVaule())) {
                         pushClueReq.setAccountName(
-                                String.valueOf(clueAgendaTaskDTOReq.getAccountNameVaule()));
+                            String.valueOf(clueAgendaTaskDTOReq.getAccountNameVaule()));
                     }
                     pushClueReq.setUrlAddress(clueAgendaTaskDTOReq.getUrlAddress());
-                    pushClueReq.setIndustryCategory(
+                    if (clueAgendaTaskDTOReq.getIndustryCategory() != null) {
+                        pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTOReq.getIndustryCategory()));
+                    }
                     pushClueReq.setProjectId(clueAgendaTaskDTOReq.getProjectId());
                     pushClueReq.setProjectName(clueAgendaTaskDTOReq.getProjectName());
                     pushClueReq.setCreateUser(user.getId());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTOReq.getAge1())) {
                         pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTOReq.getAge1()));
                     }
+                    // 推广所属公司 为当前账号所在机构的推广所属公司
+                    pushClueReq.setPromotionCompany(user.getPromotionCompany());
                     list1.add(pushClueReq);
                 } else {
                     clueAgendaTaskDTOReq.setImportFailReason(failReason.toString());
@@ -1074,7 +1082,7 @@ public class ExtendClueAgendaTaskController {
             JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
             // 导入失败数据进入导入失败列表
             if (null != jsonResult && SysConstant.SCUUESS.equals(jsonResult.getCode())
-                    && null != jsonResult.getData()) {
+                && null != jsonResult.getData()) {
                 List<PushClueReq> data = jsonResult.getData();
                 // 取得第一条数据，该数据专门用来存数据数
                 Map<String, Integer> numMap = data.get(0).getStatisticsMap();
@@ -1092,15 +1100,17 @@ public class ExtendClueAgendaTaskController {
                         clueAgendaTaskDTOReponse.setDate(pushClueReq.getCreateTime());
                         clueAgendaTaskDTOReponse.setTypeName(typeMap2.get(pushClueReq.getType()));
                         clueAgendaTaskDTOReponse
-                                .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
+                            .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
                         clueAgendaTaskDTOReponse
-                                .setSourceTypeName(sourceTypeMap2.get(pushClueReq.getSourceType()));
+                            .setSourceTypeName(sourceTypeMap2.get(pushClueReq.getSourceType()));
                         clueAgendaTaskDTOReponse
-                                .setSourceName(sourceMap2.get(pushClueReq.getSource()));
+                            .setSourceName(sourceMap2.get(pushClueReq.getSource()));
                         clueAgendaTaskDTOReponse
-                                .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
-                        clueAgendaTaskDTOReponse.setIndustryCategoryName(
+                            .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
+                        if (pushClueReq.getIndustryCategory() != null) {
+                            clueAgendaTaskDTOReponse.setIndustryCategoryName(
                                 industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        }
                         clueAgendaTaskDTOReponse.setCusName(pushClueReq.getCusName());
                         clueAgendaTaskDTOReponse.setPhone(pushClueReq.getPhone());
                         clueAgendaTaskDTOReponse.setPhone2(pushClueReq.getPhone2());
@@ -1119,17 +1129,17 @@ public class ExtendClueAgendaTaskController {
                         clueAgendaTaskDTOReponse.setAddress(pushClueReq.getProvince());
                         if (pushClueReq.getMessageTime() != null) {
                             clueAgendaTaskDTOReponse.setMessageTime1(DateUtil
-                                    .convert2String(pushClueReq.getMessageTime(), DateUtil.ymdhms));
+                                .convert2String(pushClueReq.getMessageTime(), DateUtil.ymdhms));
                         }
 
                         clueAgendaTaskDTOReponse.setMessagePoint(pushClueReq.getMessagePoint());
                         clueAgendaTaskDTOReponse.setSearchWord(pushClueReq.getSearchWord());
                         if (pushClueReq.getReserveTime() != null) {
                             clueAgendaTaskDTOReponse.setReserveTime1(DateUtil
-                                    .convert2String(pushClueReq.getReserveTime(), DateUtil.ymdhms));
+                                .convert2String(pushClueReq.getReserveTime(), DateUtil.ymdhms));
                         }
                         clueAgendaTaskDTOReponse
-                                .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
+                            .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
                         clueAgendaTaskDTOReponse.setUrlAddress(pushClueReq.getUrlAddress());
                         illegalDataList.add(clueAgendaTaskDTOReponse);
                     }
@@ -1192,9 +1202,9 @@ public class ExtendClueAgendaTaskController {
      */
     @PostMapping("/exportFaultClue")
     @LogRecord(description = "下载导入失败资源", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public void exportFaultClue(@RequestBody ClueAgendaTaskDTO dto, HttpServletResponse response)
-            throws Exception {
+        throws Exception {
 
         List<ClueAgendaTaskDTO> list = dto.getList();
         List<List<Object>> dataList = new ArrayList<List<Object>>();
@@ -1239,17 +1249,16 @@ public class ExtendClueAgendaTaskController {
         } else {
             logger.error("export trucking_order param{{}},res{{}}", dto, list);
         }
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            XSSFWorkbook wbWorkbook = ExcelUtil.creatFailClueExcel(dataList);
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creatFailClueExcel(dataList);
-
-        String name = DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
+            String name = DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-        response.setContentType("application/octet-stream");
-        ServletOutputStream outputStream = response.getOutputStream();
-        wbWorkbook.write(outputStream);
-        outputStream.close();
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            wbWorkbook.write(outputStream);
+        }
 
     }
 
@@ -1294,7 +1303,7 @@ public class ExtendClueAgendaTaskController {
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
     }
 
@@ -1307,7 +1316,7 @@ public class ExtendClueAgendaTaskController {
         queryDTO.setOrgType(type);
         // 查询所有组织
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
+            organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }
