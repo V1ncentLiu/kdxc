@@ -245,6 +245,9 @@ public class BusinessVisitRecordController {
             projectId.setId(busVisitRecordRespDTO.getProjectId());
             JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
             busVisitRecordRespDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(busVisitRecordRespDTO.getVistitStoreType(),vistitStoreJson.getData())){
+                busVisitRecordRespDTO.setVistitStoreType(null);
+            }
             if (null  !=busVisitRecordRespDTO.getAuditPerson()) {
                 IdEntityLong idEntityLongUser = new IdEntityLong();
                 idEntityLongUser.setId(busVisitRecordRespDTO.getAuditPerson());
