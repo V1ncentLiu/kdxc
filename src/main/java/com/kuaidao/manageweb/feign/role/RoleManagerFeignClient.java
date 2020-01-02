@@ -111,8 +111,6 @@ public interface RoleManagerFeignClient {
 			return fallBackError("查询角色数据失败");
 		}
 
-
-
 	}
 
 }
