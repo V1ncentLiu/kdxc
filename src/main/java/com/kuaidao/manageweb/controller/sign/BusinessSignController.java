@@ -270,9 +270,12 @@ public class BusinessSignController {
             data.setVisitCity("");
             data.setArrVisitCity("");
             data.setVisitShopType(1);
-          //获取签约店型
-          JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
-          data.setVistitStoreTypeArr(vistitStoreJson.getData());
+            //获取签约店型
+            JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
+            data.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(data.getSignShopType(),vistitStoreJson.getData())){
+              data.setSignShopType(null);
+            }
             res.setData(data);
             data.setPerformanceAmount(data.getAmountPerformance());
         }
@@ -845,9 +848,12 @@ public class BusinessSignController {
             if (data.getGiveType() == null) {
                 data.setGiveType(-1);
             }
-          //获取签约店型
-          JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
-          data.setVistitStoreTypeArr(vistitStoreJson.getData());
+            //获取签约店型
+            JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(data.getSignProjectId());
+            data.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(data.getSignShopType(),vistitStoreJson.getData())){
+              data.setSignShopType(null);
+            }
             res.setData(data);
             data.setPerformanceAmount(data.getAmountPerformance());
         }
