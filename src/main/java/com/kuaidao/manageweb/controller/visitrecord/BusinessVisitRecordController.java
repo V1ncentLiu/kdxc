@@ -241,6 +241,13 @@ public class BusinessVisitRecordController {
         JSONResult<BusVisitRecordRespDTO> jsonResult = visitRecordFeignClient.queryOne(idEntityLong);
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
             busVisitRecordRespDTO =    jsonResult.getData();
+            IdEntityLong projectId = new IdEntityLong();
+            projectId.setId(busVisitRecordRespDTO.getProjectId());
+            JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
+            busVisitRecordRespDTO.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(busVisitRecordRespDTO.getVistitStoreType(),vistitStoreJson.getData())){
+                busVisitRecordRespDTO.setVistitStoreType(null);
+            }
             if (null  !=busVisitRecordRespDTO.getAuditPerson()) {
                 IdEntityLong idEntityLongUser = new IdEntityLong();
                 idEntityLongUser.setId(busVisitRecordRespDTO.getAuditPerson());

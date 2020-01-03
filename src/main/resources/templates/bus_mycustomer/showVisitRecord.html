@@ -208,7 +208,7 @@
                     <el-row :gutter="20">
                         <el-col :span="10">
                             <el-form-item label="考察公司："  :label-width="formLabelWidth"  prop="companyid">
-                                <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
+                                <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable filterable >
                                     <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -351,7 +351,7 @@
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
-                                    <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                    <el-select v-model="formSigning.signCompanyId" clearable filterable placeholder="请选择签约餐饮公司">
                                         <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                     </el-select>
                                 </el-form-item>
@@ -556,7 +556,7 @@
                         <el-row>
                             <el-col :span="10">
                                 <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
-                                    <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                    <el-select :disabled="notEditRebutSign" clearable filterable v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
                                         <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                     </el-select>
                                 </el-form-item>
@@ -954,9 +954,11 @@
                 var param = {};
                 param.id = value;
                 axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
-                    console.log("###"+response.data.data.vistitStoreTypeArr);
+                    console.log("###"+response.data.data);
+                    if(mainDivVM.addVisitRecord.vistitStoreType){
+                        mainDivVM.addVisitRecord.vistitStoreType ='';
+                    }
                     mainDivVM.vistitStoreTypeArr= response.data.data;
-                    mainDivVM.addVisitRecord.vistitStoreType =''
                 });
             },
             formatVisitTime(row){
@@ -1169,6 +1171,7 @@
                         return false;
                     }else{
                         mainDivVM.updateFormSigning =response.data.data;
+                        mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
                         if( mainDivVM.updateFormSigning){
                             if(mainDivVM.updateFormSigning.payType > 2){
                                 if(mainDivVM.updateFormSigning.payType == 3){

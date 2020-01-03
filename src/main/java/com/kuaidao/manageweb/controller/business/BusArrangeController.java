@@ -277,7 +277,7 @@ public class BusArrangeController {
         headTitleList.add("签约城市");
         headTitleList.add("签约区/县");
         headTitleList.add("电销顾问");
-        headTitleList.add("签约项目");
+        headTitleList.add("考察项目");
         headTitleList.add("所属公司");
         headTitleList.add("电销组");
         headTitleList.add("电销项目");

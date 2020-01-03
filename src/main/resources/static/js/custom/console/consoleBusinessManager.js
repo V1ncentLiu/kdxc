@@ -104,6 +104,7 @@ var mainDivVM = new Vue({
         payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         vistitStoreTypeArr:[],
+        signStoreTypeArr: [],
         provinceArr:[],
         districtArr:[],
         cityArr:[],
@@ -554,14 +555,27 @@ var mainDivVM = new Vue({
             var param = {};
             param.id = value;
             axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
-                console.log("###"+response.data.data.vistitStoreTypeArr);
+                console.log("###"+response.data.data);
+                if(mainDivVM.addVisitRecord.vistitStoreType){
+                    mainDivVM.addVisitRecord.vistitStoreType ='';
+                }
+                if(mainDivVM.updateVisitRecord.vistitStoreType){
+                    mainDivVM.updateVisitRecord.vistitStoreType ='';
+                }
+                if(mainDivVM.formSigning.signShopType){
+                    mainDivVM.formSigning.signShopType ='';
+                }
+                if(mainDivVM.formSigning.visitShopType){
+                    mainDivVM.formSigning.visitShopType ='';
+                }
+                if(mainDivVM.updateFormSigning.signShopType){
+                    mainDivVM.updateFormSigning.signShopType ='';
+                }
+                if(mainDivVM.updateFormSigning.visitShopType){
+                    mainDivVM.updateFormSigning.visitShopType ='';
+                }
                 mainDivVM.vistitStoreTypeArr= response.data.data;
-                mainDivVM.addVisitRecord.vistitStoreType =''
-                mainDivVM.updateVisitRecord.vistitStoreType =''
-                mainDivVM.formSigning.signShopType =''
-                mainDivVM.formSigning.visitShopType =''
-                mainDivVM.updateFormSigning.signShopType =''
-                mainDivVM.updateFormSigning.visitShopType =''
+                mainDivVM.signStoreTypeArr= response.data.data;
             });
         },
     	number3() {//添加签约单业绩金额
@@ -1488,6 +1502,7 @@ var mainDivVM = new Vue({
                 mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                 mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 mainDivVM.formSigning.payName = response.data.data.customerName;
+                mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
                 mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
             //  设置默认时间
             //     mainDivVM.formSigning.payTime = new Date()
@@ -1528,6 +1543,7 @@ var mainDivVM = new Vue({
                     // }
 
                     //设置显示数据
+                    mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateFormSigning =response.data.data;
                     if(response.data.data.payName == null || response.data.data.payName == ''){
                         mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;

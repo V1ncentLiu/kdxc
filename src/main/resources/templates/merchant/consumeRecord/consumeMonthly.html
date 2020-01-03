@@ -60,7 +60,7 @@
                 <el-table-column align="center" prop="totalAmount" label="消费总金额（元）"></el-table-column>
                 <el-table-column align="center" prop="totalNumber" label="消费资源数"></el-table-column>
                 <el-table-column align="center" prop="companyNames" label="分公司"></el-table-column>
-                <el-table-column align="center" prop="proportion" label="消费占比%"></el-table-column>
+                <el-table-column align="center" prop="proportion" label="消费占比（%）"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="150">
                     <template slot-scope="scope">
                         <el-button size="mini" type="success" @click="exportExcel(scope.row)">导出分公司记录</el-button>
@@ -120,13 +120,19 @@
                 var param = {};
                 // 搜索条件
                 var month=this.form.month;
-                if(month&&month.length>6){
-                    month=this.minuteFormat(this.form.month);
+                if(month){                    
+                    if(month.length>6){
+                        month=this.minuteFormat(this.form.month);
+                    }else{
+                        month=this.form.month; 
+                    }                                        
                 }else{
-                    month=this.form.month;
+                    this.$message.error("消费月份不能为空");
+                    return;
                 }
                 param.month = month;
                 param.merchantUserId =  row.merchantUserId;
+                param.merchantUserName = row.merchantUserName;
                 axios.post('/merchant/monthConsumeStatistics/exportExcel',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
@@ -140,10 +146,15 @@
             },
             searchTable() {
                 var month=this.form.month;
-                if(month&&month.length>6){
-                    month=this.minuteFormat(this.form.month);
+                if(month){                    
+                    if(month.length>6){
+                        month=this.minuteFormat(this.form.month);
+                    }else{
+                        month=this.form.month; 
+                    }                                        
                 }else{
-                    month=this.form.month;
+                    this.$message.error("消费月份不能为空");
+                    return;
                 }
                 var param ={};
                 param.pageSize = this.pager.pageSize;

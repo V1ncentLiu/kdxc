@@ -435,15 +435,16 @@ public class ExtendClueDistributionedTaskController {
             }
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
-        String name = "资源情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
+        try(ServletOutputStream outputStream = response.getOutputStream()){
+            XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+            String name = "资源情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-        response.setContentType("application/octet-stream");
-        ServletOutputStream outputStream = response.getOutputStream();
-        wbWorkbook.write(outputStream);
-        outputStream.close();
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            wbWorkbook.write(outputStream);
+        }
+
     }
 
     /**

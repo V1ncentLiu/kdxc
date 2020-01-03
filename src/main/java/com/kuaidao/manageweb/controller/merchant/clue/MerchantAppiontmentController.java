@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,14 @@ public class MerchantAppiontmentController {
             dto.setPrimaryAccountId(userInfoDTO.getId());
         } else if(SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())){
             dto.setPrimaryAccountId(userInfoDTO.getParentId());
+        }
+        //验证项目字段第一个字符是否是“,”
+        if(StringUtils.isNotBlank(dto.getProjectId())) {
+            String project = dto.getProjectId();
+            String head = project.substring(0, 1);
+            if (",".equals(head)){
+                dto.setProjectId(project.substring(1));
+            }
         }
         return merchantAppiontmentFeignClient.saveMerchantAppiontment(dto);
     }
