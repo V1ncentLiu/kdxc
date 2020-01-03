@@ -30,10 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -80,13 +77,17 @@ public class BusinessVisitRecordController {
         if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode())){
             ProjectInfoDTO projectInfoDTO = projectInfoDTOJSONResult.getData();
             if(projectInfoDTO != null && StringUtils.isNotBlank(projectInfoDTO.getShopType())){
-                String type1 = projectInfoDTO.getShopType();
+                String[] type1 = projectInfoDTO.getShopType().split(",");
+                Map<Integer,String> typeMap = new HashMap<>();
+                for(int i =0;i<type1.length;i++){
+                    typeMap.put(Integer.parseInt(type1[i]),type1[i]);
+                }
                 DictionaryItemQueryDTO queryDTO = new DictionaryItemQueryDTO();
                 queryDTO.setGroupCode("vistitStoreType");
                 JSONResult<List<DictionaryItemRespDTO>> result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
                 if (JSONResult.SUCCESS.equals(result.getCode())) {
                     List<DictionaryItemRespDTO> dictionaryItemRespDTOList = result.getData();
-                    shopList = dictionaryItemRespDTOList.stream().filter(a->type1.contains(a.getValue())).collect(Collectors.toList());
+                    shopList = dictionaryItemRespDTOList.stream().filter(a->typeMap.containsKey(Integer.parseInt(a.getValue()))).collect(Collectors.toList());
                 }
             }
         }
