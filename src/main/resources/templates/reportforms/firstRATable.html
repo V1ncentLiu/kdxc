@@ -29,6 +29,16 @@
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
+                <el-form-item label="事业部:">
+                    <el-select v-model="form.deptId" placeholder="事业部" @change="curTelGroupSale" style="width: 100%;" clearable filterable :disabled="isDeptDisabled">
+                        <el-option
+                                v-for="item in deptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="电销组:">
                     <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
@@ -79,15 +89,18 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var deptList=[[${deptList}]];
     var queryOrg=[[${saleGroupList}]];//电销组
     var fieldList=[[${fieldList}]];//表头list
     var curOrgId = [[${curOrgId}]];
+    var curDeptId=[[${deptId}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
                 isDisabled: false,
+                isDeptDisabled: false,
                 btnDisabled: false,
                 pager:{
                     total: 0,
@@ -97,18 +110,21 @@
                 form: {
                     startTime: '',
                     endTime: '',
+                    deptId:curDeptId,
                     orgId: curOrgId,
                     isTransfer: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
+                    deptId:curDeptId,
                     orgId: curOrgId,
                     isTransfer: ''
                 },
                 tableData: [],//表格数据
                 tableColums: fieldList,//表头list
-                orgTeleArr: queryOrg,//电销组
+                orgTeleArr: "",//电销组
+                deptList: deptList,//电销组
             }
         },
         methods: {
@@ -160,6 +176,7 @@
                     param.pageNum = this.pager.currentPage;
                 }
                 param.orgId =  this.form.orgId; // 电销组
+                param.deptId=this.form.deptId;
                 param.isTransfer = this.form.isTransfer;
                 this.loading = true;
                 this.btnDisabled = true;
@@ -356,11 +373,39 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
             },
+            curTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.form.orgId = '';
+                this.getTelGroupSale(seleVal);
+            },
+            getTelGroupSale(seleVal){
+                if(!seleVal){return;}
+                param={};
+                param.parentId=seleVal;
+                param.orgType=1;
+                axios.post('/base/getGroupList',param).then(function (response) {
+                    mainDivVM.orgTeleArr=response.data.data;
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "电销组请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            firstCurTelGroupSale(seleVal){
+                if(seleVal==null||seleVal==""){
+                    return ;
+                }
+                this.getTelGroupSale(seleVal);
+            },
             exportRs(){
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId;
+                param.deptId=this.export.deptId;
                 param.isTransfer = this.export.isTransfer;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationPage',param,{responseType:'blob'})
                     .then(function (response) {
@@ -384,7 +429,20 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime;
-            if(curOrgId){this.isDisabled= true;}
+
+            if(curDeptId){
+                this.isDeptDisabled = true;
+                this.form.deptId = curDeptId;
+                this.export.deptId = this.form.deptId;
+                this.firstCurTelGroupSale(curDeptId);
+                if(curOrgId){
+                    this.isDisabled = true;
+                    this.form.orgId = curOrgId;
+                    this.export.orgId = this.form.orgId;
+                }
+            }
+
+            // if(curOrgId){this.isDisabled= true;}
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';

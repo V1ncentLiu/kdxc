@@ -331,7 +331,7 @@ public class ApplyController {
     public String getPhone(String phone) {
         String phoneName = "";
         if (StringUtils.isNotBlank(phone)) {
-            phoneName = phone.replace(phone.substring(3, 7), "****");
+            phoneName = phone.substring(0,9)+"**";
         }
         return phoneName;
     }
