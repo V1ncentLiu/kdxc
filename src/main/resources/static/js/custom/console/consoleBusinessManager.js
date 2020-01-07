@@ -609,6 +609,14 @@ var mainDivVM = new Vue({
                 if(mainDivVM.updateFormSigning.signShopType){
                     mainDivVM.updateFormSigning.signShopType ='';
                 }
+            });
+        },
+        getVisitShopTypeEdit(value){
+            var param = {};
+            param.id = value;
+            axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                console.log("###"+response.data.data);
+                mainDivVM.vistitStoreTypeArr= response.data.data;
                 if(mainDivVM.updateFormSigning.visitShopType){
                     mainDivVM.updateFormSigning.visitShopType ='';
                 }
@@ -1761,7 +1769,7 @@ var mainDivVM = new Vue({
                             responseData.makeUpTime=""
                         }
                         mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
-                        mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
+                        //mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
                         mainDivVM.updateFormSigning = responseData;
                         mainDivVM.responseData=responseData;
                         mainDivVM.dialogUpdateFormSigningVisible = true;//打开弹窗
