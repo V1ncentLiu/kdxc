@@ -114,6 +114,7 @@ var mainDivVM = new Vue({
         districtArr:[],
         cityArr:[],
         companyArr:[],
+        visitCityArr:[],
         projectArr:proSelect,
         multipleSelection:[],
         notVisitFlagRules:{
