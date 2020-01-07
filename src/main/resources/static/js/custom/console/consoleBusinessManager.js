@@ -1376,11 +1376,14 @@ var mainDivVM = new Vue({
                     }
                     return false;
                 }else{
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateVisitRecord =response.data.data;
                     mainDivVM.updateVisitRecord.clueId=row.clueId;
                     mainDivVM.updateVisitRecord.id = row.visitId
                     mainDivVM.updateVisitRecordDialogVisible = true;
-                    mainDivVM.showNotSignReason(mainDivVM.updateVisitRecord.isSign);
+                    if(mainDivVM.updateVisitRecord.isSign){
+                        mainDivVM.showNotSignReason(mainDivVM.updateVisitRecord.isSign);
+                    }
                     mainDivVM.currentProvince(mainDivVM.updateVisitRecord.signProvince)
                     mainDivVM.currentCity(mainDivVM.updateVisitRecord.signCity)
                 }
@@ -1544,6 +1547,7 @@ var mainDivVM = new Vue({
 
                     //设置显示数据
                     mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateFormSigning =response.data.data;
                     if(response.data.data.payName == null || response.data.data.payName == ''){
                         mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
@@ -1579,7 +1583,8 @@ var mainDivVM = new Vue({
                         mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                     }
 
-                    mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                    //mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                    mainDivVM.suppUpdateShow();
                     mainDivVM.dialogUpdateFormSigningVisible = true;
                 }
             })
