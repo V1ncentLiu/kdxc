@@ -606,7 +606,12 @@ var mainDivVM = new Vue({
             axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
                 console.log("###"+response.data.data);
                 mainDivVM.signStoreTypeArr= response.data.data;
-                mainDivVM.updateFormSigning.signShopType =''
+                if(mainDivVM.updateFormSigning.signShopType){
+                    mainDivVM.updateFormSigning.signShopType ='';
+                }
+                if(mainDivVM.updateFormSigning.visitShopType){
+                    mainDivVM.updateFormSigning.visitShopType ='';
+                }
             });
         },
         handleClickSigning(tab, event) {
@@ -1950,9 +1955,9 @@ var mainDivVM = new Vue({
            if(param.payTime){
                param.payTime = new Date( param.payTime)
            }
-           if(param.giveType ==null || param.giveType ==""){
-        	   param.giveType=-1;
-           }
+           // if(param.giveType ==null || param.giveType ==""){
+        	//    param.giveType=-1;
+           // }
            this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
            // 设置 clueid
             this.$refs[formName].validate((valid) => {
