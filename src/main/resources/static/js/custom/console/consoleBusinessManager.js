@@ -1547,6 +1547,7 @@ var mainDivVM = new Vue({
 
                     //设置显示数据
                     mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateFormSigning =response.data.data;
                     if(response.data.data.payName == null || response.data.data.payName == ''){
                         mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
