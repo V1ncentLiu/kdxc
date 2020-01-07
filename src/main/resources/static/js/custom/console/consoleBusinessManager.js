@@ -1,6 +1,11 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        signTabIndex:0,//点击编辑签约单tab的index
+        signTitle:'',    
+        responseData:[],  
+        activeNameSigning:'',
+
         dashboardSale:dashboardSale,
         btnDisabled: false,
         notVisitButtonAble: false,
@@ -219,28 +224,71 @@ var mainDivVM = new Vue({
             amountPerformance:'',
             payName:''
         },
+        // updateFormSigning: {
+        // 	giveType:"",
+        //     signId:"",
+        //     clueId:"",
+        //     signNo:'',
+        //     customerName: "",
+        //     idCard: '',
+        //     phone: '',
+        //     signCompanyId:'',
+        //     signProjectId: '',
+        //     signProvince:'',
+        //     signCity: '',
+        //     signDictrict:'',
+        //     signShopType:'',
+        //     amountReceivable:'',
+        //     firstToll:'',
+        //     preferentialAmount:'',
+        //     signType:"1",
+        //     giveAmount:'',
+        //     rebutTime:"",
+        //     rebutReason:"",
+        //     isRemoteSign:0,
+
+        //     visitDetailRecordId:"",
+        //     visitTime: "",
+        //     arrVisitCity: "",
+        //     visitType: "",
+        //     visitShopType: "",
+        //     visitNum: "",
+
+        //     payDetailId:"",
+        //     payType:'1',
+        //     payName:'',
+        //     payMode:'',
+        //     payModes:[],
+        //     amountReceived: '',
+        //     amountBalance: '',
+        //     makeUpTime:'',
+        //     payTime: '',
+        //     amountPerformance:'',
+        //     remarks: '', //备注
+        //     signRejectRecordList:[]//签约单驳回
+        // },
         updateFormSigning: {
-        	giveType:"",
-            signId:"",
-            clueId:"",
-            signNo:'',
+            giveType: "",
+            signId: "",
+            clueId: "",
+            signNo: '',
             customerName: "",
             idCard: '',
             phone: '',
-            signCompanyId:'',
+            signCompanyId: '',
             signProjectId: '',
-            signProvince:'',
+            signProvince: '',
             signCity: '',
-            signDictrict:'',
-            signShopType:'',
-            amountReceivable:'',
-            firstToll:'',
-            preferentialAmount:'',
-            signType:"1",
-            giveAmount:'',
-            rebutTime:"",
-            rebutReason:"",
-            isRemoteSign:0,
+            signDictrict: '',
+            signShopType: '',
+            amountReceivable: '',
+            firstToll: '',
+            preferentialAmount: '',
+            signType: "1",
+            giveAmount: '',
+            rebutTime: "",
+            rebutReason: "",
+            isRemoteSign: 0,
 
             visitDetailRecordId:"",
             visitTime: "",
@@ -249,18 +297,19 @@ var mainDivVM = new Vue({
             visitShopType: "",
             visitNum: "",
 
-            payDetailId:"",
-            payType:'1',
-            payName:'',
-            payMode:'',
-            payModes:[],
+            payDetailId: "",
+            payType: '1',
+            payName: '',
+            payModes: [],
+            payMode: '',
             amountReceived: '',
             amountBalance: '',
-            makeUpTime:'',
-            payTime: '',
-            amountPerformance:'',
+            makeUpTime: null,
+            payTime: null,
+            amountPerformance: '',
+            performanceAmount: '',
             remarks: '', //备注
-            signRejectRecordList:[]//签约单驳回
+            signRejectRecordList:[],//驳回原因
         },
         pager:{
             total: 0,
@@ -506,13 +555,13 @@ var mainDivVM = new Vue({
                 { required: true, message: '请选择到访时间', trigger: 'change' }
             ],
             arrVisitCity: [ //请填写来访城市
-                { required: true, message: '请填写到访城市', trigger: 'change' }
+                { required: true, message: '请填写到访城市', trigger: 'blur' }
             ],
             visitType: [ //请选择到访类型
                 { required: true, message: '请选择到访类型', trigger: 'change' }
             ],
             visitShopType: [ //请选择到访店铺类型
-                { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+                { required: true, message: '请选择到访店铺类型', trigger: 'blur' }
             ],
             visitNum: [ //请填写到访人数
                 { required: true, message: '请填写到访人数', trigger: 'blur' },
@@ -551,6 +600,69 @@ var mainDivVM = new Vue({
     },
     
     methods: {
+        getShopTypeEdit(value){
+            var param = {};
+            param.id = value;
+            axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
+                console.log("###"+response.data.data);
+                mainDivVM.signStoreTypeArr= response.data.data;
+                mainDivVM.updateFormSigning.signShopType =''
+            });
+        },
+        handleClickSigning(tab, event) {
+            console.log(tab, event);
+            for(var i=0;i< this.responseData.paydetailList.length;i++) {
+                if (this.responseData.paydetailList[i].name === tab.name) {
+                    // 付款类型判断
+                    if (this.responseData.paydetailList[i].payType > 2) {
+                        if (this.responseData.paydetailList[i].payType == 3) {
+                            this.isAllMoney = true;
+                        } else {
+                            this.isAllMoney = false;
+                        }
+                        this.payTypeSelect = false;
+                        this.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4);
+                        // 追加定金或者尾款时候，签约类型禁选
+                        this.notEditRebutSign=true;
+                    } else {
+                        if (this.responseData.paydetailList[i].payType == 1) {
+                            this.isAllMoney = false;
+                        } else {
+                            this.isAllMoney = true;
+                        }
+                        this.payTypeSelect = true;
+                        this.payTypeArr = this.payTypeArr1.slice(0, 2);
+                        // 全款或者定金时候，签约类型可选
+                        this.notEditRebutSign=false;
+                    }
+                    this.updateFormSigning.payType=this.responseData.paydetailList[i].payType;//付款类型
+                    this.updateFormSigning.payTime=this.responseData.paydetailList[i].payTime;//付款时间
+                    //付款方式
+                    var modeArr = this.responseData.paydetailList[i].payMode.split(",");
+                    this.updateFormSigning.payModes = this.tansPayModeValueToName(modeArr);
+                    this.updateFormSigning.amountReceived = this.responseData.paydetailList[i].amountReceived;//实收金额
+                    this.updateFormSigning.amountPerformance = this.responseData.paydetailList[i].amountPerformance;//业绩金额
+                    this.updateFormSigning.preferentialAmount = this.responseData.paydetailList[i].preferentialAmount;//招商政策金额
+                    this.updateFormSigning.firstToll=this.responseData.paydetailList[i].firstToll;//路费
+                    this.updateFormSigning.giveAmount = this.responseData.paydetailList[i].giveAmount;//赠送金额
+                    // 赠送类型
+                    if(this.responseData.paydetailList[i].giveType ==null || this.responseData.paydetailList[i].giveType =='-1'){
+                        this.updateFormSigning.giveType = null;
+                    }else{
+                        this.updateFormSigning.giveType = this.responseData.paydetailList[i].giveType + "";
+                    }
+                    this.updateFormSigning.remarks = this.responseData.paydetailList[i].remarks;//备注
+                    this.updateFormSigning.amountBalance = this.responseData.paydetailList[i].amountBalance;//余款金额
+                    this.updateFormSigning.makeUpTime = this.responseData.paydetailList[i].makeUpTime;//预计余款补齐时间
+                    // payDetailId赋值
+                    this.updateFormSigning.payDetailId = this.responseData.paydetailList[i].id;
+                    // visitDetailRecordId赋值
+                    this.updateFormSigning.visitDetailRecordId = this.responseData.paydetailList[i].visitRecordId;
+                }
+            }
+            this.signTabIndex=parseInt(tab.index);
+            this.suppUpdateShow(tab.index) // 点击tab切换到访记录关联
+        },
         getShopType(value){
             var param = {};
             param.id = value;
@@ -583,8 +695,8 @@ var mainDivVM = new Vue({
             this.formSigning.performanceAmount = this.formSigning.performanceAmount.replace('.', '');
         },
         number4() {//编辑签约单业绩金额
-            this.updateFormSigning.performanceAmount = this.updateFormSigning.performanceAmount.replace(/[^\.\d]/g, '');
-            this.updateFormSigning.performanceAmount = this.updateFormSigning.performanceAmount.replace('.', '');
+            this.updateFormSigning.amountPerformance = this.updateFormSigning.amountPerformance.replace(/[^\.\d]/g, '');
+            this.updateFormSigning.amountPerformance = this.updateFormSigning.amountPerformance.replace('.', '');
         },
     	formSigningAmountPerformance() {
             var aone = parseFloat(this.formSigning.amountReceived);
@@ -598,7 +710,7 @@ var mainDivVM = new Vue({
         var atwo = parseFloat(this.updateFormSigning.firstToll);
         if(isNaN(aone)) aone = 0
         if(isNaN(atwo)) atwo = 0
-        this.updateFormSigning.performanceAmount = (aone + atwo) + ""
+        this.updateFormSigning.amountPerformance = (aone + atwo) + ""
       },
       formatNum(value) {
           if(!value&&value!==0) return 0;
@@ -860,15 +972,47 @@ var mainDivVM = new Vue({
             this.formSigning.visitType='';
         },
 
-        suppUpdateShow() { //补充到访记录展开
+        // suppUpdateShow() { //补充到访记录展开
+        //     this.suppWrap = true;
+        //     this.shouAddVisitButton = false;
+        //     var param = {};
+        //     console.log(mainDivVM.updateFormSigning.visitDetailRecordId)
+        //     if(!mainDivVM.updateFormSigning.visitDetailRecordId){
+        //         return false;
+        //     }
+        //     param.id = mainDivVM.updateFormSigning.visitDetailRecordId;
+        //     //TODO
+        //     axios.post('/busVisitRecord/one', param).then(function (response) {
+        //         var echoData = response.data.data;
+        //         console.log("============================")
+        //         console.log(echoData)
+        //         if(echoData.arrVisitCity){
+        //             mainDivVM.updateFormSigning.arrVisitCity = echoData.arrVisitCity;
+        //         }
+        //         if (echoData.visitPeopleNum > 0) {
+        //             mainDivVM.updateFormSigning.visitNum = echoData.visitPeopleNum;
+        //         }
+        //         mainDivVM.updateFormSigning.visitShopType = echoData.vistitStoreType;
+        //         mainDivVM.updateFormSigning.visitType = echoData.visitType;
+        //         mainDivVM.updateFormSigning.visitTime = echoData.vistitTime;
+        //     });
+        // },
+        suppUpdateShow(index) { //补充到访记录展开
             this.suppWrap = true;
             this.shouAddVisitButton = false;
+            index=this.signTabIndex;
             var param = {};
-            console.log(mainDivVM.updateFormSigning.visitDetailRecordId)
-            if(!mainDivVM.updateFormSigning.visitDetailRecordId){
+            console.log(mainDivVM.updateFormSigning.paydetailList[index].visitRecordId)
+            if(!mainDivVM.updateFormSigning.paydetailList[index].visitRecordId){
+                //清空补充到访记录数据
+                this.updateFormSigning.arrVisitCity = '';
+                this.updateFormSigning.visitNum = '';
+                this.updateFormSigning.visitShopType = '';
+                this.updateFormSigning.visitTime = new Date();;
+                this.updateFormSigning.visitType = 1;
                 return false;
             }
-            param.id = mainDivVM.updateFormSigning.visitDetailRecordId;
+            param.id = mainDivVM.updateFormSigning.paydetailList[index].visitRecordId;
             //TODO
             axios.post('/busVisitRecord/one', param).then(function (response) {
                 var echoData = response.data.data;
@@ -880,9 +1024,10 @@ var mainDivVM = new Vue({
                 if (echoData.visitPeopleNum > 0) {
                     mainDivVM.updateFormSigning.visitNum = echoData.visitPeopleNum;
                 }
+                mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
                 mainDivVM.updateFormSigning.visitShopType = echoData.vistitStoreType;
                 mainDivVM.updateFormSigning.visitType = echoData.visitType;
-                mainDivVM.updateFormSigning.visitTime = echoData.vistitTime;
+                mainDivVM.updateFormSigning.visitTime =  echoData.vistitTime;
             });
         },
         suppUpdateHide() {
@@ -1509,78 +1654,195 @@ var mainDivVM = new Vue({
             //     mainDivVM.formSigning.isRemoteSign = 0;
             //     mainDivVM.formSigning.visitTime = new Date();
             });
-        },
+        },        
         showSignDetail(row){
 
         },
-        editRebutSign(row){
-            var param ={};
-            console.log(row)
+        // editRebutSign(row){
+        //     var param ={};
+        //     console.log(row)
+        //     param.id = row.signId
+        //     param.signId = row.signId
+        //     param.clueId = row.clueId
+        //     axios.post('/businesssign/one',param).then(function (response) {
+        //         console.log(response)
+        //         if(null===response||response.data==null||response.data.code!='0'){
+        //             if(response.data.code!='0'){
+        //                 mainDivVM.$message({message: response.data.msg, type: 'warning'});
+        //             }
+        //             return false;
+        //         }else{
+        //             // if(response.data.data.length==0){
+        //             //     mainDivVM.$message({message:'没有签约单', type: 'warning'});
+        //             //     return false;
+        //             // }
+        //             //填装数据
+        //             // mainDivVM.editableTabs = []
+        //             // for(var i = 0 ; i < response.data.data.length ;i++){
+        //             //     console.log(response.data.data[i])
+        //             //     var data = {};
+        //             //     data.updateFormSigning=response.data.data[i];
+        //             //     data.title='（'+ data.updateFormSigning.signNo +'）签约单';
+        //             //     data.name=""+i;
+        //             //     mainDivVM.editableTabs.push(data);
+        //             // }
+
+        //             //设置显示数据
+        //             mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
+        //             mainDivVM.updateFormSigning =response.data.data;
+        //             if(response.data.data.payName == null || response.data.data.payName == ''){
+        //                 mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
+        //             }
+        //             if( mainDivVM.updateFormSigning){
+        //                 if(mainDivVM.updateFormSigning.payType > 2){
+        //                     if(mainDivVM.updateFormSigning.payType == 3){
+        //                         mainDivVM.isAllMoney = true;
+        //                     }else{
+        //                         mainDivVM.isAllMoney = false;
+        //                     }
+        //                    // mainDivVM.notEditRebutSign = true;
+        //                     mainDivVM.payTypeSelect = false;
+        //                     mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
+        //                 }else{
+        //                     if(mainDivVM.updateFormSigning.payType == 1){
+        //                         mainDivVM.isAllMoney = false;
+        //                     }else{
+        //                         mainDivVM.isAllMoney = true;
+        //                     }
+        //                     mainDivVM.payTypeSelect = true;
+        //                     mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
+        //                 }
+        //                 if(mainDivVM.updateFormSigning.giveType !=-1){
+        //                 	mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
+        //                 }else{
+        //                 	mainDivVM.updateFormSigning.giveType = null;
+        //                 }
+
+        //                 mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
+        //                 mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
+        //                 var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
+        //                 mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
+        //             }
+
+        //             mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+        //             mainDivVM.dialogUpdateFormSigningVisible = true;
+        //         }
+        //     })
+        // },
+        editRebutSign(row) {
+            this.resetForm("updateFormSigning");
+            var param = {};
+            // console.log(row)
             param.id = row.signId
             param.signId = row.signId
             param.clueId = row.clueId
-            axios.post('/businesssign/one',param).then(function (response) {
+            axios.post('/businesssign/one', param).then(function (response) {
                 console.log(response)
-                if(null===response||response.data==null||response.data.code!='0'){
-                    if(response.data.code!='0'){
+                if (null === response || response.data == null || response.data.code != '0') {
+                    if (response.data.code != '0') {
                         mainDivVM.$message({message: response.data.msg, type: 'warning'});
                     }
                     return false;
-                }else{
-                    // if(response.data.data.length==0){
-                    //     mainDivVM.$message({message:'没有签约单', type: 'warning'});
-                    //     return false;
-                    // }
-                    //填装数据
-                    // mainDivVM.editableTabs = []
-                    // for(var i = 0 ; i < response.data.data.length ;i++){
-                    //     console.log(response.data.data[i])
-                    //     var data = {};
-                    //     data.updateFormSigning=response.data.data[i];
-                    //     data.title='（'+ data.updateFormSigning.signNo +'）签约单';
-                    //     data.name=""+i;
-                    //     mainDivVM.editableTabs.push(data);
-                    // }
-
+                } else {
                     //设置显示数据
-                    mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
-                    mainDivVM.updateFormSigning =response.data.data;
-                    if(response.data.data.payName == null || response.data.data.payName == ''){
+                    var responseData=response.data.data
+                    if(!responseData.amountBalance){//余款金额
+                        responseData.amountBalance=""
+                    }
+                    if(!responseData.makeUpTime){//预计余款补齐时间
+                        responseData.makeUpTime=""
+                    }
+                    mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
+                    mainDivVM.updateFormSigning = responseData;
+                    mainDivVM.responseData=responseData;
+                    mainDivVM.dialogUpdateFormSigningVisible = true;//打开弹窗
+
+                    mainDivVM.signTitle="编辑驳回签约单(签约单编号"+responseData.signNo+")"
+
+                    if(responseData.payName == null || responseData.payName == ''){//付款人姓名
                         mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                     }
-                    if( mainDivVM.updateFormSigning){
-                        if(mainDivVM.updateFormSigning.payType > 2){
-                            if(mainDivVM.updateFormSigning.payType == 3){
+                    
+                    mainDivVM.currentProvince(responseData.signProvince)
+                    mainDivVM.currentCity(responseData.signCity)                                              
+
+                    // 默认显示tab1
+                    if(responseData.paydetailList){
+                        // 显示tab名称
+                        for(var i=0;i<responseData.paydetailList.length;i++){
+                            if(responseData.paydetailList[i].payType=="1"){
+                                responseData.paydetailList[i].label="全款"                                    
+                            }else if(responseData.paydetailList[i].payType=="2"){
+                                responseData.paydetailList[i].label="定金"
+                            }else if(responseData.paydetailList[i].payType=="3"){
+                                responseData.paydetailList[i].label="追加定金"
+                            }else if(responseData.paydetailList[i].payType=="4"){
+                                responseData.paydetailList[i].label="尾款"
+                            }  
+                            responseData.paydetailList[i].name=i+"";//给tab赋值name
+                            mainDivVM.activeNameSigning=responseData.paydetailList[0].name; //默认显示第一个tab                      
+                        }
+                        
+                        // 付款类型判断
+                        if (responseData.paydetailList[0].payType > 2) {
+                            if (responseData.paydetailList[0].payType == 3) {
                                 mainDivVM.isAllMoney = true;
-                            }else{
+                            } else {
                                 mainDivVM.isAllMoney = false;
                             }
-                           // mainDivVM.notEditRebutSign = true;
                             mainDivVM.payTypeSelect = false;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
-                        }else{
-                            if(mainDivVM.updateFormSigning.payType == 1){
+                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4);
+                            // 追加定金或者尾款时候，签约类型禁选
+                            mainDivVM.notEditRebutSign=true;
+                        } else {
+                            if (responseData.paydetailList[0].payType == 1) {
                                 mainDivVM.isAllMoney = false;
-                            }else{
+                            } else {
                                 mainDivVM.isAllMoney = true;
                             }
                             mainDivVM.payTypeSelect = true;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
+                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0, 2);
+                            // 全款或者定金时候，签约类型可选
+                            mainDivVM.notEditRebutSign=false;
                         }
-                        if(mainDivVM.updateFormSigning.giveType !=-1){
-                        	mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
-                        }else{
-                        	mainDivVM.updateFormSigning.giveType = null;
-                        }
-
-                        mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
-                        mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
-                        var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
+                        mainDivVM.updateFormSigning.payType=responseData.paydetailList[0].payType;//付款类型
+                        mainDivVM.updateFormSigning.payTime=responseData.paydetailList[0].payTime;//付款时间
+                        //付款方式
+                        var modeArr = responseData.paydetailList[0].payMode.split(",");
                         mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
-                    }
+                        mainDivVM.updateFormSigning.amountReceived=responseData.paydetailList[0].amountReceived;//实收金额
+                        mainDivVM.updateFormSigning.amountPerformance=responseData.paydetailList[0].amountPerformance;//业绩金额
+                        mainDivVM.updateFormSigning.preferentialAmount=responseData.paydetailList[0].preferentialAmount;//招商政策金额
+                        mainDivVM.updateFormSigning.firstToll=responseData.paydetailList[0].firstToll;//路费
+                        mainDivVM.updateFormSigning.giveAmount = responseData.paydetailList[0].giveAmount;//赠送金额
+                        // 赠送类型
+                        mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
+                        if(responseData.paydetailList[0].giveType ==null || responseData.paydetailList[0].giveType =='-1'){
+                            mainDivVM.updateFormSigning.giveType = null;
+                        }else{
+                            mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
+                        }
+                        mainDivVM.updateFormSigning.remarks = responseData.paydetailList[0].remarks;//备注
+                        mainDivVM.updateFormSigning.amountBalance = responseData.paydetailList[0].amountBalance;//余款金额
+                        mainDivVM.updateFormSigning.makeUpTime = responseData.paydetailList[0].makeUpTime;//预计余款补齐时间
+                        // payDetailId赋值
+                        mainDivVM.updateFormSigning.payDetailId = mainDivVM.responseData.paydetailList[0].id;
+                        // visitDetailRecordId赋值
+                        mainDivVM.updateFormSigning.visitDetailRecordId = mainDivVM.responseData.paydetailList[0].visitRecordId;
 
-                    mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
-                    mainDivVM.dialogUpdateFormSigningVisible = true;
+                        mainDivVM.signTabIndex=0;//点击编辑签约单tab的index为0
+                        if(!mainDivVM.updateFormSigning.paydetailList[0].visitRecordId){
+                            //清空补充到访记录数据
+                            mainDivVM.updateFormSigning.arrVisitCity = '';
+                            mainDivVM.updateFormSigning.visitNum = '';
+                            mainDivVM.updateFormSigning.visitShopType = '';
+                            mainDivVM.updateFormSigning.visitTime = new Date();;
+                            mainDivVM.updateFormSigning.visitType = 1;
+                            return false;
+                        }
+                        // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                        mainDivVM.suppUpdateShow() // 默认展示第一个 到访记录关联 
+                    } 
                 }
             })
         },
@@ -1672,7 +1934,7 @@ var mainDivVM = new Vue({
         },
 
         submitUpdateForm(formName) {
-            this.updateFormSigning.amountPerformance = this.updateFormSigning.performanceAmount;
+            // this.updateFormSigning.amountPerformance = this.updateFormSigning.performanceAmount;
             var param = this.updateFormSigning;
             console.log(param)
             if(param.makeUpTime){
@@ -1773,6 +2035,12 @@ var mainDivVM = new Vue({
         param={};
         axios.post('/aggregation/companyManager/listNoPage',param).then(function (response) {
             mainDivVM.companyArr=response.data.data;
+        });
+        //到访城市
+        param = {};
+        param.groupCode = "visitCity";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            mainDivVM.visitCityArr = response.data.data;
         });
     },
     mounted(){
