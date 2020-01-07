@@ -281,8 +281,12 @@ public class ClueManagementController {
                 curList.add(dto.getCluePrice());
                 // 是否分发
                 String str = MerchantConstant.ASSIGN_SUB_ACCOUNT_YES.equals(dto.getIsAssignSubAccount()) ? "是" : "否";
-                // 公有池领取 此字段为空
-                if (MerchantConstant.CPOOLRECEIVE_FLAG_YES.equals(dto.getCpoolReceiveFlag())) {
+                //子账号导出  是否分发 为空
+                if (SysConstant.USER_TYPE_THREE.equals(userInfoDTO.getUserType())) {
+                    str = "";
+                }
+                // 公有池领取并且是否分发为否 此字段为空
+                if (MerchantConstant.CPOOLRECEIVE_FLAG_YES.equals(dto.getCpoolReceiveFlag())&& MerchantConstant.ASSIGN_SUB_ACCOUNT_NO.equals(dto.getIsAssignSubAccount())) {
                     str = "";
                 }
                 curList.add(str);
