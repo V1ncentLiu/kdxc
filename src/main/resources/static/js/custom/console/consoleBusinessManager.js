@@ -1583,7 +1583,8 @@ var mainDivVM = new Vue({
                         mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                     }
 
-                    mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                    //mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                    mainDivVM.suppUpdateShow();
                     mainDivVM.dialogUpdateFormSigningVisible = true;
                 }
             })
