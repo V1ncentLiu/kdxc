@@ -1521,11 +1521,14 @@ var mainDivVM = new Vue({
                     }
                     return false;
                 }else{
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateVisitRecord =response.data.data;
                     mainDivVM.updateVisitRecord.clueId=row.clueId;
                     mainDivVM.updateVisitRecord.id = row.visitId
                     mainDivVM.updateVisitRecordDialogVisible = true;
-                    mainDivVM.showNotSignReason(mainDivVM.updateVisitRecord.isSign);
+                    if(mainDivVM.updateVisitRecord.isSign){
+                        mainDivVM.showNotSignReason(mainDivVM.updateVisitRecord.isSign);
+                    }
                     mainDivVM.currentProvince(mainDivVM.updateVisitRecord.signProvince)
                     mainDivVM.currentCity(mainDivVM.updateVisitRecord.signCity)
                 }
@@ -1730,122 +1733,122 @@ var mainDivVM = new Vue({
         //     })
         // },
         editRebutSign(row) {
-            this.resetForm("updateFormSigning");
-            var param = {};
-            // console.log(row)
-            param.id = row.signId
-            param.signId = row.signId
-            param.clueId = row.clueId
-            axios.post('/businesssign/one', param).then(function (response) {
-                console.log(response)
-                if (null === response || response.data == null || response.data.code != '0') {
-                    if (response.data.code != '0') {
-                        mainDivVM.$message({message: response.data.msg, type: 'warning'});
-                    }
-                    return false;
-                } else {
-                    //设置显示数据
-                    var responseData=response.data.data
-                    if(!responseData.amountBalance){//余款金额
-                        responseData.amountBalance=""
-                    }
-                    if(!responseData.makeUpTime){//预计余款补齐时间
-                        responseData.makeUpTime=""
-                    }
-                    mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
-                    mainDivVM.updateFormSigning = responseData;
-                    mainDivVM.responseData=responseData;
-                    mainDivVM.dialogUpdateFormSigningVisible = true;//打开弹窗
+                this.resetForm("updateFormSigning");
+                var param = {};
+                // console.log(row)
+                param.id = row.signId
+                param.signId = row.signId
+                param.clueId = row.clueId
+                axios.post('/businesssign/one', param).then(function (response) {
+                    console.log(response)
+                    if (null === response || response.data == null || response.data.code != '0') {
+                        if (response.data.code != '0') {
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    } else {
+                        //设置显示数据
+                        var responseData=response.data.data
+                        if(!responseData.amountBalance){//余款金额
+                            responseData.amountBalance=""
+                        }
+                        if(!responseData.makeUpTime){//预计余款补齐时间
+                            responseData.makeUpTime=""
+                        }
+                        mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
+                        mainDivVM.updateFormSigning = responseData;
+                        mainDivVM.responseData=responseData;
+                        mainDivVM.dialogUpdateFormSigningVisible = true;//打开弹窗
 
-                    mainDivVM.signTitle="编辑驳回签约单(签约单编号"+responseData.signNo+")"
+                        mainDivVM.signTitle="编辑驳回签约单(签约单编号"+responseData.signNo+")"
 
-                    if(responseData.payName == null || responseData.payName == ''){//付款人姓名
-                        mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
-                    }
-                    
-                    mainDivVM.currentProvince(responseData.signProvince)
-                    mainDivVM.currentCity(responseData.signCity)                                              
-
-                    // 默认显示tab1
-                    if(responseData.paydetailList){
-                        // 显示tab名称
-                        for(var i=0;i<responseData.paydetailList.length;i++){
-                            if(responseData.paydetailList[i].payType=="1"){
-                                responseData.paydetailList[i].label="全款"                                    
-                            }else if(responseData.paydetailList[i].payType=="2"){
-                                responseData.paydetailList[i].label="定金"
-                            }else if(responseData.paydetailList[i].payType=="3"){
-                                responseData.paydetailList[i].label="追加定金"
-                            }else if(responseData.paydetailList[i].payType=="4"){
-                                responseData.paydetailList[i].label="尾款"
-                            }  
-                            responseData.paydetailList[i].name=i+"";//给tab赋值name
-                            mainDivVM.activeNameSigning=responseData.paydetailList[0].name; //默认显示第一个tab                      
+                        if(responseData.payName == null || responseData.payName == ''){//付款人姓名
+                            mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
                         }
                         
-                        // 付款类型判断
-                        if (responseData.paydetailList[0].payType > 2) {
-                            if (responseData.paydetailList[0].payType == 3) {
-                                mainDivVM.isAllMoney = true;
-                            } else {
-                                mainDivVM.isAllMoney = false;
-                            }
-                            mainDivVM.payTypeSelect = false;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4);
-                            // 追加定金或者尾款时候，签约类型禁选
-                            mainDivVM.notEditRebutSign=true;
-                        } else {
-                            if (responseData.paydetailList[0].payType == 1) {
-                                mainDivVM.isAllMoney = false;
-                            } else {
-                                mainDivVM.isAllMoney = true;
-                            }
-                            mainDivVM.payTypeSelect = true;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0, 2);
-                            // 全款或者定金时候，签约类型可选
-                            mainDivVM.notEditRebutSign=false;
-                        }
-                        mainDivVM.updateFormSigning.payType=responseData.paydetailList[0].payType;//付款类型
-                        mainDivVM.updateFormSigning.payTime=responseData.paydetailList[0].payTime;//付款时间
-                        //付款方式
-                        var modeArr = responseData.paydetailList[0].payMode.split(",");
-                        mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
-                        mainDivVM.updateFormSigning.amountReceived=responseData.paydetailList[0].amountReceived;//实收金额
-                        mainDivVM.updateFormSigning.amountPerformance=responseData.paydetailList[0].amountPerformance;//业绩金额
-                        mainDivVM.updateFormSigning.preferentialAmount=responseData.paydetailList[0].preferentialAmount;//招商政策金额
-                        mainDivVM.updateFormSigning.firstToll=responseData.paydetailList[0].firstToll;//路费
-                        mainDivVM.updateFormSigning.giveAmount = responseData.paydetailList[0].giveAmount;//赠送金额
-                        // 赠送类型
-                        mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
-                        if(responseData.paydetailList[0].giveType ==null || responseData.paydetailList[0].giveType =='-1'){
-                            mainDivVM.updateFormSigning.giveType = null;
-                        }else{
-                            mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
-                        }
-                        mainDivVM.updateFormSigning.remarks = responseData.paydetailList[0].remarks;//备注
-                        mainDivVM.updateFormSigning.amountBalance = responseData.paydetailList[0].amountBalance;//余款金额
-                        mainDivVM.updateFormSigning.makeUpTime = responseData.paydetailList[0].makeUpTime;//预计余款补齐时间
-                        // payDetailId赋值
-                        mainDivVM.updateFormSigning.payDetailId = mainDivVM.responseData.paydetailList[0].id;
-                        // visitDetailRecordId赋值
-                        mainDivVM.updateFormSigning.visitDetailRecordId = mainDivVM.responseData.paydetailList[0].visitRecordId;
+                        mainDivVM.currentProvince(responseData.signProvince)
+                        mainDivVM.currentCity(responseData.signCity)                                              
 
-                        mainDivVM.signTabIndex=0;//点击编辑签约单tab的index为0
-                        if(!mainDivVM.updateFormSigning.paydetailList[0].visitRecordId){
-                            //清空补充到访记录数据
-                            mainDivVM.updateFormSigning.arrVisitCity = '';
-                            mainDivVM.updateFormSigning.visitNum = '';
-                            mainDivVM.updateFormSigning.visitShopType = '';
-                            mainDivVM.updateFormSigning.visitTime = new Date();;
-                            mainDivVM.updateFormSigning.visitType = 1;
-                            return false;
-                        }
-                        // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
-                        mainDivVM.suppUpdateShow() // 默认展示第一个 到访记录关联 
-                    } 
-                }
-            })
-        },
+                        // 默认显示tab1
+                        if(responseData.paydetailList){
+                            // 显示tab名称
+                            for(var i=0;i<responseData.paydetailList.length;i++){
+                                if(responseData.paydetailList[i].payType=="1"){
+                                    responseData.paydetailList[i].label="全款"                                    
+                                }else if(responseData.paydetailList[i].payType=="2"){
+                                    responseData.paydetailList[i].label="定金"
+                                }else if(responseData.paydetailList[i].payType=="3"){
+                                    responseData.paydetailList[i].label="追加定金"
+                                }else if(responseData.paydetailList[i].payType=="4"){
+                                    responseData.paydetailList[i].label="尾款"
+                                }  
+                                responseData.paydetailList[i].name=i+"";//给tab赋值name
+                                mainDivVM.activeNameSigning=responseData.paydetailList[0].name; //默认显示第一个tab                      
+                            }
+                            
+                            // 付款类型判断
+                            if (responseData.paydetailList[0].payType > 2) {
+                                if (responseData.paydetailList[0].payType == 3) {
+                                    mainDivVM.isAllMoney = true;
+                                } else {
+                                    mainDivVM.isAllMoney = false;
+                                }
+                                mainDivVM.payTypeSelect = false;
+                                mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2, 4);
+                                // 追加定金或者尾款时候，签约类型禁选
+                                mainDivVM.notEditRebutSign=true;
+                            } else {
+                                if (responseData.paydetailList[0].payType == 1) {
+                                    mainDivVM.isAllMoney = false;
+                                } else {
+                                    mainDivVM.isAllMoney = true;
+                                }
+                                mainDivVM.payTypeSelect = true;
+                                mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0, 2);
+                                // 全款或者定金时候，签约类型可选
+                                mainDivVM.notEditRebutSign=false;
+                            }
+                            mainDivVM.updateFormSigning.payType=responseData.paydetailList[0].payType;//付款类型
+                            mainDivVM.updateFormSigning.payTime=responseData.paydetailList[0].payTime;//付款时间
+                            //付款方式
+                            var modeArr = responseData.paydetailList[0].payMode.split(",");
+                            mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
+                            mainDivVM.updateFormSigning.amountReceived=responseData.paydetailList[0].amountReceived;//实收金额
+                            mainDivVM.updateFormSigning.amountPerformance=responseData.paydetailList[0].amountPerformance;//业绩金额
+                            mainDivVM.updateFormSigning.preferentialAmount=responseData.paydetailList[0].preferentialAmount;//招商政策金额
+                            mainDivVM.updateFormSigning.firstToll=responseData.paydetailList[0].firstToll;//路费
+                            mainDivVM.updateFormSigning.giveAmount = responseData.paydetailList[0].giveAmount;//赠送金额
+                            // 赠送类型
+                            mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
+                            if(responseData.paydetailList[0].giveType ==null || responseData.paydetailList[0].giveType =='-1'){
+                                mainDivVM.updateFormSigning.giveType = null;
+                            }else{
+                                mainDivVM.updateFormSigning.giveType = responseData.paydetailList[0].giveType + "";
+                            }
+                            mainDivVM.updateFormSigning.remarks = responseData.paydetailList[0].remarks;//备注
+                            mainDivVM.updateFormSigning.amountBalance = responseData.paydetailList[0].amountBalance;//余款金额
+                            mainDivVM.updateFormSigning.makeUpTime = responseData.paydetailList[0].makeUpTime;//预计余款补齐时间
+                            // payDetailId赋值
+                            mainDivVM.updateFormSigning.payDetailId = mainDivVM.responseData.paydetailList[0].id;
+                            // visitDetailRecordId赋值
+                            mainDivVM.updateFormSigning.visitDetailRecordId = mainDivVM.responseData.paydetailList[0].visitRecordId;
+
+                            mainDivVM.signTabIndex=0;//点击编辑签约单tab的index为0
+                            if(!mainDivVM.updateFormSigning.paydetailList[0].visitRecordId){
+                                //清空补充到访记录数据
+                                mainDivVM.updateFormSigning.arrVisitCity = '';
+                                mainDivVM.updateFormSigning.visitNum = '';
+                                mainDivVM.updateFormSigning.visitShopType = '';
+                                mainDivVM.updateFormSigning.visitTime = new Date();;
+                                mainDivVM.updateFormSigning.visitType = 1;
+                                return false;
+                            }
+                            // mainDivVM.suppUpdateHide() // 默认隐藏 到访记录关联
+                            mainDivVM.suppUpdateShow() // 默认展示第一个 到访记录关联 
+                        } 
+                    }
+                })
+            },
         toSignPage(row){  // 进入签约单明细  能够 新增付款
             window.location.href='/businesssign/visitRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=0";
         },

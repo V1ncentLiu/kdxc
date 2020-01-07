@@ -696,7 +696,7 @@ public class BusinessSignController {
    */
   @RequestMapping("/visitRecordPage")
   public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton,int type) throws Exception {
+      @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton,@RequestParam(required = false) Integer type) throws Exception {
 
     IdEntityLong idEntityLong = new IdEntityLong();
     idEntityLong.setId(Long.valueOf(signId));
