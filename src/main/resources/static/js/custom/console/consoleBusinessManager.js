@@ -1756,6 +1756,7 @@ var mainDivVM = new Vue({
                             responseData.makeUpTime=""
                         }
                         mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
+                        mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
                         mainDivVM.updateFormSigning = responseData;
                         mainDivVM.responseData=responseData;
                         mainDivVM.dialogUpdateFormSigningVisible = true;//打开弹窗
