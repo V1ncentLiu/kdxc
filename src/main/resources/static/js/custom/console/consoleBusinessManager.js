@@ -1376,11 +1376,14 @@ var mainDivVM = new Vue({
                     }
                     return false;
                 }else{
+                    mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                     mainDivVM.updateVisitRecord =response.data.data;
                     mainDivVM.updateVisitRecord.clueId=row.clueId;
                     mainDivVM.updateVisitRecord.id = row.visitId
                     mainDivVM.updateVisitRecordDialogVisible = true;
-                    mainDivVM.showNotSignReason(mainDivVM.updateVisitRecord.isSign);
+                    if(mainDivVM.updateVisitRecord.isSign){
+                        mainDivVM.showNotSignReason(mainDivVM.updateVisitRecord.isSign);
+                    }
                     mainDivVM.currentProvince(mainDivVM.updateVisitRecord.signProvince)
                     mainDivVM.currentCity(mainDivVM.updateVisitRecord.signCity)
                 }
