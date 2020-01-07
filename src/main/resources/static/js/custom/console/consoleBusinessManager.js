@@ -114,6 +114,7 @@ var mainDivVM = new Vue({
         districtArr:[],
         cityArr:[],
         companyArr:[],
+        visitCityArr:[],
         projectArr:proSelect,
         multipleSelection:[],
         notVisitFlagRules:{
@@ -577,7 +578,7 @@ var mainDivVM = new Vue({
                         }else{
                             callback();
                         }
-                    }, trigger: 'change'}
+                    }, trigger: 'blur'}
             ],
             visitPeopleNum: [ //请填写到访人数
                  { required: true, message: '请填写到访人数', trigger: 'blur' },
