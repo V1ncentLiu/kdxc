@@ -10,9 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.kuaidao.aggregation.constant.AggregationErrorCodeEnum;
 import com.kuaidao.aggregation.dto.clue.ClueReceiveRecordsDTO;
+import com.kuaidao.businessconfig.constant.AggregationErrorCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;

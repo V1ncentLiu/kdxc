@@ -1,11 +1,11 @@
 package com.kuaidao.manageweb.feign.publiccustomer;
 
-import com.kuaidao.aggregation.dto.abnormal.AbnomalUserAddAndUpdateDTO;
-import com.kuaidao.aggregation.dto.abnormal.AbnomalUserQueryDTO;
-import com.kuaidao.aggregation.dto.abnormal.AbnomalUserRespDTO;
 import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
+import com.kuaidao.businessconfig.dto.abnormal.AbnomalUserAddAndUpdateDTO;
+import com.kuaidao.businessconfig.dto.abnormal.AbnomalUserQueryDTO;
+import com.kuaidao.businessconfig.dto.abnormal.AbnomalUserRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;

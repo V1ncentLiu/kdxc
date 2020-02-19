@@ -6,7 +6,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
+import com.kuaidao.businessconfig.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IntegerEntity;

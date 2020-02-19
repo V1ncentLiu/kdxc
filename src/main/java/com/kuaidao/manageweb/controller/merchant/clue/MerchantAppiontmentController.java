@@ -1,6 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.clue;
 
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.SortUtils;

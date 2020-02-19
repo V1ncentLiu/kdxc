@@ -7,9 +7,9 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
-import com.kuaidao.aggregation.dto.project.CompanyInfoReq;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoPageParam;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -25,7 +25,7 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/companyInfo",
+@FeignClient(name = "business-config-service", path = "/businessConfig/companyInfo",
         fallback = CompanyInfoFeignClient.HystrixClientFallback.class)
 public interface CompanyInfoFeignClient {
     /**
@@ -63,14 +63,15 @@ public interface CompanyInfoFeignClient {
      */
     @PostMapping("/allCompany")
     public JSONResult<List<CompanyInfoDTO>> allCompany();
-    
+
     /**
      * 查询集团
+     * 
      * @return
      */
     @PostMapping("/getCompanyList")
     public JSONResult<List<CompanyInfoDTO>> getCompanyList();
-    
+
 
     /**
      * 修改公司信息
@@ -101,7 +102,8 @@ public interface CompanyInfoFeignClient {
 
 
     @PostMapping("/getCompanyListByParam")
-    public JSONResult<List<CompanyInfoDTO>> getCompanyListByParam(@RequestBody CompanyInfoPageParam param);
+    public JSONResult<List<CompanyInfoDTO>> getCompanyListByParam(
+            @RequestBody CompanyInfoPageParam param);
 
 
     @Component
@@ -159,10 +161,10 @@ public interface CompanyInfoFeignClient {
         }
 
         @Override
-		public JSONResult<List<CompanyInfoDTO>> getCompanyList() {
-			// TODO Auto-generated method stub
-			return fallBackError("查询集团列表失败");
-		}
+        public JSONResult<List<CompanyInfoDTO>> getCompanyList() {
+            // TODO Auto-generated method stub
+            return fallBackError("查询集团列表失败");
+        }
 
 
 

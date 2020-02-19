@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.visit;
 
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.entity.IdEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +19,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.visitrecord.*;
+import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
