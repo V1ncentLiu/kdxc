@@ -1,8 +1,8 @@
 package com.kuaidao.manageweb.controller.deptcallset;
 
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
+import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
+import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetQueryDTO;
+import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;

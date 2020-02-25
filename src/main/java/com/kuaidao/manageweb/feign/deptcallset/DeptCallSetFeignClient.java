@@ -1,8 +1,8 @@
 package com.kuaidao.manageweb.feign.deptcallset;
 
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
-import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
+import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
+import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetQueryDTO;
+import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
@@ -24,7 +24,7 @@ import java.util.List;
  * @author  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "callcenter-service",path="/callcenter/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
 public interface DeptCallSetFeignClient {
 
     /**
