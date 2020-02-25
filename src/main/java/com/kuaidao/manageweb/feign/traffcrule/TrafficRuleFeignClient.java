@@ -23,7 +23,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年3月14日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/trafficAssignRule",
+@FeignClient(name = "business-config-service", path = "/businessConfig/trafficAssignRule",
         fallback = TrafficRuleFeignClient.HystrixClientFallback.class)
 public interface TrafficRuleFeignClient {
     /**
