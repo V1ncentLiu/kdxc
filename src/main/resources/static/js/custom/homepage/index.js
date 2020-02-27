@@ -56,13 +56,15 @@ var homePageVM=new Vue({
 	    	callTitle:'呼叫中心',
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
+        isShowTip:false,//默认不显示七陌里的天翼云app呼叫红色提示
 	    	loginClientForm:{
-	    		clientType:1,
+	    		clientType:1,//呼叫中心默认1是天润
 	    		cno:'',
 	    		bindPhone:'',
 	    		bindPhoneType:2,
-	    	    loginClient:''
-	    		
+	    	  loginClient:'',
+          callPhoneType:1,//呼叫方式，默认是1话机呼叫	 
+          mobilePhoneNumber:'',//绑定手机号   		
 	    	},
 	    	clientTypeOptions: [{
                 value: 1,
@@ -83,13 +85,28 @@ var homePageVM=new Vue({
                 label: '登录容联呼叫中心'
             }],
             bindPhoneTypeOptions: [
-            	{
-					value: 2,
-						label: '手机外显'
-				},{
-						value: 1,
-						label: '普通电话'
+                	{
+    					  value: 2,
+    						label: '手机外显'
+    				},{
+    						value: 1,
+    						label: '普通电话'
 		       }],
+           bindPhoneTypeOptions1: [{
+                value: 1,
+                label: '普通电话'
+           }],
+           callPhoneTypeOptions: [
+                  {
+                value: 1,
+                label: '话机呼叫'
+            },{
+                value: 2,
+                label: '天翼云呼app呼叫'
+           },{
+                value: 3,
+                label: '绑定手机号呼叫'
+           }],
             trClientFormRules:{//登录坐席校验规则
             	clientType:[
                     { required: true, message: '选择呼叫中心不能为空'}
@@ -138,6 +155,12 @@ var homePageVM=new Vue({
             	],
                 bindPhoneType:[
                     { required: true, message: '绑定类型不能为空'}
+                ],
+                callPhoneType:[
+                    { required: true, message: '呼叫方式不能为空'}
+                ],
+                mobilePhoneNumber:[
+                    { required: true, message: '绑定手机号不能为空'}
                 ]
             },
 			heliClientFormRules:{//登录坐席校验规则
@@ -156,10 +179,29 @@ var homePageVM=new Vue({
             		 },trigger:'blur'},
             	]
             },
-            rlClientFormRules:{//登录坐席校验规则
+            ktClientFormRules:{
                 clientType:[
                     { required: true, message: '选择呼叫中心不能为空'}
                 ],
+              loginClient:[
+                { required: true, message: '登录坐席不能为空'},
+                {validator:function(rule,value,callback){
+                 if(!/^[0-9]*$/.test(value)){
+                    callback(new Error("只可以输入数字,不超过10位"));     
+                      }else{
+                        callback();
+                      }
+                 
+               },trigger:'blur'},
+              ],
+                bindPhoneType:[
+                    { required: true, message: '绑定类型不能为空'}
+                ],
+            },
+            rlClientFormRules:{//登录坐席校验规则
+                // clientType:[
+                //     { required: true, message: '选择呼叫中心不能为空'}
+                // ],
                 loginClient:[
                     { required: true, message: '登录坐席不能为空'},
                     {validator:function(rule,value,callback){
@@ -200,6 +242,22 @@ var homePageVM=new Vue({
 	    }
 	},
  	methods: {
+      // 切换七陌里的呼叫方式
+      changeCallPhoneType(val){
+
+          if(val==2){
+            // 如果是天翼云呼叫app
+            this.isShowTip=true;
+            this.isShowPhoneNumber=false;
+          }else if(val==3){
+            this.isShowTip=false;
+            // 如果是绑定手机号
+            this.isShowPhoneNumber=true;
+          }else{
+            this.isShowTip=false;
+            this.isShowPhoneNumber=false;
+          }
+      },
         // 输入数字控制方法
         cnoNumber(){
 　　　    this.loginClientForm.cno=this.loginClientForm.cno.replace(/[^\.\d]/g,'');
@@ -208,6 +266,10 @@ var homePageVM=new Vue({
         bindPhoneNumber(){
 　　　    this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace(/[^\.\d]/g,'');
           this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace('.','');
+    　  },
+        mobilePhoneNumber(){
+　　　    this.loginClientForm.mobilePhoneNumber=this.loginClientForm.mobilePhoneNumber.replace(/[^\.\d]/g,'');
+          this.loginClientForm.mobilePhoneNumber=this.loginClientForm.mobilePhoneNumber.replace('.','');
     　  },
  		handleMin(){
  			this.dialogLoginClientVisible = false;
@@ -375,17 +437,26 @@ var homePageVM=new Vue({
         	
         },
         changeClientType(selectedValue){
+          this.isShowTip=false;
+          this.isShowPhoneNumber=false;
         	this.$refs.loginClientForm.resetFields();
         	this.$refs.loginClientForm.clearValidate();
         	this.loginClientForm.clientType=selectedValue;
             // bindPhoneType绑定类型 1是手机外显2是普通电话
         	if(selectedValue==2 || selectedValue==4){//七陌、科天
-        		this.loginClientForm.bindPhoneType = 1;
-			}else if (selectedValue==1 || selectedValue ==3){//天润 合力
-        		this.loginClientForm.bindPhoneType = 2;
-			}else if (selectedValue==5){//容联
+              this.loginClientForm.bindPhoneType = 1;
+        		  this.loginClientForm.callPhoneType = 1;//呼叫方式是1
+    			}else if (selectedValue==1 || selectedValue ==3){//天润 合力
+            		this.loginClientForm.bindPhoneType = 2;
+    			}else if (selectedValue==5){//容联
                 this.loginClientForm.bindPhoneType = "";
-            }
+          }
+          // 登录坐席是空
+          this.loginClientForm.loginClient="";
+          // 坐席号是空
+          this.loginClientForm.cno="";
+          // 坐席号是空
+          this.loginClientForm.bindPhone="";
         },
         loginClient(formName){
        	 this.$refs[formName].validate((valid) => {
@@ -1370,7 +1441,7 @@ var homePageVM=new Vue({
 	    	}else if(clientType==3){
 	    		 return this.heliClientFormRules;
 	    	}else if(clientType==4){//科天
-                 return this.qimoClientFormRules;
+                 return this.ktClientFormRules;
             }else if(clientType==5){//容联
                  return this.rlClientFormRules;
             }
