@@ -6,10 +6,8 @@ import com.kuaidao.common.entity.*;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -760,6 +758,11 @@ public class ClientController {
     @LogRecord(description = "七陌坐席", operationType = OperationType.CLIENT_LOGIN,
             menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
+        Integer callType = reqDTO.getCallType();
+        if(Objects.isNull(callType)){
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+
         String loginName = reqDTO.getLoginName();
         String bindType = reqDTO.getBindType();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -787,6 +790,9 @@ public class ClientController {
                 clientLoginRecord.setCno(qimoClient.getClientNo());
                 clientLoginRecord.setClientType(reqDTO.getClientType());
                 clientLoginRecord.setAccountNo(qimoClient.getAccountNo());
+                clientLoginRecord.setCallType(reqDTO.getCallType());
+                clientLoginRecord.setQimoBindPhone(reqDTO.getBindPhone());
+                clientLoginRecord.setId(qimoClient.getId());
                 JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
                 if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
                     logger.error("qimo_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
