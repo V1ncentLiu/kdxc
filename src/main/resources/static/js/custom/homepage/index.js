@@ -548,6 +548,8 @@ var homePageVM=new Vue({
         loginQimoClient(){//七陌登录
         	var loginClient = this.loginClientForm.loginClient;
         	var bindType = this.loginClientForm.bindPhoneType;
+          var callType = this.loginClientForm.callPhoneType;//新增呼叫方式
+          var bindPhone = this.loginClientForm.mobilePhoneNumber;//新增呼叫方式
 
 			/*if(bindType==1){
 				this.$message({message:"七陌不支持普通电话模式登录！",type:'warning'});
@@ -558,6 +560,13 @@ var homePageVM=new Vue({
         	param.loginName = loginClient;
         	param.accountType = homePageVM.accountType;
         	param.clientType = homePageVM.loginClientForm.clientType;
+          // 呼叫方式
+          param.callType = homePageVM.loginClientForm.callPhoneType;
+          // 绑定手机号
+          if(bindPhone){
+            param.bindPhone=homePageVM.loginClientForm.mobilePhoneNumber;
+          }
+
         	 axios.post('/client/client/qimoLogin',param)
              .then(function (response) {
                  var data =  response.data;
@@ -579,6 +588,11 @@ var homePageVM=new Vue({
                      clientInfo.loginClient = homePageVM.loginClientForm.loginClient
                      clientInfo.clientType = homePageVM.loginClientForm.clientType;
                      clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+                     // 呼叫方式
+                     clientInfo.callType=homePageVM.loginClientForm.callPhoneType;
+                     // 绑定手机号
+                     clientInfo.bindPhone=homePageVM.loginClientForm.mobilePhoneNumber;
+
                      localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
                      
                     /* var recordParam = {};
