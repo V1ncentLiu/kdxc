@@ -62,7 +62,7 @@ var homePageVM=new Vue({
 	    		cno:'',
 	    		bindPhone:'',
 	    		bindPhoneType:2,
-	    	  loginClient:'',
+	    	  loginClient:'',//登录坐席
           callPhoneType:1,//呼叫方式，默认是1话机呼叫	 
           mobilePhoneNumber:'',//绑定手机号   		
 	    	},
@@ -109,10 +109,10 @@ var homePageVM=new Vue({
            }],
             trClientFormRules:{//登录坐席校验规则
             	clientType:[
-                    { required: true, message: '选择呼叫中心不能为空'}
+                    { required: true, message: '请选择呼叫中心',trigger: 'change'}
                 ],
             	cno:[
-            		 { required: true, message: '坐席号不能为空'},
+            		 { required: true, message: '坐席号不能为空',trigger: 'blur'},
             		 {validator:function(rule,value,callback){
             			 if(!/^[0-9]*$/.test(value)){
           					  callback(new Error("只可以输入数字,不超过10位"));     
@@ -123,7 +123,7 @@ var homePageVM=new Vue({
             		 },trigger:'blur'},
             	],
 	    	    bindPhone:[
-	    	    	{ required: true, message: '绑定电话不能为空'},
+	    	    	{ required: true, message: '绑定电话不能为空',trigger: 'blur'},
 	    	    	 {validator:function(rule,value,callback){
             			 if(!/^[0-9]*$/.test(value)){
           					  callback(new Error("只可以输入数字,不超过11位"));     
@@ -134,16 +134,16 @@ var homePageVM=new Vue({
             		 },trigger:'blur'},
 	    	    ],
                 bindPhoneType:[
-                    { required: true, message: '绑定类型不能为空'}
+                    { required: true, message: '请选择绑定类型',trigger: 'change'}
                 ]
             	
             },
             qimoClientFormRules:{
                 clientType:[
-                    { required: true, message: '选择呼叫中心不能为空'}
+                    { required: true, message: '请选择呼叫中心',trigger: 'change'}
                 ],
             	loginClient:[
-            		{ required: true, message: '登录坐席不能为空'},
+            		{ required: true, message: '登录坐席不能为空',trigger: 'blur'},
             		{validator:function(rule,value,callback){
            			 if(!/^[0-9]*$/.test(value)){
          					  callback(new Error("只可以输入数字,不超过10位"));     
@@ -154,64 +154,75 @@ var homePageVM=new Vue({
            		 },trigger:'blur'},
             	],
                 bindPhoneType:[
-                    { required: true, message: '绑定类型不能为空'}
+                    { required: true, message: '请选择绑定类型',trigger: 'change'}
                 ],
                 callPhoneType:[
-                    { required: true, message: '呼叫方式不能为空'}
+                    { required: true, message: '请选择呼叫方式',trigger: 'change'}
                 ],
                 mobilePhoneNumber:[
-                    { required: true, message: '绑定手机号不能为空'}
+                    { required: true, message: '绑定手机号不能为空',trigger: 'blur'},
+                    {validator:function(rule,value,callback){
+                        if(!/^[0-9]*$/.test(value)){
+                            callback(new Error("只可以输入数字,不超过11位"));     
+                        }else{
+                            callback();
+                        }
+                   
+                    },trigger:'blur'},
                 ]
             },
-			heliClientFormRules:{//登录坐席校验规则
-            	clientType:[
-                    { required: true, message: '选择呼叫中心不能为空'}
+			      heliClientFormRules:{//登录坐席校验规则
+            	  clientType:[
+                    { required: true, message: '请选择呼叫中心',trigger: 'change'}
                 ],
-            	cno:[
-            		 { required: true, message: '坐席号不能为空'},
-            		 {validator:function(rule,value,callback){
-            			 if(!/^[0-9]*$/.test(value)){
-          					  callback(new Error("只可以输入数字,不超过10位"));     
+            	  cno:[
+            		    { required: true, message: '坐席号不能为空', trigger: 'blur'},
+            		    {validator:function(rule,value,callback){
+            			      if(!/^[0-9]*$/.test(value)){
+          					        callback(new Error("只可以输入数字,不超过10位"));     
           	        	  }else{
-          	        		  callback();
+          	        		    callback();
           	        	  }
             			 
-            		 },trigger:'blur'},
-            	]
+            		    },trigger:'blur'},
+            	  ],
+                bindPhoneType:[
+                    { required: true, message: '请选择绑定类型',trigger: 'change'}
+                ],
+
             },
             ktClientFormRules:{
                 clientType:[
-                    { required: true, message: '选择呼叫中心不能为空'}
+                    { required: true, message: '请选择呼叫中心',trigger: 'change'}
                 ],
-              loginClient:[
-                { required: true, message: '登录坐席不能为空'},
-                {validator:function(rule,value,callback){
-                 if(!/^[0-9]*$/.test(value)){
-                    callback(new Error("只可以输入数字,不超过10位"));     
-                      }else{
-                        callback();
-                      }
+                loginClient:[
+                    { required: true, message: '登录坐席不能为空',trigger: 'blur'},
+                    {validator:function(rule,value,callback){
+                        if(!/^[0-9]*$/.test(value)){
+                            callback(new Error("只可以输入数字,不超过10位"));     
+                        }else{
+                            callback();
+                        }
                  
-               },trigger:'blur'},
-              ],
+                    },trigger:'blur'},
+                ],
                 bindPhoneType:[
-                    { required: true, message: '绑定类型不能为空'}
+                    { required: true, message: '请选择绑定类型',trigger: 'change'}
                 ],
             },
             rlClientFormRules:{//登录坐席校验规则
-                // clientType:[
-                //     { required: true, message: '选择呼叫中心不能为空'}
-                // ],
+                clientType:[
+                    { required: true, message: '请选择呼叫中心',trigger: 'change'}
+                ],
                 loginClient:[
-                    { required: true, message: '登录坐席不能为空'},
+                    { required: true, message: '登录坐席不能为空',trigger: 'blur'},
                     {validator:function(rule,value,callback){
-                     if(!/^[0-9]*$/.test(value)){
-                              callback(new Error("只可以输入数字,不超过10位"));     
-                          }else{
-                              callback();
-                          }
-                     
-                 },trigger:'blur'},
+                        if(!/^[0-9]*$/.test(value)){
+                            callback(new Error("只可以输入数字,不超过10位"));     
+                        }else{
+                            callback();
+                        }                     
+                    },trigger:'blur'},
                 ],
             },
           /*  clientRules:'trClientFormRules',*/
