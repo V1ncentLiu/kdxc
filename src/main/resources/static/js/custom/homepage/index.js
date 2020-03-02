@@ -57,6 +57,7 @@ var homePageVM=new Vue({
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
         isShowTip:false,//默认不显示七陌里的天翼云app呼叫红色提示
+        isShowPhoneNumber:false,//默认不显示新增绑定手机号
 	    	loginClientForm:{
 	    		clientType:1,//呼叫中心默认1是天润
 	    		cno:'',
