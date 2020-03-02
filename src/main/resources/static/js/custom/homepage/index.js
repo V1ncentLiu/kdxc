@@ -563,7 +563,7 @@ var homePageVM=new Vue({
           // 呼叫方式
           param.callType = homePageVM.loginClientForm.callPhoneType;
           // 绑定手机号
-          if(bindPhone){
+          if(bindPhone&&param.callType==3){//3是选择绑定手机号呼叫
             param.bindPhone=homePageVM.loginClientForm.mobilePhoneNumber;
           }else{
             param.bindPhone="";
