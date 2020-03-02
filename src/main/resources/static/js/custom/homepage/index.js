@@ -565,6 +565,8 @@ var homePageVM=new Vue({
           // 绑定手机号
           if(bindPhone){
             param.bindPhone=homePageVM.loginClientForm.mobilePhoneNumber;
+          }else{
+            param.bindPhone="";
           }
 
         	 axios.post('/client/client/qimoLogin',param)
