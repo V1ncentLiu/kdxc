@@ -168,12 +168,27 @@
                 <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
                     <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
                        <el-option
-                           v-for="item in bindPhoneTypeOptions"
+                           v-for="item in bindPhoneTypeOptions1"
                            :key="item.value"
                            :label="item.label"
                            :value="item.value">
                        </el-option>
                     </el-select>
+                </el-form-item>
+                <!-- 新增呼叫方式 -->
+                <el-form-item label="呼叫方式：" :label-width="formLabelWidth105" prop="callPhoneType">
+                    <el-select v-model="loginClientForm.callPhoneType" placeholder="请选择" value-key="value" style="width: 350px;" @change="changeCallPhoneType">
+                       <el-option
+                           v-for="item in callPhoneTypeOptions"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
+                       </el-option>
+                    </el-select>
+                </el-form-item>
+                <!-- 新增绑定手机号 -->
+                <el-form-item v-if="isShowPhoneNumber" label="绑定手机号：" :label-width="formLabelWidth105" prop="mobilePhoneNumber">
+                    <el-input   v-model="loginClientForm.mobilePhoneNumber" autocomplete="off"  maxlength="11" style="width: 350px;" @keyup.native="mobilePhoneNumber"></el-input>
                 </el-form-item>
             </template>
             <template v-if="loginClientForm.clientType==3">
@@ -213,7 +228,11 @@
             </template>
             
         </el-form>
-        <div slot="footer" class="dialog-footer" center="true">
+        <!-- 七陌登录提示 -->
+        <div style="font-size: 12px;padding: 10px 20px;color: #f56c6c;" v-show="isShowTip">
+            选择天翼云呼app呼叫方式，需要注意以下：<br>1，需要app是打开的状态，且当前页面不可锁屏，方可进行打电话。<br>2，只支持安卓手机
+        </div>
+        <div slot="footer" class="dialog-footer" center="true" style="padding-top: 10px;">
             <el-button type="primary" @click="loginClient('loginClientForm')">登录</el-button>
             <el-button type="info" @click="cancelLoginClientForm('loginClientForm')">取 消</el-button>
         </div>
@@ -248,6 +267,10 @@
                 <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
                     <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
                     <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+                </el-form-item>
+                <!-- 新增呼叫方式 -->
+                <el-form-item label="呼叫方式：" :label-width="formLabelWidth105" prop="callPhoneType">
+                    {{loginClientForm.callPhoneType}}
                 </el-form-item>
             </template>
              <template v-if="loginClientForm.clientType==3">
