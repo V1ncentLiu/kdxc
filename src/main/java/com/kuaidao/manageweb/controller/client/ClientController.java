@@ -791,7 +791,7 @@ public class ClientController {
                 clientLoginRecord.setClientType(reqDTO.getClientType());
                 clientLoginRecord.setAccountNo(qimoClient.getAccountNo());
                 clientLoginRecord.setCallType(reqDTO.getCallType());
-                clientLoginRecord.setQimoBindPhone(reqDTO.getBindPhone());
+                clientLoginRecord.setBindPhone(reqDTO.getBindPhone());
                 clientLoginRecord.setId(qimoClient.getId());
                 JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
                 if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
