@@ -547,10 +547,9 @@ var homePageVM=new Vue({
         	
         },
         loginQimoClient(){//七陌登录
-          var localClientInfo=JSON.parse(localStorage.getItem('clientInfo'));
         	var loginClient = this.loginClientForm.loginClient;
-        	var bindType = localClientInfo? localClientInfo.bindType:this.loginClientForm.bindPhoneType;
-          var callType = localClientInfo? localClientInfo.callType:this.loginClientForm.callPhoneType;//新增呼叫方式
+        	var bindType = this.loginClientForm.bindPhoneType;
+          var callType = this.loginClientForm.callPhoneType;//新增呼叫方式
           var bindPhone = this.loginClientForm.mobilePhoneNumber;//新增呼叫方式
 
 			/*if(bindType==1){
@@ -591,10 +590,9 @@ var homePageVM=new Vue({
                      clientInfo.loginClientType="qimo";
                      clientInfo.loginClient = homePageVM.loginClientForm.loginClient
                      clientInfo.clientType = homePageVM.loginClientForm.clientType;
-                     // 绑定电话
-                     clientInfo.bindType = localClientInfo? localClientInfo.bindType:homePageVM.loginClientForm.bindPhoneType;
+                     clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
                      // 呼叫方式
-                     clientInfo.callType=localClientInfo? localClientInfo.callType:homePageVM.loginClientForm.callPhoneType;
+                     clientInfo.callType=homePageVM.loginClientForm.callPhoneType;
                      // 绑定手机号
                      clientInfo.bindPhone=homePageVM.loginClientForm.mobilePhoneNumber;
 
