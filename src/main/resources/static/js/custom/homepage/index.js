@@ -1039,8 +1039,8 @@ var homePageVM=new Vue({
                // always executed
              });
         },
-        logoutClient(formName){//坐席退出
-        	if(this.isQimoClient){
+        logoutClient(formName){//坐席退出          
+        	if(this.isQimoClient){// 七陌退出
         		 axios.post('/client/client/qimoLogout',{})
                  .then(function (response) {
                      var data =  response.data;
@@ -1056,7 +1056,15 @@ var homePageVM=new Vue({
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
-                         
+
+                         homePageVM.$message({message:"退出成功",type:'success'});
+                                              
+                         homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
+                         homePageVM.loginClientForm.bindPhoneType=2;
+                         homePageVM.loginClientForm.cno='';
+                         homePageVM.loginClientForm.bindPhone='';
+                         homePageVM.loginClientForm.loginClient='';
+                         //homePageVM.$refs.loginClientForm.clearValidate();                       
                          
                      }else{
                     		homePageVM.$message({message:data.msg,type:'error'});
@@ -1098,12 +1106,12 @@ var homePageVM=new Vue({
          	    });*/
         		
          	   this.trClientLogout();
-        	}else if(this.isHeliClient){
+        	}else if(this.isHeliClient){//合力退出
         		this.heliClientLogout();
-        	}else if(this.isKeTianClient){
+        	}else if(this.isKeTianClient){//科天退出
                 this.KeTianClientLogout();
                 homePageVM.isRingOff = false;//退出之后不显示挂断按钮
-            }else if(this.isRongLianClient){
+            }else if(this.isRongLianClient){//容联退出
                 var loginClient = this.loginClientForm.loginClient;
                 var param={};
                 param.loginName = loginClient;
@@ -1139,7 +1147,7 @@ var homePageVM=new Vue({
         heliClientLogout(){
          var param = {};
          param.clientNo = this.loginClientForm.cno;
-   		 axios.post('/client/heliClient/logout',param)
+   		   axios.post('/client/heliClient/logout',param)
          .then(function (response) {
              var data =  response.data;
              if(data.code=='0'){
