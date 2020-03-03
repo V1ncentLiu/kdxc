@@ -547,9 +547,10 @@ var homePageVM=new Vue({
         	
         },
         loginQimoClient(){//七陌登录
+          var localClientInfo=JSON.parse(localStorage.getItem('clientInfo'));
         	var loginClient = this.loginClientForm.loginClient;
-        	var bindType = this.loginClientForm.bindPhoneType;
-          var callType = this.loginClientForm.callPhoneType;//新增呼叫方式
+        	var bindType = localClientInfo? localClientInfo.bindType|| this.loginClientForm.bindPhoneType;
+          var callType = localClientInfo? localClientInfo.callType||this.loginClientForm.callPhoneType;//新增呼叫方式
           var bindPhone = this.loginClientForm.mobilePhoneNumber;//新增呼叫方式
 
 			/*if(bindType==1){
