@@ -16,7 +16,9 @@ $(function(){
 		}else if(loginClientType == "qimo"){
 			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
 			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
-			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+			homePageVM.loginClientForm.bindPhoneType = clientInfoObj.bindType;
+			// 新增呼叫方式
+			homePageVM.loginClientForm.callPhoneType = clientInfoObj.callType;
             homePageVM.loginQimoClient();
 		}else if(loginClientType == "heli"){
 			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
