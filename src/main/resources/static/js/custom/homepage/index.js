@@ -1058,9 +1058,9 @@ var homePageVM=new Vue({
                          localStorage.removeItem("clientInfo");
 
                          homePageVM.$message({message:"退出成功",type:'success'});
-                                              
+
                          homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
-                         homePageVM.loginClientForm.bindPhoneType=2;
+                         homePageVM.loginClientForm.bindPhoneType=2;//默认绑定类型是手机外显
                          homePageVM.loginClientForm.cno='';
                          homePageVM.loginClientForm.bindPhone='';
                          homePageVM.loginClientForm.loginClient='';
