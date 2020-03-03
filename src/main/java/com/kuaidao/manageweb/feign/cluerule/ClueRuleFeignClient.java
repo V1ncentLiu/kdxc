@@ -21,7 +21,7 @@ import com.kuaidao.manageweb.feign.client.ClientFeignClient;
  * @date 2019年3月1日 下午6:36:23
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/cluerule/clueRule",
+@FeignClient(name = "business-config-service", path = "/businessConfig/cluerule/clueRule",
         fallback = ClueRuleFeignClient.HystrixClientFallback.class)
 public interface ClueRuleFeignClient {
 
