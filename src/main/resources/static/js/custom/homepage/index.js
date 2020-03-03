@@ -591,9 +591,10 @@ var homePageVM=new Vue({
                      clientInfo.loginClientType="qimo";
                      clientInfo.loginClient = homePageVM.loginClientForm.loginClient
                      clientInfo.clientType = homePageVM.loginClientForm.clientType;
-                     clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+                     // 绑定电话
+                     clientInfo.bindType = localClientInfo? localClientInfo.bindType:homePageVM.loginClientForm.bindPhoneType;
                      // 呼叫方式
-                     clientInfo.callType=homePageVM.loginClientForm.callPhoneType;
+                     clientInfo.callType=localClientInfo? localClientInfo.callType:homePageVM.loginClientForm.callPhoneType;
                      // 绑定手机号
                      clientInfo.bindPhone=homePageVM.loginClientForm.mobilePhoneNumber;
 
