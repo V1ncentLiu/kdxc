@@ -21,9 +21,9 @@ $(function(){
 			homePageVM.loginClientForm.callPhoneType = clientInfoObj.callType;
 			// 新增绑定手机号
 			if(clientInfoObj.bindPhone){
-				homePageVM.loginClientForm.callPhoneType = clientInfoObj.bindPhone;
+				homePageVM.loginClientForm.mobilePhoneNumber = clientInfoObj.bindPhone;
 			}else{
-				homePageVM.loginClientForm.callPhoneType="";
+				homePageVM.loginClientForm.mobilePhoneNumber="";
 			}			
             homePageVM.loginQimoClient();
 		}else if(loginClientType == "heli"){
