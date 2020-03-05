@@ -16,7 +16,15 @@ $(function(){
 		}else if(loginClientType == "qimo"){
 			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
 			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
-			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+			homePageVM.loginClientForm.bindPhoneType = clientInfoObj.bindType;
+			// 新增呼叫方式
+			homePageVM.loginClientForm.callPhoneType = clientInfoObj.callType;
+			// 新增绑定手机号
+			if(clientInfoObj.bindPhone){
+				homePageVM.loginClientForm.mobilePhoneNumber = clientInfoObj.bindPhone;
+			}else{
+				homePageVM.loginClientForm.mobilePhoneNumber="";
+			}			
             homePageVM.loginQimoClient();
 		}else if(loginClientType == "heli"){
 			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
