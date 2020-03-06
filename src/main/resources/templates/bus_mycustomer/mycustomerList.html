@@ -1143,7 +1143,6 @@
                             </el-form-item>
                         </el-col>
                     </el-row>
-
                     <el-row>
                         <el-col :span="24">
                             <el-form-item label="备注" :label-width="formLabelWidth">
@@ -1638,14 +1637,23 @@
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="12">
+                                    <el-form-item label="实收设备金额：" :label-width="formLabelWidth" prop="amountEquipment">
+                                        <el-input maxLength="10" @input="updateFormSigningAmountPerformance"
+                                                  v-model="updateFormSigning.amountEquipment" style="width: 80%;" type="number"
+                                                  min="0" oninput="if(value.length>10)value=value.slice(0,10)"
+                                                  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                                        <span style="padding-left: 10px;">元</span>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>    
+                                <el-col :span="12">
                                     <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="amountPerformance">
                                         <el-input maxLength="10" v-model="updateFormSigning.amountPerformance"
                                                   @keyup.native="number4" min="0" style="width: 80%;"></el-input>
                                         <span style="padding-left: 10px;">元</span>
                                     </el-form-item>
-                                </el-col>
-                            </el-row>
-                            <el-row>
+                                </el-col>                            
                                 <el-col :span="12">
                                     <el-form-item label="招商政策优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
                                         <el-input v-model="updateFormSigning.preferentialAmount"
@@ -1655,6 +1663,8 @@
                                         <span style="padding-left: 10px;">元</span>
                                     </el-form-item>
                                 </el-col>
+                            </el-row>
+                            <el-row>
                                 <el-col :span="12">
                                     <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
                                         <el-input  @input="updateFormSigningAmountPerformance"
@@ -1664,9 +1674,7 @@
                                                   autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
                                         <span style="padding-left: 10px;">元</span>
                                     </el-form-item>
-                                </el-col>
-                            </el-row>
-                            <el-row>
+                                </el-col>                            
                                 <el-col :span="12">
                                     <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
                                         <el-input  placeholder="填写售价，非成本价"
@@ -1677,6 +1685,8 @@
                                         <span style="padding-left: 10px;">元</span>
                                     </el-form-item>
                                 </el-col>
+                            </el-row>
+                            <el-row>
                                 <el-col :span="12">
                                     <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
                                         <el-select clearable v-model="updateFormSigning.giveType"  placeholder="请选择赠送类型："
@@ -1699,7 +1709,6 @@
                                 </el-col>
                             </el-row>
                         </div>
-
                     </el-tab-pane>                    
                 </el-tabs>
             </el-form>
@@ -2136,6 +2145,7 @@
                 performanceAmount: '',
                 remarks: '', //备注
                 signRejectRecordList:[],//驳回原因
+                amountEquipment:'',//实收设备金额
             },
             pager: {
                 total: 0,
@@ -2526,9 +2536,11 @@
             updateFormSigningAmountPerformance() {
                 var aone = parseFloat(this.updateFormSigning.amountReceived);
                 var atwo = parseFloat(this.updateFormSigning.firstToll);
+                var athree = parseFloat(this.updateFormSigning.amountEquipment);
                 if (isNaN(aone)) aone = 0
                 if (isNaN(atwo)) atwo = 0
-                this.updateFormSigning.amountPerformance = (aone + atwo) + ""
+                if (isNaN(athree)) athree = 0    
+                this.updateFormSigning.amountPerformance = (aone + atwo +athree) + ""
             },
             tabClick(tab, event) {
                 this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
