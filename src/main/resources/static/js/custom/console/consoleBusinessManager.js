@@ -223,7 +223,8 @@ var mainDivVM = new Vue({
             makeUpTime:'',
             payTime: new Date(),
             amountPerformance:'',
-            payName:''
+            payName:'',
+            amountEquipment:'',//实收设备金额
         },
         // updateFormSigning: {
         // 	giveType:"",
@@ -311,6 +312,7 @@ var mainDivVM = new Vue({
             performanceAmount: '',
             remarks: '', //备注
             signRejectRecordList:[],//驳回原因
+            amountEquipment:'',//实收设备金额
         },
         pager:{
             total: 0,
