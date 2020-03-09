@@ -510,31 +510,39 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                        <el-input v-model="updateFormSigning.performanceAmount"  type="number"oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" min="0" maxLength="10" style="width:80%"></el-input>
+                    <el-form-item label="实收设备金额：" :label-width="formLabelWidth" prop="amountEquipment">
+                        <el-input v-model="updateFormSigning.amountEquipment"  @input="updateFormSigningAmountPerformance" type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" width="80%"></el-input>
                         <span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="12">
+                    <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
+                        <el-input v-model="updateFormSigning.performanceAmount"  type="number"oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" min="0" maxLength="10" style="width:80%"></el-input>
+                        <span style="padding-left: 10px;">元</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
                     <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
                         <el-input @input="formSigningAmountPerformance" v-model="updateFormSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
+            </el-row>
+            <el-row>
                 <el-col :span="12">
                     <el-form-item label="招商政策优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
                         <el-input v-model="updateFormSigning.preferentialAmount"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
-            </el-row>
-            <el-row>
                 <el-col :span="12">
                     <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
                         <el-input v-model="updateFormSigning.giveAmount"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
+            </el-row>
+            <el-row>
                 <el-col :span="10">
                     <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
                         <el-select v-model="updateFormSigning.giveType" clearable  placeholder="请选择赠送类型：" style="width:100%;">
@@ -2134,9 +2142,11 @@
             updateFormSigningAmountPerformance() {
                 var aone = parseFloat(this.updateFormSigning.amountReceived);
                 var atwo = parseFloat(this.updateFormSigning.firstToll);
+                var athree = parseFloat(this.updateFormSigning.amountEquipment);
                 if (isNaN(aone)) aone = 0
                 if (isNaN(atwo)) atwo = 0
-                this.updateFormSigning.performanceAmount = (aone + atwo) + ""
+                if (isNaN(athree)) athree = 0     
+                this.updateFormSigning.performanceAmount = (aone + atwo + athree) + ""
             },
             submitUpdateForm(formName) {
                 console.log("点击提交添加付款")
