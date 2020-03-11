@@ -30,7 +30,14 @@
                     <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
                 </el-form-item>
                 <el-form-item label="签约公司:" prop="cusName">
-                    <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
+                    <el-select v-model="searchForm.signProvince" clearable  placeholder="签约公司">
+                        <el-option
+                            v-for="item in provinceOptions"
+                            :key="item.name"
+                            :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="签约省份:"  prop="signProvince">
                       <el-select v-model="searchForm.signProvince" clearable  placeholder="签约省份">
@@ -79,7 +86,16 @@
                         </el-option>
                         </el-select>
                     </el-form-item>
-
+                    <el-form-item label="签约项目:"  prop="signShopType">
+                        <el-select v-model="searchForm.signShopType" clearable placeholder="签约项目">
+                          <el-option
+                            v-for="item in signShopTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="申请状态:"  prop="signStatus">
                       <el-select v-model="searchForm.signStatus" clearable placeholder="签约单状态">
                         <el-option
@@ -99,11 +115,17 @@
       	    </el-form>
         </div>
         <el-row>
-            <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange"
-                style="width: 100%"  :data="dataTable" >
-               <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
-               <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-               <el-table-column align="center" prop="signNo" label="签约单编号"  width="170"></el-table-column>
+         ，电销顾问，商务经理，签约省份，签约项目，签约店型，合同金额，付款类型，实收金额，设备成本（大礼包等），活动赠送成本（抽奖等），成本总计，成本占比，超成本红线，电销业绩比例，商务业绩比例，超成本比例，佣金比例，应退佣金，申请附件，申请状态。
+            <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" >
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="signNo" label="结算单编号"  width="170"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
+                <el-table-column align="center" prop="cusName" label="到访城市" ></el-table-column>
+                <el-table-column align="center" prop="cusName" label="签约公司" ></el-table-column>
+
+
+
                <el-table-column align="center" prop="projectName" label="签约项目" width="170"></el-table-column>
                <el-table-column align="center" prop="signStatus" label="签约单状态" :formatter="transformSignStatus" width="110px"></el-table-column>
                <el-table-column align="center" prop="signType" label="签约类型" :formatter="transformSignType"></el-table-column>
@@ -119,7 +141,7 @@
                <!--<el-table-column align="center" prop="firstToll" label="路费"></el-table-column>-->
                <!--<el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额"></el-table-column>-->
                <!--<el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>-->
-               <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
+               
                <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
                <el-table-column align="center" prop="phone" label="手机号"></el-table-column> 
                <el-table-column align="center" prop="signProvince" label="签约省份" ></el-table-column>
@@ -138,25 +160,11 @@
         </el-row>
     </div>
     <!-- dialog -->
-    <el-dialog  :title="refundTitle"  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
+    <el-dialog  :title='refundTitle+"客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
               <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
                   <el-input @input="allCalAmount" v-model="allocationForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
-              </el-form-item>
-            <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
-                <el-input v-model="allocationForm.bearAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
-            </el-form-item>
-             <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
-                  <span style="color:red;">当前项目为给品牌商结算</span>
-              </el-form-item>
-              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
-                  <el-date-picker
-                      style="width: 290px;"
-                      v-model="allocationForm.refundTime"
-                      type="datetime"
-                      placeholder="选择日期时间">
-                  </el-date-picker>
               </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
               		<el-upload
@@ -180,16 +188,6 @@
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="退款原因：" style="padding-top: 5px;" :label-width="formLabelWidth" prop="reason">
-                  <el-input
-                      type="textarea"
-                      :rows="3"
-                      placeholder=""
-                      maxLength="100"
-                      v-model="allocationForm.reason" 
-                      style="width: 290px;">
-                  </el-input>
-              </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="allocationClue('allocationForm')" :disabled="btnDisabled">提 交</el-button>
@@ -197,155 +195,7 @@
             </div>
         </template>
     </el-dialog>
-    <!-- dialog -->
-    <el-dialog  :title="rebateTitle"  :visible.sync="transferVisible" width="540px" v-dialog-drag>
-        <template>
-            <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
-              <el-form-item label="" :label-width="formLabelWidth" prop="">
-                <el-tag
-                  :key="tag"
-                  v-for="tag in transferForm.dynamicTags"
-                  closable
-                  :disable-transitions="false"
-                  @close="handleClose(tag)">
-                  {{tag}}
-                </el-tag>
-              </el-form-item>
-              <el-form-item label="关联签约单：" :label-width="formLabelWidth" prop="dynamicTags">
-                <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
-              </el-form-item>
-            	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                <el-input @input="transferCalAmount" v-model="transferForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width: 290px;"></el-input>
-              </el-form-item>
-                <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
-                    <el-input v-model="transferForm.bearAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
-                </el-form-item>
-              <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
-                  <span style="color:red;">当前项目为给品牌商结算</span>
-              </el-form-item>
-              <el-form-item label="返款时间：" :label-width="formLabelWidth" prop="refundTime">
-                  <el-date-picker
-                      style="width: 290px;"
-                      v-model="transferForm.refundTime"
-                      type="datetime"
-                      placeholder="选择日期时间">
-                  </el-date-picker>
-              </el-form-item>
-              <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
-                  <el-upload
-                    class="upload-demo"
-                    :action="uploadOssHost"
-                    ref="refundApplyImgUpload"
-                    :on-preview="handlePreview"
-                    :on-remove="handleRemove"
-                    :on-success="handleSuccess"
-                    :on-error="handleError"
-                    :before-upload="handleBefore"
-                    accept=".jpg,.png"
-                    multiple
-                    :data="uploadParamData"
-                    :on-change="selectFile"
-                    :on-exceed="handleExceed"
-                    :auto-upload="false"
-                    :file-list="fileList">
-                    <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
-                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-                </el-upload>
-              </el-form-item>
-              <el-form-item label="返款原因：" style="padding-top: 5px;" :label-width="formLabelWidth" prop="reason">
-                  <el-input
-                      type="textarea"
-                      :rows="3"
-                      placeholder=""
-                      maxLength="100"
-                      v-model="transferForm.reason" 
-                      style="width: 290px;">
-                  </el-input>
-              </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue('transferForm')" :disabled="btnDisabled1">提 交</el-button>
-                <el-button  @click="transferClueCancel('transferForm')">取 消</el-button>
-            </div>
-        </template>
-    </el-dialog>
-    <!-- dialog -->
-    <!-- 付款明细 -->
-    <el-dialog :title="payTitle" :visible.sync="recordDialog" width="1000px" v-dialog-drag>
-        <el-table
-            ref="recordTable" 
-            tooltip-effect="dark"
-            style="width: 100%;margin-bottom: 20px;"
-            border
-            :data="recordTable" 
-            >
-            <el-table-column align="center" prop="" label="序号" type="index" name="type" width="55"></el-table-column>
-            <el-table-column align="center" prop="payName" label="付款人姓名" width="200"></el-table-column>
-            <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
-            <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
-            <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
-            <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
-            <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-
-            <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
-            <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
-
-            <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
-            <el-table-column align="center" prop="accountStatus" label="结算状态" :formatter="transformStatus"></el-table-column>
-            <el-table-column align="center" prop="money" label="结算金额"></el-table-column>
-            <el-table-column align="center" prop="commissionMoney" label="佣金"></el-table-column>
-            <el-table-column align="center" prop="busGroupName" label="商务组"></el-table-column>
-            <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
-            <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
-        </el-table>
-    </el-dialog>
-    <!-- 关联签约单 -->
-    <!-- dialog -->
-    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible" width="1000px" v-dialog-drag>      
-      <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
-        <el-form :inline="true" :model="dialogFormChoose" ref="dialogFormChoose">
-          <el-form-item class="formItem" label="签约时间：">
-              <el-date-picker  v-model="dialogFormChoose.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-          </el-form-item>
-          <el-form-item class="formItem" label="—">
-              <el-date-picker  v-model="dialogFormChoose.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-          </el-form-item>
-          <el-form-item label=""  prop="">
-            <el-input v-model="dialogFormChoose.signNo" placeholder="签约单编号"></el-input>
-          </el-form-item>
-          <el-form-item label=""  prop="">
-            <el-input v-model="dialogFormChoose.cusName" placeholder="客户姓名"></el-input>
-          </el-form-item>
-          <el-form-item label=""  prop="">
-            <el-button type="primary" size="medium" @click="chooseRelevance()" icon="el-icon-search">搜索</el-button>
-          </el-form-item>
-        </el-form>  
-      </el-row>
-      <el-table 
-          tooltip-effect="dark"
-          style="width: 100%"
-          ref="chooseSignTable"
-          border
-          :row-key="getRowKey"
-          :data="dataTableChoose" 
-           @selection-change="signSelectionChange"
-          class="marginB10">
-          <el-table-column align="center" :reserve-selection="true"  prop="" type="selection" name="type" width="55"></el-table-column>
-          <el-table-column align="center" prop="" label="序号" type="index" name="type" width="55"></el-table-column>
-          <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
-          <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
-          <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-          <el-table-column align="center" prop="phone" label="客户手机号" width="150"></el-table-column>
-          <el-table-column align="center" prop="amountReceivable" label="合同应收金额" width="120"></el-table-column>
-      </el-table>
-      <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
-          <el-button @click="dialogFormChooseVisibleCancel">取消</el-button>
-      </div>
-    </el-dialog>
+    
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -455,7 +305,7 @@ var clueVM = new Vue({
           	value:7,
           	name:"已返款"
           }],
-          allocationVisible: false,
+          allocationVisible: true,
           transferVisible: false,
           isSettle:0,
           refundTitle:'',
@@ -1065,36 +915,29 @@ var clueVM = new Vue({
                },
                //打开申请退款
                toAllocationClue(formName) {
-            	   if(this.$refs[formName]){
-	            	   this.$refs[formName].resetFields();
-            	   }
-           	       this.fileList=[];
-           	       var rows = this.multipleSelection;
-            	   if(rows.length!=1){
-                       this.$message({
-                          message: '一次只允许申请一个签约单的退款操作',
-                          type: 'warning'
-                        });
-                       return;
-                   }
-                   if(rows[0].isNotAllSubmit !=null && rows[0].isNotAllSubmit ==1){
-                       this.$message({
-                           message: '此签约单还有未提交对账的付款记录，请先提交对账，再申请退款！',
-                           type: 'warning'
-                       });
-                       return;
-                   }
-            	 /*   if(rows[0].signStatus!=1){
-            		   this.$message({
-                           message: '只允许操作签约状态为正常的数据',
-                           type: 'warning'
-                         });
-                        return;
-            	   } */
-            	   this.allocationForm.signId=rows[0].signId;
-            	   this.allocationForm.refundTime=new Date();
-            	   this.isSettle=rows[0].isSettle;
-            	   this.refundTitle="（"+rows[0].signNo+"）签约单申请退款";
+            	   // if(this.$refs[formName]){
+	            	  //  this.$refs[formName].resetFields();
+            	   // }
+           	    //    this.fileList=[];
+           	    //    var rows = this.multipleSelection;
+            	   // if(rows.length!=1){
+                //        this.$message({
+                //           message: '一次只允许申请一个签约单的退款操作',
+                //           type: 'warning'
+                //         });
+                //        return;
+                //    }
+                //    if(rows[0].isNotAllSubmit !=null && rows[0].isNotAllSubmit ==1){
+                //        this.$message({
+                //            message: '此签约单还有未提交对账的付款记录，请先提交对账，再申请退款！',
+                //            type: 'warning'
+                //        });
+                //        return;
+                //    }
+            	   // this.allocationForm.signId=rows[0].signId;
+            	   // this.allocationForm.refundTime=new Date();
+            	   // this.isSettle=rows[0].isSettle;
+                 // this.refundTitle="（"+rows[0].signNo+"）";//客户姓名
                    this.allocationVisible = true;
                    this.btnDisabled=false;
                },
