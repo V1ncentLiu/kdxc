@@ -13,10 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -77,10 +73,13 @@ import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * @Auther: admin
@@ -168,7 +167,7 @@ public class PhoneTrafficController {
         if (roleList != null && roleList.get(0) != null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
                     || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())
-                    ||RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
+                    || RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
                 request.setAttribute("phtrafficList", phTrafficList());
                 flag = AggregationConstant.NO;
             } else {
@@ -180,7 +179,7 @@ public class PhoneTrafficController {
                 request.setAttribute("phtrafficList", map);
             }
         }
-        request.setAttribute("roleCode",roleList.get(0).getRoleCode());
+        request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("editflag", flag);
         return "phonetraffic/customManagement";
     }
@@ -192,20 +191,20 @@ public class PhoneTrafficController {
         logger.info("============分页数据查询==================");
         UserInfoDTO user = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
-
+        param.setPromotionCompany(user.getPromotionCompany());
         // 【话务主管】—待处理，指阶段为“待分配话务”的阶段；已处理—指待分配话务之后的流转阶段。
         // 【话务专员/信息流专员】——待处理，指阶段为“话务跟进中”的阶段；已处理—指话务跟进中之后的流转阶段。
         // 话务主管还能够看见：走了优化类分配规则+但是分配不成功的数据
         // 权限相关代码
         if (roleList != null && roleList.get(0) != null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                    || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode()) ||
-                    RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
+                    || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())
+                    || RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
                 // 这样的逻辑 下管理员能够看见电销的数据。
                 if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
                     param.setPhTraDirectorId(user.getId());
                     param.setRoleCode(RoleCodeEnum.HWZG.name());
-                } else if(RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())){
+                } else if (RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
                     param.setRoleCode(RoleCodeEnum.HWZG.name());
                 }
                 Integer dealStatus = param.getDealStatus();
@@ -334,16 +333,16 @@ public class PhoneTrafficController {
         clueDTO.setOrg(user.getOrgId());
         clueDTO.setUpdateUser(user.getId());
         clueDTO.setPhUpdateTime(new Date());
-        if(clueDTO.getClueCustomer().getPhone2CreateTime() != null){
+        if (clueDTO.getClueCustomer().getPhone2CreateTime() != null) {
             clueDTO.getClueCustomer().setPhone2CreateUser(user.getId());
         }
-        if(clueDTO.getClueCustomer().getPhone3CreateTime() != null){
+        if (clueDTO.getClueCustomer().getPhone3CreateTime() != null) {
             clueDTO.getClueCustomer().setPhone3CreateUser(user.getId());
         }
-        if(clueDTO.getClueCustomer().getPhone4CreateTime() != null){
+        if (clueDTO.getClueCustomer().getPhone4CreateTime() != null) {
             clueDTO.getClueCustomer().setPhone4CreateUser(user.getId());
         }
-        if(clueDTO.getClueCustomer().getPhone5CreateTime() != null){
+        if (clueDTO.getClueCustomer().getPhone5CreateTime() != null) {
             clueDTO.getClueCustomer().setPhone5CreateUser(user.getId());
         }
         return phoneTrafficFeignClient.toTele(clueDTO);
@@ -445,7 +444,9 @@ public class PhoneTrafficController {
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-            List<ProjectInfoDTO> projectInfoDTOList = proJson.getData().parallelStream().filter(pro -> pro.getIsNotSign() !=null && pro.getIsNotSign() == 0).collect( Collectors.toList());
+            List<ProjectInfoDTO> projectInfoDTOList = proJson.getData().parallelStream()
+                    .filter(pro -> pro.getIsNotSign() != null && pro.getIsNotSign() == 0)
+                    .collect(Collectors.toList());
             request.setAttribute("proSelect", projectInfoDTOList);
         } else {
             request.setAttribute("proSelect", new ArrayList());
@@ -462,10 +463,10 @@ public class PhoneTrafficController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         request.setAttribute("loginUserId", user.getId());
-        //话务经理 调整到查看页
-        if(RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())){
-//             return "phonetraffic/viewCustomerMaintenance";
-             return "phonetraffic/viewCustomerMaintenance";
+        // 话务经理 调整到查看页
+        if (RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())) {
+            // return "phonetraffic/viewCustomerMaintenance";
+            return "phonetraffic/viewCustomerMaintenance";
         }
         return "phonetraffic/editCustomerMaintenance";
     }
@@ -617,24 +618,26 @@ public class PhoneTrafficController {
     private Map<String, List<UserInfoDTO>> phTrafficList() {
         List<UserInfoDTO> userList = new ArrayList();
         UserInfoDTO user = CommUtil.getCurLoginUser();
-        //如果是话务经理
-        if(RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())){
-            OrganizationQueryDTO dto=new OrganizationQueryDTO();
+        // 如果是话务经理
+        if (RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())) {
+            OrganizationQueryDTO dto = new OrganizationQueryDTO();
             dto.setParentId(user.getOrgId());
-            //查询话务经理下所有话务组
-            JSONResult<List<OrganizationRespDTO>> orgListDto= organizationFeignClient.queryOrgByParam(dto);
+            // 查询话务经理下所有话务组
+            JSONResult<List<OrganizationRespDTO>> orgListDto =
+                    organizationFeignClient.queryOrgByParam(dto);
             if (JSONResult.SUCCESS.equals(orgListDto.getCode())) {
-                List<OrganizationRespDTO> orglist=orgListDto.getData();
-                for(OrganizationRespDTO org:orglist){
-                    //查询话务组下面的话务员
-                    UserOrgRoleReq req=new UserOrgRoleReq();
+                List<OrganizationRespDTO> orglist = orgListDto.getData();
+                for (OrganizationRespDTO org : orglist) {
+                    // 查询话务组下面的话务员
+                    UserOrgRoleReq req = new UserOrgRoleReq();
                     req.setRoleCode(RoleCodeEnum.HWY.name());
                     req.setOrgId(org.getId());
-                    JSONResult<List<UserInfoDTO>> jsonIfo= userInfoFeignClient.listByOrgAndRole(req);
+                    JSONResult<List<UserInfoDTO>> jsonIfo =
+                            userInfoFeignClient.listByOrgAndRole(req);
                     userList.addAll(jsonIfo.getData());
                 }
             }
-        }else{
+        } else {
             RoleQueryDTO query = new RoleQueryDTO();
             query.setRoleCode(RoleCodeEnum.HWZG.name());
             JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
@@ -647,7 +650,8 @@ public class PhoneTrafficController {
                     param.setOrgId(user.getOrgId());
                     param.setPageSize(10000);
                     param.setPageNum(1);
-                    JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
+                    JSONResult<PageBean<UserInfoDTO>> userListJson =
+                            userInfoFeignClient.list(param);
                     if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
                         PageBean<UserInfoDTO> pageList = userListJson.getData();
                         userList = pageList.getData();

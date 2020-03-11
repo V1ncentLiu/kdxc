@@ -431,15 +431,18 @@ public class ExtendClueDistributionedTaskController {
                     phstatus = "否";
                 }
                 curList.add(phstatus);
+                curList.add(taskDTO.getPhoneLocale());
+                curList.add(taskDTO.getPhone2Locale());
+                curList.add(taskDTO.getCusLevelName());
                 dataList.add(curList);
             }
         }
 
-        try(ServletOutputStream outputStream = response.getOutputStream()){
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
             XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
             String name = "资源情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             wbWorkbook.write(outputStream);
@@ -700,6 +703,9 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("资源阶段");
         headTitleList.add("话务是否接通");
         headTitleList.add("话务是否有效");
+        headTitleList.add("手机号1归属地");
+        headTitleList.add("手机号2归属地");
+        headTitleList.add("客户级别");
         return headTitleList;
     }
 
