@@ -16,12 +16,12 @@
     </el-breadcrumb>
     
     <el-row class="marginB20">
-    		<shiro:hasPermission name="financing:refundRebateManager:applyRefund">
+    		<!-- <shiro:hasPermission name="financing:refundRebateManager:applyRefund"> -->
 		        <el-button type="primary" @click="toAllocationClue('allocationForm')">申请超成本</el-button>
-		    </shiro:hasPermission>
-    		<shiro:hasPermission name="financing:refundRebateManager:applyRebate">
-		        <el-button type="success" @click="toTransferClue('transferForm')">标记为已结算</el-button>
-		    </shiro:hasPermission>
+		    <!-- </shiro:hasPermission> -->
+    		<!-- <shiro:hasPermission name="financing:refundRebateManager:applyRebate"> -->
+		        <el-button type="success" @click="settlementConfirm">标记为已结算</el-button>
+		    <!-- </shiro:hasPermission> -->
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -429,6 +429,69 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+          //结算确认
+               settlementConfirm() {
+                 var rows = this.multipleSelection;
+                 if(rows.length==0){
+                       this.$message({
+                          message: '请至少选择一条数据',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   var idList = [];
+                   for(var i=0;i<rows.length;i++){
+                    if(rows[i].status!='已对账'){
+                    this.$message({
+                            message: '只允许操作已对账状态的数据',
+                            type: 'warning'
+                          });
+                         return;
+                    }
+                     var curRow = rows[i];
+                     idList.push(curRow.accountId);
+                   }
+                   
+                
+                this.$confirm('确认标记为已结算吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+
+                  //结算确认
+                var param  = {};
+                    param.idList=idList;
+                     axios.post('/financing/reconciliationConfirm/settlementConfirm',param)
+                      .then(function (response) {
+                          var data =  response.data;
+                          if(data.code=='0'){
+                            clueVM.$message({message:'结算成功',type:'success',duration:1000,onClose:function(){
+                              
+                              // clueVM.allocationVisible = false;
+                              // clueVM.searchTable();
+                              window.location.href="/financing/reconciliationConfirm/initManager";
+                               
+                            }});
+                          }else{
+                            clueVM.$message({
+                                  message: "接口调用失败",
+                                  type: 'error'
+                                }); 
+                          }
+                          
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      })
+                      .then(function () {
+                        
+                      });
+                }).catch(() => {
+                       
+                });
+                
+               },
             //计算退款的承担金额
             allCalAmount(){
                 var rows = this.multipleSelection;
