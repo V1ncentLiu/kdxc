@@ -99,6 +99,97 @@ public class BalanceAccountController {
     }
 
     /**
+     * 超成本确认
+     * 
+     * @return
+     */
+    @RequestMapping("/balanceAccountPage1")
+    @RequiresPermissions("financing:balanceaccountManager:view")
+    public String balanceAccountPage1(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        Long busAreaStartdate = System.currentTimeMillis();
+        // 查询所有商务大区
+        List<OrganizationRespDTO> busAreaList =
+                getOrgList(null, OrgTypeConstant.SWDQ, user.getBusinessLine());
+        request.setAttribute("busAreaList", busAreaList);
+        Long busendStartdate = System.currentTimeMillis();
+        logger.info("所有商务大区查询时间" + (busendStartdate - busAreaStartdate));
+        // // 查询所有商务组
+        // List<OrganizationRespDTO> busGroupList =
+        // getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
+        // request.setAttribute("busGroupList", busGroupList);
+        Long busGrouptdate = System.currentTimeMillis();
+        // logger.info("所有商务组查询时间"+(busGrouptdate-busendStartdate));
+        // 查询所有电销事业部
+        List<OrganizationRespDTO> teleDeptList =
+                getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
+        request.setAttribute("teleDeptList", teleDeptList);
+        Long teleDeptdate = System.currentTimeMillis();
+        logger.info("所有电销事业部查询时间" + (teleDeptdate - busGrouptdate));
+        // 查询所有电销组
+        // List<OrganizationRespDTO> teleGroupList =
+        // getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
+        // request.setAttribute("teleGroupList", teleGroupList);
+        Long teleGroupdate = System.currentTimeMillis();
+        logger.info("所有电销组查询时间" + (teleGroupdate - teleDeptdate));
+        // 查询所有商务经理
+        // List<UserInfoDTO> busSaleList =
+        // getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
+        // request.setAttribute("busSaleList", busSaleList);
+        Long busSaledate = System.currentTimeMillis();
+        logger.info("所有商务经理查询时间" + (busSaledate - teleGroupdate));
+        // 查询所有电销创业顾问
+        // List<UserInfoDTO> teleSaleList =
+        // getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
+        // request.setAttribute("teleSaleList", teleSaleList);
+        Long teleSaledate = System.currentTimeMillis();
+        logger.info("所有电销创业顾问查询时间" + (teleSaledate - busSaledate));
+
+        // 查询所有签约项目
+        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        param.setIsNotSign(AggregationConstant.NO);
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
+        request.setAttribute("projectList", allProject.getData());
+        // 查询所有项目
+//        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+//        request.setAttribute("projectList", allProject.getData());
+        Long allProjectdate = System.currentTimeMillis();
+        logger.info("查询所有项目查询时间" + (allProjectdate - teleSaledate));
+        // 查询所有省
+        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
+        request.setAttribute("provinceList", getproviceList.getData());
+        Long getprovicetdate = System.currentTimeMillis();
+        logger.info("查询所有省查询时间" + (getprovicetdate - allProjectdate));
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("financing:balanceaccountManager");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        Long queryFieldByRoleAndMenuReqdate = System.currentTimeMillis();
+        logger.info("角色查询页面字段查询时间" + (queryFieldByRoleAndMenuReqdate - getprovicetdate));
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setMenuCode("financing:balanceaccountManager");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        Long queryFieldByUserAndMenuReqdate = System.currentTimeMillis();
+        logger.info(
+                "用户查询页面字段查询时间" + (queryFieldByUserAndMenuReqdate - queryFieldByRoleAndMenuReqdate));
+        // 查询签约店型集合
+        request.setAttribute("vistitStoreTypeList",
+                getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        logger.info("财务对账申请总共时间" + (queryFieldByUserAndMenuReqdate - busAreaStartdate));
+        request.setAttribute("businessLine", user.getBusinessLine());
+        return "financing/balanceAccountPage1";
+    }
+
+    /**
      * 申请页面
      * 
      * @return
@@ -188,7 +279,7 @@ public class BalanceAccountController {
         request.setAttribute("businessLine", user.getBusinessLine());
         return "financing/balanceAccountPage";
     }
-
+    
     /***
      * 对账结算申请列表
      * 
