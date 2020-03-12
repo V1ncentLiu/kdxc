@@ -223,7 +223,8 @@ var mainDivVM = new Vue({
             makeUpTime:'',
             payTime: new Date(),
             amountPerformance:'',
-            payName:''
+            payName:'',
+            amountEquipment:'',//实收设备金额
         },
         // updateFormSigning: {
         // 	giveType:"",
@@ -311,6 +312,7 @@ var mainDivVM = new Vue({
             performanceAmount: '',
             remarks: '', //备注
             signRejectRecordList:[],//驳回原因
+            amountEquipment:'',//实收设备金额
         },
         pager:{
             total: 0,
@@ -715,16 +717,20 @@ var mainDivVM = new Vue({
     	formSigningAmountPerformance() {
             var aone = parseFloat(this.formSigning.amountReceived);
             var atwo = parseFloat(this.formSigning.firstToll);
+            var athree = parseFloat(this.formSigning.amountEquipment);
             if (isNaN(aone)) aone = 0
             if (isNaN(atwo)) atwo = 0
-            this.formSigning.performanceAmount = (aone + atwo) + ""
+            if (isNaN(athree)) athree = 0
+            this.formSigning.performanceAmount = (aone + atwo + athree) + ""
         },
       updateFormSigningAmountPerformance(){
         var aone = parseFloat(this.updateFormSigning.amountReceived);
         var atwo = parseFloat(this.updateFormSigning.firstToll);
+        var athree = parseFloat(this.updateFormSigning.amountEquipment);
         if(isNaN(aone)) aone = 0
         if(isNaN(atwo)) atwo = 0
-        this.updateFormSigning.amountPerformance = (aone + atwo) + ""
+        if (isNaN(athree)) athree = 0 
+        this.updateFormSigning.amountPerformance = (aone + atwo + athree) + ""
       },
       formatNum(value) {
           if(!value&&value!==0) return 0;
