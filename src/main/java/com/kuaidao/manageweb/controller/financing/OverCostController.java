@@ -1,32 +1,31 @@
 package com.kuaidao.manageweb.controller.financing;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.kuaidao.aggregation.dto.financing.FinanceOverCostReqDto;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import freemarker.template.Configuration;
-
 /**
- * 退返款
+ * 超成本申请
  * 
- * @author Chen
- * @date 2019年4月10日 下午7:23:08
+ * @author fanjd
+ * @date 2020年3月13日 9:23:08
  * @version V1.0
  */
-@RequestMapping("/financing/overCost")
+
 @Controller
+@RequestMapping("/financing/overCost")
 public class OverCostController {
-    private static Logger logger = LoggerFactory.getLogger(OverCostController.class);
 
-    private Configuration configuration = null;
-
-    public OverCostController() {
-        configuration = new Configuration();
-        configuration.setDefaultEncoding("utf-8");
-    }
+    @Autowired
+    private OverCostFeignClient overCostFeignClient;
 
     /**
      * 申请页面
@@ -39,6 +38,47 @@ public class OverCostController {
         return "financing/overCostApply";
     }
 
+    /**
+     * 超成本申请确认页面
+     *
+     * @return
+     */
+    @RequestMapping("/overCostconfirmPage")
+    public String overCostconfirmPage(HttpServletRequest request) {
+
+        return "financing/overCostApply";
+    }
+
+    /**
+     * 超成本申请确认
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/confirm")
+    @LogRecord(description = "超成本申请确认", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_CONFIRM)
+
+    public JSONResult<String> confirm(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.confirm(reqDto);
+    }
+
+    /**
+     * 超成本申请驳回
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/reject")
+    @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
+    public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.reject(reqDto);
+    }
 
 
 }
