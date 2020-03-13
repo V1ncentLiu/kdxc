@@ -1,87 +1,31 @@
 package com.kuaidao.manageweb.controller.financing;
 
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
+import javax.servlet.http.HttpServletRequest;
+import com.kuaidao.aggregation.dto.financing.FinanceOverCostReqDto;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
-import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.financing.BalanceAccountApplyClient;
-import com.kuaidao.manageweb.feign.financing.ReconciliationConfirmFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.sys.dto.area.SysRegionDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
-import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
-import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
-import com.kuaidao.sys.dto.customfield.UserFieldDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
- * 退返款
+ * 超成本申请
  * 
- * @author Chen
- * @date 2019年4月10日 下午7:23:08
+ * @author fanjd
+ * @date 2020年3月13日 9:23:08
  * @version V1.0
  */
-@RequestMapping("/financing/overCost")
+
 @Controller
+@RequestMapping("/financing/overCost")
 public class OverCostController {
-    private static Logger logger = LoggerFactory.getLogger(OverCostController.class);
 
-    private Configuration configuration = null;
-
-    public OverCostController() {
-        configuration = new Configuration();
-        configuration.setDefaultEncoding("utf-8");
-    }
+    @Autowired
+    private OverCostFeignClient overCostFeignClient;
 
     /**
      * 申请页面
@@ -94,6 +38,47 @@ public class OverCostController {
         return "financing/overCostApply";
     }
 
+    /**
+     * 超成本申请确认页面
+     *
+     * @return
+     */
+    @RequestMapping("/overCostconfirmPage")
+    public String overCostconfirmPage(HttpServletRequest request) {
+
+        return "financing/overCostApply";
+    }
+
+    /**
+     * 超成本申请确认
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/confirm")
+    @LogRecord(description = "超成本申请确认", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_CONFIRM)
+
+    public JSONResult<String> confirm(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.confirm(reqDto);
+    }
+
+    /**
+     * 超成本申请驳回
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/reject")
+    @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
+    public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.reject(reqDto);
+    }
 
 
 }
