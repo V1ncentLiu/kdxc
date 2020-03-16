@@ -29,8 +29,8 @@
                 <el-form-item label="客户姓名:" prop="cusName">
                     <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="签约公司:" prop="cusName">
-                    <el-select v-model="searchForm.signProvince" clearable  placeholder="签约公司">
+                <el-form-item label="签约公司:" prop="companyId">
+                    <el-select v-model="searchForm.companyId" clearable  placeholder="签约公司">
                         <el-option
                             v-for="item in provinceOptions"
                             :key="item.name"
@@ -50,14 +50,14 @@
                       </el-select>
                 </el-form-item>
                 <el-form-item label="付款时间:">
-                    <el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker  v-model="searchForm.payStartTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker  v-model="searchForm.payEndTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>  
                 <el-row v-show="isShow">
-                    <el-form-item label="商务经理:"  prop="busSaleId">
-                        <el-select v-model="searchForm.busSaleId" clearable placeholder="签单商务经理">
+                    <el-form-item label="商务经理:"  prop="businessManagerId">
+                        <el-select v-model="searchForm.businessManagerId" clearable placeholder="签单商务经理">
                             <el-option
                                 v-for="item in busSaleOptions"
                                 :key="item.id"
@@ -86,8 +86,8 @@
                         </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="签约项目:"  prop="signShopType">
-                        <el-select v-model="searchForm.signShopType" clearable placeholder="签约项目">
+                    <el-form-item label="签约项目:"  prop="signProjectId">
+                        <el-select v-model="searchForm.signProjectId" clearable placeholder="签约项目">
                           <el-option
                             v-for="item in signShopTypeOptions"
                             :key="item.value"
@@ -96,8 +96,8 @@
                         </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="申请状态:"  prop="signStatus">
-                      <el-select v-model="searchForm.signStatus" clearable placeholder="申请状态">
+                    <el-form-item label="申请状态:"  prop="status">
+                      <el-select v-model="searchForm.status" clearable placeholder="申请状态">
                         <el-option
                           v-for="item in signStatusOptions"
                           :key="item.value"
@@ -118,30 +118,32 @@
             <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" >
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="signNo" label="结算单编号"  width="170"></el-table-column>
-                <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
-                <el-table-column align="center" prop="cusName" label="到访城市" ></el-table-column>
-                <el-table-column align="center" prop="cusName" label="签约公司" ></el-table-column>
+                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名" ></el-table-column>
+                <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
+                <el-table-column align="center" prop="signCompanyName" label="签约公司" ></el-table-column>
                 <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                 <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
-                <el-table-column align="center" prop="signProvince" label="签约省份" ></el-table-column>
-                <el-table-column align="center" prop="projectName" label="签约项目" width="170"></el-table-column>
-                <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="transformSignShopType" width="100px"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="合同金额" width="170"></el-table-column>
-                <el-table-column align="center" prop="signShopType" label="付款类型" :formatter="transformSignShopType" width="100px"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="实收金额" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="设备成本" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="活动赠送成本" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="成本总计" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="成本占比" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="超成本红线" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="电销业绩比例" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="商务业绩比例" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="超成本比例" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="佣金比例" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="应退佣金" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="申请附件" width="170"></el-table-column>
-                <el-table-column align="center" prop="projectName" label="申请状态" width="170"></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+                <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+                <el-table-column align="center" prop="amountReceivable" label="合同金额" width="120"></el-table-column>
+                <el-table-column align="center" prop="" label="付款类型"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额" width="120"></el-table-column>
+                <el-table-column align="center" prop="amountEquipment" label="设备成本" width="120"></el-table-column>
+                <el-table-column align="center" prop="giveAmount" label="活动赠送成本" width="150"></el-table-column>
+                <el-table-column align="center" prop="totalCost" label="成本总计" width="120"></el-table-column>
+                <el-table-column align="center" prop="" label="成本占比" width="120"></el-table-column>
+                <el-table-column align="center" prop="overCost" label="超成本红线"></el-table-column>
+                <el-table-column align="center" prop="teleSaleRatio" label="电销业绩比例" width="120"></el-table-column>
+                <el-table-column align="center" prop="busSaleRatio" label="商务业绩比例" width="120"></el-table-column>
+                <el-table-column align="center" prop="overCostRatio" label="超成本比例" width="120"></el-table-column>
+                <el-table-column align="center" prop="commissionRatio" label="佣金比例" width="120"></el-table-column>
+                <el-table-column align="center" prop="" label="应退佣金" width="120"></el-table-column>
+                <el-table-column align="center" prop="" label="申请附件" width="120">
+                  
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="申请状态" width="120"></el-table-column>
             </el-table>
             <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -216,21 +218,16 @@ var clueVM = new Vue({
           btnDisabled:false,
           btnDisabled1:false,
       		searchForm: {
-	       		busAreaId: '',
-	       		busGroupId: '',
-	       		busSaleId: '',
-	       		signType: '',
-	       		signShopType: '',
-	       		startTime: '',
-	       		endTime: '',
-	       		cusName: '',
-	       		teleDeptId: '',
-	       		teleGorupId: '',
-	       		teleSaleId: '',
-	       		signProvince: '',
-	       		signStatus: '',
-	       		phone: '',
-	       		signNo: ''
+	       		cusName:'',
+            companyId:'',
+            signProvince:'',
+            payStartTime:'',
+            payEndTime:'',
+            businessManagerId:'',
+            teleSaleId:'',
+            signShopType:'',
+            signProjectId:'',
+            status:'',
           },
           allocationForm: {
         	  
@@ -409,21 +406,16 @@ var clueVM = new Vue({
           limit:1,
           ossUrl:ossSignatureUrl,
           storeForm: {
-            busAreaId: '',
-            busGroupId: '',
-            busSaleId: '',
-            signType: '',
-            signShopType: '',
-            startTime: '',
-            endTime: '',
-            cusName: '',
-            teleDeptId: '',
-            teleGorupId: '',
-            teleSaleId: '',
-            signProvince: '',
-            signStatus: '',
-            phone: '',
-            signNo: ''
+            cusName:'',
+            companyId:'',
+            signProvince:'',
+            payStartTime:'',
+            payEndTime:'',
+            businessManagerId:'',
+            teleSaleId:'',
+            signShopType:'',
+            signProjectId:'',
+            status:'',
           },
           storeId: '',
           scrollTop: 0,
@@ -702,8 +694,8 @@ var clueVM = new Vue({
           },
         	searchTable() {
                 var param ={};
-                var startTime = this.searchForm.startTime;
-                var endTime = this.searchForm.endTime;
+                var startTime = this.searchForm.payStartTime;
+                var endTime = this.searchForm.payEndTime;
             	var vilad=false;
                 if(startTime&&endTime&&startTime> endTime){
                 	vilad=true;
@@ -719,24 +711,20 @@ var clueVM = new Vue({
                 param.endTime = endTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.busAreaId = this.searchForm.busAreaId;
-                param.busGroupId = this.searchForm.busGroupId;
-                param.busSaleId = this.searchForm.busSaleId;
-                param.signType = this.searchForm.signType;
-                param.signShopType = this.searchForm.signShopType;
+
                 param.cusName = this.searchForm.cusName;
-                param.teleDeptId = this.searchForm.teleDeptId;
-                param.teleGorupId = this.searchForm.teleGorupId;
-                param.teleSaleId = this.searchForm.teleSaleId;
+                param.companyId = this.searchForm.companyId;
                 param.signProvince = this.searchForm.signProvince;
-                param.signStatus = this.searchForm.signStatus;
-                param.phone = this.searchForm.phone;
-                param.signNo = this.searchForm.signNo;
+                param.businessManagerId = this.searchForm.businessManagerId;
+                param.teleSaleId = this.searchForm.teleSaleId;
+                param.signShopType = this.searchForm.signShopType;
+                param.signProjectId = this.searchForm.signProjectId;
+                param.status = this.searchForm.status;
                 
                 //列表只查询正常数据，取消删除数据不查询
                 //param.delFalg = this.searchForm.delFalg;
-                console.info(param);
-                axios.post('/financing/refundRebate/list', param)
+                console.info(param);                
+                axios.post('/financing/overCost/confirmPage', param)
                 .then(function (response) {
                     var result =  response.data;
                     console.info(result);
