@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @Date: 2020/3/13 10:22
  * @since: 1.0.0
  **/
-@FeignClient(name = "aggregation-service", path = "/aggregation//financing/overCost", fallback = OverCostFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/financing/overCost", fallback = OverCostFeignClient.HystrixClientFallback.class)
 public interface OverCostFeignClient {
 
     /**
@@ -48,6 +48,16 @@ public interface OverCostFeignClient {
     @PostMapping("/overCostApplyList")
     JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(@RequestBody FinanceOverCostReqDto reqDto);
 
+    /**
+     * 超成本申请确认列表
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(@RequestBody FinanceOverCostReqDto reqDto);
     @Component
     @Slf4j
     static class HystrixClientFallback implements OverCostFeignClient {
@@ -72,6 +82,11 @@ public interface OverCostFeignClient {
 
         @Override
         public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(FinanceOverCostReqDto reqDto) {
+            return fallBackError("超成本申请列表");
+        }
+
+        @Override
+        public JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(FinanceOverCostReqDto reqDto) {
             return fallBackError("超成本申请列表");
         }
 
