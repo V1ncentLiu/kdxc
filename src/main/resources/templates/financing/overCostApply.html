@@ -769,7 +769,8 @@ var clueVM = new Vue({
                 console.info(param);                
                 axios.post('/financing/overCost/overCostApplyList', param)
                 .then(function (response) {
-                    var result =  response.data;
+                  var result =  response.data;
+                  if (result.code == 0) {                    
                     console.info(result);
                     var table=result.data;
                     clueVM.dataTable= table.data;
@@ -796,6 +797,9 @@ var clueVM = new Vue({
                     }
                     clueVM.paginationShow = true;
                     clueVM.storeForm = clueVM.searchForm;
+                  }else{
+                    clueVM.$message.error(response.data.msg);
+                  }
 
                 })
                 .catch(function (error) {
