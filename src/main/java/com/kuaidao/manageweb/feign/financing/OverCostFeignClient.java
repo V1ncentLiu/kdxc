@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.financing;
 
+import com.kuaidao.aggregation.dto.financing.FinanceOverCostRespDto;
+import com.kuaidao.common.entity.PageBean;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +41,13 @@ public interface OverCostFeignClient {
     @PostMapping("/reject")
     JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto);
 
+    /**
+     * 超成本申请列表
+     * @param reqDto
+     */
+    @PostMapping("/overCostApplyList")
+    JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(@RequestBody FinanceOverCostReqDto reqDto);
+
     @Component
     @Slf4j
     static class HystrixClientFallback implements OverCostFeignClient {
@@ -61,6 +70,10 @@ public interface OverCostFeignClient {
             return fallBackError("超成本申请驳回");
         }
 
+        @Override
+        public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(FinanceOverCostReqDto reqDto) {
+            return fallBackError("超成本申请列表");
+        }
 
 
     }
