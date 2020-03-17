@@ -2,15 +2,20 @@ package com.kuaidao.manageweb.controller.financing;
 
 import javax.servlet.http.HttpServletRequest;
 import com.kuaidao.aggregation.dto.financing.FinanceOverCostReqDto;
+import com.kuaidao.aggregation.dto.financing.FinanceOverCostRespDto;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 超成本申请
@@ -36,6 +41,20 @@ public class OverCostController {
     public String balanceAccountPage(HttpServletRequest request) {
 
         return "financing/overCostApply";
+    }
+    /**
+     * 超红线申请列表
+     *
+     * @return
+     */
+    @RequestMapping("/overCostApplyList")
+    @ResponseBody
+    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request, @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
+        UserInfoDTO userInfoDTO = getUser();
+        financeOverCostReqDto.setUserId(userInfoDTO.getId());
+        financeOverCostReqDto.setRoleCode(userInfoDTO.getRoleCode());
+        JSONResult<PageBean<FinanceOverCostRespDto>> list = overCostFeignClient.overCostApplyList(financeOverCostReqDto);
+        return list;
     }
 
     /**
@@ -80,5 +99,14 @@ public class OverCostController {
         return overCostFeignClient.reject(reqDto);
     }
 
-
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 }
