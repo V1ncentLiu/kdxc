@@ -23,13 +23,7 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.List;
 
 /**
  * 超成本申请
@@ -68,7 +62,8 @@ public class OverCostController {
      */
     @PostMapping("/overCostApplyList")
     @ResponseBody
-    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request, @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
+    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request,
+            @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
         UserInfoDTO userInfoDTO = getUser();
         financeOverCostReqDto.setUserId(userInfoDTO.getId());
         financeOverCostReqDto.setRoleCode(userInfoDTO.getRoleCode());
