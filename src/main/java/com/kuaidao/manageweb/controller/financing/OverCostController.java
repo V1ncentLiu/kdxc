@@ -1,6 +1,15 @@
 package com.kuaidao.manageweb.controller.financing;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.dto.financing.FinanceOverCostReqDto;
 import com.kuaidao.aggregation.dto.financing.FinanceOverCostRespDto;
 import com.kuaidao.common.entity.JSONResult;
@@ -9,13 +18,6 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 超成本申请
@@ -42,6 +44,7 @@ public class OverCostController {
 
         return "financing/overCostApply";
     }
+
     /**
      * 超红线申请列表
      *
@@ -49,7 +52,8 @@ public class OverCostController {
      */
     @RequestMapping("/overCostApplyList")
     @ResponseBody
-    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request, @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
+    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request,
+            @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
         UserInfoDTO userInfoDTO = getUser();
         financeOverCostReqDto.setUserId(userInfoDTO.getId());
         financeOverCostReqDto.setRoleCode(userInfoDTO.getRoleCode());
@@ -97,6 +101,24 @@ public class OverCostController {
     @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
     public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.reject(reqDto);
+    }
+
+    /**
+     * 超成本申请确认列表
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/overCostConfirmList")
+    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(@RequestBody FinanceOverCostReqDto reqDto) {
+        UserInfoDTO userInfoDTO = getUser();
+        reqDto.setUserId(userInfoDTO.getId());
+        reqDto.setRoleCode(userInfoDTO.getRoleCode());
+        JSONResult<PageBean<FinanceOverCostRespDto>> pageResult = overCostFeignClient.overCostConfirmList(reqDto);
+        return pageResult;
     }
 
     /**
