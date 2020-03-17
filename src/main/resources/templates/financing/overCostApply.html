@@ -141,7 +141,9 @@
                 <el-table-column align="center" prop="commissionRatio" label="佣金比例" width="120"></el-table-column>
                 <el-table-column align="center" prop="" label="应退佣金" width="120"></el-table-column>
                 <el-table-column align="center" prop="" label="申请附件" width="120">
-                  
+                  <template slot-scope="scope">
+                    <el-button @click="download(scope.row)" size="small" type="text">查看附件</el-button>
+                  </template>
                 </el-table-column>
                 <el-table-column align="center" prop="status" label="申请状态" width="120"></el-table-column>
             </el-table>
@@ -184,6 +186,16 @@
             </div>
         </template>
     </el-dialog>
+
+    <!-- 下载图片 dialog 开始 -->
+    <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px" v-dialog-drag>
+      <ol>
+        <li v-for="(item,index) in imgList" style="margin-bottom:8px">
+          <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
+        </li>
+      </ol>
+    </el-dialog>
+    <!-- 下载图片dialog 结束 -->
     
 </div>
 <!-- import common js-->
@@ -213,6 +225,7 @@ var giveTypeList =[[${giveTypeList}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+          downloadDialogVisible: false,//下载图片dialog
           paginationShow: false,
           isShow:false,
           btnDisabled:false,
@@ -421,6 +434,35 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+          download(row) {//下载图片
+            this.downloadDialogVisible = true;
+            var id = row.id;
+            var param = {};
+            param.id = id;
+            axios.post('/financing/refund/listImgById', param)
+              .then(function (response) {
+                var resData = response.data;
+                if (resData.code == '0') {
+                  mainDivVM.imgList = resData.data;
+                  //var data = resData.data;
+                  /* var imgHtml = "";
+                  for(var i=0;i<data.length;i++){
+                      var curImg = data[i];
+                      imgHtml+='<a href="'+curImg.imgUrl+'" download="上传图片'+(i+1)+'">上传图片'+(i+1)+'</a>';
+                  }
+                  mainDivVM.imgHtml=imgHtml; */
+                } else {
+                  mainDivVM.$message({ message: '查询图片失败', type: 'error' });
+                  console.error(resData);
+                }
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              }).then(function () {
+
+              });
+          },
           //结算确认
                settlementConfirm() {
                  var rows = this.multipleSelection;
