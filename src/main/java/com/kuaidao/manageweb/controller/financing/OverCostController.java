@@ -1,7 +1,11 @@
 package com.kuaidao.manageweb.controller.financing;
 
 import javax.servlet.http.HttpServletRequest;
-
+import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.area.SysRegionDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.dto.financing.FinanceOverCostReqDto;
 import com.kuaidao.aggregation.dto.financing.FinanceOverCostRespDto;
 import com.kuaidao.common.entity.JSONResult;
@@ -18,6 +21,7 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.List;
 
 /**
  * 超成本申请
@@ -33,6 +37,10 @@ public class OverCostController {
 
     @Autowired
     private OverCostFeignClient overCostFeignClient;
+    @Autowired
+    private SysRegionFeignClient sysRegionFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 申请页面
@@ -68,7 +76,10 @@ public class OverCostController {
      */
     @RequestMapping("/overCostconfirmPage")
     public String overCostconfirmPage(HttpServletRequest request) {
-
+        // 查询签约店型集合
+        request.setAttribute("vistitStoreTypeList", getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
+        // 签约省份
+        request.setAttribute("provinceList", getProviceList());
         return "financing/overCostApply";
     }
 
@@ -130,5 +141,32 @@ public class OverCostController {
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
+    }
+
+    /**
+     * 查询所有省份
+     * 
+     * @return
+     */
+    private List<SysRegionDTO> getProviceList() {
+        JSONResult<List<SysRegionDTO>> getProviceList = sysRegionFeignClient.getproviceList();
+        if (getProviceList != null && JSONResult.SUCCESS.equals(getProviceList.getCode())) {
+            return getProviceList.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
     }
 }
