@@ -26,8 +26,8 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
     	      <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm"> 
-                <el-form-item label="客户姓名:" prop="cusName">
-                    <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
+                <el-form-item label="客户姓名:" prop="customerName">
+                    <el-input v-model="searchForm.customerName" placeholder="客户姓名"></el-input>
                 </el-form-item>
                 <el-form-item label="签约公司:" prop="companyId">
                     <el-select v-model="searchForm.companyId" clearable  placeholder="签约公司">
@@ -126,9 +126,9 @@
                 <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
                 <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
                 <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
-                <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+                <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="transformSignShopType"></el-table-column>
                 <el-table-column align="center" prop="amountReceivable" label="合同金额" width="120"></el-table-column>
-                <el-table-column align="center" prop="" label="付款类型"></el-table-column>
+                <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="120"></el-table-column>
                 <el-table-column align="center" prop="amountEquipment" label="设备成本" width="120"></el-table-column>
                 <el-table-column align="center" prop="giveAmount" label="活动赠送成本" width="150"></el-table-column>
@@ -139,13 +139,13 @@
                 <el-table-column align="center" prop="busSaleRatio" label="商务业绩比例" width="120"></el-table-column>
                 <el-table-column align="center" prop="overCostRatio" label="超成本比例" width="120"></el-table-column>
                 <el-table-column align="center" prop="commissionRatio" label="佣金比例" width="120"></el-table-column>
-                <el-table-column align="center" prop="" label="应退佣金" width="120"></el-table-column>
+                <el-table-column align="center" prop="commission" label="应退佣金" width="120"></el-table-column>
                 <el-table-column align="center" prop="" label="申请附件" width="120">
                   <template slot-scope="scope">
                     <el-button @click="download(scope.row)" size="small" type="text">查看附件</el-button>
                   </template>
                 </el-table-column>
-                <el-table-column align="center" prop="status" label="申请状态" width="120"></el-table-column>
+                <el-table-column align="center" prop="status" label="申请状态" width="120" :formatter="transformStatus"></el-table-column>
             </el-table>
             <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -232,7 +232,7 @@ var clueVM = new Vue({
           btnDisabled:false,
           btnDisabled1:false,
       		searchForm: {
-	       		cusName:'',
+	       		customerName:'',
             companyId:'',
             signProvince:'',
             payStartTime:'',
@@ -420,7 +420,7 @@ var clueVM = new Vue({
           limit:1,
           ossUrl:ossSignatureUrl,
           storeForm: {
-            cusName:'',
+            customerName:'',
             companyId:'',
             signProvince:'',
             payStartTime:'',
@@ -474,18 +474,7 @@ var clueVM = new Vue({
                         });
                        return;
                    }
-                   var idList = [];
-                   for(var i=0;i<rows.length;i++){
-                    if(rows[i].status!='已对账'){
-                    this.$message({
-                            message: '只允许操作已对账状态的数据',
-                            type: 'warning'
-                          });
-                         return;
-                    }
-                     var curRow = rows[i];
-                     idList.push(curRow.accountId);
-                   }
+                   
                    
                 
                 this.$confirm('确认标记为已结算吗？', '提示', {
@@ -705,36 +694,6 @@ var clueVM = new Vue({
           handleClose(tag) {
             this.transferForm.dynamicTags.splice(this.transferForm.dynamicTags.indexOf(tag), 1);
           },
-          chooseRelevance(){
-        	  var param ={};
-              var startTime = this.dialogFormChoose.startTime;
-              var endTime = this.dialogFormChoose.endTime;
-              if(startTime&&endTime&&startTime> endTime){
-              	this.$message({
-                      message: '开始时间不能大于结束时间',
-                      type: 'warning'
-                    });
-                  return;
-              }
-              param.startTime = startTime;
-              param.endTime = endTime;
-              param.cusName = this.dialogFormChoose.cusName;
-              param.signProvince = this.dialogFormChoose.signProvince;
-              param.signProjectId = this.dialogFormChoose.signProjectId;
-              param.signNo = this.dialogFormChoose.signNo;
-              param.signId = this.dialogFormChoose.signId;
-              
-              console.info(param);
-              axios.post('/financing/refundRebate/rebatesignList', param)
-              .then(function (response) {
-                    var result =  response.data;
-                    clueVM.dataTableChoose= result.data;
-              })
-              .catch(function (error) {
-                   console.log(error);
-              });
-            this.dialogFormChooseVisible=true;
-          },
         	searchTable() {
                 var param ={};
                 var startTime = this.searchForm.payStartTime;
@@ -755,7 +714,7 @@ var clueVM = new Vue({
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
 
-                param.cusName = this.searchForm.cusName;
+                param.customerName = this.searchForm.customerName;
                 param.companyId = this.searchForm.companyId;
                 param.signProvince = this.searchForm.signProvince;
                 param.businessManagerId = this.searchForm.businessManagerId;
@@ -854,36 +813,36 @@ var clueVM = new Vue({
                  }
                  return text;
                },
-               //邀约状态转换方法
-               transformSignStatus(row, column, cellValue, index) {
+               //状态转换方法
+               transformStatus(row, column, cellValue, index) {
                  var text="";
-                 if(cellValue=="2"){
-                   text="退款确认中";
-                 }else if(cellValue=="3"){
-                   text="返款确认中";
-                 }else if(cellValue=="4"){
-                   text="确认退款";
-                 }else if(cellValue=="5"){
-                   text="确认返款";
-                 }else if(cellValue=="6"){
-                   text="已退款";
-                 }else if(cellValue=="7"){
-                   text="已返款";
-                 }else{
-                   text="正常";
+                 if(cellValue==1){
+                   text="未申请";
+                 }else if(cellValue==2){
+                   text="已申请";
+                 }else if(cellValue==3){
+                   text="已确认";
+                 }else if(cellValue==4){
+                   text="驳回";
+                 }else if(cellValue==5){
+                   text="已结算";
                  }
                  return text;
                },
-               //合伙人转换方法
+               //签约店型转换方法
                transformSignShopType(row, column, cellValue, index) {
-             	  var text="";
-             	  if(vistitStoreTypeList){
- 	                  for(var i=0;i<vistitStoreTypeList.length;i++){
- 	                		if(cellValue==vistitStoreTypeList[i].value){
- 	                			text=vistitStoreTypeList[i].name;
- 	                		}
- 	                	}
-             	  }
+             	    var text="";
+                   if(cellValue=="1"){
+                     text="创业店"
+                   }else if(cellValue=="2"){
+                     text="标准店"
+                   }else if(cellValue=="3"){
+                     text="白金店"
+                   }else if(cellValue=="4"){
+                     text="旗舰店"
+                   }else if(cellValue=="5"){
+                     text="区域代理"
+                   }
                    return text;
                },
               
