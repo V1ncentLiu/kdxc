@@ -57,6 +57,7 @@ public interface OverCostFeignClient {
      * @Date: 2020/3/12 11:37
      * @since: 1.0.0
      **/
+    @PostMapping("/overCostConfirmList")
     JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(@RequestBody FinanceOverCostReqDto reqDto);
     @Component
     @Slf4j
