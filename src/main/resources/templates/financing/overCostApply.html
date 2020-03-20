@@ -439,34 +439,41 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+            //签约项目
+            projectChangeSelect(selVal) {
+                var param = {};
+                param.category = selVal;
+                this.form.insideProject = null;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                    clueVM.proSelect = response.data.data;
+                });
+            },
+
+
+            getBusAndTel(){
+                var param = {};
+                axios.post('/financing/balanceaccount/getBusAndTel', param)
+                  .then(function (response) {
+                    var result = response.data;
+                    //查询所有的商务经理
+                    clueVM.busSaleOptions = result.busSaleList;
+                    //查询所有商务组
+                    clueVM.busGroupOptions = result.busGroupList;
+                    // 查询所有电销顾问
+                    clueVM.teleSaleOptions = result.teleSaleList;
+                    // 查询所有电销组
+                    clueVM.teleGorupOptions = result.teleGroupList;
+                    //
+                    clueVM.dxBusinessList = result.teleCompanyList;
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+            },
           download(row) {//下载图片
             this.downloadDialogVisible = true;
-            var id = row.id;
-            var param = {};
-            param.id = id;
-            axios.post('/financing/refund/listImgById', param)
-              .then(function (response) {
-                var resData = response.data;
-                if (resData.code == '0') {
-                  mainDivVM.imgList = resData.data;
-                  //var data = resData.data;
-                  /* var imgHtml = "";
-                  for(var i=0;i<data.length;i++){
-                      var curImg = data[i];
-                      imgHtml+='<a href="'+curImg.imgUrl+'" download="上传图片'+(i+1)+'">上传图片'+(i+1)+'</a>';
-                  }
-                  mainDivVM.imgHtml=imgHtml; */
-                } else {
-                  mainDivVM.$message({ message: '查询图片失败', type: 'error' });
-                  console.error(resData);
-                }
-
-              })
-              .catch(function (error) {
-                console.log(error);
-              }).then(function () {
-
-              });
+            console.log(row)
+            // row.picUrls=imgList;
           },
           //结算确认
                settlementConfirm() {
@@ -835,118 +842,6 @@ var clueVM = new Vue({
                    }
                    return text;
                },
-              
-               //关联签约单确定
-               submitSign() {
-           	       var rows = this.signSelection;
-            	   if(rows.length==0){
-                       this.$message({
-                          message: '请至少选择一条数据进行关联',
-                          type: 'warning'
-                        });
-                       return;
-                   }
-            	   var signList=[];
-            	   for(var i=0;i<rows.length;i++){
-               			signList.push(rows[i].signNo);
-                   }
-            	   this.transferForm.dynamicTags =signList;
-            	   this.dialogFormChooseVisible=false;
-            	   this.$refs['transferForm'].validateField(["dynamicTags"]);
-               },
-               //关联签约单取消
-               dialogFormChooseVisibleCancel() {
-            	   this.dialogFormChooseVisible = false;
-            	   this.$refs.chooseSignTable.clearSelection();
-               },
-               changeTeleDept(selectedValue){//电销事业部
-                   this.clearTeleDeptList();
-                   if(!selectedValue){
-                       return;
-                   }
-                   var param ={};
-                   param.id = selectedValue;
-                   axios.post('/organization/organization/queryTeleGroupListByParentId', param)
-                   .then(function (response) {
-                         var result =  response.data;
-                         var table=result.data;
-                         clueVM.teleGorupOptions= table;
-                   })
-                   .catch(function (error) {
-                        console.log(error);
-                   });
-               },
-               changeTeleGroup(selectedValue){//改变电销组
-                   this.clearTeleGroupList();
-                   if(!selectedValue){
-                       return;
-                   }
-                   var param ={};
-                   param.id = selectedValue;
-                   axios.post('/organization/organization/queryTeleSaleByOrgId', param)
-                   .then(function (response) {
-                         var result =  response.data;
-                         var table=result.data;
-                         clueVM.teleSaleOptions= table;
-                   })
-                   .catch(function (error) {
-                        console.log(error);
-                   });
-               },
-               clearTeleDeptList(){
-                   this.teleGorupOptions=[];
-                   this.searchForm.teleGorupId='';
-                   this.clearTeleGroupList();
-                   
-               },
-               clearTeleGroupList(){
-                    this.teleSaleOptions=[];
-                    this.searchForm.teleSaleId='';
-               },
-               changeBusArea(selectedValue){//改变商务大区
-                   this.clearBusAreaList();
-                   if(!selectedValue){
-                       return;
-                   }
-                   var param ={};
-                   param.id = selectedValue;
-                   axios.post('/organization/organization/queryBusGroupListByParentId', param)
-                   .then(function (response) {
-                         var result =  response.data;
-                         var table=result.data;
-                         clueVM.busGroupOptions= table;
-                   })
-                   .catch(function (error) {
-                        console.log(error);
-                   });
-               },
-               changeBusGroup(selectedValue){//改变商务组
-                   this.clearBusGroupList();
-                   if(!selectedValue){
-                       return;
-                   }
-                   var param ={};
-                   param.id = selectedValue;
-                   axios.post('/organization/organization/queryBusManagerByOrgId', param)
-                   .then(function (response) {
-                         var result =  response.data;
-                         var table=result.data;
-                         clueVM.busSaleOptions= table;
-                   })
-                   .catch(function (error) {
-                        console.log(error);
-                   });
-               },
-               clearBusAreaList(){
-                   this.busGroupOptions=[];
-                   this.searchForm.busGroupId='';
-                   this.clearBusGroupList();
-                   
-               },
-               clearBusGroupList(){
-                    this.busSaleOptions=[];
-                    this.searchForm.busSaleId='';
-               },
                //打开申请退款
                toAllocationClue(formName) {
             	   if(this.$refs[formName]){
@@ -968,9 +863,8 @@ var clueVM = new Vue({
             	   this.$refs[formName].resetFields();
             	   this.allocationVisible = false;
               },
-              allocationClue(formName){//申请退款
+              allocationClue(formName){//客户超成本申请提交
                 var rows = this.multipleSelection;
-                debugger
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
                     var param  = {};
@@ -1015,197 +909,15 @@ var clueVM = new Vue({
                   }
                   setSessionStore("refundRebateManagerOtherVal", otherVal);
                   // 存储选中信息--end 
-              },// method end
-              //打开返款申请
-              toTransferClue(formName) {
-                   if(this.$refs[formName]){
-  	            	   this.$refs[formName].resetFields();
-              	   }
-                   this.fileList=[];
-                   this.transferForm.dynamicTags =[];
-           	       var rows = this.multipleSelection;
-            	   if(rows.length!=1){
-                       this.$message({
-                          message: '请选择一条数据进行返款申请',
-                          type: 'warning'
-                        });
-                       return;
-                   }
-            	   /* if(rows[0].signStatus!=1){
-            		   this.$message({
-                           message: '只允许操作签约状态为正常的数据',
-                           type: 'warning'
-                         });
-                        return;
-            	   } */
-                   this.transferForm.signId = rows[0].signId;
-                   this.transferForm.refundTime=new Date();
-                   this.dialogFormChoose.signProjectId = rows[0].signProject;
-                   this.dialogFormChoose.signProvince = rows[0].signProvince;
-                   this.dialogFormChoose.signId = rows[0].signId;
-                   this.isSettle=rows[0].isSettle;
-                   this.rebateTitle="（"+rows[0].signNo+"）签约单申请返款";
-                   this.transferVisible = true;
-                   this.btnDisabled1=false;
-               },
-               transferClueCancel(formName){//外调经理取消
-            	   this.$refs[formName].resetFields();
-            	   this.transferVisible = false;
-            	   this.dialogFormChooseVisibleCancel();
-               },
-               transferClue(formName){//外调经理
-                  var rows = this.multipleSelection;
-            	    this.$refs[formName].validate((valid) => {
-                      if (valid) {
-                            //外调
-                            var param  = {};
-                            param.signId=this.transferForm.signId;
-                        param.reason=this.transferForm.reason;
-                        param.refundTime=this.transferForm.refundTime;
-                        param.cusAmount=this.transferForm.cusAmount;
-                        param.bearAmount = this.transferForm.bearAmount;
-                        param.signNoList=this.transferForm.dynamicTags;
-                        param.imgList=this.fileList;
-                        this.btnDisabled1=true;
-                          axios.post('/financing/refundRebate/applyRebate',param)
-                              .then(function (response) {
-                                  var data =  response.data;
-                                  if(data.code=='0'){
-                                  clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
-                                    window.location.href='/financing/refundRebate/initRefundRebateManager';
-                                    // clueVM.transferVisible = false;
-                                    // clueVM.searchTable();
-                                  }});
-                                  }else{
-                                  clueVM.$message({
-                                          message: "接口调用失败",
-                                          type: 'error'
-                                        }); 
-                                        clueVM.btnDisabled1=false;
-                                  }
-                              })
-                              .catch(function (error) {
-                                console.log(error);
-                                clueVM.btnDisabled1=false;
-                              });
-                        //end
-            	          } else {
-            	            console.log('error submit!!');
-                          // clueVM.btnDisabled1=false;
-            	            return false;
-            	          }
-
-                    // 存储选中信息--start
-                    var clueId=rows[0].signId; 
-                    setSessionStore("refundRebateManagerStoreForm", this.storeForm);
-                    var otherVal = {
-                        "currentPage": this.pager.currentPage,
-                        "clueId": clueId,
-                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
-                    }
-                    setSessionStore("refundRebateManagerOtherVal", otherVal);
-                    // 存储选中信息--end  
-            	  });
-            	   
-                 },// method end
-                 recordClick(row) {//查看明细
-                     // row.signNo;
-                     var param = {};
-                     this.payTitle="（"+row.signNo+"）付款明细";
-                     param.idList = [row.signId];
-                     axios.post('/sign/signRecord/listPayDetail', param)
-                     .then(function (response) {
-                         var resData = response.data;
-                         console.log(resData.data)
-                         if(resData.code=='0'){
-                         	clueVM.recordTable= resData.data;
-                         }else{
-                             clueVM.$message({message:resData.msg,type:'error'});
-                             console.error(resData);
-                         }
-                         clueVM.recordDialog=true;
-                     })
-                     .catch(function (error) {
-                          console.log(error);
-                     }).then(function(){
-                     });
-                    
-                 },
-                 number(){//添加签约单余款
-            　　　      			this.allocationForm.cusAmount=this.allocationForm.cusAmount.replace(/[^\.\d]/g,'');
-                        this.allocationForm.cusAmount=this.allocationForm.cusAmount.replace('.','');
-            　　　      			this.transferForm.cusAmount=this.transferForm.cusAmount.replace(/[^\.\d]/g,'');
-                        this.transferForm.cusAmount=this.transferForm.cusAmount.replace('.','');
-                　　			},
-                 getTimeText(row, column, value, index){
-                     var valText="";
-                     if(value){
-                         valText =  moment(value).format("YYYY-MM-DD");
-                     }
-                     return valText;
-                 },
-                 getSignShopTypeText(row, column, value, index){
-                 	var valText="";
-                     if (value == 1) {
-                         valText = "旗舰店";
-                     } else if (value == 2) {
-                         valText = "创业店";
-                     } else if (value == 3) {
-                         valText = "标准店";
-                     } else if (value == 5) {
-                         valText = "区域代理";
-                     } else if (value == 6) {
-                         valText = "单技术";
-                     }
-                     return valText;
-                 },
-
-                transGiveType(row, column, value, index) {
-                  var text="";
-                  for(var i=0;i<giveTypeList.length;i++) {
-                    if(giveTypeList[i].value ==value){
-                      text = giveTypeList[i].name;
-                    }
-                  }
-                  return text;
-                },
-
-                 getPayModeText(row, column, value, index){
-                   var valText="";
-                   if(!value){
-                     return valText;
-                   }
-                   var vals = value.split(",");
-                   if(payModeItem){
-                     for(var j = 0 ; j < vals.length;j++  ){
-                       for(var i = 0; i < payModeItem.length ; i++){
-                         if(payModeItem[i].value == vals[j]){
-                           if(j==0){
-                             valText += payModeItem[i].name;
-                           }else{
-                             valText += ","+payModeItem[i].name;
-                           }
-
-                         }
-                       }
-                     }
-                   }
-                   return valText;
-                 },
-                 getStatusText(row, column, value, index){
-                 	   var valText="";
-                 	   if(value==0){
-                 		   valText="驳回";
-                 	   }
-                 	   else if(value==1){
-                            valText="审核中";
-                        }else if(value==2){
-                            valText="有效";
-                        }
-                        return valText;
-                 },
+              },
+              number(){//添加签约单余款
+            　　　this.allocationForm.cusAmount=this.allocationForm.cusAmount.replace(/[^\.\d]/g,'');
+                  this.allocationForm.cusAmount=this.allocationForm.cusAmount.replace('.','');
+            　　  this.transferForm.cusAmount=this.transferForm.cusAmount.replace(/[^\.\d]/g,'');
+                  this.transferForm.cusAmount=this.transferForm.cusAmount.replace('.','');
+              },
                //付款类型转换方法
-                 transformPayType(row, column, cellValue, index) {
+              transformPayType(row, column, cellValue, index) {
                    var text="";
                    if(cellValue=="1"){
                      text="全款"
@@ -1217,17 +929,14 @@ var clueVM = new Vue({
                      text="尾款"
                    }
                    return text;
-                 },
-                 getRowKey(row) {
-                   return row.signNo;
-                 },
-                toogleClick(){
-                    if(this.isShow){
-                        this.isShow=false
-                    }else{
-                        this.isShow=true
-                    }          
-                },
+              },
+              toogleClick(){
+                  if(this.isShow){
+                      this.isShow=false
+                  }else{
+                      this.isShow=true
+                  }          
+              },
         },
         created(){
             console.info("create method");
