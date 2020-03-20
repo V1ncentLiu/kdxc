@@ -154,8 +154,8 @@
     <el-dialog  :title='refundTitle+"客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
-              <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                  <el-input @input="allCalAmount" v-model="allocationForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
+              <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="commission">
+                  <el-input v-model="allocationForm.commission" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
               </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
               		<el-upload
@@ -244,12 +244,7 @@ var clueVM = new Vue({
             status:'',
           },
           allocationForm: {
-        	  
-        	signId:'',
-          	reason:'',
-            refundTime:'',
-            cusAmount:'',
-              bearAmount:'',
+        	  commission:'',        	
             fileList: [],
           },
           transferForm: {
@@ -468,13 +463,20 @@ var clueVM = new Vue({
                settlementConfirm() {
                  var rows = this.multipleSelection;
                  if(rows.length==0){
-                       this.$message({
-                          message: '请至少选择一条数据',
-                          type: 'warning'
-                        });
-                       return;
-                   }
-                   
+                     this.$message({
+                        message: '请至少选择一条数据',
+                        type: 'warning'
+                      });
+                     return;
+                 }
+                // 对于未确认，不可以进行已结算标记
+                if(rows[0].status!==3){
+                     this.$message({
+                        message: '超成本申请未确认不可以进行标记结算。',
+                        type: 'warning'
+                      });
+                     return;
+                 }   
                    
                 
                 this.$confirm('确认标记为已结算吗？', '提示', {
@@ -516,23 +518,18 @@ var clueVM = new Vue({
                 });
                 
                },
-            //计算退款的承担金额
-            allCalAmount(){
+            //计算应退佣金金额
+            AllCommission(){
+              //应退佣金自动算出来=实收金额*超成本比例*佣金比例
                 var rows = this.multipleSelection;
-                var aone = parseFloat(rows[0].ratio/100);
-                var atwo = parseFloat(this.allocationForm.cusAmount);
+                console.log(rows)
+                var atwo = parseFloat(rows[0].amountReceived);
+                var atwo = parseFloat(rows[0].overCostRatio);
+                var atwo = parseFloat(rows[0].commissionRatio);
                 if (isNaN(aone)) aone = 0
                 if (isNaN(atwo)) atwo = 0
-                this.allocationForm.bearAmount = (aone * atwo) + "";
-            },
-            //计算返款的承担金额
-            transferCalAmount(){
-                var rows = this.multipleSelection;
-                var aone = parseFloat(rows[0].ratio/100);
-                var atwo = parseFloat(this.transferForm.cusAmount);
-                if (isNaN(aone)) aone = 0
-                if (isNaN(atwo)) atwo = 0
-                this.transferForm.bearAmount = (aone * atwo) + "";
+                if (isNaN(three)) three = 0
+                this.allocationForm.cusAmount = (aone * atwo * three) + "";
             },
         	getUploadParam(){
                 var signUrl = this.ossUrl+"?serviceType=aggregation";
@@ -972,6 +969,7 @@ var clueVM = new Vue({
                    }
                    this.allocationVisible = true;
                    this.btnDisabled=false;
+                   this.AllCommission();
                },
               allocationClueCancel(formName){//申请退款取消
             	   this.$refs[formName].resetFields();
@@ -983,21 +981,18 @@ var clueVM = new Vue({
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
                     var param  = {};
-                    param.signId=this.allocationForm.signId;
-                    param.reason=this.allocationForm.reason;
-                    param.refundTime=this.allocationForm.refundTime;
-                    param.cusAmount=this.allocationForm.cusAmount;
-                    param.bearAmount = this.allocationForm.bearAmount;
-                    param.imgList=this.fileList;
+                    param.id=rows[0].id;
+                    param.commission=this.allocationForm.commission;
+                    param.picUrls=this.fileList.join(';');
                     this.btnDisabled=true;
-                        axios.post('/financing/refundRebate/applyRefund',param)
+                        axios.post('/financing/overCost/apply',param)
                             .then(function (response) {
                                 var data =  response.data;
                                 if(data.code=='0'){
                                   clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
                                     // clueVM.allocationVisible = false;
                                     // clueVM.searchTable();
-                                    window.location.href='/financing/refundRebate/initRefundRebateManager';
+                                    window.location.href='/financing/overCost/overCostApplyPage';
                                   }});
                                 }else{
                                   clueVM.$message({
