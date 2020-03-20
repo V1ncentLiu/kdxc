@@ -145,7 +145,16 @@
                     <el-button @click="download(scope.row)" size="small" type="text">查看附件</el-button>
                   </template>
                 </el-table-column>
-                <el-table-column align="center" prop="status" label="申请状态" width="120" :formatter="transformStatus"></el-table-column>
+                <el-table-column align="center" prop="status" label="申请状态" width="120">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.status==1">未申请</span>
+                    <span v-if="scope.row.status==2">已申请</span>
+                    <span v-if="scope.row.status==3">已确认</span>
+                    <el-button v-if="scope.row.status==4" @click="edit(scope.row.id)" size="small" type="text">已驳回</el-button>
+                    <span v-if="scope.row.status==5">已结算</span>                    
+                  </template>
+                  
+                </el-table-column>
             </el-table>
             <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -487,8 +496,8 @@ var clueVM = new Vue({
 
                   //结算确认
                 var param  = {};
-                    param.idList=idList;
-                     axios.post('/financing/reconciliationConfirm/settlementConfirm',param)
+                    param.id=rows[0].id;
+                     axios.post('/financing/overCost/settlementOverCost',param)
                       .then(function (response) {
                           var data =  response.data;
                           if(data.code=='0'){
@@ -807,22 +816,6 @@ var clueVM = new Vue({
                    text="一次性全款"
                  }else if(cellValue=="2"){
                    text="先交定金"
-                 }
-                 return text;
-               },
-               //状态转换方法
-               transformStatus(row, column, cellValue, index) {
-                 var text="";
-                 if(cellValue==1){
-                   text="未申请";
-                 }else if(cellValue==2){
-                   text="已申请";
-                 }else if(cellValue==3){
-                   text="已确认";
-                 }else if(cellValue==4){
-                   text="驳回";
-                 }else if(cellValue==5){
-                   text="已结算";
                  }
                  return text;
                },
@@ -1222,22 +1215,6 @@ var clueVM = new Vue({
                      text="追加定金"
                    }else if(cellValue=="4"){
                      text="尾款"
-                   }
-                   return text;
-                 },
-               //处理状态转换方法
-                 transformStatus(row, column, cellValue, index) {
-                   var text="";
-                   if(cellValue=="0"){
-                     text="待处理";
-                   }else if(cellValue=="1"){
-                     text="驳回";
-                   }else if(cellValue=="2"){
-                     text="提交对账";
-                   }else if(cellValue=="3"){
-                     text="已对账";
-                   }else if(cellValue=="4"){
-                     text="已结算";
                    }
                    return text;
                  },
