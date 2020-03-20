@@ -56,7 +56,7 @@ public enum MenuEnum {
     REFUNDREBATE_MANAGER("退返款申请"), REFUNDAPPLYLIST("退款申请列表"), REFUNDCONFIRM("退款确认"), REBATEAPPLYLIST("返款申请列表"), REBATECONFIRM(
             "返款确认"), RECONCILIATIONCONFIRM_MANAGER("对账结算确认"), REFUNDREBATEAPPLY_MANAGER("对账结算申请"),
 
-    OVERCOST_CONFIRM("超成本确认"),  OVERCOST_REJECT("超成本驳回"),
+    OVERCOST_CONFIRM("超成本确认"),  OVERCOST_REJECT("超成本驳回"),OVERCOST_APPLY("超成本申请"),OVERCOST_SETTLEMENT("超成本已结算"),
     /**
      * 版本管理
      */

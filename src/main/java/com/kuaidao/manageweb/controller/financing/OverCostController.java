@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.financing;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,7 +45,8 @@ public class OverCostController {
     private SysRegionFeignClient sysRegionFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
     /**
      * 申请页面
      *
@@ -51,7 +54,7 @@ public class OverCostController {
      */
     @RequestMapping("/overCostApplyPage")
     public String balanceAccountPage(HttpServletRequest request) {
-
+    	request.setAttribute("ossUrl", ossUrl);
         return "financing/overCostApply";
     }
 
@@ -170,5 +173,56 @@ public class OverCostController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+    
+
+    /**
+     * 超成本申请
+     *
+     * @author: 
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/confirm")
+    @LogRecord(description = "超成本申请", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_APPLY)
+
+    public JSONResult<String> apply(@RequestBody FinanceOverCostReqDto reqDto) {
+    	UserInfoDTO userInfoDTO = getUser();
+    	reqDto.setUpdateTime(new Date());
+    	reqDto.setUpdateUser(userInfoDTO.getId());
+        return overCostFeignClient.apply(reqDto);
+    }
+    /**
+     * 超成本申请
+     *
+     * @author: 
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/settlementOverCost")
+    @LogRecord(description = "超成本变为已结算", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_SETTLEMENT)
+    public JSONResult<String> settlementOverCost(@RequestBody FinanceOverCostReqDto reqDto) {
+    	UserInfoDTO userInfoDTO = getUser();
+    	reqDto.setUpdateTime(new Date());
+    	reqDto.setUpdateUser(userInfoDTO.getId());
+    	return overCostFeignClient.settlementOverCost(reqDto);
+    }
+    
+    /**
+     * 超成本申请
+     *
+     * @author: 
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/findFinanceOverCostById")
+    public JSONResult<String> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.findFinanceOverCostById(reqDto);
     }
 }
