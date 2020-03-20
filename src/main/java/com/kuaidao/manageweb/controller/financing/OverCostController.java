@@ -187,7 +187,7 @@ public class OverCostController {
      **/
     @PostMapping("/apply")
     @LogRecord(description = "超成本申请", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_APPLY)
-
+    @ResponseBody
     public JSONResult<String> apply(@RequestBody FinanceOverCostReqDto reqDto) {
     	UserInfoDTO userInfoDTO = getUser();
     	reqDto.setUpdateTime(new Date());
@@ -204,6 +204,7 @@ public class OverCostController {
      * @since: 1.0.0
      **/
     @PostMapping("/settlementOverCost")
+    @ResponseBody
     @LogRecord(description = "超成本变为已结算", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_SETTLEMENT)
     public JSONResult<String> settlementOverCost(@RequestBody FinanceOverCostReqDto reqDto) {
     	UserInfoDTO userInfoDTO = getUser();
@@ -222,6 +223,7 @@ public class OverCostController {
      * @since: 1.0.0
      **/
     @PostMapping("/findFinanceOverCostById")
+    @ResponseBody
     public JSONResult<String> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.findFinanceOverCostById(reqDto);
     }
