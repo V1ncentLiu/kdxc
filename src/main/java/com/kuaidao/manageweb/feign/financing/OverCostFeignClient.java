@@ -59,6 +59,34 @@ public interface OverCostFeignClient {
      **/
     @PostMapping("/overCostConfirmList")
     JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(@RequestBody FinanceOverCostReqDto reqDto);
+    
+    /**
+     * 超成本申请
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/apply")
+    JSONResult<String> apply(@RequestBody FinanceOverCostReqDto reqDto);
+    
+    /**
+     * 超成本变为已结算
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/settlementOverCost")
+    JSONResult<String> settlementOverCost(@RequestBody FinanceOverCostReqDto reqDto);
+
+    /**
+     * 根据id查询超成本信息
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/findFinanceOverCostById")
+    JSONResult<String> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto);
+    
     @Component
     @Slf4j
     static class HystrixClientFallback implements OverCostFeignClient {
@@ -90,6 +118,27 @@ public interface OverCostFeignClient {
         public JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(FinanceOverCostReqDto reqDto) {
             return fallBackError("超成本申请列表");
         }
+
+
+
+		@Override
+		public JSONResult<String> apply(FinanceOverCostReqDto reqDto) {
+			return fallBackError("超成本申请");
+		}
+
+
+
+		@Override
+		public JSONResult<String> settlementOverCost(FinanceOverCostReqDto reqDto) {
+			return fallBackError("超成本申请变为已结算");
+		}
+
+
+
+		@Override
+		public JSONResult<String> findFinanceOverCostById(FinanceOverCostReqDto reqDto) {
+			return fallBackError("根据id查询超成本信息");
+		}
 
 
     }
