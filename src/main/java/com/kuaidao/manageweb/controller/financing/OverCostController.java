@@ -185,7 +185,7 @@ public class OverCostController {
      * @Date: 2020/3/12 11:37
      * @since: 1.0.0
      **/
-    @PostMapping("/confirm")
+    @PostMapping("/apply")
     @LogRecord(description = "超成本申请", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_APPLY)
 
     public JSONResult<String> apply(@RequestBody FinanceOverCostReqDto reqDto) {
