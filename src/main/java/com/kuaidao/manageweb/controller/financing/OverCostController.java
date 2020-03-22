@@ -85,7 +85,7 @@ public class OverCostController {
         request.setAttribute("vistitStoreTypeList", getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         // 签约省份
         request.setAttribute("provinceList", getProviceList());
-        return "financing/overCostApply";
+        return "financing/overCostConfirmation";
     }
 
     /**
