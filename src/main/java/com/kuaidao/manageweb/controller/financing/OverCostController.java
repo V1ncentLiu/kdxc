@@ -1,88 +1,52 @@
 package com.kuaidao.manageweb.controller.financing;
 
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
-import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
-import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.ExcelUtil;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
-import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.financing.BalanceAccountApplyClient;
-import com.kuaidao.manageweb.feign.financing.ReconciliationConfirmFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
-import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
-import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
-import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
-import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.kuaidao.aggregation.dto.financing.FinanceOverCostReqDto;
+import com.kuaidao.aggregation.dto.financing.FinanceOverCostRespDto;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.financing.OverCostFeignClient;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.List;
 
 /**
- * 退返款
+ * 超成本申请
  * 
- * @author Chen
- * @date 2019年4月10日 下午7:23:08
+ * @author fanjd
+ * @date 2020年3月13日 9:23:08
  * @version V1.0
  */
-@RequestMapping("/financing/overCost")
+
 @Controller
+@RequestMapping("/financing/overCost")
 public class OverCostController {
-    private static Logger logger = LoggerFactory.getLogger(OverCostController.class);
 
-    private Configuration configuration = null;
-
-    public OverCostController() {
-        configuration = new Configuration();
-        configuration.setDefaultEncoding("utf-8");
-    }
-
+    @Autowired
+    private OverCostFeignClient overCostFeignClient;
+    @Autowired
+    private SysRegionFeignClient sysRegionFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
     /**
      * 申请页面
      *
@@ -90,10 +54,177 @@ public class OverCostController {
      */
     @RequestMapping("/overCostApplyPage")
     public String balanceAccountPage(HttpServletRequest request) {
-
+    	request.setAttribute("ossUrl", ossUrl);
         return "financing/overCostApply";
     }
 
+    /**
+     * 超红线申请列表
+     *
+     * @return
+     */
+    @PostMapping("/overCostApplyList")
+    @ResponseBody
+    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request,
+            @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
+        UserInfoDTO userInfoDTO = getUser();
+        financeOverCostReqDto.setUserId(1135456630805237760L);
+   //     financeOverCostReqDto.setRoleCode(userInfoDTO.getRoleCode());
+        JSONResult<PageBean<FinanceOverCostRespDto>> list = overCostFeignClient.overCostApplyList(financeOverCostReqDto);
+        return list;
+    }
 
+    /**
+     * 超成本申请确认页面
+     *
+     * @return
+     */
+    @RequestMapping("/overCostconfirmPage")
+    public String overCostconfirmPage(HttpServletRequest request) {
+        // 查询签约店型集合
+        request.setAttribute("vistitStoreTypeList", getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
+        // 签约省份
+        request.setAttribute("provinceList", getProviceList());
+        return "financing/overCostApply";
+    }
 
+    /**
+     * 超成本申请确认
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/confirm")
+    @LogRecord(description = "超成本申请确认", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_CONFIRM)
+
+    public JSONResult<String> confirm(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.confirm(reqDto);
+    }
+
+    /**
+     * 超成本申请驳回
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/reject")
+    @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
+    public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.reject(reqDto);
+    }
+
+    /**
+     * 超成本申请确认列表
+     *
+     * @author: Fanjd
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/overCostConfirmList")
+    public JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(@RequestBody FinanceOverCostReqDto reqDto) {
+        UserInfoDTO userInfoDTO = getUser();
+        reqDto.setUserId(userInfoDTO.getId());
+        reqDto.setRoleCode(userInfoDTO.getRoleCode());
+        JSONResult<PageBean<FinanceOverCostRespDto>> pageResult = overCostFeignClient.overCostConfirmList(reqDto);
+        return pageResult;
+    }
+
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
+
+    /**
+     * 查询所有省份
+     * 
+     * @return
+     */
+    private List<SysRegionDTO> getProviceList() {
+        JSONResult<List<SysRegionDTO>> getProviceList = sysRegionFeignClient.getproviceList();
+        if (getProviceList != null && JSONResult.SUCCESS.equals(getProviceList.getCode())) {
+            return getProviceList.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
+    
+
+    /**
+     * 超成本申请
+     *
+     * @author: 
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/apply")
+    @LogRecord(description = "超成本申请", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_APPLY)
+    @ResponseBody
+    public JSONResult<String> apply(@RequestBody FinanceOverCostReqDto reqDto) {
+    	UserInfoDTO userInfoDTO = getUser();
+    	reqDto.setUpdateTime(new Date());
+    	reqDto.setUpdateUser(userInfoDTO.getId());
+        return overCostFeignClient.apply(reqDto);
+    }
+    /**
+     * 超成本申请
+     *
+     * @author: 
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/settlementOverCost")
+    @ResponseBody
+    @LogRecord(description = "超成本变为已结算", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_SETTLEMENT)
+    public JSONResult<String> settlementOverCost(@RequestBody FinanceOverCostReqDto reqDto) {
+    	UserInfoDTO userInfoDTO = getUser();
+    	reqDto.setUpdateTime(new Date());
+    	reqDto.setUpdateUser(userInfoDTO.getId());
+    	return overCostFeignClient.settlementOverCost(reqDto);
+    }
+    
+    /**
+     * 超成本申请
+     *
+     * @author: 
+     * @param
+     * @return:
+     * @Date: 2020/3/12 11:37
+     * @since: 1.0.0
+     **/
+    @PostMapping("/findFinanceOverCostById")
+    @ResponseBody
+    public JSONResult<String> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto) {
+        return overCostFeignClient.findFinanceOverCostById(reqDto);
+    }
 }
