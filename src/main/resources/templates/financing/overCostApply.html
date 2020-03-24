@@ -163,7 +163,7 @@
     <el-dialog  :title='"("+refundTitle+"）客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
-                <div id="isShowEdit">
+                <div v-if="isShowEdit">
                     <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="">
                         {{allocationForm.rejectUser}}
                     </el-form-item>
@@ -280,19 +280,19 @@ var clueVM = new Vue({
           companyArr:[],//签约公司
           signShopTypeOptions:[{
               value:1,
-              name:"创业店"
+              name:"旗舰店"
           },{
               value:2,
-              name:"标准店"
+              name:"创业店"
           },{
               value:3,
-              name:"白金店"
-          },{
-              value:4,
-              name:"旗舰店"
+              name:"标准店"
           },{
               value:5,
               name:"区域代理"
+          },{
+              value:6,
+              name:"单技术"
           }],
           signStatusOptions:[{
           	  value:1,
@@ -372,11 +372,27 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+            initSignProvinceSelect(){
+                axios.post('/visit/visitRecord/getSignProvince', {})
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                          var table=result.data;
+                          mainDivVM.provinceOptions= table;
+                      }else{
+                          console.error(response);
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });  
+            },
+            // 这个param.category换成param.isNotSign =0其他的参数不需要
             //签约项目
-            projectChangeSelect(selVal) {
+            projectChangeSelect() {
                 var param = {};
-                param.category = selVal;
-                this.form.insideProject = null;
+                param.isNotSign =0;
                 axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
                     clueVM.proSelect = response.data.data;
                 });
@@ -710,19 +726,33 @@ var clueVM = new Vue({
             },
             //签约店型转换方法
             transformSignShopType(row, column, cellValue, index) {
-             	  var text="";
-                if(cellValue=="1"){
-                    text="创业店"
-                }else if(cellValue=="2"){
-                    text="标准店"
-                }else if(cellValue=="3"){
-                    text="白金店"
-                }else if(cellValue=="4"){
-                    text="旗舰店"
-                }else if(cellValue=="5"){
-                    text="区域代理"
+             	  // var text="";
+                // if(cellValue=="1"){
+                //     text="创业店"
+                // }else if(cellValue=="2"){
+                //     text="标准店"
+                // }else if(cellValue=="3"){
+                //     text="白金店"
+                // }else if(cellValue=="4"){
+                //     text="旗舰店"
+                // }else if(cellValue=="5"){
+                //     text="区域代理"
+                // }
+                // return text;
+                var valText="";
+                if (cellValue == 1) {
+                    valText = "旗舰店";
+                } else if (cellValue == 2) {
+                    valText = "创业店";
+                } else if (cellValue == 3) {
+                    valText = "标准店";
+                } else if (cellValue == 5) {
+                    valText = "区域代理";
+                } else if (cellValue == 6) {
+                    valText = "单技术";
                 }
-                return text;
+           
+                return valText;
             },
             //打开超成本申请
             toAllocationClue(formName) {
@@ -738,6 +768,8 @@ var clueVM = new Vue({
                     return;
                 }
                 this.allocationVisible = true;
+                // 不显示驳回人员，驳回时间，驳回原因
+                this.isShowEdit=false;
                 this.btnDisabled=false;
                 this.AllCommission();
                 this.refundTitle=rows[0].customerName;
@@ -779,7 +811,7 @@ var clueVM = new Vue({
                 .then(function () {
                   // always executed
                 });  
-            }
+            },
             allocationClueCancel(formName){//申请退款取消
             	  this.$refs[formName].resetFields();
             	  this.allocationVisible = false;
@@ -874,11 +906,14 @@ var clueVM = new Vue({
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
 
-            this.searchTable();
+            this.searchTable();            
             this.getUploadParam();
-            // 查询
-            // this.projectChangeSelect();
-            this.getBusAndTel()
+            // 签约省份
+            this.initSignProvinceSelect()
+            // 签约项目
+            this.projectChangeSelect();
+            // 商务经理
+            this.getBusAndTel();
             //签约公司
             param = {};
             axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
