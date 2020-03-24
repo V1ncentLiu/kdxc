@@ -32,7 +32,7 @@
                 <el-form-item label="签约公司:" prop="companyId">
                     <el-select v-model="searchForm.companyId" clearable  placeholder="签约公司">
                         <el-option
-                            v-for="item in provinceOptions"
+                            v-for="item in companyArr"
                             :key="item.name"
                             :label="item.name"
                             :value="item.name">
@@ -163,6 +163,17 @@
     <el-dialog  :title='"("+refundTitle+"）客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
+                <div id="isShowEdit">
+                    <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="">
+                        {{allocationForm.rejectUser}}
+                    </el-form-item>
+                    <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="">
+                        {{allocationForm.rejectTime}}
+                    </el-form-item>
+                    <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="">
+                        <span style="color: red;">{{allocationForm.rejectReason}}</span>
+                    </el-form-item>
+                </div>    
               <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="commission">
                   <el-input v-model="allocationForm.commission" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
               </el-form-item>
@@ -234,6 +245,7 @@ var giveTypeList =[[${giveTypeList}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+          isShowEdit:false,
           imgList: [],
           downloadDialogVisible: false,//下载图片dialog
           paginationShow: false,
@@ -252,6 +264,9 @@ var clueVM = new Vue({
               status:'',
           },
           allocationForm: {
+            rejectUser:'',
+            rejectTime:'',
+            rejectReason:'',
         	  commission:'',        	
             fileList: [],
           },
@@ -262,7 +277,7 @@ var clueVM = new Vue({
           teleSaleOptions:[],
           provinceOptions:provinceList,
           signProjectOptions:[],
-          // 创业店、标准店、白金店、旗舰店、区域代理
+          companyArr:[],//签约公司
           signShopTypeOptions:[{
               value:1,
               name:"创业店"
@@ -279,7 +294,6 @@ var clueVM = new Vue({
               value:5,
               name:"区域代理"
           }],
-          // 1未申请，2已申请，3已确认，4驳回，5已结算',
           signStatusOptions:[{
           	  value:1,
           	  name:"未申请"
@@ -367,8 +381,6 @@ var clueVM = new Vue({
                     clueVM.proSelect = response.data.data;
                 });
             },
-
-
             getBusAndTel(){
                 var param = {};
                 axios.post('/financing/balanceaccount/getBusAndTel', param)
@@ -730,6 +742,44 @@ var clueVM = new Vue({
                 this.AllCommission();
                 this.refundTitle=rows[0].customerName;
             },
+            // 编辑超成本申请
+            edit(rowsId){
+                if (this.$refs['form']!=undefined) {
+                    this.$refs['form'].resetFields();
+                }
+                //修改菜单数据  
+                this.allocationVisible = true;
+                // 显示驳回人员，驳回时间，驳回原因
+                this.isShowEdit=true;
+                var param ={};
+                param.id = rowsId;  
+                axios.post('/financing/overCost/findFinanceOverCostById',param).then(function (response) {
+                  console.log(response);
+                    var data=response.data.data;
+                    if(data){
+                        // 驳回人员，驳回时间，驳回原因，应退佣金金额，上传的附件
+                        clueVM.allocationForm.rejectUser = data.rejectUser;  
+                        clueVM.allocationForm.rejectTime = data.rejectTime; 
+                        clueVM.allocationForm.rejectReason = data.rejectReason; 
+                        clueVM.allocationForm.commission = data.commission; 
+                        // var urldata=data.url; 
+                        // var index = urldata.lastIndexOf("\/");
+                        // urldataName = urldata.substring(index + 1,urldata.length);
+                        // var fileListObj={};
+                        // fileListObj.url=urldata;
+                        // fileListObj.name=urldataName;
+                        // clueVM.form.fileList.push(fileListObj);  
+                   }else{
+                        alert(response.data.data.message);
+                        return ;
+                   } 
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                });  
+            }
             allocationClueCancel(formName){//申请退款取消
             	  this.$refs[formName].resetFields();
             	  this.allocationVisible = false;
@@ -829,6 +879,11 @@ var clueVM = new Vue({
             // 查询
             // this.projectChangeSelect();
             this.getBusAndTel()
+            //签约公司
+            param = {};
+            axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
+                clueVM.companyArr = response.data.data;
+            });
         },
         mounted(){
            console.info("mounted method");
