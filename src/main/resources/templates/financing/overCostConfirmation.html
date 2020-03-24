@@ -20,6 +20,9 @@
       text-align: center;
       padding: 30px 0;
     }
+    .statusNo{
+      color: #fd5621;
+    }
   </style>
 </head>
 
@@ -48,9 +51,9 @@
             <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
           </el-form-item>
           <el-form-item label="签约公司:" prop="companyId">
-            <el-select v-model="searchForm.companyId" clearable filterable placeholder="签单餐饮公司" 
+            <el-select v-model="searchForm.companyId" clearable filterable placeholder="签单餐饮公司"
               @clear="clearBusGroupList">
-              <el-option v-for="item in busGroupOptions" :key="item.id" :label="item.name" :value="item.id">
+              <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id">
               </el-option>
             </el-select>
           </el-form-item>
@@ -61,15 +64,16 @@
             </el-select>
           </el-form-item>
           <el-form-item label="付款时间：">
-            <el-date-picker v-model="searchForm.payStartTime" format="yyyy-MM-dd HH:mm:ss" type="datetime"
-              placeholder="选择日期">
+            <el-date-picker v-model="searchForm.payStartTime" value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="—" class="widthauto">
-            <el-date-picker v-model="searchForm.payEndTime" format="yyyy-MM-dd HH:mm:ss" type="datetime"
-              placeholder="选择日期">
+            <el-date-picker v-model="searchForm.payEndTime" value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
             </el-date-picker>
           </el-form-item>
+
           <el-row v-show="isShow">
             <el-form-item label="商务经理:" prop="businessManagerId">
               <el-select v-model="searchForm.businessManagerId" clearable filterable placeholder="商务经理">
@@ -83,9 +87,9 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="签约店型:" prop="signShopType">
-              <el-select v-model="searchForm.signShopType" clearable filterable placeholder="签约店型"
-                @change="changeBusArea" @clear="clearBusAreaList">
+            <el-form-item label="签约店型:" prop="signShopTypeId">
+              <el-select v-model="searchForm.signShopTypeId" clearable filterable placeholder="签约店型"
+                @clear="clearBusAreaList">
                 <el-option v-for="item in signShopType" :key="item.id" :label="item.name" :value="item.value">
                 </el-option>
               </el-select>
@@ -123,7 +127,6 @@
           </el-table-column>
           <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
           <el-table-column align="center" prop="visitCity" label="到访城市">
-            sdad
           </el-table-column>
           <el-table-column align="center" prop="signCompanyName" label="签约公司"></el-table-column>
           <el-table-column align="center" prop="bearAmount" label="电销顾问"></el-table-column>
@@ -148,12 +151,19 @@
           <el-table-column align="center" prop="commission" label="应退佣金"></el-table-column>
           <el-table-column align="center" prop="picUrls" label="申请附件">
             <template slot-scope="scope">
-              <div v-if="scope.row.picUrls"> 
-                  <el-button @click="openPicUrlDialog(scope.row.picUrls)" type="text" size="small"> 查看附件 </el-button>
-              </div> 
-          </template>
+              <div v-if="scope.row.picUrls">
+                <el-button @click="openPicUrlDialog(scope.row.picUrls)" type="text" size="small"> 查看附件 </el-button>
+              </div>
+            </template>
           </el-table-column>
-          <el-table-column align="center" prop="status" label="处理状态"></el-table-column>
+          <el-table-column align="center" prop="status" label="处理状态">
+            <template slot-scope="scope">
+              <div v-if="scope.row.status==’已驳回‘">
+                <span class="statusNo">已驳回</span>
+                <el-button @click="openRejectReasonDialog(scope.row)" type="text" size="small">驳回原因</el-button>
+              </div>
+            </template>
+          </el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
       </el-row>
@@ -178,17 +188,40 @@
         </div>
       </template>
     </el-dialog>
-     <!-- dialog -->
-     <el-dialog title="下载图片" :visible.sync="picUrlsVisible" width="440px" @close="closePicUrlsDialog"
-     v-dialog-drag>
-     <template>
-       <div class="picUrlsBox">
-         <div><a href="#">下载图片1</a></div>
-         <div><a href="#">下载图片2</a></div>
-         <div><a href="#">下载图片3</a></div>
-       </div>
-     </template>
-   </el-dialog>
+
+    <!--驳回原因-->
+    <el-dialog title="rejectCustomerName" :visible.sync="rejectReasonVisible" width="540px" @close="closeRejectReasonDialog" v-dialog-drag>
+      <template>
+        <el-form>
+          <el-form-item label="驳回人员:">
+            <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
+            <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectUser}}</span>
+          </el-form-item>
+          <el-form-item label="驳回时间:">
+            <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
+            <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectTime}}</span>
+          </el-form-item>
+          <el-form-item label="驳回原因:" label-width="70px" prop="remark">
+            <span class="statusNo">{{rejectReasonObj.rejectReason}}</span>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </template>
+    </el-dialog>
+    <!-- 下载图片 dialog 开始 -->
+    <el-dialog title="下载图片" :visible.sync="picUrlsVisible" width="440px" @close="closePicUrlsDialog" v-dialog-drag>
+      <template>
+        <div class="picUrlsBox">
+          <div v-for="(item,index) in imgList" style="margin-bottom:8px">
+            <a :href="'/financing/refund/downloadOssImg?url='+item.url" :download="item.name"
+              style="color:blue; text-decoration: underlined;">{{item.name}}</a>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
+
+
+
     <!-- dialog -->
     <el-dialog title="确认通过" :visible.sync="submitApplyVisible" width="440px" @close="closeSubmitApplyDialog"
       v-dialog-drag>
@@ -205,6 +238,7 @@
   </div>
   <!-- import common js-->
   <div th:include="_footer_include :: #jsLib"></div>
+  <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 </body>
 <script th:inline="javascript">
   var busAreaList = [[${ busAreaList }]];//商务大区
@@ -226,8 +260,12 @@
       isShow: false,
       lowestCommissionShow: false,
       btnDisabled: false,
-      picUrlsVisible:false,
+      picUrlsVisible: false,
       signShopType: vistitStoreTypeList,
+      companyArr: [],
+      imgList: [],
+      rejectCustomerName:'',
+      rejectReasonObj:{},
       searchForm: {
         cusName: '',
         busGroupId: '',
@@ -236,7 +274,7 @@
         payEndTime: '',
         businessManagerId: '',
         teleSaleId: '',
-        signShopType: '',
+        signShopTypeId: '',
         signProjectId: '',
         status: 2,
       },
@@ -245,6 +283,7 @@
       doubtRemarkShow: false,
       backVisable: false,
       submitApplyVisible: false,
+      rejectReasonVisible:false,
       ratio: "",
       viewDoubtForm: {
         doubtRemark: ''
@@ -259,12 +298,31 @@
       dataTable: [
         {
           statementNo: '13323232332',
+          customerName: '张三',
+          picUrls: [
+            { "id": 12321213123, "name": "测试图片名称", "url": "www.baidu.com" },
+            { "id": 22321213124, "name": "测试图片名称1", "url": "www.baidu.com1" }
+          ],
+          status:4,
+          rejectUser:"会会",
+          rejectTime:"20200304 22:44:13",
+          rejectReason:"佣金金额不对！！"
         },
         {
           statementNo: '23323232332',
+          customerName: '李四',
+          picUrls: [
+            { "id": 12321213125, "name": "测试图片名称", "url": "www.baidu.com" },
+            { "id": 22321213126, "name": "测试图片名称1", "url": "www.baidu.com1" }
+          ]
         },
         {
           statementNo: '33323232332',
+          customerName: '王五',
+          picUrls: [
+            { "id": 12321213127, "name": "测试图片名称", "url": "www.baidu.com" },
+            { "id": 22321213128, "name": "测试图片名称1", "url": "www.baidu.com1" }
+          ]
         }
       ],
       allTableColums: [],
@@ -544,39 +602,29 @@
         return text;
       },
 
-      down() {
-        var rows = this.multipleSelection;
-        if (rows.length == 0) {
-          this.$message({
-            message: '请选择数据',
-            type: 'warning'
-          });
-          return;
-        } else if (rows.length > 1) {
-          this.$message({
-            message: '请选择一条数据进行下载结算单',
-            type: 'warning'
-          });
-          return;
-        }
-        var status = rows[0].status;
-        if (status == "待处理" || status == "驳回商务") {
-          this.$message({
-            message: "未提交对账不允许下载结算单",
-            type: 'warning'
-          });
-          return;
-        }
-        window.location.href = "/financing/balanceaccount/downBalanceAccount?payDetailId=" + rows[0].payId;
-      },
+
 
       //查看附件
-      openPicUrlDialog(urls){
-        this.picUrlsVisible=true;
+      openPicUrlDialog(urls) {
+        this.picUrlsVisible = true;
+        this.imgList = urls;
+        console.log(urls, "urls");
+
       },
-      closePicUrlsDialog(){
-        this.picUrlsVisible=false;
+      closePicUrlsDialog() {
+        this.picUrlsVisible = false;
       },
+
+      //查看驳回原因
+      openRejectReasonDialog(row){
+        this.rejectReasonVisible=true;
+        this.rejectCustomerName="驳回（${row.customerName}）客户超成本申请信息";
+        this.rejectReasonObj=Object.assign({}, row);
+      },
+      closeRejectReasonDialog(){
+        this.rejectReasonVisible=false;
+      },
+
       //驳回
       rejectback() {
         var rows = this.multipleSelection;
@@ -594,7 +642,7 @@
           return;
         }
         var status = rows[0].status;
-        var statementNo = rows[0].statementNo;
+        var customerName = rows[0].customerName;
         var msg = "只有待处理的申请允许驳回！";
         /*if(status !="待处理"){
           this.$message({
@@ -604,7 +652,7 @@
                return;
         }*/
         this.rejectVisible = true;
-        this.backQuery = "【" + statementNo + "】超成本申请驳回吗?";
+        this.backQuery = "【" + customerName + "】超成本申请驳回吗?";
         // 存储选中信息--start
         // var clueId = rows[0].accountId;
         // setSessionStore("balanceAccountStoreForm", this.storeForm);
@@ -775,14 +823,13 @@
       //     });
       // },
       clearBusAreaList() {
-        this.busGroupOptions = [];
-        this.searchForm.busGroupId = '';
+        this.searchForm.signShopTypeId = '';
         this.clearBusGroupList();
 
       },
       clearBusGroupList() {
-        this.busSaleOptions = [];
-        this.searchForm.busSaleId = '';
+        this.companyArr = [];
+        this.searchForm.companyId = '';
       },
       getBusAndTel() {
         var param = {};
@@ -803,35 +850,48 @@
           .catch(function (error) {
             console.log(error);
           });
-      },
-    //   //意向品类
-    //   getIntentionalCategory() {
-    //     param = {};
-    //     param.groupCode = "project_category";
-    //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCodeSort', param).then(function (response) {
-    //       clueVM.IntentionalCategoryArr = response.data.data;
-    //       console.log(clueVM.IntentionalCategoryArr,"clueVM.IntentionalCategoryArr");
-    //     });
-    //   },
 
-    //   //签约项目
-    //   projectChangeSelect(selVal) {
-    //     var param = {};
-    //     param.category = selVal;
-    //     this.form.insideProject = null;
-    //     axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
-    //       clueVM.proSelect = response.data.data;
-    //     });
-    //   },
-     },
+      },
+      //签约公司
+      getCompanyArr() {
+        var param = {};
+        axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
+          clueVM.companyArr = response.data.data;
+          console.log(clueVM.companyArr, "clueVM.companyArr")
+        })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+      //   //意向品类
+      //   getIntentionalCategory() {
+      //     param = {};
+      //     param.groupCode = "project_category";
+      //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCodeSort', param).then(function (response) {
+      //       clueVM.IntentionalCategoryArr = response.data.data;
+      //       console.log(clueVM.IntentionalCategoryArr,"clueVM.IntentionalCategoryArr");
+      //     });
+      //   },
+
+      //   //签约项目
+      //   projectChangeSelect(selVal) {
+      //     var param = {};
+      //     param.category = selVal;
+      //     this.form.insideProject = null;
+      //     axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+      //       clueVM.proSelect = response.data.data;
+      //     });
+      //   },
+    },
     created() {
-      console.info("create method");
+      this.getBusAndTel();
+      this.getCompanyArr();
       // 进入页面判断有是否有存储值
       // 取页数存储
       var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
       if (localVal) { this.pager.pageSize = localVal; }
       // this.searchTable();
-      this.getBusAndTel();
+
       // this.getIntentionalCategory();
     },
     mounted() {
