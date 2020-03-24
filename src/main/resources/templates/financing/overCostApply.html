@@ -165,7 +165,7 @@
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
                 <div v-if="isShowEdit">
                     <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="">
-                        {{allocationForm.rejectUser}}
+                        {{allocationForm.rejectUserName}}
                     </el-form-item>
                     <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="">
                         {{allocationForm.rejectTime}}
@@ -780,10 +780,10 @@ var clueVM = new Vue({
                 param.id = rowsId;  
                 axios.post('/financing/overCost/findFinanceOverCostById',param).then(function (response) {
                   console.log(response);
-                    var data=response.data.data;
-                    if(data){
+                    var data=response.data;
+                    if(data.code=='0'){
                         // 驳回人员，驳回时间，驳回原因，应退佣金金额，上传的附件
-                        clueVM.allocationForm.rejectUser = data.rejectUser;  
+                        clueVM.allocationForm.rejectUserName = data.rejectUserName;  
                         clueVM.allocationForm.rejectTime = data.rejectTime; 
                         clueVM.allocationForm.rejectReason = data.rejectReason; 
                         clueVM.allocationForm.commission = data.commission; 
@@ -795,8 +795,11 @@ var clueVM = new Vue({
                         // fileListObj.name=urldataName;
                         // clueVM.form.fileList.push(fileListObj);  
                    }else{
-                        alert(response.data.data.message);
-                        return ;
+                        clueVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        }); 
+                        clueVM.btnDisabled=false;
                    } 
                 }).catch(function (error) {
                     console.log(error);
