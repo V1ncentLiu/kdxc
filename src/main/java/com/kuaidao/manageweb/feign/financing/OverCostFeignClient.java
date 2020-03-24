@@ -85,7 +85,7 @@ public interface OverCostFeignClient {
      * @return
      */
     @PostMapping("/findFinanceOverCostById")
-    JSONResult<String> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto);
+    JSONResult<FinanceOverCostRespDto> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto);
     
     @Component
     @Slf4j
@@ -136,7 +136,7 @@ public interface OverCostFeignClient {
 
 
 		@Override
-		public JSONResult<String> findFinanceOverCostById(FinanceOverCostReqDto reqDto) {
+		public JSONResult<FinanceOverCostRespDto> findFinanceOverCostById(FinanceOverCostReqDto reqDto) {
 			return fallBackError("根据id查询超成本信息");
 		}
 
