@@ -110,7 +110,6 @@
 
           <div class="mainSearchBtnBox">
             <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-            <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
             <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
                 v-if="isShow">收起</span><span v-else>展开更多</span><i
                 :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
@@ -130,7 +129,6 @@
           </el-table-column>
           <el-table-column align="center" prop="signCompanyName" label="签约公司"></el-table-column>
           <el-table-column align="center" prop="bearAmount" label="电销顾问"></el-table-column>
-          <!--  <el-table-column align="center" prop="companyAmount" label="返换餐饮公司金额"></el-table-column> -->
           <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
           <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
           <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
@@ -158,9 +156,12 @@
           </el-table-column>
           <el-table-column align="center" prop="status" label="处理状态">
             <template slot-scope="scope">
-              <div v-if="scope.row.status==’已驳回‘">
+              <div v-if="scope.row.status==='已驳回'">
                 <span class="statusNo">已驳回</span>
                 <el-button @click="openRejectReasonDialog(scope.row)" type="text" size="small">驳回原因</el-button>
+              </div>
+              <div v-else>
+                <span>{{scope.row.status}}</span>
               </div>
             </template>
           </el-table-column>
@@ -190,18 +191,16 @@
     </el-dialog>
 
     <!--驳回原因-->
-    <el-dialog title="rejectCustomerName" :visible.sync="rejectReasonVisible" width="540px" @close="closeRejectReasonDialog" v-dialog-drag>
+    <el-dialog :title="rejectCustomerName" :visible.sync="rejectReasonVisible" width="540px" @close="closeRejectReasonDialog" v-dialog-drag>
       <template>
         <el-form>
           <el-form-item label="驳回人员:">
-            <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
             <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectUser}}</span>
           </el-form-item>
           <el-form-item label="驳回时间:">
-            <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
             <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectTime}}</span>
           </el-form-item>
-          <el-form-item label="驳回原因:" label-width="70px" prop="remark">
+          <el-form-item label="驳回原因:">
             <span class="statusNo">{{rejectReasonObj.rejectReason}}</span>
             </el-input>
           </el-form-item>
@@ -295,36 +294,37 @@
       rejectVisible: false,
       count: 0,
       dxBusinessList: [],
-      // dataTable: [
-      //   {
-      //     statementNo: '13323232332',
-      //     customerName: '张三',
-      //     picUrls: [
-      //       { "id": 12321213123, "name": "测试图片名称", "url": "www.baidu.com" },
-      //       { "id": 22321213124, "name": "测试图片名称1", "url": "www.baidu.com1" }
-      //     ],
-      //     status:4,
-      //     rejectUser:"会会",
-      //     rejectTime:"20200304 22:44:13",
-      //     rejectReason:"佣金金额不对！！"
-      //   },
-      //   {
-      //     statementNo: '23323232332',
-      //     customerName: '李四',
-      //     picUrls: [
-      //       { "id": 12321213125, "name": "测试图片名称", "url": "www.baidu.com" },
-      //       { "id": 22321213126, "name": "测试图片名称1", "url": "www.baidu.com1" }
-      //     ]
-      //   },
-      //   {
-      //     statementNo: '33323232332',
-      //     customerName: '王五',
-      //     picUrls: [
-      //       { "id": 12321213127, "name": "测试图片名称", "url": "www.baidu.com" },
-      //       { "id": 22321213128, "name": "测试图片名称1", "url": "www.baidu.com1" }
-      //     ]
-      //   }
-      // ],
+      dataTable: [],
+        // {
+        //   statementNo: '13323232332',
+        //   customerName: '张三',
+        //   picUrls: [
+        //     { "id": 12321213123, "name": "测试图片名称", "url": "www.baidu.com" },
+        //     { "id": 22321213124, "name": "测试图片名称1", "url": "www.baidu.com1" }
+        //   ],
+        //   status:"已驳回",
+        //   rejectUser:"会会",
+        //   rejectTime:"20200304 22:44:13",
+        //   rejectReason:"佣金金额不对！！"
+        // },
+        // {
+        //   statementNo: '23323232332',
+        //   customerName: '李四',
+        //   picUrls: [
+        //     { "id": 12321213125, "name": "测试图片名称", "url": "www.baidu.com" },
+        //     { "id": 22321213126, "name": "测试图片名称1", "url": "www.baidu.com1" }
+        //   ],
+        //   status:"待处理",
+        // },
+        // {
+        //   statementNo: '33323232332',
+        //   customerName: '王五',
+        //   picUrls: [
+        //     { "id": 12321213127, "name": "测试图片名称", "url": "www.baidu.com" },
+        //     { "id": 22321213128, "name": "测试图片名称1", "url": "www.baidu.com1" }
+        //   ]
+        // }
+      
       allTableColums: [],
       tableColums: [],
       dialogFormVisible: false,
@@ -477,6 +477,7 @@
 
       },
       searchTable() {
+        console.log(9999);
         var param = {};
         param = Object.assign({}, this.searchForm);
         var payStartTime = this.searchForm.payStartTime;
@@ -499,7 +500,7 @@
         //列表只查询正常数据，取消删除数据不查询
         //param.delFalg = this.searchForm.delFalg;
         console.info(param);
-        axios.post('/financing/overCost/confirmPage', param)
+        axios.post('/financing/overCost/overCostConfirmList', param)
           .then(function (response) {
             var result = response.data;
             console.info(result);
@@ -618,7 +619,7 @@
       //查看驳回原因
       openRejectReasonDialog(row){
         this.rejectReasonVisible=true;
-        this.rejectCustomerName="驳回（${row.customerName}）客户超成本申请信息";
+        this.rejectCustomerName=`驳回（${row.customerName}）客户超成本申请信息`;
         this.rejectReasonObj=Object.assign({}, row);
       },
       closeRejectReasonDialog(){
@@ -832,6 +833,7 @@
         this.searchForm.companyId = '';
       },
       getBusAndTel() {
+        console.log(8888);
         var param = {};
         axios.post('/financing/balanceaccount/getBusAndTel', param)
           .then(function (response) {
@@ -890,7 +892,7 @@
       // 取页数存储
       var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
       if (localVal) { this.pager.pageSize = localVal; }
-       this.searchTable();
+      this.searchTable();
 
       // this.getIntentionalCategory();
     },
