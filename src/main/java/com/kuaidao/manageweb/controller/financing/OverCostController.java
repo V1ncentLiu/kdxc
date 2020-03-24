@@ -227,7 +227,7 @@ public class OverCostController {
      **/
     @PostMapping("/findFinanceOverCostById")
     @ResponseBody
-    public JSONResult<String> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto) {
+    public JSONResult<FinanceOverCostRespDto> findFinanceOverCostById(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.findFinanceOverCostById(reqDto);
     }
 }
