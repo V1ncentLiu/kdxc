@@ -216,7 +216,7 @@
       </ol>
     </el-dialog>
     <!-- 下载图片dialog 结束 -->
-    
+    <input id="updateId" type="hidden" >
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -255,7 +255,7 @@ var clueVM = new Vue({
               teleSaleId:'',
               signShopType:'',
               signProjectId:'',
-              status:'',
+              status:1,
           },
           allocationForm: {
             rejectUserName:'',
@@ -776,24 +776,22 @@ var clueVM = new Vue({
                 this.allocationVisible = true;
                 // 显示驳回人员，驳回时间，驳回原因
                 this.isShowEdit=true;
+                $("#updateId").val(rowsId);//驳回的数据id
                 var param ={};
                 param.id = rowsId;  
                 axios.post('/financing/overCost/findFinanceOverCostById',param).then(function (response) {
                   console.log(response);
                     var data=response.data;
                     if(data.code=='0'){
-                        // 驳回人员，驳回时间，驳回原因，应退佣金金额，上传的附件
-                        clueVM.allocationForm.rejectUserName = data.rejectUserName;  
-                        clueVM.allocationForm.rejectTime = data.rejectTime; 
-                        clueVM.allocationForm.rejectReason = data.rejectReason; 
-                        clueVM.allocationForm.commission = data.commission; 
-                        // var urldata=data.url; 
-                        // var index = urldata.lastIndexOf("\/");
-                        // urldataName = urldata.substring(index + 1,urldata.length);
-                        // var fileListObj={};
-                        // fileListObj.url=urldata;
-                        // fileListObj.name=urldataName;
-                        // clueVM.form.fileList.push(fileListObj);  
+                        var data=data.data;
+                        if(data){
+                            // 驳回人员，驳回时间，驳回原因，应退佣金金额，上传的附件
+                            clueVM.allocationForm.rejectUserName = data.rejectUserName;  
+                            clueVM.allocationForm.rejectTime = data.rejectTime; 
+                            clueVM.allocationForm.rejectReason = data.rejectReason; 
+                            clueVM.allocationForm.commission = data.commission; 
+                            clueVM.allocationForm.fileList = data.picUrls;
+                        }                          
                    }else{
                         clueVM.$message({
                             message: "接口调用失败",
@@ -817,7 +815,13 @@ var clueVM = new Vue({
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var param  = {};
-                        param.id=rows[0].id;
+                        // param.id=rows[0].id;
+                        var idval=$("#updateId").val();
+                        if(idval){
+                            param.id = idval; 
+                        }else{
+                            param.id=""
+                        }
                         param.commission=this.allocationForm.commission;
                         param.picUrls = JSON.stringify(this.fileList);
                         this.btnDisabled=true;
