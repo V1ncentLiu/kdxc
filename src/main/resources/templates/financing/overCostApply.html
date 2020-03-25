@@ -150,8 +150,9 @@
                     <span v-if="scope.row.status==1">未申请</span>
                     <span v-if="scope.row.status==2">已申请</span>
                     <span v-if="scope.row.status==3">已确认</span>
-                    <el-button v-if="scope.row.status==4" @click="edit(scope.row.id)" size="small" type="text">已驳回</el-button>
-                    <span v-if="scope.row.status==5">已结算</span>                    
+                    <el-button v-if="scope.row.status==4" @click="edit(scope.row)" size="small" type="text">已驳回</el-button>
+                    <span v-if="scope.row.status==5">已结算</span>  
+                     <!-- <el-button @click="edit(scope.row)" size="small" type="text">已驳回</el-button> -->
                   </template>
                   
                 </el-table-column>
@@ -160,7 +161,8 @@
         </el-row>
     </div>
     <!-- dialog -->
-    <el-dialog  :title='"("+refundTitle+"）客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
+    <!-- <el-dialog  :title='"("+refundTitle+"）客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag> -->
+    <el-dialog  :title='refundTitle'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
                 <div v-if="isShowEdit">
@@ -775,11 +777,17 @@ var clueVM = new Vue({
                 // 不显示驳回人员，驳回时间，驳回原因
                 this.isShowEdit=false;
                 this.btnDisabled=false;
-                this.AllCommission();
-                this.refundTitle=rows[0].customerName;
+                this.AllCommission();//自动计算退款客户金额
+                // 显示带客户名称的弹窗标题
+                var customerName=rows[0].customerName;
+                if(customerName){
+                    this.refundTitle="（"+customerName+"）客户超成本申请";
+                }else{
+                    this.refundTitle="客户超成本申请";
+                }                
             },
             // 编辑超成本申请
-            edit(rowsId){
+            edit(rows){
                 if (this.$refs['form']!=undefined) {
                     this.$refs['form'].resetFields();
                 }
@@ -787,9 +795,16 @@ var clueVM = new Vue({
                 this.allocationVisible = true;
                 // 显示驳回人员，驳回时间，驳回原因
                 this.isShowEdit=true;
-                $("#updateId").val(rowsId);//驳回的数据id
+                // 显示带客户名称的弹窗标题
+                var customerName=rows.customerName;
+                if(customerName){
+                    this.refundTitle="（"+customerName+"）客户超成本申请";
+                }else{
+                    this.refundTitle="客户超成本申请";
+                }  
+                $("#updateId").val(rows.id);//驳回的数据id
                 var param ={};
-                param.id = rowsId;  
+                param.id = rows.id;  
                 axios.post('/financing/overCost/findFinanceOverCostById',param).then(function (response) {
                   console.log(response);
                     var data=response.data;
