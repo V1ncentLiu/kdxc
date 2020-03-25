@@ -138,7 +138,8 @@
           <el-table-column align="center" prop="amountEquipment" label="设备成本"></el-table-column>
           <el-table-column align="center" prop="giveAmount" label="活动赠送成本"></el-table-column>
           <el-table-column align="center" prop="totalCost" label="成本总计"></el-table-column>
-          <el-table-column align="center" prop="costRatio" label="成本占比"></el-table-column>
+          <el-table-column align="center" prop="costRatio" label="成本占比">
+          </el-table-column>
           <el-table-column align="center" prop="overCost" label="超成本红线">
             <template slot-scope="scope">
               <div>{{scope.row.overCost}}%</div>
@@ -533,15 +534,18 @@
               for (var i = 0; i < data.length; i++) {
                 data[i].status = clueVM.transformStatus(data[i].status);
                 data[i].signShopType = clueVM.transformSignShopType(vistitStoreTypeList, data[i].signShopType);
-                data[i]['costRatio'] = clueVM.transformCostRatio(data[i].totalCost, data[i].amountReceived);
-                data[i]['deTeleSale'] = clueVM.transformSale(data[i].amountReceived, data[i].teleSaleRatio, data[i].overCostRatio);
-                data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
+                  data[i]['costRatio'] = clueVM.transformCostRatio(data[i].totalCost, data[i].amountReceived);
+                  data[i]['deTeleSale'] = clueVM.transformSale(data[i].amountReceived, data[i].teleSaleRatio, data[i].overCostRatio);
+                  data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
+
               }
               clueVM.dataTable = data;
             }else{
               clueVM.dataTable = [];
             }
+              console.log(clueVM.dataTable,"clueVM.dataTable")
           })
+
           .catch(function (error) {
             console.log(error);
           });
@@ -599,26 +603,27 @@
       },
       //应扣商务/电销业绩
       transformSale(val1, val2, val3) {
-        var val = val1 * val2*0.01 * val3*0.01;
-        this.transformFormat(val);
+        var val = val1 * val2 * 0.01 * val3 * 0.01;
+       return val;
       },
       //成本占比计算
       transformCostRatio(val1, val2) {
         var val = val1 / val2;
-        this.transformFormat(val);
+       return  this.transformFormat(val);
       },
       //四舍五入+%
       transformFormat(cellValue) {
         var text = cellValue * 100 + "";
         var floatText = "";
         if (text.indexOf(".") > -1) {
-          floatText = floatText.substring(text.indexOf("."));
+            floatText = text.substring(text.indexOf("."));
+            if (floatText.length >= 2) {
+                text = (text * 1).toFixed(2) + "%";
+            } else {
+                text = text + "%"
+            }
         }
-        if (floatText.length > 2) {
-          text = (text * 1).toFixed(2) + "%";
-        } else {
-          text = text + "%"
-        }
+        console.log(text,"text");
         return text;
       },
 
