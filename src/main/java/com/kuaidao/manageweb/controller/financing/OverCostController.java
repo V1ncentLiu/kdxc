@@ -104,6 +104,7 @@ public class OverCostController {
      **/
     @ResponseBody
     @RequestMapping("/confirm")
+    @RequiresPermissions("financing:overCostConfirm:confirm")
     @LogRecord(description = "超成本申请确认", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_CONFIRM)
     public JSONResult<String> confirm(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.confirm(reqDto);
@@ -120,6 +121,7 @@ public class OverCostController {
      **/
     @ResponseBody
     @RequestMapping("/reject")
+    @RequiresPermissions("financing:overCostConfirm:reject")
     @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
     public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.reject(reqDto);
