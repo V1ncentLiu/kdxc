@@ -130,7 +130,8 @@ public class OverCostController {
      * @Date: 2020/3/12 11:37
      * @since: 1.0.0
      **/
-    @PostMapping("/overCostConfirmList")
+    @ResponseBody
+    @RequestMapping("/overCostConfirmList")
     public JSONResult<PageBean<FinanceOverCostRespDto>> overCostConfirmList(@RequestBody FinanceOverCostReqDto reqDto) {
         UserInfoDTO userInfoDTO = getUser();
         reqDto.setUserId(userInfoDTO.getId());
