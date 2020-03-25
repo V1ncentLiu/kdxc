@@ -529,16 +529,18 @@
             clueVM.pager.total = table.total;
             clueVM.pager.currentPage = table.currentPage;
             var data = table.data;
-            for (var i = 0; i < data.length; i++) {
-              data[i].status = clueVM.transformStatus(data[i].status);
-              data[i].signShopType = clueVM.transformSignShopType(vistitStoreTypeList, data[i].signShopType);
-              data[i]['costRatio'] = clueVM.transformCostRatio(data[i].totalCost, data[i].amountReceived);
-              data[i]['deTeleSale'] = clueVM.transformSale(data[i].amountReceived, data[i].teleSaleRatio, data[i].overCostRatio);
-              data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
+            if(data&&data.length>0){
+              for (var i = 0; i < data.length; i++) {
+                data[i].status = clueVM.transformStatus(data[i].status);
+                data[i].signShopType = clueVM.transformSignShopType(vistitStoreTypeList, data[i].signShopType);
+                data[i]['costRatio'] = clueVM.transformCostRatio(data[i].totalCost, data[i].amountReceived);
+                data[i]['deTeleSale'] = clueVM.transformSale(data[i].amountReceived, data[i].teleSaleRatio, data[i].overCostRatio);
+                data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
+              }
+              clueVM.dataTable = data;
+            }else{
+              clueVM.dataTable = [];
             }
-            clueVM.dataTable = data;
-
-
           })
           .catch(function (error) {
             console.log(error);
