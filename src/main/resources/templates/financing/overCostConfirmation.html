@@ -139,13 +139,33 @@
           <el-table-column align="center" prop="giveAmount" label="活动赠送成本"></el-table-column>
           <el-table-column align="center" prop="totalCost" label="成本总计"></el-table-column>
           <el-table-column align="center" prop="costRatio" label="成本占比"></el-table-column>
-          <el-table-column align="center" prop="overCost" label="超成本红线"></el-table-column>
-          <el-table-column align="center" prop="teleSaleRatio" label="电销业绩比例"></el-table-column>
-          <el-table-column align="center" prop="busSaleRatio" label="商务业绩比例"></el-table-column>
+          <el-table-column align="center" prop="overCost" label="超成本红线">
+            <template slot-scope="scope">
+              <div>{{scope.row.overCost}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="teleSaleRatio" label="电销业绩比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.teleSaleRatio}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="busSaleRatio" label="商务业绩比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.busSaleRatio}}%</div>
+            </template>
+          </el-table-column>
           <el-table-column align="center" prop="deTeleSale" label="应扣电销业绩"></el-table-column>
           <el-table-column align="center" prop="deBusSale" label="应扣商务业绩"></el-table-column>
-          <el-table-column align="center" prop="overCostRatio" label="超成本比例"></el-table-column>
-          <el-table-column align="center" prop="commissionRatio" label="佣金比例"></el-table-column>
+          <el-table-column align="center" prop="overCostRatio" label="超成本比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.overCostRatio}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="commissionRatio" label="佣金比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.commissionRatio}}%</div>
+            </template>
+          </el-table-column>
           <el-table-column align="center" prop="commission" label="应退佣金"></el-table-column>
           <el-table-column align="center" prop="picUrls" label="申请附件">
             <template slot-scope="scope">
@@ -213,7 +233,7 @@
         <div class="picUrlsBox">
           <div v-for="(item,index) in imgList" style="margin-bottom:8px">
             <a :href="'/financing/refund/downloadOssImg?url='+item.url" :download="item.name"
-              style="color:blue; text-decoration: underlined;">{{item.name}}</a>
+              style="color:blue; text-decoration:underline">{{item.name}}</a>
           </div>
         </div>
       </template>
@@ -503,11 +523,11 @@
         axios.post('/financing/overCost/overCostConfirmList', param)
           .then(function (response) {
             var result = response.data;
+            console.log(result,"result");
             console.info(result);
             var table = result.data;
             clueVM.pager.total = table.total;
             clueVM.pager.currentPage = table.currentPage;
-
             var data = table.data;
             for (var i = 0; i < data.length; i++) {
               data[i].status = clueVM.transformStatus(data[i].status);
@@ -517,9 +537,6 @@
               data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
             }
             clueVM.dataTable = data;
-            // 取出存储的id
-            // removeSessionStore("balanceAccountStoreForm");
-            // removeSessionStore("balanceAccountOtherVal");
 
 
           })
@@ -580,13 +597,13 @@
       },
       //应扣商务/电销业绩
       transformSale(val1, val2, val3) {
-        var val = val1 * val2 * val3;
-        transformFormat(val);
+        var val = val1 * val2*0.01 * val3*0.01;
+        this.transformFormat(val);
       },
       //成本占比计算
       transformCostRatio(val1, val2) {
         var val = val1 / val2;
-        transformFormat(val);
+        this.transformFormat(val);
       },
       //四舍五入+%
       transformFormat(cellValue) {
@@ -608,9 +625,8 @@
       //查看附件
       openPicUrlDialog(urls) {
         this.picUrlsVisible = true;
-        this.imgList = urls;
-        console.log(urls, "urls");
-
+        this.imgList = JSON.parse(urls);
+        console.log(this.imgList,'this.imgList');
       },
       closePicUrlsDialog() {
         this.picUrlsVisible = false;
@@ -675,7 +691,7 @@
             param.id = rows[0].id;
             param.rejectReason = this.rejectform.remark;
             this.btnDisabled = true;
-            axios.post('financing/overCost/reject', param)
+            axios.post('/financing/overCost/reject', param)
               .then(function (response) {
                 var data = response.data;
                 if (response.status == 200) {

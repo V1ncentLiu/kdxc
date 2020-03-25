@@ -102,9 +102,9 @@ public class OverCostController {
      * @Date: 2020/3/12 11:37
      * @since: 1.0.0
      **/
-    @PostMapping("/confirm")
+    @ResponseBody
+    @RequestMapping("/confirm")
     @LogRecord(description = "超成本申请确认", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_CONFIRM)
-
     public JSONResult<String> confirm(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.confirm(reqDto);
     }
@@ -118,7 +118,8 @@ public class OverCostController {
      * @Date: 2020/3/12 11:37
      * @since: 1.0.0
      **/
-    @PostMapping("/reject")
+    @ResponseBody
+    @RequestMapping("/reject")
     @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
     public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
         return overCostFeignClient.reject(reqDto);
