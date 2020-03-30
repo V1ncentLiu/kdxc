@@ -73,8 +73,8 @@ public class OverCostController {
     public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request,
             @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
         UserInfoDTO userInfoDTO = getUser();
-        financeOverCostReqDto.setUserId(1135456630805237760L);
-        // financeOverCostReqDto.setRoleCode(userInfoDTO.getRoleCode());
+        financeOverCostReqDto.setUserId(userInfoDTO.getId());
+         financeOverCostReqDto.setRoleCode(userInfoDTO.getRoleCode());
         JSONResult<PageBean<FinanceOverCostRespDto>> list = overCostFeignClient.overCostApplyList(financeOverCostReqDto);
         return list;
     }
