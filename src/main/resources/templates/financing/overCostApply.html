@@ -489,12 +489,15 @@ var clueVM = new Vue({
                 var rows = this.multipleSelection;
                 console.log(rows)
                 var aone = parseFloat(rows[0].amountReceived);
-                var atwo = parseFloat(rows[0].overCostRatio);
-                var three = parseFloat(rows[0].commissionRatio);
+                var atwo = parseFloat(rows[0].overCostRatio/100);
+                var three = parseFloat(rows[0].commissionRatio/100);
                 if (isNaN(aone)) aone = 0
                 if (isNaN(atwo)) atwo = 0
                 if (isNaN(three)) three = 0
-                this.allocationForm.commission = (aone * atwo * three) + "";
+                var num =aone * atwo * three;
+                num = num.toFixed(2); // 输出结果为 2.45
+                // this.allocationForm.commission = (aone * atwo * three) + "";
+                this.allocationForm.commission = num + "";
             },
           	getUploadParam(){
                 var signUrl = this.ossUrl+"?serviceType=aggregation";
@@ -768,8 +771,14 @@ var clueVM = new Vue({
                 return valText;
             },
             //加百分号
-            transformValue(row, column, cellValue, index) {           
-                return cellValue+"%";
+            transformValue(row, column, cellValue, index) {    
+                var valText="";
+                if (cellValue) {
+                    valText = cellValue+"%";
+                }else{
+                    valText = 0
+                }      
+                return valText;
             },
             //打开超成本申请
             toAllocationClue(formName) {
