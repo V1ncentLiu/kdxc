@@ -10,6 +10,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.alibaba.fastjson.JSONObject;
+import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
+import com.kuaidao.manageweb.util.CommUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -293,8 +297,10 @@ public class MyCustomerClueController {
         List<Long> accountList = new ArrayList<Long>();
         List<DictionaryItemRespDTO> mediumList = new ArrayList<>();
         TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
+        String role = null;
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
+            role = roleCode;
             if (null != roleCode) {
                 if (roleCode.equals(RoleCodeEnum.GLY.name())) {
                     // 管理员查看所有
@@ -383,6 +389,10 @@ public class MyCustomerClueController {
 
             if (null != clueInfo.getData().getClueCustomer()) {
                 ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
+                if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())
+                        ||StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXCYGW.name())){
+                    setPhoneLocales(clueCustomerDTO);
+                }
                 clueCustomerDTO.setPhoneCreateTime(null);
                 clueCustomerDTO.setPhone2CreateTime(null);
                 clueCustomerDTO.setPhone3CreateTime(null);
@@ -564,8 +574,12 @@ public class MyCustomerClueController {
                 && clueInfo.getData() != null) {
 
             if (null != clueInfo.getData().getClueCustomer()) {
+                ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
+                if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())
+                        ||StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXCYGW.name())){
+                    setPhoneLocales(clueCustomerDTO);
+                }
                 if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
-                    ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
                     clueCustomerDTO.setPhoneCreateTime(null);
                     clueCustomerDTO.setPhone2CreateTime(null);
                     clueCustomerDTO.setPhone3CreateTime(null);
@@ -573,7 +587,7 @@ public class MyCustomerClueController {
                     clueCustomerDTO.setPhone5CreateTime(null);
                     request.setAttribute("customer", clueCustomerDTO);
                 } else {
-                    request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+                    request.setAttribute("customer", clueCustomerDTO);
                 }
 
             } else {
@@ -675,6 +689,51 @@ public class MyCustomerClueController {
         }
     }
 
+    /**
+     * 设置手机号归属地
+     * @param clueCustomerDTO
+     * @return
+     */
+    private void setPhoneLocales(ClueCustomerDTO clueCustomerDTO){
+        if(StringUtils.isNotBlank(clueCustomerDTO.getPhone())){
+            clueCustomerDTO.setPhoneLocale(getPhoneLocale(clueCustomerDTO.getPhone()));
+        }
+        if(StringUtils.isNotBlank(clueCustomerDTO.getPhone2())){
+            clueCustomerDTO.setPhone2Locale(getPhoneLocale(clueCustomerDTO.getPhone2()));
+        }
+        if(StringUtils.isNotBlank(clueCustomerDTO.getPhone3())){
+            clueCustomerDTO.setPhone3Locale(getPhoneLocale(clueCustomerDTO.getPhone3()));
+        }
+        if(StringUtils.isNotBlank(clueCustomerDTO.getPhone4())){
+            clueCustomerDTO.setPhone4Locale(getPhoneLocale(clueCustomerDTO.getPhone4()));
+        }
+        if(StringUtils.isNotBlank(clueCustomerDTO.getPhone5())){
+            clueCustomerDTO.setPhone5Locale(getPhoneLocale(clueCustomerDTO.getPhone5()));
+        }
+    }
+    /**
+     * 获取手机号归属地
+     * @param phone
+     * @return
+     */
+    private String getPhoneLocale(String phone){
+        if(StringUtils.isBlank(phone)){
+            return null;
+        }else {
+            String phoneLocale = null;
+            QueryPhoneLocaleDTO queryPhoneLocaleDTO = new QueryPhoneLocaleDTO();
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            queryPhoneLocaleDTO.setOrgId(curLoginUser.getOrgId());
+            queryPhoneLocaleDTO.setPhone(phone);
+            JSONResult<JSONObject> jsonResult = callRecordFeign. queryPhoneLocale(queryPhoneLocaleDTO);
+            JSONObject jsonObject = jsonResult.getData();
+            if(jsonObject !=null){
+                phoneLocale = jsonObject.get("area").toString();
+                return phoneLocale;
+            }
+        }
+        return null;
+    }
     /**
      * 查询资源文件上传记录
      * 

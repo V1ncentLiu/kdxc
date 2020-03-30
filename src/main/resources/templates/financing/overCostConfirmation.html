@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+  <title>后台管理系统</title>
+  <style>
+    .tableBox a {
+      color: #5c6be8
+    }
+
+    .apply-box {
+      overflow: hidden;
+      zoom: 1;
+    }
+
+    .apply-box .apply-text {
+      font-size: 12px;
+      color: #606266;
+      text-align: center;
+      padding: 30px 0;
+    }
+    .statusNo{
+      color: #fd5621;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="clueManage" class="clueManage mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>财务管理</el-breadcrumb-item>
+      <el-breadcrumb-item>超成本确认</el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <el-row class="marginB20 ">
+      <shiro:hasPermission name="financing:overCostConfirm:confirm">
+        <el-button type="warning" @click="settlementConfirmButton"> 超成本确认</el-button>
+      </shiro:hasPermission>
+      <shiro:hasPermission name="financing:overCostConfirm:reject">
+        <el-button type="danger" @click="rejectback">驳回申请</el-button>
+      </shiro:hasPermission>
+
+
+    </el-row>
+    <div class="mainSearchBg">
+      <div class="mainSearchFormBox">
+        <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm">
+          <el-form-item label="客户姓名:" prop="cusName">
+            <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
+          </el-form-item>
+          <el-form-item label="签约公司:" prop="companyId">
+            <el-select v-model="searchForm.companyId" clearable filterable placeholder="签单餐饮公司"
+              @clear="clearBusGroupList">
+              <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="签约省份:" prop="signProvince">
+            <el-select v-model="searchForm.signProvince" clearable filterable placeholder="签约省份">
+              <el-option v-for="item in provinceOptions" :key="item.name" :label="item.name" :value="item.name">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="付款时间：">
+            <el-date-picker v-model="searchForm.payStartTime" value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="—" class="widthauto">
+            <el-date-picker v-model="searchForm.payEndTime" value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+            </el-date-picker>
+          </el-form-item>
+
+          <el-row v-show="isShow">
+            <el-form-item label="商务经理:" prop="businessManagerId">
+              <el-select v-model="searchForm.businessManagerId" clearable filterable placeholder="商务经理">
+                <el-option v-for="item in busSaleOptions" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="电销顾问:" prop="teleSaleId">
+              <el-select v-model="searchForm.teleSaleId" clearable filterable placeholder="电销顾问">
+                <el-option v-for="item in teleSaleOptions" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="签约店型:" prop="signShopTypeId">
+              <el-select v-model="searchForm.signShopTypeId" clearable filterable placeholder="签约店型"
+                @clear="clearBusAreaList">
+                <el-option v-for="item in signShopType" :key="item.id" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="签约项目:" prop="signProjectId">
+              <el-select v-model="searchForm.signProjectId" clearable filterable placeholder="签约项目">
+                <el-option v-for="item in projectOptions" :key="item.id" :label="item.projectName" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="处理状态:" prop="status">
+              <el-select v-model="searchForm.status" clearable placeholder="处理状态">
+                <el-option v-for="item in statusOptions" :key="item.id" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-row>
+
+          <div class="mainSearchBtnBox">
+            <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+            <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
+                v-if="isShow">收起</span><span v-else>展开更多</span><i
+                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+          </div>
+        </el-form>
+      </div>
+      <!-- 表格 -->
+      <el-row>
+        <el-table ref="tableData" tooltip-effect="dark" border :data="dataTable"
+          @selection-change="handleSelectionChange">
+          <el-table-column align="center" type="selection"></el-table-column>
+          <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+          <el-table-column align="center" prop="statementNo" label="结算单编号">
+          </el-table-column>
+          <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+          <el-table-column align="center" prop="visitCity" label="到访城市">
+          </el-table-column>
+          <el-table-column align="center" prop="signCompanyName" label="签约公司"></el-table-column>
+          <el-table-column align="center" prop="bearAmount" label="电销顾问"></el-table-column>
+          <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
+          <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
+          <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+          <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+          <el-table-column align="center" prop="amountReceivablerefundTime" label="合同金额"></el-table-column>
+          <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+          <el-table-column align="center" prop="amountEquipment" label="设备成本"></el-table-column>
+          <el-table-column align="center" prop="giveAmount" label="活动赠送成本"></el-table-column>
+          <el-table-column align="center" prop="totalCost" label="成本总计"></el-table-column>
+          <el-table-column align="center" prop="costRatio" label="成本占比">
+          </el-table-column>
+          <el-table-column align="center" prop="overCost" label="超成本红线">
+            <template slot-scope="scope">
+              <div>{{scope.row.overCost}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="teleSaleRatio" label="电销业绩比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.teleSaleRatio}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="busSaleRatio" label="商务业绩比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.busSaleRatio}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="deTeleSale" label="应扣电销业绩"></el-table-column>
+          <el-table-column align="center" prop="deBusSale" label="应扣商务业绩"></el-table-column>
+          <el-table-column align="center" prop="overCostRatio" label="超成本比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.overCostRatio}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="commissionRatio" label="佣金比例">
+            <template slot-scope="scope">
+              <div>{{scope.row.commissionRatio}}%</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="commission" label="应退佣金"></el-table-column>
+          <el-table-column align="center" prop="picUrls" label="申请附件">
+            <template slot-scope="scope">
+              <div v-if="scope.row.picUrls">
+                <el-button @click="openPicUrlDialog(scope.row.picUrls)" type="text" size="small"> 查看附件 </el-button>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="status" label="处理状态">
+            <template slot-scope="scope">
+              <div v-if="scope.row.status==='已驳回'">
+                <span class="statusNo">已驳回</span>
+                <el-button @click="openRejectReasonDialog(scope.row)" type="text" size="small">驳回原因</el-button>
+              </div>
+              <div v-else>
+                <span>{{scope.row.status}}</span>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      </el-row>
+
+    </div>
+    <!--驳回-->
+    <el-dialog title="提示" :visible.sync="rejectVisible" width="540px" @close="closeRejectDialog" v-dialog-drag>
+      <template>
+        <el-form :model="rejectform" ref="rejectform" :rules="notVisitFlagRules">
+          <el-form-item label="确定要将此 ">
+            <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
+            <span style=" display: block; color: #1e2746; ">{{backQuery}}</span>
+          </el-form-item>
+          <el-form-item label="驳回原因:" label-width="70px" prop="remark">
+            <el-input type="textarea" v-model="rejectform.remark" maxlength="500" :rows="3" placeholder="请输入内容(限制500字)">
+            </el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" style="text-align:center;">
+          <el-button type="primary" :disabled="btnDisabled" @click="reconciliationConfirm('rejectform')">确定</el-button>
+          <el-button @click="cancelReconciliationFrom('rejectform')">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!--驳回原因-->
+    <el-dialog :title="rejectCustomerName" :visible.sync="rejectReasonVisible" width="540px" @close="closeRejectReasonDialog" v-dialog-drag>
+      <template>
+        <el-form>
+          <el-form-item label="驳回人员:">
+            <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectUser}}</span>
+          </el-form-item>
+          <el-form-item label="驳回时间:">
+            <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectTime}}</span>
+          </el-form-item>
+          <el-form-item label="驳回原因:">
+            <span class="statusNo">{{rejectReasonObj.rejectReason}}</span>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </template>
+    </el-dialog>
+    <!-- 下载图片 dialog 开始 -->
+    <el-dialog title="下载图片" :visible.sync="picUrlsVisible" width="440px" @close="closePicUrlsDialog" v-dialog-drag>
+      <template>
+        <div class="picUrlsBox">
+          <div v-for="(item,index) in imgList" style="margin-bottom:8px">
+            <a :href="'/financing/refund/downloadOssImg?url='+item.url" :download="item.name"
+              style="color:blue; text-decoration:underline">{{item.name}}</a>
+          </div>
+        </div>
+      </template>
+    </el-dialog>
+
+
+
+    <!-- dialog -->
+    <el-dialog title="确认通过" :visible.sync="submitApplyVisible" width="440px" @close="closeSubmitApplyDialog"
+      v-dialog-drag>
+      <template>
+        <div class="apply-box">
+          <div class="apply-text">确认通过此超成本申请?</div>
+        </div>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+          <el-button type="primary" :disabled="btnDisabled" @click="settlementConfirm">提交</el-button>
+          <el-button @click="cancelSubmitApplyFrom">取消</el-button>
+        </div>
+      </template>
+    </el-dialog>
+  </div>
+  <!-- import common js-->
+  <div th:include="_footer_include :: #jsLib"></div>
+  <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+</body>
+<script th:inline="javascript">
+  var busAreaList = [[${ busAreaList }]];//商务大区
+  var busGroupList = [[${ busGroupList }]];//商务组
+  var teleDeptList = [[${ teleDeptList }]];//电销事业部
+  var teleGroupList = [[${ teleGroupList }]];//电销组
+  var teleSaleList = [[${ teleSaleList }]];//电销顾问
+  var provinceList = [[${ provinceList }]];//省份
+  var projectList = [[${ projectList }]];//项目
+  var fieldList = [[${ fieldList }]];//自定义字段
+  var userFieldList = [[${ userFieldList }]];//用户自定义字段
+  var vistitStoreTypeList = [[${ vistitStoreTypeList }]];//签约店型
+  var payModeItem = [[${ payModeItem }]];
+  var giveTypeList = [[${ giveTypeList }]];
+  var businessLine = [[${ businessLine }]];
+  var clueVM = new Vue({
+    el: '#clueManage',
+    data: {
+      isShow: false,
+      lowestCommissionShow: false,
+      btnDisabled: false,
+      picUrlsVisible: false,
+      signShopType: vistitStoreTypeList,
+      companyArr: [],
+      imgList: [],
+      rejectCustomerName:'',
+      rejectReasonObj:{},
+      searchForm: {
+        cusName: '',
+        busGroupId: '',
+        signProvince: '',
+        payStartTime: '',
+        payEndTime: '',
+        businessManagerId: '',
+        teleSaleId: '',
+        signShopTypeId: '',
+        signProjectId: '',
+        status: 2,
+      },
+      businessLine: businessLine,
+      confirmCommission: "",
+      doubtRemarkShow: false,
+      backVisable: false,
+      submitApplyVisible: false,
+      rejectReasonVisible:false,
+      ratio: "",
+      viewDoubtForm: {
+        doubtRemark: ''
+      },
+      rejectform: {
+        remark: ""
+      },
+      backQuery: "",
+      rejectVisible: false,
+      count: 0,
+      dxBusinessList: [],
+      dataTable: [],
+        // {
+        //   statementNo: '13323232332',
+        //   customerName: '张三',
+        //   picUrls: [
+        //     { "id": 12321213123, "name": "测试图片名称", "url": "www.baidu.com" },
+        //     { "id": 22321213124, "name": "测试图片名称1", "url": "www.baidu.com1" }
+        //   ],
+        //   status:"已驳回",
+        //   rejectUser:"会会",
+        //   rejectTime:"20200304 22:44:13",
+        //   rejectReason:"佣金金额不对！！"
+        // },
+        // {
+        //   statementNo: '23323232332',
+        //   customerName: '李四',
+        //   picUrls: [
+        //     { "id": 12321213125, "name": "测试图片名称", "url": "www.baidu.com" },
+        //     { "id": 22321213126, "name": "测试图片名称1", "url": "www.baidu.com1" }
+        //   ],
+        //   status:"待处理",
+        // },
+        // {
+        //   statementNo: '33323232332',
+        //   customerName: '王五',
+        //   picUrls: [
+        //     { "id": 12321213127, "name": "测试图片名称", "url": "www.baidu.com" },
+        //     { "id": 22321213128, "name": "测试图片名称1", "url": "www.baidu.com1" }
+        //   ]
+        // }
+      
+      allTableColums: [],
+      tableColums: [],
+      dialogFormVisible: false,
+      apply: {
+        money: "",
+        isDoubt: "0",
+        doubtRemark: ""
+      },
+      form: {
+        type: [],
+      },
+      busAreaOptions: busAreaList,
+      busGroupOptions: busGroupList,
+      busSaleOptions: [],
+      teleGorupOptions: teleGroupList,
+      teleSaleOptions: teleSaleList,
+      provinceOptions: provinceList,
+      projectOptions: projectList,
+      statusOptions: [{
+        id: 0,
+        value: 2,
+        name: "待处理"
+      }, {
+        id: 1,
+        value: 3,
+        name: "已确认"
+      }, {
+        id: 2,
+        value: 4,
+        name: "已驳回"
+      }, {
+        id: 3,
+        value: 5,
+        name: "已结算"
+      }],
+      payTypeOptions: [{
+        value: 1,
+        name: "全款"
+      }, {
+        value: 2,
+        name: "定金"
+      }, {
+        value: 3,
+        name: "追加定金"
+      }, {
+        value: 4,
+        name: "尾款"
+      }],
+      pager: {
+        total: 0,
+        currentPage: 1,
+        pageSize: 20,
+      },
+      allocationFormRules: {
+        saleId: [
+          { required: true, message: '请选择商务经理', trigger: 'change' }
+        ]
+      },
+      transferFormRules: {
+        saleId: [
+          { required: true, message: '请选择商务经理', trigger: 'change' }
+        ]
+      },
+      notVisitFlagRules: {
+        remark: [
+          { required: true, min: 1, max: 100, message: '请输入驳回原因', trigger: 'blur' }
+        ],
+      },
+      allpyrules: {
+        money: [
+          {
+            validator: function (rule, value, callback) {
+              if (value == 0 || value == "0") {
+                callback();
+              } else {
+                var reg = /^[1-9]\d*$/;
+                if (value == null || value == "null" || value == "") {
+                  callback(new Error("请输入结算金额"));
+                  clueVM.apply.money = null;
+
+                } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                  callback(new Error("请输入正整数"));
+                  clueVM.apply.money = null;
+                } else {
+                  callback();
+                }
+
+              }
+
+            }, required: true, trigger: 'change'
+          }
+        ],
+        isDoubt: [
+          { required: true, message: '请选择是否有疑意', trigger: 'change' }
+        ],
+        doubtRemark: [
+          {
+            validator: function (rule, value, callback) {
+              if (clueVM.apply.isDoubt == 0) {
+                callback();
+              } else {
+                var reg = /^[1-9]\d*$/;
+                if (value == null || value == "null" || value == "") {
+                  callback(new Error("请输入疑意内容"));
+                  clueVM.apply.doubtRemark = null;
+
+                } else {
+                  callback();
+                }
+              }
+
+            }, required: true, trigger: 'change'
+          }
+        ]
+      },
+      multipleSelection: [],
+      viewDoubtVisable: false,
+      formLabelWidth: '150px',
+      formLabelWidth1: '130px',
+      storeForm: {
+        busAreaId: '',
+        busGroupId: '',
+        busSaleId: '',
+        status: '',
+        signProjectId: '',
+        cusName: '',
+        teleDeptId: '',
+        teleGorupId: '',
+        teleSaleId: '',
+        signProvince: '',
+        payType: '',
+        phone: '',
+        startTime: '',
+        endTime: '',
+        payStartTime: '',
+        payEndTime: '',
+        statementNo: '',
+        signNo: ''
+      },
+      storeId: '',
+      scrollTop: 0,
+    },
+    methods: {
+      isdoubtbutton() {
+        if (clueVM.apply.isDoubt == 1) {
+          this.doubtRemarkShow = true;
+        } else {
+          this.doubtRemarkShow = false;
+        }
+
+      },
+      searchTable() {
+        console.log(9999);
+        var param = {};
+        param = Object.assign({}, this.searchForm);
+        var payStartTime = this.searchForm.payStartTime;
+        var payEndTime = this.searchForm.payEndTime;
+        var vilad = false;
+        if (payStartTime && payEndTime && payStartTime > payEndTime) {
+          vilad = true;
+        }
+        if (vilad) {
+          this.$message({
+            message: '开始时间不能大于结束时间',
+            type: 'warning'
+          });
+          return;
+        }
+        param.payStartTime = payStartTime;
+        param.payEndTime = payEndTime;
+        param.pageSize = this.pager.pageSize;
+        param.pageNum = this.pager.currentPage;
+        //列表只查询正常数据，取消删除数据不查询
+        //param.delFalg = this.searchForm.delFalg;
+        console.info(param);
+        axios.post('/financing/overCost/overCostConfirmList', param)
+          .then(function (response) {
+            var result = response.data;
+            console.log(result,"result");
+            console.info(result);
+            var table = result.data;
+            clueVM.pager.total = table.total;
+            clueVM.pager.currentPage = table.currentPage;
+            var data = table.data;
+            if(data&&data.length>0){
+              for (var i = 0; i < data.length; i++) {
+                data[i].status = clueVM.transformStatus(data[i].status);
+                data[i].signShopType = clueVM.transformSignShopType(vistitStoreTypeList, data[i].signShopType);
+                  data[i]['costRatio'] = clueVM.transformCostRatio(data[i].totalCost, data[i].amountReceived);
+                  data[i]['deTeleSale'] = clueVM.transformSale(data[i].amountReceived, data[i].teleSaleRatio, data[i].overCostRatio);
+                  data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
+
+              }
+              clueVM.dataTable = data;
+            }else{
+              clueVM.dataTable = [];
+            }
+              console.log(clueVM.dataTable,"clueVM.dataTable")
+          })
+
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      toggleSelection(rows) { // table select 默认选中fn
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row, true);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      //选择行
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      handleSizeChange(val) {
+        //下拉框  每页 10,20条切换 调用
+        console.log(`每页 ${val} 条`);
+        this.pageSize = val;
+        this.initTableData(1);
+      },
+      handleCurrentChange(val) {
+        //点击 页码
+        console.log(`当前页: ${val}`);
+        this.initTableData(val);
+      },
+      //处理状态转换方法
+      transformStatus(cellValue) {
+        var text = "";
+        if (cellValue == "2") {
+          text = "待处理";
+        } else if (cellValue == "3") {
+          text = "已确认";
+        } else if (cellValue == "4") {
+          text = "已驳回";
+        } else if (cellValue == "5") {
+          text = "已结算";
+        }
+        return text;
+      },
+      //店型转换方法
+      transformSignShopType(arr, cellValue) {
+        if (arr) {
+          for (var i = 0; i < arr.length; i++) {
+            var text = "";
+            if (cellValue === arr[i].value) {
+              text = arr[i].name;
+            }
+          }
+        }
+        return text;
+      },
+      //应扣商务/电销业绩
+      transformSale(val1, val2, val3) {
+        var val = val1 * val2 * 0.01 * val3 * 0.01;
+       return val;
+      },
+      //成本占比计算
+      transformCostRatio(val1, val2) {
+        var val = val1 / val2;
+       return  this.transformFormat(val);
+      },
+      //四舍五入+%
+      transformFormat(cellValue) {
+        var text = cellValue * 100 + "";
+        var floatText = "";
+        if (text.indexOf(".") > -1) {
+            floatText = text.substring(text.indexOf("."));
+            if (floatText.length >= 2) {
+                text = (text * 1).toFixed(2) + "%";
+            } else {
+                text = text + "%"
+            }
+        }
+        console.log(text,"text");
+        return text;
+      },
+
+
+
+      //查看附件
+      openPicUrlDialog(urls) {
+        this.picUrlsVisible = true;
+        this.imgList = JSON.parse(urls);
+        console.log(this.imgList,'this.imgList');
+      },
+      closePicUrlsDialog() {
+        this.picUrlsVisible = false;
+      },
+
+      //查看驳回原因
+      openRejectReasonDialog(row){
+        this.rejectReasonVisible=true;
+        this.rejectCustomerName=`驳回（${row.customerName}）客户超成本申请信息`;
+        this.rejectReasonObj=Object.assign({}, row);
+      },
+      closeRejectReasonDialog(){
+        this.rejectReasonVisible=false;
+      },
+
+      //驳回
+      rejectback() {
+        var rows = this.multipleSelection;
+        if (rows.length == 0) {
+          this.$message({
+            message: '请选择数据',
+            type: 'warning'
+          });
+          return;
+        } else if (rows.length != 1) {
+          this.$message({
+            message: '请选择一条数据进行驳回',
+            type: 'warning'
+          });
+          return;
+        }
+        var status = rows[0].status;
+        var customerName = rows[0].customerName;
+        var msg = "只有待处理的申请允许驳回！";
+        /*if(status !="待处理"){
+          this.$message({
+                  message: msg,
+                  type: 'warning'
+                });
+               return;
+        }*/
+        this.rejectVisible = true;
+        this.backQuery = "【" + customerName + "】超成本申请驳回吗?";
+        // 存储选中信息--start
+        // var clueId = rows[0].accountId;
+        // setSessionStore("balanceAccountStoreForm", this.storeForm);
+        // var otherVal = {
+        //   "currentPage": this.pager.currentPage,
+        //   "clueId": clueId,
+        //   "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        // }
+        // setSessionStore("balanceAccountOtherVal", otherVal);
+        // 存储选中信息--end
+      },
+      //驳回
+      reconciliationConfirm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            var rows = this.multipleSelection;
+            //对账确认
+            var param = {};
+            param.id = rows[0].id;
+            param.rejectReason = this.rejectform.remark;
+            this.btnDisabled = true;
+            axios.post('/financing/overCost/reject', param)
+              .then(function (response) {
+                var data = response.data;
+                if (response.status == 200) {
+                  clueVM.$message({
+                    message: '驳回成功', type: 'success', duration: 1000, onClose: function () {
+                      clueVM.btnDisabled = false;
+                      clueVM.rejectVisible = false;
+                      clueVM.searchTable();
+                      //		window.location.href="/financing/balanceaccount/balanceAccountPage";
+                    }
+                  });
+                } else {
+                  clueVM.$message({
+                    message: "接口调用失败",
+                    type: 'error'
+                  });
+                  clueVM.btnDisabled = false;
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+                clueVM.$message({
+                  message: "驳回失败",
+                  type: 'error'
+                });
+                clueVM.btnDisabled = false;
+              })
+              .then(function () {
+
+              });
+          }
+        })
+
+
+      },
+      settlementConfirmButton() {
+        var rows = this.multipleSelection;
+        if (rows.length == 0) {
+          this.$message({
+            message: '请选择数据',
+            type: 'warning'
+          });
+          return;
+        } else if (rows.length > 1) {
+          this.$message({
+            message: '请选择一条数据提交对账确认',
+            type: 'warning'
+          });
+          return;
+        }
+        var msg = "";
+        if (msg != "") {
+          this.$message({
+            message: msg,
+            type: 'warning'
+          });
+          return;
+        }
+        clueVM.submitApplyVisible = true;
+
+      },
+      //结算确认
+      settlementConfirm() {
+        var rows = this.multipleSelection;
+        var param = {};
+        param.id = rows[0].id;
+        axios.post('/financing/overCost/confirm', param)
+          .then(function (response) {
+            var data = response.data;
+            if (response.status == 200) {
+              clueVM.$message({
+                message: '提交成功', type: 'success', duration: 1000, onClose: function () {
+                  clueVM.btnDisabled = false;
+                  clueVM.submitApplyVisible = false;
+                  clueVM.searchTable();
+                  // window.location.href="/financing/balanceaccount/balanceAccountPage";
+                }
+              });
+            } else {
+              clueVM.$message({
+                message: "接口调用失败",
+                type: 'error'
+              });
+              clueVM.btnDisabled = false;
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+            clueVM.btnDisabled = false;
+          });
+      },
+      toogleClick() {
+        if (this.isShow) {
+          this.isShow = false
+        } else {
+          this.isShow = true
+        }
+      },
+      closeSubmitApplyDialog() {//关闭提交对账确认
+        clueVM.lowestCommissionShow = false;
+        // 点击关闭 数据重置
+        this.$refs['apply'].resetFields();
+      },
+      cancelSubmitApplyFrom() {//提交确认取消
+        this.submitApplyVisible = false;
+      },
+      closeRejectDialog() {//关闭驳回
+        // 点击关闭 数据重置
+        this.$refs['rejectform'].resetFields();
+      },
+      cancelReconciliationFrom(formName) {//取消驳回
+        this.rejectVisible = false;
+        // 点击取消 数据重置
+        this.$refs[formName].resetFields();
+      },
+      clearTeleCompanyList() {
+        this.searchForm.teleDeptId = '';
+        this.clearTeleDeptList();
+
+      },
+      clearTeleDeptList() {
+        this.teleGorupOptions = [];
+        this.searchForm.teleGorupId = '';
+        this.clearTeleGroupList();
+
+      },
+      clearTeleGroupList() {
+        this.teleSaleOptions = [];
+        this.searchForm.teleSaleId = '';
+      },
+      // changeBusGroup(selectedValue) {//改变商务组
+      //   this.clearBusGroupList();
+      //   if (!selectedValue) {
+      //     return;
+      //   }
+      //   var param = {};
+      //   param.id = selectedValue;
+      //   axios.post('/organization/organization/queryBusManagerByOrgId', param)
+      //     .then(function (response) {
+      //       var result = response.data;
+      //       var table = result.data;
+      //       clueVM.busSaleOptions = table;
+      //     })
+      //     .catch(function (error) {
+      //       console.log(error);
+      //     });
+      // },
+      clearBusAreaList() {
+        this.searchForm.signShopTypeId = '';
+        this.clearBusGroupList();
+
+      },
+      clearBusGroupList() {
+        this.companyArr = [];
+        this.searchForm.companyId = '';
+      },
+      getBusAndTel() {
+        console.log(8888);
+        var param = {};
+        axios.post('/financing/balanceaccount/getBusAndTel', param)
+          .then(function (response) {
+            var result = response.data;
+            // //查询所有的商务经理
+            clueVM.busSaleOptions = result.busSaleList;
+            //查询所有商务组
+            clueVM.busGroupOptions = result.busGroupList;
+            // 查询所有电销顾问
+            clueVM.teleSaleOptions = result.teleSaleList;
+            // 查询所有电销组
+            clueVM.teleGorupOptions = result.teleGroupList;
+            // 查询所有电销公司
+            clueVM.dxBusinessList = result.teleCompanyList;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      //签约公司
+      getCompanyArr() {
+        var param = {};
+        axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
+          clueVM.companyArr = response.data.data;
+          console.log(clueVM.companyArr, "clueVM.companyArr")
+        })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+      //   //意向品类
+      //   getIntentionalCategory() {
+      //     param = {};
+      //     param.groupCode = "project_category";
+      //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCodeSort', param).then(function (response) {
+      //       clueVM.IntentionalCategoryArr = response.data.data;
+      //       console.log(clueVM.IntentionalCategoryArr,"clueVM.IntentionalCategoryArr");
+      //     });
+      //   },
+
+      //   //签约项目
+      //   projectChangeSelect(selVal) {
+      //     var param = {};
+      //     param.category = selVal;
+      //     this.form.insideProject = null;
+      //     axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+      //       clueVM.proSelect = response.data.data;
+      //     });
+      //   },
+    },
+    created() {
+      this.getBusAndTel();
+      this.getCompanyArr();
+      // 进入页面判断有是否有存储值
+      // 取页数存储
+      var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+      if (localVal) { this.pager.pageSize = localVal; }
+      this.searchTable();
+
+      // this.getIntentionalCategory();
+    },
+    mounted() {
+      console.info("mounted method");
+      document.getElementById('clueManage').style.display = 'block';
+    }
+  })
+
+</script>
+
+</html>

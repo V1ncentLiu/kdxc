@@ -376,7 +376,9 @@ public class ReconciliationConfirmController {
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> applyRefund(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
+    	UserInfoDTO user = getUser();
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_3);
+        req.setCreateUser(user.getId());
         JSONResult<Void> reconciliationConfirm =
                 reconciliationConfirmFeignClient.reconciliationConfirm(req);
         return reconciliationConfirm;
