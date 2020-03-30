@@ -119,7 +119,7 @@
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名" ></el-table-column>
                 <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
                 <el-table-column align="center" prop="signCompanyName" label="签约公司" ></el-table-column>
@@ -369,6 +369,14 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+            getTimeText(row, column, value, index) {
+                var valText = "";
+                if (value) {
+                    valText = moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                    //valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                }
+                return valText;
+            },
             initSignProvinceSelect(){
                 axios.post('/visit/visitRecord/getSignProvince', {})
                 .then(function (response) {
