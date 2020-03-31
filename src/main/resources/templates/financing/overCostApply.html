@@ -120,7 +120,7 @@
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名" ></el-table-column>
                 <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
                 <el-table-column align="center" prop="signCompanyName" label="签约公司" ></el-table-column>
@@ -132,9 +132,19 @@
                 <el-table-column align="center" prop="amountReceivable" label="合同金额" width="120"></el-table-column>
                 <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="120"></el-table-column>
-                <el-table-column align="center" prop="amountEquipment" label="设备成本" width="120"></el-table-column>
+                <el-table-column align="center" prop="amountEquipment" label="设备成本" width="120">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.amountEquipment">{{scope.row.amountEquipment}}</span>
+                    <span v-else>0</span>
+                  </template>
+                </el-table-column>
                 <el-table-column align="center" prop="giveAmount" label="活动赠送成本" width="150"></el-table-column>
-                <el-table-column align="center" prop="totalCost" label="成本总计" width="120"></el-table-column>
+                <el-table-column align="center" prop="totalCost" label="成本总计" width="120">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.totalCost">{{scope.row.totalCost}}</span>
+                    <span v-else>0</span>
+                  </template>
+                </el-table-column>
                 <el-table-column align="center" prop="costRatio" label="成本占比" width="120" :formatter="transformValue"></el-table-column>
                 <el-table-column align="center" prop="overCost" label="超成本红线" :formatter="transformValue"></el-table-column>
                 <el-table-column align="center" prop="teleSaleRatio" label="电销业绩比例" width="120" :formatter="transformValue"></el-table-column>
@@ -197,10 +207,10 @@
                     :on-exceed="handleExceed"
                     :auto-upload="false"
                     :limit="5"
-                    :file-list="allocationForm.fileList">
+                    :file-list="fileList">
                     <el-button slot="trigger" size="small" type="primary">选择附件</el-button>
                      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-                    <div slot="tip" class="el-upload__tip">只允许上传5个附件。附件允许上传图片，PDF，压缩包。</div>
+                    <div slot="tip" class="el-upload__tip">只允许上传5个附件。附件允许上传附件，PDF，压缩包。</div>
                 </el-upload>
               </el-form-item>
             </el-form>
@@ -342,7 +352,7 @@ var clueVM = new Vue({
                   }, trigger: 'blur'}
               ],
               fileList: [
-                  { required: true, message: '请上传图片', trigger: 'change' }
+                  { required: true, message: '请上传附件', trigger: 'change' }
               ],
           },
           multipleSelection:[],
@@ -359,7 +369,8 @@ var clueVM = new Vue({
               'x:params':'',
               'realName':''
           },
-          // fileList:[],
+          fileList:[],
+          limit:5,
           ossUrl:ossSignatureUrl,
           storeForm: {
               customerName:'',
@@ -579,8 +590,7 @@ var clueVM = new Vue({
                 });
             },
             deleteFile(id){//把imgList中的文件移除
-                // var curImgList = this.fileList;
-               	var curImgList = this.allocationForm.fileList;
+               	var curImgList = this.fileList;
                	for(var i=0;i<curImgList.length;i++){
                		var curImg = curImgList[i];
                		if(curImg.id==id){
@@ -603,8 +613,7 @@ var clueVM = new Vue({
             },
             handleSuccess(response, file, fileList){
           	    console.info(fileList);
-                // console.info(clueVM.fileList);
-                console.info(clueVM.allocationForm.fileList);
+                console.info(clueVM.fileList);
                 var realName = file.name;
                 var randomName = clueVM.uploadParamData.key;
                 var imgUrl =  clueVM.uploadOssHost+"/"+randomName;
@@ -622,8 +631,7 @@ var clueVM = new Vue({
                         lastFile.name=realName;
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
-                        // var curList = clueVM.fileList;
-                        var curList = clueVM.allocationForm.fileList;
+                        var curList = clueVM.fileList;
                         clueVM.allocationForm.fileList.push(resData.data);
                         curList.push(lastFile);
                         clueVM.$refs['allocationForm'].validateField(["fileList"]);
@@ -795,6 +803,7 @@ var clueVM = new Vue({
             	  if(this.$refs[formName]){
 	            	    this.$refs[formName].resetFields();
             	  }
+                this.fileList=[];
            	    var rows = this.multipleSelection;
             	  if(rows.length!=1){
                     this.$message({
@@ -825,8 +834,8 @@ var clueVM = new Vue({
             },
             // 编辑超成本申请
             edit(rows){
-                if (this.$refs['form']!=undefined) {
-                    this.$refs['form'].resetFields();
+                if (this.$refs['allocationForm']!=undefined) {
+                    this.$refs['allocationForm'].resetFields();
                 }
                 //修改菜单数据  
                 this.allocationVisible = true;
@@ -835,9 +844,9 @@ var clueVM = new Vue({
                 // 显示带客户名称的弹窗标题
                 var customerName=rows.customerName;
                 if(customerName){
-                    this.refundTitle="（"+customerName+"）客户超成本申请";
+                    this.refundTitle="（"+customerName+"）客户超成本申请编辑";
                 }else{
-                    this.refundTitle="客户超成本申请";
+                    this.refundTitle="客户超成本申请编辑";
                 }  
                 $("#updateId").val(rows.id);//驳回的数据id
                 var param ={};
@@ -854,7 +863,7 @@ var clueVM = new Vue({
                             clueVM.allocationForm.rejectReason = data.rejectReason; 
                             clueVM.allocationForm.commission = data.commission; 
                             clueVM.allocationForm.fileList = JSON.parse(data.picUrls);
-                            // clueVM.fileList = JSON.parse(data.picUrls);
+                            clueVM.fileList = JSON.parse(data.picUrls);
                         }                          
                    }else{
                         clueVM.$message({
@@ -887,8 +896,7 @@ var clueVM = new Vue({
                             param.id=rows[0].id;
                         }
                         param.commission=this.allocationForm.commission;
-                        // param.picUrls = JSON.stringify(this.fileList);
-                        param.picUrls = JSON.stringify(this.allocationForm.fileList);
+                        param.picUrls = JSON.stringify(this.fileList);
                         this.btnDisabled=true;
                         axios.post('/financing/overCost/apply',param)
                         .then(function (response) {
