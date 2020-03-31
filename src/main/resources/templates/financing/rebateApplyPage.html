@@ -223,7 +223,7 @@
           <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
         </el-form-item>
         <el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-          <el-input v-model="dialogForm.cusAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
+          <el-input v-model="dialogForm.cusAmount"  @input="transferCalAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
           <el-input v-model="dialogForm.bearAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
@@ -685,6 +685,15 @@
       }
     },
     methods: {
+      //计算返款的承担金额
+      transferCalAmount(){
+                var rows = this.multipleSelection;
+                var aone = parseFloat(rows[0].ratio/100);
+                var atwo = parseFloat(this.dialogForm.cusAmount);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                this.dialogForm.bearAmount = (aone * atwo) + "";
+            },
       submitDialogForm(formName) {//驳回提交验证
         mainDivVM.confirmBtnDisabled = true;
         this.$refs[formName].validate((valid) => {

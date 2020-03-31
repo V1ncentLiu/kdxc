@@ -203,7 +203,7 @@
           {{dialogForm.rejectReason}}
         </el-form-item>
         <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-          <el-input v-model="dialogForm.cusAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
+          <el-input v-model="dialogForm.cusAmount" @input="allCalAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
           <el-input v-model="dialogForm.bearAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
@@ -479,6 +479,15 @@
       }
     },
     methods: {
+      //计算退款的承担金额
+      allCalAmount(){
+          var rows = this.multipleSelection;
+          var aone = parseFloat(rows[0].ratio/100);
+          var atwo = parseFloat(this.dialogForm.cusAmount);
+          if (isNaN(aone)) aone = 0
+          if (isNaN(atwo)) atwo = 0
+          this.dialogForm.bearAmount = (aone * atwo) + "";
+      },
       getUploadParam() {
         var signUrl = this.ossUrl + "?serviceType=aggregation";
         var param = {};
