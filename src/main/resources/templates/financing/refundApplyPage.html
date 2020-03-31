@@ -1,1236 +1,1209 @@
 <!DOCTYPE html>
 <html>
+
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>退款申请列表</title>
+  <title>退款申请列表</title>
 </head>
+
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">  
+  <div id="maindiv" class="maindiv mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>财务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>退款申请列表</el-breadcrumb-item>
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>财务管理</el-breadcrumb-item>
+      <el-breadcrumb-item>退款申请列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-        <shiro:hasPermission name="aggregation:refundApply:updateRefundFinish">
-            <el-button type="primary" @click="openSign">标记退款结束</el-button>
-        </shiro:hasPermission>
+      <shiro:hasPermission name="aggregation:refundApply:updateRefundFinish">
+        <el-button type="primary" @click="openSign">标记退款结束</el-button>
+      </shiro:hasPermission>
     </el-row>
-    <div class="mainSearchBg">        
-        <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <el-form-item label="商务大区:" label-width="58px">
-                    <el-select v-model="form.busAreaId" placeholder="商务大区" clearable @change="changeBusArea" @clear="clearBusAreaList" >
-                        <el-option
-                            v-for="item in busAreaList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item> 
-                <el-form-item label="签单商务组:">  
-                    <el-select v-model="form.busGroupId" placeholder="签单商务组" clearable @change="changeBusGroup" @clear="clearBusGroupList">
-                        <el-option
-                            v-for="item in busGroupList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>    
-                <el-form-item label="签单商务经理:">  
-                    <el-select v-model="form.busManagerId" placeholder="签单商务经理" clearable>
-                        <el-option
-                            v-for="item in busManagerList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item> 
-                <el-form-item label="签约店型:">  
-                    <el-select v-model="form.signShopType" placeholder="签约店型" clearable>
-                        <el-option
-                            v-for="item in vistitStoreTypeArr"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>   
-                <el-form-item label="处理状态:">  
-                    <el-select v-model="form.status" placeholder="处理状态" clearable>
-                        <el-option
-                            v-for="item in statusList"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>   
-                <el-row v-show="isShow">
-                    <el-form-item label="签约类型:" label-width="58px">  
-                        <el-select v-model="form.signType" placeholder="签约类型" clearable>
-                            <el-option
-                                v-for="item in signTypeList"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>  
-                    <el-form-item label="电销事业部:">  
-                        <el-select v-model="form.teleDeptId" placeholder="电销事业部" clearable @change="changeTeleDept" @clear="clearTeleDeptList">
-                            <el-option
-                                v-for="item in teleDeptList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>  
-                    <el-form-item label="电销组:">  
-                        <el-select v-model="form.teleGroupId" placeholder="电销组" clearable @change="changeTeleGroup" @clear="clearTeleGroupList">
-                            <el-option
-                                v-for="item in teleGroupIdList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item> 
-                    <el-form-item label="电销顾问:">
-                        <el-select v-model="form.teleId" placeholder="电销顾问" clearable>
-                            <el-option
-                                v-for="item in teleIdList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>  
-                    <el-form-item label="签约省份:">  
-                        <el-select v-model="form.signProvince" placeholder="签约省份" clearable>
-                            <el-option
-                                v-for="item in proviceList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.name">
-                            </el-option>
-                        </el-select>
-                    </el-form-item> 
-                    <el-form-item label="客户姓名:" label-width="58px">
-                        <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-                    </el-form-item>
-                    <el-form-item label="客户联系方式:">
-                        <el-input v-model="form.phone" placeholder="客户联系方式"></el-input>
-                    </el-form-item>            
-                    <el-form-item label="签约单编号:">
-                        <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
-                    </el-form-item>
-                    <el-form-item label="退款时间:">
-                        <el-date-picker
-                            v-model="form.startTime"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                            v-model="form.endTime"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item> 
-                </el-row>
-                <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                </div>
-            </el-form>  
-        </div>
-        <!-- 表格 -->
-        <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
-                border
-                :data="tableData"
-                @selection-change="handleSelectionChange" 
-                >
-                <el-table-column align="center" type="selection"></el-table-column>
-                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
-                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-                <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
-                <el-table-column align="center" prop="bearAmount" label="承担金额"></el-table-column>
-                <!-- <el-table-column align="center" prop="companyAmount" label="退还餐饮公司金额"></el-table-column> -->
-                <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
-                <el-table-column align="center" prop="" label="退款图片" width="100">
-                    <template slot-scope="scope">
-                        <el-button @click="download(scope.row)" type="text">下载图片</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="reason" label="退款原因" width="100">
-                    <template slot-scope="scope">
-                        <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="applyTime" label="申请退款时间"></el-table-column>
-                <el-table-column align="center" prop="status" label="处理状态">
-                    <template slot-scope="scope">
-                    
-                        <div v-if="scope.row.status == '2'">
-                            <el-button @click="editDialog(scope.row)" type="text" class="redcolor" style="color: red;">已驳回</el-button>
-                            <el-button @click="showReason(scope.row)" type="text" class="bluecolor">驳回原因</el-button>
-                        </div>
-                        <div v-else-if="scope.row.status == '1'">退款确认中</div>
-                        <div v-else-if="scope.row.status == '3'">确认退款</div>
-                        <div v-else-if="scope.row.status == '4'">已退款</div>
-                        <div v-else-if="scope.row.status == '5'">标记退款结束</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
-                <el-table-column align="center" prop="signType" label="签约类型">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.signType == '1'">一次性全款</div>
-                        <div v-else-if="scope.row.signType == '2'">先付定金</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
-                <el-table-column align="center" prop="" label="付款明细" width="100">
-                    <!-- <template slot-scope="scope">
+    <div class="mainSearchBg">
+      <div class="mainSearchFormBox">
+        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+          <el-form-item label="商务大区:" label-width="58px">
+            <el-select v-model="form.busAreaId" placeholder="商务大区" clearable @change="changeBusArea"
+              @clear="clearBusAreaList">
+              <el-option v-for="item in busAreaList" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="签单商务组:">
+            <el-select v-model="form.busGroupId" placeholder="签单商务组" clearable @change="changeBusGroup"
+              @clear="clearBusGroupList">
+              <el-option v-for="item in busGroupList" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="签单商务经理:">
+            <el-select v-model="form.busManagerId" placeholder="签单商务经理" clearable>
+              <el-option v-for="item in busManagerList" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="签约店型:">
+            <el-select v-model="form.signShopType" placeholder="签约店型" clearable>
+              <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="处理状态:">
+            <el-select v-model="form.status" placeholder="处理状态" clearable>
+              <el-option v-for="item in statusList" :key="item.value" :label="item.name" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-row v-show="isShow">
+            <el-form-item label="签约类型:" label-width="58px">
+              <el-select v-model="form.signType" placeholder="签约类型" clearable>
+                <el-option v-for="item in signTypeList" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="电销事业部:">
+              <el-select v-model="form.teleDeptId" placeholder="电销事业部" clearable @change="changeTeleDept"
+                @clear="clearTeleDeptList">
+                <el-option v-for="item in teleDeptList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="电销组:">
+              <el-select v-model="form.teleGroupId" placeholder="电销组" clearable @change="changeTeleGroup"
+                @clear="clearTeleGroupList">
+                <el-option v-for="item in teleGroupIdList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="电销顾问:">
+              <el-select v-model="form.teleId" placeholder="电销顾问" clearable>
+                <el-option v-for="item in teleIdList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="签约省份:">
+              <el-select v-model="form.signProvince" placeholder="签约省份" clearable>
+                <el-option v-for="item in proviceList" :key="item.id" :label="item.name" :value="item.name">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="客户姓名:" label-width="58px">
+              <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+            </el-form-item>
+            <el-form-item label="客户联系方式:">
+              <el-input v-model="form.phone" placeholder="客户联系方式"></el-input>
+            </el-form-item>
+            <el-form-item label="签约单编号:">
+              <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
+            </el-form-item>
+            <el-form-item label="退款时间:">
+              <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择日期时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="—" class="widthauto">
+              <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择日期时间">
+              </el-date-picker>
+            </el-form-item>
+          </el-row>
+          <div class="mainSearchBtnBox">
+            <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+            <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+            <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
+                v-if="isShow">收起</span><span v-else>展开更多</span><i
+                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+          </div>
+        </el-form>
+      </div>
+      <!-- 表格 -->
+      <el-row>
+        <el-table ref="tableData" tooltip-effect="dark" border :data="tableData"
+          @selection-change="handleSelectionChange">
+          <el-table-column align="center" type="selection"></el-table-column>
+          <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+          <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+          <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+          <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
+          <el-table-column align="center" prop="bearAmount" label="承担金额"></el-table-column>
+          <!-- <el-table-column align="center" prop="companyAmount" label="退还餐饮公司金额"></el-table-column> -->
+          <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
+          <el-table-column align="center" prop="" label="退款图片" width="100">
+            <template slot-scope="scope">
+              <el-button @click="download(scope.row)" type="text">下载图片</el-button>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="reason" label="退款原因" width="100">
+            <template slot-scope="scope">
+              <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="applyTime" label="申请退款时间"></el-table-column>
+          <el-table-column align="center" prop="status" label="处理状态">
+            <template slot-scope="scope">
+
+              <div v-if="scope.row.status == '2'">
+                <el-button @click="editDialog(scope.row)" type="text" class="redcolor" style="color: red;">已驳回
+                </el-button>
+                <el-button @click="showReason(scope.row)" type="text" class="bluecolor">驳回原因</el-button>
+              </div>
+              <div v-else-if="scope.row.status == '1'">退款确认中</div>
+              <div v-else-if="scope.row.status == '3'">确认退款</div>
+              <div v-else-if="scope.row.status == '4'">已退款</div>
+              <div v-else-if="scope.row.status == '5'">标记退款结束</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+          <el-table-column align="center" prop="signType" label="签约类型">
+            <template slot-scope="scope">
+              <div v-if="scope.row.signType == '1'">一次性全款</div>
+              <div v-else-if="scope.row.signType == '2'">先付定金</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+          <el-table-column align="center" prop="" label="付款明细" width="100">
+            <!-- <template slot-scope="scope">
                         <el-button @click="showDetail(scope.row)" type="text">查看明细</el-button>
                     </template> -->
-                    <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
-                        </el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="signShopTypeName" label="签约店型"  width="100"></el-table-column>
-                <el-table-column align="center" prop="amountReceivable" label="合同应收金额"></el-table-column>
-                <!--<el-table-column align="center" prop="firstToll" label="路费"></el-table-column>-->
-                <!--<el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额"></el-table-column>-->
-                <!--<el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>-->
-                <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
-                <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
-                <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
-                <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
-                <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
-                <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
-                <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
-                <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
-                <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
-                <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
-                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
-                <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
-            </el-table>
-             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-        </el-row>
+            <template slot-scope="scope">
+              <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
+              </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" prop="signShopTypeName" label="签约店型" width="100"></el-table-column>
+          <el-table-column align="center" prop="amountReceivable" label="合同应收金额"></el-table-column>
+          <!--<el-table-column align="center" prop="firstToll" label="路费"></el-table-column>-->
+          <!--<el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额"></el-table-column>-->
+          <!--<el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>-->
+          <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
+          <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+          <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
+          <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
+          <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
+          <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
+          <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
+          <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
+          <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
+          <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
+          <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
+          <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+          <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120">
+          </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      </el-row>
     </div>
     <!-- 驳回编辑 -->
-    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" @close="closeEditRefundDialog" v-dialog-drag>
-        <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
-            <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="person">
-                {{dialogForm.auditUserName}}
-            </el-form-item>
-            <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="rejectTime">
-                {{dialogForm.rejectTime | getTimeTextFilter}}
-            </el-form-item>
-            <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="reason" class="redcolor">
-                {{dialogForm.rejectReason}}
-            </el-form-item>
-            <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                <el-input v-model="dialogForm.cusAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
-            </el-form-item>
-            <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
-                <el-input v-model="dialogForm.bearAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
-            </el-form-item>
-            <el-form-item  prop="settingStatus" label="" :label-width="formLabelWidth">
-                  <div v-if="dialogForm.settingStatus == 1">
-                          <span style="color:red"> 当前项目为给品牌商结算</span>
-                 </div> 
-                   
-            </el-form-item>
-            <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
-                <el-date-picker
-                    style="width: 50%;"
-                    v-model="dialogForm.refundTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
-                <el-upload
-                    class="upload-demo"
-                    :action="uploadOssHost"
-                    ref="refundApplyImgUpload"
-                    :on-preview="handlePreview"
-                    :on-remove="handleRemove"
-                    :on-success="handleSuccess"
-                    :on-error="handleError"
-                    :before-upload="handleBefore"
-                      accept="image/png,image/jpeg"
-                    :data="uploadParamData"
-                    :on-change="selectFile"
-                    :on-exceed="handleExceed"
-                    :auto-upload="false"
-                    :file-list="fileList">
-                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
-                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-                </el-upload>
-            </el-form-item>
-            <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
-                <el-input
-                    type="textarea"
-                    :rows="3"
-                    placeholder=""
-                    maxLength="100"
-                    v-model="dialogForm.reason" 
-                    style="width: 80%;">
-                </el-input>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitDialogForm('dialogForm')" :disabled="confirmBtnDisabled">确 定</el-button>
-            <el-button @click="cancleRefundEditDialog" type="info">取 消</el-button>
-        </div>
+    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" @close="closeEditRefundDialog"
+      v-dialog-drag>
+      <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">
+        <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="person">
+          {{dialogForm.auditUserName}}
+        </el-form-item>
+        <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="rejectTime">
+          {{dialogForm.rejectTime | getTimeTextFilter}}
+        </el-form-item>
+        <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="reason" class="redcolor">
+          {{dialogForm.rejectReason}}
+        </el-form-item>
+        <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
+          <el-input v-model="dialogForm.cusAmount" @input="allCalAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item label="承担金额：" :label-width="formLabelWidth" prop="bearAmount">
+          <el-input v-model="dialogForm.bearAmount" placeholder="" style="width:50%" maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item prop="settingStatus" label="" :label-width="formLabelWidth">
+          <div v-if="dialogForm.settingStatus == 1">
+            <span style="color:red"> 当前项目为给品牌商结算</span>
+          </div>
+
+        </el-form-item>
+        <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
+          <el-date-picker style="width: 50%;" v-model="dialogForm.refundTime" type="datetime" placeholder="选择日期时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
+          <el-upload class="upload-demo" :action="uploadOssHost" ref="refundApplyImgUpload" :on-preview="handlePreview"
+            :on-remove="handleRemove" :on-success="handleSuccess" :on-error="handleError" :before-upload="handleBefore"
+            accept="image/png,image/jpeg" :data="uploadParamData" :on-change="selectFile" :on-exceed="handleExceed"
+            :auto-upload="false" :file-list="fileList">
+            <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
+          <el-input type="textarea" :rows="3" placeholder="" maxLength="100" v-model="dialogForm.reason"
+            style="width: 80%;">
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitDialogForm('dialogForm')" :disabled="confirmBtnDisabled">确 定</el-button>
+        <el-button @click="cancleRefundEditDialog" type="info">取 消</el-button>
+      </div>
     </el-dialog>
     <!-- 驳回原因 -->
-    <el-dialog title="驳回原因" :visible.sync="reasonDialog" v-dialog-drag>           
-        <div class="fs16 marginB20" >{{rejectReason}}</div>
+    <el-dialog title="驳回原因" :visible.sync="reasonDialog" v-dialog-drag>
+      <div class="fs16 marginB20">{{rejectReason}}</div>
     </el-dialog>
     <!-- 返款原因 -->
-    <el-dialog title="返款原因" :visible.sync="reasonDialog1" v-dialog-drag>           
-        <div class="fs16 marginB20" >{{reason}}</div>
+    <el-dialog title="返款原因" :visible.sync="reasonDialog1" v-dialog-drag>
+      <div class="fs16 marginB20">{{reason}}</div>
     </el-dialog>
     <!-- 付款明细 -->
     <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="1000px" v-dialog-drag>
-        <el-table
-            ref="recordTableDetail" 
-            tooltip-effect="dark"
-            style="width: 100%;margin-bottom: 20px;"
-            border
-            :data="recordTableDetail" 
-            >
-             <el-table-column type="index" width="50" label="序号"></el-table-column>
-            <el-table-column align="center" prop="payName" label="付款人姓名" width="200"></el-table-column>
-            <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType" width="130"></el-table-column>
-            <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
-            <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="130"></el-table-column>
-            <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText" width="150"></el-table-column>
-            <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="amountEquipment" label="实收设备金额"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
-            <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
+      <el-table ref="recordTableDetail" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border
+        :data="recordTableDetail">
+        <el-table-column type="index" width="50" label="序号"></el-table-column>
+        <el-table-column align="center" prop="payName" label="付款人姓名" width="200"></el-table-column>
+        <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType" width="130">
+        </el-table-column>
+        <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
+        <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="130">
+        </el-table-column>
+        <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText" width="150">
+        </el-table-column>
+        <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="amountEquipment" label="实收设备金额"></el-table-column>
+        <el-table-column align="center" prop="preferentialAmount" label="招商政策优惠金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
+        <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType">
+        </el-table-column>
 
-            <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="accountStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
-            <el-table-column align="center" prop="money" label="结算金额" width="150"></el-table-column>
-            <el-table-column align="center" prop="commissionMoney" label="佣金" width="150"></el-table-column>
-            <el-table-column align="center" prop="busGroupName" label="商务组"></el-table-column>
-            <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
-            <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
-        </el-table>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="accountStatus" label="处理状态" :formatter="transformStatus">
+        </el-table-column>
+        <el-table-column align="center" prop="money" label="结算金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="commissionMoney" label="佣金" width="150"></el-table-column>
+        <el-table-column align="center" prop="busGroupName" label="商务组"></el-table-column>
+        <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
+        <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+      </el-table>
     </el-dialog>
-    
+
     <!-- 下载图片 dialog 开始 -->
-        <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px" v-dialog-drag>
-          <ol>
-             <li v-for="(item,index) in imgList"  style="margin-bottom:8px">
-              <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
-             </li>
-           </ol> 
-       </el-dialog>
+    <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px" v-dialog-drag>
+      <ol>
+        <li v-for="(item,index) in imgList" style="margin-bottom:8px">
+          <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName"
+            style="color:blue;text-decoration:underline">{{item.realName}}</a>
+        </li>
+      </ol>
+    </el-dialog>
     <!-- 下载图片dialog 结束 -->
-</div>
+  </div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-   var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
-   var businessLine = [[${businessLine}]];//业务线
-   var payModeItem =[[${payModeItem}]];
-   var giveTypeList =[[${giveTypeList}]];
+  var ossSignatureUrl = [[${ ossUrl }]];//上传文件地址
+  var businessLine = [[${ businessLine }]];//业务线
+  var payModeItem = [[${ payModeItem }]];
+  var giveTypeList = [[${ giveTypeList }]];
 </script>
-<script>    
-    var mainDivVM = new Vue({
-        el: '#maindiv',
-        data: function() {
-            return {
-                isShow:false,
-                pager:{//pager
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 20,
-                },
-                ossUrl:ossSignatureUrl,
-                fileList: [],
-                dialogFormVisible:false,//驳回编辑
-                reasonDialog:false,//驳回原因
-                downloadDialogVisible:false,//下载图片dialog
-                rejectReason:'',//退款原因
-                reason:'',//返款原因
-                reasonDialog1:false,//返款原因
-                imgList:[],
-                multipleSelection: [],//选择行
-                editRejectTitle:'',//驳回编辑头部
-                confirmBtnDisabled:false,//提交按钮 禁用
-                payDetailTitle:'',
-                form: {
-                    busAreaId:'',
-                    busGroupId:'',
-                    busManagerId:'',
-                    signProvince:'',
-                    signType:'',
-                    phone:'',
-                    signNo:'',
-                    customerName:'',
-                    startTime:'',
-                    endTime:'',
-                    teleDeptId:'',
-                    teleGroupId:'',
-                    teleId:''
-                   
-                    
-                },
-                formLabelWidth: '150px',
-                tableData: [],
-                dataTable: [],
-                options: [{
-                    value: '选项1',
-                    label: '黄金糕'
-                }, {
-                    value: '选项2',
-                    label: '双皮奶'
-                }, {
-                    value: '选项3',
-                    label: '蚵仔煎'
-                }, {
-                    value: '选项4',
-                    label: '龙须面'
-                }, {
-                    value: '选项5',
-                    label: '北京烤鸭'
-                }],
-                busAreaList:[],//商务大区
-                busGroupList:[],//签单商务组
-                busManagerList:[],//商务经理
-                teleDeptList:[],//电销事业部
-                teleGroupIdList:[],
-                teleIdList:[],
-                vistitStoreTypeArr:[],//签约店型
-                statusList:[
-                    {
-                        value: 1,
-                        name: '退款确认中'
-                    }, {
-                        value: 2,
-                        name: '已驳回'
-                    }, {
-                        value: 3,
-                        name:'确认退款'
-                    }, {
-                        value: 4,
-                        name: '已退款'
-                    }, {
-                        value: 5,
-                        name: '标记退款结束'
-                    }
-                    
-                ],//处理状态
-                proviceList:[],
-                signTypeList: [{
-                    value: 1,
-                    label: '一次性全款'
-                }, {
-                    value: 2,
-                    label: '先交定金'
-                }],
-                dialogForm:{
-                    cusAmount:'',
-                    refundTime:'',
-                    reason:'',
-                    fileList: [],
-                   
-                },
-                dialogRules:{
-                    reason : [
-                        { required: true, message: '请输入退款原因', trigger: 'blur' }
-                    ],
-                    refundTime : [
-                        { required: true, message: '请选择退款时间', trigger: 'blur' }
-                    ],
-                    cusAmount: [
-                        { required: true, message: '请输入退款客户金额', trigger: 'blur' },
-                        {validator:function(rule,value,callback){
-                            if(value){
-                                 if(!/^[0-9]*$/.test(value)){
-                                     callback(new Error("只可以输入整数"));     
-                                 }else{
-                                     callback();
-                                 }
-                            }else{
-                                callback();
-                            }
-                           
-                            
-                        },trigger:'blur'},
-                        
-                    ],
-                    fileList:[
-                    	{ required: true, message: '选择文件', trigger: 'change' }
-                    ]
-                
-                    
-                },          
-                amount: [{
-                    value: '0',
-                    label: '1000'
-                }, {
-                    value: '1',
-                    label: '2000'
-                }, {
-                    value: '2',
-                    label: '3000'
-                }, {
-                    value: '3',
-                    label: '4000'
-                }, {
-                    value: '4',
-                    label: '5000'
-                }],
-                uploadOssHost:'',
-                uploadParamData: {
-                    key:'22',
-                    policy:'',
-                    OSSAccessKeyId:'',
-                    success_action_status : '200', //让服务端返回200,不然，默认会返回204
-                    signature:'', 
-                    'x:params':'',
-                    'realName':''
-                 },
-                recordTableDetail:[],//付款明细data
-                recordDialog:false,//付款明细弹窗
-            }             
+<script>
+  var mainDivVM = new Vue({
+    el: '#maindiv',
+    data: function () {
+      return {
+        isShow: false,
+        pager: {//pager
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
         },
-        methods: {
-             getUploadParam(){
-                  var signUrl = this.ossUrl+"?serviceType=aggregation";
-                  var param={};
-                  
-                   axios.get(signUrl, param)
-                  .then(function (response) {
-                     // console.info(response);
-                      var respData= response.data;
-                      var host = respData.host;
-                      var params={};
-                      var new_multipart_params = {
-                              dir:respData.dir,
-                              'policy': respData.policy,
-                              'OSSAccessKeyId': respData.accessid,
-                              'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
-                              'signature': respData.signature,
-                              'x:params':params,//自定义编码，basse64编码后的字符串,
-                              'realName':''
-                     };
-                    mainDivVM.uploadParamData= new_multipart_params;
-                    mainDivVM.uploadOssHost = host;
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
-                  
-                  
-                  
-              },
-             selectFile(file, fileList){
-            	  debugger;
-            	  var fileLength = fileList.length;
-            	  if(fileLength>=2){
-            		  //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
-            		  var lastSecondFile = fileList[fileLength-2];
-            		  if(!lastSecondFile.hasOwnProperty("id")){
-            			  fileList.splice(length-2,1);
-            		  }
-            		  
-            	  }
-                   mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
-                   mainDivVM.uploadParamData.realName= file.name
-              },
-            submitUpload(){
-                //this.customUpload();
-                this.$refs.refundApplyImgUpload.submit();
-            },
-            submitDialogForm(formName) {//驳回提交验证
-                this.confirmBtnDisabled=true;
-            
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                    	var fileList = mainDivVM.fileList;
-                    /* 	if(fileList.length==0){
-                    		
-                    	} */
-                    	
-                        var param = this.dialogForm;
-                    	param.imgList = fileList;
-                        axios.post('/financing/refund/editRejectRefundInfo',param)
-                        .then(function (response) {
-                            var data =  response.data;
-                            if(data.code=='0'){
-                                mainDivVM.dialogFormVisible=false;
-                                mainDivVM.$message({message:'操作成功',type:'success',duration:1500,onClose:function(){
-                                    mainDivVM.searchTable();
-                                  }});
-                               
-                            }else{
-                                mainDivVM.$message({message:'操作失败',type:'error'});
-                                console.error(data);
-                            }
-                        
-                        })
-                        .catch(function (error) {
-                             console.log(error);
-                        }).then(function(){
-                              mainDivVM.confirmBtnDisabled=false;
-                        });
-                        
-                        
-                    } else {
-                        console.log('error submit!!');
-                        mainDivVM.confirmBtnDisabled=false;
-                    }
-                });
-            },
-            openSign(){//打开标记退款结束
-                var rows = this.multipleSelection;
-                if(rows.length==0){
-                    this.$message({
-                        message: '请选择数据',
-                        type: 'warning'
-                    });
-                    return;
-                }else{
-                    var isPass = true;
-                    var idList = new Array();
-                    for(var i=0;i<rows.length;i++){
-                        var curRow = rows[i];
-                        if(curRow.status!=2){
-                            this.$message({message:'只允许操作已驳回数据',type:'warning'});
-                            isPass=false;
-                            break;
-                        }
-                        idList.push(curRow.id);
-                      }
-                    
-                     if(!isPass){
-                         return;
-                     }
-                    
-                    
-                    
-                    this.$confirm('确认标记为退款结束吗？', '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                         var param={};
-                         param.idList = idList;
-                         axios.post('/financing/refund/updateRefundInfo',param)
-                         .then(function (response) {
-                             var data =  response.data
-                             if(data.code=='0'){
-                                 mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                     mainDivVM.searchTable();
-                                   }});
-                                
-                             }else{
-                                 mainDivVM.$message({message:'操作失败',type:'error'});
-                                 console.error(data);
-                             }
-                         
-                         })
-                         .catch(function (error) {
-                              console.log(error);
-                         }).then(function(){
-                         });
-                        
-                       
-                    }).catch(() => {
-                        this.$message({
-                            type: 'info',
-                            message: '已取消操作'
-                        });          
-                    });
-                }
-            },
-            handleSelectionChange(val) {//选择节点的事件
-                this.multipleSelection = val;
-            }, 
-            searchTable() { 
-                var starTime=this.form.startTime;
-                var endTime=this.form.endTime;
-                if(endTime){
-                    if(starTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-                var param = this.form;
-                param.pageNum=this.pager.currentPage;
-                param.pageSize=this.pager.pageSize;
-                axios.post('/financing/refund/listRefundApplay',param)
-                .then(function (response) {
-                    var data =  response.data
-                    if(data.code=='0'){
-                       var resData = data.data;
-                       mainDivVM.tableData= resData.data;
-                     //3.分页组件
-                       mainDivVM.pager.total= resData.total;
-                       mainDivVM.pager.currentPage = resData.currentPage;
-                       mainDivVM.pager.pageSize = resData.pageSize;
-                        
-                    }else{
-                        mainDivVM.$message({message:'初始化列表错误',type:'error'});
-                        console.error(data);
-                    }
-                
-                })
-                .catch(function (error) {
-                     console.log(error);
-                }).then(function(){
-                });
-                
-                
-            },
-            showReason(row){//驳回原因
-                this.rejectReason='';
-                this.reasonDialog=true
-                this.rejectReason = row.rejectReason;
-                
-            },
-            showReason1(row){//返款原因
-                this.reason = '';
-                this.reasonDialog1=true
-                this.reason = row.reason;
-            },
-            editDialog(row){//驳回编辑
-                //get oss param
-                this.getUploadParam();
-               /*   if(this.$refs['dialogForm]']){
-                   this.$refs['dialogForm'].resetFields();
-                  }  */ 
-                var param={};
-                param.id=row.id;
-                 axios.post('/financing/refund/queryRefundInfoById',param)
-                .then(function (response) {
-                      var result =  response.data;
-                      if(result.code=='0'){
-                          var table=result.data;
-                          mainDivVM.dialogForm= table;
-                          var imgList =  table.imgList;
-                          var imgShowList = new Array();
-                          var fileIdList = new Array();
-                          for(var i=0;i<imgList.length;i++){
-                              var curImg = imgList[i];
-                              var img={};
-                            //  img.name="上传文件"+(i+1);
-                              img.name= curImg.realName;
-                              img.url = curImg.imgUrl;
-                              img.id=curImg.id;
-                              img.rebateId=curImg.reId;
-                              imgShowList.push(img);
-                              fileIdList.push(curImg.id);
-                             
-                          } 
-                          mainDivVM.dialogForm.fileList=fileIdList;
-                          mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单退款申请";
-                          mainDivVM.fileList=imgShowList;
-                          mainDivVM.dialogFormVisible=true;
-                      }else{
-                          console.error(response);
-                      }
-                      
-                })
-                .catch(function (error) {
-                     console.log(error);
-                }); 
-                
-            },
-            handlePreview(file){
-                
-            },
-            handleRemove(file,fileList){
-            	 var id = file.id;
-            	 if(!id){
-            		 return;
-            	 }
-                 var param = {};
-                 var idList = new Array();
-                 idList.push(id)
-                 param.idList = idList;
-                 axios.post('/financing/refund/deleteImgByIdList',param)
-                 .then(function (response) {
-                       var result =  response.data;
-                       if(result.code=='0'){
-                    	   mainDivVM.deleteFile(id);
-                           mainDivVM.$message({message:'删除成功',type:'success'});
-                       }else{
-                           console.error(response);
-                           mainDivVM.$message({message:result.msg,type:'error'});
-                       }
-                       
-                 })
-                 .catch(function (error) {
-                      console.log(error);
-                 });
-                 
-            },
-            deleteFile(id){//把imgList中的文件移除
-            	var curImgList = this.fileList;
-            	for(var i=0;i<curImgList.length;i++){
-            		var curImg = curImgList[i];
-            		if(curImg.id==id){
-            			curImgList.splice(i--,1);
-            			break;
-            		}
-            	}
-            	var fileIdList = this.dialogForm.fileList;
-            	for(var i=0;i<fileIdList.length;i++){
-            		var curId = fileIdList[i];
-            		if(curId==id){
-            			fileIdList.splice(i--,1);
-            			break;
-            		}
-            	}
-            	
-            },
-            handleExceed(files, fileList) {
-                //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
-              },
-            initSelect(){
-                this.initBusAreaSelect();
-                this.initSignShopTypeSelect();
-                this.initSignProvinceSelect();
-                this.initTeleDeptId();
-            },
-            initBusAreaSelect(){//商务大区下拉框
-                 axios.post('/organization/organization/queryBusinessAreaList?businessLine='+businessLine,{})
-                 .then(function (response) {
-                       var result =  response.data;
-                       if(result.code=='0'){
-                           var table=result.data;
-                           mainDivVM.busAreaList= table;
-                       }else{
-                           console.error(response);
-                       }
-                       
-                 })
-                 .catch(function (error) {
-                      console.log(error);
-                 });
-            },
-            changeBusArea(selectedValue){//改变商务大区
-                console.info(selectedValue);
-                this.clearBusAreaList();
-                if(!selectedValue){
-                    return;
-                }
-                var param ={};
-                param.id = selectedValue;
-                axios.post('/organization/organization/queryBusGroupListByParentId', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      var table=result.data;
-                      mainDivVM.busGroupList= table;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
-            changeBusGroup(selectedValue){//改变商务组
-                this.clearBusGroupList();
-                if(!selectedValue){
-                    return;
-                }
-                var param ={};
-                param.id = selectedValue;
-                axios.post('/organization/organization/queryBusManagerByOrgId', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      var table=result.data;
-                      mainDivVM.busManagerList= table;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
-            clearBusAreaList(){
-                this.busGroupList=[];
-                this.form.busGroupId='';
-                this.clearBusGroupList();
-                
-            },
-            clearBusGroupList(){
-                 this.busManagerList=[];
-                 this.form.busManagerId='';
-            },
-            initSignShopTypeSelect(){//签约店型
-                var param={};
-                param.groupCode="vistitStoreType";
-                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                    mainDivVM.vistitStoreTypeArr=response.data.data;
-                });
-            },
-            initSignProvinceSelect(){
-                axios.post('/visit/visitRecord/getSignProvince', {})
-                .then(function (response) {
-                      var result =  response.data;
-                      if(result.code=='0'){
-                          var table=result.data;
-                          mainDivVM.proviceList= table;
-                      }else{
-                          console.error(response);
-                      }
-                      
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });  
-            },
-            getSignShopTypeText(row, column, value, index){
-                var valText="";
-                if (value == 1) {
-                    valText = "旗舰店";
-                } else if (value == 2) {
-                    valText = "创业店";
-                } else if (value == 3) {
-                    valText = "标准店";
-                } else if (value == 5) {
-                    valText = "区域代理";
-                } else if (value == 6) {
-                    valText = "单技术";
-                }
-           
-                return valText;
-            },
-            getIsRemoteSign(row, column, value, index){
-                 var valText="";
-                 if(value==0){
-                     valText="否";
-                 }else if(value==1){
-                     valText="是";
-                 }
-                 return valText;
-            },
-            download(row){//下载图片
-                this.downloadDialogVisible=true;
-                var id = row.id;
-                var param = {};
-                param.id = id;
-                axios.post('/financing/refund/listImgById', param)
-                .then(function (response) {
-                    var resData = response.data;
-                    if(resData.code=='0'){
-                        mainDivVM.imgList = resData.data;
-                        //var data = resData.data;
-                        /* var imgHtml = "";
-                        for(var i=0;i<data.length;i++){
-                            var curImg = data[i];
-                            imgHtml+='<a href="'+curImg.imgUrl+'" download="上传图片'+(i+1)+'">上传图片'+(i+1)+'</a>';
-                        }
-                        mainDivVM.imgHtml=imgHtml; */
-                    }else{
-                        mainDivVM.$message({message:'查询图片失败',type:'error'});
-                        console.error(resData);
-                    }
-                
-                })
-                .catch(function (error) {
-                     console.log(error);
-                }).then(function(){
-                    
-                });
-            },
-            downloadImg(url,index){
-                var urlArr = url.split(".");
-                //download(url, "上传图片"+(index+1)+"."+urlArr[urlArr.length-1], "image/*");
-            /*  var x=new XMLHttpRequest();
-                x.open("GET", url, true);
-                x.responseType = 'blob';
-                x.onload=function(e){
-                    download(x.response, "上传图片"+(index+1)+"."+urlArr[urlArr.length-1], "image/*");
-                    }
-                x.send(); */
-                
-            },
-            initTeleDeptId(){//电销事业部
-                axios.post('/organization/organization/queryTeleDeptList?businessLine='+businessLine,{})
-                .then(function (response) {
-                      var result =  response.data;
-                      if(result.code=='0'){
-                          var table=result.data;
-                          mainDivVM.teleDeptList= table;
-                      }else{
-                          console.error(response);
-                      }
-                      
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
-            changeTeleDept(selectedValue){//电销事业部
-                this.clearTeleDeptList();
-                if(!selectedValue){
-                    return;
-                }
-                var param ={};
-                param.id = selectedValue;
-                axios.post('/organization/organization/queryTeleGroupListByParentId', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      var table=result.data;
-                      mainDivVM.teleGroupIdList= table;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
-            changeTeleGroup(selectedValue){//改变电销组
-                this.clearTeleGroupList();
-                if(!selectedValue){
-                    return;
-                }
-                var param ={};
-                param.id = selectedValue;
-                axios.post('/organization/organization/queryTeleSaleByOrgId', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      var table=result.data;
-                      mainDivVM.teleIdList= table;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
-            clearTeleDeptList(){
-                this.teleGroupIdList=[];
-                this.form.teleGroupId='';
-                this.clearTeleGroupList();
-                
-            },
-            clearTeleGroupList(){
-                 this.teleIdList=[];
-                 this.form.teleId='';
-            },
-            handleSuccess(response, file, fileList){
-                var realName = file.name;
-                var randomName = mainDivVM.uploadParamData.key;
-                var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
-                var param = {};
-                param.realName=realName;
-                param.imgUrl = imgUrl;
-                var randomNameArr = randomName.split("/");
-                param.randomName = randomNameArr[randomNameArr.length-1];
-            
-                axios.post('/financing/refund/insertImgInfo', param)
-                .then(function (response) {
-                    var resData = response.data;
-                    if(resData.code=='0'){
-                        var lastFile = {};
-                        lastFile.id= resData.data;
-                        lastFile.name=realName;
-                        lastFile.url = imgUrl;
-                        lastFile.randomName = randomName; 
-                        var curList = mainDivVM.fileList;
-                        mainDivVM.dialogForm.fileList.push(resData.data);
-                        curList.push(lastFile);
-                        
-                        mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
-                        mainDivVM.$message({message:'上传成功',type:'success'});
-                    }else{
-                        mainDivVM.$message({message:'上传失败',type:'error'});
-                    }
-                    
-                    
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-                
-                
-                
-            },
-            handleError(err, file, fileList){
-            	 this.$message.error(err);
-                  console.info(err);
-            },
-            handleBefore(file){
-            	   var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
-                   if(!isTextComputer){
-                       this.fileList=[];
-                       this.$message.error('文件格式错误');
-                       return false;
-                   }
-            },
-            random_string(len) {
-                len = len || 32;
-                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
-                var maxPos = chars.length;
-                var pwd = '';
-                for (i = 0; i < len; i++) {
-                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
-                }
-                return pwd;
-            },
-            get_suffix(filename) {
-                var pos = filename.lastIndexOf('.')
-                suffix = ''
-                if (pos != -1) {
-                    suffix = filename.substring(pos);
-                }
-                return suffix;
-            },
-            recordClick(row) {//查看明细
-            	 var signNo = row.signNo;
-            	 this.payDetailTitle = "("+signNo+") 付款明细";
-                 // row.signNo;
-                 var param = {};
-                 param.idList = [row.signId];
-                 axios.post('/sign/signRecord/listPayDetail', param)
-                 .then(function (response) {
-                     var resData = response.data;
-                     console.log(resData.data)
-                     if(resData.code=='0'){
-                        mainDivVM.recordTableDetail= resData.data;
-                     }else{
-                         mainDivVM.$message({message:resData.msg,type:'error'});
-                         console.error(resData);
-                     }
-                     mainDivVM.recordDialog=true;
-                 })
-                 .catch(function (error) {
-                      console.log(error);
-                 }).then(function(){
-                 });
-                
-             },
-             //付款类型转换方法
-             transformPayType(row, column, cellValue, index) {
-               var text="";
-               if(cellValue=="1"){
-                 text="全款"
-               }else if(cellValue=="2"){
-                 text="定金"
-               }else if(cellValue=="3"){
-                 text="追加定金"
-               }else if(cellValue=="4"){
-                 text="尾款"
-               }
-               return text;
-             },
-             getPayModeText(row, column, value, index){
-                 var valText="";
-                 if(!value){
-                     return valText;
-                 }
-                 var vals = value.split(",");
-                 if(payModeItem){
-                     for(var j = 0 ; j < vals.length;j++  ){
-                         for(var i = 0; i < payModeItem.length ; i++){
-                             if(payModeItem[i].value == vals[j]){
-                                 if(j==0){
-                                     valText += payModeItem[i].name;
-                                 }else{
-                                     valText += ","+payModeItem[i].name;
-                                 }
+        ossUrl: ossSignatureUrl,
+        fileList: [],
+        dialogFormVisible: false,//驳回编辑
+        reasonDialog: false,//驳回原因
+        downloadDialogVisible: false,//下载图片dialog
+        rejectReason: '',//退款原因
+        reason: '',//返款原因
+        reasonDialog1: false,//返款原因
+        imgList: [],
+        multipleSelection: [],//选择行
+        editRejectTitle: '',//驳回编辑头部
+        confirmBtnDisabled: false,//提交按钮 禁用
+        payDetailTitle: '',
+        form: {
+          busAreaId: '',
+          busGroupId: '',
+          busManagerId: '',
+          signProvince: '',
+          signType: '',
+          phone: '',
+          signNo: '',
+          customerName: '',
+          startTime: '',
+          endTime: '',
+          teleDeptId: '',
+          teleGroupId: '',
+          teleId: ''
 
-                             }
-                         }
-                     }
-                 }
-                 return valText;
-             },
-             getTimeText(row, column, value, index){
-                 var valText="";
-                 if(value){
-                    /*  valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss"); */
-                     valText =  moment(Number(value)).format("YYYY-MM-DD");
-                 }
-                 return valText;
-             },
-             //处理状态转换方法
-             transformStatus(row, column, cellValue, index) {
-               var text="";
-               if(cellValue=="0"){
-                 text="待处理";
-               }else if(cellValue=="1"){
-                 text="驳回";
-               }else if(cellValue=="2"){
-                 text="提交对账";
-               }else if(cellValue=="3"){
-                 text="已对账";
-               }else if(cellValue=="4"){
-                 text="已结算";
-               }
-               return text;
-             },
 
-            transGiveType(row, column, value, index) {
-                var text="";
-                for(var i=0;i<giveTypeList.length;i++) {
-                    if(giveTypeList[i].value ==value){
-                        text = giveTypeList[i].name;
-                    }
+        },
+        formLabelWidth: '150px',
+        tableData: [],
+        dataTable: [],
+        options: [{
+          value: '选项1',
+          label: '黄金糕'
+        }, {
+          value: '选项2',
+          label: '双皮奶'
+        }, {
+          value: '选项3',
+          label: '蚵仔煎'
+        }, {
+          value: '选项4',
+          label: '龙须面'
+        }, {
+          value: '选项5',
+          label: '北京烤鸭'
+        }],
+        busAreaList: [],//商务大区
+        busGroupList: [],//签单商务组
+        busManagerList: [],//商务经理
+        teleDeptList: [],//电销事业部
+        teleGroupIdList: [],
+        teleIdList: [],
+        vistitStoreTypeArr: [],//签约店型
+        statusList: [
+          {
+            value: 1,
+            name: '退款确认中'
+          }, {
+            value: 2,
+            name: '已驳回'
+          }, {
+            value: 3,
+            name: '确认退款'
+          }, {
+            value: 4,
+            name: '已退款'
+          }, {
+            value: 5,
+            name: '标记退款结束'
+          }
+
+        ],//处理状态
+        proviceList: [],
+        signTypeList: [{
+          value: 1,
+          label: '一次性全款'
+        }, {
+          value: 2,
+          label: '先交定金'
+        }],
+        dialogForm: {
+          cusAmount: '',
+          refundTime: '',
+          reason: '',
+          fileList: [],
+          cusAmount: '',
+          bearAmount: '',
+
+        },
+        dialogRules: {
+          reason: [
+            { required: true, message: '请输入退款原因', trigger: 'blur' }
+          ],
+          refundTime: [
+            { required: true, message: '请选择退款时间', trigger: 'blur' }
+          ],
+          cusAmount: [
+            { required: true, message: '请输入退款客户金额', trigger: 'blur' },
+            {
+              validator: function (rule, value, callback) {
+                if (value) {
+                  if (!/^[0-9]*$/.test(value)) {
+                    callback(new Error("只可以输入整数"));
+                  } else {
+                    callback();
+                  }
+                } else {
+                  callback();
                 }
-                return text;
-            },
 
-            toogleClick(){
-                if(this.isShow){
-                    this.isShow=false
-                }else{
-                    this.isShow=true
-                }          
+
+              }, trigger: 'blur'
             },
-            closeEditRefundDialog(){
-            	  this.$refs['dialogForm'].resetFields();
-            },
-            cancleRefundEditDialog(){
-            	this.dialogFormVisible = false;
-            	this.closeEditRefundDialog();
+          ],
+          bearAmount: [
+            { required: true, message: '请输入承担金额', trigger: 'blur' },
+            {
+              validator: function (rule, value, callback) {
+                var reg = /^[+-]?(0|([1-9]\d*))(\.\d+)?$/g;
+                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                  callback(new Error("请输入数字"));
+                  return;
+                } else {
+                  callback();
+                }
+
+              }, trigger: 'blur'
             }
-          
-        },
-        created(){   
-            // 取页数存储
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
+          ],
+          fileList: [
+            { required: true, message: '选择文件', trigger: 'change' }
+          ]
 
-            this.searchTable();
-            this.initSelect();
+
         },
-        mounted(){
-            document.getElementById('maindiv').style.display = 'block';
+        amount: [{
+          value: '0',
+          label: '1000'
+        }, {
+          value: '1',
+          label: '2000'
+        }, {
+          value: '2',
+          label: '3000'
+        }, {
+          value: '3',
+          label: '4000'
+        }, {
+          value: '4',
+          label: '5000'
+        }],
+        uploadOssHost: '',
+        uploadParamData: {
+          key: '22',
+          policy: '',
+          OSSAccessKeyId: '',
+          success_action_status: '200', //让服务端返回200,不然，默认会返回204
+          signature: '',
+          'x:params': '',
+          'realName': ''
         },
-        filters:{
-        	 getTimeTextFilter(value){
-                 var valText="";
-                 if(value){
-                     valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
-                 }
-                 return valText;
-             },
+        recordTableDetail: [],//付款明细data
+        recordDialog: false,//付款明细弹窗
+      }
+    },
+    methods: {
+      //计算退款的承担金额
+      allCalAmount(){
+          var rows = this.multipleSelection;
+          var aone = parseFloat(rows[0].ratio/100);
+          var atwo = parseFloat(this.dialogForm.cusAmount);
+          if (isNaN(aone)) aone = 0
+          if (isNaN(atwo)) atwo = 0
+          this.dialogForm.bearAmount = (aone * atwo) + "";
+      },
+      getUploadParam() {
+        var signUrl = this.ossUrl + "?serviceType=aggregation";
+        var param = {};
+
+        axios.get(signUrl, param)
+          .then(function (response) {
+            // console.info(response);
+            var respData = response.data;
+            var host = respData.host;
+            var params = {};
+            var new_multipart_params = {
+              dir: respData.dir,
+              'policy': respData.policy,
+              'OSSAccessKeyId': respData.accessid,
+              'success_action_status': '200', //让服务端返回200,不然，默认会返回204
+              'signature': respData.signature,
+              'x:params': params,//自定义编码，basse64编码后的字符串,
+              'realName': ''
+            };
+            mainDivVM.uploadParamData = new_multipart_params;
+            mainDivVM.uploadOssHost = host;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+
+
+      },
+      selectFile(file, fileList) {
+        debugger;
+        var fileLength = fileList.length;
+        if (fileLength >= 2) {
+          //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
+          var lastSecondFile = fileList[fileLength - 2];
+          if (!lastSecondFile.hasOwnProperty("id")) {
+            fileList.splice(length - 2, 1);
+          }
+
         }
-    })
+        mainDivVM.uploadParamData.key = mainDivVM.uploadParamData.dir + mainDivVM.random_string(10) + mainDivVM.get_suffix(file.name),
+          mainDivVM.uploadParamData.realName = file.name
+      },
+      submitUpload() {
+        //this.customUpload();
+        this.$refs.refundApplyImgUpload.submit();
+      },
+      submitDialogForm(formName) {//驳回提交验证
+        this.confirmBtnDisabled = true;
+
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            var fileList = mainDivVM.fileList;
+            /* 	if(fileList.length==0){
+              	
+              } */
+
+            var param = this.dialogForm;
+            param.imgList = fileList;
+            axios.post('/financing/refund/editRejectRefundInfo', param)
+              .then(function (response) {
+                var data = response.data;
+                if (data.code == '0') {
+                  mainDivVM.dialogFormVisible = false;
+                  mainDivVM.$message({
+                    message: '操作成功', type: 'success', duration: 1500, onClose: function () {
+                      mainDivVM.searchTable();
+                    }
+                  });
+
+                } else {
+                  mainDivVM.$message({ message: '操作失败', type: 'error' });
+                  console.error(data);
+                }
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              }).then(function () {
+                mainDivVM.confirmBtnDisabled = false;
+              });
+
+
+          } else {
+            console.log('error submit!!');
+            mainDivVM.confirmBtnDisabled = false;
+          }
+        });
+      },
+      openSign() {//打开标记退款结束
+        var rows = this.multipleSelection;
+        if (rows.length == 0) {
+          this.$message({
+            message: '请选择数据',
+            type: 'warning'
+          });
+          return;
+        } else {
+          var isPass = true;
+          var idList = new Array();
+          for (var i = 0; i < rows.length; i++) {
+            var curRow = rows[i];
+            if (curRow.status != 2) {
+              this.$message({ message: '只允许操作已驳回数据', type: 'warning' });
+              isPass = false;
+              break;
+            }
+            idList.push(curRow.id);
+          }
+
+          if (!isPass) {
+            return;
+          }
+
+
+
+          this.$confirm('确认标记为退款结束吗？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            var param = {};
+            param.idList = idList;
+            axios.post('/financing/refund/updateRefundInfo', param)
+              .then(function (response) {
+                var data = response.data
+                if (data.code == '0') {
+                  mainDivVM.$message({
+                    message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                      mainDivVM.searchTable();
+                    }
+                  });
+
+                } else {
+                  mainDivVM.$message({ message: '操作失败', type: 'error' });
+                  console.error(data);
+                }
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              }).then(function () {
+              });
+
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消操作'
+            });
+          });
+        }
+      },
+      handleSelectionChange(val) {//选择节点的事件
+        this.multipleSelection = val;
+      },
+      searchTable() {
+        var starTime = this.form.startTime;
+        var endTime = this.form.endTime;
+        if (endTime) {
+          if (starTime > endTime) {
+            this.$message({
+              message: '开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+        var param = this.form;
+        param.pageNum = this.pager.currentPage;
+        param.pageSize = this.pager.pageSize;
+        axios.post('/financing/refund/listRefundApplay', param)
+          .then(function (response) {
+            var data = response.data
+            if (data.code == '0') {
+              var resData = data.data;
+              mainDivVM.tableData = resData.data;
+              //3.分页组件
+              mainDivVM.pager.total = resData.total;
+              mainDivVM.pager.currentPage = resData.currentPage;
+              mainDivVM.pager.pageSize = resData.pageSize;
+
+            } else {
+              mainDivVM.$message({ message: '初始化列表错误', type: 'error' });
+              console.error(data);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          }).then(function () {
+          });
+
+
+      },
+      showReason(row) {//驳回原因
+        this.rejectReason = '';
+        this.reasonDialog = true
+        this.rejectReason = row.rejectReason;
+
+      },
+      showReason1(row) {//返款原因
+        this.reason = '';
+        this.reasonDialog1 = true
+        this.reason = row.reason;
+      },
+      editDialog(row) {//驳回编辑
+        //get oss param
+        this.getUploadParam();
+        /*   if(this.$refs['dialogForm]']){
+            this.$refs['dialogForm'].resetFields();
+           }  */
+        var param = {};
+        param.id = row.id;
+        axios.post('/financing/refund/queryRefundInfoById', param)
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              var table = result.data;
+              mainDivVM.dialogForm = table;
+              var imgList = table.imgList;
+              var imgShowList = new Array();
+              var fileIdList = new Array();
+              for (var i = 0; i < imgList.length; i++) {
+                var curImg = imgList[i];
+                var img = {};
+                //  img.name="上传文件"+(i+1);
+                img.name = curImg.realName;
+                img.url = curImg.imgUrl;
+                img.id = curImg.id;
+                img.rebateId = curImg.reId;
+                imgShowList.push(img);
+                fileIdList.push(curImg.id);
+
+              }
+              mainDivVM.dialogForm.fileList = fileIdList;
+              mainDivVM.editRejectTitle = "编辑驳回（" + table.signNo + "）签约单退款申请";
+              mainDivVM.fileList = imgShowList;
+              mainDivVM.dialogFormVisible = true;
+            } else {
+              console.error(response);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      handlePreview(file) {
+
+      },
+      handleRemove(file, fileList) {
+        var id = file.id;
+        if (!id) {
+          return;
+        }
+        var param = {};
+        var idList = new Array();
+        idList.push(id)
+        param.idList = idList;
+        axios.post('/financing/refund/deleteImgByIdList', param)
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              mainDivVM.deleteFile(id);
+              mainDivVM.$message({ message: '删除成功', type: 'success' });
+            } else {
+              console.error(response);
+              mainDivVM.$message({ message: result.msg, type: 'error' });
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      deleteFile(id) {//把imgList中的文件移除
+        var curImgList = this.fileList;
+        for (var i = 0; i < curImgList.length; i++) {
+          var curImg = curImgList[i];
+          if (curImg.id == id) {
+            curImgList.splice(i--, 1);
+            break;
+          }
+        }
+        var fileIdList = this.dialogForm.fileList;
+        for (var i = 0; i < fileIdList.length; i++) {
+          var curId = fileIdList[i];
+          if (curId == id) {
+            fileIdList.splice(i--, 1);
+            break;
+          }
+        }
+
+      },
+      handleExceed(files, fileList) {
+        //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
+      initSelect() {
+        this.initBusAreaSelect();
+        this.initSignShopTypeSelect();
+        this.initSignProvinceSelect();
+        this.initTeleDeptId();
+      },
+      initBusAreaSelect() {//商务大区下拉框
+        axios.post('/organization/organization/queryBusinessAreaList?businessLine=' + businessLine, {})
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              var table = result.data;
+              mainDivVM.busAreaList = table;
+            } else {
+              console.error(response);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      changeBusArea(selectedValue) {//改变商务大区
+        console.info(selectedValue);
+        this.clearBusAreaList();
+        if (!selectedValue) {
+          return;
+        }
+        var param = {};
+        param.id = selectedValue;
+        axios.post('/organization/organization/queryBusGroupListByParentId', param)
+          .then(function (response) {
+            var result = response.data;
+            var table = result.data;
+            mainDivVM.busGroupList = table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      changeBusGroup(selectedValue) {//改变商务组
+        this.clearBusGroupList();
+        if (!selectedValue) {
+          return;
+        }
+        var param = {};
+        param.id = selectedValue;
+        axios.post('/organization/organization/queryBusManagerByOrgId', param)
+          .then(function (response) {
+            var result = response.data;
+            var table = result.data;
+            mainDivVM.busManagerList = table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      clearBusAreaList() {
+        this.busGroupList = [];
+        this.form.busGroupId = '';
+        this.clearBusGroupList();
+
+      },
+      clearBusGroupList() {
+        this.busManagerList = [];
+        this.form.busManagerId = '';
+      },
+      initSignShopTypeSelect() {//签约店型
+        var param = {};
+        param.groupCode = "vistitStoreType";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+          mainDivVM.vistitStoreTypeArr = response.data.data;
+        });
+      },
+      initSignProvinceSelect() {
+        axios.post('/visit/visitRecord/getSignProvince', {})
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              var table = result.data;
+              mainDivVM.proviceList = table;
+            } else {
+              console.error(response);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      getSignShopTypeText(row, column, value, index) {
+        var valText = "";
+        if (value == 1) {
+          valText = "旗舰店";
+        } else if (value == 2) {
+          valText = "创业店";
+        } else if (value == 3) {
+          valText = "标准店";
+        } else if (value == 5) {
+          valText = "区域代理";
+        } else if (value == 6) {
+          valText = "单技术";
+        }
+
+        return valText;
+      },
+      getIsRemoteSign(row, column, value, index) {
+        var valText = "";
+        if (value == 0) {
+          valText = "否";
+        } else if (value == 1) {
+          valText = "是";
+        }
+        return valText;
+      },
+      download(row) {//下载图片
+        this.downloadDialogVisible = true;
+        var id = row.id;
+        var param = {};
+        param.id = id;
+        axios.post('/financing/refund/listImgById', param)
+          .then(function (response) {
+            var resData = response.data;
+            if (resData.code == '0') {
+              mainDivVM.imgList = resData.data;
+              //var data = resData.data;
+              /* var imgHtml = "";
+              for(var i=0;i<data.length;i++){
+                  var curImg = data[i];
+                  imgHtml+='<a href="'+curImg.imgUrl+'" download="上传图片'+(i+1)+'">上传图片'+(i+1)+'</a>';
+              }
+              mainDivVM.imgHtml=imgHtml; */
+            } else {
+              mainDivVM.$message({ message: '查询图片失败', type: 'error' });
+              console.error(resData);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          }).then(function () {
+
+          });
+      },
+      downloadImg(url, index) {
+        var urlArr = url.split(".");
+        //download(url, "上传图片"+(index+1)+"."+urlArr[urlArr.length-1], "image/*");
+        /*  var x=new XMLHttpRequest();
+            x.open("GET", url, true);
+            x.responseType = 'blob';
+            x.onload=function(e){
+                download(x.response, "上传图片"+(index+1)+"."+urlArr[urlArr.length-1], "image/*");
+                }
+            x.send(); */
+
+      },
+      initTeleDeptId() {//电销事业部
+        axios.post('/organization/organization/queryTeleDeptList?businessLine=' + businessLine, {})
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              var table = result.data;
+              mainDivVM.teleDeptList = table;
+            } else {
+              console.error(response);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      changeTeleDept(selectedValue) {//电销事业部
+        this.clearTeleDeptList();
+        if (!selectedValue) {
+          return;
+        }
+        var param = {};
+        param.id = selectedValue;
+        axios.post('/organization/organization/queryTeleGroupListByParentId', param)
+          .then(function (response) {
+            var result = response.data;
+            var table = result.data;
+            mainDivVM.teleGroupIdList = table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      changeTeleGroup(selectedValue) {//改变电销组
+        this.clearTeleGroupList();
+        if (!selectedValue) {
+          return;
+        }
+        var param = {};
+        param.id = selectedValue;
+        axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+          .then(function (response) {
+            var result = response.data;
+            var table = result.data;
+            mainDivVM.teleIdList = table;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      clearTeleDeptList() {
+        this.teleGroupIdList = [];
+        this.form.teleGroupId = '';
+        this.clearTeleGroupList();
+
+      },
+      clearTeleGroupList() {
+        this.teleIdList = [];
+        this.form.teleId = '';
+      },
+      handleSuccess(response, file, fileList) {
+        var realName = file.name;
+        var randomName = mainDivVM.uploadParamData.key;
+        var imgUrl = mainDivVM.uploadOssHost + "/" + randomName;
+        var param = {};
+        param.realName = realName;
+        param.imgUrl = imgUrl;
+        var randomNameArr = randomName.split("/");
+        param.randomName = randomNameArr[randomNameArr.length - 1];
+
+        axios.post('/financing/refund/insertImgInfo', param)
+          .then(function (response) {
+            var resData = response.data;
+            if (resData.code == '0') {
+              var lastFile = {};
+              lastFile.id = resData.data;
+              lastFile.name = realName;
+              lastFile.url = imgUrl;
+              lastFile.randomName = randomName;
+              var curList = mainDivVM.fileList;
+              mainDivVM.dialogForm.fileList.push(resData.data);
+              curList.push(lastFile);
+
+              mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
+              mainDivVM.$message({ message: '上传成功', type: 'success' });
+            } else {
+              mainDivVM.$message({ message: '上传失败', type: 'error' });
+            }
+
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+
+
+      },
+      handleError(err, file, fileList) {
+        this.$message.error(err);
+        console.info(err);
+      },
+      handleBefore(file) {
+        var isTextComputer = file.type === 'image/png' || file.type === 'image/jpeg';
+        if (!isTextComputer) {
+          this.fileList = [];
+          this.$message.error('文件格式错误');
+          return false;
+        }
+      },
+      random_string(len) {
+        len = len || 32;
+        var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+        var maxPos = chars.length;
+        var pwd = '';
+        for (i = 0; i < len; i++) {
+          pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+        }
+        return pwd;
+      },
+      get_suffix(filename) {
+        var pos = filename.lastIndexOf('.')
+        suffix = ''
+        if (pos != -1) {
+          suffix = filename.substring(pos);
+        }
+        return suffix;
+      },
+      recordClick(row) {//查看明细
+        var signNo = row.signNo;
+        this.payDetailTitle = "(" + signNo + ") 付款明细";
+        // row.signNo;
+        var param = {};
+        param.idList = [row.signId];
+        axios.post('/sign/signRecord/listPayDetail', param)
+          .then(function (response) {
+            var resData = response.data;
+            console.log(resData.data)
+            if (resData.code == '0') {
+              mainDivVM.recordTableDetail = resData.data;
+            } else {
+              mainDivVM.$message({ message: resData.msg, type: 'error' });
+              console.error(resData);
+            }
+            mainDivVM.recordDialog = true;
+          })
+          .catch(function (error) {
+            console.log(error);
+          }).then(function () {
+          });
+
+      },
+      //付款类型转换方法
+      transformPayType(row, column, cellValue, index) {
+        var text = "";
+        if (cellValue == "1") {
+          text = "全款"
+        } else if (cellValue == "2") {
+          text = "定金"
+        } else if (cellValue == "3") {
+          text = "追加定金"
+        } else if (cellValue == "4") {
+          text = "尾款"
+        }
+        return text;
+      },
+      getPayModeText(row, column, value, index) {
+        var valText = "";
+        if (!value) {
+          return valText;
+        }
+        var vals = value.split(",");
+        if (payModeItem) {
+          for (var j = 0; j < vals.length; j++) {
+            for (var i = 0; i < payModeItem.length; i++) {
+              if (payModeItem[i].value == vals[j]) {
+                if (j == 0) {
+                  valText += payModeItem[i].name;
+                } else {
+                  valText += "," + payModeItem[i].name;
+                }
+
+              }
+            }
+          }
+        }
+        return valText;
+      },
+      getTimeText(row, column, value, index) {
+        var valText = "";
+        if (value) {
+          /*  valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss"); */
+          valText = moment(Number(value)).format("YYYY-MM-DD");
+        }
+        return valText;
+      },
+      //处理状态转换方法
+      transformStatus(row, column, cellValue, index) {
+        var text = "";
+        if (cellValue == "0") {
+          text = "待处理";
+        } else if (cellValue == "1") {
+          text = "驳回";
+        } else if (cellValue == "2") {
+          text = "提交对账";
+        } else if (cellValue == "3") {
+          text = "已对账";
+        } else if (cellValue == "4") {
+          text = "已结算";
+        }
+        return text;
+      },
+
+      transGiveType(row, column, value, index) {
+        var text = "";
+        for (var i = 0; i < giveTypeList.length; i++) {
+          if (giveTypeList[i].value == value) {
+            text = giveTypeList[i].name;
+          }
+        }
+        return text;
+      },
+
+      toogleClick() {
+        if (this.isShow) {
+          this.isShow = false
+        } else {
+          this.isShow = true
+        }
+      },
+      closeEditRefundDialog() {
+        this.$refs['dialogForm'].resetFields();
+      },
+      cancleRefundEditDialog() {
+        this.dialogFormVisible = false;
+        this.closeEditRefundDialog();
+      }
+
+    },
+    created() {
+      // 取页数存储
+      var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+      if (localVal) { this.pager.pageSize = localVal; }
+
+      this.searchTable();
+      this.initSelect();
+    },
+    mounted() {
+      document.getElementById('maindiv').style.display = 'block';
+    },
+    filters: {
+      getTimeTextFilter(value) {
+        var valText = "";
+        if (value) {
+          valText = moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+        }
+        return valText;
+      },
+    }
+  })
 </script>
+
 </html>
