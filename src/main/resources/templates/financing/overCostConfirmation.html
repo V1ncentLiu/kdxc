@@ -65,12 +65,12 @@
           </el-form-item>
           <el-form-item label="付款时间：">
             <el-date-picker v-model="searchForm.payStartTime" value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+              format="yyyy-MM-dd" type="datetime" placeholder="选择日期">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="—" class="widthauto">
             <el-date-picker v-model="searchForm.payEndTime" value-format="yyyy-MM-dd HH:mm:ss"
-              format="yyyy-MM-dd HH:mm:ss" type="datetime" placeholder="选择日期">
+              format="yyyy-MM-dd" type="datetime" placeholder="选择日期">
             </el-date-picker>
           </el-form-item>
 
@@ -129,17 +129,20 @@
           <el-table-column align="center" prop="visitCity" label="到访城市">
           </el-table-column>
           <el-table-column align="center" prop="signCompanyName" label="签约公司"></el-table-column>
-          <el-table-column align="center" prop="bearAmount" label="电销顾问"></el-table-column>
-          <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
+          <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+          <el-table-column align="center" prop="busSaleId" label="商务经理"></el-table-column>
           <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
           <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
           <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
-          <el-table-column align="center" prop="amountReceivablerefundTime" label="合同金额"></el-table-column>
+          <el-table-column align="center" prop="amountReceivable" label="合同金额"></el-table-column>
           <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
           <el-table-column align="center" prop="amountEquipment" label="设备成本"></el-table-column>
           <el-table-column align="center" prop="giveAmount" label="活动赠送成本"></el-table-column>
           <el-table-column align="center" prop="totalCost" label="成本总计"></el-table-column>
           <el-table-column align="center" prop="costRatio" label="成本占比">
+            <template slot-scope="scope">
+              <div>{{scope.row.costRatio}}%</div>
+            </template>
           </el-table-column>
           <el-table-column align="center" prop="overCost" label="超成本红线">
             <template slot-scope="scope">
@@ -412,7 +415,7 @@
       },
       notVisitFlagRules: {
         remark: [
-          { required: true, min: 1, max: 100, message: '请输入驳回原因', trigger: 'blur' }
+          { required: true, min: 1, max: 500, message: '请输入驳回原因', trigger: 'blur' }
         ],
       },
       allpyrules: {
@@ -541,7 +544,7 @@
             if(data&&data.length>0){
               for (var i = 0; i < data.length; i++) {
                 data[i].status = clueVM.transformStatus(data[i].status);
-                data[i].signShopType = clueVM.transformSignShopType(vistitStoreTypeList, data[i].signShopType);
+                // data[i].signShopType = clueVM.transformSignShopType(vistitStoreTypeList, data[i].signShopType);
                   data[i]['costRatio'] = clueVM.transformCostRatio(data[i].totalCost, data[i].amountReceived);
                   data[i]['deTeleSale'] = clueVM.transformSale(data[i].amountReceived, data[i].teleSaleRatio, data[i].overCostRatio);
                   data[i]['deBusSale'] = clueVM.transformSale(data[i].amountReceived, data[i].busSaleRatio, data[i].overCostRatio);
@@ -750,29 +753,21 @@
             type: 'warning'
           });
           return;
-        } else if (rows.length > 1) {
-          this.$message({
-            message: '请选择一条数据提交对账确认',
-            type: 'warning'
-          });
-          return;
-        }
-        var msg = "";
-        if (msg != "") {
-          this.$message({
-            message: msg,
-            type: 'warning'
-          });
-          return;
-        }
-        clueVM.submitApplyVisible = true;
+        }else{
+            clueVM.submitApplyVisible = true;
+          }
 
       },
       //结算确认
       settlementConfirm() {
         var rows = this.multipleSelection;
         var param = {};
-        param.id = rows[0].id;
+        var idList = new Array();
+        for (var i = 0; i < rows.length; i++) {
+            var curRow = rows[i];
+            idList.push(curRow.id);
+        }
+        param.idList=idList;
         axios.post('/financing/overCost/confirm', param)
           .then(function (response) {
             var data = response.data;
@@ -860,7 +855,6 @@
 
       },
       clearBusGroupList() {
-        this.companyArr = [];
         this.searchForm.companyId = '';
       },
       getBusAndTel() {
