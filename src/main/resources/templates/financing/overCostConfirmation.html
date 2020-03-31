@@ -364,7 +364,7 @@
       teleGorupOptions: teleGroupList,
       teleSaleOptions: teleSaleList,
       provinceOptions: provinceList,
-      projectOptions: projectList,
+      projectOptions: [],
       statusOptions: [{
         id: 0,
         value: 2,
@@ -498,8 +498,15 @@
         }
 
       },
+        //签约项目
+        projectChangeSelect() {
+            var param = {};
+            param.isNotSign =0;
+            axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                clueVM.projectOptions = response.data.data;
+            });
+        },
       searchTable() {
-        console.log(9999);
         var param = {};
         param = Object.assign({}, this.searchForm);
         var payStartTime = this.searchForm.payStartTime;
@@ -912,6 +919,8 @@
     created() {
       this.getBusAndTel();
       this.getCompanyArr();
+        // 签约项目
+        this.projectChangeSelect();
       // 进入页面判断有是否有存储值
       // 取页数存储
       var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
