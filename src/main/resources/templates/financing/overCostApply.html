@@ -181,7 +181,7 @@
                         {{allocationForm.rejectUserName}}
                     </el-form-item>
                     <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="">
-                        {{allocationForm.rejectTime}}
+                        {{this.formatTimeFn(allocationForm.rejectTime)}}
                     </el-form-item>
                     <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="">
                         <span style="color: red;">{{allocationForm.rejectReason}}</span>
@@ -388,6 +388,19 @@ var clueVM = new Vue({
           scrollTop: 0,
         },
         methods: {
+            formatTimeFn(date) {
+                if (null == date) {
+                    return "";
+                }
+                var dateNew = new Date(date);
+                var year = dateNew.getFullYear()
+                var month = dateNew.getMonth() + 1
+                var day = dateNew.getDate()
+                var hour = dateNew.getHours()
+                var minute = dateNew.getMinutes()
+                var second = dateNew.getSeconds()
+                return year + "-" + this.formatNumberFn(month) + "-" + this.formatNumberFn(day) + " " + this.formatNumberFn(hour) + ":" + this.formatNumberFn(minute) + ":" + this.formatNumberFn(second);
+            },
             getTimeText(row, column, value, index) {
                 var valText = "";
                 if (value) {
