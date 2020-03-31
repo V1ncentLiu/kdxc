@@ -107,6 +107,11 @@ public class OverCostController {
     @RequiresPermissions("financing:overCostConfirm:confirm")
     @LogRecord(description = "超成本申请确认", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_CONFIRM)
     public JSONResult<String> confirm(@RequestBody FinanceOverCostReqDto reqDto) {
+        UserInfoDTO userInfoDTO = getUser();
+        // 更新人
+        reqDto.setUpdateUser(userInfoDTO.getId());
+        // 更新时间
+        reqDto.setUpdateTime(new Date());
         return overCostFeignClient.confirm(reqDto);
     }
 
@@ -124,6 +129,11 @@ public class OverCostController {
     @RequiresPermissions("financing:overCostConfirm:reject")
     @LogRecord(description = "超成本申请驳回", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_REJECT)
     public JSONResult<String> reject(@RequestBody FinanceOverCostReqDto reqDto) {
+        UserInfoDTO userInfoDTO = getUser();
+        // 更新人
+        reqDto.setUpdateUser(userInfoDTO.getId());
+        // 更新时间
+        reqDto.setUpdateTime(new Date());
         return overCostFeignClient.reject(reqDto);
     }
 
