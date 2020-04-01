@@ -130,7 +130,7 @@
           </el-table-column>
           <el-table-column align="center" prop="signCompanyName" label="签约公司"></el-table-column>
           <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
-          <el-table-column align="center" prop="busSaleId" label="商务经理"></el-table-column>
+          <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
           <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
           <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
           <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
@@ -141,7 +141,7 @@
           <el-table-column align="center" prop="totalCost" label="成本总计"></el-table-column>
           <el-table-column align="center" prop="costRatio" label="成本占比">
             <template slot-scope="scope">
-              <div>{{scope.row.costRatio}}%</div>
+              <div>{{scope.row.costRatio}}</div>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="overCost" label="超成本红线">
@@ -220,7 +220,7 @@
       <template>
         <el-form>
           <el-form-item label="驳回人员:">
-            <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectUser}}</span>
+            <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectUserName}}</span>
           </el-form-item>
           <el-form-item label="驳回时间:">
             <span style=" display: block; color: #1e2746; ">{{rejectReasonObj.rejectTime}}</span>
@@ -367,7 +367,7 @@
       teleGorupOptions: teleGroupList,
       teleSaleOptions: teleSaleList,
       provinceOptions: provinceList,
-      projectOptions: projectList,
+      projectOptions: [],
       statusOptions: [{
         id: 0,
         value: 2,
@@ -501,8 +501,15 @@
         }
 
       },
+        //签约项目
+        projectChangeSelect() {
+            var param = {};
+            param.isNotSign =0;
+            axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                clueVM.projectOptions = response.data.data;
+            });
+        },
       searchTable() {
-        console.log(9999);
         var param = {};
         param = Object.assign({}, this.searchForm);
         var payStartTime = this.searchForm.payStartTime;
@@ -672,13 +679,13 @@
         var status = rows[0].status;
         var customerName = rows[0].customerName;
         var msg = "只有待处理的申请允许驳回！";
-        /*if(status !="待处理"){
+        if(status != 2){
           this.$message({
                   message: msg,
                   type: 'warning'
                 });
                return;
-        }*/
+        }
         this.rejectVisible = true;
         this.backQuery = "【" + customerName + "】超成本申请驳回吗?";
         // 存储选中信息--start
@@ -746,24 +753,33 @@
             type: 'warning'
           });
           return;
-        }else{
-            clueVM.submitApplyVisible = true;
-          }
+        } else if (rows.length != 1) {
+          this.$message({
+            message: '请选择一条数据进行驳回',
+            type: 'warning'
+          });
+          return;
+        }
+        var status = rows[0].status;
+        var msg = "只有待处理的申请允许确认！";
+        if(status != 2){
+          this.$message({
+                  message: msg,
+                  type: 'warning'
+                });
+               return;
+        }
+        clueVM.submitApplyVisible = true;
 
       },
       //结算确认
       settlementConfirm() {
         var rows = this.multipleSelection;
         var param = {};
-        var idList = new Array();
-        for (var i = 0; i < rows.length; i++) {
-            var curRow = rows[i];
-            idList.push(curRow.id);
-        }
-        param.idList=idList;
+        param.id = rows[0].id;
         axios.post('/financing/overCost/confirm', param)
           .then(function (response) {
-            var data = response.data;
+            var data = esponse.data;
             if (response.status == 200) {
               clueVM.$message({
                 message: '提交成功', type: 'success', duration: 1000, onClose: function () {
@@ -906,6 +922,8 @@
     created() {
       this.getBusAndTel();
       this.getCompanyArr();
+        // 签约项目
+        this.projectChangeSelect();
       // 进入页面判断有是否有存储值
       // 取页数存储
       var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
