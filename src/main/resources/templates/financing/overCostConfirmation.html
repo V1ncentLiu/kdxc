@@ -679,13 +679,13 @@
         var status = rows[0].status;
         var customerName = rows[0].customerName;
         var msg = "只有待处理的申请允许驳回！";
-        /*if(status !="待处理"){
+        if(status != 2){
           this.$message({
                   message: msg,
                   type: 'warning'
                 });
                return;
-        }*/
+        }
         this.rejectVisible = true;
         this.backQuery = "【" + customerName + "】超成本申请驳回吗?";
         // 存储选中信息--start
@@ -753,21 +753,30 @@
             type: 'warning'
           });
           return;
-        }else{
-            clueVM.submitApplyVisible = true;
-          }
+        } else if (rows.length != 1) {
+          this.$message({
+            message: '请选择一条数据进行驳回',
+            type: 'warning'
+          });
+          return;
+        }
+        var status = rows[0].status;
+        var msg = "只有待处理的申请允许确认！";
+        if(status != 2){
+          this.$message({
+                  message: msg,
+                  type: 'warning'
+                });
+               return;
+        }
+        clueVM.submitApplyVisible = true;
 
       },
       //结算确认
       settlementConfirm() {
         var rows = this.multipleSelection;
         var param = {};
-        var idList = new Array();
-        for (var i = 0; i < rows.length; i++) {
-            var curRow = rows[i];
-            idList.push(curRow.id);
-        }
-        param.idList=idList;
+        param.id = rows[0].id;
         axios.post('/financing/overCost/confirm', param)
           .then(function (response) {
             var data = esponse.data;
