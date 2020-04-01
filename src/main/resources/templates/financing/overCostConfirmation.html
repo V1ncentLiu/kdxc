@@ -41,7 +41,12 @@
       <shiro:hasPermission name="financing:overCostConfirm:reject">
         <el-button type="danger" @click="rejectback">驳回申请</el-button>
       </shiro:hasPermission>
-
+      <!-- <shiro:hasPermission name="financing:balanceaccountManager:settlementConfirm">
+        <el-button type="warning" @click="settlementConfirmButton"> 超成本确认</el-button>
+      </shiro:hasPermission>
+      <shiro:hasPermission name="financing:balanceaccountManager:rejectApply">
+        <el-button type="danger" @click="rejectback">驳回申请</el-button>
+      </shiro:hasPermission>  -->
 
     </el-row>
     <div class="mainSearchBg">
@@ -290,6 +295,7 @@
       imgList: [],
       rejectCustomerName:'',
       rejectReasonObj:{},
+      idList:[],
       searchForm: {
         cusName: '',
         busGroupId: '',
@@ -535,8 +541,396 @@
         axios.post('/financing/overCost/overCostConfirmList', param)
           .then(function (response) {
             var result = response.data;
-            console.log(result,"result");
-            console.info(result);
+//             var result = {
+//     "code": "0",
+//     "data": {
+//         "data": [
+//             {
+//                 "id": "1245222338694582272",
+//                 "status": 2,
+//                 "commission": 9999999.99,
+//                 "picUrls": "[{\"id\":\"1245223851139633152\",\"name\":\"测试图片.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/BkpzKsb2Ee.jpg\",\"randomName\":\"aggregation/BkpzKsb2Ee.jpg\",\"uid\":1585719475955,\"status\":\"success\"},{\"id\":\"1245223883062480896\",\"name\":\"重单列表.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/Bmy3fKZhjj.jpg\",\"randomName\":\"aggregation/Bmy3fKZhjj.jpg\",\"uid\":1585719483581,\"status\":\"success\"}]",
+//                 "statementNo": "zjiehegn67",
+//                 "customerName": "小图尾款",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1214723081780936704",
+//                 "signCompanyName": "李婆婆羊蝎子2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 80000,
+//                 "signProvince": "广东",
+//                 "signProjectId": "1207195784500842496",
+//                 "signProjectName": "一点点36",
+//                 "signShopType": "市代理",
+//                 "amountReceived": 20000,
+//                 "amountEquipment": 10000,
+//                 "giveAmount": 5000,
+//                 "totalCost": 15000,
+//                 "costRatio": 75,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": 60,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1245182059891445760",
+//                 "payType": 4,
+//                 "payTime": "2020-04-01"
+//             },
+//             {
+//                 "id": "1245182185930280960",
+//                 "status": 2,
+//                 "commission": 99.87,
+//                 "picUrls": "[{\"id\":\"1245228617316012032\",\"name\":\"重单列表.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/TCMFeiSGEt.jpg\",\"randomName\":\"aggregation/TCMFeiSGEt.jpg\",\"uid\":1585720612294,\"status\":\"success\"},{\"id\":\"1245228714384789504\",\"name\":\"测试图片.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/PxAZwy7CbS.jpg\",\"randomName\":\"aggregation/PxAZwy7CbS.jpg\",\"uid\":1585720635439,\"status\":\"success\"},{\"id\":\"1245228754146791424\",\"name\":\"待跟进客户.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/BTBMJZ8Q6G.jpg\",\"randomName\":\"aggregation/BTBMJZ8Q6G.jpg\",\"uid\":1585720645005,\"status\":\"success\"},{\"id\":\"1245228771175665664\",\"name\":\"工作台电销顾问-无数据.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/44XDk5Wyz5.jpg\",\"randomName\":\"aggregation/44XDk5Wyz5.jpg\",\"uid\":1585720648987,\"status\":\"success\"},{\"id\":\"1245228812158210048\",\"name\":\"客户详情-01基本信息0603.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/BZMFbpkYBJ.jpg\",\"randomName\":\"aggregation/BZMFbpkYBJ.jpg\",\"uid\":1585720658770,\"status\":\"success\"}]",
+//                 "statementNo": "t319juwg0w",
+//                 "customerName": "小图尾款",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1214723081780936704",
+//                 "signCompanyName": "李婆婆羊蝎子2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 80000,
+//                 "signProvince": "广东",
+//                 "signProjectId": "1207195784500842496",
+//                 "signProjectName": "一点点36",
+//                 "signShopType": "市代理",
+//                 "amountReceived": 20000,
+//                 "amountEquipment": 0,
+//                 "giveAmount": 10000,
+//                 "totalCost": 10000,
+//                 "costRatio": 50,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": 35,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1245182059891445760",
+//                 "payType": 2,
+//                 "payTime": "2020-04-01"
+//             },
+//             {
+//                 "id": "1245179875208515584",
+//                 "status": 2,
+//                 "commission": -6000,
+//                 "picUrls": "[{\"id\":\"1245233983592435712\",\"name\":\"重单列表.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/wWcsfWnWBE.jpg\",\"randomName\":\"aggregation/wWcsfWnWBE.jpg\",\"uid\":1585721891714,\"status\":\"success\"}]",
+//                 "statementNo": "amltrbnlyx",
+//                 "customerName": "小图全款",
+//                 "visitCity": "上海",
+//                 "signCompanyId": "1214723081780936704",
+//                 "signCompanyName": "李婆婆羊蝎子2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 90000,
+//                 "signProvince": "广东",
+//                 "signProjectId": "1207195784500842496",
+//                 "signProjectName": "一点点36",
+//                 "signShopType": "市代理",
+//                 "amountReceived": 80000,
+//                 "amountEquipment": 0,
+//                 "giveAmount": 0,
+//                 "totalCost": 0,
+//                 "costRatio": 0,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -15,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1245179506013294592",
+//                 "payType": 1,
+//                 "payTime": "2020-04-01"
+//             },
+//             {
+//                 "id": "1244599696593596416",
+//                 "status": 2,
+//                 "commission": 2000,
+//                 "picUrls": "[{\"id\":\"1245230617252433920\",\"name\":\"客户详情-01基本信息0603.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/bBdbYW5aff.jpg\",\"randomName\":\"aggregation/bBdbYW5aff.jpg\",\"uid\":1585721089135,\"status\":\"success\"},{\"id\":\"1245230638484000768\",\"name\":\"01待分配.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/j6PNdQjmc6.jpg\",\"randomName\":\"aggregation/j6PNdQjmc6.jpg\",\"uid\":1585721094193,\"status\":\"success\"},{\"id\":\"1245230656968298496\",\"name\":\"客户详情-01基本信息0603.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/TQmwbKex6d.jpg\",\"randomName\":\"aggregation/TQmwbKex6d.jpg\",\"uid\":1585721098615,\"status\":\"success\"},{\"id\":\"1245230683002343424\",\"name\":\"通话记录.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/daZEFQcK4Q.jpg\",\"randomName\":\"aggregation/daZEFQcK4Q.jpg\",\"uid\":1585721104801,\"status\":\"success\"},{\"id\":\"1245230707052482560\",\"name\":\"测试图片 (1).jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/Cf5HjWhDTx.jpg\",\"randomName\":\"aggregation/Cf5HjWhDTx.jpg\",\"uid\":1585721110545,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-30 21:21:55",
+//                 "rejectReason": "测试驳回1",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "5yabwwecya",
+//                 "customerName": "电销的数据",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1214723081780936704",
+//                 "signCompanyName": "李婆婆羊蝎子2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 50000,
+//                 "signProvince": "贵州",
+//                 "signProjectId": "1207195898380390400",
+//                 "signProjectName": "半夜虾叫34",
+//                 "signShopType": "市代理",
+//                 "amountReceived": 40000,
+//                 "amountEquipment": 5000,
+//                 "giveAmount": 5000,
+//                 "totalCost": 10000,
+//                 "costRatio": 25,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": 10,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1244599611730243584",
+//                 "payType": 1,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244599135982923776",
+//                 "status": 2,
+//                 "commission": 66,
+//                 "picUrls": "[{\"id\":\"1245268088073871360\",\"name\":\"测试图片.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/PRYwexfZZE.jpg\",\"randomName\":\"aggregation/PRYwexfZZE.jpg\",\"uid\":1585730022891,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-14 12:38:35",
+//                 "statementNo": "o94znda2wy",
+//                 "customerName": "红烧鸡块",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1214723081780936704",
+//                 "signCompanyName": "李婆婆羊蝎子2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 5555555,
+//                 "signProvince": "广西",
+//                 "signProjectId": "1207195784500842496",
+//                 "signProjectName": "一点点36",
+//                 "signShopType": "省代理",
+//                 "amountReceived": 444444,
+//                 "amountEquipment": 10000,
+//                 "giveAmount": 222,
+//                 "totalCost": 10222,
+//                 "costRatio": 2.3,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -12.7,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1244598711901040640",
+//                 "payType": 1,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244588790925045760",
+//                 "status": 2,
+//                 "commission": 123.12,
+//                 "picUrls": "[{\"id\":\"1244879731493781504\",\"name\":\"重单列表.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/TxkJMnpFxe.jpg\",\"randomName\":\"aggregation/TxkJMnpFxe.jpg\",\"uid\":1585637430077,\"status\":\"success\"},{\"id\":\"1244879778331574272\",\"name\":\"测试图片.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/aHX3rNhDbP.jpg\",\"randomName\":\"aggregation/aHX3rNhDbP.jpg\",\"uid\":1585637441237,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-31 14:51:17",
+//                 "rejectReason": "广大广东省个",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "qi1i3y780i",
+//                 "customerName": "昆德拉",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1214723209296166912",
+//                 "signCompanyName": "李婆婆羊蝎子3",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 40000,
+//                 "signProvince": "安徽",
+//                 "signProjectId": "1206391655377444864",
+//                 "signProjectName": "LX外部商家项目",
+//                 "signShopType": "省代理",
+//                 "amountReceived": 30000,
+//                 "amountEquipment": 10000,
+//                 "giveAmount": 4500,
+//                 "totalCost": 14500,
+//                 "costRatio": 48.33,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": 33.33,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1244519633751724032",
+//                 "payType": 2,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244564702315704320",
+//                 "status": 2,
+//                 "commission": 10000000,
+//                 "picUrls": "[{\"id\":\"1244565659447500800\",\"name\":\"ssss.png\",\"url\":\"https://huiju-dev.oss-cn-beijing.aliyuncs.com/aggregation/Pa7MmXtd4h.png\",\"randomName\":\"aggregation/Pa7MmXtd4h.png\",\"uid\":1585562554340,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-31 12:38:02",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "rhnut1juep",
+//                 "customerName": "闹闹",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1212992527012294656",
+//                 "signCompanyName": "tz商家主账户2",
+//                 "teleSaleId": "1244559257861599232",
+//                 "teleSaleName": "汐广州电销顾问2",
+//                 "busSaleId": "1244558567823093760",
+//                 "busSaleName": "广州商务经理2",
+//                 "amountReceivable": 50000,
+//                 "signProvince": "广东",
+//                 "signProjectId": "1207195784500842496",
+//                 "signProjectName": "一点点36",
+//                 "signShopType": "省代理",
+//                 "amountReceived": 40000,
+//                 "amountEquipment": 0,
+//                 "giveAmount": 0,
+//                 "totalCost": 0,
+//                 "costRatio": 0,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -15,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1244560427598508032",
+//                 "payType": 1,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244556064243085312",
+//                 "status": 2,
+//                 "commission": 30,
+//                 "picUrls": "[{\"id\":\"1244561409589944320\",\"name\":\"ssss.png\",\"url\":\"https://huiju-dev.oss-cn-beijing.aliyuncs.com/aggregation/68fXrhREpG.png\",\"randomName\":\"aggregation/68fXrhREpG.png\",\"uid\":1585561541092,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-31 12:37:57",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "6ydh269roi",
+//                 "customerName": "刘小花",
+//                 "visitCity": "福州",
+//                 "signCompanyId": "1211944342105882624",
+//                 "signCompanyName": "测试2",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 60000,
+//                 "signProvince": "北京",
+//                 "signProjectId": "1189832679273910272",
+//                 "signProjectName": "肉夹馍",
+//                 "signShopType": "市代理",
+//                 "amountReceived": 40000,
+//                 "amountEquipment": 0,
+//                 "giveAmount": 200,
+//                 "totalCost": 200,
+//                 "costRatio": 0.5,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -14.5,
+//                 "commissionRatio": 70,
+//                 "visitRecordId": "1244555851063390208",
+//                 "payType": 2,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244520228789243904",
+//                 "status": 2,
+//                 "commission": 4324.33,
+//                 "picUrls": "[{\"id\":\"1244542147529895936\",\"name\":\"工作台电销顾问-无数据.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/yaCABEb6KS.jpg\",\"randomName\":\"aggregation/yaCABEb6KS.jpg\",\"uid\":1585556944822,\"status\":\"success\"},{\"id\":\"1244596155476946944\",\"name\":\"测试图片.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/3KaTm75fca.jpg\",\"randomName\":\"aggregation/3KaTm75fca.jpg\",\"uid\":1585569821055,\"status\":\"success\"},{\"id\":\"1244596213131849728\",\"name\":\"待跟进客户.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/6pGt8sPXs5.jpg\",\"randomName\":\"aggregation/6pGt8sPXs5.jpg\",\"uid\":1585569834933,\"status\":\"success\"},{\"id\":\"1244596253602689024\",\"name\":\"待跟进客户.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/ixc2THXX8R.jpg\",\"randomName\":\"aggregation/ixc2THXX8R.jpg\",\"uid\":1585569844449,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-31 17:58:46",
+//                 "rejectReason": "的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大尚给大哥的是的撒干撒广东省归属感砂锅但是噶是勾搭都是高大",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "gezspdb8ey",
+//                 "customerName": "昆德拉",
+//                 "visitCity": "南京",
+//                 "signCompanyId": "1214723209296166912",
+//                 "signCompanyName": "李婆婆羊蝎子3",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 5000,
+//                 "signProvince": "安徽",
+//                 "signProjectId": "1206391655377444864",
+//                 "signProjectName": "LX外部商家项目",
+//                 "signShopType": "省代理",
+//                 "amountReceived": 5000,
+//                 "amountEquipment": 2,
+//                 "giveAmount": 2,
+//                 "totalCost": 4,
+//                 "costRatio": 0.08,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -14.92,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1244519633751724032",
+//                 "payType": 1,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244520181217447936",
+//                 "status": 2,
+//                 "picUrls": "[{\"id\":\"1244547267311202304\",\"name\":\"重单列表.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/FHr2JGfFhb.jpg\",\"randomName\":\"aggregation/FHr2JGfFhb.jpg\",\"uid\":1585558165469,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-31 12:39:52",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "306omwootb",
+//                 "customerName": "王老板",
+//                 "visitCity": "上海",
+//                 "signCompanyId": "1212992527012294656",
+//                 "signCompanyName": "tz商家主账户2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 7999,
+//                 "signProvince": "广西",
+//                 "signProjectId": "1207195495374884864",
+//                 "signProjectName": "都可41",
+//                 "signShopType": "市代理",
+//                 "amountReceived": 4000,
+//                 "amountEquipment": 0,
+//                 "giveAmount": 0,
+//                 "totalCost": 0,
+//                 "costRatio": 0,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -15,
+//                 "commissionRatio": 50,
+//                 "visitRecordId": "1244520003785805824",
+//                 "payType": 2,
+//                 "payTime": "2020-03-30"
+//             },
+//             {
+//                 "id": "1244509559482241024",
+//                 "status": 2,
+//                 "commission": 55555555,
+//                 "picUrls": "[{\"id\":\"1244517400037380096\",\"name\":\"测试图片.jpg\",\"url\":\"https://huiju-test.oss-cn-beijing.aliyuncs.com/aggregation/624eXr4MYA.jpg\",\"randomName\":\"aggregation/624eXr4MYA.jpg\",\"uid\":1585551044574,\"status\":\"success\"}]",
+//                 "rejectTime": "2020-03-31 12:36:55",
+//                 "rejectReason": "范德萨",
+//                 "rejectUser": "1236134288441942016",
+//                 "statementNo": "g8ysnpa940",
+//                 "customerName": "花花01",
+//                 "signCompanyId": "1214723081780936704",
+//                 "signCompanyName": "李婆婆羊蝎子2",
+//                 "teleSaleId": "1236133097821642752",
+//                 "teleSaleName": "广州汐电销顾问",
+//                 "busSaleId": "1236133883133763584",
+//                 "busSaleName": "广州汐商务经理",
+//                 "amountReceivable": 11111,
+//                 "signProvince": "贵州",
+//                 "signProjectId": "1207195898380390400",
+//                 "signProjectName": "半夜虾叫34",
+//                 "signShopType": "区/县代理",
+//                 "amountReceived": 111111,
+//                 "amountEquipment": 0,
+//                 "giveAmount": 1,
+//                 "totalCost": 1,
+//                 "costRatio": 0,
+//                 "overCost": 15,
+//                 "teleSaleRatio": 100,
+//                 "busSaleRatio": 100,
+//                 "overCostRatio": -15,
+//                 "commissionRatio": 50,
+//                 "payType": 1,
+//                 "payTime": "2020-03-30"
+//             }
+//         ],
+//         "currentPage": 1,
+//         "total": 11,
+//         "pageSize": 20,
+//         "pageSizes": 1
+//     }
+// }
+//             console.log(result,"result");
+//             console.info(result);
             var table = result.data;
             clueVM.pager.total = table.total;
             clueVM.pager.currentPage = table.currentPage;
@@ -679,7 +1073,7 @@
         var status = rows[0].status;
         var customerName = rows[0].customerName;
         var msg = "只有待处理的申请允许驳回！";
-        if(status != 2){
+        if(status != "待处理"){
           this.$message({
                   message: msg,
                   type: 'warning'
@@ -753,22 +1147,26 @@
             type: 'warning'
           });
           return;
-        } else if (rows.length != 1) {
-          this.$message({
-            message: '请选择一条数据进行驳回',
-            type: 'warning'
-          });
-          return;
         }
-        var status = rows[0].status;
-        var msg = "只有待处理的申请允许确认！";
-        if(status != 2){
-          this.$message({
-                  message: msg,
-                  type: 'warning'
-                });
-               return;
-        }
+        var isPass = true;
+          // var idList = new Array();
+          this.idList=[];
+          for (var i = 0; i < rows.length; i++) {
+            var curRow = rows[i];
+            console.log(curRow.status,"curRow.status");
+            if (curRow.status != "待处理") {
+              this.$message({ message: '只允许选择待处理数据', type: 'warning' });
+              isPass = false;
+              break;
+            }
+            this.idList.push(curRow.id);
+          }
+
+          if (!isPass) {
+            return;
+          }
+
+
         clueVM.submitApplyVisible = true;
 
       },
@@ -776,7 +1174,7 @@
       settlementConfirm() {
         var rows = this.multipleSelection;
         var param = {};
-        param.id = rows[0].id;
+        param.idList =this.idList;
         axios.post('/financing/overCost/confirm', param)
           .then(function (response) {
             var data = esponse.data;
@@ -810,9 +1208,8 @@
         }
       },
       closeSubmitApplyDialog() {//关闭提交对账确认
-        clueVM.lowestCommissionShow = false;
+        clueVM.submitApplyVisible = false;
         // 点击关闭 数据重置
-        this.$refs['apply'].resetFields();
       },
       cancelSubmitApplyFrom() {//提交确认取消
         this.submitApplyVisible = false;
