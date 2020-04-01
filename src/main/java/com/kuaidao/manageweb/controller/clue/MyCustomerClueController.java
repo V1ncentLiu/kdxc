@@ -727,7 +727,7 @@ public class MyCustomerClueController {
             queryPhoneLocaleDTO.setPhone(phone);
             JSONResult<JSONObject> jsonResult = callRecordFeign. queryPhoneLocale(queryPhoneLocaleDTO);
             JSONObject jsonObject = jsonResult.getData();
-            if(jsonObject !=null){
+            if(jsonObject !=null && jsonObject.get("area") !=null){
                 phoneLocale = jsonObject.get("area").toString();
                 return phoneLocale;
             }
