@@ -290,6 +290,7 @@
       imgList: [],
       rejectCustomerName:'',
       rejectReasonObj:{},
+      idList:[],
       searchForm: {
         cusName: '',
         busGroupId: '',
@@ -679,7 +680,7 @@
         var status = rows[0].status;
         var customerName = rows[0].customerName;
         var msg = "只有待处理的申请允许驳回！";
-        if(status != 2){
+        if(status != "2"){
           this.$message({
                   message: msg,
                   type: 'warning'
@@ -753,22 +754,25 @@
             type: 'warning'
           });
           return;
-        } else if (rows.length != 1) {
-          this.$message({
-            message: '请选择一条数据进行驳回',
-            type: 'warning'
-          });
-          return;
         }
-        var status = rows[0].status;
-        var msg = "只有待处理的申请允许确认！";
-        if(status != 2){
-          this.$message({
-                  message: msg,
-                  type: 'warning'
-                });
-               return;
-        }
+        var isPass = true;
+          // var idList = new Array();
+          this.idList=[];
+          for (var i = 0; i < rows.length; i++) {
+            var curRow = rows[i];
+            if (curRow.status != "2") {
+              this.$message({ message: '只允许选择待处理数据', type: 'warning' });
+              isPass = false;
+              break;
+            }
+            this.idList.push(curRow.id);
+          }
+
+          if (!isPass) {
+            return;
+          }
+
+
         clueVM.submitApplyVisible = true;
 
       },
@@ -776,7 +780,7 @@
       settlementConfirm() {
         var rows = this.multipleSelection;
         var param = {};
-        param.id = rows[0].id;
+        param.idList =this.idList;
         axios.post('/financing/overCost/confirm', param)
           .then(function (response) {
             var data = esponse.data;
