@@ -494,6 +494,7 @@
         },
         ossUrl: ossSignatureUrl,
         fileList: [],
+        ratio:'',
         dialogFormVisible: false,//驳回编辑
         reasonDialog: false,//驳回原因
         downloadDialogVisible: false,//下载图片dialog
@@ -687,8 +688,7 @@
     methods: {
       //计算返款的承担金额
       transferCalAmount(){
-                var rows = this.multipleSelection;
-                var aone = parseFloat(rows[0].ratio/100);
+                var aone = parseFloat(this.ratio/100);
                 var atwo = parseFloat(this.dialogForm.cusAmount);
                 if (isNaN(aone)) aone = 0
                 if (isNaN(atwo)) atwo = 0
@@ -854,6 +854,25 @@
         this.reasonDialog1 = true
         this.reason = row.reason;
       },
+      getRadio(row){
+        var param = {};
+        param.id = row.signProjectId ;
+        axios.post('/aggregation/projectManager/getById', param)
+          .then(function (response) {
+            var result = response.data;
+            if (result.code == '0') {
+              var table = result.data;
+              mainDivVM.ratio=table.ratio;
+            } else {
+              console.error(response);
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+
       editDialog(row) {//驳回编辑
         //get oss param
         this.getUploadParam();
@@ -892,6 +911,7 @@
               mainDivVM.dynamicTags = signNoArr;
               mainDivVM.dialogForm.dynamicTags = signNoArr;
               mainDivVM.dialogFormVisible = true;
+              mainDivVM.getRadio(row);
             } else {
               console.error(response);
             }
