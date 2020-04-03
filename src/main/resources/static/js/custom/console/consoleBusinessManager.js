@@ -223,7 +223,8 @@ var mainDivVM = new Vue({
             makeUpTime:'',
             payTime: new Date(),
             amountPerformance:'',
-            payName:''
+            payName:'',
+            amountEquipment:'',//实收设备金额
         },
         // updateFormSigning: {
         // 	giveType:"",
@@ -311,6 +312,7 @@ var mainDivVM = new Vue({
             performanceAmount: '',
             remarks: '', //备注
             signRejectRecordList:[],//驳回原因
+            amountEquipment:'',//实收设备金额
         },
         pager:{
             total: 0,
@@ -655,6 +657,7 @@ var mainDivVM = new Vue({
                     var modeArr = this.responseData.paydetailList[i].payMode.split(",");
                     this.updateFormSigning.payModes = this.tansPayModeValueToName(modeArr);
                     this.updateFormSigning.amountReceived = this.responseData.paydetailList[i].amountReceived;//实收金额
+                    this.updateFormSigning.amountEquipment = this.responseData.paydetailList[i].amountEquipment;//实收设备金额
                     this.updateFormSigning.amountPerformance = this.responseData.paydetailList[i].amountPerformance;//业绩金额
                     this.updateFormSigning.preferentialAmount = this.responseData.paydetailList[i].preferentialAmount;//招商政策金额
                     this.updateFormSigning.firstToll=this.responseData.paydetailList[i].firstToll;//路费
@@ -715,16 +718,20 @@ var mainDivVM = new Vue({
     	formSigningAmountPerformance() {
             var aone = parseFloat(this.formSigning.amountReceived);
             var atwo = parseFloat(this.formSigning.firstToll);
+            var athree = parseFloat(this.formSigning.amountEquipment);
             if (isNaN(aone)) aone = 0
             if (isNaN(atwo)) atwo = 0
-            this.formSigning.performanceAmount = (aone + atwo) + ""
+            if (isNaN(athree)) athree = 0
+            this.formSigning.performanceAmount = (aone + atwo + athree) + ""
         },
       updateFormSigningAmountPerformance(){
         var aone = parseFloat(this.updateFormSigning.amountReceived);
         var atwo = parseFloat(this.updateFormSigning.firstToll);
+        var athree = parseFloat(this.updateFormSigning.amountEquipment);
         if(isNaN(aone)) aone = 0
         if(isNaN(atwo)) atwo = 0
-        this.updateFormSigning.amountPerformance = (aone + atwo) + ""
+        if (isNaN(athree)) athree = 0 
+        this.updateFormSigning.amountPerformance = (aone + atwo + athree) + ""
       },
       formatNum(value) {
           if(!value&&value!==0) return 0;
@@ -1829,6 +1836,7 @@ var mainDivVM = new Vue({
                             var modeArr = responseData.paydetailList[0].payMode.split(",");
                             mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                             mainDivVM.updateFormSigning.amountReceived=responseData.paydetailList[0].amountReceived;//实收金额
+                            mainDivVM.updateFormSigning.amountEquipment=responseData.paydetailList[0].amountEquipment;//实收设备金额                            
                             mainDivVM.updateFormSigning.amountPerformance=responseData.paydetailList[0].amountPerformance;//业绩金额
                             mainDivVM.updateFormSigning.preferentialAmount=responseData.paydetailList[0].preferentialAmount;//招商政策金额
                             mainDivVM.updateFormSigning.firstToll=responseData.paydetailList[0].firstToll;//路费

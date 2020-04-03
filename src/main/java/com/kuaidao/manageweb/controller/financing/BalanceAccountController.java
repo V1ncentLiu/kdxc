@@ -188,7 +188,7 @@ public class BalanceAccountController {
         request.setAttribute("businessLine", user.getBusinessLine());
         return "financing/balanceAccountPage";
     }
-
+    
     /***
      * 对账结算申请列表
      * 

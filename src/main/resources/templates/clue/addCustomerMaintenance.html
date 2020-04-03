@@ -132,6 +132,7 @@
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                             <el-input v-model.trim="form.phone" maxLength="30" style="width: 70%;" v-show="isshowPhone"></el-input>
                             <span style="height: 37px;display: block;float: left;">{{form.customerPhone}}</span>
+                            <font v-show="form.phoneLocale !=null && form.phoneLocale !=''">({{form.phoneLocale}})</font>
                             <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             <el-button type="primary" size="mini" @click="showAddDomain" v-show="showAddDomainBtn" style="padding: 7px 2px 7px 7px;"><i class="el-icon-plus"></i></el-button>
                             <el-button type="primary" size="mini" @click="addDomain" v-show="phoneShow" style="padding: 7px 2px 7px 7px;margin: 0;"><i class="el-icon-plus"></i></el-button>
@@ -147,7 +148,7 @@
                                 :prop="'domains.' + index + '.value'"
                         >
                             <div v-if="editPhone == 0 && domain.edit ==1">
-                                <el-input  v-model.trim="domain.value" disabled maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
+                                <el-input  v-model.trim="domain.area" disabled maxLength="30" style="width: 70%;margin-right: 10px;"></el-input>
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
                             </div>
                             <div v-if="editPhone == 0 && domain.edit ==0">
@@ -966,6 +967,7 @@
                 form: {
                     domains: [],
                     phone: "",
+                    phoneLocale:"",
                     radioSelect: '0',//是否考虑同行业
                     radioProject: '1', //意向项目单选默认选项
                     customerName: '',
@@ -1136,6 +1138,7 @@
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
                         value: '',
+                        area:'',
                         key: Date.now(),
                         edit:1,
                     }]
@@ -2659,6 +2662,7 @@
             if (customer) {
                 this.form.customerName = customer.cusName;
                 this.form.customerPhone = customer.phone;
+                this.form.phoneLocale = customer.phoneLocale;
                 this.form.phoneCreateTime = customer.phoneCreateTime;
 
                 this.form.customerPhone2 = customer.phone2;
@@ -2688,6 +2692,11 @@
                     var phone2 = {};
                     phone2.value = customer.phone2;
                     phone2.key = customer.phone2CreateTime;
+                    if(customer.phone2Locale !=null &&customer.phone2Locale !=''){
+                        phone2.area =customer.phone2+'('+customer.phone2Locale+')';
+                    }else {
+                        phone2.area =customer.phone2
+                    }
                     if(editPhone == 1){
                         phone2.edit = 0;
                     }else {
@@ -2698,6 +2707,11 @@
                 if (customer.phone3) {
                     var phone3 = {};
                     phone3.value = customer.phone3;
+                    if(customer.phone3Locale !=null &&customer.phone3Locale !=''){
+                        phone3.area =customer.phone3+'('+customer.phone3Locale+')';
+                    }else {
+                        phone3.area =customer.phone3
+                    }
                     phone3.key = customer.phone3CreateTime;
                     if(editPhone == 1){
                         phone3.edit = 0;
@@ -2712,6 +2726,11 @@
                     var phone4 = {};
                     phone4.value = customer.phone4;
                     phone4.key = customer.phone4CreateTime;
+                    if(customer.phone4Locale !=null &&customer.phone4Locale !=''){
+                        phone4.area =customer.phone4+'('+customer.phone4Locale+')';
+                    }else {
+                        phone4.area =customer.phone4
+                    }
                     if(editPhone == 1){
                         phone4.edit = 0;
                     }else {
@@ -2724,6 +2743,11 @@
                     var phone5 = {};
                     phone5.value = customer.phone5;
                     phone5.key = customer.phone5CreateTime;
+                    if(customer.phone5Locale !=null &&customer.phone5Locale !=''){
+                        phone5.area =customer.phone5+'('+customer.phone5Locale+')';
+                    }else {
+                        phone5.area =customer.phone5
+                    }
                     if(editPhone == 1){
                         phone5.edit = 0;
                     }else {

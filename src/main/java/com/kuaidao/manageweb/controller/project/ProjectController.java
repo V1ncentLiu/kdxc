@@ -214,6 +214,17 @@ public class ProjectController {
 
         return list;
     }
+    /***
+     * 根据id获取项目详情
+     *
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/getById")
+    public JSONResult<ProjectInfoDTO> getById(@RequestBody IdEntityLong idEntityLong) {
+        JSONResult<ProjectInfoDTO> projectInfo = projectInfoFeignClient.get(idEntityLong);
+        return projectInfo;
+    }
 
     /***
      * 项目列表(不分页)

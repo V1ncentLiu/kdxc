@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+        .el-upload-list{width: 200px;}
+        .el-tag{margin-right: 10px;}
+        .el-date-picker__time-header{display: none;}/*不显示时分秒*/        
+    </style>
+</head>
+<body>
+<div id="clueManage" class="clueManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>财务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>超成本申请</el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB20">
+    		<shiro:hasPermission name="financing:coverCostApply:apply">
+		        <el-button type="primary" @click="toAllocationClue('allocationForm')">申请超成本</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="financing:coverCostApply:settlementOverCost">
+		        <el-button type="success" @click="settlementConfirm">标记为已结算</el-button>
+		    </shiro:hasPermission>
+	  </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+    	      <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm"> 
+                <el-form-item label="客户姓名:" prop="customerName">
+                    <el-input v-model="searchForm.customerName" placeholder="客户姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="签约公司:" prop="companyId">
+                    <el-select v-model="searchForm.companyId" clearable  placeholder="签约公司">
+                        <el-option
+                            v-for="item in companyArr"
+                            :key="item.id"
+                            :label="item.companyName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="签约省份:"  prop="signProvince">
+                      <el-select v-model="searchForm.signProvince" clearable  placeholder="签约省份">
+                        <el-option
+                          v-for="item in provinceOptions"
+                          :key="item.name"
+                          :label="item.name"
+                          :value="item.name">
+                      </el-option>
+                      </el-select>
+                </el-form-item>
+                <el-form-item label="付款时间:">
+                    <el-date-picker  v-model="searchForm.payStartTime" value-format="yyyy-MM-dd" format="yyyy-MM-dd" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker  v-model="searchForm.payEndTime" value-format="yyyy-MM-dd" format="yyyy-MM-dd" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>  
+                <el-row v-show="isShow">
+                    <el-form-item label="商务经理:"  prop="businessManagerId">
+                        <el-select v-model="searchForm.businessManagerId" clearable placeholder="签单商务经理">
+                            <el-option
+                                v-for="item in busSaleOptions"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="电销顾问:"  prop="teleSaleId">
+                        <el-select v-model="searchForm.teleSaleId" clearable placeholder="电销顾问">
+                          <el-option
+                            v-for="item in teleSaleOptions"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="签约店型:"  prop="signShopType">
+                        <el-select v-model="searchForm.signShopType" clearable placeholder="签约店型">
+                          <el-option
+                            v-for="item in signShopTypeOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="签约项目:"  prop="signProjectId">
+                        <el-select v-model="searchForm.signProjectId" clearable filterable placeholder="签约项目">
+                          <el-option
+                            v-for="item in signProjectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="申请状态:"  prop="status">
+                      <el-select v-model="searchForm.status" clearable placeholder="申请状态">
+                        <el-option
+                          v-for="item in signStatusOptions"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+          		      <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
+      	    </el-form>
+        </div>
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" >
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名" ></el-table-column>
+                <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
+                <el-table-column align="center" prop="signCompanyName" label="签约公司" ></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+                <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+                <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+                <el-table-column align="center" prop="amountReceivable" label="合同金额" width="120"></el-table-column>
+                <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额" width="120"></el-table-column>
+                <el-table-column align="center" prop="amountEquipment" label="设备成本" width="120">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.amountEquipment">{{scope.row.amountEquipment}}</span>
+                    <span v-else>0</span>
+                  </template>
+                </el-table-column>
+                <el-table-column align="center" prop="giveAmount" label="活动赠送成本" width="150"></el-table-column>
+                <el-table-column align="center" prop="totalCost" label="成本总计" width="120">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.totalCost">{{scope.row.totalCost}}</span>
+                    <span v-else>0</span>
+                  </template>
+                </el-table-column>
+                <el-table-column align="center" prop="costRatio" label="成本占比" width="120" :formatter="transformValue"></el-table-column>
+                <el-table-column align="center" prop="overCost" label="超成本红线" :formatter="transformValue"></el-table-column>
+                <el-table-column align="center" prop="teleSaleRatio" label="电销业绩比例" width="120" :formatter="transformValue"></el-table-column>
+                <el-table-column align="center" prop="busSaleRatio" label="商务业绩比例" width="120" :formatter="transformValue"></el-table-column>
+                <el-table-column align="center" prop="overCostRatio" label="超成本比例" width="120" :formatter="transformValue"></el-table-column>
+                <el-table-column align="center" prop="commissionRatio" label="佣金比例" width="120" :formatter="transformValue"></el-table-column>
+                <el-table-column align="center" prop="commission" label="应退佣金" width="120"></el-table-column>
+                <el-table-column align="center" prop="" label="申请附件" width="120">
+                  <template slot-scope="scope">
+                    <el-button v-if="scope.row.picUrls" @click="download(scope.row)" size="small" type="text">查看附件</el-button>
+                  </template>
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="申请状态" width="120">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.status==1">未申请</span>
+                    <span v-if="scope.row.status==2">已申请</span>
+                    <span v-if="scope.row.status==3">已确认</span>
+                    <el-button v-if="scope.row.status==4" @click="edit(scope.row)" size="small" type="text" style="color: red;">已驳回</el-button>
+                    <span v-if="scope.row.status==5">已结算</span>  
+                  </template>
+                  
+                </el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <!-- <el-dialog  :title='"("+refundTitle+"）客户超成本申请"'  :visible.sync="allocationVisible" width="540px" v-dialog-drag> -->
+    <el-dialog  :title='refundTitle'  :visible.sync="allocationVisible" width="540px" v-dialog-drag>
+        <template>
+            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
+                <div v-if="isShowEdit">
+                    <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="">
+                        {{allocationForm.rejectUserName}}
+                    </el-form-item>
+                    <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="">
+                        {{allocationForm.rejectTime}}
+                    </el-form-item>
+                    <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="">
+                        <span style="color: red;">{{allocationForm.rejectReason}}</span>
+                    </el-form-item>
+                </div>    
+              <el-form-item label="应退佣金金额：" :label-width="formLabelWidth" prop="commission">
+                  <el-input v-model="allocationForm.commission" maxlength="10" @keyup.native="number" placeholder="" style="width:290px"></el-input>
+              </el-form-item>
+              <el-form-item label="上传附件：" :label-width="formLabelWidth" prop="fileList">
+              		<el-upload
+                    class="upload-demo"
+                    :action="uploadOssHost"
+                    ref="refundApplyImgUpload"
+                    :on-preview="handlePreview"
+                    :on-remove="handleRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
+                    accept=".jpg,.png,.jpeg,.pdf,.zip,.rar"
+                    multiple
+                    :data="uploadParamData"
+                    :on-change="selectFile"
+                    :on-exceed="handleExceed"
+                    :auto-upload="false"
+                    :limit="5"
+                    :file-list="fileList">
+                    <el-button slot="trigger" size="small" type="primary">选择附件</el-button>
+                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                    <div slot="tip" class="el-upload__tip">只允许上传5个附件。附件允许上传附件，PDF，压缩包。</div>
+                </el-upload>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="allocationClue('allocationForm')" :disabled="btnDisabled">提 交</el-button>
+                <el-button  @click="allocationClueCancel('allocationForm')">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+
+    <!-- 下载图片 dialog 开始 -->
+    <el-dialog title="下载附件" :visible.sync="downloadDialogVisible" width="350px" v-dialog-drag>
+      <ol>
+        <li v-for="(item,index) in imgList" style="margin-bottom:8px">
+          <a :href="'/financing/refund/downloadOssImg?url='+item.url" :download="item.name" style="color:blue;text-decoration:underline">{{item.name}}</a>
+        </li>
+      </ol>
+    </el-dialog>
+    <!-- 下载图片dialog 结束 -->
+    <input id="updateId" type="hidden" >
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+</body>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/crypto/crypto.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/hmac/hmac.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/sha1/sha1.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/base64.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/plupload.full.min.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/financing/file_upload.js'}"></script>
+<script th:inline="javascript">
+var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+var clueVM = new Vue({
+        el: '#clueManage',
+        data: {
+          isShowEdit:false,
+          imgList: [],
+          downloadDialogVisible: false,//下载图片dialog
+          paginationShow: false,
+          isShow:false,
+          btnDisabled:false,
+      		searchForm: {
+	       		  customerName:'',
+              companyId:'',
+              signProvince:'',
+              payStartTime:'',
+              payEndTime:'',
+              businessManagerId:'',
+              teleSaleId:'',
+              signShopType:'',
+              signProjectId:'',
+              status:1,
+          },
+          allocationForm: {
+            rejectUserName:'',
+            rejectTime:'',
+            rejectReason:'',
+        	  commission:'',        	
+            fileList: [],
+          },
+          dataTable:[],
+          busSaleOptions:[],
+          teleGorupOptions:[],
+          teleSaleOptions:[],
+          provinceOptions:[],
+          signProjectOptions:[],
+          companyArr:[],//签约公司
+          signShopTypeOptions:[{
+              value:1,
+              name:"旗舰店"
+          },{
+              value:2,
+              name:"创业店"
+          },{
+              value:3,
+              name:"标准店"
+          },{
+              value:4,
+              name:"单技术"
+          },{
+              value:5,
+              name:"区域代理"
+          },{
+              value:6,
+              name:"省代理"
+          },{
+              value:7,
+              name:"市代理"
+          },{
+              value:8,
+              name:"区/县代理"
+          }],
+          signStatusOptions:[{
+          	  value:1,
+          	  name:"未申请"
+          },{
+          	  value:2,
+          	  name:"已申请"
+          },{
+          	  value:3,
+          	  name:"已确认"
+          },{
+          	  value:4,
+          	  name:"已驳回"
+          },{
+          	  value:5,
+          	  name:"已结算"
+          }],
+          allocationVisible: false,
+          transferVisible: false,
+          isSettle:0,
+          refundTitle:'',
+          rebateTitle:'',
+          payTitle:'',
+          pager:{
+              total: 0,
+              currentPage: 1,
+              pageSize: 20,
+          },
+          allocationFormRules: {
+              commission: [
+                  { required: true, message: '请输入退款客户金额', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                      var reg =  /^[+-]?(0|([1-9]\d*))(\.\d+)?$/g;
+                      if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                          callback(new Error("请输入数字"));
+                          return;
+                      }else{
+                          callback();
+                      }
+
+                  }, trigger: 'blur'}
+              ],
+              fileList: [
+                  { required: true, message: '请上传附件', trigger: 'change' }
+              ],
+          },
+          multipleSelection:[],
+          formLabelWidth: '150px',
+          formLabelWidth1: '120px',   
+          dataTableChoose:[],   
+          uploadOssHost:'',
+          uploadParamData: {
+              key:'22',
+              policy:'',
+              OSSAccessKeyId:'',
+              success_action_status : '200', //让服务端返回200,不然，默认会返回204
+              signature:'', 
+              'x:params':'',
+              'realName':''
+          },
+          fileList:[],
+          limit:5,
+          ossUrl:ossSignatureUrl,
+          storeForm: {
+              customerName:'',
+              companyId:'',
+              signProvince:'',
+              payStartTime:'',
+              payEndTime:'',
+              businessManagerId:'',
+              teleSaleId:'',
+              signShopType:'',
+              signProjectId:'',
+              status:'',
+          },
+          storeId: '',
+          scrollTop: 0,
+        },
+        methods: {
+            getTimeText(row, column, value, index) {
+                var valText = "";
+                if (value) {
+                    valText = moment(Number(value)).format("YYYY-MM-DD");
+                    // valText = moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                    //valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                }
+                return valText;
+            },
+            initSignProvinceSelect(){
+                axios.post('/visit/visitRecord/getSignProvince', {})
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                          var table=result.data;
+                          clueVM.provinceOptions= table;
+                      }else{
+                          console.error(response);
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });  
+            },
+            // 这个param.category换成param.isNotSign =0其他的参数不需要
+            //签约项目
+            projectChangeSelect() {
+                var param = {};
+                param.isNotSign =0;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                    clueVM.signProjectOptions = response.data.data;
+                });
+            },
+            getBusAndTel(){
+                var param = {};
+                axios.post('/financing/balanceaccount/getBusAndTel', param)
+                  .then(function (response) {
+                    var result = response.data;
+                    //查询所有的商务经理
+                    clueVM.busSaleOptions = result.busSaleList;
+                    //查询所有商务组
+                    clueVM.busGroupOptions = result.busGroupList;
+                    // 查询所有电销顾问
+                    clueVM.teleSaleOptions = result.teleSaleList;
+                    // 查询所有电销组
+                    clueVM.teleGorupOptions = result.teleGroupList;
+                    //
+                    clueVM.dxBusinessList = result.teleCompanyList;
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+            },
+            download(row) {//下载图片
+              this.downloadDialogVisible = true;
+              console.log(row)
+              this.imgList=JSON.parse(row.picUrls);
+            },
+            //结算确认
+            settlementConfirm() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                        message: '请至少选择一条数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                // 对于未确认，不可以进行已结算标记
+                if(rows[0].status!==3){
+                    this.$message({
+                        message: '超成本申请未确认不可以进行标记结算。',
+                        type: 'warning'
+                    });
+                    return;
+                } 
+                this.$confirm('确认标记为已结算吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    //结算确认
+                    var param  = {};
+                    param.id=rows[0].id;
+                    axios.post('/financing/overCost/settlementOverCost',param)
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                          clueVM.$message({message:'结算成功',type:'success',duration:1000,onClose:function(){
+                            
+                            // clueVM.allocationVisible = false;
+                            // clueVM.searchTable();
+                            window.location.href="/financing/overCost/overCostApplyPage";
+                             
+                          }});
+                        }else{
+                          clueVM.$message({
+                                message: data.msg,
+                                type: 'error'
+                              }); 
+                        }
+                        
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                      
+                    });
+                }).catch(() => {                       
+                });                
+            },
+            //计算应退佣金金额
+            AllCommission(){
+              //应退佣金自动算出来=实收金额*超成本比例*佣金比例
+                var rows = this.multipleSelection;
+                console.log(rows)
+                var aone = parseFloat(rows[0].amountReceived);
+                var atwo = parseFloat(rows[0].overCostRatio/100);
+                var three = parseFloat(rows[0].commissionRatio/100);
+                if (isNaN(aone)) aone = 0
+                if (isNaN(atwo)) atwo = 0
+                if (isNaN(three)) three = 0
+                var num =aone * atwo * three;
+                num = num.toFixed(2); // 输出结果为 2.45
+                // this.allocationForm.commission = (aone * atwo * three) + "";
+                this.allocationForm.commission = num + "";
+            },
+          	getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
+                
+                 axios.get(signUrl, param)
+                .then(function (response) {
+                   // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                            dir:respData.dir,
+                            'policy': respData.policy,
+                            'OSSAccessKeyId': respData.accessid,
+                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                            'signature': respData.signature,
+                            'x:params':params,//自定义编码，basse64编码后的字符串,
+                            'realName':''
+                   };
+                  clueVM.uploadParamData= new_multipart_params;
+                  clueVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
+            selectFile(file, fileList){
+            	  var fileLength = fileList.length;
+            	  if(fileLength>=2){
+            		  //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
+            		  var lastSecondFile = fileList[fileLength-2];
+            		  if(!lastSecondFile.hasOwnProperty("id")){
+            			  fileList.splice(length-2,1);
+            		  }
+            		  
+            	  }
+                clueVM.uploadParamData.key= clueVM.uploadParamData.dir+clueVM.random_string(10)+clueVM.get_suffix(file.name),
+                clueVM.uploadParamData.realName= file.name
+            },
+            submitUpload(){
+                //this.customUpload();
+                this.$refs.refundApplyImgUpload.submit();
+            },
+            handlePreview(file){
+               
+            },
+            handleRemove(file,fileList){
+          	    var id = file.id;
+          	    if(!id){
+          		      return;
+          	    }
+          	    clueVM.allocationForm.fileList.splice(clueVM.contains(clueVM.allocationForm.fileList,id),1);
+                var param = {};
+                var idList = new Array();
+                idList.push(id)
+                param.idList = idList;
+                axios.post('/financing/refund/deleteImgByIdList',param)
+                .then(function (response) {
+                     var result =  response.data;
+                     if(result.code=='0'){
+                  	   clueVM.deleteFile(id);
+                         clueVM.$message({message:'删除成功',type:'success'});
+                     }else{
+                         console.error(response);
+                         clueVM.$message({message:result.msg,type:'error'});
+                     }
+                     
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            },
+            deleteFile(id){//把imgList中的文件移除
+               	var curImgList = this.fileList;
+               	for(var i=0;i<curImgList.length;i++){
+               		var curImg = curImgList[i];
+               		if(curImg.id==id){
+               			curImgList.splice(i--,1);
+               			break;
+               		}
+               	}         	
+            },
+            contains(a, obj) {
+                var i = a.length;
+                while (i--) {
+                    if (a[i] === obj) {
+                        return i;
+                    }
+                }
+                return false;
+          	},
+            handleExceed(files, fileList) {
+                //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            handleSuccess(response, file, fileList){
+          	    console.info(fileList);
+                console.info(clueVM.fileList);
+                var realName = file.name;
+                var randomName = clueVM.uploadParamData.key;
+                var imgUrl =  clueVM.uploadOssHost+"/"+randomName;
+                var param = {};
+                param.realName=realName;
+                param.imgUrl = imgUrl;
+                var randomNameArr = randomName.split("/");
+                param.randomName = randomNameArr[randomNameArr.length-1];
+                axios.post('/financing/refund/insertImgInfo', param)
+                .then(function (response) {
+                    var resData = response.data;
+                    if(resData.code=='0'){
+                        var lastFile = {};
+                        lastFile.id= resData.data;
+                        lastFile.name=realName;
+                        lastFile.url = imgUrl;
+                        lastFile.randomName = randomName; 
+                        var curList = clueVM.fileList;
+                        clueVM.allocationForm.fileList.push(resData.data);
+                        curList.push(lastFile);
+                        clueVM.$refs['allocationForm'].validateField(["fileList"]);
+                        clueVM.$message({message:'上传成功',type:'success'});
+                    }else{
+                        clueVM.$message({message:'上传失败',type:'error'});
+                    }
+                     
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            },
+            handleError(err, file, fileList){
+                console.info(err);
+            },
+            handleBefore(file){
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                    suffix = filename.substring(pos);
+                }
+                return suffix;
+            },
+          	searchTable() {
+                var param ={};
+                var startTime=this.searchForm.payStartTime;
+                var endTime=this.searchForm.payEndTime;
+                if(startTime){
+                    startTime = this.searchForm.payStartTime+" 00:00:00";
+                }else{
+                    startTime="";
+                }
+                if(endTime){
+                    endTime = this.searchForm.payEndTime+" 23:59:59";                  
+                }else{
+                    endTime="";
+                }
+              	var vilad=false;
+                if(startTime&&endTime&&startTime> endTime){
+                  	vilad=true;
+                }
+                if(vilad){
+                  	this.$message({
+                          message: '开始时间不能大于结束时间',
+                          type: 'warning'
+                        });
+                      return;
+                }
+                param.payStartTime = startTime;
+                param.payEndTime = endTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+
+                param.cusName = this.searchForm.customerName;
+                param.companyId = this.searchForm.companyId;
+                param.signProvince = this.searchForm.signProvince;
+                param.busSaleId = this.searchForm.businessManagerId;
+                param.teleSaleId = this.searchForm.teleSaleId;
+                param.signShopType = this.searchForm.signShopType;
+                param.signProjectId = this.searchForm.signProjectId;
+                param.status = this.searchForm.status;                
+                //列表只查询正常数据，取消删除数据不查询
+                //param.delFalg = this.searchForm.delFalg;
+                console.info(param);                
+                axios.post('/financing/overCost/overCostApplyList', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    if (result.code == 0) {                    
+                        console.info(result);
+                        var table=result.data;
+                        clueVM.dataTable= table.data;
+                        clueVM.pager.total =  table.total;
+                        clueVM.pager.currentPage = table.currentPage;
+
+                        // 取出存储的id
+                        if(!clueVM.paginationShow){
+                            if(clueVM.storeId){
+                                clueVM.$nextTick(function(){
+                                    var storage = [];
+                                    clueVM.dataTable.forEach(function(item, index){
+                                    if(item.signId === clueVM.storeId ){
+                                        storage.push(clueVM.dataTable[index]);
+                                    }
+                                })
+                                clueVM.toggleSelection(storage);
+                                clueVM.$el.querySelector('.el-table__body-wrapper').scrollTop = clueVM.scrollTop;
+                              })
+                            }
+                        }else{
+                            removeSessionStore ("coverCostappLyStoreForm");
+                            removeSessionStore ("coverCostappLyOtherVal");
+                        }
+                        clueVM.paginationShow = true;
+                        clueVM.storeForm = clueVM.searchForm;
+                    }else{
+                        clueVM.$message.error(response.data.msg);
+                    }
+
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            //选择行
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //签约店型转换方法
+            transformSignShopType(row, column, cellValue, index) {
+             	  // var text="";
+                // if(cellValue=="1"){
+                //     text="创业店"
+                // }else if(cellValue=="2"){
+                //     text="标准店"
+                // }else if(cellValue=="3"){
+                //     text="白金店"
+                // }else if(cellValue=="4"){
+                //     text="旗舰店"
+                // }else if(cellValue=="5"){
+                //     text="区域代理"
+                // }
+                // return text;
+                var valText="";
+                if (cellValue == 1) {
+                    valText = "旗舰店";
+                } else if (cellValue == 2) {
+                    valText = "创业店";
+                } else if (cellValue == 3) {
+                    valText = "标准店";
+                } else if (cellValue == 4) {
+                    valText = "单技术";
+                } else if (cellValue == 5) {
+                    valText = "区域代理";
+                }else if (cellValue == 6) {
+                    valText = "省代理";
+                }else if (cellValue == 7) {
+                    valText = "市代理";
+                }else if (cellValue == 8) {
+                    valText = "区/县代理";
+                }
+           
+                return valText;
+            },
+            //加百分号
+            transformValue(row, column, cellValue, index) {    
+                var valText="";
+                if (cellValue) {
+                    valText = cellValue+"%";
+                }else{
+                    valText = 0
+                }      
+                return valText;
+            },
+            //打开超成本申请
+            toAllocationClue(formName) {
+            	  if(this.$refs[formName]){
+	            	    this.$refs[formName].resetFields();
+            	  }
+                this.fileList=[];
+           	    var rows = this.multipleSelection;
+            	  if(rows.length!=1){
+                    this.$message({
+                        message: '请至少选择一条数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                if(rows[0].status!=1){
+                    this.$message({
+                        message: '请选择未申请状态的数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.allocationVisible = true;
+                // 不显示驳回人员，驳回时间，驳回原因
+                this.isShowEdit=false;
+                this.btnDisabled=false;
+                this.AllCommission();//自动计算退款客户金额
+                // 显示带客户名称的弹窗标题
+                var customerName=rows[0].customerName;
+                if(customerName){
+                    this.refundTitle="（"+customerName+"）客户超成本申请";
+                }else{
+                    this.refundTitle="客户超成本申请";
+                }                
+            },
+            // 编辑超成本申请
+            edit(rows){
+                if (this.$refs['allocationForm']!=undefined) {
+                    this.$refs['allocationForm'].resetFields();
+                }
+                //修改菜单数据  
+                this.allocationVisible = true;
+                // 显示驳回人员，驳回时间，驳回原因
+                this.isShowEdit=true;
+                // 显示带客户名称的弹窗标题
+                var customerName=rows.customerName;
+                if(customerName){
+                    this.refundTitle="编辑（"+customerName+"）客户超成本申请";
+                }else{
+                    this.refundTitle="编辑客户超成本申请";
+                }  
+                $("#updateId").val(rows.id);//驳回的数据id
+                var param ={};
+                param.id = rows.id;  
+                axios.post('/financing/overCost/findFinanceOverCostById',param).then(function (response) {
+                  console.log(response);
+                    var data=response.data;
+                    if(data.code=='0'){
+                        var data=data.data;
+                        if(data){
+                            // 驳回人员，驳回时间，驳回原因，应退佣金金额，上传的附件
+                            clueVM.allocationForm.rejectUserName = data.rejectUserName;  
+                            clueVM.allocationForm.rejectTime = data.rejectTime; 
+                            clueVM.allocationForm.rejectReason = data.rejectReason; 
+                            clueVM.allocationForm.commission = data.commission; 
+                            clueVM.allocationForm.fileList = JSON.parse(data.picUrls);
+                            clueVM.fileList = JSON.parse(data.picUrls);
+                        }                          
+                   }else{
+                        clueVM.$message({
+                            message: data.msg,
+                            type: 'error'
+                        }); 
+                        clueVM.btnDisabled=false;
+                   } 
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                });  
+            },
+            allocationClueCancel(formName){//申请退款取消
+            	  this.$refs[formName].resetFields();
+            	  this.allocationVisible = false;
+            },
+            allocationClue(formName){//客户超成本申请提交
+                var rows = this.multipleSelection;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var param  = {};
+                        // param.id=rows[0].id;
+                        var idval=$("#updateId").val();
+                        if(idval){
+                            param.id = idval; 
+                        }else{
+                            param.id=rows[0].id;
+                        }
+                        param.commission=this.allocationForm.commission;
+                        param.picUrls = JSON.stringify(this.fileList);
+                        this.btnDisabled=true;
+                        axios.post('/financing/overCost/apply',param)
+                        .then(function (response) {
+                            var data =  response.data;
+                            if(data.code=='0'){
+                                clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
+                                    // clueVM.allocationVisible = false;
+                                    // clueVM.searchTable();
+                                    window.location.href='/financing/overCost/overCostApplyPage';
+                                }});
+                            }else{
+                                clueVM.$message({
+                                    message: data.msg,
+                                    type: 'error'
+                                }); 
+                                clueVM.btnDisabled=false;
+                            }
+                        })
+                        .catch(function (error) {
+                            clueVM.btnDisabled=false;
+                            console.log(error);
+                        });
+        	            //end
+        	          } else {
+        	              console.log('error submit!!');
+        	              return false;
+        	          }
+        	      });
+                // 存储选中信息--start
+                // var clueId=rows[0].signId;  
+                var clueId=$("#updateId").val();
+                setSessionStore("coverCostappLyStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                setSessionStore("coverCostappLyOtherVal", otherVal);
+                // 存储选中信息--end 
+            },
+            number(){//添加签约单余款
+                // this.allocationForm.commission=this.allocationForm.commission.replace(/[^\.\d]/g,'');
+                // this.allocationForm.commission=this.allocationForm.commission.replace('.','');
+                this.allocationForm.commission = this.allocationForm.commission.replace(/[^\d.]/g, ""); //清除"数字"和"."以外的字符
+                this.allocationForm.commission = this.allocationForm.commission.replace(/^\./g, ""); //验证第一个字符是数字
+                this.allocationForm.commission = this.allocationForm.commission.replace(/\.{2,}/g, "."); //只保留第一个, 清除多余的
+                this.allocationForm.commission = this.allocationForm.commission.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+                this.allocationForm.commission = this.allocationForm.commission.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); //只能输入两个小数
+            },
+             //付款类型转换方法
+            transformPayType(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="1"){
+                   text="全款"
+                 }else if(cellValue=="2"){
+                   text="定金"
+                 }else if(cellValue=="3"){
+                   text="追加定金"
+                 }else if(cellValue=="4"){
+                   text="尾款"
+                 }
+                 return text;
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+        },
+        created(){
+            console.info("create method");
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = getSessionStore("coverCostappLyStoreForm");
+                var otherVal = getSessionStore("coverCostappLyOtherVal");
+                if(storeVal && otherVal){
+                    this.searchForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
+            this.searchTable();            
+            this.getUploadParam();
+            // 签约省份
+            this.initSignProvinceSelect()
+            // 签约项目
+            this.projectChangeSelect();
+            // 商务经理
+            this.getBusAndTel();
+            //签约公司
+            param = {};
+            axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
+                clueVM.companyArr = response.data.data;
+            });
+        },
+        mounted(){
+           console.info("mounted method");
+           document.getElementById('clueManage').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
