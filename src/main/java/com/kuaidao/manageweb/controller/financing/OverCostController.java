@@ -56,8 +56,10 @@ public class OverCostController {
      * @return
      */
     @RequestMapping("/overCostApplyPage")
-   // @RequiresPermissions("financing:coverCostApply:view")
+    @RequiresPermissions("financing:coverCostApply:view")
     public String balanceAccountPage(HttpServletRequest request) {
+        // 查询签约店型集合
+        request.setAttribute("vistitStoreTypeList", getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         return "financing/overCostApply";
     }
@@ -69,7 +71,7 @@ public class OverCostController {
      */
     @PostMapping("/overCostApplyList")
     @ResponseBody
-   // @RequiresPermissions("financing:coverCostApply:view")
+    @RequiresPermissions("financing:coverCostApply:view")
     public JSONResult<PageBean<FinanceOverCostRespDto>> overCostApplyList(HttpServletRequest request,
             @RequestBody FinanceOverCostReqDto financeOverCostReqDto) {
         UserInfoDTO userInfoDTO = getUser();
@@ -207,7 +209,7 @@ public class OverCostController {
     @PostMapping("/apply")
     @LogRecord(description = "超成本申请", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_APPLY)
     @ResponseBody
-  //  @RequiresPermissions("financing:coverCostApply:apply")
+    @RequiresPermissions("financing:coverCostApply:apply")
     public JSONResult<String> apply(@RequestBody FinanceOverCostReqDto reqDto) {
         UserInfoDTO userInfoDTO = getUser();
         reqDto.setUpdateTime(new Date());
@@ -227,7 +229,7 @@ public class OverCostController {
     @PostMapping("/settlementOverCost")
     @ResponseBody
     @LogRecord(description = "超成本变为已结算", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.OVERCOST_SETTLEMENT)
- //   @RequiresPermissions("financing:coverCostApply:settlementOverCost")
+    @RequiresPermissions("financing:coverCostApply:settlementOverCost")
     public JSONResult<String> settlementOverCost(@RequestBody FinanceOverCostReqDto reqDto) {
         UserInfoDTO userInfoDTO = getUser();
         reqDto.setUpdateTime(new Date());

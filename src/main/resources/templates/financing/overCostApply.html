@@ -51,10 +51,10 @@
                       </el-select>
                 </el-form-item>
                 <el-form-item label="付款时间:">
-                    <el-date-picker  v-model="searchForm.payStartTime" format="yyyy-MM-dd" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker  v-model="searchForm.payStartTime" value-format="yyyy-MM-dd" format="yyyy-MM-dd" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                    <el-date-picker  v-model="searchForm.payEndTime" format="yyyy-MM-dd" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker  v-model="searchForm.payEndTime" value-format="yyyy-MM-dd" format="yyyy-MM-dd" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>  
                 <el-row v-show="isShow">
                     <el-form-item label="商务经理:"  prop="businessManagerId">
@@ -222,7 +222,7 @@
     </el-dialog>
 
     <!-- 下载图片 dialog 开始 -->
-    <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="350px" v-dialog-drag>
+    <el-dialog title="下载附件" :visible.sync="downloadDialogVisible" width="350px" v-dialog-drag>
       <ol>
         <li v-for="(item,index) in imgList" style="margin-bottom:8px">
           <a :href="'/financing/refund/downloadOssImg?url='+item.url" :download="item.name" style="color:blue;text-decoration:underline">{{item.name}}</a>
@@ -250,6 +250,7 @@
         th:src="@{'/js/custom/financing/file_upload.js'}"></script>
 <script th:inline="javascript">
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+var vistitStoreTypeList = [[${vistitStoreTypeList}]];//签约店型
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -285,31 +286,7 @@ var clueVM = new Vue({
           provinceOptions:[],
           signProjectOptions:[],
           companyArr:[],//签约公司
-          signShopTypeOptions:[{
-              value:1,
-              name:"旗舰店"
-          },{
-              value:2,
-              name:"创业店"
-          },{
-              value:3,
-              name:"标准店"
-          },{
-              value:4,
-              name:"单技术"
-          },{
-              value:5,
-              name:"区域代理"
-          },{
-              value:6,
-              name:"省代理"
-          },{
-              value:7,
-              name:"市代理"
-          },{
-              value:8,
-              name:"区/县代理"
-          }],
+          signShopTypeOptions:vistitStoreTypeList,//签约店型
           signStatusOptions:[{
           	  value:1,
           	  name:"未申请"
@@ -670,8 +647,18 @@ var clueVM = new Vue({
             },
           	searchTable() {
                 var param ={};
-                var startTime = this.searchForm.payStartTime;
-                var endTime = this.searchForm.payEndTime;
+                var startTime=this.searchForm.payStartTime;
+                var endTime=this.searchForm.payEndTime;
+                if(startTime){
+                    startTime = this.searchForm.payStartTime+" 00:00:00";
+                }else{
+                    startTime="";
+                }
+                if(endTime){
+                    endTime = this.searchForm.payEndTime+" 23:59:59";                  
+                }else{
+                    endTime="";
+                }
               	var vilad=false;
                 if(startTime&&endTime&&startTime> endTime){
                   	vilad=true;
@@ -752,49 +739,13 @@ var clueVM = new Vue({
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            //签约店型转换方法
-            transformSignShopType(row, column, cellValue, index) {
-             	  // var text="";
-                // if(cellValue=="1"){
-                //     text="创业店"
-                // }else if(cellValue=="2"){
-                //     text="标准店"
-                // }else if(cellValue=="3"){
-                //     text="白金店"
-                // }else if(cellValue=="4"){
-                //     text="旗舰店"
-                // }else if(cellValue=="5"){
-                //     text="区域代理"
-                // }
-                // return text;
-                var valText="";
-                if (cellValue == 1) {
-                    valText = "旗舰店";
-                } else if (cellValue == 2) {
-                    valText = "创业店";
-                } else if (cellValue == 3) {
-                    valText = "标准店";
-                } else if (cellValue == 4) {
-                    valText = "单技术";
-                } else if (cellValue == 5) {
-                    valText = "区域代理";
-                }else if (cellValue == 6) {
-                    valText = "省代理";
-                }else if (cellValue == 7) {
-                    valText = "市代理";
-                }else if (cellValue == 8) {
-                    valText = "区/县代理";
-                }
-           
-                return valText;
-            },
             //加百分号
             transformValue(row, column, cellValue, index) {    
                 var valText="";
                 if (cellValue) {
                     valText = cellValue+"%";
                 }else{
-                    valText = 0
+                    valText = 0+"%"
                 }      
                 return valText;
             },
