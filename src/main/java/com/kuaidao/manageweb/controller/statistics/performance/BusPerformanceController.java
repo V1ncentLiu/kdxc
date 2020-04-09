@@ -156,9 +156,9 @@ public class BusPerformanceController extends BaseStatisticsController {
             JSONResult<List<BusPerformanceDto>> json=busPerformanceClient.queryList(dto);
             if(null!=json && "0".equals(json.getCode())){
                 BusPerformanceDto[] dtos = json.getData().isEmpty()?new BusPerformanceDto[]{}:json.getData().toArray(new BusPerformanceDto[0]);
-                String[] keys = {"businessGroupName","firstSign","signNum","signRate","amount","firstMoney","signMoney","signOrderNum","payCount"};
+                String[] keys = {"businessGroupName","firstSign","signNum","signRate","amount","firstMoney","signMoney","signOrderNum","payCount","handselNum","handselMoney","totalNum","totalMoney","tailNum","tailMoney","handselRate","tailRate"};
 
-                String[] hader = {"商务组","首访数","签约数","签约率","净业绩金额","首访单笔","签约单笔","签约单数","付款笔数"};
+                String[] hader = {"商务组","首访数","签约数","签约率","净业绩金额","首访单笔","签约单笔","签约单数","付款笔数","定金量","定金金额","全款量","全款金额","尾款量","尾款金额","定金占比","尾款回收率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("商务业绩表_{0}_{1}.xlsx", "" + dto.getStartTime(), dto.getEndTime() + "");
                 response.addHeader("Content-Disposition",
@@ -193,9 +193,9 @@ public class BusPerformanceController extends BaseStatisticsController {
             JSONResult<List<BusPerformanceDto>> json=busPerformanceClient.queryBusList(dto);
             if(null!=json && "0".equals(json.getCode())){
                 BusPerformanceDto[] dtos = json.getData().isEmpty()?new BusPerformanceDto[]{}:json.getData().toArray(new BusPerformanceDto[0]);
-                String[] keys = {"businessGroupName","businssManagerName","firstSign","signNum","signRate","amount","firstMoney","signMoney","signOrderNum","payCount"};
+                String[] keys = {"businessGroupName","businessManagerName","firstSign","signNum","signRate","amount","firstMoney","signMoney","signOrderNum","payCount","handselNum","handselMoney","totalNum","totalMoney","tailNum","tailMoney","handselRate","tailRate"};
 
-                String[] hader = {"商务组","商务经理","首访数","签约数","签约率","净业绩金额","首访单笔","签约单笔","签约单数","付款笔数"};
+                String[] hader = {"商务组","商务经理","首访数","签约数","签约率","净业绩金额","首访单笔","签约单笔","签约单数","付款笔数","定金量","定金金额","全款量","全款金额","尾款量","尾款金额","定金占比","尾款回收率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("商务经理业绩表_{0}_{1}.xlsx", "" + dto.getStartTime(), dto.getEndTime() + "");
                 response.addHeader("Content-Disposition",
