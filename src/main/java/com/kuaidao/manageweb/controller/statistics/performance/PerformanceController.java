@@ -6,14 +6,19 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
+import com.kuaidao.manageweb.controller.statistics.busCostomerVisit.BusCustomerVisitController;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.performance.PerformanceClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.performance.PerformanceDto;
+import com.kuaidao.stastics.dto.resourceFree.ResourceFreeDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -143,8 +148,8 @@ public class PerformanceController extends BaseStatisticsController {
             JSONResult<List<PerformanceDto>> json=performanceClient.queryListByParams(baseQueryDto);
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
-                String[] keys = {"teleGroupName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","signAmount"};
-                String[] hader = {"电销组","首次分配资源数","首访数","签约数","资源来访率","签约率","业绩金额","签约单笔"};
+                String[] keys = {"teleGroupName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","drinkAchievement","nonDrinkAchievement","signAmount","resourceEfficiency","depositAmount","tailAmount","depositRatio","tailRecoveryRate"};
+                String[] hader = {"电销组","首次分配资源数","首访数","签约数","资源来访率","签约率","业绩金额","(饮品)业绩金额","(非饮品)业绩金额","签约单笔","资源效率","定金量","尾款量","定金占比(首次)","尾款回收率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("业绩表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
                 response.addHeader("Content-Disposition",
@@ -182,8 +187,8 @@ public class PerformanceController extends BaseStatisticsController {
             }
             if(null!=json && "0".equals(json.getCode())){
                 PerformanceDto[] dtos = json.getData().isEmpty()?new PerformanceDto[]{}:json.getData().toArray(new PerformanceDto[0]);
-                String[] keys = {"userName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","signAmount"};
-                String[] hader = {"电销顾问","首次分配资源数","首访数","签约数","资源来访率","签约率","业绩金额","签约单笔"};
+                String[] keys = {"userName","culeNum","firstVisitNum","signNum","visitRate","signRate","achievement","drinkAchievement","nonDrinkAchievement","signAmount","resourceEfficiency","depositAmount","tailAmount","depositRatio","tailRecoveryRate"};
+                String[] hader = {"电销顾问","首次分配资源数","首访数","签约数","资源来访率","签约率","业绩金额","(饮品)业绩金额","(非饮品)业绩金额","签约单笔","资源效率","定金量","尾款量","定金占比(首次)","尾款回收率"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
                 String name = MessageFormat.format("电销顾问业绩表_{0}_{1}.xlsx", "" + baseQueryDto.getStartTime(), baseQueryDto.getEndTime() + "");
                 response.addHeader("Content-Disposition",
