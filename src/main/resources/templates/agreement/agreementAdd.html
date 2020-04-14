@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>安卓版本记录</title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div v-loading="loading" id="agreementAdd" class="agreementAdd mainPadding"  style="display: none;">  
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>我的客户(商务)</el-breadcrumb-item>
+        <el-breadcrumb-item>合同内容补充</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="mainSearchBg">
+        <el-form :model="form" ref="form" :rules="rules" style="position: relative;">
+            <el-form-item label="乙方姓名：" :label-width="formLabelWidth" prop="agreementName" disabled>
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="乙方联系方式：" :label-width="formLabelWidth" prop="agreementName" disabled>
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="签订地区（省）：" :label-width="formLabelWidth" prop="agreementName" disabled>
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="签订地区（市）：" :label-width="formLabelWidth" prop="agreementName" disabled>
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="签订地区（区）：" :label-width="formLabelWidth" prop="agreementName" disabled>
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="支付金额（小写）：" :label-width="formLabelWidth" prop="agreementName" disabled>
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="支付金额（大写）：" :label-width="formLabelWidth" prop="agreementName">
+                <span></span>
+            </el-form-item>
+            <el-form-item label="优先权期限（年）：" :label-width="formLabelWidth" prop="agreementName">
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="优先权期限（月）：" :label-width="formLabelWidth" prop="agreementName">
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <el-form-item label="优先权期限（日）：" :label-width="formLabelWidth" prop="agreementName">
+                <el-input v-model="form.agreementName"></el-input>
+            </el-form-item>
+            <div>
+                <el-button @click="submitForm('form')">确认预览</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">生成合同</el-button>
+            </div>
+        </el-form>
+    </div>
+</div>
+<input id="addOrUpdate" type="hidden" >
+<input id="updateId" type="hidden" >
+<input id="submitval" type="hidden" >
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var orgVM =  new Vue({
+        el: '#agreementAdd',
+        data: {
+            btnDisabled: false,
+        	dataNum:"",
+          	exportFormVisible:false,
+          	dialogBatchVisible:false,
+          	confirmBtnDisabled:false,
+          	formLabelWidth: '130px',
+          	dialogFormVisible: false,
+          	telemarketingTeamId:"",
+          	businessGroupId:"",
+          	beginTime:"",
+          	endTime:"",
+          	addOrModifyDialogTitle:"",
+          	dataTable:[],
+          	multipleSelection: [],
+          	exportdataTable:[],
+          	projectId:"",
+          	form:{
+                versionNum:'',
+                upgradeType:"1", 
+                updateContent:'',
+                url:'',
+                fileList:[]
+          	},
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            loading:false,
+            rules: {
+                fileList: [
+                    { required: true, message: '请上传apk包', trigger: 'change' }
+                ],
+                versionNum: [
+                    { required: true, message: '请填写版本号', trigger: 'change' }
+                ],
+                upgradeType: [
+                    { required: true, message: '请选择是否强制升级', trigger: 'blur' }
+                ]
+            },
+            uploadOssHost:'',
+            uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'', 
+                'x:params':'',
+                'realName':''
+             },
+             // fileList:[],
+             limit:1,
+             ossUrl:ossSignatureUrl,
+             
+        },
+        methods: {
+        	inviteAreaListPage(){//查询按钮            	  
+                var param = {}; 
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum = pageNum;
+                param.pageSize = pageSize;
+                param.type=1;//版本类型:1-android2-ios                
+                axios.post('/version/list',param).then(function (response) {
+                	  console.log(response);
+                    var data=response.data;
+                    if(data){
+                        orgVM.dataTable =response.data.data; 
+                        orgVM.pager.currentPage= response.data.currentPage;
+                        orgVM.pager.total= response.data.total;
+                    }
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+                }); 
+            }, 
+            deleButton() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                        message: '请至少选择一条数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                
+                this.$confirm("禁用后商务经理不可再使用，确定要禁用吗？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    var param = {};
+                    param.id=rows.id;
+                    axios.post('/version/delete', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          if(result.code=="0"){
+                              orgVM.$message.success("禁用成功");
+                              orgVM.inviteAreaListPage();
+                          }else{
+                              orgVM.$message.error("禁用失败");
+                          }
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });             
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            selectFile(file, fileList){
+                orgVM.uploadParamData.key= orgVM.uploadParamData.dir+orgVM.random_string(10)+orgVM.get_suffix(file.name),
+                orgVM.uploadParamData.realName= file.name
+            },
+            submitUpload(){                
+                this.$refs.refundApplyImgUpload.submit();
+                $("#submitval").val(1);
+            },
+            handleRemove(file,fileList){
+              // this.fileList=[];
+              this.form.fileList=[];
+            },
+            handleExceed(files, fileList) {
+             //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            handleSuccess(response, file, fileList){
+                console.log(response)
+                console.log(file)
+                console.info(fileList);
+                var realName = file.name;
+                var randomName = orgVM.uploadParamData.key;
+                var imgUrl =  orgVM.uploadOssHost+"/"+randomName;
+                var fileListObj={};
+                fileListObj.name=realName;
+                this.form.fileList.push(fileListObj);
+                this.form.url=imgUrl;
+                console.log(randomName)
+                console.log(realName)
+                console.log(imgUrl)
+            },
+            handleError(err, file, fileList){
+               console.info(err);
+            },
+            handleBefore(file){
+                // debugger
+                // var isTextComputer = file.type === 'application/vnd.android.package-archive';
+                // var isTextComputer = file.name.split('.')[1] === 'apk';
+                var str=file.name;
+                var isTextComputer = str.split('.')[str.split('.').length - 1] === 'apk';
+                if(!isTextComputer){
+                    this.$message.error('文件格式错误');
+                      orgVM.loading = false;
+                      orgVM.fileList = [];
+                    return false;
+                }
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                    suffix = filename.substring(pos);
+                }
+                return suffix;
+            },
+            transformType(row, column, cellValue, index) {
+          	    var text="";
+                if(cellValue=="1"){
+              	  text="Android"
+                }else if(cellValue=="2"){
+              	  text="IOS"
+                }
+                return text;
+            }, 
+            transformUpgradeType(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="1"){
+                    text="是"
+                }else if(cellValue=="2"){
+                    text="否"
+                }
+                return text;
+            }, 
+            transformStatus(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="1"){
+                    text="可使用"
+                }else if(cellValue=="2"){
+                    text="已禁用"
+                }else if(cellValue=="3"){
+                    text="异常，请联系管理员"
+                }
+                return text;
+            }, 
+            //时间格式化
+            dateFormat(row, column){
+          	    var date = row[column.property]; 
+          	    if (date == undefined || date ==null || date =="") { 
+          	        return ""; 
+          	    } 
+          	    return moment(new Date(date)).format("YYYY-MM-DD"); 
+          	},
+            //时间格式化
+            dateFormatTime(row, column){
+            	  var date = row[column.property]; 
+            	  if (date == undefined) { 
+            	      return ""; 
+            	  } 
+            	  return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
+            },
+            submitForm(formName) {
+                // if(!$("#submitval").val()){
+                //     orgVM.$message({message: "请上传apk包", type: 'warning'});
+                //     return
+                // }
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var formData = this.form;
+                        var param={};
+                        param.type = 1;//版本类型:1-android2-ios
+                        param.versionNum = formData.versionNum;//版本号
+                        param.upgradeType = formData.upgradeType;//升级模式:1-强制升级、2-可选升级
+                        param.url = formData.url;//url地址
+                        param.updateContent = formData.updateContent;//更新内容
+                        param.md5 = '';//apkMD5值
+                        var str = "";
+                        var rows = this.multipleSelection;
+                        for ( var i = 0; i <rows.length; i++){
+                      	    str = rows[i].id
+                        }
+                        // param.id = str;
+                        var idval=$("#updateId").val();
+                        if(idval){
+                            param.id = idval; 
+                        }else{
+                            param.id=""
+                        }
+                        
+                        orgVM.btnDisabled = true; 
+                        var url = "/version/addAndroid";//新建
+                        if($("#addOrUpdate").val() ==2){
+                      	    url = "/version/editAndroid"//编辑
+                        }
+                   	    axios.post(url,param).then(function (response) {
+     	                  	console.log(response);
+     	                    if(null !==response && response.data !=null && response.data.code=='0'){
+                                // window.location.href="/version/androidVersionListInit"; 
+                                orgVM.inviteAreaListPage();
+                                // 关闭窗口
+                                orgVM.dialogFormVisible=false;
+                                orgVM.btnDisabled = false; 
+                                $("#updateId").val("");
+     	                    }else if(response.data.code=='21902'){
+                                orgVM.$message({message: response.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
+                            }else{
+     	                    	orgVM.$message({message: response.data.msg, type: 'warning'});
+                                orgVM.btnDisabled = false; 
+                                return ;
+                            } 
+   	                    }).catch(function (error) {
+                            orgVM.btnDisabled = false; 
+                            console.log(error);
+                        })
+                        .then(function () {
+                        // always executed
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            addbutton(){
+              	$("#addOrUpdate").val(1);
+              	this.dialogFormVisible=true;
+              	this.form.versionNum = "";
+              	this.form.upgradeType = "1";
+              	this.form.updateContent = "";
+              	if (this.$refs['form']!=undefined) {
+                 	this.$refs['form'].resetFields();
+                }
+                $("#submitval").val("");
+                // this.fileList = [];
+            },
+            getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=version";
+                var param={};
+
+                axios.get(signUrl, param)
+                .then(function (response) {
+                    // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                        dir:respData.dir,
+                        'policy': respData.policy,
+                        'OSSAccessKeyId': respData.accessid,
+                        'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                        'signature': respData.signature,
+                        'x:params':params,//自定义编码，basse64编码后的字符串,
+                        'realName':''
+                    };
+                    orgVM.uploadParamData= new_multipart_params;
+                    orgVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+            },
+        },
+        created(){
+            this.getUploadParam();
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
+        	this.inviteAreaListPage();       	
+        	
+        },//created方法 结束
+        mounted(){
+            document.getElementById('agreementAdd').style.display = 'block';
+        }
+    })
+</script>
+</html>
