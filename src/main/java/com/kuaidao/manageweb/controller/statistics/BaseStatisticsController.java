@@ -238,6 +238,8 @@ public class BaseStatisticsController {
                 }
             }
             return ;
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){//商务总裁
+            queryDTO.setParentId(curLoginUser.getOrgId());
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             //管理员查询全部
         }else{
