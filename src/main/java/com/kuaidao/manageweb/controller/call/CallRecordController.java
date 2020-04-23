@@ -549,6 +549,18 @@ public class CallRecordController {
                            .collect(Collectors.toList());
                    myCallRecordReqDTO.setAccountIdList(idList);
 
+               }else if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   Long teleDeptId = myCallRecordReqDTO.getTeleDeptId();
+                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : curLoginUser.getOrgId();
+                   List<UserInfoDTO> userList = getTeleSaleByOrgId(reqOrgId);
+                   if (CollectionUtils.isEmpty(userList)) {
+                       logger.warn("顾问通话记录-管理员查询所有的电销顾问，返回数据为null，param[{}] ",reqOrgId);
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
                } else {
                    // 其他角色
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
