@@ -260,10 +260,19 @@ public class CallRecordController {
             orgList.add(orgJr.getData());
             request.setAttribute("teleDeptList",orgList);
             request.setAttribute("curDeptId",String.valueOf(orgId));
+        }else if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            queryDTO.setParentId(orgId);
+            JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(queryDTO);
+            if (JSONResult.SUCCESS.equals(orgJr.getCode()) &&  orgJr.getData() != null &&  orgJr.getData().size()>0) {
+                request.setAttribute("teleDeptList",orgJr.getData());
+            }
         }
     }
 
     public List<OrganizationDTO> getDescenDantTeleGroupByOrgId(Long parentOrgId){
+
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(parentOrgId);
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
@@ -628,7 +637,15 @@ public class CallRecordController {
                 isBusinessAcademy = true;
             }
         }
-        
+        if (!isBusinessAcademy) {
+            //渠道拓展商学院
+            String qdtzBusOrgId = businessCallrecordLimit.getHfBusOrgId();
+            if (StringUtils.isNotBlank(qdtzBusOrgId) &&  containsOrgId(qdtzBusOrgId,curOrgId+"")) {
+                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(qdtzBusOrgId);
+                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
+                isBusinessAcademy = true;
+            }
+        }
         resMap.put("isBusinessAcademy", isBusinessAcademy);
         if (!isBusinessAcademy) {
            return resMap; 

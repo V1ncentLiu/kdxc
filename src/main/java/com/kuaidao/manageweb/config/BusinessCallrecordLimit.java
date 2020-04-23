@@ -36,5 +36,9 @@ public class BusinessCallrecordLimit {
      * 商机盒子天津商学院
      */
     private Long sjhzTjBusOrgId;
-    
+    /**
+     * 渠道拓展商学院
+     */
+    private Long qdtzBusOrgId;
+
 }
