@@ -95,7 +95,7 @@ public class CustomerManagerController {
             JSONResult<OrganizationDTO> queryOrgById =
                     organizationFeignClient.queryOrgById(new IdEntity(orgId.toString()));
             List<Map<String, Object>> saleGroupList =
-                    getSaleGroupList(queryOrgById.getData().getParentId());
+                    getSaleGroupListByBusinessLine(user.getBusinessLine());
             request.setAttribute("saleGroupList", saleGroupList);
             request.setAttribute("ownOrgId", ownOrgId);
             request.setAttribute("queryOrg", dataList);
@@ -231,8 +231,22 @@ public class CustomerManagerController {
     }
 
     /**
+     * 根据机构和角色类型获取用户
+     *
+     * @return
+     */
+    private List<UserInfoDTO> getUserListByBusliness(Integer businessLine, String roleCode, List<Integer> statusList) {
+        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setStatusList(statusList);
+        userOrgRoleReq.setBusinessLine(businessLine);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole.getData();
+    }
+    /**
      * 获取电销组
-     * 
+     *
      * @param orgId
      * @return
      */
@@ -255,6 +269,7 @@ public class CustomerManagerController {
             userMap.put(userInfoDTO.getOrgId(), userInfoDTO);
         }
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+
         // 生成结果集，匹配电销组以及电销总监
         for (OrganizationDTO organizationDTO : data) {
             Map<String, Object> orgMap = new HashMap<String, Object>();
@@ -268,6 +283,38 @@ public class CustomerManagerController {
                 orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
 
             }
+            result.add(orgMap);
+        }
+        return result;
+    }
+    /**
+     * 获取电销组
+     * 
+     * @param
+     * @return
+     */
+    private List<Map<String, Object>> getSaleGroupListByBusinessLine(Integer businessLine) {
+
+        // 查询所有电销总监
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getUserListByBusliness(businessLine, RoleCodeEnum.DXZJ.name(), statusList);
+        Map<Long, UserInfoDTO> userMap = new HashMap<Long, UserInfoDTO>();
+        // 生成<机构id，用户>map
+        for (UserInfoDTO userInfoDTO : userList) {
+            userMap.put(userInfoDTO.getOrgId(), userInfoDTO);
+        }
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+
+        // 生成结果集，匹配电销组以及电销总监
+        for (UserInfoDTO user : userList) {
+            Map<String, Object> orgMap = new HashMap<String, Object>();
+            orgMap.put("orgId", user.getOrgId());
+            orgMap.put("userId", user.getId());
+            orgMap.put("userName", user.getName());
+            orgMap.put("id", user.getOrgId() + "," + user.getId());
+            orgMap.put("name", user.getOrgName() + "(" + user.getName() + ")");
             result.add(orgMap);
         }
         return result;
