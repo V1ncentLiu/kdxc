@@ -152,7 +152,7 @@ public class CustomerManagerController {
     @RequestMapping("/findcustomerManagerPage")
     @ResponseBody
     public JSONResult<PageBean<CustomerManagerDTO>> findTeleClueInfo(HttpServletRequest request,
-            @RequestBody CustomerManagerQueryDTO dto) {
+                                                                     @RequestBody CustomerManagerQueryDTO dto) {
         java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (null != dto && null != dto.getDayTel()) {
             // 当日拨打电话
@@ -289,7 +289,7 @@ public class CustomerManagerController {
     }
     /**
      * 获取电销组
-     * 
+     *
      * @param
      * @return
      */
@@ -322,7 +322,7 @@ public class CustomerManagerController {
 
     /**
      * 转移资源
-     * 
+     *
      * @param allocationClueReq
      * @return
      */
@@ -332,7 +332,7 @@ public class CustomerManagerController {
     @LogRecord(description = "转移资源", operationType = OperationType.TRANSFER,
             menuName = MenuEnum.TELE_CUSTOMER_MANAGER)
     public JSONResult transferClue(@Valid @RequestBody AllocationClueReq allocationClueReq,
-            BindingResult result) {
+                                   BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -351,7 +351,7 @@ public class CustomerManagerController {
 
     /**
      * 获取当前 orgId所在的组织
-     * 
+     *
      * @param orgId
      * @param
      * @return
