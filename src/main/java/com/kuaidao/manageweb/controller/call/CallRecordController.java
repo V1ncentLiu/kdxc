@@ -124,7 +124,7 @@ public class CallRecordController {
         boolean isBusinessAcademy = false;
         Long curOrgId = curLoginUser.getOrgId();
         Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
-        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId()) || curOrgId.equals(businessCallrecordLimit.getQdtzBusOrgId())) {
             Integer businessLine = curLoginUser.getBusinessLine();
             isBusinessAcademy  = true;
             request.setAttribute("teleGroupList", getTeleGroupByBusinessLine(businessLine));
