@@ -80,7 +80,9 @@ public class Constants {
     public static Integer UNOPTIMIZE = 23;
     // 优化类资源导入模板列数
     public static Integer OPTIMIZE = 21;
-    //不限
+    /**
+     * 不限
+     **/
     public static String NO_LIMIT = "-1";
     /**
      * 不带走资源

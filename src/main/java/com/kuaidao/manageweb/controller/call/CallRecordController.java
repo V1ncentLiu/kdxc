@@ -612,11 +612,11 @@ public class CallRecordController {
      */
     private Map<String, Object>  setBusAccountIdList(CallRecordReqDTO myCallRecordReqDTO,Long curOrgId,Integer businessLine) {
         Map<String, Object> resMap = new HashMap<>();
-        //判断是否 秦皇岛商学院听业务线下所有； 商机盒子商学院 听业务线下所有
+        //判断是否 秦皇岛商学院听业务线下所有； 商机盒子商学院 听业务线下所有  渠道拓展 听业务线下所有
         List<UserInfoDTO>  userInfoList = new ArrayList<>();
         boolean isBusinessAcademy = false   ;
         Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
-        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId()) || curOrgId.equals(businessCallrecordLimit.getQdtzBusOrgId())) {
               userInfoList  = getTeleSaleByBusinessLine(businessLine);
               isBusinessAcademy = true;
         }
@@ -645,15 +645,6 @@ public class CallRecordController {
              String hfBusOrgId = businessCallrecordLimit.getHfBusOrgId();
             if (StringUtils.isNotBlank(hfBusOrgId) &&  containsOrgId(hfBusOrgId,curOrgId+"")) {
                 List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(hfBusOrgId);
-                userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
-                isBusinessAcademy = true;
-            }
-        }
-        if (!isBusinessAcademy) {
-            //渠道拓展商学院
-            String qdtzBusOrgId = businessCallrecordLimit.getHfBusOrgId();
-            if (StringUtils.isNotBlank(qdtzBusOrgId) &&  containsOrgId(qdtzBusOrgId,curOrgId+"")) {
-                List<String> orgIdList = Splitter.on(";").trimResults().omitEmptyStrings().splitToList(qdtzBusOrgId);
                 userInfoList = getTeleSaleByOrgId(Long.parseLong(orgIdList.get(1)));
                 isBusinessAcademy = true;
             }
