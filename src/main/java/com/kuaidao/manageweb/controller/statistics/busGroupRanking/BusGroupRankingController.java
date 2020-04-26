@@ -166,12 +166,23 @@ public class BusGroupRankingController extends BaseStatisticsController {
         if(type == 2){
             headTitleList.add("项目");
         }
+        headTitleList.add("大区总监");
+        headTitleList.add("商务总监");
+        headTitleList.add("商务经理");
         headTitleList.add("首访数");
         headTitleList.add("签约数");
         headTitleList.add("签约率");
         headTitleList.add("净业绩金额");
         headTitleList.add("签约单笔");
         headTitleList.add("来访单笔");
+        headTitleList.add("定金量");
+        headTitleList.add("定金金额");
+        headTitleList.add("全款量");
+        headTitleList.add("全款金额");
+        headTitleList.add("尾款量");
+        headTitleList.add("尾款金额");
+        headTitleList.add("定金占比（未补尾款）");
+        headTitleList.add("尾款回收率");
         return headTitleList;
     }
 
@@ -183,12 +194,23 @@ public class BusGroupRankingController extends BaseStatisticsController {
         if(type.equals(2)){
             curList.add("");
         }
+        curList.add(ra.getAreaDirectorName());
+        curList.add(ra.getBusinessDirectorName());
+        curList.add(ra.getBusinessManagerName());
         curList.add(ra.getFirstVisitNum());
         curList.add(ra.getSignNum());
         curList.add(ra.getSignRate());
         curList.add(ra.getAmount());
         curList.add(ra.getSignSingle());
         curList.add(ra.getFirstVisitMoney());
+        curList.add(ra.getDjl());
+        curList.add(ra.getDjje());
+        curList.add(ra.getQkl());
+        curList.add(ra.getQkje());
+        curList.add(ra.getWkl());
+        curList.add(ra.getWkje());
+        curList.add(ra.getDjzb());
+        curList.add(ra.getWkhsl());
         dataList.add(curList);
     }
 
