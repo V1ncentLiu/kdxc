@@ -474,7 +474,9 @@ public class CallRecordController {
                Long selectedTeleDeptId = myCallRecordReqDTO.getTeleDeptId();
                selectTeleGroupId = selectTeleGroupId != null ? selectTeleGroupId : selectedTeleDeptId;
                if (selectTeleGroupId!=null) {
+                   logger.info("callrecord userList {{}}",selectTeleGroupId);
                    List<UserInfoDTO> userList = getTeleSaleByOrgId(selectTeleGroupId);
+                   logger.info("callrecord userListsss {{}}",userList);
                    if (CollectionUtils.isEmpty(userList)) {
                        return new JSONResult<Map<String, Object>>().success(null);
                    }
@@ -698,10 +700,12 @@ public class CallRecordController {
      * @return
      */
     private List<UserInfoDTO> getTeleSaleByOrgId(Long orgId) {
+        logger.info("callrecord orgId {{}}",orgId);
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(orgId);
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        logger.info("callrecord userJr {{}}",userJr);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
             logger.error(
                     "查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
