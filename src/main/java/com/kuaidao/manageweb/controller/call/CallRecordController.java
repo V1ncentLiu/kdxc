@@ -589,7 +589,9 @@ public class CallRecordController {
             
         }
         logger.info("callrecord myCallRecordReqDTO {{}}",myCallRecordReqDTO);
-        return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
+        JSONResult<Map<String,Object>> mapss = callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
+        logger.info("callrecord mapss {{}}",mapss);
+        return mapss;
 
     }
 
