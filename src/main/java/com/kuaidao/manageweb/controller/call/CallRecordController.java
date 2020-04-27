@@ -464,8 +464,10 @@ public class CallRecordController {
            Boolean isBusLimit =  (Boolean)busMap.get("isBusinessAcademy");
 
            if (isBusLimit &&  busMap.get("result")!=null) {
+               logger.info("callrecord busMap111111 {{}}",busMap);
               return (JSONResult)busMap.get("result");
             }
+            logger.info("callrecord busMap333333 {{}}",busMap);
            if (isBusLimit) {
                //商学院组织机构
                Long selectTeleGroupId = myCallRecordReqDTO.getTeleGroupId();
