@@ -1,11 +1,13 @@
 package com.kuaidao.manageweb.controller.statistics.performance;
 
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.busPerformance.BusVisitSignFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -13,6 +15,8 @@ import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.busPerformance.BusVisitSignDto;
 import com.kuaidao.sys.constant.RegionTypeEnum;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -45,9 +49,9 @@ public class BusVisitSignController extends BaseStatisticsController {
     @Autowired
     private CompanyInfoFeignClient companyInfoFeignClient;
     @Autowired
-    private SysRegionFeignClient sysRegionFeignClient;
-    @Autowired
     private BusVisitSignFeignClient busVisitSignFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
 
     /**
      * 一级页面-按区域统计
@@ -202,6 +206,20 @@ public class BusVisitSignController extends BaseStatisticsController {
             dto.setBusinessGroupId(curLoginUser.getOrgId());
             if(RoleCodeEnum.SWJL.name().equals(roleCode)){
                 dto.setBusinessManagerId(curLoginUser.getId());
+            }
+        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){//商务总裁
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+            queryDTO.setParentId(curLoginUser.getOrgId());
+            JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                    organizationFeignClient.queryOrgByParam(queryDTO);
+            if (queryOrgByParam != null && JSONResult.SUCCESS.equals(queryOrgByParam.getCode()) && queryOrgByParam.getData() != null) {
+                List<OrganizationRespDTO> data = queryOrgByParam.getData();
+                List<Long> areasList = new ArrayList<>();
+                for(OrganizationRespDTO org : data){
+                    areasList.add(org.getId());
+                }
+                dto.setBusAreaIds(areasList);
             }
         }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
             if(null!=dto.getBusAreaId()){

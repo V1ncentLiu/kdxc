@@ -124,7 +124,7 @@ public class CallRecordController {
         boolean isBusinessAcademy = false;
         Long curOrgId = curLoginUser.getOrgId();
         Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
-        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId()) || curOrgId.equals(businessCallrecordLimit.getQdtzBusOrgId())) {
             Integer businessLine = curLoginUser.getBusinessLine();
             isBusinessAcademy  = true;
             request.setAttribute("teleGroupList", getTeleGroupByBusinessLine(businessLine));
@@ -260,10 +260,19 @@ public class CallRecordController {
             orgList.add(orgJr.getData());
             request.setAttribute("teleDeptList",orgList);
             request.setAttribute("curDeptId",String.valueOf(orgId));
+        }else if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+            queryDTO.setParentId(orgId);
+            JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(queryDTO);
+            if (JSONResult.SUCCESS.equals(orgJr.getCode()) &&  orgJr.getData() != null &&  orgJr.getData().size()>0) {
+                request.setAttribute("teleDeptList",orgJr.getData());
+            }
         }
     }
 
     public List<OrganizationDTO> getDescenDantTeleGroupByOrgId(Long parentOrgId){
+
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(parentOrgId);
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
@@ -540,6 +549,18 @@ public class CallRecordController {
                            .collect(Collectors.toList());
                    myCallRecordReqDTO.setAccountIdList(idList);
 
+               }else if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
+                   Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
+                   Long teleDeptId = myCallRecordReqDTO.getTeleDeptId();
+                   Long reqOrgId = teleGroupId != null ? teleGroupId : teleDeptId != null ? teleDeptId : curLoginUser.getOrgId();
+                   List<UserInfoDTO> userList = getTeleSaleByOrgId(reqOrgId);
+                   if (CollectionUtils.isEmpty(userList)) {
+                       logger.warn("顾问通话记录-管理员查询所有的电销顾问，返回数据为null，param[{}] ",reqOrgId);
+                       return new JSONResult<Map<String, Object>>().success(null);
+                   }
+                   List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user -> user.getId())
+                           .collect(Collectors.toList());
+                   myCallRecordReqDTO.setAccountIdList(idList);
                } else {
                    // 其他角色
                    Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
@@ -591,11 +612,11 @@ public class CallRecordController {
      */
     private Map<String, Object>  setBusAccountIdList(CallRecordReqDTO myCallRecordReqDTO,Long curOrgId,Integer businessLine) {
         Map<String, Object> resMap = new HashMap<>();
-        //判断是否 秦皇岛商学院听业务线下所有； 商机盒子商学院 听业务线下所有
+        //判断是否 秦皇岛商学院听业务线下所有； 商机盒子商学院 听业务线下所有  渠道拓展 听业务线下所有
         List<UserInfoDTO>  userInfoList = new ArrayList<>();
         boolean isBusinessAcademy = false   ;
         Long qhdBusOrgId = businessCallrecordLimit.getQhdBusOrgId();
-        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId())) {
+        if(curOrgId.equals(qhdBusOrgId) || curOrgId.equals(businessCallrecordLimit.getSjhzTjBusOrgId()) || curOrgId.equals(businessCallrecordLimit.getQdtzBusOrgId())) {
               userInfoList  = getTeleSaleByBusinessLine(businessLine);
               isBusinessAcademy = true;
         }
@@ -628,7 +649,6 @@ public class CallRecordController {
                 isBusinessAcademy = true;
             }
         }
-        
         resMap.put("isBusinessAcademy", isBusinessAcademy);
         if (!isBusinessAcademy) {
            return resMap; 
