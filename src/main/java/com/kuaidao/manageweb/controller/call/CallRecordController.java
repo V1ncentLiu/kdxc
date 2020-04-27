@@ -455,11 +455,14 @@ public class CallRecordController {
         String roleCode = CommUtil.getRoleCode(curLoginUser);
         // 电销顾问
         List<Long> accountIdList = myCallRecordReqDTO.getAccountIdList();
+        logger.info("callrecord curLoginUser {{}}",curLoginUser);
         if (CollectionUtils.isEmpty(accountIdList)) {
             //9期 商学院处理
            Integer businessLine = curLoginUser.getBusinessLine();
            Map<String,Object> busMap =  setBusAccountIdList(myCallRecordReqDTO,orgId,businessLine);
+            logger.info("callrecord busMap {{}}",busMap);
            Boolean isBusLimit =  (Boolean)busMap.get("isBusinessAcademy");
+
            if (isBusLimit &&  busMap.get("result")!=null) {
               return (JSONResult)busMap.get("result");
             }
@@ -478,7 +481,7 @@ public class CallRecordController {
                    myCallRecordReqDTO.setAccountIdList(idList);
                }
            }
-         
+            logger.info("callrecord busMap1 {{}}",busMap);
            
            if (!isBusLimit) {
                if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -585,7 +588,7 @@ public class CallRecordController {
            } 
             
         }
-
+        logger.info("callrecord myCallRecordReqDTO {{}}",myCallRecordReqDTO);
         return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
 
     }
@@ -620,6 +623,8 @@ public class CallRecordController {
               userInfoList  = getTeleSaleByBusinessLine(businessLine);
               isBusinessAcademy = true;
         }
+        logger.info("callrecord isBusinessAcademy1 {{}}",isBusinessAcademy);
+        logger.info("callrecord userInfoList {{}}",userInfoList);
        //郑州商学院 听郑州
         if (!isBusinessAcademy) {
             String zzBusOrgId = businessCallrecordLimit.getZzBusOrgId();
@@ -659,6 +664,7 @@ public class CallRecordController {
         }
         List<Long> idList = userInfoList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
         myCallRecordReqDTO.setAccountIdList(idList);
+        logger.info("callrecord resMap222 {{}}",resMap);
         return resMap;
     }
 
