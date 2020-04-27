@@ -67,13 +67,11 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-               <!--<el-form-item label="到访城市" :label-width="formLabelWidth" prop="arrVisitCity">-->
-                   <!--<el-select v-model="addVisitRecord.arrVisitCity" placeholder="请选择" clearable filterable-->
-                              <!--style="width:100%">-->
-                       <!--<el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"-->
-                                  <!--:value="item.name"></el-option>-->
-                   <!--</el-select>-->
-               <!--</el-form-item>-->
+               <el-form-item label="到访城市">
+                   <el-select v-model="form.arrVisitCity" placeholder="请选择" clearable filterable style="width:100%">
+                       <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                   </el-select>
+               </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>  
@@ -153,6 +151,7 @@
                     businessGroupId: '',
                     businessManagerId: '',
                     groupId:'',
+                    arrVisitCity:'',//到访城市
                 },
                 export: {
                     startTime:'',
@@ -161,12 +160,14 @@
                     businessGroupId: '',
                     businessManagerId: '',
                     groupId:'',
+                    arrVisitCity:'',//到访城市
                 },
                 tableData: [],
                 companyList: companyList,
                 areaList: areaList,
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
+                visitCityArr:[],//到访城市
             }             
         },
         methods: {   
@@ -498,6 +499,13 @@
             if(localVal){this.pager.pageSize = localVal;}
 
             this.searchTable();
+
+            //到访城市
+            param = {};
+            param.groupCode = "visitCity";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.visitCityArr = response.data.data;
+            });
 
         },
         mounted(){
