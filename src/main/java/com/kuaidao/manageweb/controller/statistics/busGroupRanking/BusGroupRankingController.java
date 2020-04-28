@@ -70,8 +70,8 @@ public class BusGroupRankingController extends BaseStatisticsController {
      * 二级页面跳转
      */
     @RequestMapping("/toGroupProjectPerformanceDetail")
-    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,HttpServletRequest request) {
-        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,projectId,request);
+    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,String visitCity ,HttpServletRequest request) {
+        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,projectId,visitCity,request);
         //商务组
         initOrgList(request);
         //商务大区
@@ -224,17 +224,29 @@ public class BusGroupRankingController extends BaseStatisticsController {
             if(type == 2){
                 curList.add(ra.getProjectName());
             }
+            curList.add(ra.getAreaDirectorName());
+            curList.add(ra.getBusinessDirectorName());
+            curList.add(ra.getBusinessManagerName());
             curList.add(ra.getFirstVisitNum());
             curList.add(ra.getSignNum());
             curList.add(ra.getSignRate());
             curList.add(ra.getAmount());
             curList.add(ra.getSignSingle());
             curList.add(ra.getFirstVisitMoney());
+            curList.add(ra.getDjl());
+            curList.add(ra.getDjje());
+            curList.add(ra.getQkl());
+            curList.add(ra.getQkje());
+            curList.add(ra.getWkl());
+            curList.add(ra.getWkje());
+            curList.add(ra.getDjzb());
+            curList.add(ra.getWkhsl());
             dataList.add(curList);
         }
     }
 
-    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,HttpServletRequest request){
+    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,
+                           String visitCity,HttpServletRequest request){
         BaseBusQueryDto baseBusQueryDto = new BaseBusQueryDto();
         baseBusQueryDto.setBusAreaId(busAreaId);
         baseBusQueryDto.setBusinessGroupId(businessGroupId);
@@ -243,6 +255,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
         baseBusQueryDto.setBusinessManagerId(businessManagerId);
         baseBusQueryDto.setGroupId(groupId);
         baseBusQueryDto.setProjectId(projectId);
+        baseBusQueryDto.setVisitCity(visitCity);
         request.setAttribute("baseBusQueryDto",baseBusQueryDto);
     }
 
