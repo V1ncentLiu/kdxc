@@ -201,7 +201,7 @@ var myCallRecordVm = new Vue({
                         //3.分页组件
                         myCallRecordVm.pager.total= 0;
                         myCallRecordVm.pager.currentPage = 0;
-                        myCallRecordVm.pager.pageSize = 0;
+                        myCallRecordVm.pager.pageSize =20;
                     }else{
                         var callRecordData = resData.data;
                         var callRecordDataData = callRecordData.data;
