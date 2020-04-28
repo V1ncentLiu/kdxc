@@ -4,7 +4,7 @@
     <title>后台管理系统</title>
 </head>
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
@@ -13,81 +13,81 @@
     <el-row class="marginB20">
         <el-button type="primary" @click="searchMonth">月统计</el-button>
         <el-button type="success" @click="searchSeason">季统计</el-button>
-        <el-button type="warning" @click="searchYear">年统计</el-button> 
-         <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
-        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
-         <!-- </shiro:hasPermission> -->
+        <el-button type="warning" @click="searchYear">年统计</el-button>
+        <!-- <shiro:hasPermission name="statistics:trafficCallResource:export"> -->
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
+        <!-- </shiro:hasPermission> -->
     </el-row>
-    <div class="mainSearchBg">        
+    <div class="mainSearchBg">
         <div class="mainSearchFormBox">
-           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="统计日期：">
                     <el-date-picker format="yyyy-MM-dd" v-model="form.startTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker format="yyyy-MM-dd" v-model="form.endTime" type="date" value-format="yyyy-MM-dd" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="商务大区:">  
+                <el-form-item label="商务大区:">
                     <el-select v-model="form.busAreaId" placeholder="全部" style="width: 100%;" clearable filterable @change="curTelGroupSale" :disabled="isDisabled">
                         <el-option
-                            v-for="item in areaList"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in areaList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务组:">  
+                <el-form-item label="商务组:">
                     <el-select v-model="form.businessGroupId" placeholder="全部" style="width: 100%;" clearable filterable  @change="curTelSale" :disabled="isDisabledOrgId">
                         <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="商务经理:">  
+                <el-form-item label="商务经理:">
                     <el-select v-model="form.businessManagerId" placeholder="全部" style="width: 100%;" clearable filterable :disabled="isDisabledUserId">
                         <el-option
-                            v-for="item in busSaleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in busSaleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="餐饮集团：">  
+                <el-form-item label="餐饮集团：">
                     <el-select v-model="form.groupId" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in companyList"
-                            :key="item.id"
-                            :label="item.groupName"
-                            :value="item.id">
+                                v-for="item in companyList"
+                                :key="item.id"
+                                :label="item.groupName"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-               <el-form-item label="到访城市">
-                   <el-select v-model="form.arrVisitCity" placeholder="请选择" clearable filterable style="width:100%">
-                       <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
-                   </el-select>
-               </el-form-item>
+                <el-form-item label="到访城市">
+                    <el-select v-model="form.arrVisitCity" placeholder="请选择" clearable filterable style="width:100%">
+                        <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                    </el-select>
+                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
-                </div>  
+                </div>
             </el-form>
         </div>
         <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                :data="tableData"
-                v-loading="loading"
-                :cell-style="centerStyle"
-                :header-cell-style="centerStyle"
-                :span-method="arraySpanMethod">
+            <el-table
+                    ref="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="tableData"
+                    v-loading="loading"
+                    :cell-style="centerStyle"
+                    :header-cell-style="centerStyle"
+                    :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column prop="businessAreaName" label="商务大区"></el-table-column>
                 <el-table-column prop="groupName" label="餐饮集团">
@@ -168,27 +168,27 @@
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
                 visitCityArr:[],//到访城市
-            }             
+            }
         },
-        methods: {   
+        methods: {
             format_number(row, column){
                 var nStr = row[column.property];
                 if('--'==nStr){
                     return nStr;
                 }
                 if(!nStr){return};
-                nStr += '';  
-                x = nStr.split('.');  
+                nStr += '';
+                x = nStr.split('.');
                 x1 = x[0];
                 if(!x[1]){
                     x[1] = '00';
-                }  
+                }
                 x2 = x.length > 1 ? '.' + x[1] : '';
-                var rgx = /(\d+)(\d{3})/;  
-                while (rgx.test(x1)) {  
-                    x1 = x1.replace(rgx, '$1' + ',' + '$2');  
-                }  
-                return x1 + x2;  
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
             },
             centerStyle(){
                 return "text-align:center"
@@ -227,7 +227,7 @@
                 axios.post('/base/getGroupList',param).then(function (response) {
                     mainDivVM.orgTeleArr=response.data.data;
                 }).catch(function (error) {
-                        mainDivVM.$message({
+                    mainDivVM.$message({
                         message: "商务组请求失败，请稍后重试",
                         type: "error"
                     });
@@ -237,16 +237,16 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="SWJL";
-                axios.post('/base/getSaleList' ,param).then(function (response) {  
+                axios.post('/base/getSaleList' ,param).then(function (response) {
                     mainDivVM.busSaleArr=response.data.data;
                 }).catch(function (error) {
-                        mainDivVM.$message({
+                    mainDivVM.$message({
                         message: "商务经理请求失败，请稍后重试",
                         type: "error"
                     });
                 });
             },
-            searchTable(firstPage) { 
+            searchTable(firstPage) {
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime && startTime){
@@ -277,13 +277,13 @@
                         type: 'warning'
                     });
                     return;
-                }   
-    
+                }
+
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-    
+
                 if(firstPage){
                     param.pageNum = firstPage;
                 }else{
@@ -333,7 +333,8 @@
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.groupId = mainDivVM.form.groupId;
-        
+                        mainDivVM.export.arrVisitCity = mainDivVM.form.arrVisitCity;
+
                     }else{
                         mainDivVM.loading = false;
                     }
@@ -357,7 +358,7 @@
                 }
                 if(endTime){
                     this.form.endTime = moment(end).format("YYYY-MM-DD");
-                    return this.form.endTime;      
+                    return this.form.endTime;
                 }
             },
             gotoLink(row){
@@ -367,9 +368,9 @@
                 var endTime = this.export.endTime;
                 var businessGroupId = this.export.businessGroupId;
                 var businessManagerId = this.export.businessManagerId;
-                var visitCity = this.form.arrVisitCity;
+                var visitCity = this.export.arrVisitCity;
 
-                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&startTime=" + startTime + "&endTime=" + endTime + "&visitCity=" + visitCity;
+                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&startTime=" + startTime + "&endTime=" + endTime +"&visitCity=" + visitCity;
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -400,7 +401,7 @@
                 var monthRea = timeStr.getMonth()+1;
                 monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
                 var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;               
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;
                 var timeRes = "" + yearRes + monthRea + dateRes;
                 return timeRes;
             },
@@ -409,33 +410,33 @@
                 var month = today.getMonth()+1;
                 var startTime = '';
                 switch (month) {
-                    case 1 : 
-                    case 2 : 
+                    case 1 :
+                    case 2 :
                     case 3 : startTime = today.getFullYear()+"-" + 01 + "-" + 01;break;
-                    case 4 : 
-                    case 5 : 
+                    case 4 :
+                    case 5 :
                     case 6 : startTime = today.getFullYear()+"-" + 04 + "-" + 01; break;
-                    case 7 : 
-                    case 8 : 
+                    case 7 :
+                    case 8 :
                     case 9 : startTime = today.getFullYear()+"-" + 07 + "-" + 01;break;
                     case 10 :
                     case 11 :
                     case 12 : startTime = today.getFullYear()+"-" + 10 + "-" + 01;break;
                 }
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
+                var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+                this.form.startTime=startTime;
+                this.form.endTime=endTime;
+                this.searchTable(1);
             },
             searchYear(){ // 年
-               var today = new Date();
-               var startTime = today.getFullYear()+"-" + 01 + "-" + 01;
-               var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
+                var today = new Date();
+                var startTime = today.getFullYear()+"-" + 01 + "-" + 01;
+                var endTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+                this.form.startTime=startTime;
+                this.form.endTime=endTime;
+                this.searchTable(1);
             },
-            searchMonth(){ // 本月 
+            searchMonth(){ // 本月
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -461,27 +462,27 @@
                 //餐饮集团
                 param.groupId = this.export.groupId;
                 //到访城市
-                param.visitCity = this.form.arrVisitCity;
+                param.visitCity = this.export.arrVisitCity;
                 axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
-                .then(function (response) {
-                    var data =  response.data;
-                    var fileName = response.headers.filename;
-                    saveAs(data,decodeURI(fileName));
-                })
-                .catch(function (error) {
-                    mainDivVM.$message({
-                        message: "导出失败，请稍后重试",
-                        type: "error"
+                    .then(function (response) {
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
                     });
-                });
             }
         },
-        created(){     
+        created(){
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD");
             var endTime = moment(today).format("YYYY-MM-DD");
             this.form.startTime=startTime;
-            this.form.endTime=endTime; 
+            this.form.endTime=endTime;
             if(curDeptId){
                 this.isDisabled = true;
                 this.form.busAreaId = curDeptId;
