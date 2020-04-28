@@ -192,18 +192,30 @@ var myCallRecordVm = new Vue({
                      });*/
                 	 
                  	var resData = data.data;
-                 	var callRecordData = resData.data;
-                 	var callRecordDataData = callRecordData.data;
-                   for(var i=0;i<callRecordDataData.length;i++){
-                     callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
-                   }
-                 	myCallRecordVm.callRecordData= callRecordData.data;
-                 	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
-                  //3.分页组件
-                 	myCallRecordVm.pager.total= callRecordData.total;
-                 	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
-                 	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
-                     
+                 	if(data.data ==null){
+                        var callRecordData = null;
+                        var callRecordDataData = null;
+
+                        myCallRecordVm.callRecordData= null;
+                        myCallRecordVm.totalTalkTime = null;
+                        //3.分页组件
+                        myCallRecordVm.pager.total= 0;
+                        myCallRecordVm.pager.currentPage = 0;
+                        myCallRecordVm.pager.pageSize = 0;
+                    }else{
+                        var callRecordData = resData.data;
+                        var callRecordDataData = callRecordData.data;
+                        for(var i=0;i<callRecordDataData.length;i++){
+                            callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
+                        }
+                        myCallRecordVm.callRecordData= callRecordData.data;
+                        myCallRecordVm.totalTalkTime = resData.totalTalkTime;
+                        //3.分页组件
+                        myCallRecordVm.pager.total= callRecordData.total;
+                        myCallRecordVm.pager.currentPage = callRecordData.currentPage;
+                        myCallRecordVm.pager.pageSize = callRecordData.pageSize;
+                    }
+
                  }else{
                 	 myCallRecordVm.$message({message:data.msg,type:'error'});
                  	 console.error(data);
