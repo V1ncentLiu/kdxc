@@ -342,6 +342,7 @@
             	this.inviteAreaListPage()
             },
         	inviteAreaListPage(){//查询按钮
+				this.btnDisabled =false;
             	  var param = {}; 
             	  var pageSize = this.pager.pageSize;
                   var pageNum = this.pager.currentPage;
@@ -390,11 +391,19 @@
 			addbutton(formName){
 				this.$refs[formName].validate((valid) => {
 					if (valid) {
+						this.btnDisabled =true;
 						var param = {};
 						var idList = [];
 						var rows = this.multipleSelection;
 						for ( var i = 0; i <rows.length; i++){
 							idList.push(rows[i].id)
+						}
+						if(idList.length=0){
+							orgVM.$message({
+								message: '请选择要转发的数据',
+								type: 'success'
+							});
+							return;
 						}
 						param.idList = idList;
 						param.teleSaleId = this.pdzyform.teleSaleId;
