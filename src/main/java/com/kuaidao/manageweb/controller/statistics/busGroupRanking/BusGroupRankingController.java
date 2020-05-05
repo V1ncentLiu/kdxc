@@ -70,8 +70,8 @@ public class BusGroupRankingController extends BaseStatisticsController {
      * 二级页面跳转
      */
     @RequestMapping("/toGroupProjectPerformanceDetail")
-    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,HttpServletRequest request) {
-        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,projectId,request);
+    public String toGroupProjectPerformanceDetail(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,String visitCity ,HttpServletRequest request) {
+        initParam(busAreaId,businessGroupId,startTime,endTime,businessManagerId,groupId,projectId,visitCity,request);
         //商务组
         initOrgList(request);
         //商务大区
@@ -166,12 +166,23 @@ public class BusGroupRankingController extends BaseStatisticsController {
         if(type == 2){
             headTitleList.add("项目");
         }
+        headTitleList.add("大区总监");
+        headTitleList.add("商务总监");
+        headTitleList.add("商务经理");
         headTitleList.add("首访数");
         headTitleList.add("签约数");
         headTitleList.add("签约率");
         headTitleList.add("净业绩金额");
         headTitleList.add("签约单笔");
         headTitleList.add("来访单笔");
+        headTitleList.add("定金量");
+        headTitleList.add("定金金额");
+        headTitleList.add("全款量");
+        headTitleList.add("全款金额");
+        headTitleList.add("尾款量");
+        headTitleList.add("尾款金额");
+        headTitleList.add("定金占比（未补尾款）");
+        headTitleList.add("尾款回收率");
         return headTitleList;
     }
 
@@ -183,12 +194,23 @@ public class BusGroupRankingController extends BaseStatisticsController {
         if(type.equals(2)){
             curList.add("");
         }
+        curList.add(ra.getAreaDirectorName());
+        curList.add(ra.getBusinessDirectorName());
+        curList.add(ra.getBusinessManagerName());
         curList.add(ra.getFirstVisitNum());
         curList.add(ra.getSignNum());
         curList.add(ra.getSignRate());
         curList.add(ra.getAmount());
         curList.add(ra.getSignSingle());
         curList.add(ra.getFirstVisitMoney());
+        curList.add(ra.getDjl());
+        curList.add(ra.getDjje());
+        curList.add(ra.getQkl());
+        curList.add(ra.getQkje());
+        curList.add(ra.getWkl());
+        curList.add(ra.getWkje());
+        curList.add(ra.getDjzb());
+        curList.add(ra.getWkhsl());
         dataList.add(curList);
     }
 
@@ -202,17 +224,29 @@ public class BusGroupRankingController extends BaseStatisticsController {
             if(type == 2){
                 curList.add(ra.getProjectName());
             }
+            curList.add(ra.getAreaDirectorName());
+            curList.add(ra.getBusinessDirectorName());
+            curList.add(ra.getBusinessManagerName());
             curList.add(ra.getFirstVisitNum());
             curList.add(ra.getSignNum());
             curList.add(ra.getSignRate());
             curList.add(ra.getAmount());
             curList.add(ra.getSignSingle());
             curList.add(ra.getFirstVisitMoney());
+            curList.add(ra.getDjl());
+            curList.add(ra.getDjje());
+            curList.add(ra.getQkl());
+            curList.add(ra.getQkje());
+            curList.add(ra.getWkl());
+            curList.add(ra.getWkje());
+            curList.add(ra.getDjzb());
+            curList.add(ra.getWkhsl());
             dataList.add(curList);
         }
     }
 
-    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,HttpServletRequest request){
+    private void initParam(Long busAreaId,Long businessGroupId,Long startTime,Long endTime,Long businessManagerId,Long groupId,Long projectId,
+                           String visitCity,HttpServletRequest request){
         BaseBusQueryDto baseBusQueryDto = new BaseBusQueryDto();
         baseBusQueryDto.setBusAreaId(busAreaId);
         baseBusQueryDto.setBusinessGroupId(businessGroupId);
@@ -221,6 +255,7 @@ public class BusGroupRankingController extends BaseStatisticsController {
         baseBusQueryDto.setBusinessManagerId(businessManagerId);
         baseBusQueryDto.setGroupId(groupId);
         baseBusQueryDto.setProjectId(projectId);
+        baseBusQueryDto.setVisitCity(visitCity);
         request.setAttribute("baseBusQueryDto",baseBusQueryDto);
     }
 

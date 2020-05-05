@@ -300,6 +300,9 @@ public class BaseStatisticsController {
             baseBusQueryDto.setBusinessGroupIds(null);
             baseBusQueryDto.setBusinessGroupId(null);
         }
+        if("".equals(baseBusQueryDto.getVisitCity())){
+            baseBusQueryDto.setVisitCity(null);
+        }
 
     }
     /**
