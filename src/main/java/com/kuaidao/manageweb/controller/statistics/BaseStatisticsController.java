@@ -26,6 +26,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import com.rabbitmq.http.client.domain.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -367,8 +368,8 @@ public class BaseStatisticsController {
         request.setAttribute("projectList", allProject.getData());
 
         //餐饮集团
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
-        request.setAttribute("companyList", listNoPage.getData());
+        List<CompanyInfoDTO> listNoPage = getCyjt();
+        request.setAttribute("companyList", listNoPage);
 
         request.setAttribute("busAreaId",busAreaId);
         request.setAttribute("businessGroupId",businessGroupId);
@@ -432,4 +433,24 @@ public class BaseStatisticsController {
         return list;
     }
 
+    /**
+     * 查询餐饮集团
+     */
+    private List<CompanyInfoDTO> getCyjt(){
+        List<CompanyInfoDTO> resultList = new ArrayList<>();
+        UserInfoPageParam userInfoPageParam = new UserInfoPageParam();
+        userInfoPageParam.setUserType(2);
+        userInfoPageParam.setStatus(1);
+        JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.listNoPage(userInfoPageParam);
+        if("0".equals(listJSONResult.getCode()) && null!=listJSONResult.getData()){
+            List<UserInfoDTO> data = listJSONResult.getData();
+            for(UserInfoDTO userInfo : data){
+                CompanyInfoDTO companyInfoDTO = new CompanyInfoDTO();
+                companyInfoDTO.setId(userInfo.getId());
+                companyInfoDTO.setGroupName(userInfo.getName());
+                resultList.add(companyInfoDTO);
+            }
+        }
+        return resultList;
+    }
 }
