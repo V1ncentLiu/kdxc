@@ -12,7 +12,6 @@ import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.FirstResourceAllocation.FirstResourceAllocationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationDto;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;

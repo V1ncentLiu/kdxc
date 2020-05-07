@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.statistics.resourceAllocation;
 
-import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -12,9 +11,7 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceAllocation.ResourceVisitFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.base.BaseBusQueryDto;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
-import com.kuaidao.stastics.dto.dupOrder.DupOrderDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceVisitDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;

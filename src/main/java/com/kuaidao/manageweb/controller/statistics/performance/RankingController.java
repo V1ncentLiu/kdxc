@@ -14,7 +14,6 @@ import com.kuaidao.stastics.constant.ReportExportEnum;
 import com.kuaidao.stastics.dto.dwOrganizationQueryDTO.DwOrganizationQueryDTO;
 import com.kuaidao.stastics.dto.telePerformanceRank.TelePerformanceRankDto;
 import com.kuaidao.stastics.dto.telePerformanceRank.TelePerformanceRankQueryDto;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;

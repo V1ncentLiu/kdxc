@@ -14,7 +14,6 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceFreeReceive.ResourceFreeReceiveFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.base.BaseQueryDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveDto;
 import com.kuaidao.stastics.dto.resourceFreeReceive.ResourceFreeReceiveQueryDto;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
