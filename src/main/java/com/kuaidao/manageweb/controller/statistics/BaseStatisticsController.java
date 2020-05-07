@@ -296,10 +296,13 @@ public class BaseStatisticsController {
             List<Long> orgIdList = teleGroupList.parallelStream().map(OrganizationDTO::getId).collect(Collectors.toList());
             baseBusQueryDto.setBusinessGroupIds(orgIdList);
         }
+        //TODO 重新写一个方法
         //商务经理查询 考虑借调 删除组限制
         if(null != baseBusQueryDto && RoleCodeEnum.SWJL.name().equals(roleCode)){
             baseBusQueryDto.setBusinessGroupIds(null);
             baseBusQueryDto.setBusinessGroupId(null);
+            baseBusQueryDto.setBusAreaId(null);
+            baseBusQueryDto.setBusinessManagerId(curLoginUser.getId());
         }
         if("".equals(baseBusQueryDto.getVisitCity())){
             baseBusQueryDto.setVisitCity(null);
