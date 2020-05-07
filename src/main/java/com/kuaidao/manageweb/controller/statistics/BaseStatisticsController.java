@@ -436,7 +436,7 @@ public class BaseStatisticsController {
     /**
      * 查询餐饮集团
      */
-    private List<CompanyInfoDTO> getCyjt(){
+    public List<CompanyInfoDTO> getCyjt(){
         List<CompanyInfoDTO> resultList = new ArrayList<>();
         UserInfoPageParam userInfoPageParam = new UserInfoPageParam();
         userInfoPageParam.setUserType(2);
