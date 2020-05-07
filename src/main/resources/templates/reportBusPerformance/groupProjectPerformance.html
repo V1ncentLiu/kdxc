@@ -67,11 +67,6 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="到访城市">
-                    <el-select v-model="form.arrVisitCity" placeholder="请选择" clearable filterable style="width:100%">
-                        <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
-                    </el-select>
-                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button class="searchBtn" icon="el-icon-search" type="primary" @click="searchTable(1)" :disabled="loading">搜索</el-button>
                 </div>
@@ -96,23 +91,12 @@
                         <span v-else>合计</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="areaDirectorName" label="大区总监"></el-table-column>
-                <el-table-column prop="businessDirectorName" label="商务总监"></el-table-column>
-                <el-table-column prop="businessManagerName" label="商务经理"></el-table-column>
                 <el-table-column prop="firstVisitNum" label="首访数"></el-table-column>
                 <el-table-column prop="signNum" label="签约数"></el-table-column>
                 <el-table-column prop="signRate" label="签约率"></el-table-column>
                 <el-table-column prop="amount" :formatter="format_number" label="净业绩金额" ></el-table-column>
                 <el-table-column prop="signSingle"  :formatter="format_number" label="签约单笔"></el-table-column>
                 <el-table-column prop="firstVisitMoney"  :formatter="format_number" label="来访单笔"></el-table-column>
-                <el-table-column prop="djl" label="定金量"></el-table-column>
-                <el-table-column prop="djje" label="定金金额"></el-table-column>
-                <el-table-column prop="qkl" label="全款量"></el-table-column>
-                <el-table-column prop="qkje" label="全款金额"></el-table-column>
-                <el-table-column prop="wkl" label="尾款量"></el-table-column>
-                <el-table-column prop="wkje" label="尾款金额"></el-table-column>
-                <el-table-column prop="djzb" label="定金占比（未补尾款）"></el-table-column>
-                <el-table-column prop="wkhsl" label="尾款回收率"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -151,7 +135,6 @@
                     businessGroupId: '',
                     businessManagerId: '',
                     groupId:'',
-                    arrVisitCity:'',//到访城市
                 },
                 export: {
                     startTime:'',
@@ -160,14 +143,12 @@
                     businessGroupId: '',
                     businessManagerId: '',
                     groupId:'',
-                    arrVisitCity:'',//到访城市
                 },
                 tableData: [],
                 companyList: companyList,
                 areaList: areaList,
                 orgTeleArr: '', // 商务组
                 busSaleArr: '', // 商务经理
-                visitCityArr:[],//到访城市
             }
         },
         methods: {
@@ -297,8 +278,6 @@
                 param.businessManagerId = this.form.businessManagerId;
                 //餐饮集团
                 param.groupId = this.form.groupId;
-                //到访城市
-                param.visitCity = this.form.arrVisitCity;
                 this.loading = true;
                 axios.post('/busGroupRanking/getOnePageList',param).then(function (response) {
                     if(!response || !response.data){
@@ -333,7 +312,6 @@
                         mainDivVM.export.businessGroupId = mainDivVM.form.businessGroupId;
                         mainDivVM.export.businessManagerId = mainDivVM.form.businessManagerId;
                         mainDivVM.export.groupId = mainDivVM.form.groupId;
-                        mainDivVM.export.arrVisitCity = mainDivVM.form.arrVisitCity;
 
                     }else{
                         mainDivVM.loading = false;
@@ -368,9 +346,8 @@
                 var endTime = this.export.endTime;
                 var businessGroupId = this.export.businessGroupId;
                 var businessManagerId = this.export.businessManagerId;
-                var visitCity = this.export.arrVisitCity;
 
-                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&startTime=" + startTime + "&endTime=" + endTime +"&visitCity=" + visitCity;
+                window.location.href="/busGroupRanking/toGroupProjectPerformanceDetail?busAreaId="+ busAreaId+ "&businessGroupId="+ businessGroupId + "&businessManagerId=" + businessManagerId + "&groupId="+ groupId +"&startTime=" + startTime + "&endTime=" + endTime;
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -461,8 +438,6 @@
                 param.businessManagerId = this.export.businessManagerId;
                 //餐饮集团
                 param.groupId = this.export.groupId;
-                //到访城市
-                param.visitCity = this.export.arrVisitCity;
                 axios.post('/busGroupRanking/exportOneList',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
@@ -505,14 +480,6 @@
             if(localVal){this.pager.pageSize = localVal;}
 
             this.searchTable();
-
-            //到访城市
-            param = {};
-            param.groupCode = "visitCity";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                mainDivVM.visitCityArr = response.data.data;
-            });
-
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
