@@ -1,17 +1,17 @@
 package com.kuaidao.manageweb.controller.apply;
 
-import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.apply.TeleCooperateApplyDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.*;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
+import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;

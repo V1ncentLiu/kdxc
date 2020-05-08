@@ -1,6 +1,22 @@
 package com.kuaidao.manageweb.controller.statistics.performance;
 
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import java.net.URLEncoder;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -16,28 +32,10 @@ import com.kuaidao.sys.constant.RegionTypeEnum;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author: guhuitao
- * @create: 2019-09-23 17:02
- * 商务报表-业绩报表-来访签约区域表
+ * @create: 2019-09-23 17:02 商务报表-业绩报表-来访签约区域表
  **/
 @Controller
 @RequestMapping("/busVisitSign")
@@ -53,13 +51,14 @@ public class BusVisitSignController extends BaseStatisticsController {
 
     /**
      * 一级页面-按区域统计
+     * 
      * @return
      */
     @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/areaList")
-    public String areaList(HttpServletRequest request){
+    public String areaList(HttpServletRequest request) {
         initBugOrg(request);
-        request.setAttribute("provinceList",queryProvince(RegionTypeEnum.省.getValue()));
+        request.setAttribute("provinceList", queryProvince(RegionTypeEnum.省.getValue()));
 
         return "reportBusPerformance/busAreaList";
     }
@@ -67,16 +66,18 @@ public class BusVisitSignController extends BaseStatisticsController {
 
     /**
      * 二级页面-按集团统计
+     * 
      * @return
      */
     @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/groupList")
-    public String gruopList(HttpServletRequest request,Long busAreaId,Long businessGroupId,Long businessManagerId,
-                            String province,Long startTime,Long endTime){
+    public String gruopList(HttpServletRequest request, Long busAreaId, Long businessGroupId,
+            Long businessManagerId, String province, Long startTime, Long endTime) {
         initBugOrg(request);
-        initBaseDto(request,busAreaId,businessGroupId,businessManagerId,null,province,startTime,endTime);
-        request.setAttribute("provinceList",queryProvince(RegionTypeEnum.省.getValue()));
-        //签约集团
+        initBaseDto(request, busAreaId, businessGroupId, businessManagerId, null, province,
+                startTime, endTime);
+        request.setAttribute("provinceList", queryProvince(RegionTypeEnum.省.getValue()));
+        // 签约集团
         JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
         return "reportBusPerformance/busGroupList";
@@ -84,14 +85,16 @@ public class BusVisitSignController extends BaseStatisticsController {
 
     /**
      * 一级页面
+     * 
      * @param baseQueryDto
      * @return
      */
     @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/queryPage")
-    public @ResponseBody JSONResult<Map<String,Object>> queryPage(@RequestBody BaseBusQueryDto baseQueryDto){
+    public @ResponseBody JSONResult<Map<String, Object>> queryPage(
+            @RequestBody BaseBusQueryDto baseQueryDto) {
         initParams(baseQueryDto);
-        if(RoleCodeEnum.SWJL.name().equals(getRoleCode())){
+        if (RoleCodeEnum.SWJL.name().equals(getRoleCode())) {
             baseQueryDto.setBusinessGroupId(null);
             baseQueryDto.setBusAreaId(null);
         }
@@ -100,17 +103,20 @@ public class BusVisitSignController extends BaseStatisticsController {
 
     /**
      * 二级页面查询
+     * 
      * @param baseQueryDto
      * @return
      */
     @RequiresPermissions("statistics:busVisitSign:view")
     @RequestMapping("/queryBusPage")
-    public @ResponseBody JSONResult<Map<String,Object>> queryBusPage(@RequestBody BaseBusQueryDto baseQueryDto){
+    public @ResponseBody JSONResult<Map<String, Object>> queryBusPage(
+            @RequestBody BaseBusQueryDto baseQueryDto) {
         initParams(baseQueryDto);
-        String roleCode=super.getRoleCode();
-        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.GLY.name().equals(roleCode)){
+        String roleCode = super.getRoleCode();
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
+                || RoleCodeEnum.GLY.name().equals(roleCode)) {
             return busVisitSignFeignClient.queryBusPage(baseQueryDto);
-        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+        } else if (RoleCodeEnum.SWJL.name().equals(roleCode)) {
             baseQueryDto.setBusinessGroupId(null);
             baseQueryDto.setBusAreaId(null);
         }
@@ -119,32 +125,35 @@ public class BusVisitSignController extends BaseStatisticsController {
 
     /**
      * 一级页面导出
+     * 
      * @param dto
      * @param response
      */
     @RequiresPermissions("statistics:busVisitSign:export")
     @RequestMapping("/export")
     @ResponseBody
-    public void export(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
-        try{
+    public void export(@RequestBody BaseBusQueryDto dto, HttpServletResponse response) {
+        try {
             initParams(dto);
-            JSONResult<List<BusVisitSignDto>> json=busVisitSignFeignClient.queryList(dto);
-            if(null!=json && "0".equals(json.getCode())){
-                BusVisitSignDto[] dtos = json.getData().isEmpty()?new BusVisitSignDto[]{}:json.getData().toArray(new BusVisitSignDto[0]);
-                String[] keys = {"regionName","firstVisit","signNum","signRate","amount","sigleAmount"};
-                String[] hader = {"区域","首访数","签约数","签约率","净业绩金额","签约单笔"};
+            JSONResult<List<BusVisitSignDto>> json = busVisitSignFeignClient.queryList(dto);
+            if (null != json && "0".equals(json.getCode())) {
+                BusVisitSignDto[] dtos = json.getData().isEmpty() ? new BusVisitSignDto[] {}
+                        : json.getData().toArray(new BusVisitSignDto[0]);
+                String[] keys = {"regionName", "firstVisit", "signNum", "signRate", "amount",
+                        "sigleAmount"};
+                String[] hader = {"区域", "首访数", "签约数", "签约率", "净业绩金额", "签约单笔"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
-                String name = MessageFormat.format("来访签约区域表_{0}_{1}.xlsx", "" + dto.getStartTime(), dto.getEndTime() + "");
-                response.addHeader("Content-Disposition",
-                        "attachment;filename=\"" + name + "\"");
+                String name = MessageFormat.format("来访签约区域表_{0}_{1}.xlsx", "" + dto.getStartTime(),
+                        dto.getEndTime() + "");
+                response.addHeader("Content-Disposition", "attachment;filename=\"" + name + "\"");
                 response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
                 response.setContentType("application/octet-stream");
                 ServletOutputStream outputStream = response.getOutputStream();
                 wb.write(outputStream);
                 outputStream.close();
             }
-        }catch (Exception e){
-            logger.error(" BusVisitSignDto export error:",e);
+        } catch (Exception e) {
+            logger.error(" BusVisitSignDto export error:", e);
         }
     }
 
@@ -152,39 +161,42 @@ public class BusVisitSignController extends BaseStatisticsController {
     @RequiresPermissions("statistics:busVisitSign:export")
     @RequestMapping("/exportCompany")
     @ResponseBody
-    public void saleExport(@RequestBody BaseBusQueryDto dto, HttpServletResponse response){
-        try{
+    public void saleExport(@RequestBody BaseBusQueryDto dto, HttpServletResponse response) {
+        try {
             initParams(dto);
-            String roleCode=super.getRoleCode();
-            JSONResult<List<BusVisitSignDto>> json= null;
-            if(RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.GLY.name().equals(roleCode)){
+            String roleCode = super.getRoleCode();
+            JSONResult<List<BusVisitSignDto>> json = null;
+            if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
+                    || RoleCodeEnum.GLY.name().equals(roleCode)) {
                 json = busVisitSignFeignClient.queryBusList(dto);
-            }else{
-                json= busVisitSignFeignClient.queryBusListSale(dto);
+            } else {
+                json = busVisitSignFeignClient.queryBusListSale(dto);
             }
-            if(null!=json && "0".equals(json.getCode())){
-                BusVisitSignDto[] dtos = json.getData().isEmpty()?new BusVisitSignDto[]{}:json.getData().toArray(new BusVisitSignDto[0]);
-                String[] keys = {"companyName","regionName","firstVisit","signNum","signRate","amount","sigleAmount"};
-                String[] hader = {"餐饮集团","省份","首访数","签约数","签约率","净业绩金额","签约单笔"};
+            if (null != json && "0".equals(json.getCode())) {
+                BusVisitSignDto[] dtos = json.getData().isEmpty() ? new BusVisitSignDto[] {}
+                        : json.getData().toArray(new BusVisitSignDto[0]);
+                String[] keys = {"companyName", "regionName", "firstVisit", "signNum", "signRate",
+                        "amount", "sigleAmount"};
+                String[] hader = {"餐饮集团", "省份", "首访数", "签约数", "签约率", "净业绩金额", "签约单笔"};
                 Workbook wb = ExcelUtil.createWorkBook(dtos, keys, hader);
-                String name = MessageFormat.format("集团来访签约区域表_{0}_{1}.xlsx", "" + dto.getStartTime(), dto.getEndTime() + "");
-                response.addHeader("Content-Disposition",
-                        "attachment;filename=\"" + name + "\"");
+                String name = MessageFormat.format("集团来访签约区域表_{0}_{1}.xlsx",
+                        "" + dto.getStartTime(), dto.getEndTime() + "");
+                response.addHeader("Content-Disposition", "attachment;filename=\"" + name + "\"");
                 response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
                 response.setContentType("application/octet-stream");
                 ServletOutputStream outputStream = response.getOutputStream();
                 wb.write(outputStream);
                 outputStream.close();
             }
-        }catch (Exception e){
-            logger.error(" BusVisitSignDto export error:",e);
+        } catch (Exception e) {
+            logger.error(" BusVisitSignDto export error:", e);
         }
     }
 
 
-    private void initBaseDto(HttpServletRequest request,Long areaId,Long groupId,Long saleId,
-                            Long companyId,String province,Long startTime,Long endTime){
-        BaseBusQueryDto dto=new BaseBusQueryDto();
+    private void initBaseDto(HttpServletRequest request, Long areaId, Long groupId, Long saleId,
+            Long companyId, String province, Long startTime, Long endTime) {
+        BaseBusQueryDto dto = new BaseBusQueryDto();
         dto.setBusAreaId(areaId);
         dto.setBusinessGroupId(groupId);
         dto.setBusinessManagerId(saleId);
@@ -192,38 +204,40 @@ public class BusVisitSignController extends BaseStatisticsController {
         dto.setEndTime(endTime);
         dto.setProvince(province);
         dto.setCompanyId(companyId);
-        request.setAttribute("busDto",dto);
+        request.setAttribute("busDto", dto);
     }
 
-    public void initParams(BaseBusQueryDto dto){
+    public void initParams(BaseBusQueryDto dto) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
-        if(RoleCodeEnum.SWDQZJ.name().equals(roleCode)){
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
             dto.setBusAreaId(curLoginUser.getOrgId());
-        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode) || RoleCodeEnum.SWJL.name().equals(roleCode)){
+        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)
+                || RoleCodeEnum.SWJL.name().equals(roleCode)) {
             dto.setBusinessGroupId(curLoginUser.getOrgId());
-            if(RoleCodeEnum.SWJL.name().equals(roleCode)){
+            if (RoleCodeEnum.SWJL.name().equals(roleCode)) {
                 dto.setBusinessManagerId(curLoginUser.getId());
             }
-        }else if(RoleCodeEnum.SWZC.name().equals(roleCode)){//商务总裁
+        } else if (RoleCodeEnum.SWZC.name().equals(roleCode)) {// 商务总裁
             OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
             queryDTO.setOrgType(OrgTypeConstant.SWDQ);
             queryDTO.setParentId(curLoginUser.getOrgId());
             JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                     organizationFeignClient.queryOrgByParam(queryDTO);
-            if (queryOrgByParam != null && JSONResult.SUCCESS.equals(queryOrgByParam.getCode()) && queryOrgByParam.getData() != null) {
+            if (queryOrgByParam != null && JSONResult.SUCCESS.equals(queryOrgByParam.getCode())
+                    && queryOrgByParam.getData() != null) {
                 List<OrganizationRespDTO> data = queryOrgByParam.getData();
                 List<Long> areasList = new ArrayList<>();
-                for(OrganizationRespDTO org : data){
+                for (OrganizationRespDTO org : data) {
                     areasList.add(org.getId());
                 }
                 dto.setBusAreaIds(areasList);
             }
-        }else if(RoleCodeEnum.GLY.name().equals(roleCode)){
-            if(null!=dto.getBusAreaId()){
+        } else if (RoleCodeEnum.GLY.name().equals(roleCode)) {
+            if (null != dto.getBusAreaId()) {
                 dto.setBusAreaIds(new ArrayList<>(Arrays.asList(dto.getBusAreaId())));
             }
-        }else{
+        } else {
             dto.setBusinessGroupId(curLoginUser.getOrgId());
         }
     }

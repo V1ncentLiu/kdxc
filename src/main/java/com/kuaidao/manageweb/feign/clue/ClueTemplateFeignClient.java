@@ -7,9 +7,9 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.clueTemplate.ClueTemplateDTO;
-import com.kuaidao.aggregation.dto.clueTemplate.ClueTemplatePageParam;
-import com.kuaidao.aggregation.dto.clueTemplate.ClueTemplateReq;
+import com.kuaidao.businessconfig.dto.clueTemplate.ClueTemplateDTO;
+import com.kuaidao.businessconfig.dto.clueTemplate.ClueTemplatePageParam;
+import com.kuaidao.businessconfig.dto.clueTemplate.ClueTemplateReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -23,7 +23,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/clueTemplate",
+@FeignClient(name = "business-config-service", path = "/businessConfig/clueTemplate",
         fallback = ClueTemplateFeignClient.HystrixClientFallback.class)
 public interface ClueTemplateFeignClient {
     /**
