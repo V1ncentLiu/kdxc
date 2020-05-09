@@ -24,7 +24,7 @@ import com.kuaidao.merchant.dto.clue.MerchantClueApplyDto;
  * @date: 2019年09月06日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service-ooo1", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/merchant/clue/setting", fallback = MerchantClueApplyFeignClient.HystrixClientFallback.class)
 public interface MerchantClueApplyFeignClient {
     @PostMapping("/save")
     JSONResult<Boolean> save(@Valid @RequestBody ClueApplyReqDto reqDto);

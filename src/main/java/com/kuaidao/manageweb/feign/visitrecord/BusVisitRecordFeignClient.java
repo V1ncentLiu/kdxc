@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "aggregation-service-ooo1", path = "/aggregation/busvisitrecord", fallback = BusVisitRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/busvisitrecord", fallback = BusVisitRecordFeignClient.HystrixClientFallback.class)
 public interface BusVisitRecordFeignClient {
 
 	@RequestMapping("/insert")

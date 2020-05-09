@@ -19,7 +19,7 @@ import com.kuaidao.sys.dto.user.LoginRecordReq;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service-ooo1", path = "/sys/loginRecord",
+@FeignClient(name = "sys-service", path = "/sys/loginRecord",
         fallback = LoginRecordFeignClient.HystrixClientFallback.class)
 public interface LoginRecordFeignClient {
 
