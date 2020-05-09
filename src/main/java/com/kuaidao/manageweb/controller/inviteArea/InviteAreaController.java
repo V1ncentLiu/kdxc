@@ -1,6 +1,6 @@
 package com.kuaidao.manageweb.controller.inviteArea;
 
-import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
+import com.kuaidao.businessconfig.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoPageParam;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
