@@ -28,7 +28,6 @@ import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import com.rabbitmq.http.client.domain.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
