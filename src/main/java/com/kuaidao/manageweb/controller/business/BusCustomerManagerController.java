@@ -275,7 +275,7 @@ public class BusCustomerManagerController {
         queryDTO.setBusinessLine(businessLine);
         // 查询所有组织
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
+            organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }

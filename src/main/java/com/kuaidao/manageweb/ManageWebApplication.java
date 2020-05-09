@@ -4,9 +4,11 @@ package com.kuaidao.manageweb;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,16 +20,12 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import io.prometheus.client.spring.boot.EnablePrometheusEndpoint;
-import io.prometheus.client.spring.boot.EnableSpringBootMetricsCollector;
-
 
 @SpringBootApplication
-@EnablePrometheusEndpoint
-@EnableSpringBootMetricsCollector
 @EnableEurekaClient
 @EnableFeignClients
 @EnableCircuitBreaker
+@EnableConfigurationProperties
 @EnableAsync
 public class ManageWebApplication {
 

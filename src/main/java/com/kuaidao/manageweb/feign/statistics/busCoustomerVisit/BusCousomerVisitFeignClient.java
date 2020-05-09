@@ -2,16 +2,13 @@ package com.kuaidao.manageweb.feign.statistics.busCoustomerVisit;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.statistics.appointmentVisit.AppointmentVisitFeignClient;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitDto;
 import com.kuaidao.stastics.dto.bussCoustomerVisit.CustomerVisitQueryDto;
-import groovy.util.logging.Commons;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package com.kuaidao.manageweb.feign;
 
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
