@@ -1,6 +1,6 @@
 package com.kuaidao.manageweb.service.telelayout.impl;
 
-import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;

@@ -1,6 +1,6 @@
 package com.kuaidao.manageweb.feign.telemarketing;
 
-import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;

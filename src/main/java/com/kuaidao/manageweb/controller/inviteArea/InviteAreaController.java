@@ -1,10 +1,10 @@
 package com.kuaidao.manageweb.controller.inviteArea;
 
-import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.dto.invitearea.InviteAreaDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoPageParam;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;

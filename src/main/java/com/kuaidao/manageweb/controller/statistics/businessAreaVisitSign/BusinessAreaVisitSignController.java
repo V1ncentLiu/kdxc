@@ -3,7 +3,7 @@ package com.kuaidao.manageweb.controller.statistics.businessAreaVisitSign;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Maps;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;

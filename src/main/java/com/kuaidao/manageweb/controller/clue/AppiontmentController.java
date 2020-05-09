@@ -7,9 +7,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -21,13 +21,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;

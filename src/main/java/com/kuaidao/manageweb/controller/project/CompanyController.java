@@ -3,9 +3,9 @@
  */
 package com.kuaidao.manageweb.controller.project;
 
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
-import com.kuaidao.aggregation.dto.project.CompanyInfoReq;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoPageParam;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
