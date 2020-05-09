@@ -7,14 +7,13 @@ import com.kuaidao.merchant.dto.tracking.TrackingReqDTO;
 import com.kuaidao.merchant.dto.tracking.TrackingRespDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**

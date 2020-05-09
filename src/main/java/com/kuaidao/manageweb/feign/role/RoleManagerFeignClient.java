@@ -5,7 +5,7 @@ import java.util.List;
 import com.kuaidao.common.entity.IdListReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,7 +15,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 
-@FeignClient(name = "sys-service", path = "/sys/role/roleManager", fallback = RoleManagerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service-ooo1", path = "/sys/role/roleManager", fallback = RoleManagerFeignClient.HystrixClientFallback.class)
 public interface RoleManagerFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryRoleList")

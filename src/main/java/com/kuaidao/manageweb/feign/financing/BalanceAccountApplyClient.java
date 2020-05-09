@@ -3,21 +3,12 @@ package com.kuaidao.manageweb.feign.financing;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
-import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
-import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
-import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
-import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
-import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
-import com.kuaidao.aggregation.dto.financing.RefundUpdateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 
 /**
  *  退返款 

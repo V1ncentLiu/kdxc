@@ -195,7 +195,6 @@ public class DemoController {
 	@GetMapping("/receive")
 	public String receive(){
 		String str = (String)template.receiveAndConvert();
-
 		return "success";
 	}
 

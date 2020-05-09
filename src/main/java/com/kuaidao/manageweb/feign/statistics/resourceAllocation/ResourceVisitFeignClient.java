@@ -2,9 +2,8 @@ package com.kuaidao.manageweb.feign.statistics.resourceAllocation;
 
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.stastics.dto.base.BaseQueryDto;
-import com.kuaidao.stastics.dto.performance.PerformanceDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceVisitDto;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
