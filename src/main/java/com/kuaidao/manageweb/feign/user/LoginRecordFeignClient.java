@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.user.LoginRecordDTO;
 import com.kuaidao.sys.dto.user.LoginRecordReq;
+import feign.hystrix.FallbackFactory;
 
 /**
  * 登录记录
@@ -20,7 +22,7 @@ import com.kuaidao.sys.dto.user.LoginRecordReq;
  * @version V1.0
  */
 @FeignClient(name = "sys-service", path = "/sys/loginRecord",
-        fallback = LoginRecordFeignClient.HystrixClientFallback.class)
+        fallbackFactory = DictionaryItemFeignClient.HystrixClientFallback.class)
 public interface LoginRecordFeignClient {
 
 
@@ -43,34 +45,37 @@ public interface LoginRecordFeignClient {
     @PostMapping("/create")
     public JSONResult create(@RequestBody LoginRecordReq loginRecord);
 
-
     @Component
-    static class HystrixClientFallback implements LoginRecordFeignClient {
+    static class HystrixClientFallback implements FallbackFactory<LoginRecordFeignClient> {
 
-        private static Logger logger = LoggerFactory.getLogger(LoginRecordFeignClient.class);
-
-
-        private JSONResult fallBackError(String name) {
-            logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
-        }
-
-
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
 
         @Override
-        public JSONResult create(@RequestBody LoginRecordReq loginRecord) {
-            return fallBackError("新增登录记录");
+        public LoginRecordFeignClient create(Throwable cause) {
+            return new LoginRecordFeignClient() {
+                @SuppressWarnings("rawtypes")
+                private JSONResult fallBackError(String name) {
+                    logger.error("接口调用失败");
+                    logger.error("接口名{}", name);
+                    logger.error("失败原因{}", cause);
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                            SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+                }
+
+                @Override
+                public JSONResult create(@RequestBody LoginRecordReq loginRecord) {
+                    return fallBackError("新增登录记录");
+                }
+
+
+                @Override
+                public JSONResult<List<LoginRecordDTO>> list(
+                        @RequestBody LoginRecordReq loginRecord) {
+                    return fallBackError("查询登录记录");
+                }
+
+            };
         }
-
-
-        @Override
-        public JSONResult<List<LoginRecordDTO>> list(@RequestBody LoginRecordReq loginRecord) {
-            return fallBackError("查询登录记录");
-        }
-
-
 
     }
-
 }
