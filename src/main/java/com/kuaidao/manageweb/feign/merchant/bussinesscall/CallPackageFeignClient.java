@@ -3,13 +3,10 @@ package com.kuaidao.manageweb.feign.merchant.bussinesscall;
 import com.kuaidao.account.dto.call.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
 import feign.hystrix.FallbackFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 

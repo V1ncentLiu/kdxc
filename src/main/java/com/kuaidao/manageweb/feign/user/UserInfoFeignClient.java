@@ -1,21 +1,28 @@
 package com.kuaidao.manageweb.feign.user;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.*;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.PhoneEntity;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.*;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
+import com.kuaidao.sys.dto.user.UserInfoReq;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import feign.hystrix.FallbackFactory;
 
 /**
  * 用户
@@ -25,7 +32,7 @@ import com.kuaidao.sys.dto.user.*;
  * @version V1.0
  */
 @FeignClient(name = "sys-service", path = "/sys/userInfo",
-        fallback = UserInfoFeignClient.HystrixClientFallback.class)
+        fallbackFactory = LoginRecordFeignClient.HystrixClientFallback.class)
 public interface UserInfoFeignClient {
     /**
      * 根据id查询用户信息
@@ -96,11 +103,14 @@ public interface UserInfoFeignClient {
      */
     @PostMapping("/listUserInfoByParam")
     JSONResult<List<UserInfoDTO>> listUserInfoByParam(@RequestBody UserInfoParamListReqDTO reqDTO);
+
     /**
      * 根据条件查询用户集合
      */
     @PostMapping("/getUserInfoListByParam")
-    JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody UserOrgRoleReq userOrgRoleReq);
+    JSONResult<List<UserInfoDTO>> getUserInfoListByParam(
+            @RequestBody UserOrgRoleReq userOrgRoleReq);
+
     /**
      * 根据机构和角色Code查询账号集合
      */
@@ -111,6 +121,7 @@ public interface UserInfoFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/listById")
     public JSONResult<List<UserInfoDTO>> listById(@RequestBody IdListLongReq idList);
+
     /**
      * 查询商家用户集合
      *
@@ -127,85 +138,96 @@ public interface UserInfoFeignClient {
     JSONResult<List<UserInfoDTO>> listNoPage(@RequestBody UserInfoPageParam param);
 
     @Component
-    static class HystrixClientFallback implements UserInfoFeignClient {
+    static class HystrixClientFallback implements FallbackFactory<UserInfoFeignClient> {
 
-        private static Logger logger = LoggerFactory.getLogger(UserInfoFeignClient.class);
-
-
-        private JSONResult fallBackError(String name) {
-            logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
-        }
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
 
         @Override
-        public JSONResult<UserInfoDTO> get(@RequestBody IdEntityLong id) {
-            return fallBackError("根据id查询用户信息");
-        }
+        public UserInfoFeignClient create(Throwable cause) {
+            return new UserInfoFeignClient() {
+                @SuppressWarnings("rawtypes")
+                private JSONResult fallBackError(String name) {
+                    logger.error("接口调用失败");
+                    logger.error("接口名{}", name);
+                    logger.error("失败原因{}", cause);
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                            SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+                }
+
+                @Override
+                public JSONResult<UserInfoDTO> get(@RequestBody IdEntityLong id) {
+                    return fallBackError("根据id查询用户信息");
+                }
 
 
-        @Override
-        public JSONResult<UserInfoDTO> getbyPhone(@RequestBody PhoneEntity phone) {
-            return fallBackError("根据手机号查询用户信息");
-        }
+                @Override
+                public JSONResult<UserInfoDTO> getbyPhone(@RequestBody PhoneEntity phone) {
+                    return fallBackError("根据手机号查询用户信息");
+                }
 
 
-        @Override
-        public JSONResult<UserInfoDTO> getbyUserName(@RequestBody UserInfoReq userInfoReq) {
-            return fallBackError("根据用户名查询用户信息");
-        }
+                @Override
+                public JSONResult<UserInfoDTO> getbyUserName(@RequestBody UserInfoReq userInfoReq) {
+                    return fallBackError("根据用户名查询用户信息");
+                }
 
-        @Override
-        public JSONResult<String> update(@RequestBody UserInfoReq req) {
-            return fallBackError("修改用户信息");
-        }
+                @Override
+                public JSONResult<String> update(@RequestBody UserInfoReq req) {
+                    return fallBackError("修改用户信息");
+                }
 
-        @Override
-        public JSONResult<String> create(@RequestBody UserInfoReq req) {
-            return fallBackError("新增用户");
-        }
+                @Override
+                public JSONResult<String> create(@RequestBody UserInfoReq req) {
+                    return fallBackError("新增用户");
+                }
 
 
-        @Override
-        public JSONResult<PageBean<UserInfoDTO>> list(@RequestBody UserInfoPageParam param) {
-            return fallBackError("查询用户集合");
-        }
+                @Override
+                public JSONResult<PageBean<UserInfoDTO>> list(
+                        @RequestBody UserInfoPageParam param) {
+                    return fallBackError("查询用户集合");
+                }
 
-        @Override
-        public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO) {
-            return fallBackError("查询角色列表");
-        }
+                @Override
+                public JSONResult<List<RoleInfoDTO>> roleList(
+                        @RequestBody RoleQueryDTO roleQueryDTO) {
+                    return fallBackError("查询角色列表");
+                }
 
-        @Override
-        public JSONResult<List<UserInfoDTO>> listUserInfoByParam(UserInfoParamListReqDTO reqDTO) {
-            return fallBackError("根据状态列表或用户名称查询 用户");
-        }
+                @Override
+                public JSONResult<List<UserInfoDTO>> listUserInfoByParam(
+                        UserInfoParamListReqDTO reqDTO) {
+                    return fallBackError("根据状态列表或用户名称查询 用户");
+                }
 
-        @Override
-        public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(UserOrgRoleReq userOrgRoleReq) {
-            return fallBackError("根据条件查询用户集合");
-        }
+                @Override
+                public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(
+                        UserOrgRoleReq userOrgRoleReq) {
+                    return fallBackError("根据条件查询用户集合");
+                }
 
-        @Override
-        public JSONResult<List<UserInfoDTO>> listByOrgAndRole(
-                @RequestBody UserOrgRoleReq userOrgRoleReq) {
-            return fallBackError("根据机构和角色Code查询账号集合");
-        }
+                @Override
+                public JSONResult<List<UserInfoDTO>> listByOrgAndRole(
+                        @RequestBody UserOrgRoleReq userOrgRoleReq) {
+                    return fallBackError("根据机构和角色Code查询账号集合");
+                }
 
-        @Override
-        public JSONResult<List<UserInfoDTO>> listById(IdListLongReq idList) {
-            // TODO Auto-generated method stub
-            return fallBackError("根据idlist查询用户集合");
-        }
+                @Override
+                public JSONResult<List<UserInfoDTO>> listById(IdListLongReq idList) {
+                    // TODO Auto-generated method stub
+                    return fallBackError("根据idlist查询用户集合");
+                }
 
-        @Override
-        public JSONResult<PageBean<UserInfoDTO>> merchantlist(UserInfoPageParam param) {
-            return fallBackError("查询商家账号");
-        }
+                @Override
+                public JSONResult<PageBean<UserInfoDTO>> merchantlist(UserInfoPageParam param) {
+                    return fallBackError("查询商家账号");
+                }
 
-        @Override
-        public JSONResult<List<UserInfoDTO>> listNoPage(UserInfoPageParam param) {
-            return fallBackError("按条件查询用户（不分页）");
+                @Override
+                public JSONResult<List<UserInfoDTO>> listNoPage(UserInfoPageParam param) {
+                    return fallBackError("按条件查询用户（不分页）");
+                }
+            };
         }
 
     }
