@@ -1,10 +1,6 @@
 package com.kuaidao.manageweb.feign.telemarketing;
 
-import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -13,10 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 
-import java.util.List;
-
-@FeignClient(name = "aggregation-service", path = "/aggregation/telemarketinglayout",
+@FeignClient(name = "business-config-service", path = "/aggregation/telemarketinglayout",
         fallback = TelemarketingLayoutFeignClient.HystrixClientFallback.class)
 
 public interface TelemarketingLayoutFeignClient {
@@ -42,9 +41,11 @@ public interface TelemarketingLayoutFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/getTelemarketingLayoutByTeamId")
     public JSONResult<TelemarketingLayoutDTO> getTelemarketingLayoutByTeamId(
-        @RequestBody TelemarketingLayoutDTO queryDTO);
+            @RequestBody TelemarketingLayoutDTO queryDTO);
+
     @PostMapping("/getdxListByCompanyGroupId")
-    public JSONResult<List<OrganizationDTO>> getdxListByCompanyGroupId(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO);
+    public JSONResult<List<OrganizationDTO>> getdxListByCompanyGroupId(
+            @RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO);
 
     @Component
     static class HystrixClientFallback implements TelemarketingLayoutFeignClient {
@@ -98,7 +99,8 @@ public interface TelemarketingLayoutFeignClient {
         }
 
         @Override
-        public JSONResult<List<OrganizationDTO>> getdxListByCompanyGroupId(TelemarketingLayoutDTO telemarketingLayoutDTO) {
+        public JSONResult<List<OrganizationDTO>> getdxListByCompanyGroupId(
+                TelemarketingLayoutDTO telemarketingLayoutDTO) {
             return fallBackError("根据集团Id查询集团下电销组失败");
         }
     }
