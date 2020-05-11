@@ -15,7 +15,6 @@ import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.PhoneEntity;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -33,7 +32,7 @@ import feign.hystrix.FallbackFactory;
  * @version V1.0
  */
 @FeignClient(name = "sys-service", path = "/sys/userInfo",
-        fallbackFactory = DictionaryItemFeignClient.HystrixClientFallback.class)
+        fallbackFactory = LoginRecordFeignClient.HystrixClientFallback.class)
 public interface UserInfoFeignClient {
     /**
      * 根据id查询用户信息

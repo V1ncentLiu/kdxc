@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.user.LoginRecordDTO;
 import com.kuaidao.sys.dto.user.LoginRecordReq;
 import feign.hystrix.FallbackFactory;
@@ -22,7 +21,7 @@ import feign.hystrix.FallbackFactory;
  * @version V1.0
  */
 @FeignClient(name = "sys-service", path = "/sys/loginRecord",
-        fallbackFactory = DictionaryItemFeignClient.HystrixClientFallback.class)
+        fallbackFactory = LoginRecordFeignClient.HystrixClientFallback.class)
 public interface LoginRecordFeignClient {
 
 
