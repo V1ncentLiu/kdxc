@@ -15,6 +15,7 @@ import com.kuaidao.schedule.dto.JobListReq;
 import com.kuaidao.schedule.dto.JobStatusSetReq;
 import com.kuaidao.schedule.dto.JobUpdateReq;
 import com.kuaidao.schedule.entity.QrtzJob;
+import feign.hystrix.FallbackFactory;
 
 /**
  * 定时任务
@@ -24,7 +25,7 @@ import com.kuaidao.schedule.entity.QrtzJob;
  * @version V1.0
  */
 @FeignClient(name = "schedule-service", path = "/schedule/v1.0/job",
-        fallback = ScheduleFeignClient.HystrixClientFallback.class)
+        fallbackFactory = ScheduleFeignClient.HystrixClientFallback.class)
 public interface ScheduleFeignClient {
 
 
@@ -74,48 +75,53 @@ public interface ScheduleFeignClient {
     public JSONResult<QrtzJob> getJob(@PathVariable("jobId") String jobId);
 
 
-
     @Component
-    static class HystrixClientFallback implements ScheduleFeignClient {
+    static class HystrixClientFallback implements FallbackFactory<ScheduleFeignClient> {
 
-        private static Logger logger = LoggerFactory.getLogger(ScheduleFeignClient.class);
-
-
-        private JSONResult fallBackError(String name) {
-            logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
-        }
-
-
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
 
         @Override
-        public JSONResult<PageBean<QrtzJob>> listJob(@RequestBody JobListReq jobListReq) {
-            return fallBackError("查询定时任务列表");
+        public ScheduleFeignClient create(Throwable cause) {
+            return new ScheduleFeignClient() {
+                @SuppressWarnings("rawtypes")
+                private JSONResult fallBackError(String name) {
+                    logger.error("接口调用失败");
+                    logger.error("接口名{}", name);
+                    logger.error("失败原因{}", cause);
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                            SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+                }
+
+
+                @Override
+                public JSONResult<PageBean<QrtzJob>> listJob(@RequestBody JobListReq jobListReq) {
+                    return fallBackError("查询定时任务列表");
+                }
+
+                @Override
+                public JSONResult update(@RequestBody JobUpdateReq jobUpdateReq) {
+                    return fallBackError("修改定时任务");
+                }
+
+                @Override
+                public JSONResult setStatus(JobStatusSetReq jobStatusSetReq) {
+                    return fallBackError("修改定时任务状态");
+                }
+
+                @Override
+                public JSONResult<String> create(@RequestBody JobCreateReq jobCreateReq) {
+                    return fallBackError("创建定时任务");
+                }
+
+                @Override
+                public JSONResult<QrtzJob> getJob(String jobId) {
+                    return fallBackError("查看定时任务详情");
+                }
+
+
+
+            };
         }
-
-        @Override
-        public JSONResult update(@RequestBody JobUpdateReq jobUpdateReq) {
-            return fallBackError("修改定时任务");
-        }
-
-        @Override
-        public JSONResult setStatus(JobStatusSetReq jobStatusSetReq) {
-            return fallBackError("修改定时任务状态");
-        }
-
-        @Override
-        public JSONResult<String> create(@RequestBody JobCreateReq jobCreateReq) {
-            return fallBackError("创建定时任务");
-        }
-
-        @Override
-        public JSONResult<QrtzJob> getJob(String jobId) {
-            return fallBackError("查看定时任务详情");
-        }
-
-
 
     }
-
 }
