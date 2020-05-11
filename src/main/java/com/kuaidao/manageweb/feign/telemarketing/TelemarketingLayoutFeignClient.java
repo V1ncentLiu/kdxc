@@ -15,7 +15,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 
-@FeignClient(name = "business-config-service", path = "/aggregation/telemarketinglayout",
+@FeignClient(name = "business-config-service", path = "/businessConfig/telemarketinglayout",
         fallback = TelemarketingLayoutFeignClient.HystrixClientFallback.class)
 
 public interface TelemarketingLayoutFeignClient {
