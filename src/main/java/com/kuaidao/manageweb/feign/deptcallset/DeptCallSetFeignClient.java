@@ -1,34 +1,35 @@
 package com.kuaidao.manageweb.feign.deptcallset;
 
-import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
-import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetQueryDTO;
-import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetRespDTO;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.List;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 
 
 /**
  *
- * 功能描述: 
- *      部门呼叫设置
- * @author  yangbiao
+ * 功能描述: 部门呼叫设置
+ * 
+ * @author yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "callcenter-service",path="/callcenter/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/deptcallset",
+        fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
 public interface DeptCallSetFeignClient {
 
     /**
      * 插入
+     * 
      * @param dto
      * @return
      */
@@ -37,14 +38,17 @@ public interface DeptCallSetFeignClient {
 
     /**
      * 分页查询
+     * 
      * @param dto
      * @return
      */
     @PostMapping("/queryDeptCallSetList")
-    public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(@RequestBody DeptCallSetQueryDTO dto);
+    public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(
+            @RequestBody DeptCallSetQueryDTO dto);
 
     /**
      * 查询明细
+     * 
      * @param idEntity
      * @return
      */
@@ -53,22 +57,25 @@ public interface DeptCallSetFeignClient {
 
     /**
      * 更新全部
+     * 
      * @param dto
      * @return
      */
     @PostMapping("/upateDeptCallSet")
-    public JSONResult updateDeptCallSets(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
+    public JSONResult updateDeptCallSets(@RequestBody DeptCallSetAddAndUpdateDTO dto);
 
     /**
      * 更新不为空的字段
+     * 
      * @param dto
      * @return
      */
     @PostMapping("/upateDeptCallSetForNotNull")
-    public JSONResult updateDeptCallSetsForNotNull(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
+    public JSONResult updateDeptCallSetsForNotNull(@RequestBody DeptCallSetAddAndUpdateDTO dto);
 
     /**
      * 导入
+     * 
      * @param list
      * @return
      */
@@ -77,6 +84,7 @@ public interface DeptCallSetFeignClient {
 
     /**
      * 通过组织机构ID获取部门呼叫设置
+     * 
      * @param orgid
      * @return
      */
@@ -101,7 +109,8 @@ public interface DeptCallSetFeignClient {
         }
 
         @Override
-        public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(DeptCallSetQueryDTO dto) {
+        public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(
+                DeptCallSetQueryDTO dto) {
             return fallBackError("部门呼叫设置列表查询");
         }
 
