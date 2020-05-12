@@ -2,8 +2,6 @@ package com.kuaidao.manageweb.controller.homepage;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.callcenter.dto.deptcallset.DeptCallSetRespDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -14,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.IdEntity;
