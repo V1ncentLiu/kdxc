@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>客户管理</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        button a{color:#fff!important;}
+        .el-checkbox { width: 100%; }
+    </style>
+</head>
+<body>
+<div id="myCustom" class="myCustom mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>判断管理</el-breadcrumb-item>
+        <el-breadcrumb-item>重复手机号资源</el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+
+                <el-form-item label="客户手机号:">
+                    <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
+                </el-form-item>
+                <el-form-item label="客户姓名:">
+                    <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="创建时间:">
+                    <el-date-picker
+                        v-model="form.createTimeStart"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.createTimeEnd"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="电销组:">
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDXZDisabled">
+                        <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-row v-show="isShow">
+
+
+
+
+
+                    <el-form-item label="电销顾问:">
+                        <el-select
+                            v-model="form.teleSaleId"
+                            placeholder="电销顾问"
+                            style="width: 100%;"
+                            filterable
+                            clearable  >
+                            <el-option
+                                v-for="item in busSaleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否签约:" prop="isSign">
+                        <el-select v-model="form.isSign" clearable placeholder="是否签约">
+                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
+                                       :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="是否补齐尾款:">
+                        <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable>
+                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+
+                    <el-form-item label="分配时间:">
+                        <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.assignTimeStart"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.assignTimeEnd"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+
+
+                    <el-form-item label="资源ID:">
+                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="QQ:">
+                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="微信:">
+                        <el-input v-model="form.wechat" placeholder="微信"></el-input>
+                    </el-form-item>
+
+
+
+                    <el-form-item label="资源来源:">
+	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源">
+	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name"
+	                                   :value="item.value"></el-option>
+	                    </el-select>
+	                </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo1">
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'cusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.cusName}}
+                        <span v-if="scope.row.inputType ==1">
+                            <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
+                        <span v-else-if="scope.row.phtraCustomerStatus ==4">
+                            <input type='hidden'><img th:src="@{/images/fromTraffic.png}"  style="margin:0 10px;width:44px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
+                    </template>
+                </el-table-column>
+
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone'">
+                    <template slot-scope="scope" >
+                        <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
+                        <input type='hidden'>
+                        <img th:src="@{/images/tel.png}" :readonly="phoneDisabled" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'customerStatusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.customerStatusName}}
+                        <div v-if="scope.row.signList.length >=1"  v-for="it in scope.row.signList">
+                            <el-button size="mini"  v-if="it.refundStatus==4 || it.refundStatus==6" type="text"  style="color: blue" @click="toReadOnlySignPage(it,scope.row)">{{it.signNo}}<span  style="color: red" >(已退款)</span></el-button>
+                            <el-button size="mini"  v-else-if="it.refundStatus!=4 && it.refundStatus !=6" type="text"  style="color: blue" @click="toReadOnlySignPage(it,scope.row)">{{it.signNo}}</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isTrack === 1">
+                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
+                                点击查看<span style="color:red;">({{scope.row.trackNum}})</span>
+                            </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'sex'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.sex === 1">男</div>
+                        <div v-else-if="scope.row.sex ===2">女</div>
+                    </template>
+                </el-table-column>
+                <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'repeatPhones'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isRepeatPhone===1">
+                            <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'assignTime'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2 || scope.row.teleReceiveSource == 5">
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isCall == 0">否</div>
+                        <div v-else-if="scope.row.isCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'status'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status == 0">否</div>
+                        <div v-else-if="scope.row.status ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'updateTimeStr'||item.fieldCode == 'storeArea'"></el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
+                </el-table-column>
+
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <!-- 跟进记录 -->
+    <el-dialog title="跟进记录" :visible.sync="recordDialog">
+        <el-table
+            ref="singleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="recordTable"
+        >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="callTime" label="跟进时间"></el-table-column>
+            <el-table-column align="center" prop="status" label="客户状态"></el-table-column>
+            <el-table-column align="center" prop="isConnect" label="是否接通"></el-table-column>
+            <!--  <el-table-column align="center" prop="isNeedResource" label="资源有效性"></el-table-column> -->
+            <el-table-column align="center" prop="isInvite" label="是否邀约"></el-table-column>
+            <el-table-column align="center" prop="customerFocus" label="客户关注点"></el-table-column>
+            <!--<el-table-column align="center" prop="isReturnVisit" label="是否继续回访"></el-table-column>  -->
+            <el-table-column align="center" prop="nextTimeVisit" label="下次回访时间"></el-table-column>
+            <el-table-column align="center" prop="createPerson" label="创建人"></el-table-column>
+        </el-table>
+    </el-dialog>
+    <!-- 跟进记录 -->
+    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1000px">
+        <div v-show="showPhoneTable">
+            <p style="padding:10px 0;">手机号<span style="color: red">(1)</span>{{phone}}重复手机号资源</p>
+            <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>                
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable2">
+            <p style="padding:10px 0;">手机号<span style="color: red">(2)</span>{{phone2}}重复手机号资源</p>
+            <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>                
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable3">
+            <p style="padding:10px 0;">手机号<span style="color: red">(3)</span>{{phone3}}重复手机号资源</p>
+            <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>                
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable4">
+            <p style="padding:10px 0;">手机号<span style="color: red">(4)</span>{{phone4}}重复手机号资源</p>
+            <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>                
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable5">
+            <p style="padding:10px 0;">手机号<span style="color: red">(5)</span>{{phone5}}重复手机号资源</p>
+            <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>                
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+    </el-dialog>
+
+    <dialog-tracking :param="trackingParam"></dialog-tracking>
+    <!-- 自定义列 -->
+    <el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
+        <el-form :model="form1">
+            <el-form-item label="" prop="type">
+                <el-checkbox-group v-model="form1.type">
+                    	<span>
+                    	</span>
+                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        {{item.displayName}}
+                    </el-checkbox>
+
+                </el-checkbox-group>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="confirmColumn">确 定</el-button>
+            <el-button @click="dialogChooseList = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    </template>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+  var orgList=[[${orgList}]];//电销组
+  var saleList=[[${saleList}]];//电销顾问
+  var queryOrg=[[${queryOrg}]];//电销组
+  var fieldList=[[${fieldList}]];//自定义字段
+  var userFieldList=[[${userFieldList}]];//用户自定义字段
+  var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+  //角色编码
+  var roleCode = [[${roleCode}]];
+  // var userFieldList=[];
+  var  customerManVM=new Vue({
+    el: '#myCustom',
+    data: function() {
+      return {
+        paginationShow: false,//分页是否显示
+        isShow:false,
+        phoneDisabled:false,
+        btnDisabled: false,
+        recordDialog:false,
+        dialogChooseList:false,
+        repeatPhonesDialog:false,
+        allocateFormVisible: false, //分配资源
+        isDXZDisabled:false,
+        dailogTitleType:'',
+        formAllocat:{
+          telSales:'',
+          cusLevel:''
+        },
+        transferFormVisible: false, //转移资源
+        formTransfer:{
+          salesDirector:''
+        },
+        batchFormVisible: false, //批量分配
+        formBatch: {
+          batchRule: ''
+        },
+        vicemanagerFormVisible: false, //副总分发
+        formVicemanage: {
+          salesDirector: '',
+          salesstaff: ''
+        },
+        pager:{
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
+        },
+        trackingParam:{
+          trackingDialogVisible:false,
+          tableData:[]
+        },
+        adviserValue: '', //电销顾问
+        isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+        isSignOptions: [{
+          value: 0,
+          name: "未签约"
+        }, {
+          value: 1,
+          name: "已签约"
+        }],
+        isTransfer:[
+          {
+            value: '0',
+            label: '新资源' },
+          {
+            value: '1',
+            label: '转来资源'
+          }
+        ],
+        clueStatus:[
+          {
+            value: '1',
+            label: '有效'
+          },
+          {
+            value: '0',
+            label: '无效'
+          }
+        ],
+        callTel:[
+          {
+            value: '1',
+            label: '是'
+          },
+          {
+            value: '0',
+            label: '否'
+          }
+        ],
+        hasInvite:[
+          {
+            value: '0',
+            label: '未邀约'
+          },
+          {
+            value: '1',
+            label: '已邀约'
+          }
+        ],
+        clueRepeatStatus:[
+          {
+            value: '0',
+            label: '否'
+          },
+          {
+            value: '1',
+            label: '是'
+          }
+        ],
+        hastracking:[
+          {
+            value: '0',
+            label: '未跟访'
+          },
+          {
+            value: '1',
+            label: '跟访'
+          }
+        ],
+        teleReceiveSourceArr:[
+       	 {value:"1",name:"分配"},
+            {value:"3",name:"领取"},
+       	 {value:"4",name:"自建"},
+            {value:"5",name:"分发"}
+       ],
+        form: {
+          teleReceiveSource:"",
+          isTransfer:'',
+          cluesta:'',
+          customerPhone:'',
+          customerName:'',
+          cusStatus:'',
+          cusLeve:'',
+          updateTimeStart:'',
+          updateTimeEnd:'',
+          createTimeStart:'',
+          createTimeEnd:'',
+          assignTimeStart:'',
+          assignTimeEnd:'',
+          telEndTimeStart:'',
+          telEndTimeEnd:'',
+          dayTel:'',
+          hasInvite:'',
+          repeatStatus:'',
+          province:'',
+          category:'',
+          category:'',
+          searchWord:'',
+          address:'',
+          trackingDay:'',
+          teleorg:ownOrgId,
+          teleSaleId:'',
+          clueId:'',
+          qq:"",
+          wechat:"",
+          email:"",
+          status:"",
+          isCall:"",
+          isTailMoney:"",
+          isSign:"",
+        },
+        form1: {
+          type: [],
+        },
+        comArr:[
+          {value:"",name:"全部"},
+          {value:"1",name:"是"},
+          {value:"0",name:"否"}
+        ],
+        cusLevelArr:[],
+        categoryArr:[],
+        provinceArr:[],
+        repeatCurClueArr:[],
+        cusStatusArr:[],
+        telePerArr:[],
+        orgTeleArr:queryOrg,
+        multseleSelection:[],
+        formLabelWidth: '150px',
+        dataTable: [],
+        saleInfoArr:[],
+        busSaleArr:[],
+        saleList:saleList,
+        value: '',//下拉选项默认值
+        recordTable:[],
+        repeatPhonesTable:[],
+        repeatPhonesTable2:[],
+        repeatPhonesTable3:[],
+        repeatPhonesTable4:[],
+        repeatPhonesTable5:[],
+        showPhoneTable:false,
+        showPhoneTable2:false,
+        showPhoneTable3:false,
+        showPhoneTable4:false,
+        showPhoneTable5:false,
+        phone:'',
+        phone2:'',
+        phone3:'',
+        phone4:'',
+        phone5:'',
+        dialogFormVisible: false,
+        formList: {
+          type: [],
+        },
+        allTableColums:[],
+        tableColums:[],
+
+        storeForm: {
+          isTransfer:'',
+          cluesta:'',
+          customerPhone:'',
+          customerName:'',
+          cusStatus:'',
+          cusLeve:'',
+          updateTimeStart:'',
+          updateTimeEnd:'',
+          createTimeStart:'',
+          createTimeEnd:'',
+          assignTimeStart:'',
+          assignTimeEnd:'',
+          telEndTimeStart:'',
+          telEndTimeEnd:'',
+          dayTel:'',
+          hasInvite:'',
+          repeatStatus:'',
+          province:'',
+          category:'',
+          category:'',
+          searchWord:'',
+          address:'',
+          trackingDay:'',
+          teleorg:ownOrgId,
+          teleSaleId:'',
+          clueId:'',
+          qq:"",
+          wechat:"",
+          email:"",
+          status:"",
+          isCall:"",
+        },
+        storeId: '',
+        scrollTop: 0,
+      }
+    },
+    methods: {
+    	async gettelNumberIcon(tel,clueId) {
+    	  var isReturn =false;
+      	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+          .then(function (response) {
+          	if(response.data !=""){
+          		customerManVM.$message({
+                      message: response.data,
+                      type: 'warning'
+                  });
+          		isReturn = true; ;
+          	}
+             ;
+          });
+      	if(isReturn){
+      		return;
+      	}
+          this.phoneDisabled = true;
+          var sessionStorage =window.sessionStorage;
+          if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000){
+              sessionStorage.setItem("phoneKey"+clueId,new Date().getTime());
+            //外呼手机
+              var param = {};
+              param.clueId = clueId;
+              // 存储选中信息--start
+              this.setSessionStore("telemarketingStoreForm", this.storeForm);
+              var otherVal = {
+                  "currentPage": this.pager.currentPage,
+                  "clueId": clueId
+              }
+
+              this.setSessionStore("telemarketingOtherVal", otherVal);
+              // 存储选中信息--end
+              window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                  axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                  });
+              });
+              //跳转页面
+              this.showClueDetailInfo(clueId);
+          }
+      },
+      //日期数据格式化方法
+      dateFormat(row, column, cellValue, index) {
+        if (cellValue == undefined) {
+          return "";
+        }
+        return moment(cellValue).format("YYYY-MM");
+      },
+      //初始化页面
+      initTableData(){
+        var param = {};
+        var pageSize = this.pager.pageSize;
+        var pageNum = this.pager.currentPage;
+        // 存储
+        localStorage.setItem('customManagementPageSize', pageSize);
+        param.pageNum=pageNum;
+        param.pageSize=pageSize;
+        param.phone=this.form.customerPhone ;
+        param.cusName=this.form.customerName;
+        param.createTimeStart=this.form.createTimeStart;
+        param.createTimeEnd=this.form.createTimeEnd;
+        param.teleorg= this.form.teleorg;
+        param.teleSaleId= this.form.teleSaleId;
+        param.isSign = this.form.isSign;
+        param.isTailMoney = this.form.isTailMoney;
+        param.assignTimeStart=this.form.assignTimeStart;
+        param.assignTimeEnd=this.form.assignTimeEnd;
+        param.clueId = this.form.clueId;
+        param.qq = this.form.qq;
+        param.wechat = this.form.wechat;
+        param.teleReceiveSource = this.form.teleReceiveSource;
+
+        if(this.form.createTimeStart !=null && this.form.createTimeStart != '' && this.form.createTimeEnd !=null && this.form.createTimeEnd != '' && this.form.createTimeStart>this.form.createTimeEnd){
+          this.$message({
+            message: '创建开始时间不能大于结束时间',
+            type: 'warning'
+          });
+          return;
+        }
+        if(this.form.assignTimeStart !=null && this.form.assignTimeStart != '' && this.form.assignTimeEnd !=null && this.form.assignTimeEnd != '' && this.form.assignTimeStart>this.form.assignTimeEnd){
+          this.$message({
+            message: '分配开始时间不能大于结束时间',
+            type: 'warning'
+          });
+          return;
+        }
+
+        axios.post('/tele/repeatPhone/repeatPhoneList',param).then(function (response) {
+          var resobj= response.data;
+          var pageData=resobj.data;
+          var data=pageData.data;
+          for(var i=0;i<data.length;i++){
+            data[i].urgentDate=customerManVM.dateFormat(null,null,data[i].urgentDate,null);
+          }
+          customerManVM.pager.total=pageData.total;
+          customerManVM.pager.currentPage = pageData.currentPage;
+          customerManVM.pager.pageSize = pageData.pageSize;
+          customerManVM.dataTable =pageData.data;
+
+          // 取出存储的id
+          if(!customerManVM.paginationShow){
+            if(customerManVM.storeId){
+              customerManVM.$nextTick(function(){
+                var storage = [];
+                customerManVM.dataTable.forEach(function(item, index){
+                  if(item.clueId === customerManVM.storeId ){
+                    storage.push(customerManVM.dataTable[index]);
+                  }
+                })
+                customerManVM.toggleSelection(storage);
+                customerManVM.$el.querySelector('.el-table__body-wrapper').scrollTop = customerManVM.scrollTop;
+              })
+            }
+          }else{
+            customerManVM.removeSessionStore ("telemarketingStoreForm");
+            customerManVM.removeSessionStore ("telemarketingOtherVal");
+          }
+          customerManVM.paginationShow = true;
+          customerManVM.storeForm = customerManVM.form;
+        })
+
+      },
+      toggleSelection(rows) { // table select 默认选中fn
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row,true);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      toReadOnlySignPage(row,tele){  // 进入签约单明细
+        var clueId=row.clueId;
+        // 存储选中信息--start
+        this.setSessionStore("telemarketingStoreForm", this.storeForm);
+        var otherVal = {
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        this.setSessionStore("telemarketingOtherVal", otherVal);
+        // 存储选中信息--end
+        window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId+"&type=2";
+      },
+      currentTelSale(seleVal){
+        if(null==seleVal||seleVal==""){
+          return ;
+        }
+        param={};
+        param.orgId=seleVal;
+        param.roleCode="DXCYGW";
+        param.statusList =[1,3];
+        axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
+          customerManVM.busSaleArr=response.data.data;
+        });
+      },
+      repeatPhonesClick(row) {
+        console.log(row);
+        this.repeatPhonesDialog=true;
+        this.dailogTitleType=row.clueId;
+        this.repeatPhonesTable=[];
+        var param ={};
+        param.id = row.clueId;
+        param.clueId = row.clueId;
+        param.cusPhone = row.phone;
+        debugger
+        axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
+          // var result =  response.data;
+          // var table=result.data;
+          // customerManVM.repeatPhonesTable=table;
+          var map = response.data.data;
+          if(map.phone){
+            customerManVM.phone = map.phones[0]
+            customerManVM.repeatPhonesTable=map.phone;
+            customerManVM.showPhoneTable = true;
+          }else{
+            customerManVM.phone = '';
+            customerManVM.repeatPhonesTable=[];
+            customerManVM.showPhoneTable = false;
+          }
+          if(map.phone2){
+            customerManVM.phone2 = map.phones[1]
+            customerManVM.repeatPhonesTable2=map.phone2;
+            customerManVM.showPhoneTable2 = true;
+          }else{
+            customerManVM.phone2 ='';
+            customerManVM.repeatPhonesTable2=[];
+            customerManVM.showPhoneTable2 = false;
+          }
+          if(map.phone3){
+            customerManVM.phone3 = map.phones[2]
+            customerManVM.repeatPhonesTable3=map.phone3;
+            customerManVM.showPhoneTable3 = true;
+          }else{
+            customerManVM.phone3 = '';
+            customerManVM.repeatPhonesTable3=[];
+            customerManVM.showPhoneTable3 = false;
+          }
+          if(map.phone4){
+            customerManVM.phone4 = map.phones[3]
+            customerManVM.repeatPhonesTable4=map.phone4;
+            customerManVM.showPhoneTable4 = true;
+          }else{
+            customerManVM.phone4 = ''
+            customerManVM.repeatPhonesTable4=[];
+            customerManVM.showPhoneTable4 = false;
+          }
+          if(map.phone5){
+            customerManVM.phone5 = map.phones[4]
+            customerManVM.repeatPhonesTable5=map.phone5;
+            customerManVM.showPhoneTable5 = true;
+          }else{
+            customerManVM.phone5 = map.phones[4]
+            customerManVM.repeatPhonesTable5=[];
+            customerManVM.showPhoneTable5 = false;
+          }
+          customerManVM.repeatPhonesDialog=true;
+        })  .catch(function (error) {
+          console.log(error);
+        });
+      },
+      openvicemanagerForm(){
+        var rows = this.multseleSelection;
+        if(rows.length <1){
+          this.$message({
+            message: '请选副总分发数据',
+            type: 'warning'
+          });
+          return;
+        }
+        this.vicemanagerFormVisible=true;
+        if(this.$refs['formVicemanage']) {
+          this.$refs['formVicemanage'].resetFields();
+        }
+      },
+      currentSalesDirector(selVal){
+        param={};
+        customerManVM.formVicemanage.salesstaff ='';
+        var directorArr = selVal.split(",");
+        param.orgId=directorArr[0];
+        axios.post('/clue/pendingAllocation/getSaleList',param).then(function (response) {
+          customerManVM.saleInfoArr=response.data.data;
+        });
+      },
+      openassignrDig(){
+        var rows = this.multseleSelection;
+        if(rows.length <1){
+          this.$message({
+            message: '请选分配资源',
+            type: 'warning'
+          });
+          return;
+        }
+        this.allocateFormVisible = true;
+        if(this.$refs['formAllocat']) {
+          this.$refs['formAllocat'].resetFields();
+        }
+      },
+      opentransferForm(){
+        var rows = this.multseleSelection;
+        if(rows.length <1){
+          this.$message({
+            message: '请选择转移资源',
+            type: 'warning'
+          });
+          return;
+        }
+        this.transferFormVisible = true;
+        if(this.$refs['formTransfer']) {
+          this.$refs['formTransfer'].resetFields();
+        }
+      },
+      handleSelectionChange(val) {
+        this.multseleSelection = val;
+      },
+
+      toogleClick(){
+        if(this.isShow){
+          this.isShow=false
+        }else{
+          this.isShow=true
+        }
+      },
+      submitForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            alert('submit!');
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      recordClick(row) {
+        console.log(row);
+        this.recordDialog=true;
+      },
+      resetForm(formName) {
+        // alert(1);
+        this.$refs[formName].resetFields();
+        // this.allocateFormVisible = false;
+        // this.dialogFormTransferVisible = false;
+      },
+      submitAllocatForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            var telSale=this.formAllocat.telSales;
+            var rows = this.multseleSelection;
+            var cusLevel = this.formAllocat.cusLevel;
+            var idArr=[];
+            for(var i=0;i<rows.length;i++){
+              idArr.push(rows[i].clueId);
+            }
+            var  param={};
+            param.idList=idArr;
+            param.teleSaleId=telSale;
+            param.cusLevel = cusLevel;
+            // this.allocateFormVisible = false;
+
+            this.btnDisabled = true;
+
+            // 判断选择几条
+            if(rows.length==1){
+              console.log(rows)
+              var name=rows[0].teleSaleName;
+              var time=rows[0].teleReceiveTime;
+              if(time == "" || time == null || time == undefined){
+                time = rows[0].createTime;
+              }
+              /* if(name){
+              } */
+                this.$confirm('此资源已在'+time+'分配给顾问'+name+'。确认再次分配吗？', '提示', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                  type: 'warning'
+                }).then(() => {
+                  axios.post('/clue/pendingAllocation/allocationClue', param)
+                  .then(function (response) {
+                    if(response.data.code==-1){
+                      customerManVM.$message.error(response.data.msg);
+                      customerManVM.btnDisabled = false;
+                    }else {
+                      customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                          customerManVM.allocateFormVisible = false; //关闭弹窗
+                          customerManVM.btnDisabled = false;
+                          customerManVM.initTableData();
+                        }});
+                    }
+                  }).catch(function (error) {
+                    console.log(error);
+                    customerManVM.allocateFormVisible = false; //关闭弹窗
+                    customerManVM.btnDisabled = false;
+                  });
+                }).catch(() => {
+                  this.$message({
+                    type: 'info',
+                    message: '已取消分配'
+                  });
+                  customerManVM.btnDisabled = false;
+                });
+
+            }else{
+              axios.post('/clue/pendingAllocation/allocationClue', param)
+              .then(function (response) {
+                if(response.data.code==-1){
+                  customerManVM.$message.error(response.data.msg);
+                  customerManVM.btnDisabled = false;
+                }else {
+                  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                      customerManVM.allocateFormVisible = false;
+                      customerManVM.btnDisabled = false;
+                      customerManVM.initTableData();
+                    }});
+                }
+              }).catch(function (error) {
+                console.log(error);
+                customerManVM.allocateFormVisible = false;
+                customerManVM.btnDisabled = false;
+              });
+            }
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      openTrackingDialog(cid){
+        var param = {};
+        param.clueId = cid;
+        axios.post('/aggregation/tracking/queryList', param)
+        .then(function (response) {
+          console.log(response.data)
+          if (response.data.code == 0) {
+            customerManVM.trackingParam.tableData = response.data.data
+            customerManVM.trackingParam.trackingDialogVisible = true;
+          } else {
+            customerManVM.$message.error(response.data.msg);
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+      },
+      submitTransferForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            var rows = this.multseleSelection;
+            var salesDirector=this.formTransfer.salesDirector;
+            var idArr=[];
+            for(var i=0;i<rows.length;i++){
+              idArr.push(rows[i].clueId);
+            }
+            var  param={};
+            param.idList=idArr;
+            var directorArr = salesDirector.split(",");
+            param.teleGorupId=directorArr[0];
+            param.teleDirectorId=directorArr[1];
+            this.transferFormVisible = false;
+
+            this.btnDisabled = true;
+
+            axios.post('/tele/customerManager/transferClue', param)
+            .then(function (response) {
+              customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                  customerManVM.btnDisabled = false;
+                  customerManVM.initTableData();
+                }});
+            }).catch(function (error) {
+              console.log(error);
+              customerManVM.btnDisabled = false;
+            });
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      submitBatchForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            alert('submit!');
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      //展现详情
+      showClueDetailInfo (clueId) {
+        // 存储选中信息--start
+        this.setSessionStore("telemarketingStoreForm", this.storeForm);
+        var otherVal = {
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        this.setSessionStore("telemarketingOtherVal", otherVal);
+        // 存储选中信息--end
+        window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+      },
+        //展现详情(总监编辑，其他角色查看)
+      showClueDetailInfo1 (row, column) {
+        var clueId=row.clueId;
+          if (roleCode == "DXZJ") {
+              this.showClueDetailInfo(clueId);
+          } else {
+              // 存储选中信息--start
+              this.setSessionStore("telemarketingStoreForm", this.storeForm);
+              var otherVal = {
+                  "currentPage": this.pager.currentPage,
+                  "clueId": clueId,
+                  "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+              }
+              this.setSessionStore("telemarketingOtherVal", otherVal);
+              // 存储选中信息--end
+              window.location.href = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId=' + clueId;
+          }
+      },
+      submitVicemanagerForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            var rows = this.multseleSelection;
+            var saleId=this.formVicemanage.salesstaff;
+            var salesDirector=this.formVicemanage.salesDirector
+            var idArr=[];
+            for(var i=0;i<rows.length;i++){
+              idArr.push(rows[i].clueId);
+            }
+            var  param={};
+            param.idList=idArr;
+            var directorArr = salesDirector.split(",");
+            param.teleGorupId=directorArr[0];
+            param.teleDirectorId=directorArr[1];
+            param.teleSaleId=saleId;
+            this.vicemanagerFormVisible = false;
+
+            this.btnDisabled = true;
+
+            axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
+            .then(function (response) {
+              customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                  customerManVM.btnDisabled = false;
+                  customerManVM.initTableData();
+                }});
+            }).catch(function (error) {
+              console.log(error);
+              customerManVM.btnDisabled = false;
+            });
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      //处理用户选择的列
+      confirmColumn(){
+        // debugger;
+        //处理用户选择的列
+        var customerShowColun = [];
+        var customerColumn = this.form1.type;
+        if(customerColumn.length==0){
+          this.$message({
+            message: '请选择列',
+            type: 'warning'
+          });
+          return;
+        }
+        this.dialogChooseList = false;
+        customerColumn.sort(this.sortNumber);//对选择的列排序
+        var idList=[];
+        for(var i=0;i<customerColumn.length;i++){
+          var curItem = customerColumn[i];
+          var itemArr = curItem.split("_");
+          var obj = {};
+          obj.fieldCode=itemArr[1];
+          obj.displayName=itemArr[2];
+          obj.width=itemArr[4];
+          customerShowColun.push(obj);
+          idList.push(itemArr[3])
+        }
+        this.tableColums = customerShowColun;
+        var param ={};
+        param.fieldIdList = idList;
+        param.menuCode = "customerManager";
+        if(idList.length!=0){
+          axios.post('/customfield/customField/saveUserField', param)
+          .then(function (response) {
+          }).catch(function (error) {
+            console.log(error);
+          });
+        }
+      },
+      initColumn(){
+        //初始化table 列 和 用户自定义列
+        this.allTableColums = fieldList;
+        if(userFieldList.length!=0){
+          var type=[];
+          for(var i=0;i<userFieldList.length;i++){
+            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
+          }
+          this.form1.type = type;
+          this.confirmColumn();
+        }else{
+          var type=[];
+          for(var i=0;i<fieldList.length;i++){
+            type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
+          }
+          this.form1.type = type;
+          this.confirmColumn();
+        }
+
+      },
+      sortNumber(a,b) {
+        //对数组中元素，按照数字 从小到大 排序
+        return a.split("_")[0] - b.split("_")[0];
+      },
+      setSessionStore (name, content) {
+        if (!name) return
+        if (typeof content !== 'string') {
+          content = JSON.stringify(content)
+        }
+        window.sessionStorage.setItem(name, content)
+      },
+      getSessionStore (name) {
+        if (!name) return;
+        var content = window.sessionStorage.getItem(name);
+        if (typeof content == 'string') {
+          content = JSON.parse(content)
+        }
+        return content;
+      },
+      removeSessionStore (name) {
+        if (!name) return
+        return window.sessionStorage.removeItem(name)
+      },
+    },
+    mounted(){
+      document.getElementById('myCustom').style.display = 'block';
+    },
+    created(){
+      // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+      // 进入页面判断有是否有存储值
+      if(!this.paginationShow){
+        var storeVal = this.getSessionStore("telemarketingStoreForm");
+        var otherVal = this.getSessionStore("telemarketingOtherVal");
+        if(storeVal && otherVal){
+          this.form = storeVal;
+          this.$set(this.pager,"currentPage",otherVal.currentPage);
+          this.storeId = otherVal.clueId;
+          this.scrollTop = otherVal.scrollTop;
+        }
+        // 取页数存储
+        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+        if(localVal){this.pager.pageSize = localVal;}
+      };
+      if(ownOrgId){
+        this.isDXZDisabled= true;
+        param={};
+        param.orgId=ownOrgId;
+        param.roleCode="DXCYGW";
+        param.statusList =[1,3];
+        axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
+          customerManVM.busSaleArr=response.data.data;
+        });
+      }//电销总监电销组筛选按钮不可点击
+      //初始化数据列表
+      this.initTableData();
+      //客户状态
+      var param={};
+      param.groupCode="customerStatus";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+        // customerManVM.cusStatusArr=response.data.data;
+        var datas = response.data.data;
+        var arr = []
+        for(var i = 0 ; i < datas.length ; i++){
+          if(datas[i].name!='不跟进'){
+            arr.push(datas[i])
+          }
+        }
+        customerManVM.cusStatusArr=arr
+      });
+      param={};
+      param.groupCode="customerLevel";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+        customerManVM.cusLevelArr=response.data.data;
+      });
+      //初始资源类别数据
+      param={};
+      param.groupCode="clueCategory";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+        customerManVM.categoryArr=response.data.data;
+      });
+      //初始化省份
+      param={};
+      param.type="0";
+      axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+        customerManVM.provinceArr=response.data.data.data;
+      });
+
+      // 初始化电销人员
+      //axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
+      //   console.log(response.data.data)
+      //   customerManVM.telePerArr=response.data.data;
+      //});
+
+      // 初始化电销组
+      // axios.post('/tele/customerManager/listOrgInfo').then(function (response) {
+      //   console.log(response.data.data)
+      //  customerManVM.orgTeleArr=response.data.data;
+      // });
+
+      this.initColumn();
+
+    }
+  })
+</script>
+</html>
