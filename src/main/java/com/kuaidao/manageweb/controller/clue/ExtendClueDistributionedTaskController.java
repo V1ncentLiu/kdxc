@@ -349,7 +349,7 @@ public class ExtendClueDistributionedTaskController {
             for (int i = 0; i < size; i++) {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
-                curList.add(taskDTO.getClueId()); // 资源ID
+                curList.add(taskDTO.getClueId()+""); // 资源ID
                 curList.add(taskDTO.getCreateTime()); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
