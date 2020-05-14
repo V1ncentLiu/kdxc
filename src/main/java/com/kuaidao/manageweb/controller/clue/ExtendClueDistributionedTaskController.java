@@ -7,12 +7,6 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.google.common.collect.Lists;
-import com.kuaidao.common.entity.ClueExportModel;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.google.common.collect.Lists;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
@@ -35,6 +33,7 @@ import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.ClueExportModel;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -339,7 +338,7 @@ public class ExtendClueDistributionedTaskController {
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
                 extendClueFeignClient.findClues(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-//        dataList.add(getHeadTitleList());
+        // dataList.add(getHeadTitleList());
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
                 && listJSONResult.getData().size() != 0) {
             List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
@@ -349,7 +348,7 @@ public class ExtendClueDistributionedTaskController {
             for (int i = 0; i < size; i++) {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
-                curList.add(taskDTO.getClueId()+""); // 资源ID
+                curList.add(taskDTO.getClueId() + ""); // 资源ID
                 curList.add(taskDTO.getCreateTime()); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
@@ -410,6 +409,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getFirstAsssignTeleGroupName());
                 // 首次分配电销总监
                 curList.add(taskDTO.getFirstAsssignTeleDirectorName());
+                // 首次分配电销顾问
+                curList.add(taskDTO.getFirstAsssignTeleSaleName());
                 String phase = "";
                 // 添加资源阶段
                 if (taskDTO.getPhase() != null) {
@@ -445,13 +446,13 @@ public class ExtendClueDistributionedTaskController {
         }
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
-//            XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+            // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
             String name = "资源情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition",
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
-            ExcelWriter excelWriter = EasyExcel.write(outputStream,ClueExportModel.class).build();
+            ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueExportModel.class).build();
             List<List<List<Object>>> partition = Lists.partition(dataList, 20000);
             for (int i = 0; i < partition.size(); i++) {
                 // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
@@ -583,6 +584,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getTeleGorupName());
                 // 电销顾问
                 curList.add(taskDTO.getTeleSaleName());
+                // 首次响应间隔
+                curList.add(taskDTO.getFirstResponseInterval());
                 // 这两个要进行转换
                 String isCall = null;
                 if (taskDTO.getIsCall() != null) {
@@ -660,6 +663,7 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("首次分配电销组总监");
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");
+        headTitleList.add("首次响应间隔");
         headTitleList.add("是否接通");
         headTitleList.add("是否有效");
         headTitleList.add("第一次拨打时间");
