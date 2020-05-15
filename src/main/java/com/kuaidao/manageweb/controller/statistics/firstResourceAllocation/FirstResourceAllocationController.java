@@ -513,7 +513,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
         headTitleList.add("其他");
-        headTitleList.add("网民未接");
+        headTitleList.add("新媒体");
         return headTitleList;
     }
 
@@ -534,7 +534,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
         headTitleList.add("其他");
-        headTitleList.add("网民未接");
+        headTitleList.add("新媒体");
         return headTitleList;
     }
 
@@ -556,7 +556,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
         headTitleList.add("其他");
-        headTitleList.add("网民未接");
+        headTitleList.add("新媒体");
         return headTitleList;
     }
 
@@ -581,7 +581,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         Long industry = list.stream().mapToLong(FirstResourceAllocationDto::getIndustry).sum();
         // 其他
         Long other = list.stream().mapToLong(FirstResourceAllocationDto::getOther).sum();
-        // 网民未接
+        // 新媒体
         Long netizensMissed = list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
         // 品牌
         Long brand = list.stream().mapToLong(FirstResourceAllocationDto::getBrand).sum();
