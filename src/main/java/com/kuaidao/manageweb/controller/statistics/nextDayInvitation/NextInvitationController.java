@@ -1,6 +1,6 @@
 package com.kuaidao.manageweb.controller.statistics.nextDayInvitation;
 
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -60,8 +60,8 @@ public class NextInvitationController extends BaseStatisticsController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("busList", json.getData());
         //签约集团
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
-        request.setAttribute("companyList", listNoPage.getData());
+        List<CompanyInfoDTO> listNoPage = getCyjt();
+        request.setAttribute("companyList", listNoPage);
         return "reportformsBusiness/morrowBusinessVisitTable";
     }
 
@@ -78,8 +78,8 @@ public class NextInvitationController extends BaseStatisticsController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         request.setAttribute("busList", json.getData());
         //签约集团
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
-        request.setAttribute("companyList", listNoPage.getData());
+        List<CompanyInfoDTO> listNoPage = getCyjt();
+        request.setAttribute("companyList", listNoPage);
         return "reportformsBusiness/morrowBusinessVisitTableTeam";
     }
 

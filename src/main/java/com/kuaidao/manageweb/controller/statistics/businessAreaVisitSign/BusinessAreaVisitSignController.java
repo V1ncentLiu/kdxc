@@ -3,13 +3,14 @@ package com.kuaidao.manageweb.controller.statistics.businessAreaVisitSign;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Maps;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.controller.statistics.BaseStatisticsController;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.BusinessAreaVisitSign.BusinessAreaVisitSignFeignClient;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
  */
 @RequestMapping("/businessAreaBisitSign")
 @Controller
-public class BusinessAreaVisitSignController {
+public class BusinessAreaVisitSignController extends BaseStatisticsController {
     private static Logger logger = LoggerFactory.getLogger(BusinessAreaVisitSignController.class);
 
     @Autowired
@@ -228,8 +229,8 @@ public class BusinessAreaVisitSignController {
 
 
         //餐饮集团
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
-        request.setAttribute("companyList", listNoPage.getData());
+        List<CompanyInfoDTO> listNoPage = getCyjt();
+        request.setAttribute("companyList", listNoPage);
 
 
 

@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -40,14 +41,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -369,30 +370,52 @@ public class BusinessMyCustomerController {
             OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
             orgDto.setId(user.getOrgId());
             orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-            JSONResult<List<OrganizationDTO>> orgJson =
-                organizationFeignClient.listParentsUntilOrg(orgDto);
-            if (orgJson != null && JSONResult.SUCCESS.equals(orgJson.getCode())
-                && orgJson.getData() != null && orgJson.getData().size() > 0) {
-                for (OrganizationDTO org : orgJson.getData()) {
-                    if (null != org.getOrgType()
-                        && org.getOrgType().equals(OrgTypeConstant.SWDQ)) {
-                        //商务大区
-                        relation.setBusAreaId(org.getId());
-                        UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
-                        userRoleInfo.setRoleCode(RoleCodeEnum.SWDQZJ.name());
-                        userRoleInfo.setOrgId(org.getId());
-                        JSONResult<List<UserInfoDTO>> ceoUserInfoJson =
-                            userInfoFeignClient.listByOrgAndRole(userRoleInfo);
-                        if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS)
-                            && null != ceoUserInfoJson.getData()
-                            && ceoUserInfoJson.getData().size() > 0) {
-                            // 商务大区总监
-                            relation.setBusAreaDirectorId(ceoUserInfoJson.getData().get(0).getId());
-                        }
 
-                    }
+            IdEntity idEntity = new IdEntity();
+            idEntity.setId(""+user.getOrgId());
+            JSONResult<OrganizationDTO> ores = organizationFeignClient
+                .queryOrgById(idEntity);
+            if (ores != null && JSONResult.SUCCESS.equals(ores.getCode())
+                && ores.getData() != null) {
+                OrganizationDTO data = ores.getData();
+                Long parentId = data.getParentId();
+                relation.setBusAreaId(parentId);
+                UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+                userRoleInfo.setRoleCode(RoleCodeEnum.SWDQZJ.name());
+                userRoleInfo.setOrgId(parentId);
+                JSONResult<List<UserInfoDTO>> ceoUserInfoJson =
+                    userInfoFeignClient.listByOrgAndRole(userRoleInfo);
+                if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS)
+                    && null != ceoUserInfoJson.getData()
+                    && ceoUserInfoJson.getData().size() > 0) {
+                    // 商务大区总监
+                    relation.setBusAreaDirectorId(ceoUserInfoJson.getData().get(0).getId());
                 }
             }
+//            JSONResult<List<OrganizationDTO>> orgJson =
+//                organizationFeignClient.listParentsUntilOrg(orgDto);
+//            if (orgJson != null && JSONResult.SUCCESS.equals(orgJson.getCode())
+//                && orgJson.getData() != null && orgJson.getData().size() > 0) {
+//                for (OrganizationDTO org : orgJson.getData()) {
+//                    if (null != org.getOrgType()
+//                        && org.getOrgType().equals(OrgTypeConstant.SWDQ)) {
+//                        //商务大区
+//                        relation.setBusAreaId(org.getId());
+//                        UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+//                        userRoleInfo.setRoleCode(RoleCodeEnum.SWDQZJ.name());
+//                        userRoleInfo.setOrgId(org.getId());
+//                        JSONResult<List<UserInfoDTO>> ceoUserInfoJson =
+//                            userInfoFeignClient.listByOrgAndRole(userRoleInfo);
+//                        if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS)
+//                            && null != ceoUserInfoJson.getData()
+//                            && ceoUserInfoJson.getData().size() > 0) {
+//                            // 商务大区总监
+//                            relation.setBusAreaDirectorId(ceoUserInfoJson.getData().get(0).getId());
+//                        }
+//
+//                    }
+//                }
+//            }
         }
 
         dto.setCirculationInsertOrUpdateDTO(getCircul(user,dto.getClueId()));

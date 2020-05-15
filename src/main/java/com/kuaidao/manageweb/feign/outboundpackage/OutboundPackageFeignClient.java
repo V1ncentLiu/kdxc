@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.feign.outboundpackage;
 
-import java.util.List;
 
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageReqDTO;
 import com.kuaidao.account.dto.outboundpackage.OutboundPackageRespDTO;
@@ -9,15 +8,10 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import com.kuaidao.callcenter.dto.HeLiClientOutboundReqDTO;
-import com.kuaidao.callcenter.dto.HeliClientReqDTO;
-import com.kuaidao.callcenter.dto.HeliClientRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;

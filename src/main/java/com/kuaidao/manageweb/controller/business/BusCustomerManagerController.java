@@ -3,7 +3,6 @@
  */
 package com.kuaidao.manageweb.controller.business;
 
-import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.clue.BusVisitPerDTO;
@@ -12,7 +11,9 @@ import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -51,7 +52,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.clue.BusCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.BusCustomerPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -275,7 +275,7 @@ public class BusCustomerManagerController {
         queryDTO.setBusinessLine(businessLine);
         // 查询所有组织
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
+            organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }

@@ -3,16 +3,16 @@ package com.kuaidao.manageweb.feign.project;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.project.BrandListDTO;
-import com.kuaidao.aggregation.dto.project.BrandListPageParam;
-import com.kuaidao.aggregation.dto.project.CategoryDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
+import com.kuaidao.businessconfig.dto.project.BrandListDTO;
+import com.kuaidao.businessconfig.dto.project.BrandListPageParam;
+import com.kuaidao.businessconfig.dto.project.CategoryDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -26,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/projectInfo",
+@FeignClient(name = "business-config-service", path = "/businessConfig/projectInfo",
         fallback = ProjectInfoFeignClient.HystrixClientFallback.class)
 public interface ProjectInfoFeignClient {
     /**
@@ -114,6 +114,7 @@ public interface ProjectInfoFeignClient {
 
     /**
      * 根据签约状态查询项
+     *
      * @param dto
      * @return
      */

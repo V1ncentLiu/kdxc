@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.controller.statistics;
 
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -26,8 +26,8 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import com.rabbitmq.http.client.domain.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -295,10 +295,16 @@ public class BaseStatisticsController {
             List<Long> orgIdList = teleGroupList.parallelStream().map(OrganizationDTO::getId).collect(Collectors.toList());
             baseBusQueryDto.setBusinessGroupIds(orgIdList);
         }
+        //TODO 重新写一个方法
         //商务经理查询 考虑借调 删除组限制
         if(null != baseBusQueryDto && RoleCodeEnum.SWJL.name().equals(roleCode)){
             baseBusQueryDto.setBusinessGroupIds(null);
             baseBusQueryDto.setBusinessGroupId(null);
+            baseBusQueryDto.setBusAreaId(null);
+            baseBusQueryDto.setBusinessManagerId(curLoginUser.getId());
+        }
+        if("".equals(baseBusQueryDto.getVisitCity())){
+            baseBusQueryDto.setVisitCity(null);
         }
 
     }
@@ -364,8 +370,8 @@ public class BaseStatisticsController {
         request.setAttribute("projectList", allProject.getData());
 
         //餐饮集团
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
-        request.setAttribute("companyList", listNoPage.getData());
+        List<CompanyInfoDTO> listNoPage = getCyjt();
+        request.setAttribute("companyList", listNoPage);
 
         request.setAttribute("busAreaId",busAreaId);
         request.setAttribute("businessGroupId",businessGroupId);
@@ -429,4 +435,24 @@ public class BaseStatisticsController {
         return list;
     }
 
+    /**
+     * 查询餐饮集团
+     */
+    public List<CompanyInfoDTO> getCyjt(){
+        List<CompanyInfoDTO> resultList = new ArrayList<>();
+        UserInfoPageParam userInfoPageParam = new UserInfoPageParam();
+        userInfoPageParam.setUserType(2);
+        userInfoPageParam.setStatus(1);
+        JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.listNoPage(userInfoPageParam);
+        if("0".equals(listJSONResult.getCode()) && null!=listJSONResult.getData()){
+            List<UserInfoDTO> data = listJSONResult.getData();
+            for(UserInfoDTO userInfo : data){
+                CompanyInfoDTO companyInfoDTO = new CompanyInfoDTO();
+                companyInfoDTO.setId(userInfo.getId());
+                companyInfoDTO.setGroupName(userInfo.getName());
+                resultList.add(companyInfoDTO);
+            }
+        }
+        return resultList;
+    }
 }

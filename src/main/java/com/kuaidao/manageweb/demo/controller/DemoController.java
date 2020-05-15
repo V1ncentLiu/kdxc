@@ -22,7 +22,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.expression.Lists;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.config.SnowflakeArgs;
 import com.kuaidao.manageweb.demo.DTO.AddressReqDTO;
@@ -195,7 +194,6 @@ public class DemoController {
 	@GetMapping("/receive")
 	public String receive(){
 		String str = (String)template.receiveAndConvert();
-
 		return "success";
 	}
 

@@ -1,12 +1,13 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.visitrecord.*;
+import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -333,7 +334,12 @@ public class BusinessVisitRecordController {
                 if (arrivalTime == null) {
                     arrDate = new Date();
                 } else {
-                    arrDate = new Date((Long) arrivalTime);
+                    if(arrivalTime instanceof String){
+                        arrDate = DateUtil.convert2Date((String) arrivalTime, DateUtil.ymdhms);
+                    }else{
+                        arrDate = new Date((Long) arrivalTime);
+                    }
+
                 }
 
                 recordRespDTO.setVistitTime(arrDate);

@@ -793,7 +793,7 @@ public class TeleStatementController {
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
         headTitleList.add("其他");
-        headTitleList.add("网民未接");
+        headTitleList.add("新媒体");
         headTitleList.add("其他2");
         return headTitleList;
     }
@@ -813,7 +813,7 @@ public class TeleStatementController {
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
         headTitleList.add("其他");
-        headTitleList.add("网民未接");
+        headTitleList.add("新媒体");
         headTitleList.add("其他2");
         return headTitleList;
     }
@@ -834,7 +834,7 @@ public class TeleStatementController {
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
         headTitleList.add("其他");
-        headTitleList.add("网民未接");
+        headTitleList.add("新媒体");
         headTitleList.add("其他2");
         return headTitleList;
     }

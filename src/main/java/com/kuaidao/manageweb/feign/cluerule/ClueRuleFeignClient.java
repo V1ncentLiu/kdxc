@@ -2,11 +2,11 @@ package com.kuaidao.manageweb.feign.cluerule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
+import com.kuaidao.businessconfig.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IntegerEntity;
@@ -21,7 +21,7 @@ import com.kuaidao.manageweb.feign.client.ClientFeignClient;
  * @date 2019年3月1日 下午6:36:23
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/cluerule/clueRule",
+@FeignClient(name = "business-config-service", path = "/businessConfig/cluerule/clueRule",
         fallback = ClueRuleFeignClient.HystrixClientFallback.class)
 public interface ClueRuleFeignClient {
 

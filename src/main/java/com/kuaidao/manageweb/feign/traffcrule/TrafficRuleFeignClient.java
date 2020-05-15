@@ -3,13 +3,13 @@ package com.kuaidao.manageweb.feign.traffcrule;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.traffcrule.TrafficAssignRuleDTO;
-import com.kuaidao.aggregation.dto.traffcrule.TrafficAssignRulePageParam;
-import com.kuaidao.aggregation.dto.traffcrule.TrafficAssignRuleReq;
+import com.kuaidao.businessconfig.dto.traffcrule.TrafficAssignRuleDTO;
+import com.kuaidao.businessconfig.dto.traffcrule.TrafficAssignRulePageParam;
+import com.kuaidao.businessconfig.dto.traffcrule.TrafficAssignRuleReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -23,7 +23,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年3月14日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/trafficAssignRule",
+@FeignClient(name = "business-config-service", path = "/businessConfig/trafficAssignRule",
         fallback = TrafficRuleFeignClient.HystrixClientFallback.class)
 public interface TrafficRuleFeignClient {
     /**

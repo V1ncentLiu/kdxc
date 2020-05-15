@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.controller.financing;
 
 import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
