@@ -20,6 +20,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,8 +167,45 @@ public class BusinessVisitRecordController {
     @ResponseBody
     public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto)
             throws Exception {
-        dto.setIsVisit(AggregationConstant.YES);
         dto.setIsHistory(AggregationConstant.NO);
+        return this.queryVisitList(dto);
+    }
+
+    /**
+     * 查询到访记录，且按照商务经理进行分组
+     */
+    @RequestMapping("/queryList")
+    @ResponseBody
+    public JSONResult<List<Map<Integer,BusVisitRecordRespDTO>>> visitListGroupByBusSale(@RequestBody BusVisitRecordReqDTO dto)
+        throws Exception {
+        JSONResult<List<Map<Integer, BusVisitRecordRespDTO>>> result = new JSONResult<>();
+        JSONResult<List<BusVisitRecordRespDTO>> listJSONResult = this.queryVisitList(dto);
+        if(!CommonUtil.resultCheck(listJSONResult)){
+            return result.fail("-1","没有数据");
+        }
+        // 数据转换过程如下
+        List<BusVisitRecordRespDTO> dataList = listJSONResult.getData();
+        if(CollectionUtils.isEmpty(dataList)){
+            return result.fail("-1","没有数据");
+        }
+
+        // 使用stream进行分组，而后分组后转换成map
+        Map<Long, List<BusVisitRecordRespDTO>> collectMap = dataList.stream()
+            .collect(Collectors.groupingBy(BusVisitRecordRespDTO::getBusinessManagerId));
+        // 封装成指定类型结果集
+        List<Map<Integer,BusVisitRecordRespDTO>> resList = new ArrayList<>();
+        // 遍历map
+
+        return result.success(resList);
+    }
+
+
+    /**
+     * 查询到访记录
+     */
+    private JSONResult<List<BusVisitRecordRespDTO>> queryVisitList(BusVisitRecordReqDTO dto)
+        throws Exception {
+        dto.setIsVisit(AggregationConstant.YES);
         return visitRecordFeignClient.queryList(dto);
     }
 
