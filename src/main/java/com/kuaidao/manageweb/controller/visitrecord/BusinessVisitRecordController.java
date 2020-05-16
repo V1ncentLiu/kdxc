@@ -5,6 +5,7 @@ import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -174,11 +175,11 @@ public class BusinessVisitRecordController {
     /**
      * 查询到访记录，且按照商务经理进行分组
      */
-    @RequestMapping("/queryList")
+    @RequestMapping("/visitListGroupByBusSale")
     @ResponseBody
-    public JSONResult<List<Map<Integer,BusVisitRecordRespDTO>>> visitListGroupByBusSale(@RequestBody BusVisitRecordReqDTO dto)
+    public JSONResult<List<Map<String,List<BusVisitRecordRespDTO>>>> visitListGroupByBusSale(@RequestBody BusVisitRecordReqDTO dto)
         throws Exception {
-        JSONResult<List<Map<Integer, BusVisitRecordRespDTO>>> result = new JSONResult<>();
+        JSONResult<List<Map<String,List<BusVisitRecordRespDTO>>>> result = new JSONResult<>();
         JSONResult<List<BusVisitRecordRespDTO>> listJSONResult = this.queryVisitList(dto);
         if(!CommonUtil.resultCheck(listJSONResult)){
             return result.fail("-1","没有数据");
@@ -192,10 +193,30 @@ public class BusinessVisitRecordController {
         // 使用stream进行分组，而后分组后转换成map
         Map<Long, List<BusVisitRecordRespDTO>> collectMap = dataList.stream()
             .collect(Collectors.groupingBy(BusVisitRecordRespDTO::getBusinessManagerId));
-        // 封装成指定类型结果集
-        List<Map<Integer,BusVisitRecordRespDTO>> resList = new ArrayList<>();
-        // 遍历map
 
+        // 按照时间进行排序
+        for(Map.Entry<Long,List<BusVisitRecordRespDTO>> map:collectMap.entrySet()){
+            map.getValue().stream().sorted(new Comparator<BusVisitRecordRespDTO>() {
+                @Override
+                public int compare(BusVisitRecordRespDTO o1, BusVisitRecordRespDTO o2) {
+                    if(o1.getVistitTime().getTime()>o2.getVistitTime().getTime()){
+                        return 1;
+                    }else{
+                        return -1;
+                    }
+                }
+            });
+        }
+        // 封装成指定类型结果集
+        List<Map<String,List<BusVisitRecordRespDTO>>> resList = new ArrayList<>();
+        for(Map.Entry<Long,List<BusVisitRecordRespDTO>> map:collectMap.entrySet()){
+            List<BusVisitRecordRespDTO> values = map.getValue();
+            if(CollectionUtils.isNotEmpty(values)){
+                Map<String,List<BusVisitRecordRespDTO>> map1 = new HashMap<>();
+                map1.put(values.get(0).getBusinessManagerName(),values);
+                resList.add(map1);
+            }
+        }
         return result.success(resList);
     }
 
