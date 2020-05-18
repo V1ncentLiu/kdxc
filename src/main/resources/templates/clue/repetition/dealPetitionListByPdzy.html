@@ -656,12 +656,54 @@
   </el-dialog>
 
 
-  <el-dialog title="到访记录" :visible.sync="showVisitRecordDialog" width="70%">
+  <el-dialog :title="tbVisitName" :visible.sync="showVisitRecordDialog" width="70%">
     <template>
       <el-tabs v-model="activeName" type="card">
-        <el-tab-pane v-for="(item, index) in editableTabs" :key="item.name" :label="item.title"
-                     name="item.name">
-
+        <el-tab-pane v-for="(item, index) in editableTabs" :key="item.name" :label="item.title" name="item.name">
+          <div v-for="(data, idx) in item.data">
+            <div v-if="idx==0">
+              <el-button size="mini" type="text" style="color: #1e2746">首次到访</el-button>
+            </div>
+            <div v-else-if="idx==1">
+              <el-button size="mini" type="text" style="color: #1e2746">二次到访</el-button>
+            </div>
+            <div v-else-if="idx==2">
+              <el-button size="mini" type="text" style="color: #1e2746">三次到访</el-button>
+            </div>
+            <div v-else-if="idx==3">
+              <el-button size="mini" type="text" style="color: #1e2746">四次到访</el-button>
+            </div>
+            <div v-else-if="idx==4">
+              <el-button size="mini" type="text" style="color: #1e2746">五次到访</el-button>
+            </div>
+            <el-table :data="data" style="width: 100%" tooltip-effect="dark" ref="multipleTable">
+              <el-table-column prop="customerName" label="客户姓名" width="100" align="center"></el-table-column>
+              <el-table-column prop="projectName" label="考察项目" width="100" align="center"></el-table-column>
+              <el-table-column prop="companyName" label="考察公司" width="100" align="center"></el-table-column>
+              <el-table-column prop="vistitTime" label="到访时间" width="100" :formatter="formatVisitTime" align="center"></el-table-column>
+              <el-table-column prop="signProvince" label="预签约省份" width="100" align="center"></el-table-column>
+              <el-table-column prop="signCity" label="预签约市" width="100" align="center"></el-table-column>
+              <el-table-column prop="signDistrict" label="预签约区/县" width="120" align="center"></el-table-column>
+              <el-table-column prop="vistitStoreTypeName" label="到访店铺类型" width="120" align="center"></el-table-column>
+              <el-table-column prop="visitType" label="到访类型" width="100" align="center">
+                <template slot-scope="scope">
+                  <div v-if="scope.row.visitType == 1">预约来访</div>
+                  <div v-else-if="scope.row.visitType == 2">慕名来访</div>
+                  <div v-else-if="scope.row.visitType == 3">临时来访</div>
+                </template>
+              </el-table-column>
+              <el-table-column prop="arrVisitCity" label="到访城市" width="100" align="center"></el-table-column>
+              <el-table-column prop="visitPeopleNum" label="到访人数" width="100" align="center"></el-table-column>
+              <el-table-column prop="createTime" label="创建时间" width="100" align="center"></el-table-column>
+              <el-table-column prop="createUserName" label="创建人" width="100" align="center"></el-table-column>
+              <el-table-column prop="isSign" label="是否签约" width="100" align="center">
+                <template slot-scope="scope">
+                  <div v-if="scope.row.isSign === 0">否</div>
+                  <div v-else-if="scope.row.isSign ===1">是</div>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </template>
@@ -705,6 +747,10 @@
       searchClueDisable: true,//查询资源默认不可点击
       searchRepeatClueDisable: true,//查询资源默认不可点击
       showVisitRecordDialog:false,
+      activeName: '',
+      tbVisitName:'',
+      editableTabs: [],
+      showVisitDatas:{},
       customerName: "",
       repeatName: "",
       cusNameId: "",
@@ -881,6 +927,27 @@
 
     },
     methods: {
+      formatVisitTime(row) {
+        function dateFtt(fmt, date) { //author: meizz
+          var o = {
+            "M+": date.getMonth() + 1,                 //月份
+            "d+": date.getDate(),                    //日
+            "h+": date.getHours(),                   //小时
+            "m+": date.getMinutes(),                 //分
+            "s+": date.getSeconds(),                 //秒
+            "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+            "S": date.getMilliseconds()             //毫秒
+          };
+          if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+          for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+              fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+          return fmt;
+        }
+
+        return dateFtt("yyyy-MM-dd hh:mm", new Date(row.vistitTime));
+      },
       //日期数据格式化方法
       dateFormat: function (row, column) {
         var date = row[column.property];
@@ -1372,13 +1439,46 @@
       },
 
       showVisitRecord(row){
+        this.showVisitDatas = {};
+        var cusName = row.cusName;
+        this.tbVisitName = cusName+"客户到访记录";
+        this.editableTabs = [];
+        this.activeName = '0';
         var clueId = row.clueId;
-        this.showHisVisitRecordDialog = true;
         var param = {};
-        param.id = clueId;
+        param.clueId = clueId;
         axios.post('/busVisitRecord/visitListGroupByBusSale', param).then(function (response) {
-          orgVM.showHisVisitRecordDialog = true;
-          console.log(response.data)
+          if(response.data.code==-1){
+            orgVM.$message({message: '该线索没有到访记录！', type: 'warning'});
+            return;
+          }
+          var tabs = [];
+          var data = response.data.data;
+          //设置tab名称
+          for(var i = 0 ; i< data.length ; i++){
+            var dmap = data[i];
+            var tab = {};
+            tab.title = "商务经理"+dmap.name+"的到访记录";
+            tab.name = "" + i;
+            tab.index = i;
+            // 组装data
+            tab.data = [];
+            for(var j = 0 ; j<dmap.data.length ;j++ ){
+              var arr = [];
+              arr.push(dmap.data[j]);
+              tab.data.push(arr);
+            }
+            console.log(tab)
+            tabs.push(tab)
+              // console.log(tabs[0]);
+              // orgVM.activeName =  tabs[0].name;
+              // console.log( orgVM.activeName);
+          }
+          orgVM.editableTabs=tabs;
+
+          orgVM.showVisitRecordDialog = true;
+
+
         }).catch(function (error) {
           console.log(error);
         });
