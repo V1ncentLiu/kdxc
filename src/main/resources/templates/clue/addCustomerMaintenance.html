@@ -184,6 +184,27 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
+                        <el-form-item
+                                label="身份证号：" prop="identityCard" :label-width="formLabelWidth">
+                            <el-input v-model="form.identityCard" autocomplete="off"
+                                      maxLength="20"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item
+                                label="卡点：" :label-width="formLabelWidth">
+                            <el-date-picker style='width: 60%;' v-model="form.offerEndTime" type="date" placeholder="选择天"></el-date-picker>
+                            </el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item
+                                label="卡点备注：" prop="offerEndRemark" :label-width="formLabelWidth">
+                            <el-input v-model="form.offerEndRemark" autocomplete="off"
+                                      maxLength="100"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth">
                             <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;" clearable>
                                 <el-option v-for="item in optsex" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -992,6 +1013,9 @@
                     urgency: '',
                     customerLevel: '',
                     qq: '',
+                    identityCard: '',
+                    offerEndTime: '',
+                    offerEndRemark: '',
                     money: '',
                     area: '',
                     intentionCategory: '',
@@ -1528,9 +1552,18 @@
                     //年龄
                     var customerAge = this.form.customerAge;
                     clueCustomer.age = customerAge;
-                    //职业
-                    var customerJob = this.form.customerJob;
-                    clueCustomer.profession = customerJob;
+                    //年龄
+                    var customerAge = this.form.customerAge;
+                    clueCustomer.age = customerAge;
+                    //身份证
+                    var identityCard = this.form.identityCard;
+                    clueCustomer.identityCard = identityCard;
+                    //卡点
+                    var offerEndTime = this.form.offerEndTime;
+                    clueCustomer.offerEndTime = offerEndTime;
+                    //卡点备注
+                    var offerEndRemark = this.form.offerEndRemark;
+                    clueCustomer.offerEndRemark = offerEndRemark;
                     //合伙人
                     var customerPartner = this.form.customerPartner;
                     clueCustomer.partnerType = customerPartner;
@@ -1685,6 +1718,26 @@
                         //保存按钮可点击
                         this.saveDisabled = false;
                         return;
+                    }
+                    //如果是否接通，选择是.客户关注点包含关机、拒接、挂断、空号、错号、无人接听、未接、没接通，不允许提交成功资料。
+                    if (this.formInline.isCall==1) {
+                    	var focusPoint=this.formInline.focusPoint;
+                    	if(focusPoint.includes("关机")
+                    			||focusPoint.includes("拒接")
+                    			||focusPoint.includes("挂断")
+                    			||focusPoint.includes("空号")
+                    			||focusPoint.includes("错号")
+                    			||focusPoint.includes("无人接听")
+                    			||focusPoint.includes("未接")
+                    			||focusPoint.includes("没接通")){
+	                        this.$message({
+	                            message: '请检查跟进记录中“是否接通”是否填写错误。',
+	                            type: 'warning'
+	                        });
+	                        //保存按钮可点击
+	                        this.saveDisabled = false;
+	                        return;
+                    	}
                     }
                     //省
                     var province = this.form.province;
@@ -2217,6 +2270,15 @@
                     //微信
                     var wechat = this.form.wechat;
                     clueCustomer.wechat = wechat;
+                    //身份证
+                    var identityCard = this.form.identityCard;
+                    clueCustomer.identityCard = identityCard;
+                    //卡点
+                    var offerEndTime = this.form.offerEndTime;
+                    clueCustomer.offerEndTime = offerEndTime;
+                    //卡点备注
+                    var offerEndRemark = this.form.offerEndRemark;
+                    clueCustomer.offerEndRemark = offerEndRemark;
                     //微信2
                     var wechat2 = this.form.wechat2;
                     clueCustomer.wechat2 = wechat2;
@@ -2668,6 +2730,9 @@
                 this.form.customerPhone2 = customer.phone2;
                 this.form.customerSex = customer.sex == null ? "" : customer.sex + "";
                 this.form.wechat = customer.wechat;
+                this.form.identityCard = customer.identityCard;
+                this.form.offerEndTime = customer.offerEndTime;
+                this.form.offerEndRemark = customer.offerEndRemark;
                 this.form.wechat2 = customer.wechat2;
                 this.form.wechatUrl = customer.wechatCode;
                 this.form.experience = customer.hasExperience == null ? "" : customer.hasExperience + "";
