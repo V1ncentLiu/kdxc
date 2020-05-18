@@ -177,9 +177,9 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/visitListGroupByBusSale")
     @ResponseBody
-    public JSONResult<List<Map<String,List<BusVisitRecordRespDTO>>>> visitListGroupByBusSale(@RequestBody BusVisitRecordReqDTO dto)
+    public JSONResult<List<Map<String,Object>>> visitListGroupByBusSale(@RequestBody BusVisitRecordReqDTO dto)
         throws Exception {
-        JSONResult<List<Map<String,List<BusVisitRecordRespDTO>>>> result = new JSONResult<>();
+        JSONResult<List<Map<String,Object>>> result = new JSONResult<>();
         JSONResult<List<BusVisitRecordRespDTO>> listJSONResult = this.queryVisitList(dto);
         if(!CommonUtil.resultCheck(listJSONResult)){
             return result.fail("-1","没有数据");
@@ -208,12 +208,13 @@ public class BusinessVisitRecordController {
             });
         }
         // 封装成指定类型结果集
-        List<Map<String,List<BusVisitRecordRespDTO>>> resList = new ArrayList<>();
+        List<Map<String,Object>> resList = new ArrayList<>();
         for(Map.Entry<Long,List<BusVisitRecordRespDTO>> map:collectMap.entrySet()){
             List<BusVisitRecordRespDTO> values = map.getValue();
             if(CollectionUtils.isNotEmpty(values)){
-                Map<String,List<BusVisitRecordRespDTO>> map1 = new HashMap<>();
-                map1.put(values.get(0).getBusinessManagerName(),values);
+                Map<String,Object> map1 = new HashMap<>();
+                map1.put("name",values.get(0).getBusinessManagerName());
+                map1.put("data",values);
                 resList.add(map1);
             }
         }
