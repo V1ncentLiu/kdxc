@@ -655,11 +655,14 @@
     </div>
   </el-dialog>
 
+  <el-dialog title="未签约原因" :visible.sync="notSignedReasonDialog">
+    <div class="fs16 marginB20" >{{notSignReason}}</div>
+  </el-dialog>
 
   <el-dialog :title="tbVisitName" :visible.sync="showVisitRecordDialog" width="70%">
     <template>
-      <el-tabs v-model="activeName" type="card">
-        <el-tab-pane v-for="(item, index) in editableTabs" :key="item.name" :label="item.title" name="item.name">
+      <el-tabs v-model="activeName" type="card"  @tab-click="handleClick">
+        <el-tab-pane v-for="(item, index) in editableTabs" :key="item.name" :label="item.title" :name="item.name">
           <div v-for="(data, idx) in item.data">
             <div v-if="idx==0">
               <el-button size="mini" type="text" style="color: #1e2746">首次到访</el-button>
@@ -698,8 +701,12 @@
               <el-table-column prop="createUserName" label="创建人" width="100" align="center"></el-table-column>
               <el-table-column prop="isSign" label="是否签约" width="100" align="center">
                 <template slot-scope="scope">
-                  <div v-if="scope.row.isSign === 0">否</div>
-                  <div v-else-if="scope.row.isSign ===1">是</div>
+                  <div v-if="scope.row.isSign === 0">
+                    否 &nbsp;&nbsp;<el-button size="mini" type="text" @click="showNoSignReason(scope.row)">未签约原因</el-button>
+                  </div>
+                  <div v-else-if="scope.row.isSign ===1">
+                    是
+                  </div>
                 </template>
               </el-table-column>
             </el-table>
@@ -708,10 +715,9 @@
       </el-tabs>
     </template>
   </el-dialog>
-
-
 </div>
 <input id="addOrUpdate" type="hidden">
+
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -750,7 +756,8 @@
       activeName: '',
       tbVisitName:'',
       editableTabs: [],
-      showVisitDatas:{},
+      notSignedReasonDialog:false,
+      notSignReason:'',
       customerName: "",
       repeatName: "",
       cusNameId: "",
@@ -1437,13 +1444,16 @@
       recordClick(row) {
         this.recordDialog = true;
       },
-
+      showNoSignReason(row){
+        this.notSignReason=row.notSignReason;
+        this.notSignedReasonDialog=true;
+      },
       showVisitRecord(row){
         this.showVisitDatas = {};
         var cusName = row.cusName;
         this.tbVisitName = cusName+"客户到访记录";
         this.editableTabs = [];
-        this.activeName = '0';
+        // this.activeName = '0';
         var clueId = row.clueId;
         var param = {};
         param.clueId = clueId;
@@ -1459,7 +1469,7 @@
             var dmap = data[i];
             var tab = {};
             tab.title = "商务经理"+dmap.name+"的到访记录";
-            tab.name = "" + i;
+            tab.name = "f" + i;
             tab.index = i;
             // 组装data
             tab.data = [];
@@ -1470,18 +1480,16 @@
             }
             console.log(tab)
             tabs.push(tab)
-              // console.log(tabs[0]);
-              // orgVM.activeName =  tabs[0].name;
-              // console.log( orgVM.activeName);
           }
-          orgVM.editableTabs=tabs;
-
           orgVM.showVisitRecordDialog = true;
-
-
+          orgVM.editableTabs=tabs;
+          orgVM.activeName =  tabs[0].name;
         }).catch(function (error) {
           console.log(error);
         });
+      },
+      handleClick(){
+
       },
       repeatPhonesClick(row) {
         this.repeatPhonesDialog = true;
