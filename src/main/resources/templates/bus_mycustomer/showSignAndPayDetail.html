@@ -1549,22 +1549,25 @@
         computed: {
         },
         methods: {
-            getShopType(value){
+            getShopType(value,flag){
                 var param = {};
                 param.id = value;
                 axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
                     console.log("###"+response.data.data);
-                    if(mainDivVM.formSigning.signShopType){
-                        mainDivVM.formSigning.signShopType ='';
-                    }
-                    if(mainDivVM.formSigning.visitShopType){
-                        mainDivVM.formSigning.visitShopType ='';
-                    }
-                    if(mainDivVM.updateFormSigning.signShopType){
-                        mainDivVM.updateFormSigning.signShopType ='';
-                    }
-                    if(mainDivVM.updateFormSigning.visitShopType){
-                        mainDivVM.updateFormSigning.visitShopType ='';
+
+                    if(!flag){
+                        if(mainDivVM.formSigning.signShopType){
+                            mainDivVM.formSigning.signShopType ='';
+                        }
+                        if(mainDivVM.formSigning.visitShopType){
+                            mainDivVM.formSigning.visitShopType ='';
+                        }
+                        if(mainDivVM.updateFormSigning.signShopType){
+                            mainDivVM.updateFormSigning.signShopType ='';
+                        }
+                        if(mainDivVM.updateFormSigning.visitShopType){
+                            mainDivVM.updateFormSigning.visitShopType ='';
+                        }
                     }
                     mainDivVM.vistitStoreTypeArr= response.data.data;
                     mainDivVM.signStoreTypeArr= response.data.data;
@@ -2101,6 +2104,8 @@
                         } 
                         mainDivVM.currentCity(sign.signCity);
                         mainDivVM.currentProvince(sign.signProvince);
+                        mainDivVM.getShopType(sign.signProjectId,1);
+                        mainDivVM.change
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                         // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
                         if (sign.signType&&sign.signType==1) {
