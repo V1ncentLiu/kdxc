@@ -3053,29 +3053,31 @@
                     mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
                 });
             },
-            getShopType(value){
+            getShopType(value,flag){
                 var param = {};
                 param.id = value;
                 axios.post('/busVisitRecord/getShortTypeByProjectId', param).then(function (response) {
                     console.log("###"+response.data.data);
-                    if(mainDivVM.addVisitRecord.vistitStoreType){
-                        mainDivVM.addVisitRecord.vistitStoreType ='';
-                    }
-                    if(mainDivVM.updateVisitRecord.vistitStoreType){
-                        mainDivVM.updateVisitRecord.vistitStoreType ='';
-                    }
-                    if(mainDivVM.formSigning.signShopType){
-                        mainDivVM.formSigning.signShopType ='';
-                    }
-                    if(mainDivVM.formSigning.visitShopType){
-                        mainDivVM.formSigning.visitShopType ='';
-                    }
-                    if(mainDivVM.updateFormSigning.signShopType){
-                        mainDivVM.updateFormSigning.signShopType ='';
-                    }
-                    if(mainDivVM.updateFormSigning.visitShopType){
-                        mainDivVM.updateFormSigning.visitShopType ='';
-                    }
+                   if(!flag){
+                       if(mainDivVM.addVisitRecord.vistitStoreType){
+                           mainDivVM.addVisitRecord.vistitStoreType ='';
+                       }
+                       if(mainDivVM.updateVisitRecord.vistitStoreType){
+                           mainDivVM.updateVisitRecord.vistitStoreType ='';
+                       }
+                       if(mainDivVM.formSigning.signShopType){
+                           mainDivVM.formSigning.signShopType ='';
+                       }
+                       if(mainDivVM.formSigning.visitShopType){
+                           mainDivVM.formSigning.visitShopType ='';
+                       }
+                       if(mainDivVM.updateFormSigning.signShopType){
+                           mainDivVM.updateFormSigning.signShopType ='';
+                       }
+                       if(mainDivVM.updateFormSigning.visitShopType){
+                           mainDivVM.updateFormSigning.visitShopType ='';
+                       }
+                   }
                     mainDivVM.vistitStoreTypeArr= response.data.data;
                     mainDivVM.signStoreTypeArr= response.data.data;
                 });
@@ -3497,6 +3499,7 @@
                     mainDivVM.dialogFormSigningVisible = true;
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+                    mainDivVM.getShopType(mainDivVM.formSigning.signProjectId,1)
                     mainDivVM.formSigning.payName = response.data.data.customerName;
                     mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr
                     mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr
@@ -3541,7 +3544,8 @@
                         }
                         
                         mainDivVM.currentProvince(responseData.signProvince)
-                        mainDivVM.currentCity(responseData.signCity)                                              
+                        mainDivVM.currentCity(responseData.signCity)
+                        mainDivVM.getShopType(responseData.signProjectId,1)
 
                         // 默认显示tab1
                         if(responseData.paydetailList){
