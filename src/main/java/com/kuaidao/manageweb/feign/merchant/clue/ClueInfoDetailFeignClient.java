@@ -15,7 +15,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 import com.kuaidao.merchant.dto.clue.ClueDTO;
 
-@FeignClient(name = "merchant-service", path = "/merchant/clue/myCustomer", fallback = ClueInfoDetailFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service-1", path = "/merchant/clue/myCustomer", fallback = ClueInfoDetailFeignClient.HystrixClientFallback.class)
 public interface ClueInfoDetailFeignClient {
 
 

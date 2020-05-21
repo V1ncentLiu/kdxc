@@ -30,7 +30,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
  * @author Administrator
  *
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/clue/cluereceiverecords", fallback = ClueReceiveRecordsFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1", path = "/aggregation/clue/cluereceiverecords", fallback = ClueReceiveRecordsFeignClient.HystrixClientFallback.class)
 public interface ClueReceiveRecordsFeignClient {
 	/**
 	 * 资源领取

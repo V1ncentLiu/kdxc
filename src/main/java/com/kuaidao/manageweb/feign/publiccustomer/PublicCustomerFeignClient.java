@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/publicCustomerResources",fallback = PublicCustomerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1",path="/aggregation/publicCustomerResources",fallback = PublicCustomerFeignClient.HystrixClientFallback.class)
 public interface PublicCustomerFeignClient {
 
     @PostMapping("/allocationResource")

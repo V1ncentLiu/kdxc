@@ -23,7 +23,7 @@ import java.util.List;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/apply",
+@FeignClient(name = "aggregation-service-1", path = "/aggregation/apply",
         fallback = ApplyClient.HystrixClientFallback.class)
 public interface ApplyClient {
 

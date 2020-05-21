@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/repeatClueRecord",
+@FeignClient(name = "aggregation-service-1", path = "/aggregation/repeatClueRecord",
     fallback = RepeatClueRecordFeignClient.HystrixClientFallback.class)
 public interface RepeatClueRecordFeignClient {
 

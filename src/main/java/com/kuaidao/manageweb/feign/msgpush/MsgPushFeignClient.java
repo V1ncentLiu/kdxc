@@ -20,7 +20,7 @@ import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "msg-push-service", path = "/msgpush/v1.0/sms",
+@FeignClient(name = "msg-push-service-1", path = "/msgpush/v1.0/sms",
         fallback = MsgPushFeignClient.HystrixClientFallback.class)
 public interface MsgPushFeignClient {
 
