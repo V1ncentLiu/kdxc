@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @Date: 2020/3/13 10:22
  * @since: 1.0.0
  **/
-@FeignClient(name = "aggregation-service", path = "/aggregation/financing/overCost", fallback = OverCostFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1", path = "/aggregation/financing/overCost", fallback = OverCostFeignClient.HystrixClientFallback.class)
 public interface OverCostFeignClient {
 
     /**

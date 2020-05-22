@@ -23,7 +23,7 @@ import javax.validation.Valid;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/financing/financeLayout",fallback = FinanceLayoutFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1",path="/aggregation/financing/financeLayout",fallback = FinanceLayoutFeignClient.HystrixClientFallback.class)
 public interface FinanceLayoutFeignClient {
 
 

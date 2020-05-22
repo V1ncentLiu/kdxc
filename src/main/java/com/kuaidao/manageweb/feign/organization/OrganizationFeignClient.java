@@ -28,7 +28,7 @@ import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
  * @date: 2019年1月3日 下午5:06:53
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/organization/organization",
+@FeignClient(name = "sys-service-1", path = "/sys/organization/organization",
         fallback = OrganizationFeignClient.HystrixClientFallback.class)
 public interface OrganizationFeignClient {
 
