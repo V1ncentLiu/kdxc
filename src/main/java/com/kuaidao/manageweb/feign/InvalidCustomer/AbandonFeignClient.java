@@ -19,7 +19,7 @@ import com.kuaidao.common.entity.PageBean;
  * @auther yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/abandon",
+@FeignClient(name = "aggregation-service", path = "/aggregation/abandon",
         fallback = AbandonFeignClient.HystrixClientFallback.class)
 public interface AbandonFeignClient {
 

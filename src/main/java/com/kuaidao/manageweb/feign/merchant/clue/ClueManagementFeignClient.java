@@ -26,7 +26,7 @@ import com.kuaidao.merchant.dto.clue.ResourceStatisticsDto;
  * @date: 2019年09月06日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service-1", path = "/merchant/clue/management", fallback = ClueManagementFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service", path = "/merchant/clue/management", fallback = ClueManagementFeignClient.HystrixClientFallback.class)
 public interface ClueManagementFeignClient {
 
     /**

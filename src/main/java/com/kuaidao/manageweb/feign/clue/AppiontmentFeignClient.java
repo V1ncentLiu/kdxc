@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/clueAppiontment", fallback = AppiontmentFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/clueAppiontment", fallback = AppiontmentFeignClient.HystrixClientFallback.class)
 public interface AppiontmentFeignClient {
 	/**
 	 * 根据id查询预约来访信息

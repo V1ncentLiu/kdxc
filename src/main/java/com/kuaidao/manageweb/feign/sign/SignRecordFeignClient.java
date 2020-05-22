@@ -30,7 +30,7 @@ import com.kuaidao.manageweb.feign.client.ClientFeignClient;
  * @date 2019年3月1日 下午6:36:23   
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/sign/signRecord", fallback = SignRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/sign/signRecord", fallback = SignRecordFeignClient.HystrixClientFallback.class)
 public interface SignRecordFeignClient {
     
     /**

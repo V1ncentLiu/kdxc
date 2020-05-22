@@ -16,7 +16,7 @@ import com.kuaidao.common.entity.JSONResult;
  * @date 2019年4月10日 下午7:35:14   
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/financing/balanceaccount", fallback = BalanceAccountApplyClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/financing/balanceaccount", fallback = BalanceAccountApplyClient.HystrixClientFallback.class)
 public interface BalanceAccountApplyClient {
     /**
      * 查询付款明细

@@ -19,7 +19,7 @@ import com.kuaidao.common.entity.PageBean;
  * @author Administrator
  *
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/cluerepetition", fallback = ClueRepetitionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/cluerepetition", fallback = ClueRepetitionFeignClient.HystrixClientFallback.class)
 public interface ClueRepetitionFeignClient {
 	/**
 	 * 重单申请列表

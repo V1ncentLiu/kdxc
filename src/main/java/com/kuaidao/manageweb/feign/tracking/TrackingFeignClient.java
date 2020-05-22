@@ -24,7 +24,7 @@ import java.util.List;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service-1",path="/aggregation/tracking",fallback = TrackingFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service",path="/aggregation/tracking",fallback = TrackingFeignClient.HystrixClientFallback.class)
 public interface TrackingFeignClient {
 
     @RequestMapping("/insert")

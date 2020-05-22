@@ -14,7 +14,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/visit/truckingOrder", fallback = TrackingOrderFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/visit/truckingOrder", fallback = TrackingOrderFeignClient.HystrixClientFallback.class)
 public interface TrackingOrderFeignClient {
     
     

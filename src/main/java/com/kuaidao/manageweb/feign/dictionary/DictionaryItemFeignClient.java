@@ -24,7 +24,7 @@ import feign.hystrix.FallbackFactory;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service-1", path = "/sys/DictionaryItem",
+@FeignClient(name = "sys-service", path = "/sys/DictionaryItem",
         fallbackFactory = DictionaryItemFeignClient.HystrixClientFallback.class)
 public interface DictionaryItemFeignClient {
 

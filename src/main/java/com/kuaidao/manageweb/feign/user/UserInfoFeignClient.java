@@ -31,7 +31,7 @@ import feign.hystrix.FallbackFactory;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service-1", path = "/sys/userInfo",
+@FeignClient(name = "sys-service", path = "/sys/userInfo",
         fallbackFactory = LoginRecordFeignClient.HystrixClientFallback.class)
 public interface UserInfoFeignClient {
     /**

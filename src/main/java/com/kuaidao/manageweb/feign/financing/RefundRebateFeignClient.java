@@ -21,7 +21,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/refundRebate",
+@FeignClient(name = "aggregation-service", path = "/aggregation/refundRebate",
         fallback = RefundRebateFeignClient.HystrixClientFallback.class)
 public interface RefundRebateFeignClient {
 
