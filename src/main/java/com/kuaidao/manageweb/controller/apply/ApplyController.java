@@ -330,10 +330,10 @@ public class ApplyController {
      */
     public String getPhone(String phone) {
         String phoneName = "";
-        if (StringUtils.isNotBlank(phone)) {
+        /*if (StringUtils.isNotBlank(phone)) {
             phoneName = phone.substring(0,9)+"**";
-        }
-        return phoneName;
+        }*/
+        return phone;
     }
 
     /**
