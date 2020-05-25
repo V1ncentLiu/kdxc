@@ -197,16 +197,18 @@ public class BusinessVisitRecordController {
 
         // 按照时间进行排序
         for(Map.Entry<Long,List<BusVisitRecordRespDTO>> map:collectMap.entrySet()){
-            map.getValue().stream().sorted(new Comparator<BusVisitRecordRespDTO>() {
-                @Override
-                public int compare(BusVisitRecordRespDTO o1, BusVisitRecordRespDTO o2) {
-                    if(o1.getVistitTime().getTime()>o2.getVistitTime().getTime()){
-                        return -1;
-                    }else{
-                        return 1;
+            List<BusVisitRecordRespDTO> collect = map.getValue().stream()
+                .sorted(new Comparator<BusVisitRecordRespDTO>() {
+                    @Override
+                    public int compare(BusVisitRecordRespDTO o1, BusVisitRecordRespDTO o2) {
+                        if (o1.getVistitTime().getTime() > o2.getVistitTime().getTime()) {
+                            return 1;
+                        } else {
+                            return -1;
+                        }
                     }
-                }
-            });
+                }).collect(Collectors.toList());
+            map.setValue(collect);
         }
         // 封装成指定类型结果集
         List<Map<String,Object>> resList = new ArrayList<>();
