@@ -201,9 +201,9 @@ public class BusinessVisitRecordController {
                 @Override
                 public int compare(BusVisitRecordRespDTO o1, BusVisitRecordRespDTO o2) {
                     if(o1.getVistitTime().getTime()>o2.getVistitTime().getTime()){
-                        return 1;
-                    }else{
                         return -1;
+                    }else{
+                        return 1;
                     }
                 }
             });
