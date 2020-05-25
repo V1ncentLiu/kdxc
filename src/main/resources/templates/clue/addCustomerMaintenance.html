@@ -187,7 +187,7 @@
                         <el-form-item
                                 label="身份证号：" prop="identityCard" :label-width="formLabelWidth">
                             <el-input v-model="form.identityCard" autocomplete="off"
-                                      maxLength="20"></el-input>
+                                      maxLength="20" @keyup.native="idCard"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -1936,6 +1936,10 @@
                 this.form.qq = this.form.qq.replace(/[^\.\d]/g, '');
                 this.form.qq = this.form.qq.replace('.', '');
             },
+            idCard() {
+                this.form.identityCard = this.form.identityCard.replace(/[^\.\da-zA-Z]/g, '');
+                this.form.identityCard = this.form.identityCard.replace('.', '');
+            },
             agenumber() {
                 /* this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
                 this.form.customerAge = this.form.customerAge.replace('.', ''); */
@@ -2446,6 +2450,26 @@
                         });
                         addCustomerVM.inviteBtnDisabled = false;
                         return;
+                    }
+                    //如果是否接通，选择是.客户关注点包含关机、拒接、挂断、空号、错号、无人接听、未接、没接通，不允许提交成功资料。
+                    if (this.formInline.isCall==1) {
+                    	var focusPoint=this.formInline.focusPoint;
+                    	if(focusPoint.includes("关机")
+                    			||focusPoint.includes("拒接")
+                    			||focusPoint.includes("挂断")
+                    			||focusPoint.includes("空号")
+                    			||focusPoint.includes("错号")
+                    			||focusPoint.includes("无人接听")
+                    			||focusPoint.includes("未接")
+                    			||focusPoint.includes("没接通")){
+	                        this.$message({
+	                            message: '请检查跟进记录中“是否接通”是否填写错误。',
+	                            type: 'warning'
+	                        });
+	                        //保存按钮可点击
+	                        addCustomerVM.inviteBtnDisabled = false;
+	                        return;
+                    	}
                     }
                     //省
                     var province = this.form.province;
