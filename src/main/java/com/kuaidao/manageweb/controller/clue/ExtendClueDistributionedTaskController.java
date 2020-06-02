@@ -7,6 +7,8 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.kuaidao.common.entity.ClueCommunicateExportModel;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -453,7 +455,7 @@ public class ExtendClueDistributionedTaskController {
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueExportModel.class).build();
-            List<List<List<Object>>> partition = Lists.partition(dataList, 20000);
+            List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
             for (int i = 0; i < partition.size(); i++) {
                 // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
                 WriteSheet writeSheet = EasyExcel.writerSheet(i, "资源情况" + i).build();
@@ -555,7 +557,7 @@ public class ExtendClueDistributionedTaskController {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
                 // 资源ID
-                curList.add(taskDTO.getClueId());
+                curList.add(taskDTO.getClueId() + "");
                 // 客户级别
                 curList.add(taskDTO.getCusLevelName());
                 // 创建时间
@@ -630,15 +632,30 @@ public class ExtendClueDistributionedTaskController {
                 dataList.add(curList);
             }
         }
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+//        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+//        String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+//        response.addHeader("Content-Disposition",
+//                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+//        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+//        response.setContentType("application/octet-stream");
+//        ServletOutputStream outputStream = response.getOutputStream();
+//        wbWorkbook.write(outputStream);
+//        outputStream.close();
+
         String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
-        ServletOutputStream outputStream = response.getOutputStream();
-        wbWorkbook.write(outputStream);
-        outputStream.close();
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(), ClueCommunicateExportModel.class).build();
+        List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
+        for (int i = 0; i < partition.size(); i++) {
+            // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
+            WriteSheet writeSheet = EasyExcel.writerSheet(i, "资源沟通记录" + i).build();
+            // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+            excelWriter.write(partition.get(i), writeSheet);
+        }
+        excelWriter.finish();
     }
 
     /**
