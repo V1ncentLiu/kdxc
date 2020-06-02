@@ -15,59 +15,19 @@
 <div id="myCustom" class="myCustom mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
+        <el-breadcrumb-item>判断管理</el-breadcrumb-item>
+        <el-breadcrumb-item>重复手机号资源</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB20">
-        <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
-        <shiro:hasPermission name="customerManager:allocation">
-            <el-button type="success" @click="openassignrDig">分配资源</el-button>
-        </shiro:hasPermission>
-        <shiro:hasPermission name="customerManager:transferclue">
-            <el-button type="warning" @click="opentransferForm">转移资源</el-button>
-        </shiro:hasPermission>
-        <shiro:hasPermission name="customerManager:distribute">
-            <el-button type="danger" @click="openvicemanagerForm">副总分发</el-button>
-        </shiro:hasPermission>
-    </el-row>
+
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <!--     <el-form-item label="全部资源:">
-                        <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
-                            <el-option
-                                v-for="item in isTransfer"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>  -->
-                <!--  <el-form-item label="">
-                     <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
-                         <el-option
-                             v-for="item in clueStatus"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value">
-                         </el-option>
-                     </el-select>
-                 </el-form-item> -->
+
                 <el-form-item label="客户手机号:">
                     <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
                 </el-form-item>
                 <el-form-item label="客户姓名:">
                     <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-                </el-form-item>
-                <el-form-item label="资源类别:">
-                    <el-select v-model="form.category" placeholder="资源类别" clearable>
-                        <el-option
-                            v-for="item in categoryArr"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
                 </el-form-item>
                 <el-form-item label="创建时间:">
                     <el-date-picker
@@ -83,186 +43,34 @@
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
-                <el-row v-show="isShow">
-                    <el-form-item label="客户状态:">
-                        <el-select v-model="form.cusStatus" placeholder="客户状态" clearable >
-                            <el-option
-                                v-for="item in cusStatusArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="客户级别:">
-                        <el-select v-model="form.cusLeve" placeholder="客户级别" clearable>
-                            <el-option
-                                v-for="item in cusLevelArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <!-- <el-form-item label="">
-                        <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
-                            <el-option
-                                v-for="item in hasInvite"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item> -->
-                    <el-form-item label="今日是否拨打:">
-                        <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable>
-                            <el-option
-                                v-for="item in callTel"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="编辑时间:">
-                        <el-date-picker
-                            v-model="form.updateTimeStart"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                            v-model="form.updateTimeEnd"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="今日是否跟访:">
-                        <el-select v-model="form.trackingDay" placeholder="今日是否跟访" clearable>
-                            <el-option
-                                v-for="item in hastracking"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="是否重复手机:">
-                        <el-select v-model="form.repeatStatus" placeholder="是否重复手机号" clearable >
-                            <el-option
-                                v-for="item in clueRepeatStatus"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="预签约省份:">
-                        <el-select v-model="form.province" placeholder="预签约省份" clearable   filterable  multiple>
-                            <el-option
-                                v-for="item in provinceArr"
-                                :key="item.name"
-                                :label="item.name"
-                                :value="item.name">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="分配时间:">
-                        <el-date-picker
-                            style="width: 100%;"
-                            v-model="form.assignTimeStart"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                            style="width: 100%;"
-                            v-model="form.assignTimeEnd"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-
-                    <el-form-item label="电销组:">
-                        <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDXZDisabled">
-                            <el-option
+                <el-form-item label="电销组:">
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDXZDisabled">
+                        <el-option
                                 v-for="item in orgTeleArr"
                                 :key="item.id"
                                 :label="item.name"
                                 :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-row v-show="isShow">
+
+
+
+
+
                     <el-form-item label="电销顾问:">
                         <el-select
                             v-model="form.teleSaleId"
                             placeholder="电销顾问"
                             style="width: 100%;"
                             filterable
-                            multiple
                             clearable  >
                             <el-option
                                 v-for="item in busSaleArr"
                                 :key="item.id"
                                 :label="item.name"
                                 :value="item.id">
-                                <el-checkbox-group v-model="form.teleSaleId">
-                                    <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                                </el-checkbox-group>
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="搜索词:">
-                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-                    </el-form-item>
-                    <el-form-item label="最后拨打时间:">
-                        <el-date-picker
-                            v-model="form.telEndTimeStart"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                            v-model="form.telEndTimeEnd"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <!--    <el-form-item label="">
-                        <el-input v-model="form.address" placeholder="地址"></el-input>
-                    </el-form-item> -->
-                    <el-form-item label="资源ID:">
-                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
-                    </el-form-item>
-                    <el-form-item label="QQ:">
-                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
-                    </el-form-item>
-                    <el-form-item label="微信:">
-                        <el-input v-model="form.wechat" placeholder="微信"></el-input>
-                    </el-form-item>
-                    <el-form-item label="邮箱:">
-                        <el-input v-model="form.email" placeholder="邮箱"></el-input>
-                    </el-form-item>
-                    <el-form-item label="资源是否有效:">
-                        <el-select v-model="form.status" placeholder="资源是否有效" clearable >
-                            <el-option
-                                v-for="item in comArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="是否接通:">
-                        <el-select v-model="form.isCall" placeholder="是否接通" clearable >
-                            <el-option
-                                v-for="item in comArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -272,6 +80,7 @@
                                        :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
+
                     <el-form-item label="是否补齐尾款:">
                         <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable>
                             <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
@@ -279,6 +88,38 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+
+
+                    <el-form-item label="分配时间:">
+                        <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.assignTimeStart"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.assignTimeEnd"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+
+
+                    <el-form-item label="资源ID:">
+                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="QQ:">
+                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="微信:">
+                        <el-input v-model="form.wechat" placeholder="微信"></el-input>
+                    </el-form-item>
+
+
+
                     <el-form-item label="资源来源:">
 	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源">
 	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name"
@@ -615,130 +456,7 @@
             </el-table>
         </div>
     </el-dialog>
-    <!-- 分配资源 -->
-    <el-dialog title="分配资源" :visible.sync="allocateFormVisible" width="540px">
-        <el-form :model="formAllocat" ref="formAllocat">
-            <el-form-item
-                label="电销顾问："
-                prop="telSales"
-                :rules="[
-                    { required: true, message: '请选择活动区域电销顾问', trigger: 'change' }
-                ]"
-                :label-width="formLabelWidth">
-                <el-select v-model="formAllocat.telSales" placeholder="请选择" style="width: 80%;">
-                    <el-option
-                        v-for="item in saleList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="客户级别："  prop="cusLevel"  :label-width="formLabelWidth">
-                <el-select v-model="formAllocat.cusLevel" placeholder="不变化" style="width: 80%;">
-                    <el-option
-                        v-for="item in cusLevelArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            </el-row>
-        </el-form>
-        <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary"
-                       :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交</el-button>
-            <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
-        </div>
-    </el-dialog>
-    <!-- 转移资源 -->
-    <el-dialog title="转移资源" :visible.sync="transferFormVisible" width="540px">
-        <el-form :model="formTransfer" ref="formTransfer">
-            <el-form-item
-                label="电销总监："
-                prop="salesDirector"
-                :rules="[
-                { required: true, message: '请选择活动区域电销总监', trigger: 'change' }
-            ]"
-                :label-width="formLabelWidth">
-                <el-select v-model="formTransfer.salesDirector" placeholder="请选择" style="width: 80%;">
-                    <el-option
-                        v-for="item in saleGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitTransferForm('formTransfer')">提交</el-button>
-            <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
-        </div>
-    </el-dialog>
-    <!-- 批号分配 -->
-    <el-dialog title="信息流批量分配" :visible.sync="batchFormVisible" width="540px">
-        <el-form :model="formBatch" ref="formBatch">
-            <el-form-item
-                label="信息流分配规则："
-                prop="batchRule"
-                :rules="[
-                { required: true, message: '请选择信息流分配规则', trigger: 'change' }
-            ]"
-                :label-width="formLabelWidth">
-                <el-select v-model="formBatch.batchRule" placeholder="请选择" style="width: 60%;">
-                    <el-option label="规则名称1" value="batchRule1"></el-option>
-                    <el-option label="规则名称2" value="batchRule2"></el-option>
-                </el-select>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" @click="submitBatchForm('formBatch')">提交</el-button>
-            <el-button @click="resetForm('formBatch');batchFormVisible=false;">取 消</el-button>
-        </div>
-    </el-dialog>
-    <!-- 副总分发 -->
-    <el-dialog title="副总分发" :visible.sync="vicemanagerFormVisible" width="540px">
-        <el-form :model="formVicemanage" ref="formVicemanage">
-            <el-form-item
-                label="电销总监："
-                prop="salesDirector"
-                :rules="[
-                { required: true, message: '请选择电销总监', trigger: 'change' }
-            ]"
-                :label-width="formLabelWidth">
-                <el-select v-model="formVicemanage.salesDirector" placeholder="请选择" style="width: 80%;"@change="currentSalesDirector" >
-                    <el-option
-                        v-for="item in saleGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item
-                label="电销顾问："
-                prop="salesstaff"
-                :rules="[
-                { required: true, message: '请选择电销顾问', trigger: 'change' }
-            ]"
-                :label-width="formLabelWidth">
-                <el-select v-model="formVicemanage.salesstaff" placeholder="请选择" style="width: 80%;">
-                    <el-option
-                        v-for="item in saleInfoArr"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer" style="text-align:center;">
-            <el-button type="primary" :disabled="btnDisabled" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
-            <el-button @click="resetForm('formVicemanage');vicemanagerFormVisible=false;">取 消</el-button>
-        </div>
-    </el-dialog>
+
     <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 自定义列 -->
     <el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
@@ -767,7 +485,6 @@
 <script th:inline="javascript" >
   var orgList=[[${orgList}]];//电销组
   var saleList=[[${saleList}]];//电销顾问
-  var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
   var queryOrg=[[${queryOrg}]];//电销组
   var fieldList=[[${fieldList}]];//自定义字段
   var userFieldList=[[${userFieldList}]];//用户自定义字段
@@ -946,7 +663,6 @@
         saleInfoArr:[],
         busSaleArr:[],
         saleList:saleList,
-        saleGroupList:saleGroupList,
         value: '',//下拉选项默认值
         recordTable:[],
         repeatPhonesTable:[],
@@ -1065,50 +781,21 @@
         localStorage.setItem('customManagementPageSize', pageSize);
         param.pageNum=pageNum;
         param.pageSize=pageSize;
-        param.isTransfer=this.form.isTransfer;
-        param. status=this.form.cluesta;
         param.phone=this.form.customerPhone ;
         param.cusName=this.form.customerName;
-        param.customerStatus=this.form.cusStatus;
-        param.cusLevel=this.form.cusLeve;
-        param.updateTimeStart=this.form.updateTimeStart;
-        param.updateTimeEnd=this.form.updateTimeEnd;
         param.createTimeStart=this.form.createTimeStart;
         param.createTimeEnd=this.form.createTimeEnd;
-        param.assignTimeStart=this.form.assignTimeStart;
-        param.assignTimeEnd=this.form.assignTimeEnd;
-        param.telEndTimeStart=this.form.telEndTimeStart;
-        param.telEndTimeEnd=this.form.telEndTimeEnd;
-        param.isCall=this.form.isCall;
-        param.status=this.form.status;
-        param.dayTel=this.form.dayTel;
-        param.hasInvite=this.form.hasInvite;
-        param.repeatStatus=this.form.repeatStatus;
-        if(null!=this.form.province&&this.form.province.length>0) {
-            param.provinces= this.form.province.join(",");
-        }
-        param.category= this.form.category;
-        param.address= this.form.address;
-        param.searchWord= this.form.searchWord;
-        param.trackingDay= this.form.trackingDay;
         param.teleorg= this.form.teleorg;
-        param.clueId = this.form.clueId;
-        param.qq = this.form.qq;
-        param.email = this.form.email;
-        param.wechat = this.form.wechat;
+        param.teleSaleId= this.form.teleSaleId;
         param.isSign = this.form.isSign;
         param.isTailMoney = this.form.isTailMoney;
+        param.assignTimeStart=this.form.assignTimeStart;
+        param.assignTimeEnd=this.form.assignTimeEnd;
+        param.clueId = this.form.clueId;
+        param.qq = this.form.qq;
+        param.wechat = this.form.wechat;
         param.teleReceiveSource = this.form.teleReceiveSource;
-        if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
-          param.teleSaleId= this.form.teleSaleId.join(",");
-        }
-        if(this.form.updateTimeStart !=null && this.form.updateTimeStart != '' && this.form.updateTimeEnd !=null && this.form.updateTimeEnd != '' && this.form.updateTimeStart>this.form.updateTimeEnd){
-          this.$message({
-            message: '编辑开始时间不能大于结束时间',
-            type: 'warning'
-          });
-          return;
-        }
+
         if(this.form.createTimeStart !=null && this.form.createTimeStart != '' && this.form.createTimeEnd !=null && this.form.createTimeEnd != '' && this.form.createTimeStart>this.form.createTimeEnd){
           this.$message({
             message: '创建开始时间不能大于结束时间',
@@ -1123,14 +810,8 @@
           });
           return;
         }
-        if(this.form.telEndTimeStart !=null && this.form.telEndTimeStart != '' && this.form.telEndTimeEnd !=null && this.form.telEndTimeEnd != '' && this.form.telEndTimeStart>this.form.telEndTimeEnd){
-          this.$message({
-            message: '最后拨打开始时间不能大于结束时间',
-            type: 'warning'
-          });
-          return;
-        }
-        axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
+
+        axios.post('/tele/repeatPhone/repeatPhoneList',param).then(function (response) {
           var resobj= response.data;
           var pageData=resobj.data;
           var data=pageData.data;

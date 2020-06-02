@@ -758,12 +758,16 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
 
         queryDTO.setOrgType(OrgTypeConstant.DXZ);
         if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
+            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            List<Long> orgids = orgGroupByOrgId.stream().map(c->c.getId()).collect(Collectors.toList());
+            baseQueryDto.setOrgIdList(orgids);
+            return;
             //如果有事业部筛选
-            if(null!=baseQueryDto.getDeptId()){
-                queryDTO.setParentId(baseQueryDto.getDeptId());
-            }else{
-                queryDTO.setParentId(curLoginUser.getOrgId());
-            }
+//            if(null!=baseQueryDto.getDeptId()){
+//                queryDTO.setParentId(baseQueryDto.getDeptId());
+//            }else{
+//                queryDTO.setParentId(curLoginUser.getOrgId());
+//            }
         }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             queryDTO.setParentId(curLoginUser.getOrgId());
             if(null!=baseQueryDto.getDeptId()){

@@ -307,7 +307,6 @@
                                 <font >{{formatTimeFn(form.qqUpdateTime)}}</font>
                             </el-form-item>
                         </div>
-
                     </el-col>
                     <el-col :span="8" v-show="form.wechat !=null && form.wechat !=''">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth120">
@@ -370,6 +369,29 @@
                         </div>
                     </el-col>
                 </el-row>
+
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="身份证号：" :label-width="formLabelWidth120" >
+                            <span>
+                                {{form.identityCard}}
+                            </span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="卡点：" :label-width="formLabelWidth120" >
+                            <span>{{form.offerEndTime}}</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="卡点备注：" :label-width="formLabelWidth120" >
+                            <span>{{form.offerEndRemark}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+
+
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth120" >
@@ -1174,6 +1196,9 @@ if(customer==null){
             customerSex:"",
             wechat:'',
             wechat2:'',
+            identityCard:'',
+            offerEndTime:"",
+            offerEndRemark:'',
             wechatUrl:'',
             experience:"",
             customerAge:"",
@@ -1293,6 +1318,9 @@ if(customer==null){
         wechat:customer.wechat,
         wechat2:customer.wechat2,
         wechatUrl:customer.wechatCode,
+        identityCard:customer.identityCard,
+        offerEndTime:dateFormat(customer.offerEndTime),
+        offerEndRemark:customer.offerEndRemark,
         experience:customer.hasExperience,
         customerAge:customer.age,
         customerJob:customer.profession,
@@ -1415,7 +1443,12 @@ if(base==null){
 }else{
     base.messageTime = crtTimeFtt1( base.messageTime)
 }
-
+function dateFormat(val) {
+          if (val == undefined) {
+             return "";
+          }
+          return moment(val).format("YYYY-MM-DD");
+        }
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {

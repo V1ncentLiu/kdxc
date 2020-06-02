@@ -973,8 +973,13 @@
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
+                param.siteIsNull = this.form.siteIsNull;
+                param.qq = this.form.qq;
+                param.email = this.form.email;
+                param.wechat = this.form.wechat;
                 param.searchWord = this.form.searchWord;
                 param.sourcetwo = this.form.sourcetwo;
+                param.buildSelf = this.form.buildSelf;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -1025,7 +1030,13 @@
                 var falgNew=falg;
                 axios.post('/exetend/distributionedTaskManager/findCluesCount', param)
                 .then(function (response) {
-                	debugger;
+                	if(response.data.data>150000){
+                		this.$message({
+                            message: '选择数据过多，不允许进行一次性导出',
+                            type: 'warning'
+                          });
+                		return;
+                	}
                 	ocmVM.$confirm("当前导出数据量为"+response.data.data+"条，确认导出吗？", '提示', {
                          confirmButtonText: '确认',
                          cancelButtonText: '取消',
@@ -1086,7 +1097,6 @@
               });
               return;
             }else{
-              debugger;
               var clueIds =[];
               if(rows.length == 1) {
                 if (rows[0].phase > 3) {

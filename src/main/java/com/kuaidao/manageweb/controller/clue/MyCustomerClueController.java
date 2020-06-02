@@ -1240,6 +1240,7 @@ public class MyCustomerClueController {
                         UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
                         userRoleInfo.setRoleCode(RoleCodeEnum.DXFZ.name());
                         userRoleInfo.setOrgId(org.getId());
+                        userRoleInfo.setStatusList(statusList);
                         JSONResult<List<UserInfoDTO>> ceoUserInfoJson =
                                 userInfoFeignClient.listByOrgAndRole(userRoleInfo);
                         if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS)
@@ -1256,6 +1257,7 @@ public class MyCustomerClueController {
                         UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
                         userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
                         userRoleInfo.setOrgId(org.getId());
+                        userRoleInfo.setStatusList(statusList);
                         JSONResult<List<UserInfoDTO>> ceoUserInfoJson =
                                 userInfoFeignClient.listByOrgAndRole(userRoleInfo);
                         if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS)

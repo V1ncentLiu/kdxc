@@ -122,6 +122,7 @@ public interface ClueBasicFeignClient {
         }
 
 
+        @PostMapping("/pendingAllocationList")
         @Override
         public JSONResult<PageBean<PendingAllocationClueDTO>> pendingAllocationList(
                 @RequestBody PendingAllocationCluePageParam pageParam) {
