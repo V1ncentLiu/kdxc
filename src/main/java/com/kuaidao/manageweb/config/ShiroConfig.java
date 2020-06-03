@@ -49,6 +49,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/images/**", "anon");
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/prometheus", "anon");
+        filterChainDefinitionMap.put("/monitor/prometheus", "anon");
         filterChainDefinitionMap.put("/login/resetPwd", "anon");
         filterChainDefinitionMap.put("/merchantLogin/resetPwd", "anon");
         filterChainDefinitionMap.put("/login/index", "anon");
