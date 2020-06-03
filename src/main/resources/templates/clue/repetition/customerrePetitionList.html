@@ -542,9 +542,9 @@
       },
       transCusPhone(row) {
         var text="";
-        if( row.phase ==7 || row.phase == 8 || (roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
-            ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
-            ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)){
+        if( ( row.phase !=undefined  && (row.phase ==7 || row.phase == 8)) || (roleCode =='DXCYGW' && row.teleSaleIds !=undefined && row.teleSaleIds.indexOf(userId) == -1 )
+            ||  (roleCode =='DXZJ' && row.teleGorupIds !=undefined && row.teleGorupIds.indexOf(orgId) == -1)
+            ||  (roleCode =='DXFZ' && row.teleDeptIds !=undefined && row.teleDeptIds.indexOf(orgId) == -1)){
           text ="***"
         }else{
           text = row.cusPhone;
@@ -608,10 +608,12 @@
         var text="";
         for ( var i = 0; i <rows.length; i++){
           str = rows[i].id
-          if(rows[i].phase ==7 || rows[i].phase == 8 || (roleCode =='DXCYGW' && rows[i].teleSaleIds.indexOf(userId) == -1 )
-              ||  (roleCode =='DXZJ' && rows[i].teleGorupIds.indexOf(orgId) == -1)
-              ||  (roleCode =='DXFZ' && rows[i].teleDeptIds.indexOf(orgId) == -1)){
-            text ="***"
+          if( ( rows[i].phase !=undefined  && (rows[i].phase ==7 || rows[i].phase == 8)) || (roleCode =='DXCYGW' && rows[i].teleSaleIds !=undefined && rows[i].teleSaleIds.indexOf(userId) == -1 )
+              ||  (roleCode =='DXZJ' && rows[i].teleGorupIds !=undefined && rows[i].teleGorupIds.indexOf(orgId) == -1)
+              ||  (roleCode =='DXFZ' && rows[i].teleDeptIds !=undefined && rows[i].teleDeptIds.indexOf(orgId) == -1)){
+            text ="***";
+          }else{
+              var text = rows[i].cusPhone;
           }
         }
         var param={};
@@ -621,11 +623,7 @@
 
           if(null !==response && response.data !=null && response.data.code=='0'){
             var clueRepetitionDTO = response.data.data;
-            if(text == "***") {
               orgVM.cusPhoneId = text;
-            } else {
-              orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
-            }
             if(isShowRepetition){
               orgVM.operatingArea = clueRepetitionDTO.operatingArea ;
               orgVM.investigateTime = orgVM.dateTimeFormats(clueRepetitionDTO.investigateTime) ;
