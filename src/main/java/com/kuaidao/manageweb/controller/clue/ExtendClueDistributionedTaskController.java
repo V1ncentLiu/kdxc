@@ -642,20 +642,22 @@ public class ExtendClueDistributionedTaskController {
 //        wbWorkbook.write(outputStream);
 //        outputStream.close();
 
-        String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-        response.setContentType("application/octet-stream");
-        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(), ClueCommunicateExportModel.class).build();
-        List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
-        for (int i = 0; i < partition.size(); i++) {
-            // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
-            WriteSheet writeSheet = EasyExcel.writerSheet(i, "资源沟通记录" + i).build();
-            // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
-            excelWriter.write(partition.get(i), writeSheet);
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
+            for (int i = 0; i < partition.size(); i++) {
+                // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
+                WriteSheet writeSheet = EasyExcel.writerSheet(i, "资源沟通记录" + i).build();
+                // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+                excelWriter.write(partition.get(i), writeSheet);
+            }
+            excelWriter.finish();
         }
-        excelWriter.finish();
     }
 
     /**
