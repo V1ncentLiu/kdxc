@@ -1045,68 +1045,8 @@ public class ExtendClueAgendaTaskController {
         logger.info("clue not import:{{}}", illegalDataList);
         if (list1 != null && list1.size() > 0) {
             JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
-            // 导入失败数据进入导入失败列表
-            if (null != jsonResult && SysConstant.SCUUESS.equals(jsonResult.getCode())
-                    && null != jsonResult.getData()) {
-                List<PushClueReq> data = jsonResult.getData();
-                // 取得第一条数据，该数据专门用来存数据数
-                Map<String, Integer> numMap = data.get(0).getStatisticsMap();
-                // 废弃数
-                Integer trash = numMap.get("trash");
-                // 已分发
-                Integer assign = numMap.get("assign");
-                result.put("trash", trash);
-                result.put("assign", assign);
-                // 如果有导入失败数据
-                /*
-                 * if (null != data && data.size() > 1) { for (int i = 1; i < data.size(); i++) {
-                 * PushClueReq pushClueReq = data.get(i); ClueAgendaTaskDTO clueAgendaTaskDTOReponse
-                 * = new ClueAgendaTaskDTO();
-                 * clueAgendaTaskDTOReponse.setDate(pushClueReq.getCreateTime());
-                 * clueAgendaTaskDTOReponse.setTypeName(typeMap2.get(pushClueReq.getType()));
-                 * clueAgendaTaskDTOReponse
-                 * .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
-                 * clueAgendaTaskDTOReponse
-                 * .setSourceTypeName(sourceTypeMap2.get(pushClueReq.getSourceType()));
-                 * clueAgendaTaskDTOReponse .setSourceName(sourceMap2.get(pushClueReq.getSource()));
-                 * clueAgendaTaskDTOReponse
-                 * .setProjectName(projectMap2.get(pushClueReq.getProjectId())); if
-                 * (pushClueReq.getIndustryCategory() != null) {
-                 * clueAgendaTaskDTOReponse.setIndustryCategoryName(
-                 * industryCategoryMap2.get(pushClueReq.getIndustryCategory())); }
-                 * clueAgendaTaskDTOReponse.setCusName(pushClueReq.getCusName());
-                 * clueAgendaTaskDTOReponse.setPhone(pushClueReq.getPhone());
-                 * clueAgendaTaskDTOReponse.setPhone2(pushClueReq.getPhone2());
-                 * clueAgendaTaskDTOReponse.setWechat(pushClueReq.getWechat());
-                 * clueAgendaTaskDTOReponse.setWechat2(pushClueReq.getWechat2());
-                 * clueAgendaTaskDTOReponse.setQq(pushClueReq.getQq());
-                 * clueAgendaTaskDTOReponse.setEmail(pushClueReq.getEmail()); if (null !=
-                 * pushClueReq.getSex() && pushClueReq.getSex() == 1) {
-                 * clueAgendaTaskDTOReponse.setSex1("男"); } else if (null != pushClueReq.getSex() &&
-                 * pushClueReq.getSex() == 2) { clueAgendaTaskDTOReponse.setSex1("女"); } if (null !=
-                 * pushClueReq.getAge()) {
-                 * clueAgendaTaskDTOReponse.setAge1(String.valueOf(pushClueReq.getAge())); }
-                 * clueAgendaTaskDTOReponse.setAddress(pushClueReq.getProvince()); if
-                 * (pushClueReq.getMessageTime() != null) {
-                 * clueAgendaTaskDTOReponse.setMessageTime1(DateUtil
-                 * .convert2String(pushClueReq.getMessageTime(), DateUtil.ymdhms)); }
-                 * 
-                 * clueAgendaTaskDTOReponse.setMessagePoint(pushClueReq.getMessagePoint());
-                 * clueAgendaTaskDTOReponse.setSearchWord(pushClueReq.getSearchWord()); if
-                 * (pushClueReq.getReserveTime() != null) {
-                 * clueAgendaTaskDTOReponse.setReserveTime1(DateUtil
-                 * .convert2String(pushClueReq.getReserveTime(), DateUtil.ymdhms)); }
-                 * clueAgendaTaskDTOReponse
-                 * .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
-                 * clueAgendaTaskDTOReponse.setUrlAddress(pushClueReq.getUrlAddress());
-                 * illegalDataList.add(clueAgendaTaskDTOReponse); } }
-                 */
-                result.put("success", (list.size() - illegalDataList.size()));
-                result.put("notAssign", (list.size() - illegalDataList.size() - trash - assign));
-            } else {
-                return new JSONResult().fail("-1", "导入失败");
-            }
         }
+        result.put("success", (list.size() - illegalDataList.size()));
         result.put("fail", illegalDataList.size());
         result.put("illegalDataList", illegalDataList);
         return new JSONResult<>().success(result);
