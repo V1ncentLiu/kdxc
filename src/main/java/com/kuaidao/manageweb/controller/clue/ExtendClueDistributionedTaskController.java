@@ -545,7 +545,7 @@ public class ExtendClueDistributionedTaskController {
                 extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         // 获取资源导出情况Excel表头
-        dataList.add(getCommunicateRecordsHeadTitleList());
+//        dataList.add(getCommunicateRecordsHeadTitleList());
 
 
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
