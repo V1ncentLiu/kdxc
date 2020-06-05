@@ -7,9 +7,6 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.kuaidao.common.entity.ClueCommunicateExportModel;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,11 +32,11 @@ import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.ClueCommunicateExportModel;
 import com.kuaidao.common.entity.ClueExportModel;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -412,7 +409,7 @@ public class ExtendClueDistributionedTaskController {
                 // 首次分配电销总监
                 curList.add(taskDTO.getFirstAsssignTeleDirectorName());
                 // 首次分配电销顾问
-                curList.add(taskDTO.getFirstAsssignTeleSaleName());
+                curList.add(taskDTO.getFirstAssignTeleSaleName());
                 String phase = "";
                 // 添加资源阶段
                 if (taskDTO.getPhase() != null) {
@@ -545,7 +542,7 @@ public class ExtendClueDistributionedTaskController {
                 extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         // 获取资源导出情况Excel表头
-//        dataList.add(getCommunicateRecordsHeadTitleList());
+        // dataList.add(getCommunicateRecordsHeadTitleList());
 
 
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
@@ -632,23 +629,25 @@ public class ExtendClueDistributionedTaskController {
                 dataList.add(curList);
             }
         }
-//        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
-//        String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-//        response.addHeader("Content-Disposition",
-//                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-//        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-//        response.setContentType("application/octet-stream");
-//        ServletOutputStream outputStream = response.getOutputStream();
-//        wbWorkbook.write(outputStream);
-//        outputStream.close();
+        // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+        // String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        // response.addHeader("Content-Disposition",
+        // "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        // response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        // response.setContentType("application/octet-stream");
+        // ServletOutputStream outputStream = response.getOutputStream();
+        // wbWorkbook.write(outputStream);
+        // outputStream.close();
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
-            String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            String name =
+                    "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition",
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
-            ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            ExcelWriter excelWriter =
+                    EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
             List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
             for (int i = 0; i < partition.size(); i++) {
                 // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
