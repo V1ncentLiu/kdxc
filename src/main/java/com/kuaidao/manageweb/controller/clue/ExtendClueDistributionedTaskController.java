@@ -651,7 +651,7 @@ public class ExtendClueDistributionedTaskController {
             List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
             for (int i = 0; i < partition.size(); i++) {
                 // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
-                WriteSheet writeSheet = EasyExcel.writerSheet(i, "资源沟通记录" + i).build();
+                WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
                 // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
                 excelWriter.write(partition.get(i), writeSheet);
             }
