@@ -644,7 +644,6 @@ public class MyCustomerClueController {
         circDto.setClueId(new Long(clueId));
         JSONResult<List<CirculationRespDTO>> circulationList =
                 circulationFeignClient.queryList(circDto);
-        logger.error("流转记录返回值：" + circulationList);
         if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
