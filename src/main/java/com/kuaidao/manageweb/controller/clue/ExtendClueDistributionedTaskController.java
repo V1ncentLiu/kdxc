@@ -348,7 +348,7 @@ public class ExtendClueDistributionedTaskController {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(taskDTO.getClueId() + ""); // 资源ID
-                curList.add(taskDTO.getCreateTime()); // 创建时间
+                curList.add(DateUtil.convert2String(taskDTO.getCreateTime(),"yyyy/MM/dd HH:mm:ss")); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
                 curList.add(taskDTO.getTypeName()); // 资源类型
@@ -558,7 +558,7 @@ public class ExtendClueDistributionedTaskController {
                 // 客户级别
                 curList.add(taskDTO.getCusLevelName());
                 // 创建时间
-                curList.add(taskDTO.getCreateTime());
+                curList.add(DateUtil.convert2String(taskDTO.getCreateTime(),"yyyy/MM/dd HH:mm:ss"));
                 // 资源类别
                 curList.add(taskDTO.getCategoryName());
                 // 媒介
@@ -607,21 +607,21 @@ public class ExtendClueDistributionedTaskController {
                 // 是否有效
                 curList.add(status);
                 // 第一次拨打时间
-                curList.add(taskDTO.getFirstCallTime());
+                curList.add(DateUtil.convert2String(taskDTO.getFirstCallTime(),"yyyy/MM/dd HH:mm:ss"));
                 // 第一次沟通时间
-                curList.add(taskDTO.getFirstCommunicateTime());
+                curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(),"yyyy/MM/dd HH:mm:ss"));
                 // 第一次沟通内容
                 curList.add(taskDTO.getFirstCommunicateContent());
                 // 第二次沟通时间
-                curList.add(taskDTO.getSecondCommunicateTime());
+                curList.add(DateUtil.convert2String(taskDTO.getSecondCommunicateTime(),"yyyy/MM/dd HH:mm:ss"));
                 // 第二次沟通内容
                 curList.add(taskDTO.getSecondCommunicateContent());
                 // 第三次沟通时间
-                curList.add(taskDTO.getThreeCommunicateTime());
+                curList.add(DateUtil.convert2String(taskDTO.getThreeCommunicateTime(),"yyyy/MM/dd HH:mm:ss"));
                 // 第三次沟通内容
                 curList.add(taskDTO.getThreeCommunicateContent());
                 // 留言时间
-                curList.add(taskDTO.getMessageTime());
+                curList.add(DateUtil.convert2String(taskDTO.getMessageTime(),"yyyy/MM/dd HH:mm:ss"));
                 // 资源专员
                 curList.add(taskDTO.getOperationName());
                 // 所属组
@@ -651,7 +651,7 @@ public class ExtendClueDistributionedTaskController {
             List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
             for (int i = 0; i < partition.size(); i++) {
                 // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
-                WriteSheet writeSheet = EasyExcel.writerSheet(i, "资源沟通记录" + i).build();
+                WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
                 // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
                 excelWriter.write(partition.get(i), writeSheet);
             }
