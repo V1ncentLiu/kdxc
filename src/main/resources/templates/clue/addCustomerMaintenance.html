@@ -1777,31 +1777,49 @@
                             this.saveDisabled = true;
                             axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                                 .then(function (response) {
-                                    addCustomerVM.$message({
-                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                            if(zjFalg){
-                                                window.location.href = "/tele/customerManager/initcustomerManager";
-                                            }else{
-                                                window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                    var result =  response.data;
+                                    if(result.code=="0"){
+                                        addCustomerVM.$message({
+                                            message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                                if(zjFalg){
+                                                    window.location.href = "/tele/customerManager/initcustomerManager";
+                                                }else{
+                                                    window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                                }
                                             }
-                                        }
-                                    });
-                                });
-                        })
-                    } else {
-                        axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
-                            .then(function (response) {
-                                addCustomerVM.$message({
-                                    message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                        // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                        });
+                                    }else{
+                                        addCustomerVM.$message.error(result.msg);
                                         if(zjFalg){
                                             window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
                                         }else{
                                             window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
                                         }
-                                        // addCustomerVM.saveDisabled = false;
                                     }
                                 });
+                        })
+                    } else {
+                        axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                            .then(function (response) {
+                                var result =  response.data;
+                                if(result.code=="0"){
+                                    addCustomerVM.$message({
+                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                            if(zjFalg){
+                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                            }else{
+                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            }
+                                        }
+                                    });
+                                }else{
+                                    addCustomerVM.$message.error(result.msg);
+                                    if(zjFalg){
+                                        window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                    }else{
+                                        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                    }
+                                }
                             });
                     }
                 } else {
