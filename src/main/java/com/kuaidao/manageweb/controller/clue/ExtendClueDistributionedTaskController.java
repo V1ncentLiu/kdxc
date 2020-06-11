@@ -362,7 +362,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getWechat()); // 微信1
                 curList.add(taskDTO.getWechat2()); // 微信2
                 curList.add(taskDTO.getAddress()); // 地址
-                curList.add(taskDTO.getMessageTime()); // 留言时间
+                curList.add(DateUtil.convert2String(taskDTO.getMessageTime(),"yyyy/MM/dd HH:mm:ss")); // 留言时间
                 curList.add(taskDTO.getMessagePoint()); // 留言内容
                 curList.add(taskDTO.getSearchWord()); // 搜索词
                 curList.add(taskDTO.getOperationName()); // 资源专员
