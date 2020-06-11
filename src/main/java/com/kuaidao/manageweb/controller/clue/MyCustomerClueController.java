@@ -1370,23 +1370,23 @@ public class MyCustomerClueController {
                         ClueDTO data = clueInfo.getData();
                         ClueCustomerDTO clueCustomer = data.getClueCustomer();
                         if(null != clueCustomer){
-                            if(null != clueCustomer.getPhone() && null != dto.getClueCustomer().getPhone()
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
                                     && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
                                 return new JSONResult<String>().fail("-1","手机号已存在");
                             }
-                            if(null != clueCustomer.getPhone2() && null != dto.getClueCustomer().getPhone2()
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
                                     && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
                                 return new JSONResult<String>().fail("-1","手机号2已存在");
                             }
-                            if(null != clueCustomer.getPhone3() && null != dto.getClueCustomer().getPhone3()
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
                                     && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
                                 return new JSONResult<String>().fail("-1","手机号3已存在");
                             }
-                            if(null != clueCustomer.getPhone4() && null != dto.getClueCustomer().getPhone4()
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
                                     && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
                                 return new JSONResult<String>().fail("-1","手机号4已存在");
                             }
-                            if(null != clueCustomer.getPhone5() && null != dto.getClueCustomer().getPhone5()
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
                                     && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
                                 return new JSONResult<String>().fail("-1","手机号5已存在");
                             }
