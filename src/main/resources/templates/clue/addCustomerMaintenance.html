@@ -10,7 +10,7 @@
         .openWechatbtn{position: absolute;top: 5px;left: 73%;}
         @media screen and (max-width: 1367px) {
             .openWechatbtn{position: relative;top: auto;left: auto;}
-        }        
+        }
     </style>
 </head>
 <body>
@@ -776,17 +776,17 @@
     </el-dialog>
     <!-- 在线聊天记录弹窗 -->
     <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
-        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>  
+        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>
         <p class="marginB10">聊天内容：</p>
         <div class="borderbox padding10">
             <!-- <div class="listBox listScroll"> -->
-            <div :class="['listBox',{'listScroll':isActive}]">    
+            <div :class="['listBox',{'listScroll':isActive}]">
                 <ul>
                     <li  v-for="(item,i) in onlineRecordData" :key="item.id">
                         <!-- 发送类型 0-自己发送，1-对方发送 -->
                         <p class="padding10 bluecolor" v-if="item.fromType==0">
                             <span class="marginR10">在线客服</span>
-                            <span>{{item.messageTime}}</span>                    
+                            <span>{{item.messageTime}}</span>
                         </p>
                         <p class="padding10 yellowcolor" v-else>
                             <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
@@ -798,7 +798,7 @@
                         </p>
                     </li>
                 </ul>
-            </div>        
+            </div>
             <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
@@ -1238,7 +1238,7 @@
                 this.isShowMoreBtn=false;
             },
             showOnlineRecord(){
-                this.onlineRecordDialogVisible=true;                
+                this.onlineRecordDialogVisible=true;
             },
             initData(){
                 var param = {};
@@ -1264,14 +1264,14 @@
                                     addCustomerVM.isShowMoreBtn=false;
                                 }
                             }
-                        }                        
+                        }
                     }else{
                         addCustomerVM.$message({
                             message: recordData.msg,
                             type: 'warning'
                         });
                         addCustomerVM.isShowOnlineRecordBtn=false;
-                    }                       
+                    }
 
                 });
 
@@ -1280,7 +1280,7 @@
                 // var param = {};
                 // param.clueId = clueId;
                 // axios.post('/log/imLog/getImLogByClueId', param).then(function (response) {
-                //     var data= response.data;                 
+                //     var data= response.data;
                 //     if(data){
                 //         addCustomerVM.isShowOnlineRecordBtn=true;
                 //     }else{
@@ -1777,31 +1777,51 @@
                             this.saveDisabled = true;
                             axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                                 .then(function (response) {
-                                    addCustomerVM.$message({
-                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                            if(zjFalg){
-                                                window.location.href = "/tele/customerManager/initcustomerManager";
-                                            }else{
-                                                window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                    var result =  response.data;
+                                    if(result.code=="0"){
+                                        addCustomerVM.$message({
+                                            message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                                if(zjFalg){
+                                                    window.location.href = "/tele/customerManager/initcustomerManager";
+                                                }else{
+                                                    window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
+                                    }else{
+                                        addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
+                                            if(zjFalg){
+                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                            }else{
+                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            }
+                                        }});
+                                    }
                                 });
                         })
                     } else {
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                             .then(function (response) {
-                                addCustomerVM.$message({
-                                    message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                        // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                        if(zjFalg){
-                                            window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
-                                        }else{
-                                            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                var result =  response.data;
+                                if(result.code=="0"){
+                                    addCustomerVM.$message({
+                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                            if(zjFalg){
+                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                            }else{
+                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            }
                                         }
-                                        // addCustomerVM.saveDisabled = false;
-                                    }
-                                });
+                                    });
+                                }else{
+                                    addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
+                                            if(zjFalg){
+                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                            }else{
+                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            }
+                                    }});
+                                }
                             });
                     }
                 } else {
@@ -2577,7 +2597,7 @@
                 $(".downloadMp3:eq(" + index + ") a").prop("download", "true");
                 $(".downloadMp3:eq(" + index + ") a>p").trigger("click");
             },
-            switchSoundBtn(id, url, callSource) {                
+            switchSoundBtn(id, url, callSource) {
                 // 播放器显示
                 // this.audioShow=true;
                 if (callSource == '2') {

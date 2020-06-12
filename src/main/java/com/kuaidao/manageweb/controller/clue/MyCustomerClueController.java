@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
+import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
 import com.kuaidao.manageweb.util.CommUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -1359,6 +1360,40 @@ public class MyCustomerClueController {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
+            List<RoleInfoDTO> roleList = user.getRoleList();
+            if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())){
+                if(null != dto && null != dto.getClueId()){
+                    ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
+                    clueQueryDTO.setClueId(dto.getClueId());
+                    JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(clueQueryDTO);
+                    if(JSONResult.SUCCESS.equals(clueInfo.getCode()) && null != clueInfo.getData()){
+                        ClueDTO data = clueInfo.getData();
+                        ClueCustomerDTO clueCustomer = data.getClueCustomer();
+                        if(null != clueCustomer){
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
+                                    && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
+                                return new JSONResult<String>().fail("-1","手机号已存在");
+                            }
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
+                                    && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
+                                return new JSONResult<String>().fail("-1","手机号2已存在");
+                            }
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
+                                    && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
+                                return new JSONResult<String>().fail("-1","手机号3已存在");
+                            }
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
+                                    && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
+                                return new JSONResult<String>().fail("-1","手机号4已存在");
+                            }
+                            if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
+                                    && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
+                                return new JSONResult<String>().fail("-1","手机号5已存在");
+                            }
+                        }
+                    }
+                }
+            }
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
             if (dto.getClueCustomer().getPhoneCreateTime() != null
