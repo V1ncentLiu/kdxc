@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 @EnableAsync
 public class ManageWebApplication {
 
+
     public static void main(String[] args) {
         SpringApplication.run(ManageWebApplication.class, args);
     }
