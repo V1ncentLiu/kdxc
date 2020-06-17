@@ -626,6 +626,17 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getOperationName());
                 // 所属组
                 curList.add(taskDTO.getSourcetwo());
+                String isSelfBuild;
+                Integer inputType = taskDTO.getInputType();
+                if(inputType == 1){
+                    isSelfBuild = "是";
+                }else{
+                    isSelfBuild = "否";
+                }
+                //是否自建
+                curList.add(isSelfBuild);
+                //ip
+                curList.add(taskDTO.getIp());
                 dataList.add(curList);
             }
         }
