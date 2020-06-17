@@ -377,16 +377,12 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC1"
+                <el-table
                           tooltip-effect="dark" style="width: 100%"
                           border
                           @selection-change="handleFileSelectionChange">
                     <el-table-column type="selection" prop="id" width="55" @selection-change="handleFileSelectionChange"
                                      align="center">
-                    </el-table-column>
-                    <el-table-column prop="uploadUserName" label="上传人姓名" align="center">
-                    </el-table-column>
-                    <el-table-column prop="uploadTime" label="上传时间" align="center">
                     </el-table-column>
                     <el-table-column prop="fileName" label="文件名称" align="center">
                     </el-table-column>
@@ -395,12 +391,6 @@
                             <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">
                                 {{scope.row.fileType !=="jpg" && scope.row.fileType !=="png" && scope.row.fileType !=="jpeg" && scope.row.fileType !=="gif" && scope.row.fileType !=="bmp"? '下载录音':'查看图片'}}
                             </el-button>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="delStatus" label="删除状态" align="center">
-                        <template slot-scope="scope">
-                            <div v-if="scope.row.delStatus === 0">未删除</div>
-                            <div v-else-if="scope.row.delStatus ===1" class="redcolor">已删除</div>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -477,6 +467,88 @@
     </template>
   </el-dialog>
 </div>
+<link rel="stylesheet" href="/css/common/uploadStyle.css">
+<style type="text/css">
+    .lineFeed {
+        word-break: break-all;
+        word-wrap: break-word;
+        cursor: not-allowed;
+    }
+
+    .lineFeed2 {
+        width: 530px;
+    }
+
+    .paddingTB {
+        padding: 4px 0px;
+    }
+
+    .paddingL55 {
+        padding-left: 55px;
+    }
+
+    .el-form-item.lineInherit .el-form-item__content {
+        line-height: inherit !important;
+    }
+
+    .progress {
+        width: 100% !important;
+    }
+
+    #ossfile {
+        text-align: right;
+    }
+    .lineFormShow .el-form-item__content{width: 100%;}
+    .lineFormShow .el-input__inner{height: 35px!important;}
+    .lineFormShow .el-form-item__error{text-align: center;width: 100%;}
+
+    i.el-icon-phone-outline {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        font-size: 20px;
+        margin: 0 5px;
+    }
+
+    .telNumberIcon {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        position: absolute;
+        right: 0;
+        top: 13px;
+    }
+
+    .fa-play-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_play.png);
+        background-repeat: no-repeat;
+    }
+
+    .fa-stop-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_stop.png);
+        background-repeat: no-repeat;
+    }
+
+    .download_img {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_download.png);
+        background-repeat: no-repeat;
+    }
+
+    .resourceInfo .el-button {
+        font-size: 12px;
+    }
+</style>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -635,6 +707,7 @@
                 optsex: [{
                     value: '1',
                     label: '男'
+                }, {
                 }, {
                     value: '2',
                     label: '女'
@@ -1368,14 +1441,6 @@
 
 <script type="text/javascript"
         src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
-<script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>
-<script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>
-<!-- 播放錄音 js -->
-<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
-<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
 
     function clueUploadFile() {
@@ -1385,21 +1450,22 @@
             addCustomerVM.$message({message: '请选择上传文件', type: 'warning'});
             return;
         }
-        var param = {};
-        param.clueId = clueId;
-        param.filePath = result;
-        axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
-            addCustomerVM.$message({
-                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                    axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
-                        .then(function (response) {
-                            addCustomerVM.tableDataC1 = response.data.data;
-                            var ossfile = document.getElementById("ossfile");
-                            ossfile.innerHTML = "";
-                        });
-                }
-            });
-        });
+        console.log(result);
+        // var param = {};
+        // param.clueId = clueId;
+        // param.filePath = result;
+        // axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
+        //     addCustomerVM.$message({
+        //         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+        //             axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+        //                 .then(function (response) {
+        //                     addCustomerVM.tableDataC1 = response.data.data;
+        //                     var ossfile = document.getElementById("ossfile");
+        //                     ossfile.innerHTML = "";
+        //                 });
+        //         }
+        //     });
+        // });
     }
 
 </script>
