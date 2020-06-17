@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-<div id="failClueManagement" class="failClueManagement mainPadding" style="display: none;">  
+<div id="searchNewPhone" class="searchNewPhone mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>资源管理</el-breadcrumb-item>
@@ -19,30 +19,29 @@
     </el-breadcrumb>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                                 
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                                 
                 <el-form-item label="手机号:">
-                    <el-input v-model="form.dianhua" placeholder="手机号"></el-input>
+                    <el-input v-model="form.phone" placeholder="手机号"></el-input>
                 </el-form-item>
                 <el-form-item label="资源ID:">
-                    <el-input v-model="form.pushId" placeholder="推送Id"></el-input>
+                    <el-input v-model="form.clueId" placeholder="推送Id"></el-input>
                 </el-form-item>
                 <el-form-item label="资源创建时间:">
                     <el-date-picker
-                        v-model="form.createTimeStart"
+                        v-model="form.startTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.createTimeEnd"
+                        v-model="form.endTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">
-                    <el-select v-model="form.failClueStatus" placeholder="请选择">
+                    <el-select v-model="form.teleGorupId" placeholder="请选择">
                         <el-option
                             v-for="item in statusOptions"
                             :key="item.value"
@@ -52,7 +51,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">
-                    <el-select v-model="form.failClueStatus" placeholder="请选择">
+                    <el-select v-model="form.teleSaleId" placeholder="请选择">
                         <el-option
                             v-for="item in statusOptions"
                             :key="item.value"
@@ -63,14 +62,14 @@
                 </el-form-item>
                 <el-form-item label="手机号创建时间:">
                     <el-date-picker
-                        v-model="form.createTimeStart"
+                        v-model="form.phoneCreateStartTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.createTimeEnd"
+                        v-model="form.phoneCreateEndTime"
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
@@ -128,12 +127,11 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var ocmVM = new Vue({
-        el: '#failClueManagement',
+        el: '#searchNewPhone',
         data: function() {
             return {
                 paginationShow: false,
                 isShow:false,
-                isPush:false,
                 dialogFormVisible: false,
                 multipleSelection: [],//选择行
                 pager:{
@@ -142,13 +140,14 @@
 	                pageSize: 20,
 	            },
                 form: {
-                	createTimeStart:'',
-                	createTimeEnd:'',
-                    failClueStatus:1,
-                    sessionid:'',
-                    pvid:'',
-                    pushId:'',
-                    dianhua:''
+                	phone:'',
+                    clueId:'',
+                    startTime:'',
+                    endTime:'',
+                    teleGorupId:'',
+                    teleSaleId:'',
+                    phoneCreateStartTime:'',
+                    phoneCreateEndTime:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -164,13 +163,14 @@
                     name: '重新推送失败'
                 }],
                 storeForm: {
-                	createTimeStart:'',
-                	createTimeEnd:'',
-                    failClueStatus:1,
-                    sessionid:'',
-                    pvid:'',
-                    pushId:'',
-                    dianhua:''
+                	phone:'',
+                    clueId:'',
+                    startTime:'',
+                    endTime:'',
+                    teleGorupId:'',
+                    teleSaleId:'',
+                    phoneCreateStartTime:'',
+                    phoneCreateEndTime:'',
                 },
                 storeId: '',
                 scrollTop: 0,
@@ -185,55 +185,19 @@
                 // console.log(val)
                 this.multipleSelection = val;
             },
-            deleteFun() {
-            	var rows = this.multipleSelection;
-                if(rows.length==0){
+            searchTable() {
+            	var startTime=this.form.startTime;
+                var endTime=this.form.endTime;
+                if(endTime && startTime>endTime){
                     this.$message({
-                       message: '请选择数据进行推送',
-                       type: 'warning'
-                     });
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
                     return;
                 }
-                var rowIds = [];
-                for(var i=0;i<rows.length;i++){
-             	   var curRow = rows[i];
-                   rowIds.push(curRow.id);
-                }
-             this.$confirm('确定要重新推送吗？', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning'
-             }).then(() => {
-             	  //删除
-             	var param  = {idList:rowIds};
-                 axios.post('/failClue/push',param)
-                 .then(function (response) {
-                     var data =  response.data;
-                     if(data.code=='0'){
-                    	 ocmVM.$message({message:'推送成功',type:'success',duration:1000,onClose:function(){
-                     		ocmVM.searchTable();
-                 	    }});
-                     }else{
-                    	 ocmVM.$message({
-                             message: "接口调用失败",
-                             type: 'error'
-                           }); 
-                     }
-                 })
-                 .catch(function (error) {
-                   console.log(error);
-                 })
-                 .then(function () {
-                 	
-                 });
-             }).catch(() => {
-                    
-             });
-            },
-            searchTable() {
-            	var startTime=this.form.createTimeStart;
-                var endTime=this.form.createTimeEnd;
-                if(endTime && startTime>endTime){
+                var startTime1=this.form.phoneCreateStartTime;
+                var endTime1=this.form.phoneCreateEndTime;
+                if(endTime1 && startTime1>endTime1){
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
                         type: 'warning'
@@ -244,7 +208,7 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
-                axios.post('/failClue/list', param)
+                axios.post('/clueCustomerTelLog/queryPageList', param)
                 .then(function (response) {
                         var result =  response.data;
                         console.info(result);
@@ -252,7 +216,6 @@
                         ocmVM.dataTable= table.data;
                         ocmVM.pager.total =  table.total;
                         ocmVM.pager.currentPage = table.currentPage;
-                        ocmVM.statusChange();
                         // 取出存储的id
                         if(!ocmVM.paginationShow){
                             if(ocmVM.storeId){
@@ -268,8 +231,8 @@
                                 })
                             }
                         }else{
-                            ocmVM.removeSessionStore ("failClueManagerStoreForm");
-                            ocmVM.removeSessionStore ("failClueManagerOtherVal");
+                            ocmVM.removeSessionStore ("searchNewPhoneStoreForm");
+                            ocmVM.removeSessionStore ("searchNewPhoneOtherVal");
                         }
                         ocmVM.paginationShow = true;
                         ocmVM.storeForm = ocmVM.form;
@@ -302,14 +265,6 @@
                   this.isShow=true
                 }
             },
-            statusChange(){
-            	var status=this.form.failClueStatus;
-                if(status==1||status==3){
-                  this.isPush=false;
-                }else{
-                  this.isPush=true;
-                }
-            },
             setSessionStore (name, content) {
                 if (!name) return
                 if (typeof content !== 'string') {
@@ -331,13 +286,24 @@
             },
         },
         created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("searchNewPhoneStoreForm");
+                var otherVal = this.getSessionStore("searchNewPhoneOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
 			if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
         },
         mounted(){
-            document.getElementById('failClueManagement').style.display = 'block';
+            document.getElementById('searchNewPhone').style.display = 'block';
         }
     })
 </script>
