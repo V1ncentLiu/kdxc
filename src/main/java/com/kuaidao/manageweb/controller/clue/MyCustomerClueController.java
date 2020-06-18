@@ -16,6 +16,7 @@ import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -167,7 +168,6 @@ public class MyCustomerClueController {
         if (("," + repetitionBusinessLine + ",").contains("," + user.getBusinessLine() + ",")) {
             isShowRepetition = true;
         }
-        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         request.setAttribute("isShowRepetition", isShowRepetition);
         return "clue/myCustom";
     }
@@ -1164,12 +1164,16 @@ public class MyCustomerClueController {
     @LogRecord(description = "新建资源保存", operationType = OperationType.INSERT,
             menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveCreateClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
-        if(CollectionUtils.isEmpty(dto.getClueFiles())){
-            return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
-        }
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
+            if(null != user.getBusinessLine()
+            && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                            user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
+                            user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
+            && CollectionUtils.isEmpty(dto.getClueFiles())){
+                return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
+            }
             // 添加创建人
             if (null != dto) {
                 ClueCustomerDTO cus = dto.getClueCustomer();
