@@ -565,6 +565,7 @@
   var ossUrl = [[${ossUrl}]];//上传文件地址
   var optList = [[${optList}]];//优化资源类别
   var notOptList = [[${notOptList}]];//非优化资源类别
+  var roleCode = [[${roleCode}]];
   var opt=[];
   var notOpt=[];
   if(optList){
@@ -962,13 +963,18 @@
                	      clue.clueIntention=clueIntention; 
                	      clue.clueBasic=clueBasic;
                	      clue.clueProject=clueProject;
+               	      clue.clueFiles = this.tableDataC1;
                	      addCustomerVM.confirmBtnDisabled=true;//禁用提交按钮
                       axios.post('/tele/clueMyCustomerInfo/saveCreateClue',clue)
                       .then(function (response) {
-                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                   		    window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
-                   		// addCustomerVM.confirmBtnDisabled=false;
-   		        	   }});
+                          var result =  response.data;
+                          if(result.code=="0"){
+                              addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                      window.location.href="/tele/clueMyCustomerInfo/initmyCustomer";
+                                  }});
+                          }else{
+                              addCustomerVM.$message({message:result.msg,type:'error',duration:2000,onClose:function(){}});
+                          }
                      }).catch(function (error) {
                         addCustomerVM.confirmBtnDisabled=false;
                      })

@@ -56,6 +56,7 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -166,6 +167,7 @@ public class MyCustomerClueController {
         if (("," + repetitionBusinessLine + ",").contains("," + user.getBusinessLine() + ",")) {
             isShowRepetition = true;
         }
+        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         request.setAttribute("isShowRepetition", isShowRepetition);
         return "clue/myCustom";
     }
@@ -1162,6 +1164,9 @@ public class MyCustomerClueController {
     @LogRecord(description = "新建资源保存", operationType = OperationType.INSERT,
             menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveCreateClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
+        if(CollectionUtils.isEmpty(dto.getClueFiles())){
+            return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
+        }
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
