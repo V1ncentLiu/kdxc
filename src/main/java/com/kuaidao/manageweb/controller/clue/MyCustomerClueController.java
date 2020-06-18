@@ -1419,6 +1419,14 @@ public class MyCustomerClueController {
                                 return new JSONResult<String>().fail("-1","微信2已存在不允许修改和删除");
                             }
                         }
+                        if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                                user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
+                            String res = validateClueFile(clueCustomer, dto);
+                            //新增手机号 资料上传判断
+                            if(!"".equals(res)){
+                                return new JSONResult<String>().fail("-1",res);
+                            }
+                        }
                     }
                 }
             }
@@ -1515,10 +1523,10 @@ public class MyCustomerClueController {
      * 校验 新增手机号时候 是否上传资料
      * 判断条件 手机号的创建时间 与资料上传的时间 5分钟以内验证通过
      */
-    private String validateClueFile(ClueCustomerDTO clueCustomer,ClueDTO dto,Long clueId){
+    private String validateClueFile(ClueCustomerDTO clueCustomer,ClueDTO dto){
         String resultStr = "";
         ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
-        clueQueryDTO.setClueId(clueId);
+        clueQueryDTO.setClueId(dto.getClueId());
         JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
         List<ClueFileDTO> clueFiles = clueFilesRes.getData();
         if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
