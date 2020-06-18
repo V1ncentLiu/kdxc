@@ -1,54 +1,14 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.fastjson.JSONObject;
-import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
-import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
-import com.kuaidao.manageweb.util.CommUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
+import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
@@ -63,6 +23,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.SortUtils;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -81,6 +42,7 @@ import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
@@ -94,6 +56,29 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -1515,5 +1500,74 @@ public class MyCustomerClueController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 校验 新增手机号时候 是否上传资料
+     * 判断条件 手机号的创建时间 与资料上传的时间 5分钟以内验证通过
+     */
+    private String validateClueFile(ClueCustomerDTO clueCustomer,ClueDTO dto,Long clueId){
+        String resultStr = "";
+        ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
+        clueQueryDTO.setClueId(clueId);
+        JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
+        List<ClueFileDTO> clueFiles = clueFilesRes.getData();
+        if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                || clueFiles.size() == 0){
+            return "请上传资料（沟通记录录音或者聊天截图）";
+        }
+        Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+            @Override
+            public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                return o1.getUploadTime().compareTo(o2.getUploadTime());
+            }
+        });
+        //新增
+        if(StringUtils.isBlank(clueCustomer.getPhone())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhoneCreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > 5){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone2())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone2CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > 5){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone3())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone3CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > 5){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone4())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone4CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > 5){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone5())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone5CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > 5){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        return resultStr;
     }
 }
