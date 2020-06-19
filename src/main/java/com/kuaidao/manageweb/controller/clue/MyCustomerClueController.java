@@ -1323,14 +1323,9 @@ public class MyCustomerClueController {
                         ClueDTO data = clueInfo.getData();
                         ClueCustomerDTO clueCustomer = data.getClueCustomer();
                         if(null != clueCustomer){
-                            //微信 微信2 存在不允许删除修改
-                            if(StringUtils.isNotBlank(clueCustomer.getWechat())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
-                                    && !clueCustomer.getWechat().equals(dto.getClueCustomer().getWechat())){
-                                return new JSONResult<String>().fail("-1","微信已存在不允许修改和删除");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getWechat2())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat2())
-                                    && !clueCustomer.getWechat2().equals(dto.getClueCustomer().getWechat2())){
-                                return new JSONResult<String>().fail("-1","微信2已存在不允许修改和删除");
+                            String res = validateWeChat(clueCustomer, dto);
+                            if(!"".equals(res)){
+                                return new JSONResult<String>().fail("-1",res);
                             }
                         }
                     }
@@ -1390,34 +1385,13 @@ public class MyCustomerClueController {
                         ClueDTO data = clueInfo.getData();
                         ClueCustomerDTO clueCustomer = data.getClueCustomer();
                         if(null != clueCustomer){
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
-                                    && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
-                                return new JSONResult<String>().fail("-1","手机号已存在");
+                            String res = validatePhone(clueCustomer, dto);
+                            if(!"".equals(res)){
+                                return new JSONResult<String>().fail("-1",res);
                             }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
-                                    && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
-                                return new JSONResult<String>().fail("-1","手机号2已存在");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
-                                    && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
-                                return new JSONResult<String>().fail("-1","手机号3已存在");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
-                                    && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
-                                return new JSONResult<String>().fail("-1","手机号4已存在");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
-                                    && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
-                                return new JSONResult<String>().fail("-1","手机号5已存在");
-                            }
-                            //微信 微信2 存在不允许删除修改
-                            if(StringUtils.isNotBlank(clueCustomer.getWechat())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
-                                    && !clueCustomer.getWechat().equals(dto.getClueCustomer().getWechat())){
-                                return new JSONResult<String>().fail("-1","微信已存在不允许修改和删除");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getWechat2())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat2())
-                                    && !clueCustomer.getWechat2().equals(dto.getClueCustomer().getWechat2())){
-                                return new JSONResult<String>().fail("-1","微信2已存在不允许修改和删除");
+                            String res1 = validateWeChat(clueCustomer, dto);
+                            if(!"".equals(res1)){
+                                return new JSONResult<String>().fail("-1",res1);
                             }
                         }
                         if(null != user.getBusinessLine()){
@@ -1520,6 +1494,50 @@ public class MyCustomerClueController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 校验手机号
+     * @return
+     */
+    private String validatePhone(ClueCustomerDTO clueCustomer,ClueDTO dto){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
+                && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
+            return "手机号已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
+                && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
+            return "手机号2已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
+                && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
+            return "手机号3已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
+                && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
+            return "手机号4已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
+                && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
+            return "手机号5已存在";
+        }
+        return "";
+    }
+
+    /**
+     * 校验微信号
+     */
+    public String validateWeChat(ClueCustomerDTO clueCustomer,ClueDTO dto){
+        //微信 微信2 存在不允许删除修改
+        if(StringUtils.isNotBlank(clueCustomer.getWechat())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
+                && !clueCustomer.getWechat().equals(dto.getClueCustomer().getWechat())){
+            return "微信已存在不允许修改和删除";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getWechat2())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat2())
+                && !clueCustomer.getWechat2().equals(dto.getClueCustomer().getWechat2())){
+            return "微信2已存在不允许修改和删除";
+        }
+        return "";
     }
 
     /**
