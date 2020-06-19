@@ -1168,7 +1168,8 @@ public class MyCustomerClueController {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             if(null != user.getBusinessLine()
-            && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+            && (RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode()) &&
+                    user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
                             user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
                             user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
             && CollectionUtils.isEmpty(dto.getClueFiles())){
