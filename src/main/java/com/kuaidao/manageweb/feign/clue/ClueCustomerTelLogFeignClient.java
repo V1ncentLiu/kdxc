@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @date: 2020年6月18日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/clueCustomerTelLog",
+@FeignClient(name = "aggregation-service-yangxin", path = "/aggregation/clueCustomerTelLog",
         fallback = ClueCustomerTelLogFeignClient.HystrixClientFallback.class)
 public interface ClueCustomerTelLogFeignClient {
 
@@ -29,7 +30,7 @@ public interface ClueCustomerTelLogFeignClient {
      * @param
      * @return
      */
-    @RequestMapping("/queryPageList")
+	@PostMapping("/queryPageList")
     JSONResult<PageBean<ClueCustomerTelLogDto>> queryPageList(@RequestBody ClueCustomerTelLogReqDto reqDTO);
 
     @Component

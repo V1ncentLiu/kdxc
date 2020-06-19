@@ -15,9 +15,11 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +29,7 @@ import java.util.List;
  * 新建手机号查询
  * @author fanjd
  */
-@RestController
+@Controller
 @RequestMapping(value = "/clueCustomerTelLog")
 public class ClueCustomerTelLogController {
     @Autowired
@@ -52,6 +54,7 @@ public class ClueCustomerTelLogController {
     /**
      * 新建手机号查询列表
      */
+    @ResponseBody
     @PostMapping("/queryPageList")
     public JSONResult<PageBean<ClueCustomerTelLogDto>> queryPageList(@RequestBody ClueCustomerTelLogReqDto reqDTO) {
         UserInfoDTO user = getUser();
