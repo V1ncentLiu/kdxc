@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @date: 2020年6月18日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-yangxin", path = "/aggregation/clueCustomerTelLog",
+@FeignClient(name = "aggregation-service", path = "/aggregation/clueCustomerTelLog",
         fallback = ClueCustomerTelLogFeignClient.HystrixClientFallback.class)
 public interface ClueCustomerTelLogFeignClient {
 
