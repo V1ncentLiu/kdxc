@@ -40,23 +40,24 @@
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
-                <el-form-item label="电销组:">
-                    <el-select v-model="form.teleGorupId" placeholder="请选择">
-                        <el-option
-                            v-for="item in statusOptions"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
+                </el-form-item>
+                <el-form-item label="电销组:" prop="teleGorupId">
+                    <el-select v-model="form.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable>
+                      <el-option
+                          v-for="item in teleGorupOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销顾问:">
-                    <el-select v-model="form.teleSaleId" placeholder="请选择">
-                        <el-option
-                            v-for="item in statusOptions"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
+                <el-form-item label="电销顾问:" prop="teleSaleId">
+                    <el-select v-model="form.teleSaleId" clearable placeholder="电销顾问" filterable>
+                      <el-option
+                          v-for="item in teleSaleOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -88,6 +89,7 @@
                 style="width: 100%"
                 border
                 :data="dataTable"
+                @row-dblclick="customerEidt"
                 @row-click="clickRow"
                 @selection-change="handleSelectionChange" 
                 >
@@ -126,6 +128,7 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
+    var saleGroupList=[[${saleGroupList}]];//电销组
     var ocmVM = new Vue({
         el: '#searchNewPhone',
         data: function() {
@@ -134,6 +137,8 @@
                 isShow:false,
                 dialogFormVisible: false,
                 multipleSelection: [],//选择行
+                teleGorupOptions:saleGroupList,//电销组
+                teleSaleOptions:[],//电销顾问
                 pager:{
 	                total: 0,
 	                currentPage: 1,
@@ -178,6 +183,34 @@
             }        	  
         },
         methods: {
+            //根据电销组查询电销总监
+            getSaleList() {
+              var param ={};
+              param.orgId = this.searchForm.teleGorupId;
+              console.info(param);
+              axios.post('/business/busAllocation/getSaleList', param)
+              .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    clueVM.teleSaleOptions= table;
+              })
+              .catch(function (error) {
+                   console.log(error);
+              });
+            },
+            customerEidt(row){
+                var clueId=row.clueId;
+                //客户维护界面
+                this.setSessionStore("storeForm", this.storeForm);
+                var otherVal = {
+                  "currentPage": this.pager.currentPage,
+                  "clueId": clueId,
+                  "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("otherVal", otherVal);
+                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
