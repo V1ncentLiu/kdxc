@@ -1167,13 +1167,24 @@ public class MyCustomerClueController {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
-            if(null != user.getBusinessLine()
-            && (RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode()) &&
-                    user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
-                            user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
-                            user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
-            && CollectionUtils.isEmpty(dto.getClueFiles())){
-                return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
+            if(RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode())){
+                if(null != user.getBusinessLine() && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))&& CollectionUtils.isEmpty(dto.getClueFiles())){
+                    return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
+                }
+                //小物种业务线手机号微信验证
+                if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
+                    //TODO 调用去重方法校验
+                }
+                //渠道拓展业务线手机号微信验证
+                if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
+                    //TODO 调用去重方法校验
+                }
+                //商机盒子业务线手机号微信验证
+                if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
+                    //TODO 调用去重方法校验
+                }
             }
             // 添加创建人
             if (null != dto) {
