@@ -208,7 +208,7 @@
                   "clueId": clueId,
                   "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
-                this.setSessionStore("otherVal", otherVal);
+                this.setSessionStore("searchNewPhoneOtherVal", otherVal);
                 window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
             },
             clickRow(row){
@@ -253,11 +253,16 @@
                 axios.post('/clueCustomerTelLog/queryPageList', param)
                 .then(function (response) {
                         var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        ocmVM.dataTable= table.data;
-                        ocmVM.pager.total =  table.total;
-                        ocmVM.pager.currentPage = table.currentPage;
+                        if (response.data.code == 0) {
+                                console.info(result);
+                            var table=result.data;
+                            ocmVM.dataTable= table.data;
+                            ocmVM.pager.total =  table.total;
+                            ocmVM.pager.currentPage = table.currentPage;
+                        } else {
+                            ocmVM.$message.error(response.data.msg);
+                        }                       
+
                         // 取出存储的id
                         if(!ocmVM.paginationShow){
                             if(ocmVM.storeId){
