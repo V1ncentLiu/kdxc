@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.alibaba.fastjson.JSON;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -148,7 +150,9 @@ public class PayDetaiController {
                     userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
             request.setAttribute("busSaleList", listByOrgAndRole.getData());
             ownOrgId = String.valueOf(user.getOrgId());
+            logger.info("logownOrgId:{}",ownOrgId);
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+            logger.info("logowncurOrgGroupByOrgId:{}", JSON.toJSONString(curOrgGroupByOrgId));
             if (curOrgGroupByOrgId != null) {
                 orgList.add(curOrgGroupByOrgId);
             }
