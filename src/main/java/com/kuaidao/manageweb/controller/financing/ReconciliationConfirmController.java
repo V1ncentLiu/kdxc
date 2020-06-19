@@ -181,8 +181,8 @@ public class ReconciliationConfirmController {
     @PostMapping("/export")
     @LogRecord(description = "导出", operationType = OperationType.EXPORT,
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
-    public void export(@RequestBody ReconciliationConfirmPageParam pageParam,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void export(@RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
@@ -199,13 +199,11 @@ public class ReconciliationConfirmController {
             pageParam.setNotInCompanyIds(notInCompanyIds);
         }
 
-        JSONResult<List<ReconciliationConfirmDTO>> listNoPage =
-                reconciliationConfirmFeignClient.listNoPage(pageParam);
+        JSONResult<List<ReconciliationConfirmDTO>> listNoPage = reconciliationConfirmFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList(roleCode));
 
-        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
-                && listNoPage.getData().size() != 0) {
+        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null && listNoPage.getData().size() != 0) {
 
             List<ReconciliationConfirmDTO> resultList = listNoPage.getData();
             int size = resultList.size();
@@ -290,10 +288,8 @@ public class ReconciliationConfirmController {
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
-
         String name = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
