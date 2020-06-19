@@ -1420,12 +1420,14 @@ public class MyCustomerClueController {
                                 return new JSONResult<String>().fail("-1","微信2已存在不允许修改和删除");
                             }
                         }
-                        if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
-                                user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
-                            String res = validateClueFile(clueCustomer, dto);
-                            //新增手机号 资料上传判断
-                            if(!"".equals(res)){
-                                return new JSONResult<String>().fail("-1",res);
+                        if(null != user.getBusinessLine()){
+                            if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                                    user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
+                                String res = validateClueFile(clueCustomer, dto);
+                                //新增手机号 资料上传判断
+                                if(!"".equals(res)){
+                                    return new JSONResult<String>().fail("-1",res);
+                                }
                             }
                         }
                     }
@@ -1537,7 +1539,7 @@ public class MyCustomerClueController {
         Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
             @Override
             public int compare(ClueFileDTO o1, ClueFileDTO o2) {
-                return o1.getUploadTime().compareTo(o2.getUploadTime());
+                return o2.getUploadTime().compareTo(o1.getUploadTime());
             }
         });
         //新增
