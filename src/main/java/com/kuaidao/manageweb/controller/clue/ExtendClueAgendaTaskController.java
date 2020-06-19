@@ -260,8 +260,7 @@ public class ExtendClueAgendaTaskController {
         queryDto.setPromotionCompany(user.getPromotionCompany());
         List<Long> idList = new ArrayList<Long>();
         // 推广总监，优化主管，优化文员，内勤经理可以在查看待分配资源列表中资源专员为管理员的数据
-        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
             idList.add(SysConstant.GLY_USER_ID);
@@ -296,7 +295,6 @@ public class ExtendClueAgendaTaskController {
                 || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
@@ -310,7 +308,8 @@ public class ExtendClueAgendaTaskController {
             }
             idList.add(user.getId());
 
-        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         } else {
             return new JSONResult<PageBean<ClueAgendaTaskDTO>>()
