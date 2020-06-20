@@ -1278,7 +1278,8 @@ public class MyCustomerClueController {
                 }
 
             }
-
+            //设置角色
+            dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         }
 
         // 保存流转记录
@@ -1301,7 +1302,6 @@ public class MyCustomerClueController {
         }
         circul.setOrg(user.getOrgId());
         dto.setCirculationInsertOrUpdateDTO(circul);
-
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
         return customerClue;
     }
@@ -1440,6 +1440,8 @@ public class MyCustomerClueController {
                     && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
+            //设置角色
+            dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }
