@@ -174,7 +174,7 @@ public class ReconciliationConfirmController {
     /**
      * 导出
      * 
-     * @param reqDTO
+     * @param pageParam
      * @return
      */
     @RequiresPermissions("financing:reconciliationConfirmManager:export")
@@ -220,11 +220,14 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getCusName());
                     curList.add(dto.getSignCompanyName());
                     curList.add(dto.getTeleGorupName());
+                    curList.add(dto.getTeleSaleName());
                     curList.add(dto.getProjectName());
                     curList.add(dto.getPayTypeName());
                     curList.add(dto.getSignShopTypeName());
+                    curList.add(dto.getTeleAmountPerformance());
                     curList.add(dto.getAmountPerformance());
                     curList.add(dto.getMoney());
+                    curList.add(dto.getAmountEquipment());
                     curList.add(dto.getAmountReceived());
                     curList.add(dto.getRatio() + "%");
                     curList.add(dto.getPreferentialAmount());
@@ -251,6 +254,7 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getSignCompanyName());
                     curList.add(dto.getTeleGorupName());
                     curList.add(dto.getMoney());
+                    curList.add(dto.getAmountEquipment());
                     curList.add(dto.getAmountReceived());
                     curList.add(dto.getFirstToll());
                     curList.add(dto.getPreferentialAmount());
@@ -260,6 +264,8 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getCommissionMoney());
                     curList.add(dto.getIsAccount());
                     curList.add(dto.getBusSaleName());
+                    curList.add(dto.getTeleAmountPerformance());
+                    curList.add(dto.getAmountPerformance());
                     curList.add(dto.getTeleSaleName());
                     curList.add(dto.getTeleDirectorName());
                     curList.add(dto.getRemarks());
@@ -311,12 +317,15 @@ public class ReconciliationConfirmController {
             headTitleList.add("客户姓名");
             headTitleList.add("结算单位");
             headTitleList.add("电销组");
+            headTitleList.add("电销顾问");
             headTitleList.add("签约项目");
             headTitleList.add("付款类型");
             headTitleList.add("签约店型");
-            headTitleList.add("业绩金额");
+            headTitleList.add("电销业绩金额");
+            headTitleList.add("商务业绩金额");
             headTitleList.add("结算金额");
             headTitleList.add("实收金额");
+            headTitleList.add("设备金额");
             headTitleList.add("结算比例");
             headTitleList.add("优惠金额");
             headTitleList.add("赠送金额");
@@ -343,6 +352,7 @@ public class ReconciliationConfirmController {
             headTitleList.add("电销组");
             headTitleList.add("结算金额");
             headTitleList.add("实收金额");
+            headTitleList.add("设备金额");
             headTitleList.add("路费");
             headTitleList.add("优惠金额");
             headTitleList.add("赠送金额");
@@ -351,6 +361,8 @@ public class ReconciliationConfirmController {
             headTitleList.add("佣金");
             headTitleList.add("是否已结算");
             headTitleList.add("商务经理");
+            headTitleList.add("电销业绩金额");
+            headTitleList.add("商务业绩金额");
             headTitleList.add("电销顾问");
             headTitleList.add("电销总监");
             headTitleList.add("备注");
