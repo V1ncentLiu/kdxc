@@ -150,9 +150,7 @@ public class PayDetaiController {
                     userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
             request.setAttribute("busSaleList", listByOrgAndRole.getData());
             ownOrgId = String.valueOf(user.getOrgId());
-            logger.info("logownOrgId:{}",ownOrgId);
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
-            logger.info("logowncurOrgGroupByOrgId:{}", JSON.toJSONString(curOrgGroupByOrgId));
             if (curOrgGroupByOrgId != null) {
                 orgList.add(curOrgGroupByOrgId);
             }
