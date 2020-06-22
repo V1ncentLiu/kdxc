@@ -36,6 +36,7 @@ import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.deduplicationDetail.DeduplicationDetailFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -124,6 +125,8 @@ public class MyCustomerClueController {
     private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private DeduplicationDetailFeignClient deduplicationDetailFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -1173,17 +1176,13 @@ public class MyCustomerClueController {
                         user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))&& CollectionUtils.isEmpty(dto.getClueFiles())){
                     return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
                 }
-                //小物种业务线手机号微信验证
-                if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
-                    //TODO 调用去重方法校验
-                }
-                //渠道拓展业务线手机号微信验证
-                if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
-                    //TODO 调用去重方法校验
-                }
-                //商机盒子业务线手机号微信验证
-                if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
-                    //TODO 调用去重方法校验
+                if(null != user.getBusinessLine() && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))){
+                    if(!"".equals(validateRepeatPhoneAndWeChat(user,dto))){
+                        return new JSONResult<String>().fail("-1",validateRepeatPhoneAndWeChat(user,dto));
+                    }
+
                 }
             }
             // 添加创建人
@@ -1620,5 +1619,50 @@ public class MyCustomerClueController {
             }
         }
         return resultStr;
+    }
+
+    private String validateRepeatPhoneAndWeChat(UserInfoDTO user,ClueDTO dto){
+        PushClueReq pushClueReq = new PushClueReq();
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            pushClueReq.setPhone(dto.getClueCustomer().getPhone());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            pushClueReq.setPhone2(dto.getClueCustomer().getPhone2());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            pushClueReq.setPhone3(dto.getClueCustomer().getPhone3());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            pushClueReq.setPhone4(dto.getClueCustomer().getPhone4());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            pushClueReq.setPhone5(dto.getClueCustomer().getPhone5());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getWechat())){
+            pushClueReq.setWechat(dto.getClueCustomer().getWechat());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getWechat2())){
+            pushClueReq.setWechat2(dto.getClueCustomer().getWechat2());
+        }
+        //小物种业务线手机号微信验证
+        if(user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
+            pushClueReq.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
+            pushClueReq.setDay(15);
+        }
+        //渠道拓展业务线手机号微信验证
+        if(user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)){
+            pushClueReq.setBusinessLine(BusinessLineConstant.QUDAOTUOZHAN);
+            pushClueReq.setDay(7);
+        }
+        //商机盒子业务线手机号微信验证
+        if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
+            pushClueReq.setBusinessLine(BusinessLineConstant.SHANGJI);
+            pushClueReq.setDay(15);
+        }
+        JSONResult<Boolean> clueByParamRes = deduplicationDetailFeignClient.getClueByParam(pushClueReq);
+        if(JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()){
+            return "此号码已存在，不允许进行再次进行创建";
+        }
+        return "";
     }
 }
