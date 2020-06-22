@@ -90,7 +90,7 @@ public class MyCustomerClueController {
     private static final Integer IS_NOT_SIGN_NO = -1;
     private static final Integer DAY_15 = 15;
     private static final Integer DAY_7 = 7;
-    private static final Integer DIFF_MIN  = 5;
+    private static final Integer DIFF_MIN  = 10;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
