@@ -88,6 +88,9 @@ import java.util.stream.Collectors;
 public class MyCustomerClueController {
     private static Logger logger = LoggerFactory.getLogger(MyCustomerClueController.class);
     private static final Integer IS_NOT_SIGN_NO = -1;
+    private static final Integer DAY_15 = 15;
+    private static final Integer DAY_7 = 7;
+    private static final Integer DIFF_MIN  = 5;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -1578,7 +1581,7 @@ public class MyCustomerClueController {
             Date phoneCreateTime = dto.getClueCustomer().getPhoneCreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
-            if(diffMinuteLong > 5){
+            if(diffMinuteLong > DIFF_MIN){
                 return "请上传资料（沟通记录录音或者聊天截图）";
             }
         }
@@ -1587,7 +1590,7 @@ public class MyCustomerClueController {
             Date phoneCreateTime = dto.getClueCustomer().getPhone2CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
-            if(diffMinuteLong > 5){
+            if(diffMinuteLong > DIFF_MIN){
                 return "请上传资料（沟通记录录音或者聊天截图）";
             }
         }
@@ -1596,7 +1599,7 @@ public class MyCustomerClueController {
             Date phoneCreateTime = dto.getClueCustomer().getPhone3CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
-            if(diffMinuteLong > 5){
+            if(diffMinuteLong > DIFF_MIN){
                 return "请上传资料（沟通记录录音或者聊天截图）";
             }
         }
@@ -1605,7 +1608,7 @@ public class MyCustomerClueController {
             Date phoneCreateTime = dto.getClueCustomer().getPhone4CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
-            if(diffMinuteLong > 5){
+            if(diffMinuteLong > DIFF_MIN){
                 return "请上传资料（沟通记录录音或者聊天截图）";
             }
         }
@@ -1614,7 +1617,7 @@ public class MyCustomerClueController {
             Date phoneCreateTime = dto.getClueCustomer().getPhone5CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
-            if(diffMinuteLong > 5){
+            if(diffMinuteLong > DIFF_MIN){
                 return "请上传资料（沟通记录录音或者聊天截图）";
             }
         }
@@ -1647,17 +1650,17 @@ public class MyCustomerClueController {
         //小物种业务线手机号微信验证
         if(user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
             pushClueReq.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
-            pushClueReq.setDay(15);
+            pushClueReq.setDay(DAY_15);
         }
         //渠道拓展业务线手机号微信验证
         if(user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)){
             pushClueReq.setBusinessLine(BusinessLineConstant.QUDAOTUOZHAN);
-            pushClueReq.setDay(7);
+            pushClueReq.setDay(DAY_7);
         }
         //商机盒子业务线手机号微信验证
         if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
             pushClueReq.setBusinessLine(BusinessLineConstant.SHANGJI);
-            pushClueReq.setDay(15);
+            pushClueReq.setDay(DAY_15);
         }
         JSONResult<Boolean> clueByParamRes = deduplicationDetailFeignClient.getClueByParam(pushClueReq);
         if(JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()){
