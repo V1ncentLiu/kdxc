@@ -174,15 +174,15 @@ public class ReconciliationConfirmController {
     /**
      * 导出
      * 
-     * @param reqDTO
+     * @param pageParam
      * @return
      */
     @RequiresPermissions("financing:reconciliationConfirmManager:export")
     @PostMapping("/export")
     @LogRecord(description = "导出", operationType = OperationType.EXPORT,
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
-    public void export(@RequestBody ReconciliationConfirmPageParam pageParam,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void export(@RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
@@ -199,13 +199,11 @@ public class ReconciliationConfirmController {
             pageParam.setNotInCompanyIds(notInCompanyIds);
         }
 
-        JSONResult<List<ReconciliationConfirmDTO>> listNoPage =
-                reconciliationConfirmFeignClient.listNoPage(pageParam);
+        JSONResult<List<ReconciliationConfirmDTO>> listNoPage = reconciliationConfirmFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList(roleCode));
 
-        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
-                && listNoPage.getData().size() != 0) {
+        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null && listNoPage.getData().size() != 0) {
 
             List<ReconciliationConfirmDTO> resultList = listNoPage.getData();
             int size = resultList.size();
@@ -222,11 +220,14 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getCusName());
                     curList.add(dto.getSignCompanyName());
                     curList.add(dto.getTeleGorupName());
+                    curList.add(dto.getTeleSaleName());
                     curList.add(dto.getProjectName());
                     curList.add(dto.getPayTypeName());
                     curList.add(dto.getSignShopTypeName());
+                    curList.add(dto.getTeleAmountPerformance());
                     curList.add(dto.getAmountPerformance());
                     curList.add(dto.getMoney());
+                    curList.add(dto.getAmountEquipment());
                     curList.add(dto.getAmountReceived());
                     curList.add(dto.getRatio() + "%");
                     curList.add(dto.getPreferentialAmount());
@@ -253,6 +254,7 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getSignCompanyName());
                     curList.add(dto.getTeleGorupName());
                     curList.add(dto.getMoney());
+                    curList.add(dto.getAmountEquipment());
                     curList.add(dto.getAmountReceived());
                     curList.add(dto.getFirstToll());
                     curList.add(dto.getPreferentialAmount());
@@ -262,6 +264,8 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getCommissionMoney());
                     curList.add(dto.getIsAccount());
                     curList.add(dto.getBusSaleName());
+                    curList.add(dto.getTeleAmountPerformance());
+                    curList.add(dto.getAmountPerformance());
                     curList.add(dto.getTeleSaleName());
                     curList.add(dto.getTeleDirectorName());
                     curList.add(dto.getRemarks());
@@ -290,10 +294,8 @@ public class ReconciliationConfirmController {
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
-
         String name = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
@@ -315,12 +317,15 @@ public class ReconciliationConfirmController {
             headTitleList.add("客户姓名");
             headTitleList.add("结算单位");
             headTitleList.add("电销组");
+            headTitleList.add("电销顾问");
             headTitleList.add("签约项目");
             headTitleList.add("付款类型");
             headTitleList.add("签约店型");
-            headTitleList.add("业绩金额");
+            headTitleList.add("电销业绩金额");
+            headTitleList.add("商务业绩金额");
             headTitleList.add("结算金额");
             headTitleList.add("实收金额");
+            headTitleList.add("设备金额");
             headTitleList.add("结算比例");
             headTitleList.add("优惠金额");
             headTitleList.add("赠送金额");
@@ -347,6 +352,7 @@ public class ReconciliationConfirmController {
             headTitleList.add("电销组");
             headTitleList.add("结算金额");
             headTitleList.add("实收金额");
+            headTitleList.add("设备金额");
             headTitleList.add("路费");
             headTitleList.add("优惠金额");
             headTitleList.add("赠送金额");
@@ -355,6 +361,8 @@ public class ReconciliationConfirmController {
             headTitleList.add("佣金");
             headTitleList.add("是否已结算");
             headTitleList.add("商务经理");
+            headTitleList.add("电销业绩金额");
+            headTitleList.add("商务业绩金额");
             headTitleList.add("电销顾问");
             headTitleList.add("电销总监");
             headTitleList.add("备注");

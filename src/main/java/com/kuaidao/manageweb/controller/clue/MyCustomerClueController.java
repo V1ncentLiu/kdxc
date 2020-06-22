@@ -1,20 +1,64 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.fastjson.JSONObject;
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
+import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
+import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
-import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
+import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.SortUtils;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.call.CallRecordFeign;
+import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
+import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.deduplicationDetail.DeduplicationDetailFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
+import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -29,77 +73,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.constant.ClueCirculationConstant;
-import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
-import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
-import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
-import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
-import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
-import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
-import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.SortUtils;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.feign.call.CallRecordFeign;
-import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
-import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
-import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
-import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
-import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
-import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
-import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
-import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
-import com.kuaidao.sys.dto.customfield.UserFieldDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
 public class MyCustomerClueController {
     private static Logger logger = LoggerFactory.getLogger(MyCustomerClueController.class);
     private static final Integer IS_NOT_SIGN_NO = -1;
+    private static final Integer DAY_15 = 15;
+    private static final Integer DAY_7 = 7;
+    private static final Integer DIFF_MIN  = 5;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -137,6 +128,8 @@ public class MyCustomerClueController {
     private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private DeduplicationDetailFeignClient deduplicationDetailFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -1180,6 +1173,21 @@ public class MyCustomerClueController {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
+            if(RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode())){
+                if(null != user.getBusinessLine() && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))&& CollectionUtils.isEmpty(dto.getClueFiles())){
+                    return new JSONResult<String>().fail("-1","请上传资料（沟通记录录音或者聊天截图）");
+                }
+                if(null != user.getBusinessLine() && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) ||
+                        user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))){
+                    if(!"".equals(validateRepeatPhoneAndWeChat(user,dto))){
+                        return new JSONResult<String>().fail("-1",validateRepeatPhoneAndWeChat(user,dto));
+                    }
+
+                }
+            }
             // 添加创建人
             if (null != dto) {
                 ClueCustomerDTO cus = dto.getClueCustomer();
@@ -1272,7 +1280,8 @@ public class MyCustomerClueController {
                 }
 
             }
-
+            //设置角色
+            dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         }
 
         // 保存流转记录
@@ -1295,7 +1304,6 @@ public class MyCustomerClueController {
         }
         circul.setOrg(user.getOrgId());
         dto.setCirculationInsertOrUpdateDTO(circul);
-
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
         return customerClue;
     }
@@ -1317,6 +1325,26 @@ public class MyCustomerClueController {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
+            //电销总监待分配新资源 微信号已存在不允许修改和删除
+            List<RoleInfoDTO> roleList = user.getRoleList();
+            if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())){
+                if(null != dto && null != dto.getClueId()){
+                    ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
+                    clueQueryDTO.setClueId(dto.getClueId());
+                    JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(clueQueryDTO);
+                    if(JSONResult.SUCCESS.equals(clueInfo.getCode()) && null != clueInfo.getData()){
+                        ClueDTO data = clueInfo.getData();
+                        ClueCustomerDTO clueCustomer = data.getClueCustomer();
+                        if(null != clueCustomer){
+                            String res = validateWeChat(clueCustomer, dto);
+                            if(!"".equals(res)){
+                                return new JSONResult<String>().fail("-1",res);
+                            }
+                        }
+                    }
+                }
+            }
+
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
             if (dto.getClueCustomer().getPhoneCreateTime() != null
@@ -1370,25 +1398,23 @@ public class MyCustomerClueController {
                         ClueDTO data = clueInfo.getData();
                         ClueCustomerDTO clueCustomer = data.getClueCustomer();
                         if(null != clueCustomer){
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
-                                    && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
-                                return new JSONResult<String>().fail("-1","手机号已存在");
+                            String res = validatePhone(clueCustomer, dto);
+                            if(!"".equals(res)){
+                                return new JSONResult<String>().fail("-1",res);
                             }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
-                                    && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
-                                return new JSONResult<String>().fail("-1","手机号2已存在");
+                            String res1 = validateWeChat(clueCustomer, dto);
+                            if(!"".equals(res1)){
+                                return new JSONResult<String>().fail("-1",res1);
                             }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
-                                    && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
-                                return new JSONResult<String>().fail("-1","手机号3已存在");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
-                                    && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
-                                return new JSONResult<String>().fail("-1","手机号4已存在");
-                            }
-                            if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
-                                    && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
-                                return new JSONResult<String>().fail("-1","手机号5已存在");
+                        }
+                        if(null != user.getBusinessLine()){
+                            if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
+                                    user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
+                                String res = validateClueFile(clueCustomer, dto);
+                                //新增手机号 资料上传判断
+                                if(!"".equals(res)){
+                                    return new JSONResult<String>().fail("-1",res);
+                                }
                             }
                         }
                     }
@@ -1416,6 +1442,8 @@ public class MyCustomerClueController {
                     && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
+            //设置角色
+            dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }
@@ -1481,5 +1509,163 @@ public class MyCustomerClueController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+
+    /**
+     * 校验手机号
+     * @return
+     */
+    private String validatePhone(ClueCustomerDTO clueCustomer,ClueDTO dto){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
+                && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
+            return "手机号已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
+                && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
+            return "手机号2已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
+                && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
+            return "手机号3已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
+                && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
+            return "手机号4已存在";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
+                && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
+            return "手机号5已存在";
+        }
+        return "";
+    }
+
+    /**
+     * 校验微信号
+     */
+    public String validateWeChat(ClueCustomerDTO clueCustomer,ClueDTO dto){
+        //微信 微信2 存在不允许删除修改
+        if(StringUtils.isNotBlank(clueCustomer.getWechat())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
+                && !clueCustomer.getWechat().equals(dto.getClueCustomer().getWechat())){
+            return "微信已存在不允许修改和删除";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getWechat2())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat2())
+                && !clueCustomer.getWechat2().equals(dto.getClueCustomer().getWechat2())){
+            return "微信2已存在不允许修改和删除";
+        }
+        return "";
+    }
+
+    /**
+     * 校验 新增手机号时候 是否上传资料
+     * 判断条件 手机号的创建时间 与资料上传的时间 5分钟以内验证通过
+     */
+    private String validateClueFile(ClueCustomerDTO clueCustomer,ClueDTO dto){
+        String resultStr = "";
+        ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
+        clueQueryDTO.setClueId(dto.getClueId());
+        JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
+        List<ClueFileDTO> clueFiles = clueFilesRes.getData();
+        if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                || clueFiles.size() == 0){
+            return "请上传资料（沟通记录录音或者聊天截图）";
+        }
+        Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+            @Override
+            public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                return o2.getUploadTime().compareTo(o1.getUploadTime());
+            }
+        });
+        //新增
+        if(StringUtils.isBlank(clueCustomer.getPhone())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhoneCreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > DIFF_MIN){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone2())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone2CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > DIFF_MIN){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone3())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone3CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > DIFF_MIN){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone4())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone4CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > DIFF_MIN){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        if(StringUtils.isBlank(clueCustomer.getPhone5())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            Date phoneCreateTime = dto.getClueCustomer().getPhone5CreateTime();
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
+            if(diffMinuteLong > DIFF_MIN){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+        }
+        return resultStr;
+    }
+
+    private String validateRepeatPhoneAndWeChat(UserInfoDTO user,ClueDTO dto){
+        PushClueReq pushClueReq = new PushClueReq();
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            pushClueReq.setPhone(dto.getClueCustomer().getPhone());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            pushClueReq.setPhone2(dto.getClueCustomer().getPhone2());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            pushClueReq.setPhone3(dto.getClueCustomer().getPhone3());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            pushClueReq.setPhone4(dto.getClueCustomer().getPhone4());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            pushClueReq.setPhone5(dto.getClueCustomer().getPhone5());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getWechat())){
+            pushClueReq.setWechat(dto.getClueCustomer().getWechat());
+        }
+        if(StringUtils.isNotBlank(dto.getClueCustomer().getWechat2())){
+            pushClueReq.setWechat2(dto.getClueCustomer().getWechat2());
+        }
+        //小物种业务线手机号微信验证
+        if(user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
+            pushClueReq.setBusinessLine(BusinessLineConstant.XIAOWUZHONG);
+            pushClueReq.setDay(DAY_15);
+        }
+        //渠道拓展业务线手机号微信验证
+        if(user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)){
+            pushClueReq.setBusinessLine(BusinessLineConstant.QUDAOTUOZHAN);
+            pushClueReq.setDay(DAY_7);
+        }
+        //商机盒子业务线手机号微信验证
+        if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)){
+            pushClueReq.setBusinessLine(BusinessLineConstant.SHANGJI);
+            pushClueReq.setDay(DAY_15);
+        }
+        JSONResult<Boolean> clueByParamRes = deduplicationDetailFeignClient.getClueByParam(pushClueReq);
+        if(JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()){
+            return "此号码已存在，不允许进行再次进行创建";
+        }
+        return "";
     }
 }
