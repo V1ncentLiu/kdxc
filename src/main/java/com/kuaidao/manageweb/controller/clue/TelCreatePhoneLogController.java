@@ -1,9 +1,14 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,12 +34,13 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
  */
 @Controller
 @RequestMapping(value = "/telCreatePhoneLog")
-public class ClueCustomerTelLogController {
+public class TelCreatePhoneLogController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private TelCreatePhoneLogFeignClient telCreatePhoneLogFeignClient;
-
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
     /***
      * 初始化列表
      * @return
@@ -56,9 +62,39 @@ public class ClueCustomerTelLogController {
     @PostMapping("/queryPageList")
     public JSONResult<PageBean<TelCreatePhoneLogDto>> queryPageList(@RequestBody TelCreatePhoneLogReqDto reqDTO) {
         UserInfoDTO user = getUser();
-        reqDTO.setBusinessLine(user.getBusinessLine());
+        String roleCode = user.getRoleList().get(0).getRoleCode();
+        //监察按照业务线查询，其他推广角色按照配置的业务线查询
+        if (RoleCodeEnum.JC.name().equals(roleCode)) {
+            reqDTO.setBusinessLine(user.getBusinessLine());
+        }else{
+            List<Integer> businessLineList = getBusinessLineList(user.getId());
+            reqDTO.setBusinessLineList(businessLineList);
+        }
+
         JSONResult<PageBean<TelCreatePhoneLogDto>> jsonResult = telCreatePhoneLogFeignClient.queryPageList(reqDTO);
         return jsonResult;
+    }
+    /**
+     * @Description: 根据用户id查询用户权限关系然后构建业务线集合
+     *
+     * @Param: [userId]
+     * @return: java.util.List<java.lang.Integer>
+     * @author: fanjd
+     * @date: 2020/6/23  17:12
+     * @version: V1.0
+     */
+    private List<Integer> getBusinessLineList(Long userId) {
+        List<Integer> businessLineList = new ArrayList<>();
+        UserDataAuthReq req = new UserDataAuthReq();
+        req.setUserId(userId);
+        JSONResult<List<UserDataAuthReq>> jsonResult =  userInfoFeignClient.findUserDataAuthByParam(req);
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+            List<UserDataAuthReq> list =  jsonResult.getData();
+            for (UserDataAuthReq userDataAuthReq : list) {
+                businessLineList.add(userDataAuthReq.getBusinessLine());
+            }
+        }
+        return  businessLineList;
     }
 
     /**
