@@ -1571,19 +1571,19 @@ public class MyCustomerClueController {
         clueQueryDTO.setClueId(dto.getClueId());
         JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
         List<ClueFileDTO> clueFiles = clueFilesRes.getData();
-        if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
-                || clueFiles.size() == 0){
-            return "请上传资料（沟通记录录音或者聊天截图）";
-        }
-        Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
-            @Override
-            public int compare(ClueFileDTO o1, ClueFileDTO o2) {
-                return o2.getUploadTime().compareTo(o1.getUploadTime());
-            }
-        });
         //新增
         if(StringUtils.isBlank(clueCustomer.getPhone())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
+            if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
             Date phoneCreateTime = dto.getClueCustomer().getPhoneCreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
@@ -1593,6 +1593,16 @@ public class MyCustomerClueController {
         }
         if(StringUtils.isBlank(clueCustomer.getPhone2())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())){
+            if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
             Date phoneCreateTime = dto.getClueCustomer().getPhone2CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
@@ -1602,6 +1612,16 @@ public class MyCustomerClueController {
         }
         if(StringUtils.isBlank(clueCustomer.getPhone3())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())){
+            if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
             Date phoneCreateTime = dto.getClueCustomer().getPhone3CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
@@ -1611,6 +1631,16 @@ public class MyCustomerClueController {
         }
         if(StringUtils.isBlank(clueCustomer.getPhone4())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())){
+            if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
             Date phoneCreateTime = dto.getClueCustomer().getPhone4CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
@@ -1620,6 +1650,16 @@ public class MyCustomerClueController {
         }
         if(StringUtils.isBlank(clueCustomer.getPhone5())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())){
+            if(!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0){
+                return "请上传资料（沟通记录录音或者聊天截图）";
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
             Date phoneCreateTime = dto.getClueCustomer().getPhone5CreateTime();
             ClueFileDTO clueFileDTO = clueFiles.get(0);
             long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
