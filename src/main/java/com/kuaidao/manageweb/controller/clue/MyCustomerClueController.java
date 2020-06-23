@@ -90,7 +90,7 @@ public class MyCustomerClueController {
     private static final Integer IS_NOT_SIGN_NO = -1;
     private static final Integer DAY_15 = 15;
     private static final Integer DAY_7 = 7;
-    private static final Integer DIFF_MIN  = 5;
+    private static final Integer DIFF_MIN  = 10;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -1544,6 +1544,12 @@ public class MyCustomerClueController {
      */
     public String validateWeChat(ClueCustomerDTO clueCustomer,ClueDTO dto){
         //微信 微信2 存在不允许删除修改
+        if(StringUtils.isNotBlank(clueCustomer.getWechat())  && StringUtils.isBlank(dto.getClueCustomer().getWechat())){
+            return "微信已存在不允许修改和删除";
+        }
+        if(StringUtils.isNotBlank(clueCustomer.getWechat2())  && StringUtils.isBlank(dto.getClueCustomer().getWechat2())){
+            return "微信已存在不允许修改和删除";
+        }
         if(StringUtils.isNotBlank(clueCustomer.getWechat())  && StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
                 && !clueCustomer.getWechat().equals(dto.getClueCustomer().getWechat())){
             return "微信已存在不允许修改和删除";
