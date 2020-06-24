@@ -469,9 +469,19 @@ public class BusCustomerManagerController {
                 curList.add(visitPerDTO.getVisitProvince());
                 curList.add(visitPerDTO.getProjectCategory());
                 curList.add(visitPerDTO.getValue());
+                curList.add(visitPerDTO.getClueId());
                 dataList.add(curList);
             }
         }
+
+        String roleCode = user.getRoleList().get(0).getRoleCode();
+        logger.info("roleCode：{}",roleCode);
+//         非商务中心文员，剔除最后一列(没有明确要求故而注释)
+//        if(!RoleCodeEnum.SWZXWY.name().equals(roleCode)){
+//            for(List<Object> subList:dataList){
+//                subList.remove(subList.size()-1);
+//            }
+//        }
 
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
         String name = "到访业绩" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
@@ -519,6 +529,7 @@ public class BusCustomerManagerController {
         headTitleList.add("来访省份");
         headTitleList.add("项目类别（饮品／非饮品）");
         headTitleList.add("值");
+        headTitleList.add("clueId");
         return headTitleList;
     }
 
