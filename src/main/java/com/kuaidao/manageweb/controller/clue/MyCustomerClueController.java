@@ -1404,7 +1404,7 @@ public class MyCustomerClueController {
                             }
                             String res1 = validateWeChat(clueCustomer, dto);
                             if(!"".equals(res1)){
-                                return new JSONResult<String>().fail("-1",res1);
+                                return new JSONResult<String>().fail("-2",res1);
                             }
                         }
                         if(null != user.getBusinessLine()){
@@ -1413,7 +1413,7 @@ public class MyCustomerClueController {
                                 String res = validateClueFile(clueCustomer, dto);
                                 //新增手机号 资料上传判断
                                 if(!"".equals(res)){
-                                    return new JSONResult<String>().fail("-1",res);
+                                    return new JSONResult<String>().fail("-3",res);
                                 }
                             }
                         }
