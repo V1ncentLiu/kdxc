@@ -268,7 +268,11 @@ public class BalanceAccountController {
                 curList.add(dto.getTeleAmountPerformance());
                 curList.add(dto.getAmountPerformance());
                 curList.add(dto.getMoney());
-                curList.add(dto.getRatio() + "%");
+                if (org.apache.commons.lang.StringUtils.isNotBlank(dto.getRatio())) {
+                    curList.add(dto.getRatio() + "%");
+                }else{
+                    curList.add("");
+                }
                 curList.add(dto.getCommissionMoney());
                 curList.add(dto.getFirstToll());
                 curList.add(dto.getPreferentialAmount());
