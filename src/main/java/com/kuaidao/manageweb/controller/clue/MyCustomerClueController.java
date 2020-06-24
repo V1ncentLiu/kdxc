@@ -1672,6 +1672,9 @@ public class MyCustomerClueController {
 
     private String validateRepeatPhoneAndWeChat(UserInfoDTO user,ClueDTO dto){
         PushClueReq pushClueReq = new PushClueReq();
+        if(null != user.getOrgId()){
+            pushClueReq.setTeleGorupId(user.getOrgId());
+        }
         if(StringUtils.isNotBlank(dto.getClueCustomer().getPhone())){
             pushClueReq.setPhone(dto.getClueCustomer().getPhone());
         }
