@@ -191,14 +191,13 @@ public class BalanceAccountController {
     
     /***
      * 对账结算申请列表
-     * 
      * @return
      */
     @PostMapping("/applyList")
     @ResponseBody
     @RequiresPermissions("financing:balanceaccountManager:view")
-    public JSONResult<PageBean<ReconciliationConfirmDTO>> appayList(
-            @RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<ReconciliationConfirmDTO>> appayList(@RequestBody ReconciliationConfirmPageParam pageParam,
+            HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -208,25 +207,22 @@ public class BalanceAccountController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         pageParam.setBusinessLine(user.getBusinessLine());
-        Date date = new Date();
-        JSONResult<PageBean<ReconciliationConfirmDTO>> list =
-                reconciliationConfirmFeignClient.applyList(pageParam);
-        logger.info("财务对账列表总共时间" + (new Date().getTime() - date.getTime()));
+        Long start = System.currentTimeMillis();
+        JSONResult<PageBean<ReconciliationConfirmDTO>> list = reconciliationConfirmFeignClient.applyList(pageParam);
+        logger.info("财务对账列表总共时间:{} ", System.currentTimeMillis() - start);
         return list;
     }
 
     /**
      * 导出
-     * 
-     * @param reqDTO
+     * @param
      * @return
      */
     @RequiresPermissions("financing:balanceaccountManager:export")
     @PostMapping("/export")
-    @LogRecord(description = "导出", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
-    public void export(@RequestBody ReconciliationConfirmPageParam pageParam,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
+    public void export(@RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
@@ -238,14 +234,11 @@ public class BalanceAccountController {
         }
         pageParam.setBusinessLine(user.getBusinessLine());
 
-
-        JSONResult<List<ReconciliationConfirmDTO>> listNoPage =
-                reconciliationConfirmFeignClient.applyListNoPage(pageParam);
-        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        JSONResult<List<ReconciliationConfirmDTO>> listNoPage = reconciliationConfirmFeignClient.applyListNoPage(pageParam);
+        List<List<Object>> dataList = new ArrayList<>();
         dataList.add(getHeadTitleList());
 
-        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
-                && listNoPage.getData().size() != 0) {
+        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null && listNoPage.getData().size() != 0) {
 
             List<ReconciliationConfirmDTO> resultList = listNoPage.getData();
             int size = resultList.size();
@@ -264,15 +257,22 @@ public class BalanceAccountController {
                 curList.add(dto.getPhone());
                 curList.add(dto.getIdCard());
                 curList.add(dto.getTeleGorupName());
+                curList.add(dto.getTeleSaleName());
                 curList.add(dto.getBusSaleName());
                 curList.add(dto.getPayModeName());
                 curList.add(dto.getAmountReceived());
+                curList.add(dto.getAmountEquipment());
                 curList.add("");
                 curList.add(dto.getPayTypeName());
                 curList.add(dto.getAmountReceivable());
+                curList.add(dto.getTeleAmountPerformance());
                 curList.add(dto.getAmountPerformance());
                 curList.add(dto.getMoney());
-                curList.add(dto.getRatio() + "%");
+                if (org.apache.commons.lang.StringUtils.isNotBlank(dto.getRatio())) {
+                    curList.add(dto.getRatio() + "%");
+                }else{
+                    curList.add("");
+                }
                 curList.add(dto.getCommissionMoney());
                 curList.add(dto.getFirstToll());
                 curList.add(dto.getPreferentialAmount());
@@ -296,10 +296,8 @@ public class BalanceAccountController {
         sheet.setColumnWidth(22, 8000);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
-
         String name = "对账结算申请" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
@@ -322,13 +320,16 @@ public class BalanceAccountController {
         headTitleList.add("联系方式");
         headTitleList.add("身份证号码");
         headTitleList.add("电销组");
+        headTitleList.add("电销顾问");
         headTitleList.add("商务经理");
         headTitleList.add("支付方式");
         headTitleList.add("实收金额");
+        headTitleList.add("设备金额");
         headTitleList.add("款项来源");
         headTitleList.add("付款类型");
         headTitleList.add("应收金额");
-        headTitleList.add("业绩金额");
+        headTitleList.add("电销业绩金额");
+        headTitleList.add("商务业绩金额");
         headTitleList.add("结算金额");
         headTitleList.add("结算比例");
         headTitleList.add("佣金");

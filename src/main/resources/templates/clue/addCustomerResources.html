@@ -353,6 +353,48 @@
                     
                 </el-row>
             </div>
+
+            <div class="marginB20 fs16 paddingT20">上传资料</div>
+            <el-row class="marginB10">
+                <el-col :span="8">
+                    <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
+                    <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
+                </el-col>
+                <el-col :span="4" class="f-fr">
+                    <form name=theform v-show="false">
+                        <input type="radio" name="myradio" value="local_name" checked=true/>上传文件名字保持本地文件名字 <input
+                            type="radio" name="myradio" value="random_name"/>上传文件名字是随机文件名 <br/>上传到指定目录:<input
+                            type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+                    </form>
+                    <div id="container" style="text-align:right;">
+                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
+                        <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
+                    </div>
+                    <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
+                    <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50><pre
+                            id="console"></pre></span>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-table ref="multipleTable" :data="tableDataC1" :default-sort="{ prop: 'id', order: 'ascending' }"
+                          tooltip-effect="dark" style="width: 100%"
+                          border
+                          @selection-change="handleFileSelectionChange">
+                    <el-table-column type="selection" width="55" align="center"> </el-table-column>
+                    <el-table-column prop="id" type="index" label="序号" width="55" align="center">
+                    </el-table-column>
+                    <el-table-column prop="fileName" label="文件名称" align="center">
+                    </el-table-column>
+                    <el-table-column label="操作" align="center">
+                        <template slot-scope="scope">
+                            <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                                {{scope.row.fileType !=="jpg" && scope.row.fileType !=="png" && scope.row.fileType !=="jpeg" && scope.row.fileType !=="gif" && scope.row.fileType !=="bmp"? '下载录音':'查看图片'}}
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+
             <div class="padding20 f-tac">            
                 <el-button type="primary" @click="submitForm('form')"  :disabled="confirmBtnDisabled" >提交客户资源</el-button>
                 <el-button  @click="rebackMV">取 消</el-button>
@@ -383,50 +425,141 @@
             <el-button type="success" @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>
-  <!-- dialog -->
-  <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
-    <template>
-      <el-form :model="wechatForm" ref="wechatForm" >
-        <el-form-item label="微信2：" :label-width="formLabelWidth1" >
-          <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
-        </el-form-item>
-        <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
-          <el-upload
-              class="upload-demo"
-              :action="uploadOssHost"
-              ref="refundApplyImgUpload"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :on-success="handleSuccess"
-              :on-error="handleError"
-              :before-upload="handleBefore"
-              accept=".jpg,.png"
-              multiple
-              :data="uploadParamData"
-              :limit='1'
-              :on-change="selectFile"
-              :on-exceed="handleExceed"
-              :auto-upload="false"
-              :file-list="fileList">
-            <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
-            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="" :label-width="formLabelWidth1" >
-          <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
-        <el-button  @click="wechatVisible=false">取 消</el-button>
-      </div>
-    </template>
-  </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
+        <template>
+          <el-form :model="wechatForm" ref="wechatForm" >
+            <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+              <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+            </el-form-item>
+            <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
+              <el-upload
+                  class="upload-demo"
+                  :action="uploadOssHost"
+                  ref="refundApplyImgUpload"
+                  :on-preview="handlePreview"
+                  :on-remove="handleRemove"
+                  :on-success="handleSuccess"
+                  :on-error="handleError"
+                  :before-upload="handleBefore"
+                  accept=".jpg,.png"
+                  multiple
+                  :data="uploadParamData"
+                  :limit='1'
+                  :on-change="selectFile"
+                  :on-exceed="handleExceed"
+                  :auto-upload="false"
+                  :file-list="fileList">
+                <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
+                <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
+              </el-upload>
+            </el-form-item>
+            <el-form-item label="" :label-width="formLabelWidth1" >
+              <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
+            <el-button  @click="wechatVisible=false">取 消</el-button>
+          </div>
+        </template>
+    </el-dialog>
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt=""
+                 style="width: 250px; height: 250px;">
+        </div>
+    </el-dialog>
 </div>
+<link rel="stylesheet" href="/css/common/uploadStyle.css">
+<style type="text/css">
+    .lineFeed {
+        word-break: break-all;
+        word-wrap: break-word;
+        cursor: not-allowed;
+    }
+
+    .lineFeed2 {
+        width: 530px;
+    }
+
+    .paddingTB {
+        padding: 4px 0px;
+    }
+
+    .paddingL55 {
+        padding-left: 55px;
+    }
+
+    .el-form-item.lineInherit .el-form-item__content {
+        line-height: inherit !important;
+    }
+
+    .progress {
+        /*width: 100% !important;*/
+    }
+
+    #ossfile {
+        text-align: right;
+    }
+    .lineFormShow .el-form-item__content{width: 100%;}
+    .lineFormShow .el-input__inner{height: 35px!important;}
+    .lineFormShow .el-form-item__error{text-align: center;width: 100%;}
+
+    i.el-icon-phone-outline {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        font-size: 20px;
+        margin: 0 5px;
+    }
+
+    .telNumberIcon {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        line-height: 20px;
+        position: absolute;
+        right: 0;
+        top: 13px;
+    }
+
+    .fa-play-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_play.png);
+        background-repeat: no-repeat;
+    }
+
+    .fa-stop-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_stop.png);
+        background-repeat: no-repeat;
+    }
+
+    .download_img {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_download.png);
+        background-repeat: no-repeat;
+    }
+
+    .resourceInfo .el-button {
+        font-size: 12px;
+    }
+</style>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
+<!-- 下载播放錄音 js -->
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script th:inline="javascript" >
   //下拉项目数据
   var proSelect=[[${proSelect}]];
@@ -446,6 +579,8 @@
         el: '#addCustomer',
         data: function() {
             return {
+                dialogFormUploadImg: false, //上传资源图片弹框
+                dialogFormUploadImgSrc: '', //上传资源图片弹框
                 isDisabled:true,//默认不可点击  
                 insideProjectShow:true,//内部项目默认显示
                 outsideProjectShow:false,//外部项目默认不显示
@@ -457,6 +592,8 @@
                 loading:false,
                 confirmBtnDisabled:false,//提交按钮 是否禁用
                 domainShow: false,//默认不显示输入同行品牌名称
+                tableDataC1:[],//上传资料
+                multipleFileSelection: [],//上传内容表格选中
                 form: {
                     domains: [{
                         value: '',
@@ -582,6 +719,7 @@
                 optsex: [{
                     value: '1',
                     label: '男'
+                }, {
                 }, {
                     value: '2',
                     label: '女'
@@ -826,13 +964,19 @@
                	      clue.clueIntention=clueIntention; 
                	      clue.clueBasic=clueBasic;
                	      clue.clueProject=clueProject;
+               	      clue.clueFiles = this.tableDataC1;
                	      addCustomerVM.confirmBtnDisabled=true;//禁用提交按钮
                       axios.post('/tele/clueMyCustomerInfo/saveCreateClue',clue)
                       .then(function (response) {
-                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                   		    window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
-                   		// addCustomerVM.confirmBtnDisabled=false;
-   		        	   }});
+                          var result =  response.data;
+                          if(result.code=="0"){
+                              addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                      window.location.href="/tele/clueMyCustomerInfo/initmyCustomer";
+                                  }});
+                          }else{
+                              addCustomerVM.$message({message:result.msg,type:'error',duration:2000,onClose:function(){}});
+                              addCustomerVM.confirmBtnDisabled=false;
+                          }
                      }).catch(function (error) {
                         addCustomerVM.confirmBtnDisabled=false;
                      })
@@ -1104,7 +1248,101 @@
               this.$message.error('图片最大为2MB');
               return false;
             }
-          },
+          }, 
+            deteleClueFile() {
+                //删除上传文件
+                var rows = this.multipleFileSelection;
+                if (rows.length < 1) {
+                    if (rows.length != 1) {
+                        this.$message({message: '请选择删除数据', type: 'warning'});
+                        return;
+                    }
+                }
+                rows.forEach((item) => {
+                    for (let i = 0; i < this.tableDataC1.length; i++) {
+                        if (this.tableDataC1[i].filePath === item.filePath) {
+                            this.tableDataC1.splice(i, 1);
+                            break;
+                        }
+                    }
+                });
+                rows = [];
+                
+                // for (var i = 0; i < rows.length; i++) {
+                //     if (rows[i].uploadUser != this.loginUserId) {
+                //         this.$message({message: '选中数据存在他人数据，不能进行编辑操作', type: 'warning'});
+                //         return;
+                //     }
+                // }
+
+                // this.$confirm('确定要删除上传文件？', '提示', {
+                //     confirmButtonText: '确定',
+                //     cancelButtonText: '取消',
+                //     type: 'warning'
+                // }).then(() => {
+                //     var ids = [];
+                // for (var i = 0; i < rows.length; i++) {
+                //     ids.push(rows[i].id);
+                // }
+                // var param = {};
+                // param.delIds = ids;
+                // param.clueId = clueId;
+                // axios.post('/tele/clueMyCustomerInfo/deleteClueFile', param)
+                //     .then(function (response) {
+                //         addCustomerVM.$message({
+                //             message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                //                 axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+                //                     .then(function (response) {
+                //                         addCustomerVM.tableDataC1 = response.data.data;
+                //                     });
+
+                //             }
+                //         });
+                //     });
+                // }).catch(() => {
+                //         this.$message({
+                //         type: 'info',
+                //         message: '已取消删除'
+                //     });
+                // });
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            handleFileSelectionChange(val) {
+                //上传资料
+                this.multipleFileSelection = val;
+            },
+            handleTrackingSelection(val) {
+                this.multipleTrackingSelection = val;
+            },
+            handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
+
+                console.log(index, row);
+                console.log(row.filePath);
+                console.log(row.fileName);
+
+                if (row.fileType == 'mp3'|| row.fileType == 'mp4' || row.fileType == 'wav' || row.fileType == 'wma'|| row.fileType == '3gpp' || row.fileType == 'm4a' ||row.fileType == 'ape'|| row.fileType == 'midi' || row.fileType == 'amr'|| row.fileType == 'MP3'|| row.fileType == 'MP4' ||row.fileType == 'WAV' || row.fileType == 'WMA'|| row.fileType == '3GPP' || row.fileType == 'M4A' ||row.fileType == 'APE'|| row.fileType == 'MIDI' || row.fileType == 'AMR') {
+                    /* axios.get(row.filePath).then(function(response){
+                  console.log(response);
+                  //this.download1( response.data, row.fileName, 'auido/mp3' );
+                }).catch(function(error){
+                  console.log(error);
+                }); */
+                    var x = new XMLHttpRequest();
+                    x.open("GET", row.filePath, true);
+                    x.responseType = 'blob';
+                    x.onload = function (e) {
+                        download(x.response, row.fileName, "audio/mp3");
+                    };
+                    x.send();
+                    //this.download1( row.filePath, row.fileName, 'auido/mp3' );
+                } else {
+                    this.dialogFormUploadImgSrc = row.filePath;
+                    this.dialogFormUploadImg = true;
+                }
+
+            },
             // 单选切换
             projectChange(){
                 if(this.form.radioProject=="1"){//内部项目
@@ -1118,6 +1356,7 @@
                 }
             }
         },
+
         mounted(){
             document.getElementById('addCustomer').style.display = 'block';
          },
@@ -1214,5 +1453,81 @@
            
          }
     })
+</script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/crypto/crypto.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/hmac/hmac.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/sha1/sha1.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/base64.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/plupload.full.min.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/file_upload.js'}"></script>
+
+<script type="text/javascript"
+        src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
+<script type="text/javascript">
+    function extname(filename){
+      if(!filename||typeof filename!='string'){
+         return false
+      };
+      let a = filename.split('').reverse().join('');
+      let b = a.substring(0,a.search(/\./)).split('').reverse().join('');
+      return b
+    };
+    function getCaption(obj,state) {
+        var index=obj.lastIndexOf("\;");
+        if(state==0){
+            obj=obj.substring(0,index);
+        }else {
+            obj=obj.substring(index+1,obj.length);
+        }
+        return obj;
+    }
+
+    function clueUploadFile() {
+        var result = uploadFile();
+        var resultName = uploadFileName();
+        
+        if (resultName == null) {
+            addCustomerVM.$message({message: '请选择上传文件', type: 'warning'});
+            return;
+        }
+        // var param = {};
+        // param.clueId = clueId;
+        // param.filePath = result;
+        // axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
+        //     addCustomerVM.$message({
+        //         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+        //             axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+        //                 .then(function (response) {
+        //                     addCustomerVM.tableDataC1 = response.data.data;
+        //                     var ossfile = document.getElementById("ossfile");
+        //                     ossfile.innerHTML = "";
+        //                 });
+        //         }
+        //     });
+        // });  
+        var resultType="";
+        resultType=extname(resultName);//获取文件格式
+        var resultUrl="";
+        resultUrl=getCaption(result,0);  //截取符号前面部分
+ 
+        addCustomerVM.$message({
+            message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                this.addCustomerVM.tableDataC1.push({
+                    fileName: resultName,
+                    fileType: resultType,
+                    filePath: resultUrl
+                });
+                var ossfile = document.getElementById("ossfile");
+                ossfile.innerHTML = "";
+            }
+        });
+    }
+
 </script>
 </html>

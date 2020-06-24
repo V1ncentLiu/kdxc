@@ -392,7 +392,8 @@ var myCallRecordVm = new Vue({
             // this.audioShow=true;
     		if(callSource=='2'){
                 // switchSound(id,url);
-                window.parent.open(url)
+                var httpUrl = url.replace("https","http");
+                window.parent.open(httpUrl)
     			return;
     		}
 
@@ -412,7 +413,8 @@ var myCallRecordVm = new Vue({
                  if(data.code=='0'){
                 	 var url = data.data;
                 	 // switchSound(id,url);
-                    newWindow.location.href = url;
+                     var httpUrl = url.replace("https","http");
+                    newWindow.location.href = httpUrl;
                  }else{
                 	 console.error(data);
                 	 myCallRecordVm.$message({message:data.msg,type:'error'});
