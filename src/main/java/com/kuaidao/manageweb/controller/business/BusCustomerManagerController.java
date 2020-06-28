@@ -529,7 +529,7 @@ public class BusCustomerManagerController {
         headTitleList.add("来访省份");
         headTitleList.add("项目类别（饮品／非饮品）");
         headTitleList.add("值");
-        headTitleList.add("clueId");
+        headTitleList.add("资源ID");
         return headTitleList;
     }
 
