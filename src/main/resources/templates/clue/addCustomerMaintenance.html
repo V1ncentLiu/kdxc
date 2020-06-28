@@ -1789,11 +1789,15 @@
                                             }
                                         });
                                     }else{
+                                        this.saveDisabled = false;
+                                        addCustomerVM.saveDisabled = false;
                                         addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
-                                            if(zjFalg){
-                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
-                                            }else{
-                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            if(result.code=="-1"){
+                                                if(zjFalg){
+                                                    window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                                }else{
+                                                    window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                                }
                                             }
                                         }});
                                     }
@@ -1814,12 +1818,16 @@
                                         }
                                     });
                                 }else{
+                                    this.saveDisabled = false;
+                                    addCustomerVM.saveDisabled = false;
                                     addCustomerVM.$message({
                                         message:result.msg, type: 'error',duration: 2000,onClose:function(){
-                                            if(zjFalg){
-                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
-                                            }else{
-                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            if(result.code=="-1"){
+                                                if(zjFalg){
+                                                    window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                                }else{
+                                                    window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                                }
                                             }
                                     }});
                                 }
@@ -2527,6 +2535,12 @@
                     clue.isInvitation = 1;
                     axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                         .then(function (response) {
+                            var result =  response.data;
+                            if(result.code!="0"){
+                                addCustomerVM.inviteBtnDisabled = false;
+                                addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000 });
+                                return;
+                            }
                             if (response.data.data == "1") {
                                 addCustomerVM.$message({
                                     message: '当前资源存在未处理完成邀约来访，不可重复提交',
