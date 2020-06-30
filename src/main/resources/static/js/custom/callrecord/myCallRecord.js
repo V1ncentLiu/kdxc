@@ -254,8 +254,7 @@ var myCallRecordVm = new Vue({
                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
                 		 }
             			 var x=new XMLHttpRequest();
-                         var httpUrl = url.replace("https","http");
-             			x.open("GET", httpUrl, true);
+             			x.open("GET", url, true);
              			x.responseType = 'blob';
              			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
              			x.send(); 
