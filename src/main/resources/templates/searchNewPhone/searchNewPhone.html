@@ -20,14 +20,7 @@
     </el-breadcrumb>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">                                 
-                <el-form-item label="手机号:">
-                    <el-input v-model="form.phone" placeholder="手机号"></el-input>
-                </el-form-item>
-                <el-form-item label="资源ID:">
-                    <el-input v-model="form.clueId" placeholder="资源ID"></el-input>
-                </el-form-item>
-                <el-form-item label="资源创建时间:">
+                <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">    <el-form-item label="资源创建时间:">
                     <el-date-picker
                         v-model="form.startTime"
                         type="datetime"
@@ -40,8 +33,37 @@
                         type="datetime"
                         placeholder="选择日期时间">
                     </el-date-picker>
+                </el-form-item>                             
+                <el-form-item label="手机号:">
+                    <el-input v-model="form.phone" placeholder="手机号"></el-input>
                 </el-form-item>
-                <br>
+                <el-form-item label="资源ID:">
+                    <el-input v-model="form.clueId" placeholder="资源ID"></el-input>
+                </el-form-item>                
+                <el-form-item label="电销分公司:">
+                    <el-select v-model="form.teleCompanyId" placeholder="电销分公司" clearable filterable>
+                        <el-option
+                                v-for="item in dxBusinessList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="手机号创建时间:">
+                    <el-date-picker
+                        v-model="form.phoneCreateStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.phoneCreateEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
                 <el-form-item label="电销组:" prop="teleGroupId">
                     <el-select v-model="form.teleGroupId" clearable @change="getSaleList" placeholder="电销组" filterable>
                       <el-option
@@ -62,20 +84,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="手机号创建时间:">
-                    <el-date-picker
-                        v-model="form.phoneCreateStartTime"
-                        type="datetime"
-                        placeholder="选择日期时间">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker
-                        v-model="form.phoneCreateEndTime"
-                        type="datetime"
-                        placeholder="选择日期时间">
-                    </el-date-picker>
-                </el-form-item>
+                
                 <div class="mainSearchBtnBox"> 
                     <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button>  -->
@@ -146,6 +155,7 @@
                 multipleSelection: [],//选择行
                 teleGorupOptions:saleGroupList,//电销组
                 teleSaleOptions:[],//电销顾问
+                dxBusinessList:[],//
                 pager:{
 	                total: 0,
 	                currentPage: 1,
@@ -190,6 +200,17 @@
             }        	  
         },
         methods: {
+            getBusAndTel(){
+                var param ={};
+                axios.post('/financing/balanceaccount/getBusAndTel', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      ocmVM.dxBusinessList = result.teleCompanyList;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
             //根据电销组查询电销总监
             getSaleList() {
               var param ={};
@@ -357,6 +378,7 @@
 			if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
+            this.getBusAndTel();
         },
         mounted(){
             document.getElementById('searchNewPhone').style.display = 'block';
