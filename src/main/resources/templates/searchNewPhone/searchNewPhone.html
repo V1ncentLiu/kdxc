@@ -203,14 +203,25 @@
         },
         methods: {
             getBusAndTel(){
-                var param ={};
-                axios.post('/financing/balanceaccount/getBusAndTel', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      ocmVM.dxBusinessList = result.teleCompanyList;
+                // var param ={};
+                // axios.post('/financing/balanceaccount/getBusAndTel', param)
+                // .then(function (response) {
+                //       var result =  response.data;
+                //       ocmVM.dxBusinessList = result.teleCompanyList;
+                // })
+                // .catch(function (error) {
+                //      console.log(error);
+                // });
+                var param={};
+                param.orgType="8";                
+                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+                    //    console.log(response);                    
+                    ocmVM.dxBusinessList = response.data.data;                    
+                }).catch(function (error) {
+                    console.log(error);
                 })
-                .catch(function (error) {
-                     console.log(error);
+                .then(function () {
+                    // always executed
                 });
             },
             //根据电销组查询电销总监
