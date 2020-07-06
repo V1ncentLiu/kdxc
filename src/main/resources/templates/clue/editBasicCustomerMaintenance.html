@@ -518,10 +518,9 @@
         </template>
     </el-dialog>
     <!-- 上传资源dialog -->
-    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg" width="1100px">
         <div class="padding20" style="text-align: center;">
-            <img :src="dialogFormUploadImgSrc" alt=""
-                 style="width: 250px; height: 250px;">
+            <img :src="dialogFormUploadImgSrc" alt="" max-width="1000px">
         </div>
     </el-dialog>
     <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
@@ -1392,12 +1391,18 @@
           clue.clueCustomer = clueCustomer;
           axios.post('/tele/clueMyCustomerInfo/updateCustomerBasicInfoClue', clue)
           .then(function (response) {
-            addCustomerVM.$message({
-              message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                // window.location.href = "/tele/customerManager/initcustomerManager";
-                window.location.href = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+              var result =  response.data;
+              if(result.code=="0"){
+                  addCustomerVM.$message({
+                      message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                          window.location.href = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+                      }
+                  });
+              }else{
+                  addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
+                          window.location.href = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+                      }});
               }
-            });
           });
         } else {
           console.log('error submit!!');

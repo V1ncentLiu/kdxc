@@ -29,11 +29,11 @@ function send_request()
     if (xmlhttp!=null)
     {
         var serverUrl = ossUrl+"?serviceType="+serviceType;
-        console.log(serverUrl);
+        // console.log(serverUrl);
         //serverUrl = 'http://localhost:8080/v1.0/OSS/policyAndCallBack'+"?serviceType="+serviceType;
         xmlhttp.open( "GET", serverUrl, false );
         xmlhttp.send( null );
-        console.log('xmlhttp.responseText', xmlhttp.responseText);
+        // console.log('xmlhttp.responseText', xmlhttp.responseText);
 
         return xmlhttp.responseText
     }
@@ -90,11 +90,21 @@ function uploadFile(data) {
     	return null;
     }
     set_upload_param(uploader, '', false);
-    console.log("host", host);
-    console.log("g_object_name", g_object_name);
+    // console.log("host", host);
+    // console.log("g_object_name", g_object_name);
     return host+"/"+g_object_name+";"+oldfilename;
 }
-
+function uploadFileName(data) {
+    
+    params = data;
+    if(uploader.files.length==0){
+        return null;
+    }
+    set_upload_param(uploader, '', false);
+    // console.log("host", host);
+    // console.log("g_object_name", g_object_name);
+    return oldfilename;
+}
  
 function calculate_object_name(filename)
 {
@@ -108,8 +118,8 @@ function calculate_object_name(filename)
         suffix = get_suffix(filename)
         g_object_name = key + random_string(10) + suffix
     }
-    console.log('calculate_object_name-g_object_name_type ', g_object_name_type);
-    console.log('calculate_object_name-g_object_name', g_object_name);
+    // console.log('calculate_object_name-g_object_name_type ', g_object_name_type);
+    // console.log('calculate_object_name-g_object_name', g_object_name);
     return ''
 }
 

@@ -682,10 +682,9 @@
         </template>
     </el-dialog>
     <!-- 上传资源dialog -->
-    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg" width="1100px">
         <div class="padding20" style="text-align: center;">
-            <img :src="dialogFormUploadImgSrc" alt=""
-                 style="width: 250px; height: 250px;">
+            <img :src="dialogFormUploadImgSrc" alt="" max-width="1000px">
         </div>
     </el-dialog>
     <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
@@ -1789,11 +1788,15 @@
                                             }
                                         });
                                     }else{
+                                        this.saveDisabled = false;
+                                        addCustomerVM.saveDisabled = false;
                                         addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
-                                            if(zjFalg){
-                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
-                                            }else{
-                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            if(result.code=="-1"){
+                                                if(zjFalg){
+                                                    window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                                }else{
+                                                    window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                                }
                                             }
                                         }});
                                     }
@@ -1814,11 +1817,16 @@
                                         }
                                     });
                                 }else{
-                                    addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
-                                            if(zjFalg){
-                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
-                                            }else{
-                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                    this.saveDisabled = false;
+                                    addCustomerVM.saveDisabled = false;
+                                    addCustomerVM.$message({
+                                        message:result.msg, type: 'error',duration: 2000,onClose:function(){
+                                            if(result.code=="-1"){
+                                                if(zjFalg){
+                                                    window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                                }else{
+                                                    window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                                }
                                             }
                                     }});
                                 }
@@ -2526,6 +2534,12 @@
                     clue.isInvitation = 1;
                     axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                         .then(function (response) {
+                            var result =  response.data;
+                            if(result.code!="0"){
+                                addCustomerVM.inviteBtnDisabled = false;
+                                addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000 });
+                                return;
+                            }
                             if (response.data.data == "1") {
                                 addCustomerVM.$message({
                                     message: '当前资源存在未处理完成邀约来访，不可重复提交',

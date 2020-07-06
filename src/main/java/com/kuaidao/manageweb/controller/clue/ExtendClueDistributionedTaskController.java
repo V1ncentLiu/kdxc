@@ -324,7 +324,8 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
-        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
@@ -348,7 +349,8 @@ public class ExtendClueDistributionedTaskController {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(taskDTO.getClueId() + ""); // 资源ID
-                curList.add(DateUtil.convert2String(taskDTO.getCreateTime(),"yyyy/MM/dd HH:mm:ss")); // 创建时间
+                curList.add(
+                        DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss")); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
                 curList.add(taskDTO.getTypeName()); // 资源类型
@@ -362,7 +364,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getWechat()); // 微信1
                 curList.add(taskDTO.getWechat2()); // 微信2
                 curList.add(taskDTO.getAddress()); // 地址
-                curList.add(DateUtil.convert2String(taskDTO.getMessageTime(),"yyyy/MM/dd HH:mm:ss")); // 留言时间
+                curList.add(
+                        DateUtil.convert2String(taskDTO.getMessageTime(), "yyyy/MM/dd HH:mm:ss")); // 留言时间
                 curList.add(taskDTO.getMessagePoint()); // 留言内容
                 curList.add(taskDTO.getSearchWord()); // 搜索词
                 curList.add(taskDTO.getOperationName()); // 资源专员
@@ -527,7 +530,8 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
-        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
@@ -558,7 +562,8 @@ public class ExtendClueDistributionedTaskController {
                 // 客户级别
                 curList.add(taskDTO.getCusLevelName());
                 // 创建时间
-                curList.add(DateUtil.convert2String(taskDTO.getCreateTime(),"yyyy/MM/dd HH:mm:ss"));
+                curList.add(
+                        DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 资源类别
                 curList.add(taskDTO.getCategoryName());
                 // 媒介
@@ -607,25 +612,41 @@ public class ExtendClueDistributionedTaskController {
                 // 是否有效
                 curList.add(status);
                 // 第一次拨打时间
-                curList.add(DateUtil.convert2String(taskDTO.getFirstCallTime(),"yyyy/MM/dd HH:mm:ss"));
+                curList.add(
+                        DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 第一次沟通时间
-                curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(),"yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(),
+                        "yyyy/MM/dd HH:mm:ss"));
                 // 第一次沟通内容
                 curList.add(taskDTO.getFirstCommunicateContent());
                 // 第二次沟通时间
-                curList.add(DateUtil.convert2String(taskDTO.getSecondCommunicateTime(),"yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getSecondCommunicateTime(),
+                        "yyyy/MM/dd HH:mm:ss"));
                 // 第二次沟通内容
                 curList.add(taskDTO.getSecondCommunicateContent());
                 // 第三次沟通时间
-                curList.add(DateUtil.convert2String(taskDTO.getThreeCommunicateTime(),"yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getThreeCommunicateTime(),
+                        "yyyy/MM/dd HH:mm:ss"));
                 // 第三次沟通内容
                 curList.add(taskDTO.getThreeCommunicateContent());
                 // 留言时间
-                curList.add(DateUtil.convert2String(taskDTO.getMessageTime(),"yyyy/MM/dd HH:mm:ss"));
+                curList.add(
+                        DateUtil.convert2String(taskDTO.getMessageTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 资源专员
                 curList.add(taskDTO.getOperationName());
                 // 所属组
                 curList.add(taskDTO.getSourcetwo());
+                String isSelfBuild;
+                Integer inputType = taskDTO.getInputType();
+                if (inputType == 1) {
+                    isSelfBuild = "是";
+                } else {
+                    isSelfBuild = "否";
+                }
+                // 是否自建
+                curList.add(isSelfBuild);
+                // ip
+                curList.add(taskDTO.getIp());
                 dataList.add(curList);
             }
         }
@@ -919,7 +940,8 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
-        if (RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }

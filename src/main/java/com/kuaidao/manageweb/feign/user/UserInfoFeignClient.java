@@ -1,6 +1,8 @@
 package com.kuaidao.manageweb.feign.user;
 
 import java.util.List;
+
+import com.kuaidao.sys.dto.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,16 +19,11 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.PhoneEntity;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
-import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import feign.hystrix.FallbackFactory;
 
 /**
  * 用户
- * 
+ *
  * @author: zxy
  * @date: 2019年1月4日
  * @version V1.0
@@ -36,7 +33,7 @@ import feign.hystrix.FallbackFactory;
 public interface UserInfoFeignClient {
     /**
      * 根据id查询用户信息
-     * 
+     *
      * @param
      * @return
      */
@@ -45,7 +42,7 @@ public interface UserInfoFeignClient {
 
     /**
      * 根据手机号查询用户信息
-     * 
+     *
      * @param
      * @return
      */
@@ -54,7 +51,7 @@ public interface UserInfoFeignClient {
 
     /**
      * 根据用户名查询用户信息
-     * 
+     *
      * @param
      * @return
      */
@@ -63,7 +60,7 @@ public interface UserInfoFeignClient {
 
     /**
      * 查询用户集合
-     * 
+     *
      * @param
      * @return
      */
@@ -72,7 +69,7 @@ public interface UserInfoFeignClient {
 
     /**
      * 修改用户信息
-     * 
+     *
      * @param
      * @return
      */
@@ -81,7 +78,7 @@ public interface UserInfoFeignClient {
 
     /**
      * 新增用户
-     * 
+     *
      * @param
      * @return
      */
@@ -90,7 +87,7 @@ public interface UserInfoFeignClient {
 
     /**
      * 角色列表
-     * 
+     *
      * @param
      * @return
      */
@@ -136,7 +133,16 @@ public interface UserInfoFeignClient {
      */
     @PostMapping("/listNoPage")
     JSONResult<List<UserInfoDTO>> listNoPage(@RequestBody UserInfoPageParam param);
-
+    /**
+     * @Description: 根据条件查询用户与数据权限关系
+     * @Param: [req]
+     * @return: com.kuaidao.common.entity.JSONResult<java.util.List<com.kuaidao.sys.dto.user.UserDataAuthReq>>
+     * @author: fanjd
+     * @date: 2020/6/23 16:50
+     * @version: V1.0
+     */
+    @PostMapping("/findUserDataAuthByParam")
+     JSONResult<List<UserDataAuthReq>> findUserDataAuthByParam(@RequestBody UserDataAuthReq req);
     @Component
     static class HystrixClientFallback implements FallbackFactory<UserInfoFeignClient> {
 
@@ -226,6 +232,11 @@ public interface UserInfoFeignClient {
                 @Override
                 public JSONResult<List<UserInfoDTO>> listNoPage(UserInfoPageParam param) {
                     return fallBackError("按条件查询用户（不分页）");
+                }
+
+                @Override
+                public JSONResult<List<UserDataAuthReq>> findUserDataAuthByParam(UserDataAuthReq req) {
+                    return fallBackError("按条件查询用户与数据权限关系");
                 }
             };
         }
