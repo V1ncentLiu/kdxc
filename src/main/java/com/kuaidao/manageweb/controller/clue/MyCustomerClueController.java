@@ -1516,24 +1516,19 @@ public class MyCustomerClueController {
      * @return
      */
     private String validatePhone(ClueCustomerDTO clueCustomer,ClueDTO dto){
-        if(StringUtils.isNotBlank(clueCustomer.getPhone())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())
-                && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone()) && !clueCustomer.getPhone().equals(dto.getClueCustomer().getPhone())){
             return "手机号已存在";
         }
-        if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())
-                && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone2())  && !clueCustomer.getPhone2().equals(dto.getClueCustomer().getPhone2())){
             return "手机号2已存在";
         }
-        if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())
-                && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone3())  && !clueCustomer.getPhone3().equals(dto.getClueCustomer().getPhone3())){
             return "手机号3已存在";
         }
-        if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())
-                && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone4())  && !clueCustomer.getPhone4().equals(dto.getClueCustomer().getPhone4())){
             return "手机号4已存在";
         }
-        if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())
-                && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
+        if(StringUtils.isNotBlank(clueCustomer.getPhone5())  && !clueCustomer.getPhone5().equals(dto.getClueCustomer().getPhone5())){
             return "手机号5已存在";
         }
         return "";
