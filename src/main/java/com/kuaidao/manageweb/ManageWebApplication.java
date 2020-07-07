@@ -56,7 +56,6 @@ public class ManageWebApplication {
 
     /**
      * redistemplate 修改序列化方式
-     * 
      * @param redisConnectionFactory
      * @return
      */
