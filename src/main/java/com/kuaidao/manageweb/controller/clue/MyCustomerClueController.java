@@ -1382,35 +1382,34 @@ public class MyCustomerClueController {
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
             menuName = MenuEnum.CUSTOMER_INFO)
-    public JSONResult<String> updateCustomerClue(HttpServletRequest request,
-            @RequestBody ClueDTO dto) {
+    public JSONResult<String> updateCustomerClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             List<RoleInfoDTO> roleList = user.getRoleList();
-            if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())){
-                if(null != dto && null != dto.getClueId()){
+            if (RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())) {
+                if (null != dto && null != dto.getClueId()) {
                     ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
                     clueQueryDTO.setClueId(dto.getClueId());
                     JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(clueQueryDTO);
-                    if(JSONResult.SUCCESS.equals(clueInfo.getCode()) && null != clueInfo.getData()){
+                    if (JSONResult.SUCCESS.equals(clueInfo.getCode()) && null != clueInfo.getData()) {
                         ClueDTO data = clueInfo.getData();
                         ClueCustomerDTO clueCustomer = data.getClueCustomer();
-                        if(null != clueCustomer){
+                        if (null != clueCustomer) {
                             String res = validatePhone(clueCustomer, dto);
-                            if(!"".equals(res)){
-                                return new JSONResult<String>().fail("-1",res);
+                            if (!"".equals(res)) {
+                                return new JSONResult<String>().fail("-1", res);
                             }
                             String res1 = validateWeChat(clueCustomer, dto);
-                            if(!"".equals(res1)){
-                                return new JSONResult<String>().fail("-2",res1);
+                            if (!"".equals(res1)) {
+                                return new JSONResult<String>().fail("-2", res1);
                             }
                         }
-                        if(null != user.getBusinessLine()){
-                            if(user.getBusinessLine().equals(BusinessLineConstant.SHANGJI) ||
-                                    user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)){
-                                String res = validateClueFile(clueCustomer, dto);
+                        if (null != user.getBusinessLine()) {
+                            if (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)
+                                    || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
+                                 String res = validateClueFile(clueCustomer, dto);
                                 //新增手机号 资料上传判断
                                 if(!"".equals(res)){
                                     return new JSONResult<String>().fail("-3",res);
@@ -1422,27 +1421,22 @@ public class MyCustomerClueController {
             }
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
-            if (dto.getClueCustomer().getPhoneCreateTime() != null
-                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone())) {
+            if (dto.getClueCustomer().getPhoneCreateTime() != null && null != dto.getClueCustomer().getPhone()) {
                 dto.getClueCustomer().setPhoneCreateUser(user.getId());
             }
-            if (dto.getClueCustomer().getPhone2CreateTime() != null
-                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone2())) {
+            if (dto.getClueCustomer().getPhone2CreateTime() != null && null != dto.getClueCustomer().getPhone2()) {
                 dto.getClueCustomer().setPhone2CreateUser(user.getId());
             }
-            if (dto.getClueCustomer().getPhone3CreateTime() != null
-                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone3())) {
+            if (dto.getClueCustomer().getPhone3CreateTime() != null && null != dto.getClueCustomer().getPhone3()) {
                 dto.getClueCustomer().setPhone3CreateUser(user.getId());
             }
-            if (dto.getClueCustomer().getPhone4CreateTime() != null
-                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone4())) {
+            if (dto.getClueCustomer().getPhone4CreateTime() != null && null != dto.getClueCustomer().getPhone4()) {
                 dto.getClueCustomer().setPhone4CreateUser(user.getId());
             }
-            if (dto.getClueCustomer().getPhone5CreateTime() != null
-                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone5())) {
+            if (dto.getClueCustomer().getPhone5CreateTime() != null && null != dto.getClueCustomer().getPhone5()) {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
-            //设置角色
+            // 设置角色
             dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
