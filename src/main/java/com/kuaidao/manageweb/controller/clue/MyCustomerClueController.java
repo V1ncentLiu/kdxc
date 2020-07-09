@@ -1423,23 +1423,23 @@ public class MyCustomerClueController {
             dto.setUpdateUser(user.getId());
             dto.setOrg(user.getOrgId());
             if (dto.getClueCustomer().getPhoneCreateTime() != null
-                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())) {
+                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone())) {
                 dto.getClueCustomer().setPhoneCreateUser(user.getId());
             }
             if (dto.getClueCustomer().getPhone2CreateTime() != null
-                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())) {
+                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone2())) {
                 dto.getClueCustomer().setPhone2CreateUser(user.getId());
             }
             if (dto.getClueCustomer().getPhone3CreateTime() != null
-                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())) {
+                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone3())) {
                 dto.getClueCustomer().setPhone3CreateUser(user.getId());
             }
             if (dto.getClueCustomer().getPhone4CreateTime() != null
-                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())) {
+                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone4())) {
                 dto.getClueCustomer().setPhone4CreateUser(user.getId());
             }
             if (dto.getClueCustomer().getPhone5CreateTime() != null
-                    && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
+                    && StringUtils.isNotEmpty(dto.getClueCustomer().getPhone5())) {
                 dto.getClueCustomer().setPhone5CreateUser(user.getId());
             }
             //设置角色
