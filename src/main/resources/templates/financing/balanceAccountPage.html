@@ -954,10 +954,20 @@ var clueVM = new Vue({
             	   }
 
                    this.ratio = rows[0].ratio.substring(0,2) ;
-
+                   var parm = {};
+                   parm.id = rows[0].payId;
+                   //获取结算金额
+                   var money = 0 ;
+                   debugger;
+                   axios.post('/financing/balanceaccount/getSettlementAmount', parm).then(function (response) {
+                       if (null != response || response.data != null || response.data.code == '0') {
+                           console.log("================"+response.data.data);
+                           money  = response.data.data;
+                       }
+                   });
             	   if(status=="提交对账" || status=="已对账"){
             		   this.apply.commissionMoney = null;
-                	   this.apply.money = rows[0].money ;
+                	   this.apply.money = money ;
                 	   this.apply.isDoubt = rows[0].isDoubt ;
                 	   this.apply.commissionMoney = rows[0].commissionMoney ;
                 	   if(rows[0].isDoubt ==1){
@@ -969,8 +979,8 @@ var clueVM = new Vue({
                 	   }
             	   }else{
                        //结算金额
-                       this.apply.money = rows[0].amountReceived;
-            		   this.apply.commissionMoney = this.apply.money * this.ratio / 100;
+                       this.apply.money = money;
+            		   this.apply.commissionMoney = money * this.ratio / 100;
                 	   this.apply.isDoubt = 0 ;
                 	   this.apply.doubtRemark = null ;
                 	   this.doubtRemarkShow = false;
