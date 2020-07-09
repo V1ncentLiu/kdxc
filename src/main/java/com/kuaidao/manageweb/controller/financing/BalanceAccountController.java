@@ -412,8 +412,8 @@ public class BalanceAccountController {
     @ResponseBody
     @PostMapping("/getSettlementAmount")
     public JSONResult<BigDecimal> getSettlementAmount(@RequestBody IdEntityLong idEntityLong) {
-        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getSettlementAmount(idEntityLong);
-        return sumConfirmCommission;
+        JSONResult<BigDecimal> settlementAmount = reconciliationConfirmFeignClient.getSettlementAmount(idEntityLong);
+        return settlementAmount;
     }
     /**
      * 获取当前登录账号
