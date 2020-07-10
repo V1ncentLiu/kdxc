@@ -128,7 +128,7 @@
             loading:false,
             rules: {
                 orgId: [
-                    { required: true, message: '请选择电销组', trigger: 'change' }
+                    // { required: true, message: '请选择电销组', trigger: 'change' }
                 ],
                 dailyUpperLimit: [
                     { required: true, message: '请填写单日分配量上限', trigger: 'change' }
@@ -252,37 +252,43 @@
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
                         if (valid) {
-                          var formData = this.form;
-                          var param={};                          
-                          param.orgId = formData.orgId;
-                          param.businessLine = formData.businessLine;
-                          param.startTime = formData.startTime;
-                          param.endTime = formData.endTime;
-                          if(formData.beginTime>formData.endTime){
-                            this.$message("开始时间不能大于结束时间");
-                             return;
-                          }
-                          var str = "";
-                          var rows = this.multipleSelection;
-                          for ( var i = 0; i <rows.length; i++){
-                        	  str = rows[i].id
-                          }
-                          orgVM.btnDisabled = true;
-                          var url = "/clueAssign/clueAssignLimit/save";
-                          if($("#addOrUpdate").val() ==2){//编辑
-                              param.id = str;
-                        	    url = "/clueAssign/clueAssignLimit/update"
-                          }
-                       	  axios.post(url,param).then(function (response) {
-       	                  	//   console.log(response);
-       	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/telemarketing/telemarketingLayoutList"; 
-                                orgVM.btnDisabled = false; 
-       	                     }else{
-       	                    	orgVM.$message({message: response.data.data.msg, type: 'warning'});
-                                orgVM.btnDisabled = false; 
-                                return ;
-                            } 
+                            var formData = this.form;
+                            var param={};                          
+                            param.orgId = formData.orgId;
+                            param.businessLine = formData.businessLine;
+                            if(formData.startTime !=null && formData.endTime !=null && formData.startTime !='' && formData.endTime != ''){
+                                if(formData.startTime>formData.endTime){
+                                    this.$message("开始时间不能大于结束时间");
+                                    return;
+                                }
+                            }
+                            if(formData.startTime !=null && formData.startTime !=''){
+                                param.startTime=formData.startTime;
+                            }
+                            if(formData.endTime !=null && formData.endTime !=''){
+                                param.endTime=formData.endTime;
+                            }
+                            var str = "";
+                            var rows = this.multipleSelection;
+                            for ( var i = 0; i <rows.length; i++){
+                          	  str = rows[i].id
+                            }
+                            orgVM.btnDisabled = true;
+                            var url = "/clueAssign/clueAssignLimit/save";
+                            if($("#addOrUpdate").val() ==2){//编辑
+                                param.id = str;
+                          	    url = "/clueAssign/clueAssignLimit/update"
+                            }
+                         	  axios.post(url,param).then(function (response) {
+           	                  	//   console.log(response);
+         	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                                  orgVM.inviteAreaListPage();
+                                  orgVM.btnDisabled = false; 
+         	                      }else{
+         	                    	  orgVM.$message({message: response.data.msg, type: 'warning'});
+                                  orgVM.btnDisabled = false; 
+                                  return ;
+                                } 
        	                    }).catch(function (error) {
                                 orgVM.btnDisabled = false; 
                                 console.log(error);
