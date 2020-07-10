@@ -208,7 +208,6 @@
                     if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var telemarketing = response.data.data;
                     	  orgVM.form.orgId = telemarketing.orgName;
-                    	  orgVM.form.businessLine = telemarketing.businessLine;
                     	  orgVM.form.dailyUpperLimit = telemarketing.dailyUpperLimit;
                     	  orgVM.form.startTime = telemarketing.startTime;
                         orgVM.form.endTime = telemarketing.endTime;
@@ -244,27 +243,28 @@
           	} ,
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                    if (valid) {
+                    if (valid) {                      
                         var formData = this.form;
-                        var param={};                          
-                        param.orgId = formData.orgId;
-                        param.businessLine = formData.businessLine;
-                        if(formData.startTime !=null && formData.endTime !=null && formData.startTime !='' && formData.endTime != ''){
-                            if(formData.startTime>formData.endTime){
-                                this.$message("开始时间不能大于结束时间");
-                                return;
-                            }
-                        }
-                        if(formData.startTime !=null && formData.startTime !=''){
-                            param.startTime=formData.startTime;
-                        }
-                        if(formData.endTime !=null && formData.endTime !=''){
-                            param.endTime=formData.endTime;
-                        }
+                        var param={}; 
+                        param.orgId = formData.orgId;                         
+                        param.dailyUpperLimit = formData.dailyUpperLimit;                         
+                        param.startTime = formData.startTime;                         
+                        param.endTime = formData.endTime;                         
                         var str = "";
                         var rows = this.multipleSelection;
                         for ( var i = 0; i <rows.length; i++){
-                      	  str = rows[i].id
+                          str = rows[i].id
+                        }  
+                        if(formData.startTime>formData.endTime){
+                            this.$message("开始时间不能大于结束时间");
+                            return;
+                        } 
+                        if(dzList){
+                            for(var i=0;i<dzList.length;i++){
+                              if(formData.orgId==dzList[i].id){
+                                  param.businessLine = dzList[i].businessLine;
+                              }                            
+                            }
                         }
                         orgVM.btnDisabled = true;
                         var url = "/clueAssign/clueAssignLimit/save";
