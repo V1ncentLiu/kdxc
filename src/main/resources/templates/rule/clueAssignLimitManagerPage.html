@@ -36,10 +36,10 @@
           			</el-select>
                 </el-form-item>
                 <el-form-item label="开始时间:" label-width="80px">
-        			  <el-date-picker value-format="yyyy-MM-dd" v-model="startTime" type="date" placeholder="选择日期"></el-date-picker>
+        			      <el-date-picker value-format="yyyy-MM-dd" v-model="startTime" type="date" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
-          			<el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期"></el-date-picker>
+          			    <el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="">
       				      <el-button icon="el-icon-search" type="primary" @click="inviteAreaListPage" style="width: 90px;">搜索</el-button>
@@ -157,9 +157,9 @@
                 param.orgId=this.orgId;
                 console.log(param);
                 if(this.startTime !=null && this.endTime !=null && this.startTime !='' && this.endTime != ''){
-              	  if(this.startTime>this.endTime){
-                  	  this.$message("开始时间不能大于结束时间");
-             	         return;
+              	    if(this.startTime>this.endTime){
+                  	    this.$message("开始时间不能大于结束时间");
+             	          return;
                     }
                 }
                 if(this.startTime !=null && this.startTime !=''){
@@ -172,16 +172,16 @@
                 axios.post('/clueAssign/clueAssignLimit/list',param).then(function (response) {
                 	  console.log(response);
                     if(null===response||response.data==null||response.data.code!='0'){
-                  	  alert(response.data.msg);
-                  	  return ;
-                   }else{
-                  	 orgVM.dataTable =response.data.data.data;
-                  	 orgVM.pager.currentPage= response.data.data.currentPage;
-                  	 orgVM.pager.total= response.data.data.total;
-                   }
+                    	  orgVM.$message(response.data.msg);
+                    	  return ;
+                    }else{
+                    	  orgVM.dataTable =response.data.data.data;
+                    	  orgVM.pager.currentPage= response.data.data.currentPage;
+                    	  orgVM.pager.total= response.data.data.total;
+                    }
                 })
                 .catch(function (error) {
-                  console.log(error);
+                    console.log(error);
                 })
                 .then(function () {
                 });
@@ -196,125 +196,125 @@
             	  $("#addOrUpdate").val(2);
             	  //修改菜单数据
               	var rows = this.multipleSelection;
-                  if(rows.length!=1){
-                      this.$message({
-                         message: '请选择一条数据进行修改',
-                         type: 'warning'
-                      });
-                      return;
-                  }
-                  this.dialogFormVisible = true;
-                  var param ={};
-                  var str = "";
-                  for ( var i = 0; i <rows.length; i++){
-                	  str = rows[i].id
-                  }
-                  param.id = str;
-                  axios.post('/clueAssign/clueAssignLimit/get',param).then(function (response) {
-                  	  console.log(response);
-                      if(null !==response && response.data !=null && response.data.code=='0'){
-                      	  var telemarketing = response.data.data;
-                      	  orgVM.form.orgId = telemarketing.orgName;
-                      	  orgVM.form.businessLine = telemarketing.businessLine;
-                      	  orgVM.form.dailyUpperLimit = telemarketing.dailyUpperLimit;
-                      	  orgVM.form.startTime = telemarketing.startTime;
-                          orgVM.form.endTime = telemarketing.endTime;
-                      }else{
-                    	    alert(response.data.data.message);
-	                  	  	return ;
-                     }
-                  }).catch(function (error) {
-                      console.log(error);
-                  })
-                  .then(function () {
-                    // always executed
-                  });
-              },
-              handleSelectionChange(val) {
-                  this.multipleSelection = val;
-              },
-            //时间格式化
-              dateFormat(row, column){
-            	  var date = row[column.property];
-            	     if (date == undefined || date ==null || date =="") {
-            	       return "";
-            	     }
-            	     return moment(new Date(date)).format("YYYY-MM-DD");
-            	} ,
-              //时间格式化
-              dateFormatTime(row, column){
-            	  var date = row[column.property];
-            	     if (date == undefined) {
-            	       return "";
-            	     }
-            	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss");
-            	} ,
-             submitForm(formName) {
-                    this.$refs[formName].validate((valid) => {
-                        if (valid) {
-                            var formData = this.form;
-                            var param={};                          
-                            param.orgId = formData.orgId;
-                            param.businessLine = formData.businessLine;
-                            if(formData.startTime !=null && formData.endTime !=null && formData.startTime !='' && formData.endTime != ''){
-                                if(formData.startTime>formData.endTime){
-                                    this.$message("开始时间不能大于结束时间");
-                                    return;
-                                }
-                            }
-                            if(formData.startTime !=null && formData.startTime !=''){
-                                param.startTime=formData.startTime;
-                            }
-                            if(formData.endTime !=null && formData.endTime !=''){
-                                param.endTime=formData.endTime;
-                            }
-                            var str = "";
-                            var rows = this.multipleSelection;
-                            for ( var i = 0; i <rows.length; i++){
-                          	  str = rows[i].id
-                            }
-                            orgVM.btnDisabled = true;
-                            var url = "/clueAssign/clueAssignLimit/save";
-                            if($("#addOrUpdate").val() ==2){//编辑
-                                param.id = str;
-                          	    url = "/clueAssign/clueAssignLimit/update"
-                            }
-                         	  axios.post(url,param).then(function (response) {
-           	                  	//   console.log(response);
-         	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                                  orgVM.inviteAreaListPage();
-                                  orgVM.btnDisabled = false; 
-         	                      }else{
-         	                    	  orgVM.$message({message: response.data.msg, type: 'warning'});
-                                  orgVM.btnDisabled = false; 
-                                  return ;
-                                } 
-       	                    }).catch(function (error) {
-                                orgVM.btnDisabled = false; 
-                                console.log(error);
-                            })
-                            .then(function () {
-                            // always executed
-                            });  
-                        } else {
-                            console.log('error submit!!');
-                            return false;
-                        }
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
                     });
-                },
-                addbutton(){
-                  	this.showTitle="新增分配设置"
-                  	$("#addOrUpdate").val(1);
-                  	this.dialogFormVisible=true;
-                    this.form.orgId = "";
-                    this.form.businessLine = "";
-                  	this.form.dailyUpperLimit = "";
-                  	this.form.startTime = "";
-                    this.form.endTime = "";
-                  	if (this.$refs['form']!=undefined) {
-                     		this.$refs['form'].resetFields();
+                    return;
+                }
+                this.dialogFormVisible = true;
+                var param ={};
+                var str = "";
+                for ( var i = 0; i <rows.length; i++){
+              	  str = rows[i].id
+                }
+                param.id = str;
+                axios.post('/clueAssign/clueAssignLimit/get',param).then(function (response) {
+                	  console.log(response);
+                    if(null !==response && response.data !=null && response.data.code=='0'){
+                    	  var telemarketing = response.data.data;
+                    	  orgVM.form.orgId = telemarketing.orgName;
+                    	  orgVM.form.businessLine = telemarketing.businessLine;
+                    	  orgVM.form.dailyUpperLimit = telemarketing.dailyUpperLimit;
+                    	  orgVM.form.startTime = telemarketing.startTime;
+                        orgVM.form.endTime = telemarketing.endTime;
+                    }else{
+                  	    alert(response.data.data.message);
+                  	  	return ;
+                   }
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                });
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //时间格式化
+            dateFormat(row, column){
+          	  var date = row[column.property];
+          	     if (date == undefined || date ==null || date =="") {
+          	       return "";
+          	     }
+          	     return moment(new Date(date)).format("YYYY-MM-DD");
+          	} ,
+            //时间格式化
+            dateFormatTime(row, column){
+          	  var date = row[column.property];
+          	     if (date == undefined) {
+          	       return "";
+          	     }
+          	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss");
+          	} ,
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var formData = this.form;
+                        var param={};                          
+                        param.orgId = formData.orgId;
+                        param.businessLine = formData.businessLine;
+                        if(formData.startTime !=null && formData.endTime !=null && formData.startTime !='' && formData.endTime != ''){
+                            if(formData.startTime>formData.endTime){
+                                this.$message("开始时间不能大于结束时间");
+                                return;
+                            }
+                        }
+                        if(formData.startTime !=null && formData.startTime !=''){
+                            param.startTime=formData.startTime;
+                        }
+                        if(formData.endTime !=null && formData.endTime !=''){
+                            param.endTime=formData.endTime;
+                        }
+                        var str = "";
+                        var rows = this.multipleSelection;
+                        for ( var i = 0; i <rows.length; i++){
+                      	  str = rows[i].id
+                        }
+                        orgVM.btnDisabled = true;
+                        var url = "/clueAssign/clueAssignLimit/save";
+                        if($("#addOrUpdate").val() ==2){//编辑
+                            param.id = str;
+                      	    url = "/clueAssign/clueAssignLimit/update"
+                        }
+                     	  axios.post(url,param).then(function (response) {
+       	                  	//   console.log(response);
+     	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                              orgVM.inviteAreaListPage();
+                              orgVM.btnDisabled = false; 
+     	                      }else{
+     	                    	  orgVM.$message({message: response.data.msg, type: 'warning'});
+                              orgVM.btnDisabled = false; 
+                              return ;
+                            } 
+   	                    }).catch(function (error) {
+                            orgVM.btnDisabled = false; 
+                            console.log(error);
+                        })
+                        .then(function () {
+                        // always executed
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return false;
                     }
-                },
+                });
+            },
+            addbutton(){
+              	this.showTitle="新增分配设置"
+              	$("#addOrUpdate").val(1);
+              	this.dialogFormVisible=true;
+                this.form.orgId = "";
+                this.form.businessLine = "";
+              	this.form.dailyUpperLimit = "";
+              	this.form.startTime = "";
+                this.form.endTime = "";
+              	if (this.$refs['form']!=undefined) {
+                 		this.$refs['form'].resetFields();
+                }
+            },
         },
         created(){
             // 取页数存储
