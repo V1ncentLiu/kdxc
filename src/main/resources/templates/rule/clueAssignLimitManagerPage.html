@@ -17,10 +17,9 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>增加分配量设置</el-button>
-            <el-button type="warning" @click="dialogBatchVisible = true"><i class="el-icon-download"></i>导入</el-button>
+            <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>增加分配量设置</el-button>            
+   			    <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑分配量设置</el-button>
             <!-- <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button> -->
-   			<el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑分配量设置</el-button>
         </el-col>
     </el-row>
     <div class="mainSearchBg">        
@@ -72,10 +71,9 @@
 
     <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
-        <!-- <el-form :model="form" ref="form" :rules="rules" class="width500"> -->
         <el-form :model="form" ref="form" :rules="rules" >
-            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="telemarketingTeamId">
-                <el-select filterable v-model="form.telemarketingTeamId"  placeholder="选择电销组" style="width: 290px;">
+            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="orgName">
+                <el-select filterable v-model="form.orgId"  placeholder="选择电销组" style="width: 290px;">
                     <el-option
                         v-for="item in dzList"
                         :key="item.id"
@@ -84,10 +82,10 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="单日分配上线：" :label-width="formLabelWidth" prop="projectIds">
+            <el-form-item label="单日分配上线：" :label-width="formLabelWidth" prop="dailyUpperLimit">
                 
             </el-form-item>
-            <el-form-item label="有效开始时间：" :label-width="formLabelWidth" prop="beginTime">
+            <el-form-item label="有效开始时间：" :label-width="formLabelWidth" prop="startTime">
                 <el-date-picker value-format="yyyy-MM-dd" v-model="form.beginTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
             </el-form-item>
             <el-form-item label="有效结束时间："  :label-width="formLabelWidth" prop="endTime">
@@ -115,38 +113,13 @@
             startTime:'',
             endTime:'',
             dzList:dzList,//电销组
-
-            isShow:false,
-            btnDisabled: false,
-        	dataNum:"",
-        	showTitle:"",
-        	dialogBatchVisible:false,
-        	confirmBtnDisabled:false,
-        	formLabelWidth: '130px',
-        	dialogFormVisible: false,
-        	addOrModifyDialogTitle:"",
-        	dialogFormVisible:false,
-        	dataTable:[],
-        	multipleSelection: [],
-        	exportdataTable:[],
-        	
-        	projectList:[],
-            projectAddList:[],
-        	projectId:"",
-            companyGroupId:'',
-        	form:{
-        	 projectIds: [],
-        	 telemarketingTeamId: '',
-        	 beginTime:'',
-        	 endTime:'',
-        	  status:'0',
-              adShow:"0",
-              projectShow:"0",
-              sourceShow:"0",
-              category:"",
-              companyGroupId:''
-
-        	  },
+            form:{
+                orgId:'',
+                businessLine:'',//业务线
+                dailyUpperLimit:'',
+                startTime:'',
+                endTime:''
+            },
             pager:{
                 total: 0,
                 currentPage: 1,
@@ -154,89 +127,27 @@
             },
             loading:false,
             rules: {
-            	projectIds: [
-                    { required: true, message: '请选择项目', trigger: 'change' }
-                ],
                 telemarketingTeamId: [
                     { required: true, message: '请选择电销组', trigger: 'change' }
                 ],
-                companyGroupId: [
-                    { required: true, message: '请选择所属集团', trigger: 'change' }
+                telemarketingTeamId: [
+                    { required: true, message: '请填写单日分配量上限', trigger: 'change' }
                 ],
                 beginTime: [
                     { required: true, message: '请选择开始时间', trigger: 'blur' }
                 ],
                 endTime: [
                     { required: true, message: '请选择结束时间', trigger: 'blur' }
-                ],
-                status: [
-                    { required: true, message: '请选择启用状态', trigger: 'blur' }
-                ],
-                adShow: [
-                     { required: true, message: '请选择广告文案是否可以查看', trigger: 'blur' },
-                    { validator:function(rule,value,callback){
-                            if(orgVM.form.category ==null || orgVM.form.category ==''){
-                                callback();
-                            }else{
-                                if(orgVM.form.adShow ==null){
-                                    callback(new Error("请选择广告文案是否可以查看"));
-                                }
-                                callback();
-                            }
-                        }, trigger: 'blur'}
-                ],
-                sourceShow   : [
-                    { required: true, message: '请选择媒介是否可以查看', trigger: 'blur' },
-                    { validator:function(rule,value,callback){
-                            if(orgVM.form.category ==null || orgVM.form.category ==''){
-                                callback();
-                            }else{
-                                if(orgVM.form.sourceShow ==null){
-                                    callback(new Error("请选择媒介是否可以查看"));
-                                }
-                                callback();
-                            }
-                        }, trigger: 'blur'}
-                ],
-                projectShow  : [
-                    { required: true, message: '请选择资源项目是否可以查看', trigger: 'blur' },
-                    { validator:function(rule,value,callback){
-                            if(orgVM.form.category ==null || orgVM.form.category ==''){
-                                callback();
-                            }else{
-                                if(orgVM.form.projectShow ==null){
-                                    callback(new Error("请选择广告文案是否可以查看"));
-                                }
-                            }
-                            callback();
-                        }, trigger: 'blur'}
-                ],
+                ]
             }
-
+            dataTable:[],
+            multipleSelection: [],
+            btnDisabled: false,
+        	  showTitle:"",
+        	  formLabelWidth: '130px',
+        	  dialogFormVisible: false,
         },
         methods: {
-            currentProjects(seleVal){
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                param={};
-                param.groupId=seleVal;
-                axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
-                    orgVM.projectList=response.data.data;
-                    orgVM.projectId ='';
-                });
-            },
-            currentAddProjects(seleVal){
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                param={};
-                param.groupId=seleVal;
-                axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
-                    orgVM.projectAddList=response.data.data;
-                    orgVM.form.projectIds =[];
-                });
-            },
         	  inviteAreaListPage(){//查询按钮
             	  var param = {};
             	  var pageSize = this.pager.pageSize;
@@ -289,7 +200,7 @@
                       this.$message({
                          message: '请选择一条数据进行修改',
                          type: 'warning'
-                       });
+                      });
                       return;
                   }
                   this.dialogFormVisible = true;
@@ -299,55 +210,17 @@
                 	  str = rows[i].id
                   }
                   param.id = str;
-                  axios.post('/telemarketing/findTelemarketingById',param).then(function (response) {
+                  axios.post('/clueAssign/clueAssignLimit/update',param).then(function (response) {
                   	  console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
-                    	  var telemarketing = response.data.data;
-                    	  orgVM.form.projectIds = telemarketing.projectIds;
-                    	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
-                    	  orgVM.form.beginTime = telemarketing.beginTime;
-                    	  orgVM.form.endTime = telemarketing.endTime;
-                          orgVM.form.companyGroupId = telemarketing.companyGroupId;
-                    	  orgVM.form.status = telemarketing.status+"";
-                    	  var projects = telemarketing.projectIds;
-                    	  var category = telemarketing.category ;
-                    	  if(category !=null && category !=""){
-                              orgVM.isShow = true;
-                              orgVM.form.adShow = telemarketing.adShow+"" ;
-                              orgVM.form.sourceShow = telemarketing.sourceShow+"" ;
-                              orgVM.form.projectShow = telemarketing.projectShow+"" ;
-                          }
-                    	  var valueMultiple=[];
-                    	  if(projects != null && projects !=''){
-                              var obj = projects.split(',');
-                              if(null!=projects&&obj.length>0) {
-                                  for(var i=0;i<obj.length;i++){
-                                      valueMultiple.push(obj[i]+"");
-                                  }
-                              }
-                              orgVM.form.projectIds=valueMultiple;
-                          }
-                    	  if(category != null && category !=''){
-                              var categoryvalueMultiple=[];
-                              var categoryobj = category.split(',');
-                              if(null!=category&&categoryobj.length>0) {
-                                  for(var i=0;i<categoryobj.length;i++){
-                                      categoryvalueMultiple.push(categoryobj[i]+"");
-                                  }
-                              }
-                              orgVM.form.category=categoryvalueMultiple;
-                          }
-                          console.log("companyGroupId:"+orgVM.form.companyGroupId);
-                          if(null==orgVM.form.companyGroupId||orgVM.form.companyGroupId==""){
-                              return ;
-                          }
-                          param={};
-                          param.groupId=orgVM.form.companyGroupId;
-                          axios.post('/aggregation/projectManager/listNoPage' ,param).then(function (response) {
-                              orgVM.projectAddList=response.data.data;
-                          });
-                     }else{
-                    	 alert(response.data.data.message);
+                      	  var telemarketing = response.data.data;
+                      	  orgVM.form.orgId = telemarketing.orgId;
+                      	  orgVM.form.businessLine = telemarketing.businessLine;
+                      	  orgVM.form.dailyUpperLimit = telemarketing.dailyUpperLimit;
+                      	  orgVM.form.startTime = telemarketing.startTime;
+                          orgVM.form.endTime = telemarketing.endTime;
+                      }else{
+                    	    alert(response.data.data.message);
 	                  	  	return ;
                      }
                   }).catch(function (error) {
@@ -356,65 +229,6 @@
                   .then(function () {
                     // always executed
                   });
-              },
-              deleButton(){
-            	  var rows = this.multipleSelection;
-                  if(rows.length <1){
-                      this.$message({
-                         message: '请选择删除数据',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-                  var moduleName="";
-    	           if(null!=rows){
-    	 		       for ( var i = 0; i <rows.length; i++){
-    	 		    	  moduleName+="【"+rows[i].projects+"】";
-    	 		        }
-    	           }
-    	           this.$confirm("确定要删除"+moduleName+"电销布局?", '提示', {
-                       confirmButtonText: '确定',
-                       cancelButtonText: '取消',
-                       type: 'warning'
-                   }).then(() => {
-                      	// 查询 table 需要数据
-                       var param = {};
-                       var deleInfo=this.multipleSelection;
-     	        	    var ids="";
-     		            if(null!=deleInfo){
-     		             for ( var i = 0; i <deleInfo.length; i++){
-     		            	if("" == ids){
-     		            		ids = deleInfo[i].id
-     		            	}else{
-     		            		ids = ids+","+deleInfo[i].id
-     		            	}
-     		             }
-     		             var param={};
-     		             param.ids=ids;
-    	                 axios.post('/telemarketing/deleTelemarketingLayout',param).then(function (response) {
-    	                  	  console.log(response);
-    	                      if(null !==response && response.data !=null && response.data.code=='0'){
-    	                    	  window.location.href="/telemarketing/telemarketingLayoutList";
-    	                     }else{
-    	                    	 alert(response.data.data.msg);
-     	                  	  	return ;
-    	                     }
-    	                  }).catch(function (error) {
-                              console.log(error);
-                          })
-                          .then(function () {
-                            // always executed
-                          });
-
-                     }
-                   }).catch(() => {
-                       this.$message({
-                           type: 'info',
-                           message: '已取消删除'
-                       });
-                   });
-
-
               },
               handleSelectionChange(val) {
                   this.multipleSelection = val;
@@ -439,51 +253,25 @@
                     this.$refs[formName].validate((valid) => {
                         if (valid) {
                           var formData = this.form;
-                          var param={};
-                          param.projectIds = formData.projectIds;
-                          var strs ="";
-                          for ( var i = 0; i <formData.projectIds.length; i++){
-                        	   if(strs !=""){
-                        		   strs = strs+","+formData.projectIds[i];
-                        	   }else{
-                        		   strs = formData.projectIds[i];
-                        	   }
-                        	}
-                          param.projectIds = strs;
-                          param.telemarketingTeamId = formData.telemarketingTeamId;
-                          param.beginTime = formData.beginTime;
+                          var param={};                          
+                          param.orgId = formData.orgId;
+                          param.businessLine = formData.businessLine;
+                          param.startTime = formData.startTime;
                           param.endTime = formData.endTime;
-                          param.status = formData.status;
-                            param.companyGroupId = formData.companyGroupId;
+                          if(formData.beginTime>formData.endTime){
+                            this.$message("开始时间不能大于结束时间");
+                             return;
+                          }
                           var str = "";
                           var rows = this.multipleSelection;
                           for ( var i = 0; i <rows.length; i++){
                         	  str = rows[i].id
                           }
-                          param.id = str;
-                          if(formData.beginTime>formData.endTime){
-                        	  this.$message("开始时间不能大于结束时间");
-                   	         return;
-                          }
-
-                            if(this.form.category !=null && this.form.category !=''){
-                                var categorys = ""
-                                for ( var i = 0; i <formData.category.length; i++){
-                                    if(categorys !=""){
-                                        categorys = categorys+","+formData.category[i];
-                                    }else{
-                                        categorys = formData.category[i];
-                                    }
-                                }
-                                param.category = categorys;
-                                param.adShow = this.form.adShow;
-                                param.sourceShow = this.form.sourceShow;
-                                param.projectShow = this.form.projectShow;
-                            }
                           orgVM.btnDisabled = true;
-                          var url = "/telemarketing/addTelemarketingLayout";
-                          if($("#addOrUpdate").val() ==2){
-                        	  url = "/telemarketing/updateTelemarketingLayout"
+                          var url = "/clueAssign/clueAssignLimit/save";
+                          if($("#addOrUpdate").val() ==2){//编辑
+                              param.id = str;
+                        	    url = "/clueAssign/clueAssignLimit/update"
                           }
                        	  axios.post(url,param).then(function (response) {
        	                  	//   console.log(response);
@@ -509,17 +297,17 @@
                     });
                 },
                 addbutton(){
-                	this.showTitle="新增分配设置"
-                	$("#addOrUpdate").val(1);
-                	this.dialogFormVisible=true;
-                	this.form.beginTime = "";
-                	this.form.endTime = "";
-                	this.form.projectIds = [];
-                	this.form.telemarketingTeamId = "";
-                	this.form.status= '0';
-                	if (this.$refs['form']!=undefined) {
-                   		this.$refs['form'].resetFields();
-                   	  }
+                  	this.showTitle="新增分配设置"
+                  	$("#addOrUpdate").val(1);
+                  	this.dialogFormVisible=true;
+                    this.form.orgId = "";
+                    this.form.businessLine = "";
+                  	this.form.dailyUpperLimit = "";
+                  	this.form.startTime = "";
+                    this.form.endTime = "";
+                  	if (this.$refs['form']!=undefined) {
+                     		this.$refs['form'].resetFields();
+                    }
                 },
         },
         created(){
