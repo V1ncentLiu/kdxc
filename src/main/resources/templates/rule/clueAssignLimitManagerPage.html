@@ -36,10 +36,10 @@
           			</el-select>
                 </el-form-item>
                 <el-form-item label="开始时间:" label-width="80px">
-        			      <el-date-picker value-format="yyyy-MM-dd" v-model="startTime" type="date" placeholder="选择日期"></el-date-picker>
+        			      <el-date-picker v-model="startTime" type="date" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
-          			    <el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期"></el-date-picker>
+          			    <el-date-picker v-model="endTime" type="date" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="">
       				      <el-button icon="el-icon-search" type="primary" @click="inviteAreaListPage" style="width: 90px;">搜索</el-button>
@@ -86,10 +86,10 @@
                 <el-input v-model="form.dailyUpperLimit" autocomplete="off" maxlength="5" style="width:290px;"></el-input>
             </el-form-item>
             <el-form-item label="有效开始时间：" :label-width="formLabelWidth" prop="startTime">
-                <el-date-picker value-format="yyyy-MM-dd" v-model="form.startTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
+                <el-date-picker v-model="form.startTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
             </el-form-item>
             <el-form-item label="有效结束时间："  :label-width="formLabelWidth" prop="endTime">
-                <el-date-picker value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
+                <el-date-picker v-model="form.endTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
@@ -128,7 +128,7 @@
             loading:false,
             rules: {
                 orgId: [
-                    // { required: true, message: '请选择电销组', trigger: 'change' }
+                    { required: true, message: '请选择电销组', trigger: 'change' }
                 ],
                 dailyUpperLimit: [
                     { required: true, message: '请填写单日分配量上限', trigger: 'change' }
@@ -154,21 +154,14 @@
                 var pageNum = this.pager.currentPage;
                 param.pageNum = pageNum;
                 param.pageSize = pageSize;                
-                param.orgId=this.orgId;
+                param.orgId=this.orgId;                
+                param.startTime=this.startTime;
+                param.endTime=this.endTime;
+                if(this.endTime&&this.startTime>this.endTime){
+                   this.$message("开始时间不能大于结束时间");
+                }
+                
                 console.log(param);
-                if(this.startTime !=null && this.endTime !=null && this.startTime !='' && this.endTime != ''){
-              	    if(this.startTime>this.endTime){
-                  	    this.$message("开始时间不能大于结束时间");
-             	          return;
-                    }
-                }
-                if(this.startTime !=null && this.startTime !=''){
-              	  param.startTime=this.startTime;
-                }
-                if(this.endTime !=null && this.endTime !=''){
-              	  param.endTime=this.endTime;
-                }
-
                 axios.post('/clueAssign/clueAssignLimit/list',param).then(function (response) {
                 	  console.log(response);
                     if(null===response||response.data==null||response.data.code!='0'){
