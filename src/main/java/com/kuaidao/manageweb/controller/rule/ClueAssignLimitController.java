@@ -86,7 +86,7 @@ public class ClueAssignLimitController {
     @RequestMapping("/get")
     @ResponseBody
     @RequiresPermissions("clueAssignLimit:clueAssignLimitManager:view")
-    public JSONResult<ClueAssignLimitDTO> get(@RequestParam IdEntityLong idEntityLong) {
+    public JSONResult<ClueAssignLimitDTO> get(@RequestBody IdEntityLong idEntityLong) {
         JSONResult<ClueAssignLimitDTO> jsonResult = clueAssignLimitFegin.get(idEntityLong);
         return jsonResult;
     }
