@@ -412,7 +412,7 @@ public class BalanceAccountController {
     @ResponseBody
     @PostMapping("/getSettlementAmount")
     public JSONResult<BigDecimal> getSettlementAmount(@RequestBody IdEntityLong idEntityLong) {
-        JSONResult<BigDecimal> settlementAmount = reconciliationConfirmFeignClient.getSettlementAmount(idEntityLong);
+        JSONResult<BigDecimal> settlementAmount = reconciliationConfirmFeignClient.getConfirmCommission(idEntityLong.getId());
         return settlementAmount;
     }
     /**
