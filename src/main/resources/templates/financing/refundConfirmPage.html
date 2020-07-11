@@ -22,6 +22,7 @@
       <shiro:hasPermission name="aggregation:refundConfirm:markRefund">
         <el-button type="warning" @click="openMarkRefundDialog">标记已退款</el-button>
       </shiro:hasPermission>
+      <el-button  icon="el-icon-download"  type="warning" @click="exportMes">退款导出</el-button>
     </el-row>
     <div class="mainSearchBg">
       <div class="mainSearchFormBox">
@@ -321,6 +322,7 @@
     el: '#maindiv',
     data: function () {
       return {
+        isExport1:true,
         paginationShow: false,
         isShow: false,
         pager: {//pager
@@ -1199,6 +1201,71 @@
           this.isShow = true
         }
       },
+
+
+      timedown(){
+        console.log(0)
+        clearInterval(this.timer);
+        var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+        if(storageDistributeExport1){
+          this.isExport1=false;
+        }else{
+          this.isExport1=true;
+        }
+        if(storageDistributeExport1){
+          this.timer=setInterval(this.timedown,1000)
+        }else{
+          clearInterval(this.timer)
+        }
+      },
+
+
+
+      exportMes(){
+        var starTime = this.form.startTime;
+        var endTime = this.form.endTime;
+        if (endTime) {
+          if (starTime > endTime) {
+            this.$message({
+              message: '开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+        var param = this.form;
+        param.pageNum = null;
+        param.pageSize = null;
+        axios.post('/financing/refund/listRefundApplyExport',param,{responseType:'blob'})
+                .then(function (response) {
+                  var data =  response.data;
+                  var fileName = response.headers.filename;
+                  saveAs(data,decodeURI(fileName));
+                  mainDivVM.$notify({
+                    type: 'success',
+                    title: '提示',
+                    message: '退款导出下载完成',
+                    position: 'bottom-right',
+                    duration: 0
+                  });
+                  localStorage.removeItem("distributeExport1");
+                }).catch(function (error) {
+          console.log(error);
+          mainDivVM.$notify.error({
+            title: '提示',
+            message: error + ',退款导出失败',
+            position: 'bottom-right'
+          });
+          localStorage.removeItem("distributeExport1");
+        }).then(function(){
+        });
+      },
+
+
+
+
+
+
 
     },
     created() {
