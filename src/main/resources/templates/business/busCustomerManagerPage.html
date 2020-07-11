@@ -1510,12 +1510,22 @@
                             idList.push(curRow.appiontmentId);
                             clueIdList.push(curRow.clueId);
                         }
-                        //外调
+                        //分发
                         var param = {};
                         param.type = 1;
                         param.idList = idList;
                         param.clueIdList = clueIdList;
                         param.busSaleId = this.allocationForm.saleId;
+                        if(this.allocationForm.saleIdOther){
+                            if(this.allocationForm.saleIdOther==this.allocationForm.saleId){
+                                clueVM.$message({
+                                   message: "辅助经理不能和商务经理相同",
+                                   type: 'error'
+                                }); 
+                                return
+                            }
+                            param.busSale2Id=this.allocationForm.saleIdOther;
+                        } 
                         param.remark = this.allocationForm.remark;
                         axios.post('/business/busAllocation/busAllocationClue', param)
                             .then(function (response) {
