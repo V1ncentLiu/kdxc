@@ -132,7 +132,10 @@
           <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
           <el-table-column align="center" prop="" label="退款图片" width="100">
             <template slot-scope="scope">
-              <el-button @click="download(scope.row)" size="small" type="text">下载图片</el-button>
+              <!-- <el-button @click="download(scope.row)" size="small" type="text">下载图片</el-button> -->
+              <p v-for="(item,index) in scope.row.images" style="margin-bottom:8px;">
+                  <span @click="download(scope.row.images,index)" style="color:blue;text-decoration:underline">{{item.realName}}</span>
+              </p>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="reason" label="退款原因" width="100">
@@ -251,13 +254,17 @@
     </el-dialog>
 
     <!-- 下载图片 dialog 开始 -->
-    <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px" v-dialog-drag>
-      <ol>
+    <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="1000px" v-dialog-drag>
+      <!-- <ol>
         <li v-for="(item,index) in imgList" style="margin-bottom:8px">
           <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName"
             style="color:blue;text-decoration:underline">{{item.realName}}</a>
         </li>
-      </ol>
+      </ol> -->
+      <div class="padding20" style="text-align: center;">
+          <img :src="dialogFormUploadImgSrc" alt="" max-width="1000px">
+          <a :href="'/financing/refund/downloadOssImg?url='+dialogFormUploadImgSrc" :download="dialogFormUploadImgName" style="color:blue;text-decoration:underline">{{dialogFormUploadImgName}}</a>
+      </div>
     </el-dialog>
     <!-- 下载图片dialog 结束 -->
 
@@ -321,6 +328,8 @@
     el: '#maindiv',
     data: function () {
       return {
+        dialogFormUploadImgSrc:'',//查看图片url
+        dialogFormUploadImgName:'',//查看图片名称
         paginationShow: false,
         isShow: false,
         pager: {//pager
@@ -830,34 +839,31 @@
         }
         return valText;
       },
-      download(row) {//下载图片
-        this.downloadDialogVisible = true;
-        var id = row.id;
-        var param = {};
-        param.id = id;
-        axios.post('/financing/refund/listImgById', param)
-          .then(function (response) {
-            var resData = response.data;
-            if (resData.code == '0') {
-              mainDivVM.imgList = resData.data;
-              //var data = resData.data;
-              /* var imgHtml = "";
-              for(var i=0;i<data.length;i++){
-                  var curImg = data[i];
-                  imgHtml+='<a href="'+curImg.imgUrl+'" download="上传图片'+(i+1)+'">上传图片'+(i+1)+'</a>';
-              }
-              mainDivVM.imgHtml=imgHtml; */
-            } else {
-              mainDivVM.$message({ message: '查询图片失败', type: 'error' });
-              console.error(resData);
-            }
+      download(row,index) {//打开弹窗下载图片
+          this.downloadDialogVisible = true;
+          // 给弹窗图片地址和名称赋值
+          this.dialogFormUploadImgSrc=row[index].imgUrl;
+          this.dialogFormUploadImgName=row[index].realName; 
+        // this.downloadDialogVisible = true;
+        // var id = row.id;
+        // var param = {};
+        // param.id = id;
+        // axios.post('/financing/refund/listImgById', param)
+        //   .then(function (response) {
+        //     var resData = response.data;
+        //     if (resData.code == '0') {
+        //       mainDivVM.imgList = resData.data;
+        //     } else {
+        //       mainDivVM.$message({ message: '查询图片失败', type: 'error' });
+        //       console.error(resData);
+        //     }
 
-          })
-          .catch(function (error) {
-            console.log(error);
-          }).then(function () {
+        //   })
+        //   .catch(function (error) {
+        //     console.log(error);
+        //   }).then(function () {
 
-          });
+        //   });
       },
       downloadImg(url, index) {
         var urlArr = url.split(".");
