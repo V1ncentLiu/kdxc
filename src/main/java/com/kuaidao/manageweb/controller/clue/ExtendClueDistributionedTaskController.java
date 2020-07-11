@@ -48,6 +48,7 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CustomCellWriteHandler;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
@@ -454,7 +455,8 @@ public class ExtendClueDistributionedTaskController {
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
-            ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueExportModel.class).build();
+            ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueExportModel.class)
+                    .registerWriteHandler(new CustomCellWriteHandler()).build();
             List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
             for (int i = 0; i < partition.size(); i++) {
                 // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
