@@ -705,7 +705,7 @@ public class RefundController {
      */
     @LogRecord(description = "导出退款列表", operationType = OperationType.EXPORT,
             menuName = MenuEnum.REFUNDAPPLYLIST)
-  //  @RequiresPermissions("aggregation:refundConfirm:export")
+    @RequiresPermissions("aggregation:refundConfirm:export")
     @PostMapping("/listRefundApplyExport")
     public void listRefundApplyExport(HttpServletRequest request, HttpServletResponse response,
                                       @RequestBody RefundQueryDTO queryDTO) throws Exception {
@@ -735,13 +735,6 @@ public class RefundController {
                 BeanUtils.copyProperties(refundRespDTO, refundExportModel);
                 refundExportModels.add(refundExportModel);
             }
-         /*   for(RefundRespDTO refundRespDTO:refundRespResult.getData()){
-                List<Object> curList = new ArrayList<>();
-                curList.add(refundRespDTO.getPayTime());
-                curList.add(refundRespDTO.getCustomerName());
-                curList.add(refundRespDTO.getSignProjectName());
-                curList.add(refundRespDTO.getSignShopTypeName());
-            }*/
         }
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
@@ -765,7 +758,7 @@ public class RefundController {
      */
     @LogRecord(description = "导出返款列表", operationType = OperationType.EXPORT,
             menuName = MenuEnum.REBATEAPPLYLIST)
-   // @RequiresPermissions("aggregation:rebateApply:export")
+    @RequiresPermissions("aggregation:rebateConfirm:export")
     @PostMapping("/listRebateApplyExport")
     public void listRebateApplyExport(HttpServletRequest request, HttpServletResponse response,
                                       @RequestBody RefundQueryDTO queryDTO) throws Exception {
