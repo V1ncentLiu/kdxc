@@ -59,7 +59,7 @@ public class TitleColorSheetWriteHandler implements CellWriteHandler {
         if (0 == cell.getRowIndex()) {
             // 设置列宽
             Sheet sheet = writeSheetHolder.getSheet();
-            sheet.setColumnWidth(cell.getColumnIndex(), 14 * 256);
+            sheet.setColumnWidth(cell.getColumnIndex(), 16 * 256);
             // 设置行高
             writeSheetHolder.getSheet().getRow(0).setHeight((short) (1.8 * 256));
             // 获取workbook
@@ -75,7 +75,8 @@ public class TitleColorSheetWriteHandler implements CellWriteHandler {
             // 边框
             headWriteFont.setBold(true);
             headWriteCellStyle.setWriteFont(headWriteFont);
-            // 设置背景颜色为灰色
+            // 设置背景颜色为淡蓝色
+            headWriteCellStyle.setFillBackgroundColor(IndexedColors.PALE_BLUE.getIndex());
             headWriteCellStyle.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
             // 设置指定单元格字体自定义颜色
             headWriteFont.setColor(IndexedColors.BLACK.getIndex());

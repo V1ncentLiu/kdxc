@@ -97,26 +97,8 @@ public class SettlementConfirmCellWriteHandler implements RowWriteHandler {
         cellStyle.setFillBackgroundColor(color);
         cellStyle.setFillForegroundColor(color);
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-       /* // 内容的策略
-        WriteCellStyle contentWriteCellStyle = new WriteCellStyle();
-        // 这里需要指定 FillPatternType 为FillPatternType.SOLID_FOREGROUND 不然无法显示背景颜色.头默认了 FillPatternType所以可以不指定
-        // 字体策略
-        // 设置背景颜色白色
-        contentWriteCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
-        WriteFont contentWriteFont = new WriteFont();
-        // 字体大小
-        contentWriteFont.setFontHeightInPoints((short) 12);
-        contentWriteCellStyle.setWriteFont(contentWriteFont);
-        contentWriteFont.setColor(color);
-        // 设置 自动换行
-        contentWriteCellStyle.setWrapped(true);
-        // 设置 垂直居中
-        contentWriteCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-
-        CellStyle style = StyleUtil.buildHeadCellStyle(workbook, contentWriteCellStyle);*/
         for (int i = 0; i < 28; i++) {
             Cell cell = row.getCell(i);
-           // cell.setCellStyle(style);
             cell.setCellStyle(cellStyle);
         }
     }
