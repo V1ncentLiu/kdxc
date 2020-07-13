@@ -394,15 +394,13 @@ public class BalanceAccountController {
      **/
     @ResponseBody
     @PostMapping("/getConfirmCommission")
-    public JSONResult<BigDecimal> getConfirmCommission(
-            @RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
-        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient
-                .getConfirmCommission(reconciliationConfirmReq.getSignId());
+    public JSONResult<BigDecimal> getConfirmCommission(@RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getSignId());
         return sumConfirmCommission;
     }
+
     /**
      * 根据付款明细id获取提交对账确认结算金额初始化
-     *
      * @author: Fanjd
      * @param idEntityLong 请求实体
      * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
@@ -412,7 +410,7 @@ public class BalanceAccountController {
     @ResponseBody
     @PostMapping("/getSettlementAmount")
     public JSONResult<BigDecimal> getSettlementAmount(@RequestBody IdEntityLong idEntityLong) {
-        JSONResult<BigDecimal> settlementAmount = reconciliationConfirmFeignClient.getConfirmCommission(idEntityLong.getId());
+        JSONResult<BigDecimal> settlementAmount = reconciliationConfirmFeignClient.getSettlementAmount(idEntityLong);
         return settlementAmount;
     }
     /**
