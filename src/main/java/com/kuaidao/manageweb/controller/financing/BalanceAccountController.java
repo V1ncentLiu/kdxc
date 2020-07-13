@@ -10,6 +10,7 @@ import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -393,13 +394,25 @@ public class BalanceAccountController {
      **/
     @ResponseBody
     @PostMapping("/getConfirmCommission")
-    public JSONResult<BigDecimal> getConfirmCommission(
-            @RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
-        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient
-                .getConfirmCommission(reconciliationConfirmReq.getSignId());
+    public JSONResult<BigDecimal> getConfirmCommission(@RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getSignId());
         return sumConfirmCommission;
     }
 
+    /**
+     * 根据付款明细id获取提交对账确认结算金额初始化
+     * @author: Fanjd
+     * @param idEntityLong 请求实体
+     * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
+     * @Date: 2020/07/08 18:25
+     * @since: 1.0.0
+     **/
+    @ResponseBody
+    @PostMapping("/getSettlementAmount")
+    public JSONResult<BigDecimal> getSettlementAmount(@RequestBody IdEntityLong idEntityLong) {
+        JSONResult<BigDecimal> settlementAmount = reconciliationConfirmFeignClient.getSettlementAmount(idEntityLong);
+        return settlementAmount;
+    }
     /**
      * 获取当前登录账号
      * 

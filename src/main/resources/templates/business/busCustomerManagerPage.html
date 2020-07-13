@@ -148,6 +148,9 @@
                     <el-form-item label="联系方式:">
                         <el-input v-model="searchForm.linkPhone" placeholder="请输入联系方式"></el-input>
                     </el-form-item>
+                    <el-form-item label="签约单编号:">
+                        <el-input v-model="searchForm.signNo" placeholder="签约单编号"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索
@@ -274,10 +277,21 @@
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
                 <p class="marginB10">{{allocationForm.message}}</p>
                 <el-form-item label="商务经理:" label-width="100px" prop="saleId">
-                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 350px" filterable>
+                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 260px;margin-right: 10px;" filterable>
                         <el-option v-for="item in saleOptions" :key="item.id" :label="item.name"
                                    :value="item.id"></el-option>
                     </el-select>
+                    <el-button type="text" @click="showSaleIdOther" size="mini">
+                        <i v-if="!isSaleIdOther" class="el-icon-plus"/></i>
+                        <i v-if="isSaleIdOther" class="el-icon-minus"/></i>
+                        辅助经理
+                    </el-button>
+                </el-form-item>
+                <el-form-item label="辅助商务经理:" label-width="100px" prop="" style="margin-bottom: 20px;" v-if="isSaleIdOther">
+                    <el-select v-model="allocationForm.saleIdOther" placeholder="组内商务经理姓名" style="width: 260px;margin-right: 10px;" filterable>
+                        <el-option v-for="item in saleOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                    <p style="position: absolute;bottom: -25px;color: #f56c6c;">增加辅助商务经理后，签约后两个商务经理将平分业绩</p>
                 </el-form-item>
                 <el-form-item label="备注:" label-width="100px" prop="remark">
                     <el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxLength="200"
@@ -882,6 +896,7 @@
     var customerVM = new Vue({
         el: '#clueManage',
         data: {
+            isSaleIdOther:false,
             paginationShow: false,
             isShow: false,
             cusTitleName: '',//到访情况-点击查看-title客户名称
@@ -912,7 +927,8 @@
                 endAllocationTime: '',
                 sortField: '',
                 sortType: '',
-                isTailMoney: ''
+                isTailMoney: '',
+                signNo:""
             },
             isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
             allocationForm: {
@@ -1049,6 +1065,15 @@
             scrollTop: 0,
         },
         methods: {
+            showSaleIdOther(){
+                if(this.isSaleIdOther){
+                    this.isSaleIdOther=false;
+                    // 清空辅助经理的值
+                    this.allocationForm.saleIdOther="";
+                }else{
+                    this.isSaleIdOther=true;
+                }
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -1489,12 +1514,22 @@
                             idList.push(curRow.appiontmentId);
                             clueIdList.push(curRow.clueId);
                         }
-                        //外调
+                        //分发
                         var param = {};
                         param.type = 1;
                         param.idList = idList;
                         param.clueIdList = clueIdList;
                         param.busSaleId = this.allocationForm.saleId;
+                        if(this.allocationForm.saleIdOther){
+                            if(this.allocationForm.saleIdOther==this.allocationForm.saleId){
+                                clueVM.$message({
+                                   message: "辅助经理不能和商务经理相同",
+                                   type: 'error'
+                                }); 
+                                return
+                            }
+                            param.busSale2Id=this.allocationForm.saleIdOther;
+                        } 
                         param.remark = this.allocationForm.remark;
                         axios.post('/business/busAllocation/busAllocationClue', param)
                             .then(function (response) {

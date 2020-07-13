@@ -127,6 +127,7 @@ public class ExtendClueDistributionedTaskController {
     public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(
             HttpServletRequest request, @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
         UserInfoDTO user = getUser();
+        queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
@@ -272,6 +273,7 @@ public class ExtendClueDistributionedTaskController {
     public void findClues(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
         UserInfoDTO user = getUser();
+        queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
@@ -478,6 +480,7 @@ public class ExtendClueDistributionedTaskController {
     public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response,
             @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
         UserInfoDTO user = getUser();
+        queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
@@ -888,6 +891,7 @@ public class ExtendClueDistributionedTaskController {
     public JSONResult<Long> findCluesCount(@RequestBody ClueDistributionedTaskQueryDTO queryDto)
             throws Exception {
         UserInfoDTO user = getUser();
+        queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员

@@ -31,6 +31,8 @@ public interface RefundFeignClient {
     @PostMapping("/listRefundApply")
     JSONResult<PageBean<RefundRespDTO>> listRefundApply(RefundQueryDTO queryDTO);
 
+
+
     /**
      * 更新退还款信息
      * @param refundUpdateDTO
@@ -98,7 +100,14 @@ public interface RefundFeignClient {
     @PostMapping("/insertImgInfo")
     JSONResult<Long> insertImgInfo(RefundImgDTO refundImgDTO);
 
-    
+    /**
+     * 退返款申请列表
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/listRefundApplyExport")
+    JSONResult<List<RefundRespDTO>> listRefundApplyExport(RefundQueryDTO queryDTO);
+
     @Component
     static class HystrixClientFallback implements RefundFeignClient {
 
@@ -154,6 +163,11 @@ public interface RefundFeignClient {
         @Override
         public JSONResult<Long> insertImgInfo(RefundImgDTO refundImgDTO) {
             return fallBackError("插入图片");
+        }
+
+        @Override
+        public JSONResult<List<RefundRespDTO>> listRefundApplyExport(RefundQueryDTO queryDTO) {
+            return fallBackError("查询退返款申请列表");
         }
     }
 

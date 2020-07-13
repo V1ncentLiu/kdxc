@@ -954,34 +954,44 @@ var clueVM = new Vue({
             	   }
 
                    this.ratio = rows[0].ratio.substring(0,2) ;
-
-            	   if(status=="提交对账" || status=="已对账"){
-            		   this.apply.commissionMoney = null;
-                	   this.apply.money = rows[0].money ;
-                	   this.apply.isDoubt = rows[0].isDoubt ;
-                	   this.apply.commissionMoney = rows[0].commissionMoney ;
-                	   if(rows[0].isDoubt ==1){
-                		   this.doubtRemarkShow = true;
-                		   this.apply.doubtRemark = rows[0].doubtRemark ;
-                	   }else{
-                		   this.doubtRemarkShow = false;
-                		   this.apply.doubtRemark = null;
-                	   }
-            	   }else{
-                       //结算金额
-                       this.apply.money = rows[0].amountReceived;
-            		   this.apply.commissionMoney = this.apply.money * this.ratio / 100;
-                	   this.apply.isDoubt = 0 ;
-                	   this.apply.doubtRemark = null ;
-                	   this.doubtRemarkShow = false;
-            	   }
+                   var parm = {};
+                   parm.id = rows[0].payId;
+                   if(status=="提交对账" || status=="已对账"){
+                       axios.post('/financing/balanceaccount/getSettlementAmount', parm).then(function (response) {
+                           if (null != response || response.data != null || response.data.code == '0') {
+                               clueVM.apply.money = response.data.data ;
+                           }
+                       });
+                       this.apply.commissionMoney = null;
+                       this.apply.isDoubt = rows[0].isDoubt ;
+                       this.apply.commissionMoney = rows[0].commissionMoney ;
+                       if(rows[0].isDoubt ==1){
+                           this.doubtRemarkShow = true;
+                           this.apply.doubtRemark = rows[0].doubtRemark ;
+                       }else{
+                           this.doubtRemarkShow = false;
+                           this.apply.doubtRemark = null;
+                       }
+                   }else{
+                       axios.post('/financing/balanceaccount/getSettlementAmount', parm).then(function (response) {
+                           if (null != response || response.data != null || response.data.code == '0') {
+                               //结算金额
+                               var money = response.data.data;
+                               clueVM.apply.money = response.data.data;
+                               clueVM.apply.commissionMoney = money* clueVM.ratio / 100;
+                           }
+                       });
+                       this.apply.isDoubt = 0 ;
+                       this.apply.doubtRemark = null ;
+                       this.doubtRemarkShow = false;
+                   }
                    var lowestCommissionStr = rows[0].lowestCommissionStr;
                    if ((rows[0].payType == "全款" || rows[0].payType == "尾款") && lowestCommissionStr != "") {
                        var signId = rows[0].signId;
                        var parmMap = {};
                        parmMap.signId = signId;
-                       this.lowestCommissionShow = true;
-                       this.lowestCommission = lowestCommissionStr;
+                       clueVM.lowestCommissionShow = true;
+                       clueVM.lowestCommission = lowestCommissionStr;
                        //根据签约id获取已对账确认的佣金
                        axios.post('/financing/balanceaccount/getConfirmCommission', parmMap).then(function (response) {
                            if (null != response || response.data != null || response.data.code == '0') {
@@ -1146,7 +1156,7 @@ var clueVM = new Vue({
 
                   },
             repeatApplyNumber() {
-                var commissionMoney = this.apply.money * this.ratio / 100;
+                var commissionMoney = clueVM.apply.money * this.ratio / 100;
                 if (!this.lowestCommissionShow) {
                     clueVM.apply.commissionMoney = commissionMoney;
                 }
