@@ -377,8 +377,7 @@ public class BusinessVisitRecordController {
             newData.setRebutReason(null);
             newData.setRebutTime(null);
             newData.setNotSignReason(null);
-            newData.setIsSign(1);
-            newData.setVisitPeopleNum(null);
+//            newData.setVisitPeopleNum(null);
             IdEntityLong projectId = new IdEntityLong();
             projectId.setId(newData.getProjectId());
             JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
