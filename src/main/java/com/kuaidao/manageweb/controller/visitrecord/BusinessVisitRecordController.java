@@ -445,7 +445,7 @@ public class BusinessVisitRecordController {
         recordReqDTO.setBusGroupId(curLoginUser.getOrgId());
         JSONResult<List<BusVisitRecordRespDTO>> result = visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = result.data();
-        if (data == null) {
+        if (CollectionUtils.isEmpty(data)) {
             return null;
         }else{
             return data.get(0);
