@@ -64,8 +64,18 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="所属组:">
-                    <el-input v-model="queryForm.sourcetwo" placeholder="所属组" ></el-input>
-                </el-form-item>
+	                    <el-input v-model="queryForm.sourcetwo" placeholder="所属组" ></el-input>
+	                </el-form-item>
+                    <el-form-item label="业务线:">
+                        <el-select v-model="queryForm.businessLineList" placeholder="业务线" clearable filterable multiple>
+                            <el-option
+                                v-for="item in businessLineArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="废弃原因:">
                         <el-select v-model="queryForm.abandonReason" placeholder="废弃原因" clearable>
                             <el-option
@@ -227,6 +237,7 @@
             tableColums:[],
             tableData:[],
             categoryArr:[],
+            businessLineArr:[],
             typeArr:[],
             mediumArr:[],
             zyzyArr:zyzyList,
@@ -236,6 +247,7 @@
                 starTime:'',
                 endTime:'',
                 sourcetwo:'',
+                businessLineList:[],
                 medium:'',
                 resourcePerson:'',
                 abandonReason:'',
@@ -259,6 +271,7 @@
                 starTime:'',
                 endTime:'',
                 medium:'',
+                businessLineList:[],
                 resourcePerson:'',
                 abandonReason:'',
                 resourceType:'',
@@ -451,6 +464,13 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 // console.log(response.data.data)
                 mainDivVM.typeArr=response.data.data;
+            });
+            //初始化业务线数据
+            param={};
+            param.groupCode="businessLine";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                // console.log(response.data.data)
+                mainDivVM.businessLineArr=response.data.data;
             });
 
             //初始化媒介数据
