@@ -974,9 +974,14 @@ var mainDivVM = new Vue({
             param.id = mainDivVM.formSigning.clueId;
             axios.post('/businesssign/visitEcho',param).then(function (response) {
                 var echoData = response.data.data;
-                mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                if(echoData.arrVisitCity){
+                    mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
+                }
                 if(echoData.visitNum>0){
                     mainDivVM.formSigning.visitNum=echoData.visitNum;
+                }
+                if(echoData.visitShopType){
+                    mainDivVM.formSigning.visitShopType = ""+echoData.visitShopType;
                 }
                 mainDivVM.formSigning.visitType=1;;
                 mainDivVM.formSigning.visitTime=new Date();
@@ -1673,6 +1678,9 @@ var mainDivVM = new Vue({
                 mainDivVM.formSigning.payName = response.data.data.customerName;
                 mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
                 mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                if(response.data.data.visitShopType){
+                    mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
+                }
             //  设置默认时间
             //     mainDivVM.formSigning.payTime = new Date()
             //     mainDivVM.formSigning.isRemoteSign = 0;
