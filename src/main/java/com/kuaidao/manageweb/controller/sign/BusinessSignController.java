@@ -519,15 +519,23 @@ public class BusinessSignController {
         // 获取客户信息
         String linkPhone = linkPhone(idEntityLong);
         // 查询最新一次到访
-        JSONResult<BusVisitRecordRespDTO> maxNewOne =
-                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+        BusVisitRecordRespDTO newVisitData = vrecordInGroup(idEntityLong.getId());
         Boolean flag = true;
-        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
-            BusVisitRecordRespDTO data = maxNewOne.getData();
-            if (data != null) {
-                flag = false;
+        if (newVisitData != null) {
+
+            if (newVisitData.getVisitPeopleNum() != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                signDTO.setVisitNum((Integer) newVisitData.getVisitPeopleNum());// 来访人数
             }
+            if (newVisitData.getArrVisitCity() != null) {
+                signDTO.setArrVisitCity((String) newVisitData.getArrVisitCity());// 来访城市
+            }
+            if (newVisitData.getVistitStoreType() != null) {
+                signDTO.setVisitShopType(Integer.valueOf(newVisitData.getVistitStoreType()));// 到访店铺类型
+            }
+
+            flag = false;
         }
+
         if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
             Map data = mapJSONResult.getData();
             if (data != null) {
