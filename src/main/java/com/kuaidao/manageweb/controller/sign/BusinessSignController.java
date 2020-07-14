@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
@@ -448,7 +449,7 @@ public class BusinessSignController {
         recordReqDTO.setBusGroupId(curLoginUser.getOrgId());
         JSONResult<List<BusVisitRecordRespDTO>> result = visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = result.data();
-        if (data == null) {
+        if (CollectionUtils.isEmpty(data)) {
             return null;
         }else{
             return data.get(0);
