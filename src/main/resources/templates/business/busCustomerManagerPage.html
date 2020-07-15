@@ -250,7 +250,7 @@
                 <el-table-column align="center" prop="busAreaName" label="商务大区" width="100"></el-table-column>
                 <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="120"></el-table-column>
                 <el-table-column align="center" prop="accountPhone" label="电销顾问电话" width="100"></el-table-column>
-                <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleProjectName" label="电销组项目" width="100"></el-table-column>
                 <el-table-column align="center" prop="isView" label="读取客户状态" :formatter="transformView" width="120"></el-table-column>
                 <el-table-column align="center" prop="appiontmentCreateTime" sortable label="提交邀约来访时间" :formatter="dateFormat" width="145"></el-table-column>    
                 <el-table-column align="center" prop="allocateTime" sortable label="接收邀约时间" :formatter="dateFormat" width="130"></el-table-column>
@@ -943,7 +943,8 @@
             allocationForm: {
                 saleId: '',
                 remark: '',
-                message: ''
+                message: '',
+                saleIdOther:'',//辅助商务经理
             },
             transferForm: {
                 saleId: '',
@@ -1510,6 +1511,10 @@
 
                 this.allocationVisible = true;                
                 this.submitDisable = false;// 提交按钮可点击
+                // 默认不显示辅助商务经理
+                this.isSaleIdOther=false;
+                // 清空辅助经理的值
+                this.allocationForm.saleIdOther="";
             },
             allocationClue(formName) {//分发资源
                 this.$refs[formName].validate((valid) => {
@@ -1531,7 +1536,7 @@
                         param.busSaleId = this.allocationForm.saleId;
                         if(this.allocationForm.saleIdOther){
                             if(this.allocationForm.saleIdOther==this.allocationForm.saleId){
-                                clueVM.$message({
+                                customerVM.$message({
                                    message: "辅助经理不能和商务经理相同",
                                    type: 'error'
                                 }); 

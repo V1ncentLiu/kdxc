@@ -55,6 +55,7 @@
                 border
                 :data="dataTable"  @selection-change="handleSelectionChange">
                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->                
                 <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="dailyUpperLimit" label="单日分配上线（条）"></el-table-column>
@@ -83,7 +84,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="单日分配上线：" :label-width="formLabelWidth" prop="dailyUpperLimit">
-                <el-input v-model="form.dailyUpperLimit" autocomplete="off" maxlength="5" style="width:290px;"></el-input>
+                <el-input v-model="form.dailyUpperLimit" autocomplete="off" maxlength="5" style="width:290px;" oninput="if(value.length > 11){value = value.slice(0, 11)}" @keyup.native="number"></el-input>
             </el-form-item>
             <el-form-item label="有效开始时间：" :label-width="formLabelWidth" prop="startTime">
                 <el-date-picker v-model="form.startTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
@@ -143,14 +144,18 @@
             dataTable: [],
             multipleSelection: [],
             btnDisabled: false,
-        	  showTitle:"",
-        	  formLabelWidth: '130px',
-        	  dialogFormVisible: false,
+        	showTitle:"",
+        	formLabelWidth: '130px',
+        	dialogFormVisible: false,
         },
         methods: {
-        	  inviteAreaListPage(){//查询按钮
-            	  var param = {};
-            	  var pageSize = this.pager.pageSize;
+            number() {
+                this.form.dailyUpperLimit = this.form.dailyUpperLimit.replace(/[^\.\d]/g, '');
+                this.form.dailyUpperLimit = this.form.dailyUpperLimit.replace('.', '');
+            },
+        	inviteAreaListPage(){//查询按钮
+            	var param = {};
+            	var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
                 param.pageNum = pageNum;
                 param.pageSize = pageSize;                
