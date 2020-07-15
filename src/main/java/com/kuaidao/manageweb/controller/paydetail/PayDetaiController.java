@@ -118,7 +118,7 @@ public class PayDetaiController {
             throws Exception {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());
-        dto.setRoleCode(user.getRoleCode());
+        dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         // 全款
         if (PayDetailConstant.PayType.FULL_PAYMENT.getCode().equals(dto.getSignType())) {
             dto.setMakeUpTime(null);
