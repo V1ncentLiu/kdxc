@@ -977,6 +977,7 @@ var mainDivVM = new Vue({
                 this.formSigning.visitTime = new Date();;
                 this.formSigning.visitType = 1;
             } else {
+                this.busVisitEcho();
                 this.isshowVisit = true;
             }
         },
@@ -1001,21 +1002,28 @@ var mainDivVM = new Vue({
         suppShow(){ //补充到访记录展开
             this.suppWrap = true;
             this.shouAddVisitButton = false;
+            this.busVisitEcho();
+        },
+
+        busVisitEcho(){
             var param = {};
             param.id = mainDivVM.formSigning.clueId;
-            axios.post('/businesssign/visitEcho',param).then(function (response) {
+            axios.post('/businesssign/visitEcho', param).then(function (response) {
                 var echoData = response.data.data;
                 if(echoData.arrVisitCity){
                     mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
                 }
-                if(echoData.visitNum>0){
-                    mainDivVM.formSigning.visitNum=echoData.visitNum;
+                if (echoData.visitNum > 0) {
+                    mainDivVM.formSigning.visitNum = echoData.visitNum;
                 }
+
                 if(echoData.visitShopType){
-                    mainDivVM.formSigning.visitShopType = ""+echoData.visitShopType;
+                    mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
                 }
-                mainDivVM.formSigning.visitType=1;;
-                mainDivVM.formSigning.visitTime=new Date();
+
+                mainDivVM.formSigning.visitType = 1;
+
+                mainDivVM.formSigning.visitTime = new Date();
             });
         },
         suppHide(){
