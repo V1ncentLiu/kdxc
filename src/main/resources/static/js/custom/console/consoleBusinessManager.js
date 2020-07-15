@@ -56,6 +56,8 @@ var mainDivVM = new Vue({
         //待处理邀约来访记录
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
+        isshowVisit:true,//是否显示到访记录
+        updateIsshowVisit:true,//驳回签约单是否显示到访记录
         suppWrap: true,
         tabIndex: 2,
         shouAddVisitButton:false,
@@ -961,10 +963,39 @@ var mainDivVM = new Vue({
             this.multipleSelection = val;
         },
         selectIsRemoteSign (pa1) { //是否远程签约event
-            if( pa1==1 ){
-                this.suppWrap = false;
-            }else{
-                this.suppWrap = true;
+            // if( pa1==1 ){
+            //     this.suppWrap = false;
+            // }else{
+            //     this.suppWrap = true;
+            // }
+            if (pa1 == 1) {//1是远程签约
+                this.isshowVisit = false;
+                //清空补充到访记录数据
+                this.formSigning.arrVisitCity = '';
+                this.formSigning.visitNum = '';
+                this.formSigning.visitShopType = '';
+                this.formSigning.visitTime = new Date();;
+                this.formSigning.visitType = 1;
+            } else {
+                this.isshowVisit = true;
+            }
+        },
+        updateSelectIsRemoteSign(pa1) { //是否远程签约event
+            // if (pa1 == 1) {//1是远程签约
+            //     this.suppWrap = false;
+            // } else {
+            //     this.suppWrap = true;
+            // }
+            if (pa1 == 1) {//1是远程签约
+                this.updateIsshowVisit = false;
+                //清空补充到访记录数据
+                this.updateFormSigning.arrVisitCity = '';
+                this.updateFormSigning.visitNum = '';
+                this.updateFormSigning.visitShopType = '';
+                this.updateFormSigning.visitTime = new Date();;
+                this.updateFormSigning.visitType = 1;
+            } else {
+                this.updateIsshowVisit = true;
             }
         },
         suppShow(){ //补充到访记录展开
