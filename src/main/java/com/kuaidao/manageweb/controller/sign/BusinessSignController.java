@@ -336,6 +336,7 @@ public class BusinessSignController {
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(-1);
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        BusVisitRecordRespDTO newVisitData = vrecordInGroup(idEntityLong.getId());
 
         boolean signFlag = true;
         BusSignRespDTO newSignData = newSign.data();
@@ -352,14 +353,21 @@ public class BusinessSignController {
             signDTO.setPhone(linkPhone);
             signDTO.setSignType(1);
             signDTO.setPayType("1");
+            if (newVisitData != null) {
+                if (newVisitData.getVisitPeopleNum() != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                    signDTO.setVisitNum((Integer) newVisitData.getVisitPeopleNum());// 来访人数
+                }
+                if (newVisitData.getArrVisitCity() != null) {
+                    signDTO.setArrVisitCity((String) newVisitData.getArrVisitCity());// 来访城市
+                }
+                if (newVisitData.getVistitStoreType() != null) {
+                    signDTO.setVisitShopType(Integer.valueOf(newVisitData.getVistitStoreType()));// 到访店铺类型
+                }
+            }
             signFlag = false;
         }
 
-        // 查询最新一次到访
-//        JSONResult<BusVisitRecordRespDTO> maxNewOne =
-//                visitRecordFeignClient.findMaxNewOne(idEntityLong);
 
-        BusVisitRecordRespDTO newVisitData = vrecordInGroup(idEntityLong.getId());
         Boolean flag = true;
         if (signFlag) {
             if (newVisitData != null) {
