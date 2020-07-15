@@ -419,8 +419,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约："
-                                           style="width: 100%;">
+                                <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约：" @change="updateSelectIsRemoteSign" style="width: 100%;">
                                     <el-option
                                             v-for="item in isSignArr"
                                             :key="item.value"
@@ -1108,7 +1107,6 @@
             projectArr:proSelect,
             isAllMoney:false,
             isshowVisit:true,//是否显示到访记录
-            updateIsshowVisit:true,//驳回签约单是否显示到访记录
             suppWrap:false,
             dialogForm:{
                 reason:''
@@ -1815,8 +1813,9 @@
                 }
             },
             editSign(){
-              this.suppWrap = true;
-              this.shouAddVisitButton = false;
+                debugger
+                this.suppWrap = true;
+                this.shouAddVisitButton = false;
                 mainDivVM.resetForm('formSigning');
                 var param = {};
                 param.id = vclueId;
@@ -1824,6 +1823,7 @@
                 this.suppWrap =true; // 默认关闭 到访记录 填写部分
                 this.shouAddVisitButton = false;
                 axios.post('/businesssign/echo',param).then(function (response) {
+                    console.log(response)
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
                     mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
@@ -1834,6 +1834,12 @@
                     mainDivVM.formSigning.payName = response.data.data.customerName;
                     if(response.data.data.visitShopType){
                         mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
+                    }
+                    // 判断是否远程签约
+                    if(response.data.data.isRemoteSign&&response.data.data.isRemoteSign==1){//1是远程签约，不显示到访记录
+                        mainDivVM.isshowVisit=false;
+                    }else{
+                        mainDivVM.isshowVisit=true;
                     }
                 });
             },
@@ -1885,6 +1891,13 @@
                     // this.formSigning.visitType = 1;
                 } else {
                     this.isshowVisit = true;
+                }
+            },
+            updateSelectIsRemoteSign(pa1) { //是否远程签约event
+                if (pa1 == 1) {//1是远程签约
+                    this.suppWrapBox = false;
+                } else {
+                    this.suppWrapBox = true;
                 }
             },
             suppShow(){ //补充到访记录展开
@@ -2134,6 +2147,12 @@
                         // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
                         if (sign.signType&&sign.signType==1) {
                             mainDivVM.showfalg=false;
+                        }
+                        // 判断是否远程签约
+                        if(sign.isRemoteSign&&sign.isRemoteSign==1){//1是远程签约，不显示到访记录
+                            mainDivVM.suppWrapBox=false;
+                        }else{
+                            mainDivVM.suppWrapBox=true;
                         }
                     }
                 })
