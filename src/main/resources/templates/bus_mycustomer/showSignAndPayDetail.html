@@ -419,8 +419,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约："
-                                           style="width: 100%;">
+                                <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约：" @change="updateSelectIsRemoteSign" style="width: 100%;">
                                     <el-option
                                             v-for="item in isSignArr"
                                             :key="item.value"
@@ -1894,6 +1893,13 @@
                     this.isshowVisit = true;
                 }
             },
+            updateSelectIsRemoteSign(pa1) { //是否远程签约event
+                if (pa1 == 1) {//1是远程签约
+                    this.suppWrapBox = false;
+                } else {
+                    this.suppWrapBox = true;
+                }
+            },
             suppShow(){ //补充到访记录展开
                 this.suppWrap = true;
                 this.shouAddVisitButton = false;
@@ -2141,6 +2147,12 @@
                         // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
                         if (sign.signType&&sign.signType==1) {
                             mainDivVM.showfalg=false;
+                        }
+                        // 判断是否远程签约
+                        if(sign.isRemoteSign&&sign.isRemoteSign==1){//1是远程签约，不显示到访记录
+                            mainDivVM.suppWrapBox=false;
+                        }else{
+                            mainDivVM.suppWrapBox=true;
                         }
                     }
                 })
