@@ -1108,7 +1108,6 @@
             projectArr:proSelect,
             isAllMoney:false,
             isshowVisit:true,//是否显示到访记录
-            updateIsshowVisit:true,//驳回签约单是否显示到访记录
             suppWrap:false,
             dialogForm:{
                 reason:''
@@ -1815,8 +1814,9 @@
                 }
             },
             editSign(){
-              this.suppWrap = true;
-              this.shouAddVisitButton = false;
+                debugger
+                this.suppWrap = true;
+                this.shouAddVisitButton = false;
                 mainDivVM.resetForm('formSigning');
                 var param = {};
                 param.id = vclueId;
@@ -1824,6 +1824,7 @@
                 this.suppWrap =true; // 默认关闭 到访记录 填写部分
                 this.shouAddVisitButton = false;
                 axios.post('/businesssign/echo',param).then(function (response) {
+                    console.log(response)
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
                     mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
@@ -1834,6 +1835,12 @@
                     mainDivVM.formSigning.payName = response.data.data.customerName;
                     if(response.data.data.visitShopType){
                         mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
+                    }
+                    // 判断是否远程签约
+                    if(response.data.data.isRemoteSign&&response.data.data.isRemoteSign==1){//1是远程签约，不显示到访记录
+                        mainDivVM.isshowVisit=false;
+                    }else{
+                        mainDivVM.isshowVisit=true;
                     }
                 });
             },

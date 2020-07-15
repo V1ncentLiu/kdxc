@@ -1836,7 +1836,14 @@ var mainDivVM = new Vue({
                         }
                         
                         mainDivVM.currentProvince(responseData.signProvince)
-                        mainDivVM.currentCity(responseData.signCity)                                              
+                        mainDivVM.currentCity(responseData.signCity) 
+
+                        // 判断是否远程签约
+                        if(responseData.isRemoteSign&&responseData.isRemoteSign==1){//1是远程签约，不显示到访记录
+                            mainDivVM.updateIsshowVisit=false;
+                        }else{
+                            mainDivVM.updateIsshowVisit=true;
+                        }                                             
 
                         // 默认显示tab1
                         if(responseData.paydetailList){
