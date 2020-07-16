@@ -56,6 +56,8 @@ var mainDivVM = new Vue({
         //待处理邀约来访记录
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
+        isshowVisit:true,//是否显示到访记录
+        updateIsshowVisit:true,//驳回签约单是否显示到访记录
         suppWrap: true,
         tabIndex: 2,
         shouAddVisitButton:false,
@@ -961,25 +963,67 @@ var mainDivVM = new Vue({
             this.multipleSelection = val;
         },
         selectIsRemoteSign (pa1) { //是否远程签约event
-            if( pa1==1 ){
-                this.suppWrap = false;
-            }else{
-                this.suppWrap = true;
+            // if( pa1==1 ){
+            //     this.suppWrap = false;
+            // }else{
+            //     this.suppWrap = true;
+            // }
+            if (pa1 == 1) {//1是远程签约
+                this.isshowVisit = false;
+                //清空补充到访记录数据
+                this.formSigning.arrVisitCity = '';
+                this.formSigning.visitNum = '';
+                this.formSigning.visitShopType = '';
+                this.formSigning.visitTime = new Date();;
+                this.formSigning.visitType = 1;
+            } else {
+                this.busVisitEcho();
+                this.isshowVisit = true;
+            }
+        },
+        updateSelectIsRemoteSign(pa1) { //是否远程签约event
+            // if (pa1 == 1) {//1是远程签约
+            //     this.suppWrap = false;
+            // } else {
+            //     this.suppWrap = true;
+            // }
+            if (pa1 == 1) {//1是远程签约
+                this.updateIsshowVisit = false;
+                //清空补充到访记录数据
+                this.updateFormSigning.arrVisitCity = '';
+                this.updateFormSigning.visitNum = '';
+                this.updateFormSigning.visitShopType = '';
+                this.updateFormSigning.visitTime = new Date();;
+                this.updateFormSigning.visitType = 1;
+            } else {
+                this.updateIsshowVisit = true;
             }
         },
         suppShow(){ //补充到访记录展开
             this.suppWrap = true;
             this.shouAddVisitButton = false;
+            this.busVisitEcho();
+        },
+
+        busVisitEcho(){
             var param = {};
             param.id = mainDivVM.formSigning.clueId;
-            axios.post('/businesssign/visitEcho',param).then(function (response) {
+            axios.post('/businesssign/visitEcho', param).then(function (response) {
                 var echoData = response.data.data;
-                mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
-                if(echoData.visitNum>0){
-                    mainDivVM.formSigning.visitNum=echoData.visitNum;
+                if(echoData.arrVisitCity){
+                    mainDivVM.formSigning.arrVisitCity = echoData.arrVisitCity;
                 }
-                mainDivVM.formSigning.visitType=1;;
-                mainDivVM.formSigning.visitTime=new Date();
+                if (echoData.visitNum > 0) {
+                    mainDivVM.formSigning.visitNum = echoData.visitNum;
+                }
+
+                if(echoData.visitShopType){
+                    mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
+                }
+
+                mainDivVM.formSigning.visitType = 1;
+
+                mainDivVM.formSigning.visitTime = new Date();
             });
         },
         suppHide(){
@@ -1673,6 +1717,9 @@ var mainDivVM = new Vue({
                 mainDivVM.formSigning.payName = response.data.data.customerName;
                 mainDivVM.signStoreTypeArr= response.data.data.vistitStoreTypeArr;
                 mainDivVM.vistitStoreTypeArr= response.data.data.vistitStoreTypeArr;
+                if(response.data.data.visitShopType){
+                    mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
+                }
             //  设置默认时间
             //     mainDivVM.formSigning.payTime = new Date()
             //     mainDivVM.formSigning.isRemoteSign = 0;
@@ -1789,7 +1836,14 @@ var mainDivVM = new Vue({
                         }
                         
                         mainDivVM.currentProvince(responseData.signProvince)
-                        mainDivVM.currentCity(responseData.signCity)                                              
+                        mainDivVM.currentCity(responseData.signCity) 
+
+                        // 判断是否远程签约
+                        if(responseData.isRemoteSign&&responseData.isRemoteSign==1){//1是远程签约，不显示到访记录
+                            mainDivVM.updateIsshowVisit=false;
+                        }else{
+                            mainDivVM.updateIsshowVisit=true;
+                        }                                             
 
                         // 默认显示tab1
                         if(responseData.paydetailList){

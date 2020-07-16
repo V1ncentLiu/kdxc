@@ -327,8 +327,7 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.phone"
-                                          maxLength="11"></el-input>
+                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.phone" maxLength="50" onkeyup="this.value=this.value.replace(/[^\d\,，]/g,'')"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -419,8 +418,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约："
-                                           style="width: 100%;">
+                                <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约：" @change="updateSelectIsRemoteSign" style="width: 100%;">
                                     <el-option
                                             v-for="item in isSignArr"
                                             :key="item.value"
@@ -658,7 +656,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
-                                <el-input v-model="formSigning.phone" maxLength="11" ></el-input>
+                                <el-input v-model="formSigning.phone" maxLength="50" onkeyup="this.value=this.value.replace(/[^\d\,，]/g,'')"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
@@ -733,7 +731,7 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="formSigning.isRemoteSign"  placeholder="请选择是否远程签约：" style="width: 100%;">
+                                <el-select v-model="formSigning.isRemoteSign"  placeholder="请选择是否远程签约：" style="width: 100%;" @change="selectIsRemoteSign">
                                     <el-option
                                             v-for="item in isSignArr"
                                             :key="item.value"
@@ -745,70 +743,71 @@
                         </el-col>
                     </el-row>
                 </div>
+                <div v-if="isshowVisit">
+                    <div class="paddB20">
+                        <!--补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>-->
+                        <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
+                    </div>
+                    <div v-if="suppWrap">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
+                                    <el-date-picker
+                                            type="datetime"
+                                            format="yyyy-MM-dd HH:mm"
+                                            placeholder="选择日期"
+                                            v-model="formSigning.visitTime" style="width: 90%;"></el-date-picker>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
+                                    <!-- -   <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
+                                       </el-input>-->
+                                    <el-select v-model="formSigning.arrVisitCity" placeholder="请选择" clearable
+                                               style="width:100%">
+                                        <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
+                                                   :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
 
-                <div class="paddB20">
-                    <!--补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>-->
-                    <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
-                </div>
-                <div v-if="suppWrap">
-                    <el-row>
-                        <el-col :span="12">
-                            <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
-                                <el-date-picker
-                                        type="datetime"
-                                        format="yyyy-MM-dd HH:mm"
-                                        placeholder="选择日期"
-                                        v-model="formSigning.visitTime" style="width: 90%;"></el-date-picker>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="到访城市：" :label-width="formLabelWidth"  prop="arrVisitCity">
-                                <!-- -   <el-input  v-model="formSigning.arrVisitCity" maxLength="50" >
-                                   </el-input>-->
-                                <el-select v-model="formSigning.arrVisitCity" placeholder="请选择" clearable
-                                           style="width:100%">
-                                    <el-option v-for="item in visitCityArr" :key="item.name" :label="item.name"
-                                               :value="item.name"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-
-                    <el-row>
-                        <el-col :span="12">
-                            <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
-                                <el-select v-model="formSigning.visitType" placeholder="请选择到访类型" style="width: 100%;">
-                                    <el-option
-                                            v-for="item in visitTypeArr"
-                                            :key="item.value"
-                                            :label="item.name"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="到访店铺类型：" :label-width="formLabelWidth"  prop="visitShopType">
-                                <el-select v-model="formSigning.visitShopType" placeholder="请选择到访店铺类型" style="width: 100%;">
-                                    <el-option
-                                            v-for="item in vistitStoreTypeArr"
-                                            :key="item.value"
-                                            :label="item.name"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="12">
-                            <el-form-item label="到访人数：" :label-width="formLabelWidth"  prop="visitNum">
-                                <el-input  v-model="formSigning.visitNum" type="number"  min="1" maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%;">
-                                </el-input>
-                                <span style="padding-left: 10px;">人</span>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
+                                    <el-select v-model="formSigning.visitType" placeholder="请选择到访类型" style="width: 100%;">
+                                        <el-option
+                                                v-for="item in visitTypeArr"
+                                                :key="item.value"
+                                                :label="item.name"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="到访店铺类型：" :label-width="formLabelWidth"  prop="visitShopType">
+                                    <el-select v-model="formSigning.visitShopType" placeholder="请选择到访店铺类型" style="width: 100%;">
+                                        <el-option
+                                                v-for="item in vistitStoreTypeArr"
+                                                :key="item.value"
+                                                :label="item.name"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="到访人数：" :label-width="formLabelWidth"  prop="visitNum">
+                                    <el-input  v-model="formSigning.visitNum" type="number"  min="1" maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%;">
+                                    </el-input>
+                                    <span style="padding-left: 10px;">人</span>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
                 </div>
                 <div class="paddB20">付款明细</div>
                 <div>
@@ -1084,6 +1083,7 @@
                 visitType:'',
                 visitShopType:'',
                 visitNum:'',
+                arrVisitCity:'',
                 visitTime:''
                 
             },
@@ -1105,6 +1105,7 @@
             companyArr:[],
             projectArr:proSelect,
             isAllMoney:false,
+            isshowVisit:true,//是否显示到访记录
             suppWrap:false,
             dialogForm:{
                 reason:''
@@ -1811,8 +1812,9 @@
                 }
             },
             editSign(){
-              this.suppWrap = true;
-              this.shouAddVisitButton = false;
+                debugger
+                this.suppWrap = true;
+                this.shouAddVisitButton = false;
                 mainDivVM.resetForm('formSigning');
                 var param = {};
                 param.id = vclueId;
@@ -1820,6 +1822,7 @@
                 this.suppWrap =true; // 默认关闭 到访记录 填写部分
                 this.shouAddVisitButton = false;
                 axios.post('/businesssign/echo',param).then(function (response) {
+                    console.log(response)
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.signStoreTypeArr = response.data.data.vistitStoreTypeArr;
                     mainDivVM.vistitStoreTypeArr = response.data.data.vistitStoreTypeArr;
@@ -1828,6 +1831,15 @@
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince);
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity);
                     mainDivVM.formSigning.payName = response.data.data.customerName;
+                    if(response.data.data.visitShopType){
+                        mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
+                    }
+                    // 判断是否远程签约
+                    if(response.data.data.isRemoteSign&&response.data.data.isRemoteSign==1){//1是远程签约，不显示到访记录
+                        mainDivVM.isshowVisit=false;
+                    }else{
+                        mainDivVM.isshowVisit=true;
+                    }
                 });
             },
             currentProvince(selVal){
@@ -1863,10 +1875,28 @@
                 this.currentCity(selVal);
             },
             selectIsRemoteSign (pa1) { //是否远程签约event
-                if( pa1==1 ){
-                    this.suppWrap = false;
-                }else{
-                    this.suppWrap = true;
+                // if( pa1==1 ){
+                //     this.suppWrap = false;
+                // }else{
+                //     this.suppWrap = true;
+                // }
+                if (pa1 == 1) {//1是远程签约
+                    this.isshowVisit = false;
+                    // //清空补充到访记录数据
+                    // this.formSigning.arrVisitCity = '';
+                    // this.formSigning.visitNum = '';
+                    // this.formSigning.visitShopType = '';
+                    // this.formSigning.visitTime = new Date();;
+                    // this.formSigning.visitType = 1;
+                } else {
+                    this.isshowVisit = true;
+                }
+            },
+            updateSelectIsRemoteSign(pa1) { //是否远程签约event
+                if (pa1 == 1) {//1是远程签约
+                    this.suppWrapBox = false;
+                } else {
+                    this.suppWrapBox = true;
                 }
             },
             suppShow(){ //补充到访记录展开
@@ -1882,6 +1912,9 @@
                     }
                     if(echoData.visitNum>0){
                         mainDivVM.formSigning.visitNum=echoData.visitNum;
+                    }
+                    if(echoData.visitShopType){
+                        mainDivVM.formSigning.visitShopType = ""+response.data.data.visitShopType;
                     }
                     mainDivVM.formSigning.visitType= 1;
                     mainDivVM.formSigning.visitTime=new Date();
@@ -1920,6 +1953,9 @@
                     }
                     if(echoData.visitNum>0){
                         mainDivVM.updateFormSigning.visitNum=echoData.visitNum;
+                    }
+                    if(echoData.visitShopType){
+                        mainDivVM.updateFormSigning.visitShopType = ""+echoData.visitShopType;
                     }
                     mainDivVM.updateFormSigning.visitType= 1;
                     mainDivVM.updateFormSigning.visitTime=new Date();
@@ -2110,6 +2146,12 @@
                         // 判断签约类型是一次性全款的话就不显示余款金额和预计补齐时间
                         if (sign.signType&&sign.signType==1) {
                             mainDivVM.showfalg=false;
+                        }
+                        // 判断是否远程签约
+                        if(sign.isRemoteSign&&sign.isRemoteSign==1){//1是远程签约，不显示到访记录
+                            mainDivVM.suppWrapBox=false;
+                        }else{
+                            mainDivVM.suppWrapBox=true;
                         }
                     }
                 })

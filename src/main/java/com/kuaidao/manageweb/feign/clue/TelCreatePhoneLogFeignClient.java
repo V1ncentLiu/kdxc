@@ -19,7 +19,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2020年6月18日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/telCreatePhoneLog",
+@FeignClient(name = "aggregation-service", path = "/aggregation/telCreatePhoneLog",
         fallback = TelCreatePhoneLogFeignClient.HystrixClientFallback.class)
 public interface TelCreatePhoneLogFeignClient {
 

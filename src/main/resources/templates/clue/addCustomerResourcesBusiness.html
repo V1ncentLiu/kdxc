@@ -115,7 +115,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="联系电话：" prop="linkPhone" :label-width="formLabelWidth">
-                            <el-input v-model="form.linkPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number" maxlength="11"></el-input>
+                            <el-input v-model="form.linkPhone" autocomplete="off" style="width: 200px;margin-right: 5px;" @keyup.native="number50" maxlength="50" placeholder="填写多个电话使用逗号分隔开"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -516,7 +516,7 @@
                     linkPhone: [
                         { required: true, message: '联系电话不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){                 
-                            if(/^[0-9]*$/.test(value) == false){
+                            if(/^[0-9,，]+$/.test(value) == false){
                                callback(new Error("请输入数字"));
                             }else{
                                callback();
@@ -922,6 +922,10 @@
             },
             number(){
     　　　      this.form.linkPhone=this.form.linkPhone.replace(/[^\.\d]/g,'');
+                this.form.linkPhone=this.form.linkPhone.replace('.','');
+        　  },
+            number50(){
+    　　　      this.form.linkPhone=this.form.linkPhone.replace(/[^\d\,，]/g,'','');
                 this.form.linkPhone=this.form.linkPhone.replace('.','');
         　  },
             phoneNumber(){

@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 @EnableAsync
 public class ManageWebApplication {
 
+
     public static void main(String[] args) {
         SpringApplication.run(ManageWebApplication.class, args);
     }
@@ -55,7 +56,6 @@ public class ManageWebApplication {
 
     /**
      * redistemplate 修改序列化方式
-     * 
      * @param redisConnectionFactory
      * @return
      */

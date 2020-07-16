@@ -13,16 +13,31 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.style.WriteCellStyle;
+import com.alibaba.excel.write.metadata.style.WriteFont;
+import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
+import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
 import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.common.entity.RefundExportModel;
+import com.kuaidao.common.entity.SettlementConfirmExportModel;
+import com.kuaidao.manageweb.util.SettlementConfirmCellWriteHandler;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -173,16 +188,14 @@ public class ReconciliationConfirmController {
 
     /**
      * 导出
-     * 
-     * @param reqDTO
+     * @param pageParam
      * @return
      */
     @RequiresPermissions("financing:reconciliationConfirmManager:export")
     @PostMapping("/export")
-    @LogRecord(description = "导出", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
-    public void export(@RequestBody ReconciliationConfirmPageParam pageParam,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
+    public void export(@RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
@@ -199,21 +212,24 @@ public class ReconciliationConfirmController {
             pageParam.setNotInCompanyIds(notInCompanyIds);
         }
 
-        JSONResult<List<ReconciliationConfirmDTO>> listNoPage =
-                reconciliationConfirmFeignClient.listNoPage(pageParam);
+        JSONResult<List<ReconciliationConfirmDTO>> listNoPage = reconciliationConfirmFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList(roleCode));
-
-        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
-                && listNoPage.getData().size() != 0) {
-
+        String fileName = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && CollectionUtils.isNotEmpty(listNoPage.getData())) {
+            List<SettlementConfirmExportModel>  modelList = new ArrayList<>();
             List<ReconciliationConfirmDTO> resultList = listNoPage.getData();
             int size = resultList.size();
-
             for (int i = 0; i < size; i++) {
                 ReconciliationConfirmDTO dto = resultList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(i + 1);
+                if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+                    SettlementConfirmExportModel settlementConfirmExportModel = new SettlementConfirmExportModel();
+                    settlementConfirmExportModel.setNum(i + 1);
+                    BeanUtils.copyProperties(dto, settlementConfirmExportModel);
+                    modelList.add(settlementConfirmExportModel);
+                }
                 if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
                     // 渠道速建财务（小物种业务线）导出表格为：
                     // 付款日期，客户姓名，结算单位，电销组，签约项目，付款类型，签约店型，业绩金额，结算金额，
@@ -222,13 +238,21 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getCusName());
                     curList.add(dto.getSignCompanyName());
                     curList.add(dto.getTeleGorupName());
+                    curList.add(dto.getTeleSaleName());
                     curList.add(dto.getProjectName());
                     curList.add(dto.getPayTypeName());
                     curList.add(dto.getSignShopTypeName());
+                    curList.add(dto.getTeleAmountPerformance());
                     curList.add(dto.getAmountPerformance());
                     curList.add(dto.getMoney());
+                    curList.add(dto.getAmountEquipment());
                     curList.add(dto.getAmountReceived());
-                    curList.add(dto.getRatio() + "%");
+                    curList.add(dto.getRatio());
+                    /*if (StringUtils.isNotBlank(dto.getRatio())) {
+                        curList.add(dto.getRatio() + "%");
+                    }else{
+                        curList.add("");
+                    }*/
                     curList.add(dto.getPreferentialAmount());
                     curList.add(dto.getGiveAmount());
                     curList.add(dto.getCommissionMoney());
@@ -238,67 +262,47 @@ public class ReconciliationConfirmController {
                     curList.add(dto.getBusSaleName());
                     curList.add(dto.getSignProvince() + dto.getSignCity() + dto.getSignDictrict());
                     curList.add(dto.getIsAccount());
-                    dataList.add(curList);
-                } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
-                    // (商机盒子财务)商务盒子业务线导出表格为：
-                    // 付款日期，客户姓名，签约项目，签约店型，签约区域，支付方式，付款类型，结算单位，电销组，签约项目，付款类型，
-                    // 结算金额，实收金额，路费，优惠金额，赠送金额，赠送类型，结算比例，佣金，是否已结算，商务经理，电销组，电销顾问，电销总监，备注
-                    curList.add(getTimeStr(dto.getPayTime()));
-                    curList.add(dto.getCusName());
-                    curList.add(dto.getProjectName());
-                    curList.add(dto.getSignShopTypeName());
-                    curList.add(dto.getSignProvince() + dto.getSignCity() + dto.getSignDictrict());
-                    curList.add(dto.getPayModeName());
-                    curList.add(dto.getPayTypeName());
-                    curList.add(dto.getSignCompanyName());
-                    curList.add(dto.getTeleGorupName());
-                    curList.add(dto.getMoney());
-                    curList.add(dto.getAmountReceived());
-                    curList.add(dto.getFirstToll());
-                    curList.add(dto.getPreferentialAmount());
-                    curList.add(dto.getGiveAmount());
-                    curList.add(dto.getGiveTypeName());
-                    curList.add(dto.getRatio() + "%");
-                    curList.add(dto.getCommissionMoney());
-                    curList.add(dto.getIsAccount());
-                    curList.add(dto.getBusSaleName());
-                    curList.add(dto.getTeleSaleName());
-                    curList.add(dto.getTeleDirectorName());
-                    curList.add(dto.getRemarks());
                     dataList.add(curList);
                 }
             }
-
+            if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+                try (ServletOutputStream outputStream = response.getOutputStream()) {
+                    response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"), "ISO8859-1"));
+                    response.addHeader("fileName", URLEncoder.encode(fileName, "utf-8"));
+                    response.setContentType("application/octet-stream");
+                    ExcelWriter excelWriter = EasyExcel.write(outputStream, SettlementConfirmExportModel.class).build();
+                    // 实例化表单
+                    WriteSheet writeSheet = EasyExcel.writerSheet(0, "对账结算确认")
+                            .registerWriteHandler(new SettlementConfirmCellWriteHandler())
+                            //表头样式设置
+                            .registerWriteHandler(new TitleColorSheetWriteHandler()).build();
+                    excelWriter.write(modelList, writeSheet);
+                    excelWriter.finish();
+                }
+            }
         } else {
             logger.error("export rule_report res{{}}", listNoPage);
         }
-        XSSFWorkbook workBook = new XSSFWorkbook();// 创建一个工作薄
-        XSSFSheet sheet = workBook.createSheet();// 创建一个工作薄对象sheet
-        // 设置宽度
+
         if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
+            // 创建一个工作薄
+            XSSFWorkbook workBook = new XSSFWorkbook();
+            // 创建一个工作薄对象sheet
+            XSSFSheet sheet = workBook.createSheet();
+            // 设置宽度
             sheet.setColumnWidth(1, 4000);
             sheet.setColumnWidth(3, 4000);
             sheet.setColumnWidth(5, 6000);
             sheet.setColumnWidth(17, 6000);
             sheet.setColumnWidth(19, 6000);
-        } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
-
-            sheet.setColumnWidth(1, 4000);
-            sheet.setColumnWidth(3, 5000);
-            sheet.setColumnWidth(5, 6000);
-            sheet.setColumnWidth(22, 8000);
+            XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(fileName, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ServletOutputStream outputStream = response.getOutputStream();
+            wbWorkbook.write(outputStream);
+            outputStream.close();
         }
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
-
-
-        String name = "对账结算确认" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        response.addHeader("Content-Disposition",
-                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-        response.setContentType("application/octet-stream");
-        ServletOutputStream outputStream = response.getOutputStream();
-        wbWorkbook.write(outputStream);
-        outputStream.close();
 
     }
 
@@ -309,57 +313,31 @@ public class ReconciliationConfirmController {
             // 渠道速建财务（小物种业务线）导出表格为：
             // 付款日期，客户姓名，结算单位，电销组，签约项目，付款类型，签约店型，业绩金额，结算金额，
             // 实收金额，结算比例，优惠金额，赠送金额，佣金，路费，赠送类型，备注，商务经理，签约区域，是否已结算
-
             headTitleList.add("序号");
             headTitleList.add("付款日期");
             headTitleList.add("客户姓名");
             headTitleList.add("结算单位");
             headTitleList.add("电销组");
-            headTitleList.add("签约项目");
-            headTitleList.add("付款类型");
-            headTitleList.add("签约店型");
-            headTitleList.add("业绩金额");
-            headTitleList.add("结算金额");
-            headTitleList.add("实收金额");
-            headTitleList.add("结算比例");
-            headTitleList.add("优惠金额");
-            headTitleList.add("赠送金额");
-            headTitleList.add("佣金");
-            headTitleList.add("路费");
-            headTitleList.add("赠送类型");
-            headTitleList.add("备注");
-            headTitleList.add("商务经理");
-            headTitleList.add("签约区域");
-            headTitleList.add("是否已结算");
-        } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
-            // (商机盒子财务)商务盒子业务线导出表格为：
-            // 付款日期，客户姓名，签约项目，签约店型，签约区域，支付方式，付款类型，结算单位，电销组，签约项目，付款类型，
-            // 结算金额，实收金额，路费，优惠金额，赠送金额，赠送类型，结算比例，佣金，是否已结算，商务经理，电销组，电销顾问，电销总监，备注
-            headTitleList.add("序号");
-            headTitleList.add("付款日期");
-            headTitleList.add("客户姓名");
-            headTitleList.add("签约项目");
-            headTitleList.add("签约店型");
-            headTitleList.add("签约区域");
-            headTitleList.add("支付方式");
-            headTitleList.add("付款类型");
-            headTitleList.add("结算单位");
-            headTitleList.add("电销组");
-            headTitleList.add("结算金额");
-            headTitleList.add("实收金额");
-            headTitleList.add("路费");
-            headTitleList.add("优惠金额");
-            headTitleList.add("赠送金额");
-            headTitleList.add("赠送类型");
-            headTitleList.add("结算比例");
-            headTitleList.add("佣金");
-            headTitleList.add("是否已结算");
-            headTitleList.add("商务经理");
             headTitleList.add("电销顾问");
-            headTitleList.add("电销总监");
+            headTitleList.add("签约项目");
+            headTitleList.add("付款类型");
+            headTitleList.add("签约店型");
+            headTitleList.add("电销业绩金额");
+            headTitleList.add("商务业绩金额");
+            headTitleList.add("结算金额");
+            headTitleList.add("实收金额");
+            headTitleList.add("设备金额");
+            headTitleList.add("结算比例");
+            headTitleList.add("优惠金额");
+            headTitleList.add("赠送金额");
+            headTitleList.add("佣金");
+            headTitleList.add("路费");
+            headTitleList.add("赠送类型");
             headTitleList.add("备注");
+            headTitleList.add("商务经理");
+            headTitleList.add("签约区域");
+            headTitleList.add("是否已结算");
         }
-
         return headTitleList;
     }
 

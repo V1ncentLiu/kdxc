@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.alibaba.fastjson.JSON;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -116,6 +118,7 @@ public class PayDetaiController {
             throws Exception {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());
+        dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
         // 全款
         if (PayDetailConstant.PayType.FULL_PAYMENT.getCode().equals(dto.getSignType())) {
             dto.setMakeUpTime(null);

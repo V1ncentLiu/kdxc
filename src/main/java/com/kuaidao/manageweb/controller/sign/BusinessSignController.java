@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
@@ -323,100 +326,115 @@ public class BusinessSignController {
             throws Exception {
         BusSignRespDTO signDTO = new BusSignRespDTO();
         // 查询需要进行回显的信息，并进行映射
-        // 最新一次的邀约
-        JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
         // 获取客户信息
         String linkPhone = linkPhone(idEntityLong);
-        // 查询最新一次到访
-        JSONResult<BusVisitRecordRespDTO> maxNewOne =
-                visitRecordFeignClient.findMaxNewOne(idEntityLong);
-        // 查询最新一次签约记录
-        JSONResult<BusSignRespDTO> maxNewOne1 = businessSignFeignClient.findMaxNewOne(idEntityLong);
 
+        // 查询最新一次签约记录
+        JSONResult<BusSignRespDTO> newSign = businessSignFeignClient.findMaxNewOne(idEntityLong);
         // 查詢當前使用項目
         // 项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(-1);
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        BusVisitRecordRespDTO newVisitData = vrecordInGroup(idEntityLong.getId());
 
         boolean signFlag = true;
-        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
-            BusSignRespDTO data = maxNewOne1.getData();
-            if (data != null) {
-                signDTO.setIdCard(data.getIdCard());
-                signDTO.setSignCompanyId(data.getSignCompanyId());
-                Long signProjectId = data.getSignProjectId();
+        BusSignRespDTO newSignData = newSign.data();
+        if ( newSignData!= null) {
+            signDTO.setIdCard(newSignData.getIdCard());
+            signDTO.setSignCompanyId(newSignData.getSignCompanyId());
+            Long signProjectId = newSignData.getSignProjectId();
+            signDTO.setSignProjectId(getProjectId(proJson, signProjectId));
+            signDTO.setSignProvince(newSignData.getSignProvince());
+            signDTO.setSignCity(newSignData.getSignCity());
+            signDTO.setSignDictrict(newSignData.getSignDictrict());
+            signDTO.setSignShopType(newSignData.getSignShopType());
+            signDTO.setCustomerName(newSignData.getCustomerName());
+            signDTO.setPhone(linkPhone);
+            signDTO.setSignType(1);
+            signDTO.setPayType("1");
+            if (newVisitData != null) {
+                if (newVisitData.getVisitPeopleNum() != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                    signDTO.setVisitNum((Integer) newVisitData.getVisitPeopleNum());// 来访人数
+                }
+                if (newVisitData.getArrVisitCity() != null) {
+                    signDTO.setArrVisitCity((String) newVisitData.getArrVisitCity());// 来访城市
+                }
+                if (newVisitData.getVistitStoreType() != null) {
+                    signDTO.setVisitShopType(Integer.valueOf(newVisitData.getVistitStoreType()));// 到访店铺类型
+                }
+            }
+            signFlag = false;
+        }
+
+
+        Boolean flag = true;
+        if (signFlag) {
+            if (newVisitData != null) {
+                signDTO.setSignCompanyId(newVisitData.getCompanyid());
+                Long signProjectId = newVisitData.getProjectId();
                 signDTO.setSignProjectId(getProjectId(proJson, signProjectId));
-                signDTO.setSignProvince(data.getSignProvince());
-                signDTO.setSignCity(data.getSignCity());
-                signDTO.setSignDictrict(data.getSignDictrict());
-                signDTO.setSignShopType(data.getSignShopType());
-                signDTO.setCustomerName(data.getCustomerName());
+                signDTO.setSignProvince(newVisitData.getSignProvince());
+                signDTO.setSignCity(newVisitData.getSignCity());
+                signDTO.setSignDictrict(newVisitData.getSignDistrict());
+                signDTO.setSignShopType(newVisitData.getVistitStoreType());
+                signDTO.setCustomerName(newVisitData.getCustomerName());
                 signDTO.setPhone(linkPhone);
                 signDTO.setSignType(1);
                 signDTO.setPayType("1");
-                signFlag = false;
+
+                if (newVisitData.getVisitPeopleNum() != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                    signDTO.setVisitNum((Integer) newVisitData.getVisitPeopleNum());// 来访人数
+                }
+                if (newVisitData.getArrVisitCity() != null) {
+                    signDTO.setArrVisitCity((String) newVisitData.getArrVisitCity());// 来访城市
+                }
+                if (newVisitData.getVistitStoreType() != null) {
+                    signDTO.setVisitShopType(Integer.valueOf(newVisitData.getVistitStoreType()));// 到访店铺类型
+                }
+                flag = false;
             }
         }
 
-        Boolean flag = true;
-        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
-            BusVisitRecordRespDTO data = maxNewOne.getData();
-            if (data != null) {
-                if (signFlag) {
-                    signDTO.setSignCompanyId(data.getCompanyid());
-                    Long signProjectId = data.getProjectId();
-                    signDTO.setSignProjectId(getProjectId(proJson, signProjectId));
-                    signDTO.setSignProvince(data.getSignProvince());
-                    signDTO.setSignCity(data.getSignCity());
-                    signDTO.setSignDictrict(data.getSignDistrict());
-                    signDTO.setSignShopType(data.getVistitStoreType());
-                    signDTO.setCustomerName(data.getCustomerName());
-                    signDTO.setPhone(linkPhone);
-                    signDTO.setSignType(1);
-                    signDTO.setPayType("1");
-                    flag = false;
+        // 最新一次的邀约
+        JSONResult<Map> appiontment = visitRecordFeignClient.echoAppoinment(idEntityLong);
+        // 使用邀约来访
+        Map appiontmentData = appiontment.data();
+        if (appiontmentData != null) {
+            if (flag && signFlag) {// 没有到访记录
+                // signDTO.setSignCompanyId((Long) data.get("busCompany"));
+                String tasteProjectId = (String) appiontmentData.get("tasteProjectId");
+                if (tasteProjectId != null) {
+                    String[] split = tasteProjectId.split(",");
+                    if (split.length > 0 && !"".equals(split[0])) {
+                        Long signProjectId = Long.valueOf(split[0]);
+                        signDTO.setSignProjectId(getProjectId(proJson, signProjectId));
+                    }
                 }
+                if (StringUtils.isBlank(signDTO.getIdCard()) && appiontmentData.get("idCard") != null) {
+                    signDTO.setIdCard((String) appiontmentData.get("idCard"));
+                }
+                signDTO.setSignProvince((String) appiontmentData.get("signProvince"));
+                signDTO.setSignCity((String) appiontmentData.get("signCity"));
+                signDTO.setSignDictrict((String) appiontmentData.get("signDistrict"));
+                signDTO.setCustomerName((String) appiontmentData.get("cusName"));
+                signDTO.setPhone(linkPhone);
+                signDTO.setSignType(1);
+                signDTO.setSignShopType("");
+                signDTO.setPayType("1");
+                if (appiontmentData.get("cusNum") != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                    signDTO.setVisitNum((Integer) appiontmentData.get("cusNum"));// 来访人数
+                }
+            }
+            if (appiontmentData.get("city") != null) {
+                signDTO.setVisitCity((String) appiontmentData.get("city"));// 来访城市
             }
         }
 
-        if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
-            Map data = mapJSONResult.getData();
-            if (data != null) {
-                if (flag && signFlag) {// 没有到访记录
-                    // signDTO.setSignCompanyId((Long) data.get("busCompany"));
-                    String tasteProjectId = (String) data.get("tasteProjectId");
-                    if (tasteProjectId != null) {
-                        String[] split = tasteProjectId.split(",");
-                        if (split.length > 0 && !"".equals(split[0])) {
-                            Long signProjectId = Long.valueOf(split[0]);
-                            signDTO.setSignProjectId(getProjectId(proJson, signProjectId));
-                        }
-                    }
-                    if (StringUtils.isBlank(signDTO.getIdCard()) && data.get("idCard") != null) {
-                        signDTO.setIdCard((String) data.get("idCard"));
-                    }
-                    signDTO.setSignProvince((String) data.get("signProvince"));
-                    signDTO.setSignCity((String) data.get("signCity"));
-                    signDTO.setSignDictrict((String) data.get("signDistrict"));
-                    signDTO.setCustomerName((String) data.get("cusName"));
-                    signDTO.setPhone(linkPhone);
-                    signDTO.setSignType(1);
-                    signDTO.setSignShopType("");
-                    signDTO.setPayType("1");
-                    if (data.get("cusNum") != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
-                        signDTO.setVisitNum((Integer) data.get("cusNum"));// 来访人数
-                    }
-                }
-                if (data.get("city") != null) {
-                    signDTO.setVisitCity((String) data.get("city"));// 来访城市
-                }
-            }
-        }
         signDTO.setIsRemoteSign(0);
         signDTO.setPayTime(new Date());
-        signDTO.setVisitTime(new Date());
-        signDTO.setVisitType(1);
+        signDTO.setVisitTime(new Date()); // 到访时间
+        signDTO.setVisitType(1); // 到访类型
         signDTO.setRebutReason(null);
         signDTO.setRebutTime(null);
         signDTO.setAmountReceived(null);
@@ -438,6 +456,24 @@ public class BusinessSignController {
         }
         return new JSONResult<BusSignRespDTO>().success(signDTO);
     }
+
+
+
+    private BusVisitRecordRespDTO vrecordInGroup(Long clueId){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
+        recordReqDTO.setClueId(clueId);
+        recordReqDTO.setIsVisit(AggregationConstant.YES);
+        recordReqDTO.setBusGroupId(curLoginUser.getOrgId());
+        JSONResult<List<BusVisitRecordRespDTO>> result = visitRecordFeignClient.queryList(recordReqDTO);
+        List<BusVisitRecordRespDTO> data = result.data();
+        if (CollectionUtils.isEmpty(data)) {
+            return null;
+        }else{
+            return data.get(0);
+        }
+    }
+
 
     private Boolean checkShopType(String type, List<DictionaryItemRespDTO> itemList) {
         Boolean flag = false;
@@ -491,15 +527,23 @@ public class BusinessSignController {
         // 获取客户信息
         String linkPhone = linkPhone(idEntityLong);
         // 查询最新一次到访
-        JSONResult<BusVisitRecordRespDTO> maxNewOne =
-                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+        BusVisitRecordRespDTO newVisitData = vrecordInGroup(idEntityLong.getId());
         Boolean flag = true;
-        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
-            BusVisitRecordRespDTO data = maxNewOne.getData();
-            if (data != null) {
-                flag = false;
+        if (newVisitData != null) {
+
+            if (newVisitData.getVisitPeopleNum() != null) { // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                signDTO.setVisitNum((Integer) newVisitData.getVisitPeopleNum());// 来访人数
             }
+            if (newVisitData.getArrVisitCity() != null) {
+                signDTO.setArrVisitCity((String) newVisitData.getArrVisitCity());// 来访城市
+            }
+            if (newVisitData.getVistitStoreType() != null) {
+                signDTO.setVisitShopType(Integer.valueOf(newVisitData.getVistitStoreType()));// 到访店铺类型
+            }
+
+            flag = false;
         }
+
         if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
             Map data = mapJSONResult.getData();
             if (data != null) {

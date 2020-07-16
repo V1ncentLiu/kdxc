@@ -23,6 +23,7 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -359,6 +360,7 @@ public class BusinessVisitRecordController {
     @ResponseBody
     public JSONResult<BusVisitRecordRespDTO> echo(@RequestBody IdEntityLong idEntityLong)
             throws Exception {
+
         BusVisitRecordRespDTO recordRespDTO = new BusVisitRecordRespDTO();
         // 查询需要进行回显的信息，并进行映射
         /**
@@ -366,61 +368,58 @@ public class BusinessVisitRecordController {
          * 投资意向信息- 区县 来访城市： 派车单-城市 到访人数： 派车单-客户人数
          */
 
-        JSONResult<BusVisitRecordRespDTO> maxNewOne =
-                visitRecordFeignClient.findMaxNewOne(idEntityLong);
-        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
-            BusVisitRecordRespDTO data = maxNewOne.getData();
-            if (data != null) {
-                data.setRebutReason(null);
-                data.setRebutTime(null);
-                data.setNotSignReason(null);
-                data.setIsSign(1);
-                data.setVisitPeopleNum(null);
-                IdEntityLong projectId = new IdEntityLong();
-                projectId.setId(data.getProjectId());
-                JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
-                data.setVistitStoreTypeArr(vistitStoreJson.getData());
-                if(!checkShopType(data.getVistitStoreType(),vistitStoreJson.getData())){
-                    data.setVistitStoreType(null);
-                }
-                return new JSONResult<BusVisitRecordRespDTO>().success(data);
+        // 同步组内最先到访记录
+//        JSONResult<BusVisitRecordRespDTO> maxNewOne =
+//                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+//        BusVisitRecordRespDTO newData = maxNewOne.data();
+        BusVisitRecordRespDTO newData = vrecordInGroup(idEntityLong.getId());
+        if (newData != null) {
+            newData.setRebutReason(null);
+            newData.setRebutTime(null);
+            newData.setNotSignReason(null);
+//            newData.setVisitPeopleNum(null);
+            IdEntityLong projectId = new IdEntityLong();
+            projectId.setId(newData.getProjectId());
+            JSONResult<List<DictionaryItemRespDTO>> vistitStoreJson = getShortTypeByProjectId(projectId);
+            newData.setVistitStoreTypeArr(vistitStoreJson.getData());
+            if(!checkShopType(newData.getVistitStoreType(),vistitStoreJson.getData())){
+                newData.setVistitStoreType(null);
             }
+            return new JSONResult<BusVisitRecordRespDTO>().success(newData);
         }
 
-        JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
-        if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
-            Map data = mapJSONResult.getData();
-            if (data != null) {
-                Object arrivalTime = data.get("arrivalTime");
-                Date arrDate = null;
-                if (arrivalTime == null) {
-                    arrDate = new Date();
-                } else {
-                    if(arrivalTime instanceof String){
-                        arrDate = DateUtil.convert2Date((String) arrivalTime, DateUtil.ymdhms);
-                    }else{
-                        arrDate = new Date((Long) arrivalTime);
-                    }
-
+        // 同步最新邀约来访
+        JSONResult<Map> echoAppoinment = visitRecordFeignClient.echoAppoinment(idEntityLong);
+        Map appData = echoAppoinment.data();
+        if (appData != null) {
+            Object arrivalTime = appData.get("arrivalTime");
+            Date arrDate = null;
+            if (arrivalTime == null) {
+                arrDate = new Date();
+            } else {
+                if(arrivalTime instanceof String){
+                    arrDate = DateUtil.convert2Date((String) arrivalTime, DateUtil.ymdhms);
+                }else{
+                    arrDate = new Date((Long) arrivalTime);
                 }
 
-                recordRespDTO.setVistitTime(arrDate);
-                recordRespDTO.setCustomerName((String) data.get("cusName"));
-                String tasteProjectId = (String) data.get("tasteProjectId");
-                if(tasteProjectId!=null){
-                    String[] split = tasteProjectId.split(",");
-                    if (split.length > 0 && !"".equals(split[0])) {
-                        recordRespDTO.setProjectId(Long.valueOf(split[0]));
-                    }
-                }
-                recordRespDTO.setSignProvince((String) data.get("signProvince"));
-                recordRespDTO.setSignCity((String) data.get("signCity"));
-                recordRespDTO.setSignDistrict((String) data.get("signDistrict"));
-                recordRespDTO.setVisitCity((String) data.get("city"));
-                recordRespDTO.setVisitPeopleNum((Integer) data.get("cusNum"));
-                recordRespDTO.setVisitType(1);
-                recordRespDTO.setIsSign(1);
             }
+            recordRespDTO.setVistitTime(arrDate);
+            recordRespDTO.setCustomerName((String) appData.get("cusName"));
+            String tasteProjectId = (String) appData.get("tasteProjectId");
+            if(tasteProjectId!=null){
+                String[] split = tasteProjectId.split(",");
+                if (split.length > 0 && !"".equals(split[0])) {
+                    recordRespDTO.setProjectId(Long.valueOf(split[0]));
+                }
+            }
+            recordRespDTO.setSignProvince((String) appData.get("signProvince"));
+            recordRespDTO.setSignCity((String) appData.get("signCity"));
+            recordRespDTO.setSignDistrict((String) appData.get("signDistrict"));
+            recordRespDTO.setVisitCity((String) appData.get("city"));
+            recordRespDTO.setVisitPeopleNum((Integer) appData.get("cusNum"));
+            recordRespDTO.setVisitType(1);
+            recordRespDTO.setIsSign(1);
         }
         IdEntityLong projectId = new IdEntityLong();
         projectId.setId(recordRespDTO.getProjectId());
@@ -434,6 +433,25 @@ public class BusinessVisitRecordController {
         recordRespDTO.setNotSignReason(null);
         return new JSONResult<BusVisitRecordRespDTO>().success(recordRespDTO);
     }
+
+
+
+    private BusVisitRecordRespDTO vrecordInGroup(Long clueId){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
+        recordReqDTO.setClueId(clueId);
+        recordReqDTO.setIsVisit(AggregationConstant.YES);
+        recordReqDTO.setBusGroupId(curLoginUser.getOrgId());
+        JSONResult<List<BusVisitRecordRespDTO>> result = visitRecordFeignClient.queryList(recordReqDTO);
+        List<BusVisitRecordRespDTO> data = result.data();
+        if (CollectionUtils.isEmpty(data)) {
+            return null;
+        }else{
+            return data.get(0);
+        }
+    }
+
+
 
     private Boolean checkShopType(String type,List<DictionaryItemRespDTO> itemList){
         Boolean flag = false;

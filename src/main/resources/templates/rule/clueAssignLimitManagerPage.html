@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>资源分配量设置</title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div v-loading="loading" id="clueAllocationSetting" class="clueAllocationSetting mainPadding"  style="display: none;">  
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源分配量设置</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+            <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>增加分配量设置</el-button>            
+   			    <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑分配量设置</el-button>
+            <!-- <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button> -->
+        </el-col>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+          	<el-form :inline="true" class="demo-form-inline mainSearchForm">
+                <el-form-item label="电销组:" label-width="55px">
+          			<el-select filterable v-model="orgId" placeholder="电销组" clearable>
+          			    <el-option
+                        v-for="item in dzList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+          			    </el-option>
+          			</el-select>
+                </el-form-item>
+                <el-form-item label="开始时间:" label-width="80px">
+        			      <el-date-picker v-model="startTime" type="date" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
+          			    <el-date-picker v-model="endTime" type="date" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="">
+      				      <el-button icon="el-icon-search" type="primary" @click="inviteAreaListPage" style="width: 90px;">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  @selection-change="handleSelectionChange">
+                <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->                
+                <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="dailyUpperLimit" label="单日分配上线（条）"></el-table-column>
+                <el-table-column align="center" prop="teleProjectNames" label="电销组项目"></el-table-column>                
+                <el-table-column align="center"  prop="startTime" label="有效开始日期" :formatter="dateFormat" width="140"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="有效结束日期" :formatter="dateFormat" width="140"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="创建人"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="最后编辑时间" :formatter="dateFormatTime" width="170"></el-table-column>
+                <el-table-column align="center" prop="updateUserName" label="最后编辑人"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+        </el-row>
+    </div>
+
+    <!-- dialog -->
+    <el-dialog :title="showTitle" :visible.sync="dialogFormVisible" width="540px">
+        <el-form :model="form" ref="form" :rules="rules" >
+            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="orgId">
+                <el-select filterable v-model="form.orgId"  placeholder="选择电销组" style="width:290px;">
+                    <el-option
+                        v-for="item in dzList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="单日分配上线：" :label-width="formLabelWidth" prop="dailyUpperLimit">
+                <el-input v-model="form.dailyUpperLimit" autocomplete="off" maxlength="5" style="width:290px;" oninput="if(value.length > 11){value = value.slice(0, 11)}" @keyup.native="number"></el-input>
+            </el-form-item>
+            <el-form-item label="有效开始时间：" :label-width="formLabelWidth" prop="startTime">
+                <el-date-picker v-model="form.startTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
+            </el-form-item>
+            <el-form-item label="有效结束时间："  :label-width="formLabelWidth" prop="endTime">
+                <el-date-picker v-model="form.endTime" type="date" placeholder="选择日期" style="width:290px;"></el-date-picker>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
+            <el-button @click="dialogFormVisible= false">取消</el-button>
+        </div>
+    </el-dialog>
+
+</div>
+<input id="addOrUpdate" type="hidden" >
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var dzList=[[${teleGroupList}]]; //电销组
+    var orgVM =  new Vue({
+        el: '#clueAllocationSetting',
+        data: {
+            orgId:'',
+            startTime:'',
+            endTime:'',
+            dzList:dzList,//电销组
+            form:{
+                orgId:'',
+                businessLine:'',//业务线
+                dailyUpperLimit:'',
+                startTime:'',
+                endTime:''
+            },
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            loading:false,
+            rules: {
+                orgId: [
+                    { required: true, message: '请选择电销组', trigger: 'change' }
+                ],
+                dailyUpperLimit: [
+                    { required: true, message: '请填写单日分配量上限', trigger: 'blur'}                    
+                ],
+                startTime: [
+                    { required: true, message: '请选择开始时间', trigger: 'blur' }
+                ],
+                endTime: [
+                    { required: true, message: '请选择结束时间', trigger: 'blur' }
+                ]
+            },
+            dataTable: [],
+            multipleSelection: [],
+            btnDisabled: false,
+        	showTitle:"",
+        	formLabelWidth: '130px',
+        	dialogFormVisible: false,
+        },
+        methods: {
+            number() {
+                this.form.dailyUpperLimit = this.form.dailyUpperLimit.replace(/[^\.\d]/g, '');
+                this.form.dailyUpperLimit = this.form.dailyUpperLimit.replace('.', '');
+            },
+        	inviteAreaListPage(){//查询按钮
+            	var param = {};
+            	var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum = pageNum;
+                param.pageSize = pageSize;                
+                param.orgId=this.orgId;                
+                param.startTime=this.startTime;
+                param.endTime=this.endTime;
+                if(this.endTime&&this.startTime>this.endTime){
+                   this.$message("开始时间不能大于结束时间");
+                }
+                
+                console.log(param);
+                axios.post('/clueAssign/clueAssignLimit/list',param).then(function (response) {
+                	  console.log(response);
+                    if(null===response||response.data==null||response.data.code!='0'){
+                    	  orgVM.$message(response.data.msg);
+                    	  return ;
+                    }else{
+                    	  orgVM.dataTable =response.data.data.data;
+                    	  orgVM.pager.currentPage= response.data.data.currentPage;
+                    	  orgVM.pager.total= response.data.data.total;
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                });
+
+            } ,
+
+            updateButton(){
+            	  this.showTitle="编辑分配量设置"
+            	  if (this.$refs['form']!=undefined) {
+                 		this.$refs['form'].resetFields();
+                 	  }
+            	  $("#addOrUpdate").val(2);
+            	  //修改菜单数据
+              	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                    });
+                    return;
+                }
+                this.dialogFormVisible = true;
+                var param ={};
+                var str = "";
+                for ( var i = 0; i <rows.length; i++){
+              	  str = rows[i].id
+                }
+                param.id = str;
+                axios.post('/clueAssign/clueAssignLimit/get',param).then(function (response) {
+                	  console.log(response);
+                    if(null !==response && response.data !=null && response.data.code=='0'){
+                    	  var telemarketing = response.data.data;
+                    	  orgVM.form.orgId = telemarketing.orgId;
+                    	  orgVM.form.dailyUpperLimit = telemarketing.dailyUpperLimit;
+                    	  orgVM.form.startTime = telemarketing.startTime;
+                        orgVM.form.endTime = telemarketing.endTime;
+                    }else{
+                  	    alert(response.data.data.message);
+                  	  	return ;
+                   }
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                });
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            //时间格式化
+            dateFormat(row, column){
+          	  var date = row[column.property];
+          	     if (date == undefined || date ==null || date =="") {
+          	       return "";
+          	     }
+          	     return moment(new Date(date)).format("YYYY-MM-DD");
+          	} ,
+            //时间格式化
+            dateFormatTime(row, column){
+          	  var date = row[column.property];
+          	     if (date == undefined) {
+          	       return "";
+          	     }
+          	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss");
+          	} ,
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {                      
+                        var formData = this.form;
+                        var param={}; 
+                        param.orgId = formData.orgId;                         
+                        param.dailyUpperLimit = formData.dailyUpperLimit;                         
+                        param.startTime = formData.startTime;                         
+                        param.endTime = formData.endTime;                         
+                        var str = "";
+                        var rows = this.multipleSelection;
+                        for ( var i = 0; i <rows.length; i++){
+                          str = rows[i].id
+                        }  
+                        if(formData.startTime>formData.endTime){
+                            this.$message("开始时间不能大于结束时间");
+                            return;
+                        } 
+                        if(dzList){
+                            for(var i=0;i<dzList.length;i++){
+                              if(formData.orgId==dzList[i].id){
+                                  param.businessLine = dzList[i].businessLine;
+                              }                            
+                            }
+                        }
+                        orgVM.btnDisabled = true;
+                        var url = "/clueAssign/clueAssignLimit/save";
+                        if($("#addOrUpdate").val() ==2){//编辑
+                            param.id = str;
+                      	    url = "/clueAssign/clueAssignLimit/update"
+                        }
+                     	  axios.post(url,param).then(function (response) {
+       	                  	//   console.log(response);
+     	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                              orgVM.inviteAreaListPage();
+                              orgVM.dialogFormVisible=false;
+                              orgVM.btnDisabled = false; 
+     	                      }else{
+     	                    	  orgVM.$message({message: response.data.msg, type: 'warning'});
+                              orgVM.btnDisabled = false; 
+                              return ;
+                            } 
+   	                    }).catch(function (error) {
+                            orgVM.btnDisabled = false; 
+                            console.log(error);
+                        })
+                        .then(function () {
+                        // always executed
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            addbutton(){
+              	this.showTitle="新增分配设置"
+              	$("#addOrUpdate").val(1);
+              	this.dialogFormVisible=true;
+                this.form.orgId = "";
+                this.form.businessLine = "";
+              	this.form.dailyUpperLimit = "";
+              	this.form.startTime = "";
+                this.form.endTime = "";
+              	if (this.$refs['form']!=undefined) {
+                 		this.$refs['form'].resetFields();
+                }
+            },
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+
+        	  this.inviteAreaListPage();
+        	  document.getElementById('clueAllocationSetting').style.display = 'block';
+        	
+        	
+        },//created方法 结束
+        mounted(){
+            document.getElementById('clueAllocationSetting').style.display = 'block';
+        }
+    })
+</script>
+</html>

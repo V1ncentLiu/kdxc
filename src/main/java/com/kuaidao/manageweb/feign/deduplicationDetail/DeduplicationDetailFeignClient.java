@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/deduplicationDetail", fallback = DeduplicationDetailFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/deduplicationDetail", fallback = DeduplicationDetailFeignClient.HystrixClientFallback.class)
 public interface DeduplicationDetailFeignClient {
 
     /**

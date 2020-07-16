@@ -762,7 +762,6 @@ public class RefundController {
     @PostMapping("/listRebateApplyExport")
     public void listRebateApplyExport(HttpServletRequest request, HttpServletResponse response,
                                       @RequestBody RefundQueryDTO queryDTO) throws Exception {
-        Long strarDate = System.currentTimeMillis();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
