@@ -29,7 +29,8 @@ public interface AbandonFeignClient {
     public JSONResult<PageBean<AbandonRespDTO>> queryListPage(@RequestBody AbandonParamDTO dto);
     @PostMapping("/queryListExport")
     public JSONResult<List<AbandonRespDTO>> queryListExport(@RequestBody AbandonParamDTO dto);
-
+    @PostMapping("/findAbandonCluesCount")
+    public JSONResult<Long> findAbandonCluesCount(@RequestBody AbandonParamDTO dto);
 
     @Component
     static class HystrixClientFallback implements AbandonFeignClient {
@@ -50,8 +51,15 @@ public interface AbandonFeignClient {
         }
 
         @Override
-        public JSONResult<List<AbandonRespDTO>> queryListExport(AbandonParamDTO dto) {
+        public JSONResult<List<AbandonRespDTO>> queryListExport(@RequestBody AbandonParamDTO dto) {
             return fallBackError("废弃池分页查询");
         }
+
+        @Override
+        public JSONResult<Long> findAbandonCluesCount(AbandonParamDTO dto) {
+            return fallBackError("废弃池分页查询导出数量");
+        }
+
+
     }
 }

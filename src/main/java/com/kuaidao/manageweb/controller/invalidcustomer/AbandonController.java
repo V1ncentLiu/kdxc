@@ -183,6 +183,12 @@ public class AbandonController {
         return userList;
 
     }
+    @PostMapping("/findAbandonCluesCount")
+    @ResponseBody
+    public JSONResult<Long> findAbandonCluesCount(@RequestBody AbandonParamDTO dto)
+            throws Exception {
+        return abandonFeignClient.findAbandonCluesCount(dto);
+    }
 
     @PostMapping("/queryListExport")
     @ResponseBody
