@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.aggregation.dto.clue.TelCreatePhoneAuditDTO;
 import com.kuaidao.manageweb.feign.clue.TelCreatePhoneAuditFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.SecurityUtils;
@@ -56,6 +57,15 @@ public class TelCreatePhoneAuditController {
         reqDTO.setCreateUser(user.getId());
         reqDTO.setCreateTime(new Date());
         JSONResult<String> jsonResult = telCreatePhoneAuditFeignClient.insert(reqDTO);
+        return jsonResult;
+    }
+    /**
+     * 根据资源id查询最新的审核不通过记录
+     */
+    @ResponseBody
+    @PostMapping("/findByClueId")
+    public JSONResult<TelCreatePhoneAuditDTO> findByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
+        JSONResult<TelCreatePhoneAuditDTO> jsonResult = telCreatePhoneAuditFeignClient.findByClueId(reqDTO);
         return jsonResult;
     }
     /**

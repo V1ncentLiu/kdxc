@@ -1685,6 +1685,25 @@ function dateFormat(val) {
             },
             telCreatePhoneAudit(){
              this.dialogFormVisibleAudit =true;
+                var param = {};
+                param.clueId = clueId;
+                axios.post('/telCreatePhoneAudit/findByClueId', param).then(function (response) {
+                    if (null !== response && response.data != null && response.data.code == '0') {
+                        var telCreatePhoneAudit = response.data.data;
+                        addCustomerVM.submitForm.remark = telCreatePhoneAudit .remark;
+                    } else {
+                        this.$message({
+                            message: response.data.data.msg,
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                    .then(function () {
+                        // always executed
+                    });
             },
             submitFormMethod(form) {
                 debugger;
@@ -1692,6 +1711,7 @@ function dateFormat(val) {
                     if (valid) {
                         var param = {};
                         param.clueId = clueId;
+                        param.cusName = customer.cusName;
                         param.remark = addCustomerVM.submitForm.remark;
                         this.btnDisabled = true;
                         axios.post('/telCreatePhoneAudit/insert', param).then(function (response) {
@@ -1702,6 +1722,8 @@ function dateFormat(val) {
                                 });
                                 addCustomerVM.btnDisabled = false;
                                 return;
+                            }else{
+                                window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&telCreatePhoneAuditFlag=1&clueId="+clueId;
                             }
                         }).catch(function (error) {
                                 console.log(error);
