@@ -12,6 +12,8 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
+import java.util.List;
+
 /**
  *
  * 功能描述: 无效客户资源
@@ -25,6 +27,9 @@ public interface AbandonFeignClient {
 
     @PostMapping("/queryPage")
     public JSONResult<PageBean<AbandonRespDTO>> queryListPage(@RequestBody AbandonParamDTO dto);
+    @PostMapping("/queryListExport")
+    public JSONResult<List<AbandonRespDTO>> queryListExport(@RequestBody AbandonParamDTO dto);
+
 
     @Component
     static class HystrixClientFallback implements AbandonFeignClient {
@@ -41,6 +46,11 @@ public interface AbandonFeignClient {
         @Override
         public JSONResult<PageBean<AbandonRespDTO>> queryListPage(
                 @RequestBody AbandonParamDTO dto) {
+            return fallBackError("废弃池分页查询");
+        }
+
+        @Override
+        public JSONResult<List<AbandonRespDTO>> queryListExport(AbandonParamDTO dto) {
             return fallBackError("废弃池分页查询");
         }
     }
