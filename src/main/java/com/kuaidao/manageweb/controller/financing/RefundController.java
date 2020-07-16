@@ -1,19 +1,29 @@
 package com.kuaidao.manageweb.controller.financing;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.google.common.collect.Lists;
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.entity.*;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+
+import java.net.URLEncoder;
+import java.util.*;
 import java.util.stream.Collectors;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -41,10 +51,6 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -377,7 +383,7 @@ public class RefundController {
     /**
      * 退款确认
      * 
-     * @param result
+     * @param
      * @return
      */
     @RequiresPermissions("aggregation:refundConfirm:confirmRefund")
@@ -648,7 +654,7 @@ public class RefundController {
     /**
      * 查询签约单信息
      * 
-     * @param 参数 签约单号
+     * @param
      * @return
      */
     @PostMapping("/querySignInfoBySignNo")
@@ -691,5 +697,113 @@ public class RefundController {
     public JSONResult<Long> insertImgInfo(@RequestBody RefundImgDTO refundImgDTO) {
         return refundFeignClient.insertImgInfo(refundImgDTO);
     }
+    /***
+     * 退款申请列表
+     *
+     * @param queryDTO
+     * @return
+     */
+    @LogRecord(description = "导出退款列表", operationType = OperationType.EXPORT,
+            menuName = MenuEnum.REFUNDAPPLYLIST)
+    @RequiresPermissions("aggregation:refundConfirm:export")
+    @PostMapping("/listRefundApplyExport")
+    public void listRefundApplyExport(HttpServletRequest request, HttpServletResponse response,
+                                      @RequestBody RefundQueryDTO queryDTO) throws Exception {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        queryDTO.setCurUser(curLoginUser.getId());
+        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        // 处理商务参数
+        // handleBusinessReqParam(queryDTO);
+        // 处理电销参数
+        // handleTeleReqParam(queryDTO);
+        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
+            queryDTO.setRoleCode(roleCode);
+        } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+            queryDTO.setRoleCode(roleCode);
+        }
+        JSONResult<List<RefundRespDTO>> refundRespResult = refundFeignClient.listRefundApplyExport(queryDTO);
+        List<RefundExportModel> refundExportModels = new ArrayList<>();
+        if (JSONResult.SUCCESS.equals(refundRespResult.getCode()) && refundRespResult.getData() != null
+                && refundRespResult.getData().size() > 0) {
+            List<RefundRespDTO> refundRespList = refundRespResult.getData();
+            for(RefundRespDTO refundRespDTO:refundRespList){
+                RefundExportModel refundExportModel = new RefundExportModel();
+                BeanUtils.copyProperties(refundRespDTO, refundExportModel);
+                refundExportModels.add(refundExportModel);
+            }
+        }
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+            String name = "退款导出" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ExcelWriter excelWriter = EasyExcel.write(outputStream, RefundExportModel.class).build();
+            //实例化表单
+            WriteSheet writeSheet = EasyExcel.writerSheet(0, "退款导出" ).build();
+            excelWriter.write(refundExportModels, writeSheet);
+            excelWriter.finish();
+        }
+    }
+    /***
+     * 返款申请列表
+     *
+     * @param queryDTO
+     * @return
+     */
+    @LogRecord(description = "导出返款列表", operationType = OperationType.EXPORT,
+            menuName = MenuEnum.REBATEAPPLYLIST)
+    @RequiresPermissions("aggregation:rebateConfirm:export")
+    @PostMapping("/listRebateApplyExport")
+    public void listRebateApplyExport(HttpServletRequest request, HttpServletResponse response,
+                                      @RequestBody RefundQueryDTO queryDTO) throws Exception {
+        Long strarDate = System.currentTimeMillis();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        queryDTO.setCurUser(curLoginUser.getId());
+        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        // 处理商务参数
+        // handleBusinessReqParam(queryDTO);
+        // 处理电销参数
+        // handleTeleReqParam(queryDTO);
+        queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if (RoleCodeEnum.QDSJCW.name().equals(roleCode)) {
+            queryDTO.setRoleCode(roleCode);
+        } else if (RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
+            queryDTO.setRoleCode(roleCode);
+        }
+        List<RebateExportModel> refundExportModels = new ArrayList<>();
+        JSONResult<List<RefundRespDTO>> refundRespResult = refundFeignClient.listRefundApplyExport(queryDTO);
+        if (JSONResult.SUCCESS.equals(refundRespResult.getCode()) && refundRespResult.getData() != null
+                && refundRespResult.getData().size() > 0) {
+            List<RefundRespDTO> refundRespList = refundRespResult.getData();
+            for(RefundRespDTO refundRespDTO:refundRespList){
+                RebateExportModel rebateExportModel = new RebateExportModel();
+                BeanUtils.copyProperties(refundRespDTO, rebateExportModel);
+                refundExportModels.add(rebateExportModel);
+            }
 
+        }
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
+            String name = "返款导出" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ExcelWriter excelWriter = EasyExcel.write(outputStream, RebateExportModel.class).build();
+
+            //实例化表单
+            WriteSheet writeSheet = EasyExcel.writerSheet(0, "返款导出" ).build();
+            excelWriter.write(refundExportModels, writeSheet);
+            excelWriter.finish();
+        }
+    }
 }
