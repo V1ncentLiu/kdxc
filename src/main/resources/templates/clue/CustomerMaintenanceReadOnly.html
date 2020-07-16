@@ -609,6 +609,9 @@
                 <el-table-column prop="createTime" label="开始服务时间" align="center"></el-table-column>
             </el-table>            
         </el-form>
+        <div v-show="showAudit" class="padding20 f-tac">
+            <el-button type="primary" :disabled="saveDisabled" @click="telCreatePhoneAudit">新建号码审核</el-button>
+        </div>
     </el-row>
 
     <!-- dialog -->
@@ -859,6 +862,19 @@
             <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="新建号码审核" :visible.sync="dialogFormVisibleAudit" width="670px">
+        <el-form :model="submitForm" :rules="dialogAuditRules" ref="submitForm">
+            <el-form-item label="新建号码审核无效原因：" :label-width="formLabelWidth160"  prop="remark">
+                <el-input type="textarea" rows="4" maxlength="500" v-model="submitForm.remark" placeholder="请输入审核新建手机号无效原因&#13;&#10; 例：手机号2 130**2323无效 原因是通话记录不实"
+                          class="marginB20" style="width:80%;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnDisabled" @click="submitFormMethod('submitForm')">提交</el-button>
+            <el-button @click="dialogFormVisibleAudit =false">取消</el-button>
+        </div>
+    </el-dialog>
 </div>
 
 <style type="text/css">
@@ -1063,9 +1079,13 @@ var clueProject = [[${clueProject}]];
 var mediumList = [[${mediumList}]]
 var showPhone = true;
 var ossUrl = [[${ossUrl}]];//上传文件地址
-
+var telCreatePhoneAuditFlag=[[${telCreatePhoneAuditFlag}]];//电销创建手机号审核按钮是否显示标志
 if(commonPool==1){
     showPhone = false;
+}
+var showAudit = false;
+if (telCreatePhoneAuditFlag == 1) {
+    showAudit = true;
 }
 
 var repeatShowFalg = false;
@@ -1454,6 +1474,13 @@ function dateFormat(val) {
         data: function() {
             return {
                 isActive:false,
+
+                formLabelWidth160: '160px',
+                saveDisabled: false,
+                btnDisabled: false,
+                submitForm: {
+                    remark: "",
+                },
                 isShowMoreBtn:false,
                 customerInfo:customer,
                 isShowOnlineRecordBtn:false,
@@ -1472,12 +1499,14 @@ function dateFormat(val) {
                 audioShow:false,//播放器默认不显示
             	loginUserId:loginUserId,
                 showPhone:showPhone,
+                showAudit:showAudit,
                 showwchatcode:showwchatcode,
                 isDisabled:true,//默认不可点击
                 wechatVisible: false,//查看微信号
                 dialogFormUploadImgSrc: '',
                 radioProject:'',
                 dialogFormVisible: false,
+                dialogFormVisibleAudit:false,
                 dialogFormImg:false,
                 deleteShow:false,//删除新增手机号输入框
                 dialogFormUploadImg:false,
@@ -1523,6 +1552,11 @@ function dateFormat(val) {
                             callback();
                         }, trigger: 'blur'} */
                     // ]
+                },
+                dialogAuditRules: {
+                    remark: [
+                        {required: true, message: '请输入新建号码审核无效原因', trigger: 'blur'}
+                    ]
                 },
                 statusOptions: [{
                     value: '0',
@@ -1648,6 +1682,37 @@ function dateFormat(val) {
                 //     }
 
                 // });
+            },
+            telCreatePhoneAudit(){
+             this.dialogFormVisibleAudit =true;
+            },
+            submitFormMethod(form) {
+                debugger;
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.clueId = clueId;
+                        param.remark = addCustomerVM.submitForm.remark;
+                        this.btnDisabled = true;
+                        axios.post('/telCreatePhoneAudit/insert', param).then(function (response) {
+                            if (null === response || response.data == null || response.data.code != '0') {
+                                addCustomerVM.$message({
+                                    message: response.data.msg,
+                                    type: 'warning'
+                                });
+                                addCustomerVM.btnDisabled = false;
+                                return;
+                            }
+                        }).catch(function (error) {
+                                console.log(error);
+                            addCustomerVM.btnDisabled = false;
+                            });
+                        console.log('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
             },
           getPhones(cus){
             var phones = '';
