@@ -229,7 +229,8 @@ public class BusArrangeController {
                 curList.add(busArrangeDTO.getCompanyName());
                 curList.add(busArrangeDTO.getTeleGorupName());
                 if (StringUtils.isNotBlank(busArrangeDTO.getTeleProjectId())) {
-                    curList.add(transFormTeleProjectName(proMap, busArrangeDTO.getTeleProjectId()));
+//                    curList.add(transFormTeleProjectName(proMap, busArrangeDTO.getTeleProjectId()));
+                    curList.add(busArrangeDTO.getTeleProjectName());
                 } else {
                     curList.add("");
                 }
