@@ -27,7 +27,7 @@ public interface TelCreatePhoneAuditFeignClient {
      * @return
      */
     @PostMapping("/insert")
-    JSONResult<String> inset(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
+    JSONResult<String> insert(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
 
     @Component
     static class HystrixClientFallback implements TelCreatePhoneAuditFeignClient {
@@ -40,7 +40,7 @@ public interface TelCreatePhoneAuditFeignClient {
         }
 
         @Override
-        public JSONResult<String> inset(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
+        public JSONResult<String> insert(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
             return fallBackError("新建手机号审核插入");
         }
     }
