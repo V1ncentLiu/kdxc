@@ -32,8 +32,8 @@ public interface TelCreatePhoneAuditFeignClient {
     /**
      * 根据资源id查询最新的审核不通过记录
      */
-    @PostMapping("/findByClueId")
-    JSONResult<TelCreatePhoneAuditDTO> findByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
+    @PostMapping("/findNewestByClueId")
+    JSONResult<TelCreatePhoneAuditDTO> findNewestByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
     @Component
     static class HystrixClientFallback implements TelCreatePhoneAuditFeignClient {
 
@@ -50,7 +50,7 @@ public interface TelCreatePhoneAuditFeignClient {
         }
 
         @Override
-        public JSONResult<TelCreatePhoneAuditDTO> findByClueId(TelCreatePhoneAuditReqDTO reqDTO) {
+        public JSONResult<TelCreatePhoneAuditDTO> findNewestByClueId(TelCreatePhoneAuditReqDTO reqDTO) {
             return fallBackError("根据资源id查询最新的审核不通过记录");
         }
     }
