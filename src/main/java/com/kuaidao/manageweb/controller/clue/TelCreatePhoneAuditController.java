@@ -63,9 +63,9 @@ public class TelCreatePhoneAuditController {
      * 根据资源id查询最新的审核不通过记录
      */
     @ResponseBody
-    @PostMapping("/findByClueId")
+    @PostMapping("/findNewestByClueId")
     public JSONResult<TelCreatePhoneAuditDTO> findByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
-        JSONResult<TelCreatePhoneAuditDTO> jsonResult = telCreatePhoneAuditFeignClient.findByClueId(reqDTO);
+        JSONResult<TelCreatePhoneAuditDTO> jsonResult = telCreatePhoneAuditFeignClient.findNewestByClueId(reqDTO);
         return jsonResult;
     }
     /**
