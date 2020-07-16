@@ -1,12 +1,24 @@
 package com.kuaidao.manageweb.controller.invalidcustomer;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.google.common.collect.Lists;
+import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
+import com.kuaidao.common.entity.*;
+import com.kuaidao.common.util.DateUtil;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +29,6 @@ import com.kuaidao.aggregation.dto.invalidcustomer.AbandonParamDTO;
 import com.kuaidao.aggregation.dto.invalidcustomer.AbandonRespDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.InvalidCustomer.AbandonFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -172,5 +182,66 @@ public class AbandonController {
 
         return userList;
 
+    }
+    @PostMapping("/findAbandonCluesCount")
+    @ResponseBody
+    public JSONResult<Long> findAbandonCluesCount(@RequestBody AbandonParamDTO dto)
+            throws Exception {
+        return abandonFeignClient.findAbandonCluesCount(dto);
+    }
+
+    @PostMapping("/queryListExport")
+    @ResponseBody
+    public void queryListExport(HttpServletRequest request, HttpServletResponse response, @RequestBody AbandonParamDTO dto)  throws Exception{
+        Long strarDate = System.currentTimeMillis();
+        Date date1 = dto.getCreateTime1();
+        Date date2 = dto.getCreateTime2();
+        if (date1 != null && date2 != null) {
+            if (date1.getTime() > date2.getTime()) {
+                return ;
+            }
+        }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        dto.setPromotionCompany(user.getPromotionCompany());
+        JSONResult<List<AbandonRespDTO>>  abandonRespResult = abandonFeignClient.queryListExport(dto);
+        List<AbandonExportModel> abandonExportModels = new ArrayList<>();
+        if (JSONResult.SUCCESS.equals(abandonRespResult.getCode()) && abandonRespResult.getData() != null
+                && abandonRespResult.getData().size() > 0) {
+            List<AbandonRespDTO> abandonRespList = abandonRespResult.getData();
+            for(AbandonRespDTO abandonRespDTO:abandonRespList){
+                AbandonExportModel abandonExportModel = new AbandonExportModel();
+                BeanUtils.copyProperties(abandonRespDTO, abandonExportModel);
+                abandonExportModels.add(abandonExportModel);
+            }
+
+        }
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            String name =
+                    "废弃池导出" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition",
+                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ExcelWriter excelWriter =
+                    EasyExcel.write(outputStream, AbandonExportModel.class).build();
+            List<List<AbandonExportModel>> partition = Lists.partition(abandonExportModels, 50000);
+            if(abandonExportModels !=null && abandonExportModels.size()>0){
+                for (int i = 0; i < partition.size(); i++) {
+                    // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
+                    WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
+                    // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+                    excelWriter.write(partition.get(i), writeSheet);
+                }
+            }else{
+                //实例化表单
+                WriteSheet writeSheet = EasyExcel.writerSheet(0, "废弃池导出" ).build();
+                excelWriter.write(abandonExportModels, writeSheet);
+            }
+
+            excelWriter.finish();
+        }
+        logger.info("废弃池导出总数量{}" , abandonExportModels.size());
+        logger.info("废弃池导出总时长{}" , (System.currentTimeMillis() - strarDate));
     }
 }
