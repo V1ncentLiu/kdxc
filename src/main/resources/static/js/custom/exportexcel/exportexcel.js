@@ -56,7 +56,7 @@ function abandonExport(param) {
             var data =  response.data;
             var fileName = response.headers.filename;
             saveAs(data,decodeURI(fileName));
-            mainDivVM.$notify({
+            homePageVM.$notify({
                 type: 'success',
                 title: '提示',
                 message: '导出下载完成',
@@ -66,7 +66,7 @@ function abandonExport(param) {
             localStorage.removeItem("abandonExport");
         }).catch(function (error) {
         console.log(error);
-        mainDivVM.$notify.error({
+        homePageVM.$notify.error({
             title: '提示',
             message: error + ',导出失败',
             position: 'bottom-right'
