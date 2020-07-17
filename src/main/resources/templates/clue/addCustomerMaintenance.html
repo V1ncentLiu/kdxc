@@ -537,12 +537,27 @@
                     </el-table-column>
                 </el-table>
             </el-row>
-
+            <div   v-show="telCreatePhoneAuditsFlag">
+                <div class="marginB20 fs16 paddingT20">新建号码审核记录</div>
+                <el-table
+                        ref="multipleTable"
+                        :data="tableDataC5"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        @selection-change="handleSelectionChange"
+                >
+                    <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+                    <el-table-column prop="createUserName" label="审核人姓名" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="审核时间" align="center"></el-table-column>
+                    <el-table-column prop="remark" label="审核无效原因" align="center"></el-table-column>
+                </el-table>
+            </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
             <el-row class="marginB10">
                 <el-col :span="8">
                     <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
-                    <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
+                    <el-button type="text" disabled>只允许上传图片／音频文件后增加支持格式：jpg,png,jpeg,gif,bmp,mp3,mp4,wav,wma,3gpp,m4a,ape,midi,amr。不允许超过500MB。</el-button>
                 </el-col>
                 <el-col :span="5"
                         class="f-fr">
@@ -914,6 +929,8 @@
     var mediumList = [[${mediumList}]]
     var repeatStatus =false;
     var editPhone = 1;
+    var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
+    var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
@@ -923,6 +940,9 @@
     showConfirmButtonFlag = true;
     if(zjFalg){
         showConfirmButtonFlag = false;
+    }
+    if (null != telCreatePhoneAudits && telCreatePhoneAudits.length> 0 ){
+        telCreatePhoneAuditsFlag  = true;
     }
     var addCustomerVM = new Vue({
         el: '#addCustomer',
@@ -943,6 +963,7 @@
                 showAddDomainBtn:true,
                 phoneShow:false,//手机号2默认不显示
                 audioShow:false,//播放器默认不显示
+                telCreatePhoneAuditsFlag:telCreatePhoneAuditsFlag,
                 expireTimeOption: {
                     disabledDate(date) { //disabledDate 文档上：设置禁用状态，参数为当前日期，要求返回 Boolean
                         return date.getTime() <= Date.now() - 8.64e7 || date.getTime() >= Date.now();
@@ -1228,7 +1249,8 @@
                 limit:1,
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: callRecord,  //通话记录
-                tableDataC4: circulationList//流转记录
+                tableDataC4: circulationList,//流转记录
+                tableDataC5:telCreatePhoneAudits//流转记录
             }
         },
         methods: {
