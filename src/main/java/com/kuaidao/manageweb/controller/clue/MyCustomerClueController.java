@@ -12,6 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.manageweb.feign.clue.TelCreatePhoneAuditFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -36,21 +39,6 @@ import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
@@ -148,6 +136,8 @@ public class MyCustomerClueController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private DeduplicationDetailFeignClient deduplicationDetailFeignClient;
+    @Autowired
+    private TelCreatePhoneAuditFeignClient telCreatePhoneAuditFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -497,6 +487,16 @@ public class MyCustomerClueController {
         }
         request.setAttribute("mediumList", mediumList);
         request.setAttribute("zjFalg", request.getParameter("zjFalg"));
+
+        //电销创建手机号审核不通过集合
+        TelCreatePhoneAuditReqDTO reqDTO = new TelCreatePhoneAuditReqDTO();
+        reqDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<TelCreatePhoneAuditDTO>> jsonResult = telCreatePhoneAuditFeignClient.findListByClueId(reqDTO);
+        if (jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+            request.setAttribute("telCreatePhoneAudits", jsonResult.getData());
+        } else {
+            request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
+        }
         return "clue/addCustomerMaintenance";
     }
 
@@ -677,6 +677,15 @@ public class MyCustomerClueController {
             request.setAttribute("repeatClueStatus", 0);
         }
 
+        //电销创建手机号审核不通过集合
+        TelCreatePhoneAuditReqDTO reqDTO = new TelCreatePhoneAuditReqDTO();
+        reqDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<TelCreatePhoneAuditDTO>> jsonResult = telCreatePhoneAuditFeignClient.findListByClueId(reqDTO);
+        if (jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+            request.setAttribute("telCreatePhoneAudits", jsonResult.getData());
+        } else {
+            request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
+        }
         if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
             return "clue/editBasicCustomerMaintenance";
         } else {

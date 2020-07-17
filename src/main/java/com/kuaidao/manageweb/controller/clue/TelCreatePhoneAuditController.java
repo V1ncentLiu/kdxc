@@ -13,6 +13,7 @@ import com.kuaidao.aggregation.dto.clue.TelCreatePhoneAuditReqDTO;
 import com.kuaidao.common.entity.JSONResult;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 　　┏┓　　　┏┓+ +
@@ -66,6 +67,14 @@ public class TelCreatePhoneAuditController {
     @PostMapping("/findNewestByClueId")
     public JSONResult<TelCreatePhoneAuditDTO> findByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
         JSONResult<TelCreatePhoneAuditDTO> jsonResult = telCreatePhoneAuditFeignClient.findNewestByClueId(reqDTO);
+        return jsonResult;
+    }
+    /**
+     * 根据资源id查询所有审核不通过记录
+     */
+    @PostMapping("/findListByClueId")
+    public JSONResult<List<TelCreatePhoneAuditDTO>> findListByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
+        JSONResult<List<TelCreatePhoneAuditDTO>> jsonResult = telCreatePhoneAuditFeignClient.findListByClueId(reqDTO);
         return jsonResult;
     }
     /**
