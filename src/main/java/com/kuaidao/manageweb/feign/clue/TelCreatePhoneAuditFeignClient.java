@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
-import com.kuaidao.aggregation.dto.clue.TelCreatePhoneAuditDTO;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.kuaidao.aggregation.dto.clue.TelCreatePhoneAuditDTO;
 import com.kuaidao.aggregation.dto.clue.TelCreatePhoneAuditReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -29,11 +31,16 @@ public interface TelCreatePhoneAuditFeignClient {
      */
     @PostMapping("/insert")
     JSONResult<String> insert(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
+
     /**
      * 根据资源id查询最新的审核不通过记录
      */
     @PostMapping("/findNewestByClueId")
     JSONResult<TelCreatePhoneAuditDTO> findNewestByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
+
+    @PostMapping("/findListByClueId")
+    JSONResult<List<TelCreatePhoneAuditDTO>> findListByClueId(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
+
     @Component
     static class HystrixClientFallback implements TelCreatePhoneAuditFeignClient {
 
@@ -52,6 +59,11 @@ public interface TelCreatePhoneAuditFeignClient {
         @Override
         public JSONResult<TelCreatePhoneAuditDTO> findNewestByClueId(TelCreatePhoneAuditReqDTO reqDTO) {
             return fallBackError("根据资源id查询最新的审核不通过记录");
+        }
+
+        @Override
+        public JSONResult<List<TelCreatePhoneAuditDTO>> findListByClueId(TelCreatePhoneAuditReqDTO reqDTO) {
+            return fallBackError("根据资源id查询所有的审核不通过记录");
         }
     }
 
