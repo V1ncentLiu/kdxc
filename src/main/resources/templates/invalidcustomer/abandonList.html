@@ -18,7 +18,8 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
-        <el-button  icon="el-icon-download"  type="warning" @click="exportMes">废弃池导出</el-button>
+        <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportMes">废弃池导出</el-button>
+        <el-button v-else icon="el-icon-loading" type="warning" disabled>废弃池导出中</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -229,6 +230,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            isExport1:true,
             paginationShow: false,
             isShow:false,
             dialogFormVisible: false,
@@ -447,32 +449,62 @@
                         return;
                     }
                 }
-                axios.post('/abandonsource/queryListExport',param,{responseType:'blob'})
+                axios.post('/abandonsource/findAbandonCluesCount', param)
                     .then(function (response) {
-                        var data =  response.data;
-                        var fileName = response.headers.filename;
-                        saveAs(data,decodeURI(fileName));
-                        mainDivVM.$notify({
-                            type: 'success',
-                            title: '提示',
-                            message: '导出下载完成',
-                            position: 'bottom-right',
-                            duration: 0
+                        if(response.data.data>10000){
+                            mainDivVM.$message({
+                                message: '选择数据过多，不允许进行一次性导出',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+                        mainDivVM.$confirm("当前导出数据量为"+response.data.data+"条，确认导出吗？", '提示', {
+                            confirmButtonText: '确认',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+
+                            mainDivVM.isExport1=false;
+                            // 存localstorage
+                            localStorage.setItem('abandonExport','1');
+                            mainDivVM.timedown();
+                             window.parent.abandonExport(param)
+                        }).catch(() => {
+                            this.$message({
+                                type: 'info',
+                                message: '已取消导出'
+                            });
                         });
-                        localStorage.removeItem("distributeExport1");
-                    }).catch(function (error) {
-                    console.log(error);
-                    mainDivVM.$notify.error({
-                        title: '提示',
-                        message: error + ',导出导出失败',
-                        position: 'bottom-right'
+                    })
+                    .catch(function (error) {
+                        console.log(error);
                     });
-                    localStorage.removeItem("distributeExport1");
-                }).then(function(){
-                });
+
+
+            },
+
+
+            timedown(){
+                console.log(0)
+                clearInterval(this.timer);
+                var storageDistributeExport1 = localStorage.getItem("abandonExport");
+                if(storageDistributeExport1){
+                    this.isExport1=false;
+                }else{
+                    this.isExport1=true;
+                }
+                if(storageDistributeExport1){
+                    this.timer=setInterval(this.timedown,1000)
+                }else{
+                    clearInterval(this.timer)
+                }
             },
         },
         created(){
+            var storageDistributeExport1 = localStorage.getItem("abandonExport");
+            if(storageDistributeExport1 ){
+                this.timedown();
+            }
             // 进入页面判断有是否有存储值
             if(!this.paginationShow){
                 var storeVal = getSessionStore("abandonListStoreForm");

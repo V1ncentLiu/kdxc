@@ -191,7 +191,6 @@ public class AbandonController {
     }
 
     @PostMapping("/queryListExport")
-    @ResponseBody
     public void queryListExport(HttpServletRequest request, HttpServletResponse response, @RequestBody AbandonParamDTO dto)  throws Exception{
         Long strarDate = System.currentTimeMillis();
         Date date1 = dto.getCreateTime1();

@@ -49,3 +49,29 @@ function distributeExportFun(falgNew,param){
     }).then(function(){
     });
 }
+
+function abandonExport(param) {
+    axios.post('/abandonsource/queryListExport',param,{responseType:'blob'})
+        .then(function (response) {
+            var data =  response.data;
+            var fileName = response.headers.filename;
+            saveAs(data,decodeURI(fileName));
+            mainDivVM.$notify({
+                type: 'success',
+                title: '提示',
+                message: '导出下载完成',
+                position: 'bottom-right',
+                duration: 0
+            });
+            localStorage.removeItem("abandonExport");
+        }).catch(function (error) {
+        console.log(error);
+        mainDivVM.$notify.error({
+            title: '提示',
+            message: error + ',导出失败',
+            position: 'bottom-right'
+        });
+        localStorage.removeItem("abandonExport");
+    }).then(function(){
+    });
+}
