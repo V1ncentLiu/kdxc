@@ -12,6 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.manageweb.feign.clue.TelCreatePhoneAuditFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -36,21 +39,6 @@ import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueRecordQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
@@ -148,6 +136,8 @@ public class MyCustomerClueController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private DeduplicationDetailFeignClient deduplicationDetailFeignClient;
+    @Autowired
+    private TelCreatePhoneAuditFeignClient telCreatePhoneAuditFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -497,6 +487,16 @@ public class MyCustomerClueController {
         }
         request.setAttribute("mediumList", mediumList);
         request.setAttribute("zjFalg", request.getParameter("zjFalg"));
+
+        //电销创建手机号审核不通过集合
+        TelCreatePhoneAuditReqDTO reqDTO = new TelCreatePhoneAuditReqDTO();
+        reqDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<TelCreatePhoneAuditDTO>> jsonResult = telCreatePhoneAuditFeignClient.findListByClueId(reqDTO);
+        if (jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+            request.setAttribute("telCreatePhoneAudits", jsonResult.getData());
+        } else {
+            request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
+        }
         return "clue/addCustomerMaintenance";
     }
 
@@ -505,12 +505,12 @@ public class MyCustomerClueController {
      * 
      * @param request
      * @param clueId
+     * @param  telCreatePhoneAuditFlag  电销创建手机号审核按钮是否显示标志
      * @return
      */
     @RequestMapping("/customerInfoReadOnly")
-    public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam(required = false) String commonPool,
-            @RequestParam(required = false) String repeatFlag) {
+    public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId, @RequestParam(required = false) String commonPool,
+            @RequestParam(required = false) String repeatFlag, @RequestParam(required = false) String telCreatePhoneAuditFlag) {
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
         TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
@@ -527,28 +527,22 @@ public class MyCustomerClueController {
                     UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
                     userOrgRoleReq.setOrgId(user.getOrgId());
                     userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
-                    JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-                    if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS)
-                            && null != listByOrgAndRole.getData()
+                    JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+                    if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
                             && listByOrgAndRole.getData().size() > 0) {
-                        accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
-                                .collect(Collectors.toList());
+                        accountList = listByOrgAndRole.getData().stream().map(c -> c.getId()).collect(Collectors.toList());
                     }
                     accountList.add(user.getId());
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
                 // 获取电销布局信息
-                if (roleCode.equals(RoleCodeEnum.DXZJ.name())
-                        || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+                if (roleCode.equals(RoleCodeEnum.DXZJ.name()) || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
 
                     telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
-                    JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult =
-                            telemarketingLayoutFeignClient
-                                    .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
-                    if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS)
-                            && telemarketingLayoutResult.getData() != null
+                    JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult = telemarketingLayoutFeignClient
+                            .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
+                    if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS) && telemarketingLayoutResult.getData() != null
                             && telemarketingLayoutResult.getData().getId() != null) {
                         telemarketingLayoutDTO = telemarketingLayoutResult.getData();
                     }
@@ -563,11 +557,9 @@ public class MyCustomerClueController {
             fileDto.setIdList(accountList);
         }
         call.setClueId(clueId);
-        JSONResult<List<CallRecordRespDTO>> callRecord =
-                callRecordFeign.listTmCallReacordByParamsNoPage(call);
+        JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
-        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode())
-                && callRecord.getData() != null) {
+        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
         }
@@ -583,14 +575,12 @@ public class MyCustomerClueController {
         JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
         // 维护的资源数据
-        if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode())
-                && clueInfo.getData() != null) {
+        if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
 
             if (null != clueInfo.getData().getClueCustomer()) {
                 ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
                 if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())
-                        || StringUtils.isNotBlank(role)
-                                && role.equals(RoleCodeEnum.DXCYGW.name())) {
+                        || StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXCYGW.name())) {
                     setPhoneLocales(clueCustomerDTO);
                 }
                 if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
@@ -612,12 +602,9 @@ public class MyCustomerClueController {
             if (null != clueInfo.getData().getClueBasic()) {
                 ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
                 if (telemarketingLayoutDTO != null && telemarketingLayoutDTO.getId() != null) {
-                    if (StringUtils.isNotBlank(telemarketingLayoutDTO.getCategory())
-                            && clueBasic.getCategory() != null
-                            && ("," + telemarketingLayoutDTO.getCategory() + ",")
-                                    .contains("," + clueBasic.getCategory().toString() + ",")) {
-                        List<DictionaryItemRespDTO> mediumList =
-                                getDictionaryByCode(Constants.MEDIUM);
+                    if (StringUtils.isNotBlank(telemarketingLayoutDTO.getCategory()) && clueBasic.getCategory() != null
+                            && ("," + telemarketingLayoutDTO.getCategory() + ",").contains("," + clueBasic.getCategory().toString() + ",")) {
+                        List<DictionaryItemRespDTO> mediumList = getDictionaryByCode(Constants.MEDIUM);
                         request.setAttribute("mediumList", mediumList);
                         request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
                     }
@@ -646,8 +633,7 @@ public class MyCustomerClueController {
         TrackingReqDTO dto = new TrackingReqDTO();
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
-        if (trackingList != null && JSONResult.SUCCESS.equals(trackingList.getCode())
-                && trackingList.getData() != null) {
+        if (trackingList != null && JSONResult.SUCCESS.equals(trackingList.getCode()) && trackingList.getData() != null) {
             request.setAttribute("trackingList", trackingList.getData());
         } else {
             request.setAttribute("trackingList", new ArrayList());
@@ -656,10 +642,8 @@ public class MyCustomerClueController {
         // 获取资源流转数据
         CirculationReqDTO circDto = new CirculationReqDTO();
         circDto.setClueId(new Long(clueId));
-        JSONResult<List<CirculationRespDTO>> circulationList =
-                circulationFeignClient.queryList(circDto);
-        if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode())
-                && circulationList.getData() != null) {
+        JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+        if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode()) && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
         } else {
             request.setAttribute("circulationList", new ArrayList());
@@ -675,26 +659,33 @@ public class MyCustomerClueController {
         // 获取已上传的文件数据
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
-                && clueFileList.getData() != null) {
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
         request.setAttribute("commonPool", commonPool);
         request.setAttribute("repeatFlag", repeatFlag);
         request.setAttribute("loginUserId", user.getId());
-
+        request.setAttribute("telCreatePhoneAuditFlag", telCreatePhoneAuditFlag);
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
-        JSONResult<List<RepeatClueRecordDTO>> repeatJson =
-                repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode())
-                && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null
+                && repeatJson.getData().size() > 0) {
             request.setAttribute("repeatClueList", repeatJson.getData());
             request.setAttribute("repeatClueStatus", 1);
         } else {
             request.setAttribute("repeatClueStatus", 0);
         }
 
+        //电销创建手机号审核不通过集合
+        TelCreatePhoneAuditReqDTO reqDTO = new TelCreatePhoneAuditReqDTO();
+        reqDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<TelCreatePhoneAuditDTO>> jsonResult = telCreatePhoneAuditFeignClient.findListByClueId(reqDTO);
+        if (jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+            request.setAttribute("telCreatePhoneAudits", jsonResult.getData());
+        } else {
+            request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
+        }
         if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
             return "clue/editBasicCustomerMaintenance";
         } else {
