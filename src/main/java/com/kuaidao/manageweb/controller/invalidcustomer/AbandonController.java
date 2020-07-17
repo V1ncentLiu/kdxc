@@ -183,6 +183,7 @@ public class AbandonController {
         return userList;
 
     }
+    @RequiresPermissions("aggregation:abandonPool:export")
     @PostMapping("/findAbandonCluesCount")
     @ResponseBody
     public JSONResult<Long> findAbandonCluesCount(@RequestBody AbandonParamDTO dto)
