@@ -218,7 +218,7 @@ public class AbandonController {
         }
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             String name =
-                    "废弃池导出" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+                    "导出废弃池" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition",
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
