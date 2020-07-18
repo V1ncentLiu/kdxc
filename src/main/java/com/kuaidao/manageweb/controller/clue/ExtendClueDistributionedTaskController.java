@@ -445,6 +445,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getPhoneLocale());
                 curList.add(taskDTO.getPhone2Locale());
                 curList.add(taskDTO.getCusLevelName());
+                curList.add(taskDTO.getOperatorName());
                 dataList.add(curList);
             }
         }
