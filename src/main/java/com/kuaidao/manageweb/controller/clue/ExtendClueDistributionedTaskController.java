@@ -7,6 +7,9 @@ import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -651,6 +654,23 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(isSelfBuild);
                 // ip
                 curList.add(taskDTO.getIp());
+                //手机号1异常标签
+                curList.add(taskDTO.getPhone1AbnormalLabel());
+                //手机号2异常标签
+                curList.add(taskDTO.getPhone2AbnormalLabel());
+                //投资金额
+                curList.add(taskDTO.getAdvanceAmountValue());
+                //是否重复
+               Integer isRepeatPhone =  taskDTO.getIsRepeatPhone();
+               String repeatPhone ="";
+                if (null != isRepeatPhone) {
+                    if (isRepeatPhone == 1) {
+                        repeatPhone = "是";
+                    } else {
+                        repeatPhone = "否";
+                    }
+                }
+                curList.add(repeatPhone);
                 dataList.add(curList);
             }
         }
@@ -673,12 +693,19 @@ public class ExtendClueDistributionedTaskController {
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter =
                     EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
-            List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
-            for (int i = 0; i < partition.size(); i++) {
-                // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
-                WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
-                // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
-                excelWriter.write(partition.get(i), writeSheet);
+
+            if(CollectionUtils.isNotEmpty(dataList)){
+                List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
+                for (int i = 0; i < partition.size(); i++) {
+                    // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
+                    WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
+                    // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+                    excelWriter.write(partition.get(i), writeSheet);
+                }
+            }else{
+                //实例化表单
+                WriteSheet writeSheet = EasyExcel.writerSheet(0, "Sheet" ).build();
+                excelWriter.write(dataList, writeSheet);
             }
             excelWriter.finish();
         }
