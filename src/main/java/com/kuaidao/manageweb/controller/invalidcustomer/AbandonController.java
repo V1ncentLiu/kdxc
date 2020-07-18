@@ -188,6 +188,9 @@ public class AbandonController {
     @ResponseBody
     public JSONResult<Long> findAbandonCluesCount(@RequestBody AbandonParamDTO dto)
             throws Exception {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        dto.setPromotionCompany(user.getPromotionCompany());
         return abandonFeignClient.findAbandonCluesCount(dto);
     }
 
