@@ -9,9 +9,7 @@ var homePageVM=new Vue({
             }
         };
   		
-	    return { 
-          dataBasedialogVisible:true,//知识库弹窗默认不显示
-          searchDatabase:'',//搜索关键词
+	    return {
 	    	  formLabelWidth:'130px',
             formLabelWidth105:'105px',
 	      	isCollapse: false,//侧导航是否展开
@@ -250,45 +248,80 @@ var homePageVM=new Vue({
 					}
 				}
 			},
-            ringOffdialogVisible:false,//默认不显示挂断弹窗
-            isRingOff:false,//默认不显示挂断按钮
-			ketianInBoundPhone:'',//科天来电手机号
+          ringOffdialogVisible:false,//默认不显示挂断弹窗
+          isRingOff:false,//默认不显示挂断按钮
+    			ketianInBoundPhone:'',//科天来电手机号
+
+          dataBasedialogVisible:true,//知识库弹窗默认不显示
+          searchDatabaseKeyword:'',//搜索关键词
+          dataBaseInvestMoneyArr:[],//投资金额list
+          dataBaseInvestAreaArr:[],//投资区域list
+          dataBaseCategoryArr:[],//意向品类list
+          dataBaseInvestMoneyVal:"0",//默认是不限
+          dataBaseInvestAreaVal: "0",//默认是不限
+          dataBaseCategoryVal: "0",//默认是不限
+          dataBaseResultArr:[],//搜索结果
+          isshowsearchTip:true,//默认暂无搜索结果
+          issearchResult:false,
 	    }
 	},
  	methods: {
+      dataBaseClick1(val){//投资金额
+        console.log(val)
+        this.dataBaseInvestMoneyVal=val;
+      },
+      dataBaseClick2(val){//投资区域
+        console.log(val)
+        this.dataBaseInvestAreaVal=val;
+      },
+      dataBaseClick3(val){//意向品类
+        console.log(val)
+        this.dataBaseCategoryVal=val;
+      },
       // 获取搜索条件
       searchDataList1() {//投资金额
           var param = {};
           param.groupCode = "dataBaseInvestMoney";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            mainDivVM.vistitStoreTypeArr = response.data.data;
+            console.log(response)
+            homePageVM.dataBaseInvestMoneyArr = response.data.data;
           });
       },
       searchDataList2() {//投资区域
           var param = {};
           param.groupCode = "dataBaseInvestArea";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            mainDivVM.vistitStoreTypeArr = response.data.data;
+            console.log(response)
+            homePageVM.dataBaseInvestAreaArr = response.data.data;
           });
       },
       searchDataList3() {//意向品类
           var param = {};
           param.groupCode = "dataBaseCategory";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            mainDivVM.vistitStoreTypeArr = response.data.data;
+            console.log(response)
+            homePageVM.dataBaseCategoryArr = response.data.data;
           });
       },
       searchDatabaseFun(){
-          var keyword="";
-          var join_fee="";
-          var join_area="";
-          var category_name="";
+          var keyword=this.searchDatabaseKeyword;
+          var join_fee=this.dataBaseInvestMoneyVal;
+          var join_area=this.dataBaseInvestAreaVal;
+          var category_name=this.dataBaseCategoryVal;
           axios.get('http://192.168.13.137/api/search?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
           .then(function (response) {
               console.log(response)
               var result =  response.data;
               if(result.code==0){
-                                         
+                  if(result.data.list&&result.data.list.length>0){
+                      homePageVM.issearchResult=true;
+                      homePageVM.isshowsearchTip=false;
+                      homePageVM.dataBaseResultArr=result.data.list; 
+                  }else{
+                      homePageVM.issearchResult=false;
+                      homePageVM.isshowsearchTip=true;
+                  }
+                                    
               }else{
                   homePageVM.$message.error(result.msg);
               }                    
