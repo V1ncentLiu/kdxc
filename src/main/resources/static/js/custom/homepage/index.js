@@ -10,7 +10,8 @@ var homePageVM=new Vue({
         };
   		
 	    return { 
-          dataBasedialogVisible:false,//知识库弹窗默认不显示
+          dataBasedialogVisible:true,//知识库弹窗默认不显示
+          searchDatabase:'',//搜索关键词
 	    	  formLabelWidth:'130px',
             formLabelWidth105:'105px',
 	      	isCollapse: false,//侧导航是否展开
@@ -255,6 +256,47 @@ var homePageVM=new Vue({
 	    }
 	},
  	methods: {
+      // 获取搜索条件
+      searchDataList1() {//投资金额
+          var param = {};
+          param.groupCode = "dataBaseInvestMoney";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            mainDivVM.vistitStoreTypeArr = response.data.data;
+          });
+      },
+      searchDataList2() {//投资区域
+          var param = {};
+          param.groupCode = "dataBaseInvestArea";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            mainDivVM.vistitStoreTypeArr = response.data.data;
+          });
+      },
+      searchDataList3() {//意向品类
+          var param = {};
+          param.groupCode = "dataBaseCategory";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            mainDivVM.vistitStoreTypeArr = response.data.data;
+          });
+      },
+      searchDatabaseFun(){
+          var keyword="";
+          var join_fee="";
+          var join_area="";
+          var category_name="";
+          axios.get('http://192.168.13.137/api/search?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
+          .then(function (response) {
+              console.log(response)
+              var result =  response.data;
+              if(result.code==0){
+                                         
+              }else{
+                  homePageVM.$message.error(result.msg);
+              }                    
+          })
+          .catch(function (error) {
+               console.log(error);
+          });
+      },
       opendataBase(){
           this.dataBasedialogVisible=true
       },
@@ -1462,13 +1504,16 @@ var homePageVM=new Vue({
 	}
     
          
-  	},
-   	created() {  
+	},
+ 	created() {  
    		document.body.removeChild(document.getElementById('Loading'));
-		this.messageCount();
-		if(isUpdatePassword=="1"){
-			this.dialogModifyPwdVisible=true;
-		}
+  		this.messageCount();
+  		if(isUpdatePassword=="1"){
+  			this.dialogModifyPwdVisible=true;
+  		}
+      this.searchDataList1();//知识库投资金额list
+      this.searchDataList2();//知识库投资区域list
+      this.searchDataList3();//知识库意向品类list
 	},
 	computed: {
 	    clientRules:function() {
