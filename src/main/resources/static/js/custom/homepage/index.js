@@ -10,7 +10,8 @@ var homePageVM=new Vue({
         };
   		
 	    return { 
-	    	formLabelWidth:'130px',
+          dataBasedialogVisible:false,//知识库弹窗默认不显示
+	    	  formLabelWidth:'130px',
             formLabelWidth105:'105px',
 	      	isCollapse: false,//侧导航是否展开
 	      	isActive:true,
@@ -254,6 +255,9 @@ var homePageVM=new Vue({
 	    }
 	},
  	methods: {
+      opendataBase(){
+          this.dataBasedialogVisible=true
+      },
       // 切换七陌里的呼叫方式
       changeCallPhoneType(val){
 
