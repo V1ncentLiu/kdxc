@@ -2,6 +2,8 @@ package com.kuaidao.manageweb.controller.homepage;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.common.constant.BusinessLineConstant;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -40,6 +42,9 @@ public class HomePageController {
     // 汇聚-商家端 域名：用来判断首页跳转
     @Value("${merchantServletName}")
     private String merchantServletName;
+    @Value("${dataBaseUrl}")
+    private String dataBaseUrl;
+
 
     @Autowired
     DeptCallSetFeignClient deptCallSetFeignClient;
@@ -103,9 +108,10 @@ public class HomePageController {
         // 判断是否显示控制台按钮
         List<RoleInfoDTO> roleList = user.getRoleList();
         boolean isShowConsoleBtn = false;
+        String roleCode = "";
         if (CollectionUtils.isNotEmpty(roleList)) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleCode = roleInfoDTO.getRoleCode();
+            roleCode = roleInfoDTO.getRoleCode();
             if (RoleCodeEnum.DXCYGW.name().equals(roleCode)
                     || RoleCodeEnum.DXZJ.name().equals(roleCode)
                     || RoleCodeEnum.SWJL.name().equals(roleCode)
@@ -115,6 +121,12 @@ public class HomePageController {
             }
         }
         request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
+        boolean isShowDataBase = false;
+        if((user.getBusinessLine() !=null && user.getBusinessLine() == BusinessLineConstant.SHANGJI) || roleCode.equals(RoleCodeEnum.GLY.name()) ){
+            isShowDataBase = true;
+        }
+        request.setAttribute("isShowDataBase", isShowDataBase);
+        request.setAttribute("dataBaseUrl", dataBaseUrl);
         return "index";
     }
 
