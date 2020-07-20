@@ -889,7 +889,7 @@
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" :disabled="btnDisabled" @click="submitFormMethod('submitForm')">提交</el-button>
-            <el-button @click="submitFormCancel">取消</el-button>
+            <el-button @click="dialogFormVisibleAudit = false ">取消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -1710,7 +1710,9 @@ function dateFormat(val) {
             submitFormCancel(){
                 window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&telCreatePhoneAuditFlag=1&clueId="+clueId;
             },
+
             telCreatePhoneAudit(){
+                this.resetForm("submitForm");
              this.dialogFormVisibleAudit =true;
                 var param = {};
                 param.clueId = clueId;
@@ -1762,6 +1764,11 @@ function dateFormat(val) {
                         return false;
                     }
                 });
+            },
+            resetForm(formName) {
+                if (addCustomerVM.$refs[formName]) {
+                    addCustomerVM.$refs[formName].resetFields();
+                }
             },
           getPhones(cus){
             var phones = '';

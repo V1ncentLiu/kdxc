@@ -228,8 +228,8 @@ public class AbandonController {
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter =
                     EasyExcel.write(outputStream, AbandonExportModel.class).build();
-            List<List<AbandonExportModel>> partition = Lists.partition(abandonExportModels, 50000);
             if(abandonExportModels !=null && abandonExportModels.size()>0){
+                List<List<AbandonExportModel>> partition = Lists.partition(abandonExportModels, 50000);
                 for (int i = 0; i < partition.size(); i++) {
                     // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
                     WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
