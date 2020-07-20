@@ -241,7 +241,7 @@ var uploader = new plupload.Uploader({
         Error: function(up, err) {
             if (err.code == -600) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n选择的文件太大了,可以根据应用情况，在upload.js 设置一下上传的最大大小"));
-                alert("选择的图片不能超过10mb", {icon: 2});
+                alert("选择的图片不能超过500mb", {icon: 2});
             }
             else if (err.code == -601) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n选择的文件后缀不对,可以根据应用情况，在upload.js进行设置可允许的上传文件类型"));
