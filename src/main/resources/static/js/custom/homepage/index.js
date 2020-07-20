@@ -252,7 +252,8 @@ var homePageVM=new Vue({
           isRingOff:false,//默认不显示挂断按钮
     			ketianInBoundPhone:'',//科天来电手机号
 
-          dataBasedialogVisible:true,//知识库弹窗默认不显示
+          isDataBase:false,//默认不展示知识库按钮
+          dataBasedialogVisible:false,//知识库弹窗默认不显示
           searchDatabaseKeyword:'',//搜索关键词
           dataBaseInvestMoneyArr:[],//投资金额list
           dataBaseInvestAreaArr:[],//投资区域list
@@ -263,6 +264,7 @@ var homePageVM=new Vue({
           dataBaseResultArr:[],//搜索结果
           isshowsearchTip:true,//默认暂无搜索结果
           issearchResult:false,
+          dataBaseUrl:dataBaseUrl,//搜索接口地
 	    }
 	},
  	methods: {
@@ -308,7 +310,7 @@ var homePageVM=new Vue({
           var join_fee=this.dataBaseInvestMoneyVal;
           var join_area=this.dataBaseInvestAreaVal;
           var category_name=this.dataBaseCategoryVal;
-          axios.get('http://192.168.13.137/api/search?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
+          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
           .then(function (response) {
               console.log(response)
               var result =  response.data;
@@ -1544,6 +1546,10 @@ var homePageVM=new Vue({
   		if(isUpdatePassword=="1"){
   			this.dialogModifyPwdVisible=true;
   		}
+      // 判断是否展示知识库按钮
+      if(isShowDataBase){
+        this.isDataBase=true;
+      }
       this.searchDataList1();//知识库投资金额list
       this.searchDataList2();//知识库投资区域list
       this.searchDataList3();//知识库意向品类list
