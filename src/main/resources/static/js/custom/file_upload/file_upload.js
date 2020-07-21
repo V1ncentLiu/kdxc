@@ -241,7 +241,14 @@ var uploader = new plupload.Uploader({
         Error: function(up, err) {
             if (err.code == -600) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n选择的文件太大了,可以根据应用情况，在upload.js 设置一下上传的最大大小"));
-                alert("选择的图片不能超过500mb", {icon: 2});
+                // alert("选择的图片不能超过500mb", {icon: 2});
+                if(addCustomerVM){
+                    addCustomerVM.$message({
+                        message: '选择的图片不能超过500mb',
+                        type: 'warning'
+                    });
+                }
+                
             }
             else if (err.code == -601) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n选择的文件后缀不对,可以根据应用情况，在upload.js进行设置可允许的上传文件类型"));
@@ -249,12 +256,25 @@ var uploader = new plupload.Uploader({
             }
             else if (err.code == -602) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n这个文件已经上传过一遍了"));
-               alert("这个文件已经上传过一遍了", {icon: 2});
+               // alert("这个文件已经上传过一遍了", {icon: 2});
+               if(addCustomerVM){
+                    addCustomerVM.$message({
+                        message: '这个文件已经上传过一遍了',
+                        type: 'warning'
+                    });
+                }
             }
             else
             {
                 // document.getElementById('console').appendChild(document.createTextNode("\nError xml:" + err.response));
-                 alert("请上传图片", {icon: 2});
+                // alert("请上传图片", {icon: 2});
+                if(addCustomerVM){
+                    addCustomerVM.$message({
+                        message: '请上传图片',
+                        type: 'warning'
+                    });
+                }
+
             }
         }
     }
