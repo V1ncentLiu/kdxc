@@ -70,7 +70,7 @@
                     <el-col :span="12">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -50px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model.trim="form.wechat" autocomplete="off" style="width: 260px;margin-right: 10px;" maxLength="20"></el-input>
+                            <el-input v-model.trim="form.wechat" autocomplete="off" style="width: 260px;margin-right: 10px;" maxLength="20" @keyup.native="unSpaceWeChat" @change.native="unSpaceWeChat"></el-input>
                            	<span v-if="form.wechat2 == '' && form.wechatUrl=='' ">
 	                           <el-button type="primary"  @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
                             </span>
@@ -90,7 +90,7 @@
                 	<el-col :span="12">
                         <el-form-item label="邮箱：" prop="email" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -50px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                            <el-input v-model.trim="form.email" autocomplete="off" maxLength="100" style="width: 260px;"></el-input>
+                            <el-input v-model.trim="form.email" autocomplete="off" maxLength="100" style="width: 260px;" @keyup.native="unSpaceEmail" @change.native="unSpaceEmail"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -1265,6 +1265,14 @@ if(notOptList){
     　　　     	this.form.qq=this.form.qq.replace(/[^\.\d]/g,'');
                 this.form.qq=this.form.qq.replace('.','');
     　　　 	},
+            unSpaceWeChat(){
+                this.form.wechat=this.form.wechat.replace(/\s+/g,'');//禁止输入空格
+                this.form.wechat=this.form.wechat.replace('.','');
+            },
+            unSpaceEmail(){
+                this.form.email=this.form.email.replace(/\s+/g,'');//禁止输入空格
+                this.form.email=this.form.email.replace('.','');
+            },
     　　　 	chooseTemplate(){
                 this.chooseVisible=true;
 　　　     			this.pager.pageSize=20;
