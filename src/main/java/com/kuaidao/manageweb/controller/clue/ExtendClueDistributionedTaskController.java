@@ -663,12 +663,10 @@ public class ExtendClueDistributionedTaskController {
                 //是否重复
                Integer isRepeatPhone =  taskDTO.getIsRepeatPhone();
                String repeatPhone ="";
-                if (null != isRepeatPhone) {
-                    if (isRepeatPhone == 1) {
-                        repeatPhone = "是";
-                    } else {
-                        repeatPhone = "否";
-                    }
+                if (null != isRepeatPhone && isRepeatPhone == 1) {
+                    repeatPhone = "是";
+                }else {
+                    repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
                 dataList.add(curList);
