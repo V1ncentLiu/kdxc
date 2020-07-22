@@ -396,11 +396,11 @@ public class MyCustomerClueController {
                                 && role.equals(RoleCodeEnum.DXCYGW.name())) {
                     setPhoneLocales(clueCustomerDTO);
                 }
-                clueCustomerDTO.setPhoneCreateTime(null);
+                /*clueCustomerDTO.setPhoneCreateTime(null);
                 clueCustomerDTO.setPhone2CreateTime(null);
                 clueCustomerDTO.setPhone3CreateTime(null);
                 clueCustomerDTO.setPhone4CreateTime(null);
-                clueCustomerDTO.setPhone5CreateTime(null);
+                clueCustomerDTO.setPhone5CreateTime(null);*/
                 request.setAttribute("customer", clueCustomerDTO);
             } else {
                 request.setAttribute("customer", new ArrayList());
