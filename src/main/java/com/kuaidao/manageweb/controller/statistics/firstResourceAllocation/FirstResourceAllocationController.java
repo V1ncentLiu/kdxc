@@ -120,6 +120,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
             curList.add(ra.getSjhz());
+            curList.add(ra.getCmpt());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -200,6 +201,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
             curList.add(ra.getSjhz());
+            curList.add(ra.getCmpt());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -284,6 +286,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
             curList.add(ra.getSjhz());
+            curList.add(ra.getCmpt());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             dataList.add(curList);
@@ -512,6 +515,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("行业");
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
+        headTitleList.add("餐盟平台");
         headTitleList.add("其他");
         headTitleList.add("新媒体");
         return headTitleList;
@@ -533,6 +537,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("行业");
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
+        headTitleList.add("餐盟平台");
         headTitleList.add("其他");
         headTitleList.add("新媒体");
         return headTitleList;
@@ -555,6 +560,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("行业");
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
+        headTitleList.add("餐盟平台");
         headTitleList.add("其他");
         headTitleList.add("新媒体");
         return headTitleList;
@@ -592,6 +598,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
 
         // 商机盒子
         Long sjhz = list.stream().mapToLong(FirstResourceAllocationDto::getSjhz).sum();
+        //餐盟平台
+        Long cmpt = list.stream().mapToLong(FirstResourceAllocationDto::getCmpt).sum();
         firstResourceAllocationDto.setOrgId(0L);
         firstResourceAllocationDto.setDeptName("");
         firstResourceAllocationDto.setOrgName("合计");
@@ -606,6 +614,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         firstResourceAllocationDto.setIndustry(industry);
         firstResourceAllocationDto.setBrand(brand);
         firstResourceAllocationDto.setSjhz(sjhz);
+        firstResourceAllocationDto.setCmpt(cmpt);
         firstResourceAllocationDto.setOther(other);
         firstResourceAllocationDto.setTrackCounts(trackCounts);
         firstResourceAllocationDto.setCallCounts(callCounts);
@@ -829,6 +838,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         totalList.add(resTotal.getIndustry());
         totalList.add(resTotal.getBrand());
         totalList.add(resTotal.getSjhz());
+        totalList.add(resTotal.getCmpt());
         totalList.add(resTotal.getOther());
         totalList.add(resTotal.getNetizensMissed());
         dataList.add(totalList);
