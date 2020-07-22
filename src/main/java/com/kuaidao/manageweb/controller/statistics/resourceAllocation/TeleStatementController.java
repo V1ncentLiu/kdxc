@@ -202,6 +202,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
             curList.add(ra.getSjhz());
+            curList.add(ra.getCmpt());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             curList.add(ra.getOther2());
@@ -331,6 +332,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
             curList.add(ra.getSjhz());
+            curList.add(ra.getCmpt());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             curList.add(ra.getOther2());
@@ -386,6 +388,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getBrand());
             curList.add(ra.getSjhz());
+            curList.add(ra.getCmpt());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
             curList.add(ra.getOther2());
@@ -792,6 +795,7 @@ public class TeleStatementController {
         headTitleList.add("行业");
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
+        headTitleList.add("餐盟平台");
         headTitleList.add("其他");
         headTitleList.add("新媒体");
         headTitleList.add("其他2");
@@ -812,6 +816,7 @@ public class TeleStatementController {
         headTitleList.add("行业");
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
+        headTitleList.add("餐盟平台");
         headTitleList.add("其他");
         headTitleList.add("新媒体");
         headTitleList.add("其他2");
@@ -833,6 +838,7 @@ public class TeleStatementController {
         headTitleList.add("行业");
         headTitleList.add("品牌");
         headTitleList.add("商机盒子");
+        headTitleList.add("餐盟平台");
         headTitleList.add("其他");
         headTitleList.add("新媒体");
         headTitleList.add("其他2");
