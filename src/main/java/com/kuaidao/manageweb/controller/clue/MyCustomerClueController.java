@@ -1434,11 +1434,11 @@ public class MyCustomerClueController {
                         if (null != user.getBusinessLine()) {
                             if (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)
                                     || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
-                                 String res = validateClueFile(clueCustomer, dto);
+                                 /*String res = validateClueFile(clueCustomer, dto);
                                 //新增手机号 资料上传判断
                                 if(!"".equals(res)){
                                     return new JSONResult<String>().fail("-3",res);
-                                }
+                                }*/
                             }
                         }
                     }
