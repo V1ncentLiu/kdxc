@@ -244,6 +244,7 @@ public class TeleStatementController {
         totalList.add(resTotal.getIndustry());
         totalList.add(resTotal.getBrand());
         totalList.add(resTotal.getSjhz());
+        totalList.add(resTotal.getCmpt());
         totalList.add(resTotal.getOther());
         totalList.add(resTotal.getNetizensMissed());
         totalList.add(resTotal.getOther2());
