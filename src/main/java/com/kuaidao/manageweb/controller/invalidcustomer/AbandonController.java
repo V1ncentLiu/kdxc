@@ -15,6 +15,8 @@ import com.google.common.collect.Lists;
 import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,7 +196,10 @@ public class AbandonController {
         return abandonFeignClient.findAbandonCluesCount(dto);
     }
 
+    @RequiresPermissions("aggregation:abandonPool:export")
     @PostMapping("/queryListExport")
+    @LogRecord(description = "导出废弃池", operationType = LogRecord.OperationType.EXPORT,
+            menuName = MenuEnum.ABANDON)
     public void queryListExport(HttpServletRequest request, HttpServletResponse response, @RequestBody AbandonParamDTO dto)  throws Exception{
         Long strarDate = System.currentTimeMillis();
         Date date1 = dto.getCreateTime1();
