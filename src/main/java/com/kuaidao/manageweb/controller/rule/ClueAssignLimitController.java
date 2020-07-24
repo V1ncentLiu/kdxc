@@ -132,6 +132,7 @@ public class ClueAssignLimitController {
         // 插入创建人信息
         UserInfoDTO user = getUser();
         clueAssignLimitReq.setCreateUser(user.getId());
+        clueAssignLimitReq.setUpdateUser(user.getId());
         return clueAssignLimitFegin.create(clueAssignLimitReq);
     }
 
