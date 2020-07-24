@@ -22,7 +22,7 @@
 <body>
 <div id="myCustom" class="myCustom mainPadding" style="display: none;">
     <table-uniontabtemplate :param="dataUrlParam"></table-uniontabtemplate>
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户</el-breadcrumb-item>
@@ -828,6 +828,7 @@
                 url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
             }]
         },
+        isElBreadcrumb:true,
         paginationShow: false,
         btnDisabled: false,
         searchClueDisable:true,//查询资源默认不可点击
@@ -1847,16 +1848,21 @@
      // 4已签约客户 isSign = 1
       var type=getQueryString("type");
       console.log(type)
-      if(type==1){
-        this.form.isSign=0;
-      }else if(type==2){
-        this.form.createTimeStart=new Date();
-        this.form.createTimeEnd=new Date();
-      }else if(type==3){
-        this.form.teleReceiveSource=4;
-      }else if(type==4){
-        this.form.isSign=1;
-      }
+        if(type){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+            if(type==1){
+                this.form.isSign=0;
+            }else if(type==2){
+                this.form.createTimeStart=new Date();
+                this.form.createTimeEnd=new Date();
+            }else if(type==3){
+                this.form.teleReceiveSource="4";
+            }else if(type==4){
+                this.form.isSign=1;
+            }
+        }
+      
 
       //初始化数据列表
       this.initTableData();
