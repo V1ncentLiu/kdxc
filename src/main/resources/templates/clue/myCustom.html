@@ -802,30 +802,30 @@
         dataUrlParam:{
             dataUrlArr:[{
                 name:"未签约客户",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer"
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=1",                
             },{
                 name:"今日新增",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer"
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=2"
             },
             {
                 name:"今日回访",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer"
+                url:"/clue/clueMyCustomerInfo/customerVisitToday"
             },
             {
                 name:"自建客户",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer"
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=3"
             },
             {
                 name:"重单客户",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer"
+                url:"/clue/cluerepetition/queryRepeatPage?type=1"
             },
             {
                 name:"邀约客户",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer"
+                url:"/clue/appiontment/initAppiontmentList?type=1"
             },
             {
                 name:"已签约客户",
-                url:"/aggregation/publiccustomer/listPage"
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
             }]
         },
         paginationShow: false,
@@ -1805,8 +1805,7 @@
       }
       //是否已签约 -默认查未签约的
         this.form.isSign = 0;
-      //初始化数据列表
-      this.initTableData();
+      
       //客户状态
       var param={};
       param.groupCode="customerStatus";
@@ -1840,6 +1839,27 @@
 
       // 初始化列
       this.initColumn();
+      // 获取url地址
+      // debugger
+     //  1:未签约  isSign = 0
+     // 2今日新增  createTimeStart=  createTimeEnd=
+     // 3自建客户  teleReceiveSource = 4
+     // 4已签约客户 isSign = 1
+      var type=getQueryString("type");
+      console.log(type)
+      if(type==1){
+        this.form.isSign=0;
+      }else if(type==2){
+        this.form.createTimeStart=new Date();
+        this.form.createTimeEnd=new Date();
+      }else if(type==3){
+        this.form.teleReceiveSource=4;
+      }else if(type==4){
+        this.form.isSign=1;
+      }
+
+      //初始化数据列表
+      this.initTableData();
     }
   })
 </script>
