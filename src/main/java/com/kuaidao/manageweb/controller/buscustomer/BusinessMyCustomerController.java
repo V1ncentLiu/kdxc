@@ -36,11 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
@@ -101,9 +97,19 @@ public class BusinessMyCustomerController {
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
+    /**
+     *
+     * 餐盟端待处理邀约来访客户跳转页面
+     * @param request
+     * @return
+     */
+    @RequestMapping("/initPendingList")
+    public String initPendingList(HttpServletRequest request) {
+        return "visit/customerVistiPend";
+    }
 
     @RequestMapping("/listPage")
-    public String listPage(HttpServletRequest request) {
+    public String listPage(HttpServletRequest request,@RequestParam(required = false) Integer type) {
         logger.info("------------ 商务：我的客户列表 ---------------");
         UserInfoDTO user = CommUtil.getCurLoginUser();
         // 电销组
@@ -139,6 +145,7 @@ public class BusinessMyCustomerController {
         // request.setAttribute("teleGroupList", teleGroupList);
         // request.setAttribute("teleSaleList", teleSaleList);
         request.setAttribute("loginUserId", user.getId());
+        request.setAttribute("type",type);
         return "bus_mycustomer/mycustomerList";
     }
 

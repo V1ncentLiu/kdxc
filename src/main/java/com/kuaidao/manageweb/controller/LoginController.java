@@ -125,10 +125,12 @@ public class LoginController {
     private String wsUrlHttps;
     @Value("${session_time_out}")
     private int sessionTimeOut;
-    // 汇聚-商家端 域名：用来判断首页跳转
+    /** 汇聚-商家端 域名：用来判断首页跳转 **/
     @Value("${merchantServletName}")
     private String merchantServletName;
-
+    /** 汇聚-餐盟 域名：用来判断首页跳转 **/
+    @Value("${cmServletName}")
+    private String cmServletName;
 
     /**
      * 是否显示验证码
@@ -165,7 +167,10 @@ public class LoginController {
         if (serverName.equals(merchantServletName)) {
             // 汇聚商家端：跳转
             return "merchantLogin/login";
-        } else {
+        } else if (serverName.equals(cmServletName)) {
+            // 汇聚餐盟：跳转
+            return "canmengLogin/login";
+        }else {
             // 系统默认 汇聚登录页
             return "login/login";
         }
@@ -190,6 +195,17 @@ public class LoginController {
     public String resetMerchantPwd() {
         return "merchantLogin/resetPwd";
     }
+
+    /**
+     * 餐盟忘记密码
+     *
+     * @return
+     */
+    @RequestMapping("/cmLogin/resetPwd")
+    public String resetCmPwd() {
+        return "canmengLogin/resetPwd";
+    }
+
 
     @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
     @ResponseBody
