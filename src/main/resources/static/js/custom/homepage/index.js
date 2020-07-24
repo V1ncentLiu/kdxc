@@ -9,8 +9,8 @@ var homePageVM=new Vue({
             }
         };
   		
-	    return { 
-	    	formLabelWidth:'130px',
+	    return {
+	    	  formLabelWidth:'130px',
             formLabelWidth105:'105px',
 	      	isCollapse: false,//侧导航是否展开
 	      	isActive:true,
@@ -248,12 +248,93 @@ var homePageVM=new Vue({
 					}
 				}
 			},
-            ringOffdialogVisible:false,//默认不显示挂断弹窗
-            isRingOff:false,//默认不显示挂断按钮
-			ketianInBoundPhone:'',//科天来电手机号
+          ringOffdialogVisible:false,//默认不显示挂断弹窗
+          isRingOff:false,//默认不显示挂断按钮
+    			ketianInBoundPhone:'',//科天来电手机号
+
+          isDataBase:false,//默认不展示知识库按钮
+          dataBasedialogVisible:false,//知识库弹窗默认不显示
+          searchDatabaseKeyword:'',//搜索关键词
+          dataBaseInvestMoneyArr:[],//投资金额list
+          dataBaseInvestAreaArr:[],//投资区域list
+          dataBaseCategoryArr:[],//意向品类list
+          dataBaseInvestMoneyVal:"0",//默认是不限
+          dataBaseInvestAreaVal: "0",//默认是不限
+          dataBaseCategoryVal: "0",//默认是不限
+          dataBaseResultArr:[],//搜索结果
+          isshowsearchTip:true,//默认暂无搜索结果
+          issearchResult:false,
+          dataBaseUrl:dataBaseUrl,//搜索接口地
 	    }
 	},
  	methods: {
+      dataBaseClick1(val){//投资金额
+        console.log(val)
+        this.dataBaseInvestMoneyVal=val;
+      },
+      dataBaseClick2(val){//投资区域
+        console.log(val)
+        this.dataBaseInvestAreaVal=val;
+      },
+      dataBaseClick3(val){//意向品类
+        console.log(val)
+        this.dataBaseCategoryVal=val;
+      },
+      // 获取搜索条件
+      searchDataList1() {//投资金额
+          var param = {};
+          param.groupCode = "dataBaseInvestMoney";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            console.log(response)
+            homePageVM.dataBaseInvestMoneyArr = response.data.data;
+          });
+      },
+      searchDataList2() {//投资区域
+          var param = {};
+          param.groupCode = "dataBaseInvestArea";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            console.log(response)
+            homePageVM.dataBaseInvestAreaArr = response.data.data;
+          });
+      },
+      searchDataList3() {//意向品类
+          var param = {};
+          param.groupCode = "dataBaseCategory";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            console.log(response)
+            homePageVM.dataBaseCategoryArr = response.data.data;
+          });
+      },
+      searchDatabaseFun(){
+          var keyword=this.searchDatabaseKeyword;
+          var join_fee=this.dataBaseInvestMoneyVal;
+          var join_area=this.dataBaseInvestAreaVal;
+          var category_name=this.dataBaseCategoryVal;
+          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
+          .then(function (response) {
+              console.log(response)
+              var result =  response.data;
+              if(result.code==0){
+                  if(result.data.list&&result.data.list.length>0){
+                      homePageVM.issearchResult=true;
+                      homePageVM.isshowsearchTip=false;
+                      homePageVM.dataBaseResultArr=result.data.list; 
+                  }else{
+                      homePageVM.issearchResult=false;
+                      homePageVM.isshowsearchTip=true;
+                  }
+                                    
+              }else{
+                  homePageVM.$message.error(result.msg);
+              }                    
+          })
+          .catch(function (error) {
+               console.log(error);
+          });
+      },
+      opendataBase(){
+          this.dataBasedialogVisible=true
+      },
       // 切换七陌里的呼叫方式
       changeCallPhoneType(val){
 
@@ -1458,13 +1539,20 @@ var homePageVM=new Vue({
 	}
     
          
-  	},
-   	created() {  
+	},
+ 	created() {  
    		document.body.removeChild(document.getElementById('Loading'));
-		this.messageCount();
-		if(isUpdatePassword=="1"){
-			this.dialogModifyPwdVisible=true;
-		}
+  		this.messageCount();
+  		if(isUpdatePassword=="1"){
+  			this.dialogModifyPwdVisible=true;
+  		}
+      // 判断是否展示知识库按钮
+      if(isShowDataBase){
+        this.isDataBase=true;
+      }
+      this.searchDataList1();//知识库投资金额list
+      this.searchDataList2();//知识库投资区域list
+      this.searchDataList3();//知识库意向品类list
 	},
 	computed: {
 	    clientRules:function() {
