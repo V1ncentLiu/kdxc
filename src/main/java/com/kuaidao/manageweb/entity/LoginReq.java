@@ -22,6 +22,6 @@ public class LoginReq implements Serializable {
     private String isUpdatePassword;
     // 类型 1-短信 2-语音
     private String type;
-
-
+    /** 登录来源 1--餐盟*/
+    private Integer loginSource;
 }
