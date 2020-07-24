@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
+    <title>后台管理系统</title>
+    <link rel="stylesheet" th:href="@{/css/custom/canmenglogin/login1.css}">
+    <link rel="stylesheet" href="" id="skinCss">
+    <style>
+       /* #aboutUs {
+            position: fixed;
+            bottom: 30px;
+            left: 340px;
+            color: #757d88;
+            border-top: 1px solid #e0e7f1;
+            font-size: 20px;
+            width: 1200px;
+        }
+
+        #aboutUs p {
+            padding-top: 20px;
+        }
+        #header_top {
+            height: 79px;
+            background: rgba(255, 255, 255, 1);
+            padding-left: 354px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        #header_top .headerimage {
+            width: 46px;
+            height: 32px;
+        }
+        #header_top .headerimage img{
+            width: 100%;
+            height: 100%;
+        }
+        #header_top span{
+            color: #616161;
+            font-size: 26px;
+        }
+        .el-form-item__error{
+            left: 16px;
+            top: 145%;
+        } */
+    </style>
+</head>
+<body>
+<div id="Loading">
+    <div class="loader-inner ball-beat">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+<div id="loginbox" style="height: 100%;"> 
+    <div id="header_top">
+        <div class="headerimage">
+            <img v-if="skinVal==1" th:src="@{/images/merchantlogo.png}" alt="">
+            <img v-if="skinVal==2" th:src="@{/images/skin1/merchantlogo1.png}" alt="">
+        </div>
+        <!-- <span>汇聚系统</span> -->
+    </div>
+    <div class="loginbox">
+      <div id="passwordloginbox" class="passwordloginbox">
+        <div class="control-group normal_text">忘记密码-找回密码</div>
+        <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm" class="demo-resetPwdForm" label-width="100px">
+            <el-row class="accountNumber">
+                <el-form-item  prop="username" label="登录账号">
+                  <!-- <span class="iconImg"><img th:src="@{/images/loginIco01.jpg}" alt=""></span> -->
+                  <el-input v-model="resetPwdForm.username" maxlength="30"  placeholder="请输入用户名"></el-input>
+                </el-form-item>
+            </el-row>
+            <el-row class="accountNumber lastaccountNumber" id="canmengloginbox">
+                <el-col :span="9">
+                    <el-form-item  prop="codeInput">
+                      <!-- <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span> -->
+                      <el-input v-model="resetPwdForm.codeInput" maxlength="6"  placeholder="请输入验证码     |"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="13">
+                  <el-button type="primary" class="codeBtn" @click="sendCode('resetPwdForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
+                </el-col>
+            </el-row>
+                    
+            <div class="control-group">
+                <div class="codeTip">
+                    未收到验证码，使用<span class="link">
+                      <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('resetPwdForm','1');">短信验证码</el-button>
+                      <!-- <a id="msgHref" type="submit" @click="sendCode('resetPwdForm','1');">短信验证码</a> -->
+                    </span>
+                </div>              
+            </div>
+            <el-row class="accountNumber">
+                <el-form-item  prop="pswInput1" label="新密码">
+                  <!-- <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span> -->
+                  <el-input type="password" v-model="resetPwdForm.pswInput1" maxlength="30"  placeholder="请输入密码" autocomplete="new-password"></el-input>
+                  <!-- <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span> -->
+                </el-form-item>
+            </el-row>
+            <el-row class="accountNumber">
+                <el-form-item  prop="pswInput2" label="确认密码">
+                  <!-- <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span> -->
+                  <el-input type="password" v-model="resetPwdForm.pswInput2" maxlength="30"  placeholder="请输入密码"></el-input>
+                  <!-- <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span> -->
+                </el-form-item>
+            </el-row>
+        </el-form>
+        <div class="control-group">
+            <!-- 提示语 -->
+            <div class="tipBox">
+                <div class="tipCntBox" id="errorSpan"></div>
+            </div>              
+            <!-- 提示语结束 -->
+            <div class="loginBtnBox">
+              <el-row>
+                <el-col :span="11" class="loginBtnBoxBar">
+                  <el-button class="resetBtn" type="primary" @click="submitForm('resetPwdForm')">提&nbsp;&nbsp;交</el-button>
+                </el-col>
+                <el-col :span="11" style="margin-left: 40px" class="loginBtnBoxBar">
+                  <el-button class="cancelBtn" @click="toLogin()">取&nbsp;&nbsp;消</el-button>
+                </el-col>
+              </el-row>
+            </div>
+        </div>
+      </div>
+    </div>
+    <!-- 关于我们介绍 -->
+    <div id="aboutUs">
+        <p><span>关于我们</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<span>业务介绍</span></p>
+        <p>版权所有: 北京快道网络有限公司 京ICP备14037633号</p>
+    </div>
+  </div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script>
+    var oLink =  document.getElementById("skinCss");
+    var vm =  new Vue({
+        el: '#loginbox',
+        data: {
+          skinVal: getLocalStore("skinVal") ? getLocalStore("skinVal") : 1,//1蓝色 //2白色 皮肤切换
+          buttonName: "获取语音验证码",
+          isDisabled: false,
+          time: 60,
+        	resetPwdForm: {
+        		username: '',
+                codeInput:'',
+                pswInput1:'',
+                pswInput2:''
+            },
+            rules: {
+            	username: [
+                    { required: true, message: '用户名不能为空', trigger: 'blur' },
+                  	{  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  	{ validator:function(rule,value,callback){
+                 
+                    if(/^[A-Za-z0-9]+$/.test(value) == false){
+                       callback(new Error("请输入数字和字母"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                      
+                    }, trigger: 'change'}
+                ],
+                pswInput1: [
+                  { required: true, message: '密码不能为空', trigger: 'change' },
+                  {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  {  min: 6, message: '最少6个字符', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                 
+                    if(/^[A-Za-z0-9]+$/.test(value) == false){
+                       callback(new Error("请输入数字和字母"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                      
+                    }, trigger: 'change'}
+                ],
+                pswInput2: [
+                  { required: true, message: '密码不能为空', trigger: 'change' },
+                  {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  {  min: 6, message: '最少6个字符', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                 
+                    if(/^[A-Za-z0-9]+$/.test(value) == false){
+                       callback(new Error("请输入数字和字母"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                      
+                    }, trigger: 'change'}
+                ],
+                codeInput: [
+                  { required: true, message: '验证码不能为空', trigger: 'change' },
+                  {  max: 6, message: '最大6个字符', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                      
+                   }, trigger: 'change'}
+                ],
+              },         
+        },
+        
+        methods: {
+        	submitForm(formName) {
+       	        this.$refs[formName].validate((valid) => {
+       	          if (valid) {
+    	             var formData = vm.resetPwdForm;
+    	             if(formData.pswInput1!=formData.pswInput2){
+    	            	$("#errorSpan").text("确认密码与设置密码不一致，请修改");
+ 	            		$("#errorSpan").show();
+ 	            		return;
+    	             }
+    	             var param={};
+    	             param.username= formData.username;
+    	             param.oldPassword = formData.pswInput1;
+    	             param.code = formData.codeInput;
+    	             console.info(param);
+    	             
+    	            axios.post("/login/updatePassword", param)
+    	            .then(function (response) {
+    	            	console.info(response);
+    	            	var data =response.data;
+    	            	if(data.code!="0"){
+    	            		$("#errorSpan").text(data.msg);
+    	            		$("#errorSpan").show();
+    	            	}else{
+    	            		vm.$message({message:'密码找回成功，请使用新密码重新进行登录',type:'success',duration:1000,onClose:function(){
+	    	                	document.location.href='/login';
+                      	    }});
+    	            	}
+    	            })
+    	            .catch(function (error) {
+    	                 console.log(error);
+    	            });
+    	             
+       	          } else {
+       	        	console.log('数据未通过校验！');
+       	            return false;
+       	          }
+       	        });
+       	      },
+       	   	  sendCode(formName,type) {
+       	    	var valid=true;
+	       	  	this.$refs[formName].validateField(["username"],(error) => {
+  	    	      if (error) {
+  	    	    	  valid=false;
+	       	      }
+   	          	});
+  	       	 	if (valid) {
+  	       	 		vm.isDisabled = true;
+  	    		    var formData = vm.resetPwdForm;
+		            var param={};
+		            param.username= formData.username;
+		            param.type = type;
+		            console.info(param);
+		            axios.post("/login/sendmsgPwd", param)
+		 	           .then(function (response) {
+		  	       	 		vm.isDisabled = false;
+		 	           		console.info(response);
+		 	            	var data =response.data;
+		 	            	var msg="";
+	 	            		if(data.code=="0"){
+	 	            			vm.cutDown();//倒计时
+		 	            		if(type=="1"){
+		 	            			msg="发送短信验证成功";
+		 	            		}else{
+		 	            			msg="请注意接听语音来电获取验证码！";
+		 	            		}
+		 	            	}else {
+	    						msg=data.msg;
+	    					}
+	 	            		$("#errorSpan").text(msg);
+	 	            		$("#errorSpan").show();
+		 	            })
+		 	            .catch(function (error) {
+		  	       	 		vm.isDisabled = false;
+		 	                 console.log(error);
+		 	            });
+	       	     }else {
+	   	        	console.log('数据未通过校验！');
+	   	            return false;
+	   	          }
+       	      },
+       	   	  toLogin() {
+       	    	document.location.href='/login';
+       	      },
+              cutDown() {
+                var me = this;
+                me.isDisabled = true;
+                var interval = window.setInterval(function() {
+                  me.buttonName = '重新发送('+me.time+')';
+                  --me.time;
+                  if(me.time < 0) {
+                    me.buttonName = "获取语音验证码";
+                    me.time = 60;
+                    me.isDisabled = false;
+                    window.clearInterval(interval);
+                  }
+                }, 1000);
+       
+              }
+        },
+        created() {  
+            if(getLocalStore("skinVal")){               
+                oLink['href'] = "/css/custom/canmenglogin/login" + getLocalStore("skinVal") + ".css";
+            }else{
+                oLink['href'] = "/css/custom/canmenglogin/login1.css";
+            }
+            
+            if (this.$refs['resetPwdForm']!==undefined) {
+          		  this.$refs['resetPwdForm'].resetFields();
+          	}
+            document.body.removeChild(document.getElementById('Loading'));
+        }
+    })
+</script>
+</html>

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
@@ -55,7 +56,7 @@ public class PerformanceController extends BaseStatisticsController {
      */
     @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/groupList")
-    public String teamList(HttpServletRequest request){
+    public String teamList(HttpServletRequest request, @RequestParam Integer type){
         initSaleDept(request);
         //资源类别
         request.setAttribute("clueCategoryList",
@@ -66,7 +67,7 @@ public class PerformanceController extends BaseStatisticsController {
             initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null,null);
             return "reportPerformance/managerPerformance";
         }
-
+        request.setAttribute("type", type);
         return "reportPerformance/groupPerformance";
     }
 
