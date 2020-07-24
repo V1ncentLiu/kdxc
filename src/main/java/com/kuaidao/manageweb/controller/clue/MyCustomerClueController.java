@@ -1747,4 +1747,16 @@ public class MyCustomerClueController {
         }
         return "";
     }
+
+    /**
+     * 初始化我的客户
+     *
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/customerVisitToday")
+    public String customerVisitToday(HttpServletRequest request, Model model) {
+        return "visit/customerVisitToday";
+    }
 }
