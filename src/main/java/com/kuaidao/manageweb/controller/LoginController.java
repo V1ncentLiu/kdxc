@@ -257,15 +257,17 @@ public class LoginController {
             }
             user.setPromotionCompany(organizationDTO.getPromotionCompany());
         }
-        //餐盟用户登录增加判断
-        boolean  cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource()) && BusinessLineTypeConstant.SHANGJI == user.getBusinessLine();
+        // 餐盟用户登录增加判断
+        boolean cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource());
         if (cmFlag) {
-            if (!RoleCodeEnum.DXCYGW.equals(roleInfoDTO.getRoleCode()) || !RoleCodeEnum.SWJL.equals(roleInfoDTO.getRoleCode())  ) {
-                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
-                        "抱歉您的账号暂未开放餐盟端");
+            if (null != user.getBusinessLine() && BusinessLineTypeConstant.SHANGJI == user.getBusinessLine()) {
+                if (!RoleCodeEnum.DXCYGW.name().equals(roleInfoDTO.getRoleCode()) && !RoleCodeEnum.SWJL.name().equals(roleInfoDTO.getRoleCode())) {
+                    return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
+                }
+            } else {
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
             }
         }
-
         Date date = new Date();
         LoginRecordReq loginRecord = new LoginRecordReq();
         loginRecord.setId(IdUtil.getUUID());
