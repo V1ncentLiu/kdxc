@@ -12,18 +12,14 @@
 </head>
 <body>
 <div id="mainDiv"  class="mainPadding consoleStyle" style="display: none;">  
+    <table-uniontabtemplate :param="dataUrlParam"></table-uniontabtemplate>
     <!-- 待处理邀约来访记录 -->
     <el-row>
         <div class="title">
-            <div class="leftbox f-fl">待处理邀约来访记录</div>
-            <div class="rightbox f-fr" @click="gotoBusinessMyCustomer">
-                <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
-                <span class="f-fr">&nbsp;&nbsp;&nbsp;&nbsp;进入我的客户资源</span>
-            </div>
-            <div class="rightbox f-fr">
-                <el-button type="primary" size="small" @click="notVisit">标记未到访</el-button>
-                <!--<span class="f-fr">标记未到访&nbsp;&nbsp;&nbsp;&nbsp;</span>-->
-            </div>
+            <el-button type="primary" size="small" @click="notVisit">标记未到访</el-button>
+            <shiro:hasPermission name="businessMyCustomer:add">
+                <el-button type="warning" @click="createClueData">新建客户资源</el-button>
+            </shiro:hasPermission>
         </div>
         <el-row class="mainWhiteBg mainWhitePadding">
             <el-table border :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable" @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange" class="elTableHeightAuto">

@@ -1,6 +1,26 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        dataUrlParam:{
+            dataUrlArr:[{
+                isActive:true,
+                name:"待处理客户",
+                url:"/aggregation/businessMyCustomer/initPendingList",                
+            },{
+                isActive:false,
+                name:"未补齐尾款",
+                url:"/aggregation/businessMyCustomer/listPage?type=1",                
+            },{
+                isActive:false,
+                name:"未签约",
+                url:"/aggregation/businessMyCustomer/listPage?type=2"
+            },
+            {
+                isActive:false,
+                name:"已签约",
+                url:"/aggregation/businessMyCustomer/listPage?type=3"
+            }]
+        },
         signTabIndex:0,//点击编辑签约单tab的index
         signTitle:'',    
         responseData:[],  
@@ -605,6 +625,9 @@ var mainDivVM = new Vue({
     },
     
     methods: {
+        createClueData(){
+            window.location.href='/aggregation/businessMyCustomer/createClue';
+        },
         getShopTypeEdit(value){
             var param = {};
             param.id = value;
