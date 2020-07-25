@@ -269,7 +269,7 @@ public class ConsoleController {
          *
          * path="console/consoleBusinessMajordomo"; }
          */
-
+        request.setAttribute("type", type);
         return path;
     }
 
@@ -278,7 +278,7 @@ public class ConsoleController {
     /**
      * 查询公告 --不 带分页
      *
-     * @param queryDTO
+     * @param
      * @return
      */
     @PostMapping("/queryAnnReceiveNoPage")
@@ -363,7 +363,7 @@ public class ConsoleController {
     /***
      * 控制台 今日邀约单 不包括 删除的
      *
-     * @param teleConsoleReqDTO
+     * @param
      * @return
      */
     @PostMapping("/countTodayAppiontmentNum")
@@ -830,7 +830,7 @@ public class ConsoleController {
     /**
      * 根据机构和角色类型获取用户
      *
-     * @param orgDTO
+     * @param
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
@@ -846,7 +846,7 @@ public class ConsoleController {
     /**
      * 获取所有商务经理（组织名-大区名）
      *
-     * @param orgDTO
+     * @param
      * @return
      */
     private List<Map<String, Object>> getAllSaleList() {
