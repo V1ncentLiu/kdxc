@@ -16,6 +16,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.kuaidao.common.constant.BusinessLineTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -254,6 +257,15 @@ public class LoginController {
             }
             user.setPromotionCompany(organizationDTO.getPromotionCompany());
         }
+        //餐盟用户登录增加判断
+        boolean  cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource()) && BusinessLineTypeConstant.SHANGJI == user.getBusinessLine();
+        if (cmFlag) {
+            if (!RoleCodeEnum.DXCYGW.equals(roleInfoDTO.getRoleCode()) && !RoleCodeEnum.SWJL.equals(roleInfoDTO.getRoleCode())  ) {
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                        "抱歉您的账号暂未开放餐盟端");
+            }
+        }
+
         Date date = new Date();
         LoginRecordReq loginRecord = new LoginRecordReq();
         loginRecord.setId(IdUtil.getUUID());
