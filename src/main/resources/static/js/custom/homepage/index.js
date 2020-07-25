@@ -10,6 +10,8 @@ var homePageVM=new Vue({
         };
   		
 	    return {
+          isRoleCodeDX:false,
+          isRoleCodeSW:false,
 	    	  formLabelWidth:'130px',
             formLabelWidth105:'105px',
 	      	isCollapse: false,//侧导航是否展开
@@ -269,15 +271,15 @@ var homePageVM=new Vue({
 	},
  	methods: {
       dataBaseClick1(val){//投资金额
-        console.log(val)
+        // console.log(val)
         this.dataBaseInvestMoneyVal=val;
       },
       dataBaseClick2(val){//投资区域
-        console.log(val)
+        // console.log(val)
         this.dataBaseInvestAreaVal=val;
       },
       dataBaseClick3(val){//意向品类
-        console.log(val)
+        // console.log(val)
         this.dataBaseCategoryVal=val;
       },
       // 获取搜索条件
@@ -285,7 +287,7 @@ var homePageVM=new Vue({
           var param = {};
           param.groupCode = "dataBaseInvestMoney";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            console.log(response)
+            // console.log(response)
             homePageVM.dataBaseInvestMoneyArr = response.data.data;
           });
       },
@@ -293,7 +295,7 @@ var homePageVM=new Vue({
           var param = {};
           param.groupCode = "dataBaseInvestArea";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            console.log(response)
+            // console.log(response)
             homePageVM.dataBaseInvestAreaArr = response.data.data;
           });
       },
@@ -301,7 +303,7 @@ var homePageVM=new Vue({
           var param = {};
           param.groupCode = "dataBaseCategory";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            console.log(response)
+            // console.log(response)
             homePageVM.dataBaseCategoryArr = response.data.data;
           });
       },
@@ -312,7 +314,7 @@ var homePageVM=new Vue({
           var category_name=this.dataBaseCategoryVal;
           axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
           .then(function (response) {
-              console.log(response)
+              // console.log(response)
               var result =  response.data;
               if(result.code==0){
                   if(result.data.list&&result.data.list.length>0){
@@ -786,7 +788,7 @@ var homePageVM=new Vue({
 			
 			agentSign = hex_md5(agentSign);
 			url += "&timestamp=" + timestamp + "&sign=" + agentSign;
-			console.log(url);
+			// console.log(url);
 			
 			$.ajax({
 				type : 'get',
@@ -952,7 +954,7 @@ var homePageVM=new Vue({
 						console.info("登录成功");
 						CtiAgentBar.ready();
 					} else {
-						console.log(data.data.message);
+						// console.log(data.data.message);
 						this.$message({message:"坐席登录失败-"+data.data.message,type:'error'});
 					}
 					break;
@@ -1553,6 +1555,16 @@ var homePageVM=new Vue({
       this.searchDataList1();//知识库投资金额list
       this.searchDataList2();//知识库投资区域list
       this.searchDataList3();//知识库意向品类list
+      // 通过用户信息判断餐盟菜单显示
+      if(user){
+        var roleCode=user.roleCode;
+        console.log(roleCode);
+        if(roleCode=="DXCYGW"){//电销顾问
+          this.isRoleCodeDX=true;//电销顾问
+        }else if(roleCode==""){
+          this.isRoleCodeSW=true;//商务经理
+        }
+      }
 	},
 	computed: {
 	    clientRules:function() {
