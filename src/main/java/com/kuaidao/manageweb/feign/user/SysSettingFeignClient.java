@@ -18,7 +18,7 @@ import com.kuaidao.sys.dto.user.SysSettingReq;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/sysSetting",
+@FeignClient(name = "sys-service-fanjd", path = "/sys/sysSetting",
         fallback = SysSettingFeignClient.HystrixClientFallback.class)
 public interface SysSettingFeignClient {
 
