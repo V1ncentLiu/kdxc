@@ -105,7 +105,7 @@ public class BusinessMyCustomerController {
      */
     @RequestMapping("/initPendingList")
     public String initPendingList(HttpServletRequest request) {
-        return "visit/customerVistiPend";
+        return "visit/customerVisitPend";
     }
 
     @RequestMapping("/listPage")
