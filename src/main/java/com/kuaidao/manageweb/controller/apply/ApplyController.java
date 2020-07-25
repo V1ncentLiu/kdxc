@@ -97,7 +97,7 @@ public class ApplyController {
      */
     @RequestMapping("/applyPage")
     @RequiresPermissions("apply:view")
-    public String applyPage(HttpServletRequest request, @RequestParam Integer type) {
+    public String applyPage(HttpServletRequest request, @RequestParam(required = false) Integer type) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {

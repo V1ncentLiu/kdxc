@@ -131,7 +131,7 @@ public class PublicCustomerResourcesController {
      * 分页查询
      */
     @RequestMapping("/listPage")
-    public String listPage(HttpServletRequest request, @RequestParam Integer type) {
+    public String listPage(HttpServletRequest request, @RequestParam(required = false) Integer type) {
         logger.info("------------ 公共客户资源列表 ---------------");
         // 电销组
         List dxzList = new ArrayList();

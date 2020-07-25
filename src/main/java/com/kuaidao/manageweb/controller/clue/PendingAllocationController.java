@@ -81,7 +81,7 @@ public class PendingAllocationController {
      */
     @RequestMapping("/initAppiontmentList")
     @RequiresPermissions("aggregation:pendingAllocationManager:view")
-    public String initCompanyList(HttpServletRequest request, @RequestParam Integer type) {
+    public String initCompanyList(HttpServletRequest request,  @RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         String ownOrgId = "";

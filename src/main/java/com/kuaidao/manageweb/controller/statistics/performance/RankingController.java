@@ -53,7 +53,7 @@ public class RankingController {
      * @return
      */
     @RequestMapping("/deptList")
-    public String deptList(HttpServletRequest request, @RequestParam Integer type){
+    public String deptList(HttpServletRequest request, @RequestParam(required = false) Integer type){
         initOrg(request);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();

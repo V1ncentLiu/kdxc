@@ -88,7 +88,7 @@ public class ClueRepetitionController {
      * @return
      */
     @RequestMapping("/queryRepeatPage")
-    public String queryRepeatPage(HttpServletRequest request, @RequestParam Integer type) {
+    public String queryRepeatPage(HttpServletRequest request , @RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
      // 添加重单字段限制的业务线

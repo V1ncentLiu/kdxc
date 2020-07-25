@@ -151,7 +151,7 @@ public class MyCustomerClueController {
      */
     @RequiresPermissions("myCustomerInfo:view")
     @RequestMapping("/initmyCustomer")
-    public String initmyCustomer(HttpServletRequest request, Model model, @RequestParam Integer type) {
+    public String initmyCustomer(HttpServletRequest request, Model model, @RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();

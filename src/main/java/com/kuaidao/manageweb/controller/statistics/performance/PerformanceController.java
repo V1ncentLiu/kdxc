@@ -56,7 +56,7 @@ public class PerformanceController extends BaseStatisticsController {
      */
     @RequiresPermissions("statistics:performance:view")
     @RequestMapping("/groupList")
-    public String teamList(HttpServletRequest request, @RequestParam Integer type){
+    public String teamList(HttpServletRequest request, @RequestParam(required = false) Integer type){
         initSaleDept(request);
         //资源类别
         request.setAttribute("clueCategoryList",
