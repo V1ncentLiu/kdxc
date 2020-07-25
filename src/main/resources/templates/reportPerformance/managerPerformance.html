@@ -5,7 +5,7 @@
 </head>
 <body>
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>电销业绩表</el-breadcrumb-item>
@@ -130,6 +130,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                isElBreadcrumb:true,
                 loading: false,
                 isDisabled: false,
                 isDisabledOrgId: false,
@@ -521,6 +522,13 @@
             if(localVal){this.pager.pageSize = localVal;}
 
             this.searchTable();
+            // 判断是否显示面包屑
+            var type=getQueryString("type");
+            console.log(type)
+            if(type=="1"){
+                // 隐藏面包屑
+                this.isElBreadcrumb=false;                
+            }
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
