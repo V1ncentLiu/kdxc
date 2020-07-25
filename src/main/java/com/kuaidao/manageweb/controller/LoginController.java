@@ -260,7 +260,7 @@ public class LoginController {
         //餐盟用户登录增加判断
         boolean  cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource()) && BusinessLineTypeConstant.SHANGJI == user.getBusinessLine();
         if (cmFlag) {
-            if (!RoleCodeEnum.DXCYGW.equals(roleInfoDTO.getRoleCode()) && !RoleCodeEnum.SWJL.equals(roleInfoDTO.getRoleCode())  ) {
+            if (!RoleCodeEnum.DXCYGW.equals(roleInfoDTO.getRoleCode()) || !RoleCodeEnum.SWJL.equals(roleInfoDTO.getRoleCode())  ) {
                 return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
                         "抱歉您的账号暂未开放餐盟端");
             }
