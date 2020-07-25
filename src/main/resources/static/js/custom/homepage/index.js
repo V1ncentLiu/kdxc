@@ -1561,7 +1561,7 @@ var homePageVM=new Vue({
         console.log(roleCode);
         if(roleCode=="DXCYGW"){//电销顾问
           this.isRoleCodeDX=true;//电销顾问
-        }else if(roleCode==""){
+        }else if(roleCode=="SWJL"){
           this.isRoleCodeSW=true;//商务经理
         }
       }
