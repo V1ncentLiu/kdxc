@@ -6,24 +6,20 @@ package com.kuaidao.manageweb.controller;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.Authenticator;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.LogoutAware;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -31,6 +27,7 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.crazycake.shiro.RedisSessionDAO;
+import org.crazycake.shiro.exception.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -41,14 +38,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -76,13 +69,7 @@ import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.LoginRecordDTO;
-import com.kuaidao.sys.dto.user.LoginRecordReq;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
+import com.kuaidao.sys.dto.user.*;
 
 
 /**
@@ -298,7 +285,7 @@ public class LoginController {
                     }
                 }
                 /** 强制清空session，防止非正常退出导致权限不刷新 **/
-                kickOutUser(username);
+                kickOutUser(user.getId());
                 // 用户登陆
                 UsernamePasswordToken token = new UsernamePasswordToken(username,
                         MD5Util.StringToMd5(MD5Util.StringToMd5(password + user.getSalt())));
@@ -347,7 +334,7 @@ public class LoginController {
                     }
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("sessionid", "" + sessionid);
-                redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(), sessionid, 1,
+                redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(), sessionid, 3,
                         TimeUnit.DAYS);
                 loginRecordFeignClient.create(loginRecord);
                 List<LoginRecordDTO> findList =
@@ -767,34 +754,40 @@ public class LoginController {
      * 删除用户缓存信息(防止非正常登录事session存在导致权限不刷新)
      * 
      * @author fanjd 2019/05/9 20:05:08
-     * @param username 当前登陆用户名
+     * @param userId 当前登陆用户id
      */
-    private void kickOutUser(String username) {
+    private void kickOutUser(Long userId) {
         // 处理session
-        DefaultWebSecurityManager securityManager =
-                (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
-        DefaultWebSessionManager sessionManager =
-                (DefaultWebSessionManager) securityManager.getSessionManager();
-        // 获取当前已登录的用户session列表
-        Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();
-        String sessionUserName = "";
-        for (Session session : sessions) {
+        DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+        DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
+        // 从redis获取sessionId
+        String sessionId = redisTemplate.opsForValue().get(Constants.SESSION_ID + userId);
+        if (StringUtils.isBlank(sessionId)) {
+            return;
+        }
+        RedisSessionDAO redisSessionDAO = (RedisSessionDAO) sessionManager.getSessionDAO();
+        if (null == redisSessionDAO) {
+            return;
+        }
+        String keyPrefix = redisSessionDAO.getKeyPrefix();
+        try {
+            byte[] key = redisSessionDAO.getKeySerializer().serialize(keyPrefix + sessionId);
+            Session session = (Session) redisSessionDAO.getValueSerializer().deserialize(redisSessionDAO.getRedisManager().get(key));
             if (null == session) {
-                continue;
+                return;
             }
-            // 清除该用户以前登录时保存的session，强制退出
             Object attribute = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
             if (attribute == null) {
-                continue;
+                return;
             }
-            sessionUserName = (String) session.getAttribute("userName");
-            // 判断是否当前用户
-            if (username.equals(sessionUserName)) {
-                Authenticator authc = securityManager.getAuthenticator();
-                // 删除cache，登录成功后重新授权
-                ((LogoutAware) authc).onLogout((PrincipalCollection) attribute);
-            }
+            Authenticator authc = securityManager.getAuthenticator();
+            // 删除cache，登录成功后重新授权
+            ((LogoutAware) authc).onLogout((PrincipalCollection) attribute);
 
+        } catch (SerializationException e) {
+            e.printStackTrace();
+            logger.error("清空用户权限出现异常", e);
         }
+
     }
 }
