@@ -109,7 +109,7 @@ public class CmHomePageController {
         }
         request.setAttribute("isShowDataBase", isShowDataBase);
         request.setAttribute("dataBaseUrl", dataBaseUrl);
-        return "index";
+        return "unionIndex";
     }
 
 }

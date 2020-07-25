@@ -10,6 +10,10 @@ public class LoginReq implements Serializable {
      * 
      */
     private static final long serialVersionUID = 1L;
+
+    /** 登录来源 1--餐盟 */
+    public static final Integer LOGIN_SOURCE = 1;
+
     // 用户名
     private String username;
     // 密码
@@ -22,6 +26,7 @@ public class LoginReq implements Serializable {
     private String isUpdatePassword;
     // 类型 1-短信 2-语音
     private String type;
-    /** 登录来源 1--餐盟*/
+
+    /** 登录来源 1--餐盟 */
     private Integer loginSource;
 }
