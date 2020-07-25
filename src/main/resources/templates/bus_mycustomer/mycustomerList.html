@@ -29,7 +29,8 @@
 <body>
 
 <div id="mainDiv" class="mainPadding" style="display: none;">
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <table-uniontabtemplate :param="dataUrlParam"></table-uniontabtemplate>
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户（商务）</el-breadcrumb-item>
@@ -1892,6 +1893,27 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {  
+            dataUrlParam:{
+                dataUrlArr:[{
+                    isActive:false,
+                    name:"待处理客户",
+                    url:"/aggregation/businessMyCustomer/initPendingList",                
+                },{
+                    isActive:false,
+                    name:"未补齐尾款",
+                    url:"/aggregation/businessMyCustomer/listPage?type=1",                
+                },{
+                    isActive:false,
+                    name:"未签约",
+                    url:"/aggregation/businessMyCustomer/listPage?type=2"
+                },
+                {
+                    isActive:false,
+                    name:"已签约",
+                    url:"/aggregation/businessMyCustomer/listPage?type=3"
+                }]
+            },
+            isElBreadcrumb:true,
             signTabIndex:0,//点击编辑签约单tab的index
             signTitle:'',    
             responseData:[],  
@@ -3994,8 +4016,7 @@
                 mainDivVM.teleketGroupArr = response.data.data.teleGroupList;
                 mainDivVM.teleketSaleArr = response.data.data.teleSaleList;
             });
-            //初始化数据列表
-            this.initList();
+            
             // //  到访店铺类型 vistitStoreTypeArr
             // param.groupCode = "vistitStoreType";
             // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
@@ -4026,6 +4047,29 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 mainDivVM.visitCityArr = response.data.data;
             });
+
+            // 获取url地址
+            // 1未补齐尾款
+            // 2未签约
+            // 3已签约
+          var type=getQueryString("type");
+          console.log(type)
+            if(type){
+                // 隐藏面包屑
+                this.isElBreadcrumb=false;
+                if(type==1){//未补齐尾款
+                    this.queryForm.isTailMoney ="0";
+                    this.dataUrlParam.dataUrlArr[1].isActive=true;
+                }else if(type==2){//未签约
+                    this.queryForm.isSign =0;
+                    this.dataUrlParam.dataUrlArr[2].isActive=true;
+                }else if(type==3){//已签约
+                    this.queryForm.isSign =1;
+                    this.dataUrlParam.dataUrlArr[3].isActive=true;
+                }
+            }
+            //初始化数据列表
+            this.initList();
 
         },
         mounted() {
