@@ -21,6 +21,7 @@ var mainDivVM = new Vue({
                 url:"/aggregation/businessMyCustomer/listPage?type=3"
             }]
         },
+        isElBreadcrumb:true,
         signTabIndex:0,//点击编辑签约单tab的index
         signTitle:'',    
         responseData:[],  
@@ -2145,6 +2146,14 @@ var mainDivVM = new Vue({
         axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
             mainDivVM.visitCityArr = response.data.data;
         });
+        // 获取url地址
+        var type=getQueryString("type");
+        console.log(type)
+        if(type=="1"){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+            
+        }
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';

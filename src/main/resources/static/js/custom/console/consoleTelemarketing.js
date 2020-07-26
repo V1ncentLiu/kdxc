@@ -567,9 +567,6 @@ var mainDivVM = new Vue({
         this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
         this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
         // 获取url地址
-        // 1未补齐尾款
-        // 2未签约
-        // 3已签约
         var type=getQueryString("type");
         console.log(type)
         if(type=="1"){
