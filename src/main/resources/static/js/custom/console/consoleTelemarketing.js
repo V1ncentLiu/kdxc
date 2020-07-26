@@ -1,6 +1,37 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        dataUrlParam:{
+            dataUrlArr:[{
+                name:"未签约客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=1",                
+            },{
+                name:"今日新增",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=2"
+            },
+            {
+                isActive:true,
+                name:"今日回访",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday"
+            },
+            {
+                name:"自建客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=3"
+            },
+            {
+                name:"重单客户",
+                url:"/clue/cluerepetition/queryRepeatPage?type=1"
+            },
+            {
+                name:"邀约客户",
+                url:"/clue/appiontment/initAppiontmentList?type=1"
+            },
+            {
+                name:"已签约客户",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
+            }]
+        },
+        isElBreadcrumb:true,
     	receiveDialog:false,
     	receiveTitle:"",
     	dailogTitleType:"",
@@ -535,6 +566,18 @@ var mainDivVM = new Vue({
         this.todayTalkTimem = this.fomatSecondsm(dashboardTelSale.todayCallDuration);
         this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
         this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
+        // 获取url地址
+        // 1未补齐尾款
+        // 2未签约
+        // 3已签约
+        var type=getQueryString("type");
+        console.log(type)
+        if(type=="1"){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+            
+        }
+
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
