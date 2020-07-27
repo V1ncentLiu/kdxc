@@ -153,7 +153,7 @@ public class ShiroConfig {
             log.info("==========password1111111===============,{}",password);
             redisManager.setPassword(password);
         }
-        redisManager.setPassword(password);
+        //redisManager.setPassword(password);
         return redisManager;
     }
 
