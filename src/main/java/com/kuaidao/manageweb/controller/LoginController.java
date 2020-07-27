@@ -24,7 +24,6 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.crazycake.shiro.RedisSessionDAO;
-import org.crazycake.shiro.exception.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -282,7 +281,7 @@ public class LoginController {
                     }
                 }
                 /** 强制清空session，防止非正常退出导致权限不刷新 **/
-                kickOutUser(user.getId());
+                kickOutUser(username);
                 // 用户登陆
                 UsernamePasswordToken token = new UsernamePasswordToken(username,
                         MD5Util.StringToMd5(MD5Util.StringToMd5(password + user.getSalt())));
@@ -751,40 +750,34 @@ public class LoginController {
      * 删除用户缓存信息(防止非正常登录事session存在导致权限不刷新)
      *
      * @author fanjd 2019/05/9 20:05:08
-     * @param userId 当前登陆用户id
+     * @param username 当前登陆用户id
      */
-    private void kickOutUser(Long userId) {
+    private void kickOutUser(String username) {
         // 处理session
-        DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
-        DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
-        // 从redis获取sessionId
-        String sessionId = redisTemplate.opsForValue().get(Constants.SESSION_ID + userId);
-        if (StringUtils.isBlank(sessionId)) {
-            return;
-        }
-        RedisSessionDAO redisSessionDAO = (RedisSessionDAO) sessionManager.getSessionDAO();
-        if (null == redisSessionDAO) {
-            return;
-        }
-        String keyPrefix = redisSessionDAO.getKeyPrefix();
-        try {
-            byte[] key = redisSessionDAO.getKeySerializer().serialize(keyPrefix + sessionId);
-            Session session = (Session) redisSessionDAO.getValueSerializer().deserialize(redisSessionDAO.getRedisManager().get(key));
+        DefaultWebSecurityManager securityManager =
+                (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+        DefaultWebSessionManager sessionManager =
+                (DefaultWebSessionManager) securityManager.getSessionManager();
+        // 获取当前已登录的用户session列表
+        Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();
+        String sessionUserName = "";
+        for (Session session : sessions) {
             if (null == session) {
-                return;
+                continue;
             }
+            // 清除该用户以前登录时保存的session，强制退出
             Object attribute = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
             if (attribute == null) {
-                return;
+                continue;
             }
-            Authenticator authc = securityManager.getAuthenticator();
-            // 删除cache，登录成功后重新授权
-            ((LogoutAware) authc).onLogout((PrincipalCollection) attribute);
+            sessionUserName = (String) session.getAttribute("userName");
+            // 判断是否当前用户
+            if (username.equals(sessionUserName)) {
+                Authenticator authc = securityManager.getAuthenticator();
+                // 删除cache，登录成功后重新授权
+                ((LogoutAware) authc).onLogout((PrincipalCollection) attribute);
+            }
 
-        } catch (SerializationException e) {
-            e.printStackTrace();
-            logger.error("清空用户权限出现异常", e);
         }
-
     }
 }

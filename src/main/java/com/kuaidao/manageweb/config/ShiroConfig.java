@@ -137,23 +137,15 @@ public class ShiroConfig {
      * @return
      */
     public RedisManager redisManager() {
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxIdle(Integer.parseInt(maxIdle));
-        jedisPoolConfig.setMinIdle(Integer.parseInt(minIdle));
-        jedisPoolConfig.setMaxTotal(Integer.parseInt(maxActive));
-        jedisPoolConfig.setMaxWaitMillis(Long.parseLong(maxWait));
-        log.info("==========password===============");
-        log.info("==========password===============,{}",password);
         RedisManager redisManager = new RedisManager();
-        JedisPool jedisPool = new JedisPool(jedisPoolConfig,host,port);
-        log.info("==========password0000000===============,{}",password);
+        redisManager.setHost(host);
+        redisManager.setPort(port);
+        // redisManager.setExpire(1800);// 配置缓存过期时间
         redisManager.setTimeout(timeout);
-        redisManager.setJedisPool(jedisPool);
         if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
-            log.info("==========password1111111===============,{}",password);
             redisManager.setPassword(password);
         }
-        //redisManager.setPassword(password);
+        // redisManager.setPassword(password);
         return redisManager;
     }
 
