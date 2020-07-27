@@ -1555,9 +1555,9 @@ var homePageVM=new Vue({
   			this.dialogModifyPwdVisible=true;
   		}
       // 判断是否展示知识库按钮
-      if(isShowDataBase){
-        this.isDataBase=true;
-      }
+      // if(isShowDataBase){
+      //   this.isDataBase=true;
+      // }
       this.searchDataList1();//知识库投资金额list
       this.searchDataList2();//知识库投资区域list
       this.searchDataList3();//知识库意向品类list
