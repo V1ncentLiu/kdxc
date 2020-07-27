@@ -1581,7 +1581,7 @@ var homePageVM=new Vue({
         }
       }
       // 首次登陆显示
-      if(true){
+      if(false){
         this.unionTipdialogVisible=true;
       }
 	},
