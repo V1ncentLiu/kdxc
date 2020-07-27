@@ -38,6 +38,8 @@ public class CmHomePageController {
     private static final Integer SHOW_IKONW_FLAG_YES = 1;
     /** 餐盟登录我知道了弹窗是否展示 -0 不展示 **/
     private static final Integer SHOW_IKONW_FLAG_NO = 0;
+    /** 餐盟电销顾问登录次数 **/
+    private static final Long CM_DXGW_LOGIN_NUM = 1L;
 
     @Value("${ws_url_http}")
     private String wsUrlHttp;
@@ -113,7 +115,7 @@ public class CmHomePageController {
             //顾问首次登录展示我知道了弹框
             if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
                 Long loginNum = redisTemplate.opsForValue().increment(Constants.CM_DXGW_FIRST_LOGIN + user.getId(), 1L);
-                if (loginNum == 1) {
+                if (CM_DXGW_LOGIN_NUM.equals(loginNum)) {
                     showIKonwFlag = SHOW_IKONW_FLAG_YES;
                 }
             }
