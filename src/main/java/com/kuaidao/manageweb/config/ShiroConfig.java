@@ -147,8 +147,10 @@ public class ShiroConfig {
         redisManager.setJedisPool(jedisPool);
         log.info("environment={}",environment);
         if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
+            log.info("aaaaaaa={}","ces");
             redisManager.setPassword(password);
         }
+        log.info("environment={}",password);
         // redisManager.setPassword(password);
         return redisManager;
     }
