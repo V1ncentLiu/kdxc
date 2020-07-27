@@ -14,10 +14,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -45,10 +42,11 @@ public class BusRankingController extends BaseStatisticsController {
      * @return
      */
     @RequestMapping("/busRankingList")
-    public String  busTeamList(HttpServletRequest request){
+    public String  busTeamList(HttpServletRequest request,@RequestParam(required = false) Integer type){
         initSWDQByBusiness(request);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode=curLoginUser.getRoleList().get(0).getRoleCode();
+        request.setAttribute("type",type);
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
             request.setAttribute("curUserId",curLoginUser.getId()+"");
             return "reportBusPerformance/rankingManager";

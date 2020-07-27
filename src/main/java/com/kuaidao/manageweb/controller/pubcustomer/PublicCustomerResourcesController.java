@@ -11,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
@@ -134,7 +131,7 @@ public class PublicCustomerResourcesController {
      * 分页查询
      */
     @RequestMapping("/listPage")
-    public String listPage(HttpServletRequest request) {
+    public String listPage(HttpServletRequest request, @RequestParam(required = false) Integer type) {
         logger.info("------------ 公共客户资源列表 ---------------");
         // 电销组
         List dxzList = new ArrayList();
@@ -209,6 +206,7 @@ public class PublicCustomerResourcesController {
                 getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUSSUB.getCode()));
         long endTime1 = System.currentTimeMillis();
         // System.out.println("数据字典： "+(endTime1-startTime1)+"ms");
+        request.setAttribute("type", type);
         return "pubcustomer/publicCustomer";
     }
 
