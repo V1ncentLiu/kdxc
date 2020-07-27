@@ -267,6 +267,7 @@ var homePageVM=new Vue({
           isshowsearchTip:true,//默认暂无搜索结果
           issearchResult:false,
           dataBaseUrl:dataBaseUrl,//搜索接口地
+          unionTipdialogVisible:false,
 	    }
 	},
  	methods: {
@@ -1578,6 +1579,10 @@ var homePageVM=new Vue({
         }else if(roleCode=="SWJL"){
           this.isRoleCodeSW=true;//商务经理
         }
+      }
+      // 首次登陆显示
+      if(true){
+        this.unionTipdialogVisible=true;
       }
 	},
 	computed: {

@@ -36,9 +36,9 @@
                 <el-button  v-if="consoleBtnVisible" type="primary" @click="openConsolePage" class="f-fl headerBtn current">首页</el-button>
                 <el-button v-if="isRoleCodeDX" type="primary" @click="openLoginClientDialog" class="f-fl headerBtn headerBtn2">{{callTitle}}</el-button>
                 <el-button v-if="isRoleCodeDX" type="primary" @click="openOutboundDialog" class="f-fl headerBtn headerBtn3">主动外呼</el-button>
-                <!-- 新增知识库按钮 -->
-                <el-button type="primary" @click="opendataBase" class="f-fl headerBtn headerBtn4" v-if="isDataBase">知识库</el-button>
-                <!-- 知识库按钮结束 -->
+                <!-- 新增资料库按钮 -->
+                <el-button type="primary" @click="opendataBase" class="f-fl headerBtn headerBtn4" v-if="isDataBase">资料库</el-button>
+                <!-- 资料库按钮结束 -->
                 <!-- 挂断按钮 -->
                 <el-button type="primary" @click="ketianHangup" class="f-fl headerBtn" v-if="isRingOff">挂断</el-button>
             </div>
@@ -170,8 +170,8 @@
         </span>
     </el-dialog>
  <!-- 退出登录 dialog start -->
- <!-- 知识库 dialog start -->
-<el-dialog title="知识库" :visible.sync="dataBasedialogVisible" class="dataBasedialog" :close-on-click-modal="false" width="800px">
+ <!-- 资料库 dialog start -->
+<el-dialog title="资料库" :visible.sync="dataBasedialogVisible" class="dataBasedialog" :close-on-click-modal="false" width="800px">
     <div class="searchIpt">       
         <el-input v-model="searchDatabaseKeyword" placeholder="输入关键词">
             <el-button slot="append" icon="el-icon-search" @click="searchDatabaseFun">搜索</el-button>
@@ -212,7 +212,13 @@
         </div>
     </div>
 </el-dialog>
- <!-- 知识库 dialog end -->
+ <!-- 资料库 dialog end -->
+ <!-- 第一次登陆蒙层提示 -->
+<el-dialog title="" :visible.sync="unionTipdialogVisible" class="unionTipdialog"  width="525px" :close-on-click-modal="false">
+    <img th:src="@{/images/unionSkin/canmengBg.png}" alt="" style="display: block;" v-if="isRoleCodeDX"><!-- 电销顾问图片 -->
+    <img th:src="@{/images/unionSkin/insideBg2.png}" alt="" style="display: block;" v-if="isRoleCodeSW"><!-- 商务经理 -->
+</el-dialog>
+
  
  <!-- 呼叫中心登录 dialog start -->
      <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px" v-dialog-drag>
@@ -487,7 +493,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var dataBaseUrl=[[${dataBaseUrl}]];//搜索接口
-    var isShowDataBase=[[${isShowDataBase}]];//是否展示知识库按钮
+    var isShowDataBase=[[${isShowDataBase}]];//是否展示资料库按钮
     var menuList=[[${menuList}]];//menu list 
     var user=[[${user}]];
     var isUpdatePassword=[[${isUpdatePassword}]];
