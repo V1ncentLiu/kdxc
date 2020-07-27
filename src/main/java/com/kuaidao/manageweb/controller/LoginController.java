@@ -786,7 +786,7 @@ public class LoginController {
 
         } catch (SerializationException e) {
             e.printStackTrace();
-            logger.error("清空用户权限出现异常", e);
+            logger.error("清空用户权限出现异常,用户id:{},异常堆栈:{}", userId, e);
         }
 
     }
