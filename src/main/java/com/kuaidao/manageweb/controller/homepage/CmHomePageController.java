@@ -114,7 +114,7 @@ public class CmHomePageController {
             }
             //顾问首次登录展示我知道了弹框
             if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
-                Long loginNum = redisTemplate.opsForValue().increment(Constants.CM_DXGW_FIRST_LOGIN + user.getId(), 1L);
+                Long loginNum = redisTemplate.opsForValue().increment(Constants.CM_DXGW_FIRST_LOGIN + user.getId());
                 if (CM_DXGW_LOGIN_NUM.equals(loginNum)) {
                     showIKonwFlag = SHOW_IKONW_FLAG_YES;
                 }
