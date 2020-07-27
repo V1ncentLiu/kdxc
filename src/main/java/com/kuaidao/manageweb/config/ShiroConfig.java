@@ -142,17 +142,21 @@ public class ShiroConfig {
         jedisPoolConfig.setMinIdle(Integer.parseInt(minIdle));
         jedisPoolConfig.setMaxTotal(Integer.parseInt(maxActive));
         jedisPoolConfig.setMaxWaitMillis(Long.parseLong(maxWait));
+
+        log.info("startstartstartstartstart");
+        log.info("redismimahost={}",host);
+        log.info("redismima={}",password);
+        log.info("timeout={}",timeout);
+        log.info("jedisPoolConfig={}", JSON.toJSONString(jedisPoolConfig));
         RedisManager redisManager = new RedisManager();
         JedisPool jedisPool = new JedisPool(jedisPoolConfig,host,port);
+        log.info("jedisPool={}",jedisPool);
         redisManager.setTimeout(timeout);
         redisManager.setJedisPool(jedisPool);
        /* if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
             redisManager.setPassword(password);
         }*/
-        log.info("jedisPoolConfig={}", JSON.toJSONString(jedisPoolConfig));
-        log.info("redismimahost={}",host);
-       log.info("redismima={}",password);
-        log.info("timeout={}",timeout);
+        log.info("endendendend");
          redisManager.setPassword(password);
         return redisManager;
     }
