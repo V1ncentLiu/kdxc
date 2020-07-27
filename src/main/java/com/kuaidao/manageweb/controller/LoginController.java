@@ -210,11 +210,11 @@ public class LoginController {
     }
 
 
-    @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
+    @RequestMapping(value = "/login/index", method = { RequestMethod.POST })
     @ResponseBody
     @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
-    public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
-            RedirectAttributes redirectAttributes) throws Exception {
+    public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model, RedirectAttributes redirectAttributes)
+            throws Exception {
         String username = loginReq.getUsername();
         String password = loginReq.getPassword();
         redirectAttributes.addFlashAttribute("username", username);
@@ -233,8 +233,7 @@ public class LoginController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         // TODO使用工具类判断
         if (roleList == null || roleList.size() == 0) {
-            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
-                    "当前账号没有角色");
+            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "当前账号没有角色");
         }
         // TODO修改错误码
         RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -243,13 +242,11 @@ public class LoginController {
             List<String> ipList = roleInfoDTO.getIpList();
             logger.info("login_ip_address{{}},ipList{{}}", ipAddr, ipList);
             if (!ipList.contains(ipAddr)) {
-                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
-                        "当前登录系统IP异常，请联系管理员");
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "当前登录系统IP异常，请联系管理员");
             }
         }
         // 查询登录用户所属业务线放入登录对象中
-        JSONResult<OrganizationDTO> organizationDTOJSONResult =
-                organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
+        JSONResult<OrganizationDTO> organizationDTOJSONResult = organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
         if (JSONResult.SUCCESS.equals(organizationDTOJSONResult.getCode())) {
             OrganizationDTO organizationDTO = organizationDTOJSONResult.getData();
             if (organizationDTO != null && organizationDTO.getBusinessLine() != null) {
@@ -298,32 +295,25 @@ public class LoginController {
                     // 判断账号是否禁用
                     if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
                         errorMessage = "帐号已禁用，请联系管理员修改！";
-                        return new JSONResult<>().fail(
-                                ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                     }
                     // 判断账号是否锁定
                     if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
                         errorMessage = "账号锁定，请联系管理员修改！";
-                        return new JSONResult<>().fail(
-                                ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                     }
                     // 判断密码是否过期。
                     String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
                     if (StringUtils.isNotBlank(passwordExpires)) {
                         long pwdTime = Long.parseLong(passwordExpires);
                         if (isRepwdNotify(user, pwdTime)) {// 是否到密码提醒修改日期
-                            int differentDays =
-                                    DateUtil.differentDays(user.getResetPasswordTime(), new Date());
-                            redirectAttributes.addFlashAttribute("isNotify",
-                                    pwdTime - differentDays);
+                            int differentDays = DateUtil.differentDays(user.getResetPasswordTime(), new Date());
+                            redirectAttributes.addFlashAttribute("isNotify", pwdTime - differentDays);
                         }
                         Date resetpwdTime = user.getResetPasswordTime();
-                        if (date.getTime() - resetpwdTime.getTime() > pwdTime * 24 * 60 * 60
-                                * 1000) {
+                        if (date.getTime() - resetpwdTime.getTime() > pwdTime * 24 * 60 * 60 * 1000) {
                             errorMessage = "账号过期，请忘记密码方式找回！";
-                            return new JSONResult<>().fail(
-                                    ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
-                                    errorMessage);
+                            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                         }
                     }
                 }
@@ -336,8 +326,7 @@ public class LoginController {
                 subject.login(token);
                 SecurityUtils.getSubject().getSession().setTimeout(sessionTimeOut);
                 SecurityUtils.getSubject().getSession().setAttribute("userId", "" + user.getId());
-                SecurityUtils.getSubject().getSession().setAttribute("userName",
-                        "" + user.getUsername());
+                SecurityUtils.getSubject().getSession().setAttribute("userName", "" + user.getUsername());
                 SecurityUtils.getSubject().getSession().setAttribute("user", user);
                 // 登录成功，保存登录状态
                 userInfoReq.setId(user.getId());
@@ -348,8 +337,7 @@ public class LoginController {
                 loginRecord.setIsChangeMachine(SysConstant.NO);
                 // 判断是否是踢下线操作
                 String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
-                String string =
-                        redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
+                String string = redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
                 logger.warn("newSessionId:" + sessionid);
                 logger.warn("OldSessionId:" + string);
                 if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
@@ -364,8 +352,8 @@ public class LoginController {
                             }
                         }).start();
                         // 判断累计次数
-                        List<LoginRecordDTO> findList2 = findLoginRecordList(username, null,
-                                new Date(date.getTime() - 1800000), date, null, SysConstant.YES);
+                        List<LoginRecordDTO> findList2 = findLoginRecordList(username, null, new Date(date.getTime() - 1800000), date, null,
+                                                                             SysConstant.YES);
                         // 30分钟内互踢5次 ，加上这次共6次锁定账号
                         if (findList2 != null && findList2.size() >= 5) {
                             // 锁定账号
@@ -377,12 +365,10 @@ public class LoginController {
                     }
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("sessionid", "" + sessionid);
-                redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(), sessionid, 1,
-                        TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(), sessionid, 1, TimeUnit.DAYS);
                 loginRecordFeignClient.create(loginRecord);
-                List<LoginRecordDTO> findList =
-                        findLoginRecordList(username, null, new Date(date.getTime() - 60000), date,
-                                Constants.LOGIN_STATUS_SUCCESS, null);
+                List<LoginRecordDTO> findList = findLoginRecordList(username, null, new Date(date.getTime() - 60000), date,
+                                                                    Constants.LOGIN_STATUS_SUCCESS, null);
                 // 同一账号 60秒内登陆成功6次
                 if (findList != null && findList.size() >= 6) {
                     // 锁定账号
@@ -391,12 +377,10 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    return new JSONResult<>()
-                            .fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                    return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                 }
-                List<LoginRecordDTO> findList2 =
-                        findLoginRecordList(username, null, new Date(date.getTime() - 600000), date,
-                                Constants.LOGIN_STATUS_SUCCESS, null);
+                List<LoginRecordDTO> findList2 = findLoginRecordList(username, null, new Date(date.getTime() - 600000), date,
+                                                                     Constants.LOGIN_STATUS_SUCCESS, null);
                 // 同一账号 10分钟内登陆成功20次
                 if (findList2 != null && findList2.size() >= 20) {
                     // 锁定账号
@@ -405,8 +389,7 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    return new JSONResult<>()
-                            .fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                    return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttp", wsUrlHttp);
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
@@ -437,8 +420,7 @@ public class LoginController {
             // 累计当日错误次数
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
             String format = simpleDateFormat.format(date);
-            String string = redisTemplate.opsForValue()
-                    .get(Constants.PASSWORD_ERROR + user.getId() + format);
+            String string = redisTemplate.opsForValue().get(Constants.PASSWORD_ERROR + user.getId() + format);
             if (string != null) {
                 int parseInt = Integer.parseInt(string);
                 if (parseInt >= 5) {
@@ -456,23 +438,18 @@ public class LoginController {
                         errorMessage = "密码错误，您还可以尝试2次";
                     }
                 }
-                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format,
-                        Integer.toString(parseInt + 1), 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format, Integer.toString(parseInt + 1), 1, TimeUnit.DAYS);
             } else {
-                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format,
-                        "1", 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format, "1", 1, TimeUnit.DAYS);
             }
             // 判断密码错误次数 是否需要提示验证码
-            List<LoginRecordDTO> findList =
-                    findLoginRecordList(null, ipAddr, new Date(date.getTime() - 60000), date,
-                            Constants.LOGIN_STATUS_PASSWORD_ERROR, null);
+            List<LoginRecordDTO> findList = findLoginRecordList(null, ipAddr, new Date(date.getTime() - 60000), date,
+                                                                Constants.LOGIN_STATUS_PASSWORD_ERROR, null);
             if (findList != null && findList.size() >= 3) {
-                redisTemplate.opsForValue().set(Constants.SHOW_CAPTCHA + ipAddr,
-                        SysConstant.YES.toString(), 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.SHOW_CAPTCHA + ipAddr, SysConstant.YES.toString(), 1, TimeUnit.DAYS);
             }
         }
-        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
-                errorMessage);
+        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
     }
 
     /**

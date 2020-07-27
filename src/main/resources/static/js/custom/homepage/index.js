@@ -267,6 +267,7 @@ var homePageVM=new Vue({
           isshowsearchTip:true,//默认暂无搜索结果
           issearchResult:false,
           dataBaseUrl:dataBaseUrl,//搜索接口地
+          unionTipdialogVisible:false,
 	    }
 	},
  	methods: {
@@ -1477,7 +1478,21 @@ var homePageVM=new Vue({
     	openConsolePage(){//点击控制台button 事件
     		this.defaultActive= null;
     		$('.menu').css("color","rgb(255, 255, 255)");
-    		var dataUrl = "/console/console/index?type=1";
+        var dataUrl=""
+        if(user){
+          var roleCode=user.roleCode;
+          console.log(roleCode);
+          if(roleCode=="DXCYGW"){//电销顾问
+            this.isRoleCodeDX=true;//电销顾问
+            dataUrl = "/console/console/index?type=1";
+          }else if(roleCode=="SWJL"){
+            this.isRoleCodeSW=true;//商务经理
+            dataUrl = "/console/console/index?type=1";
+          }else{
+            dataUrl = "/console/console/index";
+          }
+        }
+    		// var dataUrl = "/console/console/index?type=1";
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
 			});
@@ -1564,6 +1579,10 @@ var homePageVM=new Vue({
         }else if(roleCode=="SWJL"){
           this.isRoleCodeSW=true;//商务经理
         }
+      }
+      // 首次登陆显示
+      if(showIKonwFlag==1){
+        this.unionTipdialogVisible=true;
       }
 	},
 	computed: {
