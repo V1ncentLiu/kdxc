@@ -97,7 +97,7 @@ public class Constants {
     /** redis前缀 看板计数-电销顾问计数-今日 **/
     public static final String NOTTODAY_TELE_SALE = "huiju:dashboard:nottodaytelesale:";
     /** 餐盟首次登录 **/
-    public static final String  CM_FIRST_LOGIN = "huiju:sys:cmfirstlogin:";
+    public static final String  CM_DXGW_FIRST_LOGIN = "huiju:sys:cmfirstlogin:";
     /**
      * 返回码成功
      */

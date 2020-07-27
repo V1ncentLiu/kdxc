@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.manageweb.constant.Constants;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +34,11 @@ public class CmHomePageController {
 
     private static Logger logger = LoggerFactory.getLogger(CmHomePageController.class);
 
+    /** 餐盟登录我知道了弹窗是否展示 -1 展示 **/
+    private static final Integer SHOW_IKONW_FLAG_YES = 1;
+    /** 餐盟登录我知道了弹窗是否展示 -0 不展示 **/
+    private static final Integer SHOW_IKONW_FLAG_NO = 0;
+
     @Value("${ws_url_http}")
     private String wsUrlHttp;
     @Value("${spring.rabbitmq.username}")
@@ -42,7 +49,8 @@ public class CmHomePageController {
     private String wsUrlHttps;
     @Value("${dataBaseUrl}")
     private String dataBaseUrl;
-
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
     @Autowired
     DeptCallSetFeignClient deptCallSetFeignClient;
 
@@ -89,7 +97,8 @@ public class CmHomePageController {
             }
 
         }
-
+        //默认不展示我知道了弹框
+        Integer showIKonwFlag = SHOW_IKONW_FLAG_NO;
         // 判断是否显示控制台按钮
         List<RoleInfoDTO> roleList = user.getRoleList();
         boolean isShowConsoleBtn = false;
@@ -101,7 +110,15 @@ public class CmHomePageController {
                 // 电销顾问 电销总监 商务经理 商务总监
                 isShowConsoleBtn = true;
             }
+            //顾问首次登录展示我知道了弹框
+            if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+                Long loginNum = redisTemplate.opsForValue().increment(Constants.CM_DXGW_FIRST_LOGIN + user.getId(), 1L);
+                if (loginNum == 1) {
+                    showIKonwFlag = SHOW_IKONW_FLAG_YES;
+                }
+            }
         }
+        request.setAttribute("showIKonwFlag", showIKonwFlag);
         request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
         boolean isShowDataBase = false;
         if ((user.getBusinessLine() != null && user.getBusinessLine() == BusinessLineConstant.SHANGJI) || roleCode.equals(RoleCodeEnum.GLY.name())) {
@@ -109,6 +126,9 @@ public class CmHomePageController {
         }
         request.setAttribute("isShowDataBase", isShowDataBase);
         request.setAttribute("dataBaseUrl", dataBaseUrl);
+
+
+
         return "unionIndex";
     }
 
