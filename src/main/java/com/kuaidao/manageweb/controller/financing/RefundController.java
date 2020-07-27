@@ -2,11 +2,16 @@ package com.kuaidao.manageweb.controller.financing;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.enums.CellDataTypeEnum;
+import com.alibaba.excel.metadata.CellData;
+import com.alibaba.excel.metadata.Head;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.google.common.collect.Lists;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -19,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -744,8 +750,12 @@ public class RefundController {
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = EasyExcel.write(outputStream, RefundExportModel.class).build();
+            Integer[] widthArr = new Integer[] {5200,5200,5200,4000,5200,5200,4000,4000,2600,5200,4000,4000,4000,4000,4000,5200,5200,5200};
+            Map<Integer, Integer> columnWidthMap = new HashMap<>();
+
             //实例化表单
             WriteSheet writeSheet = EasyExcel.writerSheet(0, "退款导出" ).build();
+            writeSheet.setColumnWidthMap(ExcelUtil.setColunmWidth(widthArr));
             excelWriter.write(refundExportModels, writeSheet);
             excelWriter.finish();
         }
@@ -798,11 +808,15 @@ public class RefundController {
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = EasyExcel.write(outputStream, RebateExportModel.class).build();
-
+            Integer[] widthArr = new Integer[] {5200,5200,5200,4000,5200,5200,4000,4000,2600,5200,4000,4000,4000,4000,4000,5200,5200,5200};
             //实例化表单
             WriteSheet writeSheet = EasyExcel.writerSheet(0, "返款导出" ).build();
+            Map<Integer, Integer> columnWidthMap = new HashMap<>();
+            writeSheet.setColumnWidthMap(ExcelUtil.setColunmWidth(widthArr));
             excelWriter.write(refundExportModels, writeSheet);
             excelWriter.finish();
         }
     }
+
+
 }
