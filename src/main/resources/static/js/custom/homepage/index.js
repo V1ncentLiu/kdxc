@@ -262,7 +262,7 @@ var homePageVM=new Vue({
           dataBaseInvestAreaVal: "0",//默认是不限
           dataBaseCategoryVal: "0",//默认是不限
           dataBaseResultArr:[],//搜索结果
-          isshowsearchTip:true,//默认暂无搜索结果
+          isshowsearchTip:false,//默认不显示暂无搜索结果
           issearchResult:false,
           dataBaseUrl:dataBaseUrl,//搜索接口地
 	    }
@@ -1536,7 +1536,15 @@ var homePageVM=new Vue({
 			
 			return isPass;
 		
-	}
+	},
+  closeDataBasedialog(){//关闭知识库清空搜索框和搜索结果,默认显示不限
+    this.searchDatabaseKeyword="";
+    this.dataBaseInvestMoneyVal="0";
+    this.dataBaseInvestAreaVal="0";
+    this.dataBaseCategoryVal="0";
+    this.isshowsearchTip=false;
+    this.issearchResult=false;
+  }
     
          
 	},
