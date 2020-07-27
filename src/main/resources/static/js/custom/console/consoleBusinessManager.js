@@ -2147,7 +2147,7 @@ var mainDivVM = new Vue({
             mainDivVM.visitCityArr = response.data.data;
         });
         // 获取url地址
-        var type=getQueryString("type");
+        var type=getQueryString("sourceType");
         console.log(type)
         if(type=="1"){
             // 隐藏面包屑

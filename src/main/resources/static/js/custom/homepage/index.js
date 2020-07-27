@@ -268,6 +268,7 @@ var homePageVM=new Vue({
           issearchResult:false,
           dataBaseUrl:dataBaseUrl,//搜索接口地
           unionTipdialogVisible:false,
+          isTipbgShow:false,//默认不显示提示框图片2
 	    }
 	},
  	methods: {
@@ -1484,12 +1485,12 @@ var homePageVM=new Vue({
           console.log(roleCode);
           if(roleCode=="DXCYGW"){//电销顾问
             this.isRoleCodeDX=true;//电销顾问
-            dataUrl = "/console/console/index?type=1";
+            dataUrl = "/console/console/index?sourceType=1";
           }else if(roleCode=="SWJL"){
             this.isRoleCodeSW=true;//商务经理
-            dataUrl = "/console/console/index?type=1";
+            dataUrl = "/console/console/index?sourceType=1";
           }else{
-            dataUrl = "/console/console/index";
+            dataUrl = "/console/console/index?type=1";
           }
         }
     		// var dataUrl = "/console/console/index?type=1";
@@ -1553,7 +1554,14 @@ var homePageVM=new Vue({
 			
 			return isPass;
 		
-	}
+	},
+  showTipbg2(){//展示图片2和关闭按钮
+    this.isTipbgShow=true;    
+    this.$el.querySelector('.unionTipdialog .el-dialog__headerbtn').style.display="block";
+  },
+  closeUnionTipdialog(){//关闭提示框
+    this.unionTipdialogVisible=false;
+  }
     
          
 	},

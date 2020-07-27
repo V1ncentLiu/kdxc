@@ -567,7 +567,7 @@ var mainDivVM = new Vue({
         this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
         this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
         // 获取url地址
-        var type=getQueryString("type");
+        var type=getQueryString("sourceType");
         console.log(type)
         if(type=="1"){
             // 隐藏面包屑
