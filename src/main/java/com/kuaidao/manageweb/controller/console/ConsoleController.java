@@ -13,10 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -147,7 +144,7 @@ public class ConsoleController {
      * @return
      */
     @RequestMapping("/index")
-    public String index(String type, HttpServletRequest request) {
+    public String index(String type, @RequestParam(required = false) Integer sourceType, HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
@@ -270,6 +267,7 @@ public class ConsoleController {
          * path="console/consoleBusinessMajordomo"; }
          */
         request.setAttribute("type", type);
+        request.setAttribute("sourceType", sourceType);
         return path;
     }
 
