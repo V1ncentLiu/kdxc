@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.mgt.SecurityManager;
@@ -148,8 +149,10 @@ public class ShiroConfig {
        /* if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
             redisManager.setPassword(password);
         }*/
+        log.info("jedisPoolConfig={}", JSON.toJSONString(jedisPoolConfig));
         log.info("redismimahost={}",host);
        log.info("redismima={}",password);
+        log.info("timeout={}",timeout);
          redisManager.setPassword(password);
         return redisManager;
     }
