@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::link},~{})">
+    <title>我的工作台-电销顾问</title>
+    <link rel="stylesheet" th:href="@{/css/custom/console/console.css}">
+</head>
+<body>
+<div id="mainDiv"  class="mainPadding consoleStyle" style="display: none;">
+    <table-uniontabtemplate :param="dataUrlParam"></table-uniontabtemplate>
+    <el-row class="mainWhiteBg mainWhitePadding marginB20">
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            border
+            :data="dataTable" 
+            @row-dblclick="customerEidt"
+            >
+            <el-table-column align="center" type="index" width="55" prop="clueId" label="序号"></el-table-column>
+            <el-table-column align="center" prop="cusLevelName" label="客户级别" width="120"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号" width="150">
+                <!-- <template slot-scope="scope">
+                    {{scope.row.phone}}
+                    <input type='hidden'>
+                    <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
+                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                </template> -->
+                <template slot-scope="scope">
+                    {{scope.row.phone}}
+                    <input type='hidden'>
+                    <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="isTrack" label="跟进记录"  align="center" width="120">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isTrack===1"> 
+                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
+                        </div> 
+                    </template>
+            </el-table-column>
+            <el-table-column align="center" prop="customerStatusName" label="客户状态" width="120"></el-table-column>
+            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源" width="120">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isRepeatPhone === 1"> 
+                            <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                        </div> 
+                    </template>
+            </el-table-column>
+            <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
+            <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="140"></el-table-column>
+            <el-table-column align="center" prop="assignTime" label="分配时间" width="140" sortable></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="initTableData"></table-pagination>
+    </el-row>
+    <!-- 今日待跟进客户资源 重复手机号资源 -->
+    <!--<el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"    :visible.sync="repeatPhonesDialog">-->
+        <!--<el-table-->
+            <!--ref="singleTable"-->
+            <!--tooltip-effect="dark"-->
+            <!--style="width: 100%"-->
+            <!--border-->
+            <!--:data="repeatPhonesTable"-->
+            <!--&gt;-->
+            <!--<el-table-column align="center" type="index" width="55" label="序号"></el-table-column>-->
+            <!--<el-table-column align="center" prop="createTime" label="资源创建时间" width="170"></el-table-column>-->
+            <!--<el-table-column align="center" prop="phone" label="联系方式" width="170"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>-->
+            <!--<el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>-->
+            <!--<el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>-->
+        <!--</el-table>-->
+    <!--</el-dialog>-->
+
+    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1160px">
+        <div v-show="showPhoneTable">
+            <span>手机号<span style="color: red">(1)</span>{{phone}}重复手机号资源</span>
+            <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable2">
+            <span>手机号<span style="color: red">(2)</span>{{phone2}}重复手机号资源</span>
+            <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable3">
+            <span>手机号<span style="color: red">(3)</span>{{phone3}}重复手机号资源</span>
+            <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable4">
+            <span>手机号<span style="color: red">(4)</span>{{phone4}}重复手机号资源</span>
+            <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable5">
+            <span>手机号<span style="color: red">(5)</span>{{phone5}}重复手机号资源</span>
+            <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+    </el-dialog>
+     
+    <!-- 跟进记录 -->
+    <dialog-tracking :param="trackingParam"></dialog-tracking>
+    <!-- 快速领取新资源 重复手机号资源-->
+    <el-dialog :title="dailogTitleType+'重复资源信息'" :visible.sync="repeatPhonesDialog2" width="70%">
+        <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="170"></el-table-column>
+            <el-table-column align="center" prop="clueId" label="资源id" width="200"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="150"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="150"></el-table-column>  
+            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
+        </el-table>
+    </el-dialog>
+    <el-dialog :title="receiveTitle" :visible.sync="receiveDialog">
+        <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="receiveTable">
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column>
+        </el-table>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+// var dashboardTelSale =[[${dashboardTelSale}]];
+</script>
+<!-- <script th:src="@{/js/custom/console/consoleTelemarketing.js?v=1.0.0}"></script> -->
+
+</body>
+</html>

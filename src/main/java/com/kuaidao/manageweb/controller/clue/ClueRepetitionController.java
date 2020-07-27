@@ -88,7 +88,7 @@ public class ClueRepetitionController {
      * @return
      */
     @RequestMapping("/queryRepeatPage")
-    public String queryRepeatPage(HttpServletRequest request) {
+    public String queryRepeatPage(HttpServletRequest request , @RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
      // 添加重单字段限制的业务线
@@ -102,6 +102,7 @@ public class ClueRepetitionController {
         request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());
+        request.setAttribute("type", type);
         return "clue/repetition/customerrePetitionList";
     }
 
