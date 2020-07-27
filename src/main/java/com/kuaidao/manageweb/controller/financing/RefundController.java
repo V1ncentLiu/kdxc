@@ -750,7 +750,7 @@ public class RefundController {
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = EasyExcel.write(outputStream, RefundExportModel.class).build();
-            Integer[] widthArr = new Integer[] {5200,5200,5200,4000,5200,5200,4000,4000,2600,5200,4000,4000,4000,4000,4000,5200,5200,5200};
+            Integer[] widthArr = new Integer[] {5200,3500,5200,4000,5200,5200,4000,4000,2600,5200,4000,4000,4000,4000,4000,5200,5200,5200};
             Map<Integer, Integer> columnWidthMap = new HashMap<>();
 
             //实例化表单
@@ -808,7 +808,7 @@ public class RefundController {
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = EasyExcel.write(outputStream, RebateExportModel.class).build();
-            Integer[] widthArr = new Integer[] {5200,5200,5200,4000,5200,5200,4000,4000,2600,5200,4000,4000,4000,4000,4000,5200,5200,5200};
+            Integer[] widthArr = new Integer[] {5200,3500,5200,4000,5200,5200,4000,4000,2600,5200,4000,4000,4000,4000,4000,5200,5200,5200};
             //实例化表单
             WriteSheet writeSheet = EasyExcel.writerSheet(0, "返款导出" ).build();
             Map<Integer, Integer> columnWidthMap = new HashMap<>();
