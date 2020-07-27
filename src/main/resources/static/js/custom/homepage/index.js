@@ -1561,8 +1561,7 @@ var homePageVM=new Vue({
   },
   closeUnionTipdialog(){//关闭提示框
     this.unionTipdialogVisible=false;
-  }
-	},
+  },
   closeDataBasedialog(){//关闭知识库清空搜索框和搜索结果,默认显示不限
     this.searchDatabaseKeyword="";
     this.dataBaseInvestMoneyVal="0";
@@ -1574,7 +1573,7 @@ var homePageVM=new Vue({
 
          
 	},
- 	created() {  
+ 	created() {
    		document.body.removeChild(document.getElementById('Loading'));
   		this.messageCount();
   		if(isUpdatePassword=="1"){
