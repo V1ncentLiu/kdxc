@@ -2,8 +2,6 @@ package com.kuaidao.manageweb.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
@@ -24,7 +22,6 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
-@Slf4j
 public class ShiroConfig {
 
     @Value("${spring.redis.host}")
@@ -145,13 +142,10 @@ public class ShiroConfig {
         JedisPool jedisPool = new JedisPool(jedisPoolConfig,host,port);
         redisManager.setTimeout(timeout);
         redisManager.setJedisPool(jedisPool);
-        log.info("environment={}",environment);
-        if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
-            log.info("aaaaaaa={}","ces");
+       /* if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
             redisManager.setPassword(password);
-        }
-        log.info("environment={}",password);
-        // redisManager.setPassword(password);
+        }*/
+         redisManager.setPassword(password);
         return redisManager;
     }
 
