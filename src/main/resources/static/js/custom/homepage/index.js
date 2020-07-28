@@ -1505,6 +1505,7 @@ var homePageVM=new Vue({
     			});
           // 给餐盟首页加高亮
           this.isCurrent=true;
+          // 给左侧餐盟菜单取消高亮
           this.$el.querySelector('.elAsideCm .is-active').classList.remove("is-active");
 
     	},
