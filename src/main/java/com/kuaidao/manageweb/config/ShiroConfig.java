@@ -140,7 +140,7 @@ public class ShiroConfig {
         jedisPoolConfig.setMaxTotal(Integer.parseInt(maxActive));
         jedisPoolConfig.setMaxWaitMillis(Long.parseLong(maxWait));
         RedisManager redisManager = new RedisManager();
-        JedisPool jedisPool = null;
+        JedisPool jedisPool;
         if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
             jedisPool = new JedisPool(jedisPoolConfig,host,port,timeout,password);
         }else{
