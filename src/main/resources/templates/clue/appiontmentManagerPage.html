@@ -4,13 +4,13 @@
     <title>后台管理系统</title>
 </head>
 <body>
-<div id="appiontmentManage" class="appiontmentManage mainPadding" style="display: none;">
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+<div id="appiontmentManage" class="appiontmentManage mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>邀约来访记录</el-breadcrumb-item>
     </el-breadcrumb>
-
+    <table-uniontabtemplate :param="dataUrlParam" v-else></table-uniontabtemplate>
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="aggregation:appiontmentManager:edit">
@@ -536,6 +536,43 @@
   var appiontmentVM = new Vue({
     el: '#appiontmentManage',
     data: {
+        dataUrlParam:{
+            dataUrlArr:[{
+                isActive:false,
+                name:"未签约客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=1",                
+            },{
+                isActive:false,
+                name:"今日新增",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=2"
+            },
+            {
+                isActive:false,
+                name:"今日回访",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday"
+            },
+            {
+                isActive:false,
+                name:"自建客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=3"
+            },
+            {
+                isActive:false,
+                name:"重单客户",
+                url:"/clue/cluerepetition/queryRepeatPage?type=1"
+            },
+            {
+                isActive:true,
+                name:"邀约客户",
+                url:"/clue/appiontment/initAppiontmentList?type=1"
+            },
+            {
+                isActive:false,
+                name:"已签约客户",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
+            }]
+        },
+        isElBreadcrumb:true,
       paginationShow: false,
       isShow:false,
       btnDisabled: false,
@@ -1422,6 +1459,12 @@
       this.initColumn();
       this.searchTable();
       this.currentBusArea();
+        // 判断是否显示面包屑
+        var type=getQueryString("type");
+        if(type==1){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+        }
 
     },
     mounted(){

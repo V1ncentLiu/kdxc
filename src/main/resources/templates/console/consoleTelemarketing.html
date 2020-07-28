@@ -8,7 +8,7 @@
 <body>
 <div id="mainDiv"  class="mainPadding consoleStyle" style="display: none;">
     <!-- 工作台 -->
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的工作台</el-breadcrumb-item>
@@ -46,10 +46,12 @@
                 </div>
             </li>
             <li class="boardStyle0 bg3">
-                <div class="cnt">
+                <div class="cnt" style="position: relative;">
                     <div class="toptitle">今日通话时长</div>
                     <div class="con hms" v-if="todayCallDuration !=null && todayCallDuration>0"><span>{{todayTalkTimeh}}</span><i>时</i><span>{{todayTalkTimem}}</span><i>分</i><span>{{todayTalkTimes}}</span><i>秒</i></div> 
-                    <div class="con hms" v-else><span style="float: left;">--</span><em style="float: left;height: 78px;line-height: 87px;">时</em><span style="float: left;">--</span><em style="float: left;height: 78px;line-height: 87px;">分</em><span style="float: left;">--</span><em style="float: left;height: 78px;line-height: 87px;">秒</em></div> 
+                    <div class="con hms" v-else><span style="float: left;">--</span><em style="float: left;height: 78px;line-height: 87px;">时</em><span style="float: left;">--</span><em style="float: left;height: 78px;line-height: 87px;">分</em><span style="float: left;">--</span><em style="float: left;height: 78px;line-height: 87px;">秒</em></div>
+                    <!-- 餐盟新增按钮  -->
+                    <a href="/call/callRecord/myCallRecord" class="moreRecordBtn" v-if="!isElBreadcrumb">更多通话记录<i></i></a>
                 </div>
             </li>
         </ul>
@@ -232,14 +234,14 @@
     </el-row>
     <!-- 工作台结束 -->
     <!-- 今日待跟进客户资源 -->
-    <div class="title">
+    <div class="title" v-if="isElBreadcrumb">
         <div class="leftbox f-fl">今日待跟进客户资源</div>
         <div class="rightbox f-fr" @click="gotoMyCustomer">
             <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
             <span class="f-fr">进入我的客户</span>
         </div>
     </div>
-    <el-row class="mainWhiteBg mainWhitePadding marginB20">
+    <el-row class="mainWhiteBg mainWhitePadding marginB20" v-if="isElBreadcrumb">
         <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
@@ -524,7 +526,7 @@
         </div>
     </el-dialog>
     <!-- 快速领取资源 -->
-    <el-row>
+    <el-row v-if="isElBreadcrumb">
         <div class="title">
             <div class="leftbox f-fl">快速领取资源</div>
             <div class="rightbox f-fr" @click="gotoPublicCustomer">
