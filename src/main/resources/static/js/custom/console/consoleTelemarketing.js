@@ -536,6 +536,17 @@ var mainDivVM = new Vue({
         this.todayTalkTimem = this.fomatSecondsm(dashboardTelSale.todayCallDuration);
         this.todayTalkTimes = this.fomatSecondss(dashboardTelSale.todayCallDuration);
         this.totalPerformance = dashboardTelSale.cumulativeNonDrinkPerformance*1.5+dashboardTelSale.cumulativePerformance;
+        // 今日待跟进客户资源
+        //初始化数据列表
+        this.initTableData();        
+        // 获取url地址
+        var type=getQueryString("sourceType");
+        console.log(type)
+        if(type==1){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+            
+        }
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';

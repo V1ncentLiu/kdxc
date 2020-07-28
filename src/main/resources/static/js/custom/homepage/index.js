@@ -254,8 +254,8 @@ var homePageVM=new Vue({
           isRingOff:false,//默认不显示挂断按钮
     			ketianInBoundPhone:'',//科天来电手机号
 
-          isDataBase:false,//默认不展示知识库按钮
-          dataBasedialogVisible:false,//知识库弹窗默认不显示
+          isDataBase:false,//默认不展示资料库按钮
+          dataBasedialogVisible:false,//资料库弹窗默认不显示
           searchDatabaseKeyword:'',//搜索关键词
           dataBaseInvestMoneyArr:[],//投资金额list
           dataBaseInvestAreaArr:[],//投资区域list
@@ -1562,7 +1562,7 @@ var homePageVM=new Vue({
   closeUnionTipdialog(){//关闭提示框
     this.unionTipdialogVisible=false;
   },
-  closeDataBasedialog(){//关闭知识库清空搜索框和搜索结果,默认显示不限
+  closeDataBasedialog(){//关闭资料库清空搜索框和搜索结果,默认显示不限
     this.searchDatabaseKeyword="";
     this.dataBaseInvestMoneyVal="0";
     this.dataBaseInvestAreaVal="0";
@@ -1579,13 +1579,13 @@ var homePageVM=new Vue({
   		if(isUpdatePassword=="1"){
   			this.dialogModifyPwdVisible=true;
   		}
-      // 判断是否展示知识库按钮
+      // 判断是否展示资料库按钮
       if(isShowDataBase){
         this.isDataBase=true;
       }
-      this.searchDataList1();//知识库投资金额list
-      this.searchDataList2();//知识库投资区域list
-      this.searchDataList3();//知识库意向品类list
+      this.searchDataList1();//资料库投资金额list
+      this.searchDataList2();//资料库投资区域list
+      this.searchDataList3();//资料库意向品类list
       // 通过用户信息判断餐盟菜单显示
       if(user){
         var roleCode=user.roleCode;
