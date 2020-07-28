@@ -1506,7 +1506,7 @@ var homePageVM=new Vue({
           // 给餐盟首页加高亮
           this.isCurrent=true;
           // 给左侧餐盟菜单取消高亮
-          this.$el.querySelector('.elAsideCm .el-menu-item.is-active').classList.remove("is-active");
+          // this.$el.querySelector('.elAsideCm .el-menu-item.is-active').classList.remove("is-active");
     	},
     	validClientNo(cno){//验证坐席是否属于自己
     			var isPass =false;
