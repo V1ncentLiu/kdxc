@@ -327,12 +327,13 @@ public class LoginController {
                         // 如果是踢下线操作1-判断累计次数，是否锁定账号 2-发送下线通知
                         loginRecord.setIsChangeMachine(SysConstant.YES);
                         // 发送下线通知
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                amqpTemplate.convertAndSend("amq.topic", string, string);
-                            }
-                        }).start();
+//TODO 记得放开 yangbiao
+//                        new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                amqpTemplate.convertAndSend("amq.topic", string, string);
+//                            }
+//                        }).start();
                         // 判断累计次数
                         List<LoginRecordDTO> findList2 = findLoginRecordList(username, null,
                                 new Date(date.getTime() - 1800000), date, null, SysConstant.YES);
