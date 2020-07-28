@@ -1,6 +1,27 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        dataUrlParam:{
+            dataUrlArr:[{
+                isActive:true,
+                name:"待处理客户",
+                url:"/aggregation/businessMyCustomer/initPendingList",                
+            },{
+                isActive:false,
+                name:"未补齐尾款",
+                url:"/aggregation/businessMyCustomer/listPage?type=1",                
+            },{
+                isActive:false,
+                name:"未签约",
+                url:"/aggregation/businessMyCustomer/listPage?type=2"
+            },
+            {
+                isActive:false,
+                name:"已签约",
+                url:"/aggregation/businessMyCustomer/listPage?type=3"
+            }]
+        },
+        isElBreadcrumb:true,
         signTabIndex:0,//点击编辑签约单tab的index
         signTitle:'',    
         responseData:[],  
@@ -605,6 +626,9 @@ var mainDivVM = new Vue({
     },
     
     methods: {
+        createClueData(){
+            window.location.href='/aggregation/businessMyCustomer/createClue';
+        },
         getShopTypeEdit(value){
             var param = {};
             param.id = value;
@@ -2122,6 +2146,14 @@ var mainDivVM = new Vue({
         axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
             mainDivVM.visitCityArr = response.data.data;
         });
+        // 获取url地址
+        var type=getQueryString("sourceType");
+        console.log(type)
+        if(type=="1"){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+            
+        }
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';

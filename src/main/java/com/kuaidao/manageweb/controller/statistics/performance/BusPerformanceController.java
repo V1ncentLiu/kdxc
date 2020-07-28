@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
@@ -50,7 +51,7 @@ public class BusPerformanceController extends BaseStatisticsController {
 
     @RequiresPermissions("statistics:busperformance:view")
     @RequestMapping("/groupList")
-    public String teamList(HttpServletRequest request){
+    public String teamList(HttpServletRequest request,@RequestParam(required = false) Integer type){
         initBugOrg(request);
         // 签约店型
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
@@ -62,7 +63,7 @@ public class BusPerformanceController extends BaseStatisticsController {
         if(line!=null && 3==line){
             proType(request);
         }
-
+        request.setAttribute("type",type);
         if(RoleCodeEnum.SWJL.name().equals(roleCode)){
             initBaseDto(request,null,curLoginUser.getOrgId(),curLoginUser.getId(),null,null,null,null,null);
             return "reportBusPerformance/performanceManager";

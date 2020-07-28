@@ -13,10 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -147,7 +144,7 @@ public class ConsoleController {
      * @return
      */
     @RequestMapping("/index")
-    public String index(String type, HttpServletRequest request) {
+    public String index(String type, @RequestParam(required = false) Integer sourceType, HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
@@ -269,7 +266,8 @@ public class ConsoleController {
          *
          * path="console/consoleBusinessMajordomo"; }
          */
-
+        request.setAttribute("type", type);
+        request.setAttribute("sourceType", sourceType);
         return path;
     }
 
@@ -278,7 +276,7 @@ public class ConsoleController {
     /**
      * 查询公告 --不 带分页
      *
-     * @param queryDTO
+     * @param
      * @return
      */
     @PostMapping("/queryAnnReceiveNoPage")
@@ -363,7 +361,7 @@ public class ConsoleController {
     /***
      * 控制台 今日邀约单 不包括 删除的
      *
-     * @param teleConsoleReqDTO
+     * @param
      * @return
      */
     @PostMapping("/countTodayAppiontmentNum")
@@ -830,7 +828,7 @@ public class ConsoleController {
     /**
      * 根据机构和角色类型获取用户
      *
-     * @param orgDTO
+     * @param
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
@@ -846,7 +844,7 @@ public class ConsoleController {
     /**
      * 获取所有商务经理（组织名-大区名）
      *
-     * @param orgDTO
+     * @param
      * @return
      */
     private List<Map<String, Object>> getAllSaleList() {

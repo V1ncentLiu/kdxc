@@ -5,11 +5,12 @@
 </head>
 <body>
     <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
-        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
             <el-breadcrumb-item>数据报表</el-breadcrumb-item>
             <el-breadcrumb-item>商务业绩排名<span style="color:red;">（暂时支持每天更新一次数据，更新时间：每天早上7:00）</span></el-breadcrumb-item>
         </el-breadcrumb>
+        <p else-if="isElBreadcrumb" class="marginB20"><span style="color:red;">（从0点开始，每2小时更新一次数据，0点更新，2点更新，4点更新，依次类推）</span></p>
         <el-row class="marginB20">
             <el-button type="primary" @click="searchMonth">月累计排名</el-button>
             <el-button type="success" @click="searchYear">年累计排名</el-button>
@@ -126,6 +127,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                isElBreadcrumb:true,
                 activeName: 'second',
                 loading: false,
                 isShowDept: false,
@@ -374,6 +376,13 @@
             this.isShowDept = true;
         }
 		this.searchTable();
+        // 判断是否显示面包屑
+        var type=getQueryString("type");
+        console.log(type)
+        if(type=="1"){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;                
+        }
 	},
 	mounted(){
         document.getElementById('maindiv').style.display = 'block';

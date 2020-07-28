@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.constant.PayDetailConstant;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailListDTO;
@@ -137,7 +134,7 @@ public class PayDetaiController {
      */
     @RequestMapping("/initPayDetailList")
     @RequiresPermissions("aggregation:payDetailManager:view")
-    public String initPayDetailList(HttpServletRequest request) {
+    public String initPayDetailList(HttpServletRequest request,@RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         String ownOrgId = "";
@@ -210,6 +207,7 @@ public class PayDetaiController {
         request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());
+        request.setAttribute("type",type);
         return "paydetail/payDetailManagerPage";
     }
 

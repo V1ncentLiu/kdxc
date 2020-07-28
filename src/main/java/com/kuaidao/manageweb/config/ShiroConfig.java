@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
 public class ShiroConfig {
@@ -31,6 +33,20 @@ public class ShiroConfig {
 
     @Value("${spring.redis.password}")
     private String password;
+
+    @Value("${spring.redis.jedis.shiro.pool.maxIdle}")
+    private String maxIdle;
+
+    @Value("${spring.redis.jedis.shiro.pool.minIdle}")
+    private String minIdle;
+
+    @Value("${spring.redis.jedis.shiro.pool.maxActive}")
+    private String maxActive;
+
+    @Value("${spring.redis.jedis.shiro.pool.maxWait}")
+    private String maxWait;
+
+
     /**
      * 运行环境
      */
@@ -52,6 +68,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/monitor/prometheus", "anon");
         filterChainDefinitionMap.put("/login/resetPwd", "anon");
         filterChainDefinitionMap.put("/merchantLogin/resetPwd", "anon");
+        filterChainDefinitionMap.put("/cmLogin/resetPwd", "anon");
         filterChainDefinitionMap.put("/login/index", "anon");
         filterChainDefinitionMap.put("/login/sendmsg", "anon");
         filterChainDefinitionMap.put("/login/sendmsgPwd", "anon");
@@ -117,15 +134,19 @@ public class ShiroConfig {
      * @return
      */
     public RedisManager redisManager() {
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxIdle(Integer.parseInt(maxIdle));
+        jedisPoolConfig.setMinIdle(Integer.parseInt(minIdle));
+        jedisPoolConfig.setMaxTotal(Integer.parseInt(maxActive));
+        jedisPoolConfig.setMaxWaitMillis(Long.parseLong(maxWait));
         RedisManager redisManager = new RedisManager();
-        redisManager.setHost(host);
-        redisManager.setPort(port);
-        // redisManager.setExpire(1800);// 配置缓存过期时间
-        redisManager.setTimeout(timeout);
+        JedisPool jedisPool;
         if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
-            redisManager.setPassword(password);
+            jedisPool = new JedisPool(jedisPoolConfig,host,port,timeout,password);
+        }else{
+            jedisPool = new JedisPool(jedisPoolConfig,host,port);
         }
-        // redisManager.setPassword(password);
+        redisManager.setJedisPool(jedisPool);
         return redisManager;
     }
 

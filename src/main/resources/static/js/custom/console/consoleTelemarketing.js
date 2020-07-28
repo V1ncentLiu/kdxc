@@ -1,6 +1,7 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        isElBreadcrumb:true,
     	receiveDialog:false,
     	receiveTitle:"",
     	dailogTitleType:"",

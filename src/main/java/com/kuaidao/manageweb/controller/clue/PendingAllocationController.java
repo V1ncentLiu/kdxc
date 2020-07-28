@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
@@ -84,7 +81,7 @@ public class PendingAllocationController {
      */
     @RequestMapping("/initAppiontmentList")
     @RequiresPermissions("aggregation:pendingAllocationManager:view")
-    public String initCompanyList(HttpServletRequest request) {
+    public String initCompanyList(HttpServletRequest request,  @RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         String ownOrgId = "";
@@ -193,7 +190,7 @@ public class PendingAllocationController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
-
+        request.setAttribute("type", type);
         return "clue/pendingAllocationManagerPage";
     }
 
