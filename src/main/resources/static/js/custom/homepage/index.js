@@ -264,11 +264,12 @@ var homePageVM=new Vue({
           dataBaseInvestAreaVal: "0",//默认是不限
           dataBaseCategoryVal: "0",//默认是不限
           dataBaseResultArr:[],//搜索结果
-          isshowsearchTip:true,//默认暂无搜索结果
+          isshowsearchTip:false,//默认暂无搜索结果
           issearchResult:false,
           dataBaseUrl:dataBaseUrl,//搜索接口地
           unionTipdialogVisible:false,
           isTipbgShow:false,//默认不显示提示框图片2
+          isCurrent:true,//首页按钮默认高亮
 	    }
 	},
  	methods: {
@@ -390,9 +391,14 @@ var homePageVM=new Vue({
 	      	}          
 	    },
 	    menuClick:function(ifreamUrl){
-	     	this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
-            window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
-	   	},  
+	     	  this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
+          window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+	   	}, 
+      menuClickCm:function(ifreamUrl){//餐盟菜单点击
+          window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+          // 餐盟首页index去掉高亮
+          this.isCurrent=false;
+      },  
 	   	handleCommand(command) {//点击下拉菜单
 	        if(command=='modifyPwd'){//修改密码
 	        	this.modifyPwd();
@@ -1477,27 +1483,30 @@ var homePageVM=new Vue({
     		//console.info("postBack");
     	},
     	openConsolePage(){//点击控制台button 事件
-    		this.defaultActive= null;
-    		$('.menu').css("color","rgb(255, 255, 255)");
-        var dataUrl=""
-        if(user){
-          var roleCode=user.roleCode;
-          console.log(roleCode);
-          if(roleCode=="DXCYGW"){//电销顾问
-            this.isRoleCodeDX=true;//电销顾问
-            dataUrl = "/console/console/index?sourceType=1";
-          }else if(roleCode=="SWJL"){
-            this.isRoleCodeSW=true;//商务经理
-            dataUrl = "/console/console/index?sourceType=1";
-          }else{
-            dataUrl = "/console/console/index?type=1";
+      		this.defaultActive= null;
+      		$('.menu').css("color","rgb(255, 255, 255)");
+          var dataUrl=""
+          if(user){
+            var roleCode=user.roleCode;
+            console.log(roleCode);
+            if(roleCode=="DXCYGW"){//电销顾问
+              this.isRoleCodeDX=true;//电销顾问
+              dataUrl = "/console/console/index?sourceType=1";
+            }else if(roleCode=="SWJL"){
+              this.isRoleCodeSW=true;//商务经理
+              dataUrl = "/console/console/index?sourceType=1";
+            }else{
+              dataUrl = "/console/console/index?type=1";
+            }
           }
-        }
-    		// var dataUrl = "/console/console/index?type=1";
-			$("#iframeBox").attr({
-				"src":dataUrl //设置ifream地址
-			});
-    		
+      		// var dataUrl = "/console/console/index?type=1";
+    			$("#iframeBox").attr({
+    				"src":dataUrl //设置ifream地址
+    			});
+          // 给餐盟首页加高亮
+          this.isCurrent=true;
+          this.$el.querySelector('.elAsideCm .is-active').classList.remove("is-active");
+
     	},
     	validClientNo(cno){//验证坐席是否属于自己
     			var isPass =false;
