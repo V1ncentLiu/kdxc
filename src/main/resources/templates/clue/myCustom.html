@@ -64,15 +64,16 @@
                     <el-date-picker
                         v-model="form.createTimeStart"
                         type="datetime"
-                        placeholder="选择日期时间">
+                        placeholder="选择日期时间"
+                        :disabled="disabledCreateTime">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-
                         v-model="form.createTimeEnd"
                         type="datetime"
-                        placeholder="选择日期时间">
+                        placeholder="选择日期时间"
+                        :disabled="disabledCreateTime">
                     </el-date-picker>
                 </el-form-item>
                 <!--
@@ -253,9 +254,8 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否签约:" prop="isSign">
-                        <el-select v-model="form.isSign" clearable placeholder="是否签约">
-                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
-                                       :value="item.value"></el-option>
+                        <el-select v-model="form.isSign" clearable placeholder="是否签约" :disabled="disabledIsSign">
+                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
@@ -266,9 +266,8 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源来源:">
-	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源">
-	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name"
-	                                   :value="item.value"></el-option>
+	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源" :disabled="disabledTeleReceiveSource">
+	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
 	                    </el-select>
 	                </el-form-item>
                 </el-row>
@@ -799,6 +798,9 @@
     el: '#myCustom',
     data: function() {
       return {
+        disabledIsSign:false,//是否签约默认可选
+        disabledCreateTime:false,//默认可选
+        disabledTeleReceiveSource:false,//默认可选
         dataUrlParam:{
             dataUrlArr:[{
                 isActive:false,
@@ -1861,16 +1863,20 @@
             if(type==1){
                 this.form.isSign=0;
                 this.dataUrlParam.dataUrlArr[0].isActive=true;
+                this.disabledIsSign=true;
             }else if(type==2){
                 this.form.createTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
                 this.form.createTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
                 this.dataUrlParam.dataUrlArr[1].isActive=true;
+                this.disabledCreateTime=true;
             }else if(type==3){
                 this.form.teleReceiveSource="4";
                 this.dataUrlParam.dataUrlArr[3].isActive=true;
+                this.disabledTeleReceiveSource=true;
             }else if(type==4){
                 this.form.isSign=1;
                 this.dataUrlParam.dataUrlArr[6].isActive=true;
+                this.disabledIsSign=true;
             }
         }
       
