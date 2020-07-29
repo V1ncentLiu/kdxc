@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(name="sys-service-fanjd")
+@FeignClient(name="sys-service")
 public interface SysFeign {
 
     @RequestMapping(method = RequestMethod.POST, value = "/sys/dictionary/findByPrimaryKey")
