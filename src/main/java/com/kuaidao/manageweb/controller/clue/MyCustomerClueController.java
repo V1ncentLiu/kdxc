@@ -1364,6 +1364,10 @@ public class MyCustomerClueController {
                             if (!"".equals(res)) {
                                 return new JSONResult<String>().fail("-1", res);
                             }
+                            String res1 = validatePhone(clueCustomer, dto);
+                            if (!"".equals(res1)) {
+                                return new JSONResult<String>().fail("-1", res1);
+                            }
                         }
                     }
                 }
