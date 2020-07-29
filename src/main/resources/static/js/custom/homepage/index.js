@@ -469,7 +469,9 @@ var homePageVM=new Vue({
          },
          confirmLogout(){//确认退出系统
              window.sessionStorage.clear();//清除缓存
-        	 location.href="/index/logout";            
+        	 location.href="/index/logout";     
+           // 清除餐盟localstorage
+           localStorage.removeItem("union");       
         },
         gotoHomePage(){//首页跳转
         	location.href='/login';
@@ -1617,8 +1619,10 @@ var homePageVM=new Vue({
         console.log(roleCode);
         if(roleCode=="DXCYGW"){//电销顾问
           this.isRoleCodeDX=true;//电销顾问
+          setLocalStore("union","unionStorage");
         }else if(roleCode=="SWJL"){
           this.isRoleCodeSW=true;//商务经理
+          setLocalStore("union","unionStorage");
         }
       }
       // 首次登陆显示
