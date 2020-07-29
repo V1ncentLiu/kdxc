@@ -264,7 +264,8 @@ var homePageVM=new Vue({
           dataBaseInvestAreaVal: "0",//默认是不限
           dataBaseCategoryVal: "0",//默认是不限
           dataBaseResultArr:[],//搜索结果
-          isshowsearchTip:false,//默认暂无搜索结果
+          isshowsearch:false,//暂无搜索结果
+          isshowsearchTip:false,//暂无搜索结果不显示
           issearchResult:false,
           dataBaseUrl:dataBaseUrl,//搜索接口地
           unionTipdialogVisible:false,
@@ -321,10 +322,12 @@ var homePageVM=new Vue({
               var result =  response.data;
               if(result.code==0){
                   if(result.data.list&&result.data.list.length>0){
+                      homePageVM.isshowsearch=true;
                       homePageVM.issearchResult=true;
                       homePageVM.isshowsearchTip=false;
                       homePageVM.dataBaseResultArr=result.data.list; 
                   }else{
+                      homePageVM.isshowsearch=true;
                       homePageVM.issearchResult=false;
                       homePageVM.isshowsearchTip=true;
                   }
@@ -1576,6 +1579,7 @@ var homePageVM=new Vue({
     this.dataBaseInvestMoneyVal="0";
     this.dataBaseInvestAreaVal="0";
     this.dataBaseCategoryVal="0";
+    this.isshowsearch=false;
     this.isshowsearchTip=false;
     this.issearchResult=false;
   }
