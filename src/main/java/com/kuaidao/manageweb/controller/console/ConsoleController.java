@@ -401,6 +401,26 @@ public class ConsoleController {
     }
 
     /**
+     * 查询电销人员 待跟进客户资源
+     *
+     * @param queryDto
+     * @return
+     */
+    @PostMapping("/telelistTodayFollowClue")
+    @ResponseBody
+    public JSONResult<PageBean<CustomerClueDTO>> telelistTodayFollowClue(
+            @RequestBody CustomerClueQueryDTO queryDto) throws Exception {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        queryDto.setTeleSale(curLoginUser.getId());
+        /*
+         * queryDto.setTeleSale(33336666L); queryDto.setAssignTimeStart(DateUtil.convert2Date(
+         * "2019-01-14 00:00:00", DateUtil.ymdhms));
+         * queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));
+         */
+        return myCustomerFeignClient.telelistTodayFollowClue(queryDto);
+    }
+
+    /**
      * 电销总监未分配资源数
      *
      * @param reqDTO
