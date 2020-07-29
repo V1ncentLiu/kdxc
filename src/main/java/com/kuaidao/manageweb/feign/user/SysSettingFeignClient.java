@@ -59,6 +59,11 @@ public interface SysSettingFeignClient {
     @PostMapping("/page")
     public JSONResult<PageBean<SysSettingDTO>> querySysSettingByPage(@RequestBody SysSettingReq sysSettingReq);
 
+    /**
+     * 根据多code删除系统参数
+     * @param codes
+     * @return
+     */
     @PostMapping("/deleteSysSettingByCode")
     JSONResult<Boolean> deleteSysSettingByCode(String codes);
 

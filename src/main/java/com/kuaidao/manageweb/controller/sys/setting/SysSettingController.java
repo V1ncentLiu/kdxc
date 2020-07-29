@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
+
 /**
  * 参数管理
  */
@@ -44,7 +46,7 @@ public class SysSettingController {
      * @return
      */
     @RequestMapping("/deleteSysSettingByCode")
-    public @ResponseBody JSONResult<Boolean> deleteSysSettingByCode(@RequestBody String codes){
+    public @ResponseBody JSONResult<Boolean> deleteSysSettingByCode(@Valid @RequestBody String codes){
         return sysSettingFeignClient.deleteSysSettingByCode(codes) ;
     }
 }
