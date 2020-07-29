@@ -28,7 +28,8 @@ var homePageVM=new Vue({
 		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
 		       ,
 		    user:user,//用戶信息
-		    defaultOpeneds:showBtnIndex,//默认打开菜单索引
+        defaultOpeneds:showBtnIndex,//默认打开菜单索引
+		    defaultOpenedsCm:["1","2"],//默认打开菜单索引
 		    initUrl:showMenuUrl,//默认展示页面
 	       // defaultActive:'0-0',//默认激活菜单
 	        defaultActive:defaultActive,//默认激活菜单
