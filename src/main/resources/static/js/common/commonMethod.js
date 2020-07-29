@@ -48,4 +48,16 @@ function getLocalStore (name) {//取localstorage
     }
     return content;
 }
- 
+function getQueryString(name){//获取url地址栏参数的方法
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if(r!=null)return  unescape(r[2]); return null;
+}
+// 餐盟页面不显示面包屑
+var canment = window.localStorage.getItem('union');
+if(canment=="unionStorage"){
+    var elBreadcrumb=document.getElementsByClassName('elBreadcrumb');
+    if(elBreadcrumb.length!=0){
+        elBreadcrumb[0].style.display="none";
+    }
+}

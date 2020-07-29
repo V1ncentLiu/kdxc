@@ -4,12 +4,13 @@
     <title>后台管理系统</title>
 </head>
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>商务业绩表<span style="color:red;">（从0点开始，每2小时更新一次数据，0点更新，2点更新，4点更新，依次类推）</span></el-breadcrumb-item>
-    </el-breadcrumb>
+    </el-breadcrumb>    
+    <p v-if="!isElBreadcrumb" class="marginB20"><span style="color:red;">（从0点开始，每2小时更新一次数据，0点更新，2点更新，4点更新，依次类推）</span></p>
     <el-row class="marginB20">
         <el-button type="primary" @click="searchMonth">月统计</el-button>
         <el-button type="success" @click="searchSeason">季统计</el-button>
@@ -158,6 +159,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                isElBreadcrumb:true,
                 loading: false,
                 isDisabled: false,
                 isDisabledOrgId: false,
@@ -552,6 +554,13 @@
                 this.firstCurTelSale(this.form.businessGroupId);
             }
             this.searchTable();
+            // 判断是否显示面包屑
+            var type=getQueryString("type");
+            console.log(type)
+            if(type=="1"){
+                // 隐藏面包屑
+                this.isElBreadcrumb=false;                
+            }
             
         },
         mounted(){

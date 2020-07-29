@@ -13,7 +13,7 @@
 
 <div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
 
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>在线申请表</el-breadcrumb-item>
@@ -197,6 +197,7 @@
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+        	isElBreadcrumb:true,
 			confirmBtnDisabled:false,
 			viewFormVisible:false,
 			importVisitPerFlag:true,
@@ -483,6 +484,13 @@
             if(localVal){this.pager.pageSize = localVal;}
         	this.inviteAreaListPage();
         	document.getElementById('organizationManage').style.display = 'block';
+        	// 判断是否显示面包屑
+	        var type=getQueryString("type");
+	        console.log(type)
+	        if(type=="1"){
+	            // 隐藏面包屑
+	            this.isElBreadcrumb=false;                
+	        }
         }
     })
 </script>

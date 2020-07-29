@@ -151,7 +151,7 @@ public class MyCustomerClueController {
      */
     @RequiresPermissions("myCustomerInfo:view")
     @RequestMapping("/initmyCustomer")
-    public String initmyCustomer(HttpServletRequest request, Model model) {
+    public String initmyCustomer(HttpServletRequest request, Model model, @RequestParam(required = false) Integer type) {
         UserInfoDTO user = getUser();
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -183,6 +183,7 @@ public class MyCustomerClueController {
             isShowRepetition = true;
         }
         request.setAttribute("isShowRepetition", isShowRepetition);
+        request.setAttribute("type", type);
         return "clue/myCustom";
     }
 
@@ -1363,6 +1364,10 @@ public class MyCustomerClueController {
                             if (!"".equals(res)) {
                                 return new JSONResult<String>().fail("-1", res);
                             }
+                            String res1 = validatePhone(clueCustomer, dto);
+                            if (!"".equals(res1)) {
+                                return new JSONResult<String>().fail("-1", res1);
+                            }
                         }
                     }
                 }
@@ -1746,5 +1751,17 @@ public class MyCustomerClueController {
             return "此号码已存在，不允许进行再次进行创建";
         }
         return "";
+    }
+
+    /**
+     * 初始化我的客户
+     *
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/customerVisitToday")
+    public String customerVisitToday(HttpServletRequest request, Model model) {
+        return "visit/customerVisitToday";
     }
 }

@@ -28,12 +28,13 @@
 </head>
 <body>
 
-<div id="mainDiv" class="mainPadding" style="display: none;">
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+<div id="mainDiv" class="mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户（商务）</el-breadcrumb-item>
     </el-breadcrumb>
+    <table-uniontabtemplate :param="dataUrlParam" v-else></table-uniontabtemplate>
     <el-row class="marginB20">
         <el-button type="primary" @click="notVisit">标记未到访</el-button>
         <shiro:hasPermission name="businessMyCustomer:add">
@@ -58,9 +59,8 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="签约状态:">
-                    <el-select v-model="queryForm.isSign" clearable placeholder="签约状态">
-                        <el-option v-for="item in signArr" :key="item.value" :label="item.name"
-                                   :value="item.value"></el-option>
+                    <el-select v-model="queryForm.isSign" clearable placeholder="签约状态" :disabled="disabledIsSign">
+                        <el-option v-for="item in signArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">
@@ -101,9 +101,8 @@
                                         placeholder="选择日期时间"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
-                        <el-select v-model="queryForm.isTailMoney" placeholder="是否补齐尾款" clearable>
-                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
-                                       :value="item.value">
+                        <el-select v-model="queryForm.isTailMoney" placeholder="是否补齐尾款" clearable :disabled="disabledIsTailMoney">
+                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label" :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -1891,7 +1890,30 @@
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
-        data: {  
+        data: { 
+            disabledIsTailMoney:false,//默认可选
+            disabledIsSign:false,//默认可选
+            dataUrlParam:{
+                dataUrlArr:[{
+                    isActive:false,
+                    name:"待处理客户",
+                    url:"/aggregation/businessMyCustomer/initPendingList",                
+                },{
+                    isActive:false,
+                    name:"未补齐尾款",
+                    url:"/aggregation/businessMyCustomer/listPage?type=1",                
+                },{
+                    isActive:false,
+                    name:"未签约",
+                    url:"/aggregation/businessMyCustomer/listPage?type=2"
+                },
+                {
+                    isActive:false,
+                    name:"已签约",
+                    url:"/aggregation/businessMyCustomer/listPage?type=3"
+                }]
+            },
+            isElBreadcrumb:true,
             signTabIndex:0,//点击编辑签约单tab的index
             signTitle:'',    
             responseData:[],  
@@ -3994,8 +4016,7 @@
                 mainDivVM.teleketGroupArr = response.data.data.teleGroupList;
                 mainDivVM.teleketSaleArr = response.data.data.teleSaleList;
             });
-            //初始化数据列表
-            this.initList();
+            
             // //  到访店铺类型 vistitStoreTypeArr
             // param.groupCode = "vistitStoreType";
             // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
@@ -4026,6 +4047,32 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 mainDivVM.visitCityArr = response.data.data;
             });
+
+            // 获取url地址
+            // 1未补齐尾款
+            // 2未签约
+            // 3已签约
+          var type=getQueryString("type");
+          console.log(type)
+            if(type){
+                // 隐藏面包屑
+                this.isElBreadcrumb=false;
+                if(type==1){//未补齐尾款
+                    this.queryForm.isTailMoney ="0";
+                    this.dataUrlParam.dataUrlArr[1].isActive=true;
+                    this.disabledIsTailMoney=true;
+                }else if(type==2){//未签约
+                    this.queryForm.isSign =0;
+                    this.dataUrlParam.dataUrlArr[2].isActive=true;
+                    this.disabledIsSign=true;
+                }else if(type==3){//已签约
+                    this.queryForm.isSign =1;
+                    this.dataUrlParam.dataUrlArr[3].isActive=true;
+                    this.disabledIsSign=true;
+                }
+            }
+            //初始化数据列表
+            this.initList();
 
         },
         mounted() {

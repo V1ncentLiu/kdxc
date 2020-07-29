@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>我的工作台-电销顾问</title>
+</head>
+<body>
+<div id="mainDiv"  class="mainPadding consoleStyle" style="display: none;">
+    <table-uniontabtemplate :param="dataUrlParam"></table-uniontabtemplate>
+    <!-- 今日待跟进客户资源 -->    
+    <el-row class="mainWhiteBg mainWhitePadding marginB20" v-if="isElBreadcrumb">
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            border
+            :data="dataTable" 
+            @row-dblclick="customerEidt"
+            >
+            <el-table-column align="center" type="index" width="55" prop="clueId" label="序号"></el-table-column>
+            <el-table-column align="center" prop="cusLevelName" label="客户级别" width="120"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号" width="150">
+                <!-- <template slot-scope="scope">
+                    {{scope.row.phone}}
+                    <input type='hidden'>
+                    <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
+                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                </template> -->
+                <template slot-scope="scope">
+                    {{scope.row.phone}}
+                    <input type='hidden'>
+                    <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="isTrack" label="跟进记录"  align="center" width="120">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isTrack===1"> 
+                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
+                        </div> 
+                    </template>
+            </el-table-column>
+            <el-table-column align="center" prop="customerStatusName" label="客户状态" width="120"></el-table-column>
+            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源" width="120">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isRepeatPhone === 1"> 
+                            <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                        </div> 
+                    </template>
+            </el-table-column>
+            <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
+            <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="140"></el-table-column>
+            <el-table-column align="center" prop="assignTime" label="分配时间" width="140" sortable></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="initTableData"></table-pagination>
+    </el-row>
+    <!-- 今日待跟进客户资源 重复手机号资源 -->
+    <!--<el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"    :visible.sync="repeatPhonesDialog">-->
+        <!--<el-table-->
+            <!--ref="singleTable"-->
+            <!--tooltip-effect="dark"-->
+            <!--style="width: 100%"-->
+            <!--border-->
+            <!--:data="repeatPhonesTable"-->
+            <!--&gt;-->
+            <!--<el-table-column align="center" type="index" width="55" label="序号"></el-table-column>-->
+            <!--<el-table-column align="center" prop="createTime" label="资源创建时间" width="170"></el-table-column>-->
+            <!--<el-table-column align="center" prop="phone" label="联系方式" width="170"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>-->
+            <!--<el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>-->
+            <!--<el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>-->
+            <!--<el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column>-->
+        <!--</el-table>-->
+    <!--</el-dialog>-->
+
+    <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'" :visible.sync="repeatPhonesDialog" width="1160px">
+        <div v-show="showPhoneTable">
+            <span>手机号<span style="color: red">(1)</span>{{phone}}重复手机号资源</span>
+            <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable2">
+            <span>手机号<span style="color: red">(2)</span>{{phone2}}重复手机号资源</span>
+            <el-table ref="singleTable2" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable3">
+            <span>手机号<span style="color: red">(3)</span>{{phone3}}重复手机号资源</span>
+            <el-table ref="singleTable3" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable3">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable4">
+            <span>手机号<span style="color: red">(4)</span>{{phone4}}重复手机号资源</span>
+            <el-table ref="singleTable4" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable4">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="showPhoneTable5">
+            <span>手机号<span style="color: red">(5)</span>{{phone5}}重复手机号资源</span>
+            <el-table ref="singleTable5" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable5">
+                <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="资源创建时间" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.phase == 1 || scope.row.phase == 2">
+                            <font color="red">「重话务」</font>{{scope.row.createTime}}
+                        </div>
+                        <div v-else>
+                            {{scope.row.createTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
+                <el-table-column align="center" prop="teleDirectorName" label="电销总监" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组" width="130"></el-table-column>
+                <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="170">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2">
+                            {{scope.row.teleReceiveTime}}(分配)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===3">
+                            {{scope.row.teleReceiveTime}}(领取)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===4">
+                            {{scope.row.teleReceiveTime}}(自建)
+                        </div>
+                        <div v-else-if="scope.row.teleReceiveSource ===5">
+                            {{scope.row.teleReceiveTime}}(分发)
+                        </div>
+                        <div v-else>
+                            {{scope.row.teleReceiveTime}}
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="fowEndTime" label="最新跟进时间"></el-table-column>
+                <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+                <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="资源创建人" width="110"></el-table-column>
+            </el-table>
+        </div>
+    </el-dialog> 
+    <!-- 跟进记录 -->
+    <dialog-tracking :param="trackingParam"></dialog-tracking>
+    <!-- 快速领取新资源 重复手机号资源-->
+    <el-dialog :title="dailogTitleType+'重复资源信息'" :visible.sync="repeatPhonesDialog2" width="70%">
+        <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable2">
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间" width="170"></el-table-column>
+            <el-table-column align="center" prop="clueId" label="资源id" width="200"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目" width="150"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色" width="150"></el-table-column>  
+            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
+        </el-table>
+    </el-dialog>
+    <el-dialog :title="receiveTitle" :visible.sync="receiveDialog">
+        <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="receiveTable">
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column>
+        </el-table>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+// var dashboardTelSale =[[${dashboardTelSale}]];
+// console.log(dashboardTelSale)
+var mainDivVM = new Vue({
+    el: '#mainDiv',
+    data: {
+        dataUrlParam:{
+            dataUrlArr:[{
+                name:"未签约客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=1",                
+            },{
+                name:"今日新增",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=2"
+            },
+            {
+                isActive:true,
+                name:"今日回访",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday"
+            },
+            {
+                name:"今日领取",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=5"
+            },
+            {
+                name:"自建客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=3"
+            },
+            {
+                name:"重单客户",
+                url:"/clue/cluerepetition/queryRepeatPage?type=1"
+            },
+            {
+                name:"邀约客户",
+                url:"/clue/appiontment/initAppiontmentList?type=1"
+            },
+            {
+                name:"已签约客户",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
+            }]
+        },
+        isElBreadcrumb:true,
+        receiveDialog:false,
+        receiveTitle:"",
+        dailogTitleType:"",
+        repeatPhonesDialog:false,//今日待跟进客户资源重复手机号
+        repeatPhonesDialog2:false,//快速领取新资源重复手机号
+        formLabelWidth:"150px",
+        // 快速领取新资源
+        tableData:[],        
+        repeatPhonesTable:[],
+        repeatPhonesTable2:[],
+        repeatPhonesTable3:[],
+        repeatPhonesTable4:[],
+        repeatPhonesTable5:[],
+        showPhoneTable:false,
+        showPhoneTable2:false,
+        showPhoneTable3:false,
+        showPhoneTable4:false,
+        showPhoneTable5:false,
+        phone:'',
+        phone2:'',
+        phone3:'',
+        phone4:'',
+        phone5:'',
+        categoryArr:[],
+        typeArr:[],
+        reasonArr:[],
+        cusStatusArr:[],
+        multipleSelection:[],
+        pager:{
+            total: 0,
+            currentPage: 1,
+            pageSize: 20,
+        },
+        trackingParam:{
+            trackingDialogVisible:false,
+            tableData:[]
+        },
+        receiveTable:[],
+        // 今日待跟进客户资源
+        dataTable: [],
+        // 工作台
+        activeName:'1',
+        activeName2:'1',
+        activeName3:'1',
+        activeName4:'1',
+        activeName5:'1',
+        
+        totalPerformance:'',
+        workDay:'',//工作天数
+        //公告
+        afficheBox:false,
+        items: [
+            // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
+            // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
+            // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
+        ],
+        // 未读消息
+        consoleNewsParam:{
+            newsBox:false,
+            newsData: [
+                // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
+                // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
+                // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
+            ]
+        }
+    },
+    methods: {
+        async gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
+            var isReturn =false;
+            await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+            .then(function (response) {
+                if(response.data !=""){
+                    mainDivVM.$message({
+                        message: response.data,
+                        type: 'warning'
+                    });
+                    isReturn = true; ;
+                }
+               ;
+            });
+            if(isReturn){
+                return;
+            }
+            //外呼手机
+            var param = {};
+            param.clueId = clueId;
+            var sessionStorage =window.sessionStorage;
+            if(sessionStorage.getItem("phoneKey"+clueId) ==null || new Date().getTime()-sessionStorage.getItem("phoneKey"+clueId)>15000) {
+                sessionStorage.setItem("phoneKey" + clueId, new Date().getTime());
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                    });
+                });
+                //跳转页面
+                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+            }
+
+
+        },
+        gotoMyCustomer(){//跳转我的客户
+            window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+        },
+        gotoPublicCustomer(){//跳转公有池
+            window.location.href="/aggregation/publiccustomer/listPage"; 
+        },
+        openTrackingDialog(cid){//跟进记录点击方法
+            var param = {};
+            param.clueId = cid;
+            axios.post('/aggregation/tracking/queryList', param)
+                .then(function (response) {
+                    if (response.data.code == 0) {
+                        mainDivVM.trackingParam.tableData = response.data.data
+                        mainDivVM.trackingParam.trackingDialogVisible = true;
+                    } else {
+                        mainDivVM.$message.error(response.data.msg);
+                    }
+                }).catch(function (error) {
+                console.log(error);
+            });
+        },
+        handleSelectionChange(val) {
+            this.multipleSelection = val;
+        },
+        resetForm(formName) {
+            if( mainDivVM.$refs[formName]) {
+                mainDivVM.$refs[formName].resetFields();
+            }
+        },
+        // 今日待跟进客户资源进入我的客户详情
+        showClueDetailInfo (row, column) {
+            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+        },
+      customerEidt(row){
+        var clueId=row.clueId;
+        //客户维护界面
+        this.setSessionStore("storeForm", this.storeForm);
+        var otherVal = {
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        this.setSessionStore("otherVal", otherVal);
+        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+      },
+        // 快速领取新资源
+        initList(){
+            var param = {};
+            // param.pageSize = this.pager.pageSize;
+            // param.pageNum =  this.pager.currentPage;
+            param.pageSize = 20;
+            param.pageNum =  1;
+            axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
+                console.log('快速领取新资源')
+                console.log(response.data)
+                if(null===response||response.data==null||response.data.code!='0'){
+                    if(response.data.code!='0'){
+                        mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                    }
+                    return false;
+                }else{
+                    mainDivVM.tableData =response.data.data.data;
+                }
+            })
+        },
+        openReceive(row){//领取 
+            console.log(row)               
+            var param={};
+            param.idList = []
+            // for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
+            //     param.idList.push(this.multipleSelection[i].clueid)
+            // }
+            param.idList.push(row.clueId)
+            axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
+              .then(function (response) {
+                    var result =  response.data;
+                    if(result.code == 0){
+                        if(result.data !=null){
+                            var data = result.data;
+                            if(data.backStatus ==3){
+                                mainDivVM.$message({message: data.backResult, type: 'warning'});
+                            }else if(data.backStatus !=0){
+                                mainDivVM.receiveDialog = true;
+                                mainDivVM.receiveTitle=data.backResult;
+                                mainDivVM.receiveTable= data.clueCustomerDTOs;
+                            }else{
+                                // window.location.href="/aggregation/publiccustomer/listPage"; 
+                                // 领取成功刷新表格
+                                mainDivVM.initList();
+                            }
+                        }                                
+                    }else{
+                        mainDivVM.$message({message: result.msg, type: 'warning'});
+                    }
+                    
+              }).catch(function (error) {
+                          console.log(error);
+              })           
+            // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
+            // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
+            // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
+        },
+        //快速领取新资源进入公有池展现详情
+        showClueDetailInfo2 (row, column) {
+            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId+"&commonPool=1";
+        },
+        repeatPhonesClick(row) {//今日待跟进客户资源-我的客户重复手机号按钮点击
+            debugger
+            this.repeatPhonesDialog=true;
+            this.dailogTitleType=row.clueId;
+            this.repeatPhonesTable=[];
+            var param ={};
+            param.id = row.clueId;
+            param.cusPhone = row.phone;
+            param.clueId = row.clueId;
+            axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
+                // var result =  response.data;
+                // var table=result.data;
+                // mainDivVM.repeatPhonesTable=table;
+                var map = response.data.data;
+                if(map.phone){
+                    mainDivVM.phone = map.phones[0]
+                    mainDivVM.repeatPhonesTable=map.phone;
+                    mainDivVM.showPhoneTable = true;
+                }else{
+                    mainDivVM.phone = '';
+                    mainDivVM.repeatPhonesTable=[];
+                    mainDivVM.showPhoneTable = false;
+                }
+                if(map.phone2){
+                    mainDivVM.phone2 = map.phones[1]
+                    mainDivVM.repeatPhonesTable2=map.phone2;
+                    mainDivVM.showPhoneTable2 = true;
+                }else{
+                    mainDivVM.phone2 ='';
+                    mainDivVM.repeatPhonesTable2=[];
+                    mainDivVM.showPhoneTable2 = false;
+                }
+                if(map.phone3){
+                    mainDivVM.phone3 = map.phones[2]
+                    mainDivVM.repeatPhonesTable3=map.phone3;
+                    mainDivVM.showPhoneTable3 = true;
+                }else{
+                    mainDivVM.phone3 = '';
+                    mainDivVM.repeatPhonesTable3=[];
+                    mainDivVM.showPhoneTable3 = false;
+                }
+                if(map.phone4){
+                    mainDivVM.phone4 = map.phones[3]
+                    mainDivVM.repeatPhonesTable4=map.phone4;
+                    mainDivVM.showPhoneTable4 = true;
+                }else{
+                    mainDivVM.phone4 = ''
+                    mainDivVM.repeatPhonesTable4=[];
+                    mainDivVM.showPhoneTable4 = false;
+                }
+                if(map.phone5){
+                    mainDivVM.phone5 = map.phones[4]
+                    mainDivVM.repeatPhonesTable5=map.phone5;
+                    mainDivVM.showPhoneTable5 = true;
+                }else{
+                    mainDivVM.phone5 = map.phones[4]
+                    mainDivVM.repeatPhonesTable5=[];
+                    mainDivVM.showPhoneTable5 = false;
+                }
+                mainDivVM.repeatPhonesDialog=true;
+            })  .catch(function (error) {
+                console.log(error);
+            });
+        },
+        repeatPhonesClick2(row) {//重复手机号按钮点击
+            this.repeatPhonesDialog2=true;
+            this.dailogTitleType=row.clueid;
+            var param ={};
+            param.id = row.clueid;
+            param.cusPhone = row.phone;
+            axios.post('/clue/appiontment/repeatPhonelist', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    mainDivVM.repeatPhonesTable2= table;
+                    mainDivVM.repeatPhonesDialog2=true;
+                })  .catch(function (error) {
+                    console.log(error);
+            });
+        },
+        // 今日待跟进客户资源
+        customerEidt(row){
+            //客户维护界面   
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId;
+        },
+        // 今日待跟进客户资源
+        initTableData(){
+            var param = {};
+            var pageSize = this.pager.pageSize;
+            var pageNum = this.pager.currentPage;
+            param.pageNum=pageNum;
+            param.pageSize=pageSize;
+            axios.post('/console/console/telelistTodayFollowClue',param).then(function (response) {
+                console.log('今日待跟进客户资源')
+                console.log(response.data)
+                if(!response){
+                    mainDivVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                    }); 
+                    return ;
+                }
+                var resobj= response.data;
+                if(!resobj){
+                    mainDivVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
+                    return ;
+                } 
+                if(resobj.code!='0'){
+                    mainDivVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
+                    return ;
+                }
+                var pageData=resobj.data;
+                mainDivVM.pager.total=pageData.total;
+                mainDivVM.pager.currentPage = pageData.currentPage;
+                mainDivVM.pager.pageSize = pageData.pageSize;
+                mainDivVM.dataTable =pageData.data;
+            })
+        },        
+        dateFormat:function(row, column) {//日期数据格式化方法
+            var date = row[column.property];
+             if (date == undefined) {
+               return "";
+             }
+             return moment(date).format("YYYY-MM-DD HH:mm:ss");
+        },        
+        handleClick(tab, event) {// 工作台
+            console.log(tab, event);
+        },
+        initBoard(){
+            var param={};
+            // 公告
+            param={};
+            axios.post('/console/console/queryAnnReceiveNoPage',param).then(function (response) {
+                console.log('公告')
+                console.log(response.data)
+                if(response.data.data&&response.data.data.length>0){
+                    mainDivVM.items=response.data.data;
+                    mainDivVM.afficheBox=true
+                }else{
+                    mainDivVM.afficheBox=false
+                }
+                
+            });
+            // 未读消息
+            param={};
+            axios.post('/console/console/queryBussReceiveNoPage',param).then(function (response) {
+                console.log('未读消息')
+                console.log(response.data)
+                if(response.data){
+                    if (response.data.data) {
+                        if(response.data.data.length!=0){
+                            mainDivVM.consoleNewsParam.newsData=response.data.data;
+                            mainDivVM.consoleNewsParam.newsBox=true
+                        }else{
+                            mainDivVM.consoleNewsParam.newsBox=false
+                        }
+                    }else{
+                        mainDivVM.consoleNewsParam.newsBox=false
+                    }
+                }else{
+                    mainDivVM.consoleNewsParam.newsBox=false
+                }                
+            }); 
+            // 今日领取资源数
+//            param={};
+//            axios.post('/console/console/countReceiveClueNum',param).then(function (response) {
+//                console.log('今日领取资源数')
+//                console.log(response.data)
+//                mainDivVM.receiveTodayNum=response.data.data;
+//            });
+//            // 今日分配资源数
+//            param={};
+//            axios.post('/console/console/countAssignClueNum',param).then(function (response) {
+//                console.log('今日分配资源数')
+//                console.log(response.data)
+//                mainDivVM.assignTodayNum=response.data.data;
+//            });
+//            // 今日通话时长
+//            param={};
+//            axios.post('/call/callRecord/countTodayTalkTime',param).then(function (response) {
+//                mainDivVM.todayTalkTime=mainDivVM.fomatSeconds2(response.data.data);
+//                mainDivVM.todayTalkTimeh=mainDivVM.fomatSecondsh(response.data.data);
+//                mainDivVM.todayTalkTimem=mainDivVM.fomatSecondsm(response.data.data);
+//                mainDivVM.todayTalkTimes=mainDivVM.fomatSecondss(response.data.data);
+//            }); 
+//            // 今日邀约数
+//            param={};
+//            axios.post('/console/console/countTodayAppiontmentNum',param).then(function (response) {
+//                console.log('今日邀约数')
+//                console.log(response.data)
+//                mainDivVM.todayAppiontmentNum=response.data.data;
+//            }); 
+            // 工作天数
+            param={};
+            axios.post('/console/console/getWorkDay',param).then(function (response) {
+                console.log('工作天数')                
+                console.log(response.data)                
+                mainDivVM.workDay=response.data.data;
+            });
+        },
+        fomatSeconds2(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+             if(hour<10){
+                t+="0";
+             }
+              t+=hour+"小时"
+              if(min < 10){
+                t += "0";
+              }
+              t += min + "分";
+              if(sec < 10){
+                t += "0";
+             }
+              t += sec + "秒";
+              return t;
+        },
+        fomatSecondsh(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+             if(hour<10){
+                t+="0";
+             }
+              t+=hour;
+              
+              return t;
+        },
+        fomatSecondsm(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+              if(min < 10){
+                t += "0";
+              }
+              t += min;
+              return t;
+        },
+        fomatSecondss(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+              if(sec < 10){
+                t += "0";
+             }
+              t += sec;
+              return t;
+        }
+    },
+    created(){
+        // this.initList();
+        //初始资源类别数据
+        var  param={};
+        param.groupCode="clueCategory";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            mainDivVM.categoryArr=response.data.data;
+        });
+        //初始化资源类型数据
+        param={};
+        param.groupCode="clueType";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            mainDivVM.typeArr=response.data.data;
+        });
+        // 初始化释放原因
+        param={};
+        param.groupCode="releaseReason";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            mainDivVM.reasonArr=response.data.data;
+            if(mainDivVM.reasonArr.length==8){
+                mainDivVM.reasonArr = mainDivVM.reasonArr.slice(0,7);
+            }
+        });
+        
+        //初始化客户状态
+        param={};
+        param.groupCode="customerStatus";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            mainDivVM.cusStatusArr=response.data.data;
+        });
+        // 今日待跟进客户资源
+        //初始化数据列表
+        this.initTableData();
+    },
+    mounted(){
+        document.getElementById('mainDiv').style.display = 'block';
+    }
+});
+</script>
+<!-- <script th:src="@{/js/custom/console/consoleTelemarketing.js?v=1.0.0}"></script> -->
+
+</body>
+</html>
