@@ -2,9 +2,6 @@ package com.kuaidao.manageweb.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.alibaba.fastjson.JSON;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
@@ -25,7 +22,6 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
-@Slf4j
 public class ShiroConfig {
 
     @Value("${spring.redis.host}")
@@ -72,6 +68,8 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/monitor/prometheus", "anon");
         filterChainDefinitionMap.put("/login/resetPwd", "anon");
         filterChainDefinitionMap.put("/merchantLogin/resetPwd", "anon");
+        filterChainDefinitionMap.put("/cmLogin/resetPwd", "anon");
+
         filterChainDefinitionMap.put("/login/index", "anon");
         filterChainDefinitionMap.put("/login/sendmsg", "anon");
         filterChainDefinitionMap.put("/login/sendmsgPwd", "anon");
@@ -137,15 +135,20 @@ public class ShiroConfig {
      * @return
      */
     public RedisManager redisManager() {
+
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxIdle(Integer.parseInt(maxIdle));
+        jedisPoolConfig.setMinIdle(Integer.parseInt(minIdle));
+        jedisPoolConfig.setMaxTotal(Integer.parseInt(maxActive));
+        jedisPoolConfig.setMaxWaitMillis(Long.parseLong(maxWait));
         RedisManager redisManager = new RedisManager();
-        redisManager.setHost(host);
-        redisManager.setPort(port);
-        // redisManager.setExpire(1800);// 配置缓存过期时间
-        redisManager.setTimeout(timeout);
+        JedisPool jedisPool;
         if (StringUtils.isNotBlank(environment) && StringUtils.equals(environment, "prod")) {
-            redisManager.setPassword(password);
+            jedisPool = new JedisPool(jedisPoolConfig,host,port,timeout,password);
+        }else{
+            jedisPool = new JedisPool(jedisPoolConfig,host,port);
         }
-        // redisManager.setPassword(password);
+        redisManager.setJedisPool(jedisPool);
         return redisManager;
     }
 
