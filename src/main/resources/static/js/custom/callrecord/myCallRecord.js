@@ -1,6 +1,7 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
+        isElBreadcrumb:true,
         audioShow:false,
         isShow:false,
     	formLabelWidth:'120px',
@@ -329,6 +330,14 @@ var myCallRecordVm = new Vue({
         var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
         if(localVal){this.pager.pageSize = localVal;}
         this.initCallRecordData();
+        // 获取url地址
+        var type=getQueryString("type");
+        console.log(type)
+        if(type=="1"){
+            // 隐藏面包屑
+            this.isElBreadcrumb=false;
+            
+        }
    },
    mounted(){
      	document.getElementById('myCallRecordVm').style.display = 'block';
