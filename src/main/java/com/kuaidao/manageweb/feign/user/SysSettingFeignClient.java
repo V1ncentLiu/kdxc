@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/sysSetting",
+@FeignClient(name = "sys-service-t", path = "/sys/sysSetting",
         fallback = SysSettingFeignClient.HystrixClientFallback.class)
 public interface SysSettingFeignClient {
 
@@ -57,7 +57,10 @@ public interface SysSettingFeignClient {
      * @return
      */
     @PostMapping("/page")
-    public JSONResult<PageBean<SysSettingDTO>> page(@RequestBody SysSettingReq sysSettingReq);
+    public JSONResult<PageBean<SysSettingDTO>> querySysSettingByPage(@RequestBody SysSettingReq sysSettingReq);
+
+    @PostMapping("/deleteSysSettingByCode")
+    JSONResult<Boolean> deleteSysSettingByCode(String codes);
 
 
     @Component
@@ -90,10 +93,14 @@ public interface SysSettingFeignClient {
         }
 
         @Override
-        public JSONResult<PageBean<SysSettingDTO>> page(SysSettingReq sysSettingReq) {
+        public JSONResult<PageBean<SysSettingDTO>> querySysSettingByPage(SysSettingReq sysSettingReq) {
             return fallBackError("系统参数分页");
         }
 
+        @Override
+        public JSONResult<Boolean> deleteSysSettingByCode(String codes) {
+            return fallBackError("系统参数删除");
+        }
 
     }
 

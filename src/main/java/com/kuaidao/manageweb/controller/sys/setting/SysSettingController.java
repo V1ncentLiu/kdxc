@@ -7,6 +7,7 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -22,9 +23,9 @@ public class SysSettingController {
     private SysSettingFeignClient sysSettingFeignClient;
 
     /**系统跳转*/
-    @RequestMapping("/page")
+    @RequestMapping("/index")
     public String page() {
-        return "sys/setting/page";
+        return "sys/setting/index";
     }
 
     /**
@@ -32,9 +33,18 @@ public class SysSettingController {
      * @param sysSettingReq
      * @return
      */
-    @RequestMapping("page")
-    public @ResponseBody JSONResult<PageBean<SysSettingDTO>> page(SysSettingReq sysSettingReq){
+    @RequestMapping("/querySysSettingByPage")
+    public @ResponseBody JSONResult<PageBean<SysSettingDTO>> querySysSettingByPage(@RequestBody SysSettingReq sysSettingReq){
+        return sysSettingFeignClient.querySysSettingByPage(sysSettingReq) ;
+    }
 
-        return sysSettingFeignClient.page(sysSettingReq) ;
+    /**
+     * 系统参数删除
+     * @param codes
+     * @return
+     */
+    @RequestMapping("/deleteSysSettingByCode")
+    public @ResponseBody JSONResult<Boolean> deleteSysSettingByCode(@RequestBody String codes){
+        return sysSettingFeignClient.deleteSysSettingByCode(codes) ;
     }
 }

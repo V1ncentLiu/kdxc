@@ -19,14 +19,14 @@
 
     <el-row type="flex" class="row-bg" justify="start">
         <el-col :span="18">
-            <el-button type="primary" @click="openAddDialog()"><i class="el-icon-plus"></i>添加参数主题</el-button>
-            <el-button type="success" @click="openUpdateDialog()"><i class="el-icon-edit"></i>编辑参数主题</el-button>
-            <el-button type="danger" @click="deleteDic()"><i class="el-icon-delete"></i>删除数据参数主题</el-button>
+            <el-button type="primary" @click="openAddDialog()"><i class="el-icon-plus"></i>添加</el-button>
+            <el-button type="success" @click="openUpdateDialog()"><i class="el-icon-edit"></i>编辑</el-button>
+            <el-button type="danger" @click="deleteDic()"><i class="el-icon-delete"></i>删除</el-button>
         </el-col>
         <el-col :span="6" style="text-align: right;">
             <el-form :inline="true" :model="formInline" class="formBox" ref="queryForm" >
                 <el-form-item label="" prop="name" style="margin-right: 0;width: 100%">
-                    <el-input v-model="formInline.name" placeholder="请输入名称进行查询">
+                    <el-input v-model="formInline.code" placeholder="请输入参数编码进行查询">
                         <el-button slot="append" icon="el-icon-search" @click="onSubmit">搜索</el-button>
                     </el-input>
                 </el-form-item>
@@ -40,10 +40,13 @@
         <template>
             <el-table :data="tableData3" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow" @row-dblclick="rowDblClick()" @selection-change="handleSelectionChange" border>
                 <el-table-column type="selection" width="55" prop="id" align="center"></el-table-column>
-                <el-table-column prop="name" label="名称" align="center"></el-table-column>
-                <el-table-column prop="code" label="编码" align="center"></el-table-column>
+                <el-table-column prop="code" label="参数编码" align="center"></el-table-column>
+                <el-table-column prop="value" label="参数值" align="center"></el-table-column>
                 <el-table-column prop="description" label="描述" align="center"></el-table-column>
-                <el-table-column  label="操作" align="center" width="150">
+                <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
+
+                <el-table-column prop="updateTime" label="修改时间"  :formatter="dateFormat"  align="center"></el-table-column>
+                <!--<el-table-column  label="操作" align="center" width="150">
                     <template slot-scope="scope">
                         <el-button
                                 @click="inDicItemPage(scope.row)"
@@ -52,7 +55,7 @@
                             进入词条
                         </el-button>
                     </template>
-                </el-table-column>
+                </el-table-column>-->
             </el-table>
         </template>
 
@@ -296,18 +299,18 @@
                     for(var i=0;i<rows.length;i++){
                         names = names + '['+rows[i].name+']';
                     }
-                    var str = '确定要删除'+names+'数据字典?';
+                    var str = '确定要删除'+names+'系统参数?';
                     this.$confirm(str, '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
                         //拼接rowIds
                         var rowIds = [];
                         for(var i=0;i<rows.length;i++){
-                            rowIds.push(rows[i].id)
+                            rowIds.push(rows[i].code)
                         }
                         //调用后台数据删除操作。
                         var param={};
-                        param.ids = rowIds.join(",");
+                        param.codes = rowIds.join(",");
 
-                        axios.post('/dictionary/Dictionary/deleteDictionarys', param)
+                        axios.post('/sys/Dictionary/deleteSysSettingByCode', param)
                             .then(function (response) {
                                 // console.log()
                                 // if(response.data.){
@@ -332,7 +335,7 @@
                 param.pageSize = paginationVm.pageSize;
                 param.pageNum = paginationVm.pageNum;
                 console.log(param)
-                axios.post('/dictionary/Dictionary/queryDictionary', param)
+                axios.post('/sys/setting/querySysSettingByPage', param)
                     .then(function (response) {
                         var data = response.data.data;
                         paginationVm.tableData3 = data.data;
@@ -393,11 +396,18 @@
                 this.pageNum = val;
                 this.initTableData(val);
             },
+            //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
             initTableData(v_pageNum) {
                 var param = queryFormVM.formInline;
                 param.pageSize = this.pageSize;
                 param.pageNum = v_pageNum;
-                axios.post('/dictionary/Dictionary/queryDictionary', param)
+                axios.post('/sys/setting/querySysSettingByPage', param)
                     .then(function (response) {
                         var data = response.data.data;
                         console.log(data)
