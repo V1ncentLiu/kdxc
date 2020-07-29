@@ -64,15 +64,16 @@
                     <el-date-picker
                         v-model="form.createTimeStart"
                         type="datetime"
-                        placeholder="选择日期时间">
+                        placeholder="选择日期时间"
+                        :disabled="disabledCreateTime">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-
                         v-model="form.createTimeEnd"
                         type="datetime"
-                        placeholder="选择日期时间">
+                        placeholder="选择日期时间"
+                        :disabled="disabledCreateTime">
                     </el-date-picker>
                 </el-form-item>
                 <!--
@@ -253,9 +254,8 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否签约:" prop="isSign">
-                        <el-select v-model="form.isSign" clearable placeholder="是否签约">
-                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
-                                       :value="item.value"></el-option>
+                        <el-select v-model="form.isSign" clearable placeholder="是否签约" :disabled="disabledIsSign">
+                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
@@ -266,9 +266,8 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源来源:">
-	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源">
-	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name"
-	                                   :value="item.value"></el-option>
+	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源" :disabled="disabledTeleReceiveSource">
+	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
 	                    </el-select>
 	                </el-form-item>
                 </el-row>
@@ -799,6 +798,9 @@
     el: '#myCustom',
     data: function() {
       return {
+        disabledIsSign:false,//是否签约默认可选
+        disabledCreateTime:false,//默认可选
+        disabledTeleReceiveSource:false,//默认可选
         dataUrlParam:{
             dataUrlArr:[{
                 isActive:false,
@@ -813,6 +815,11 @@
                 isActive:false,
                 name:"今日回访",
                 url:"/tele/clueMyCustomerInfo/customerVisitToday"
+            },
+            {
+                isActive:false,
+                name:"今日领取",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=5"
             },
             {
                 isActive:false,
@@ -1478,7 +1485,12 @@
           "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
         }
         this.setSessionStore("otherVal", otherVal);
-        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+        var type=getQueryString("type");
+        if(type){
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId+"&type="+type;//餐盟type=1
+        }else{
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId
+        }        
       },
       submitForm(formName) {
         //重单提交
@@ -1853,6 +1865,7 @@
      // 2今日新增  createTimeStart=  createTimeEnd=
      // 3自建客户  teleReceiveSource = 4
      // 4已签约客户 isSign = 1
+     // 5今日领取 teleReceiveSource = 1
       var type=getQueryString("type");
       console.log(type)
         if(type){
@@ -1861,16 +1874,24 @@
             if(type==1){
                 this.form.isSign=0;
                 this.dataUrlParam.dataUrlArr[0].isActive=true;
+                this.disabledIsSign=true;
             }else if(type==2){
-                this.form.createTimeStart=new Date();
-                this.form.createTimeEnd=new Date();
+                this.form.createTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
+                this.form.createTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
                 this.dataUrlParam.dataUrlArr[1].isActive=true;
+                this.disabledCreateTime=true;
             }else if(type==3){
                 this.form.teleReceiveSource="4";
-                this.dataUrlParam.dataUrlArr[3].isActive=true;
+                this.dataUrlParam.dataUrlArr[4].isActive=true;
+                this.disabledTeleReceiveSource=true;
             }else if(type==4){
                 this.form.isSign=1;
-                this.dataUrlParam.dataUrlArr[6].isActive=true;
+                this.dataUrlParam.dataUrlArr[7].isActive=true;
+                this.disabledIsSign=true;
+            }else if(type==5){
+                this.form.teleReceiveSource="3";
+                this.dataUrlParam.dataUrlArr[3].isActive=true;
+                this.disabledTeleReceiveSource=true;
             }
         }
       

@@ -59,9 +59,8 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="签约状态:">
-                    <el-select v-model="queryForm.isSign" clearable placeholder="签约状态">
-                        <el-option v-for="item in signArr" :key="item.value" :label="item.name"
-                                   :value="item.value"></el-option>
+                    <el-select v-model="queryForm.isSign" clearable placeholder="签约状态" :disabled="disabledIsSign">
+                        <el-option v-for="item in signArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销组:">
@@ -102,9 +101,8 @@
                                         placeholder="选择日期时间"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
-                        <el-select v-model="queryForm.isTailMoney" placeholder="是否补齐尾款" clearable>
-                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
-                                       :value="item.value">
+                        <el-select v-model="queryForm.isTailMoney" placeholder="是否补齐尾款" clearable :disabled="disabledIsTailMoney">
+                            <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label" :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -1892,7 +1890,9 @@
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
-        data: {  
+        data: { 
+            disabledIsTailMoney:false,//默认可选
+            disabledIsSign:false,//默认可选
             dataUrlParam:{
                 dataUrlArr:[{
                     isActive:false,
@@ -4060,12 +4060,15 @@
                 if(type==1){//未补齐尾款
                     this.queryForm.isTailMoney ="0";
                     this.dataUrlParam.dataUrlArr[1].isActive=true;
+                    this.disabledIsTailMoney=true;
                 }else if(type==2){//未签约
                     this.queryForm.isSign =0;
                     this.dataUrlParam.dataUrlArr[2].isActive=true;
+                    this.disabledIsSign=true;
                 }else if(type==3){//已签约
                     this.queryForm.isSign =1;
                     this.dataUrlParam.dataUrlArr[3].isActive=true;
+                    this.disabledIsSign=true;
                 }
             }
             //初始化数据列表

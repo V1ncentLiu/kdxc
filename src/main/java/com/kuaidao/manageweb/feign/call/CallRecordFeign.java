@@ -21,7 +21,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
 
-@FeignClient(name = "aggregation-service-fanjd", path = "/aggregation/call/callRecord", fallback = CallRecordFeign.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/call/callRecord", fallback = CallRecordFeign.HystrixClientFallback.class)
 public interface CallRecordFeign {
     
     /**

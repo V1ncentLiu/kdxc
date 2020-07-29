@@ -2,7 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
     <title>后台管理系统</title>
-    <link rel="stylesheet" th:href="@{/css/common/union_base.css}">
     <link rel="stylesheet" th:href="@{/css/custom/unionpage/union_index.css}">
     <style>
         .rightBottom {
@@ -33,7 +32,7 @@
                 <span v-if="isRoleCodeSW">经纪端</span>
             </div>   
             <div class="f-fl">
-                <el-button  v-if="consoleBtnVisible" type="primary" @click="openConsolePage" class="f-fl headerBtn current">首页</el-button>
+                <el-button  v-if="consoleBtnVisible" type="primary" @click="openConsolePageCm" :class="['f-fl','headerBtn', {'current': isCurrent }]">首页</el-button>
                 <el-button v-if="isRoleCodeDX" type="primary" @click="openLoginClientDialog" class="f-fl headerBtn headerBtn2">{{callTitle}}</el-button>
                 <el-button v-if="isRoleCodeDX" type="primary" @click="openOutboundDialog" class="f-fl headerBtn headerBtn3">主动外呼</el-button>
                 <!-- 新增资料库按钮 -->
@@ -70,7 +69,7 @@
                 <i  :class="{'iconfont el-icon-arrow-left':isActive,'iconfont el-icon-arrow-right':!isActive}"></i>
             </span> -->
             <!-- 左侧菜单 -->
-            <el-aside width="" class="elAside">
+            <el-aside width="" class="elAside elAsideCm">
                 <!-- <el-menu 
                     class="el-menu-vertical-demo" 
                     @open="handleOpen" 
@@ -103,24 +102,24 @@
                     <!-- 顾问端菜单开始-->
                     <el-submenu  index="1" v-if="isRoleCodeDX">
                         <template slot="title"><span slot="title">我的操作台</span></template>
-                        <el-menu-item  class="menu" index="1-1" data-url="/tele/clueMyCustomerInfo/initmyCustomer?type=1">我的客户</el-menu-item>
-                        <el-menu-item  class="menu menu2" index="1-2" data-url="/apply/applyPage?type=1">在线申请表</el-menu-item>
-                        <el-menu-item  class="menu menu3" index="1-3" data-url="/aggregation/publiccustomer/listPage?type=1">公有池</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu" index="1-1" data-url="/tele/clueMyCustomerInfo/initmyCustomer?type=1">我的客户</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu2" index="1-2" data-url="/apply/applyPage?type=1">在线申请表</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu3" index="1-3" data-url="/aggregation/publiccustomer/listPage?type=1">公有池</el-menu-item>
                     </el-submenu>
                     <el-submenu  index="2" class="title" v-if="isRoleCodeDX">
                         <template slot="title"><span slot="title">数据报表</span></template>
-                        <el-menu-item  class="menu menu4" index="2-1" data-url="/performance/groupList?type=1">顾问业绩表</el-menu-item>
-                        <el-menu-item  class="menu menu5" index="2-2" data-url="/ranking/deptList?type=1">顾问业绩排名表</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu4" index="2-1" data-url="/performance/groupList?type=1">顾问业绩表</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu5" index="2-2" data-url="/ranking/deptList?type=1">顾问业绩排名表</el-menu-item>
                     </el-submenu> 
                     <el-submenu  index="3" v-if="isRoleCodeSW">
                         <template slot="title"><span slot="title">我的操作台</span></template>
-                        <el-menu-item  class="menu " index="3-1" data-url="/aggregation/businessMyCustomer/initPendingList">我的客户</el-menu-item>
-                        <el-menu-item  class="menu menu6" index="3-2" data-url="/payDetail/initPayDetailList?type=1">付款信息</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu " index="3-1" data-url="/aggregation/businessMyCustomer/initPendingList">我的客户</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu6" index="3-2" data-url="/payDetail/initPayDetailList?type=1">付款信息</el-menu-item>
                     </el-submenu>
                     <el-submenu  index="4" class="title" v-if="isRoleCodeSW">
                         <template slot="title"><span slot="title">数据报表</span></template>
-                        <el-menu-item  class="menu menu4" index="4-1" data-url="/busperformance/groupList?type=1">经纪业绩表</el-menu-item>
-                        <el-menu-item  class="menu menu5" index="4-2" data-url="/busRanking/busRankingList?type=1">经纪业绩排名表</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu4" index="4-1" data-url="/busperformance/groupList?type=1">经纪业绩表</el-menu-item>
+                        <el-menu-item @click="menuClickCm" class="menu menu5" index="4-2" data-url="/busRanking/busRankingList?type=1">经纪业绩排名表</el-menu-item>
                     </el-submenu>  
                     <!-- 经纪端菜单结束--> 
                 </el-menu>
@@ -171,11 +170,14 @@
     </el-dialog>
  <!-- 退出登录 dialog start -->
  <!-- 资料库 dialog start -->
-<el-dialog title="资料库" :visible.sync="dataBasedialogVisible" class="dataBasedialog" :close-on-click-modal="false" width="800px" @close="closeDataBasedialog">
-    <div class="searchIpt">       
-        <el-input v-model="searchDatabaseKeyword" placeholder="输入关键词">
+<el-dialog title="资料库" :visible.sync="dataBasedialogVisible" class="dataBasedialog" :close-on-click-modal="false" width="980px" @close="closeDataBasedialog">
+    <div class="searchIptBox">       
+        <!-- <el-input v-model="searchDatabaseKeyword" placeholder="输入关键词">
             <el-button slot="append" icon="el-icon-search" @click="searchDatabaseFun">搜索</el-button>
-        </el-input>
+        </el-input> -->
+        <el-input v-model="searchDatabaseKeyword" placeholder="输入关键词" class="searchIpt"></el-input>
+        <img th:src="@{/images/unionSkin/icon_search.jpg}" alt="" class="searchIcon">
+        <el-button slot="append" @click="searchDatabaseFun" type="primary" style="width: 103px;height: 40px;font-size: 16px;">搜索</el-button>
     </div>
     <div class="searchConditions">
         <div class="clearFix"><span class="f-fl">投资金额：</span>
@@ -204,8 +206,9 @@
         </div>
     </div>
     <div class="searchResult">
+        <p class="searchLoading" v-if="issearchLoading"><i class="el-icon-loading"></i><span>加载中</span></p>
         <div class="clearFix">
-            <div class="f-fl">搜索结果：<span v-if="isshowsearchTip">暂无搜索结果</span></div>
+            <div class="f-fl" v-if="isshowsearch">搜索结果：<span v-if="isshowsearchTip">暂无搜索结果</span></div>
             <div class="f-fl searchResultList" v-if="issearchResult">
                 <a class="searchResultItem" :href="item.url" v-for="(item,index) in dataBaseResultArr" target="_blank"><span class="f-fl numbg">{{index+1}}</span>{{item.brand_name}}</a>
             </div>

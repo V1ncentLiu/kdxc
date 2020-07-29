@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-<head th:replace="_header_include::frag(~{::title},~{::link},~{})">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>我的工作台-电销顾问</title>
-    <link rel="stylesheet" th:href="@{/css/custom/console/console.css}">
 </head>
 <body>
 <div id="mainDiv"  class="mainPadding consoleStyle" style="display: none;">
@@ -340,6 +339,10 @@ var mainDivVM = new Vue({
                 url:"/tele/clueMyCustomerInfo/customerVisitToday"
             },
             {
+                name:"今日领取",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?type=5"
+            },
+            {
                 name:"自建客户",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?type=3"
             },
@@ -655,8 +658,7 @@ var mainDivVM = new Vue({
             var pageNum = this.pager.currentPage;
             param.pageNum=pageNum;
             param.pageSize=pageSize;
-            // axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
-            axios.post('/console/console/listTodayFollowClue',param).then(function (response) {
+            axios.post('/console/console/telelistTodayFollowClue',param).then(function (response) {
                 console.log('今日待跟进客户资源')
                 console.log(response.data)
                 if(!response){
@@ -825,7 +827,7 @@ var mainDivVM = new Vue({
         }
     },
     created(){
-        this.initList();
+        // this.initList();
         //初始资源类别数据
         var  param={};
         param.groupCode="clueCategory";
@@ -847,25 +849,16 @@ var mainDivVM = new Vue({
                 mainDivVM.reasonArr = mainDivVM.reasonArr.slice(0,7);
             }
         });
+        
         //初始化客户状态
         param={};
         param.groupCode="customerStatus";
         axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
             mainDivVM.cusStatusArr=response.data.data;
         });
-
         // 今日待跟进客户资源
         //初始化数据列表
-        this.initTableData();        
-        // 获取url地址
-        var type=getQueryString("sourceType");
-        console.log(type)
-        if(type=="1"){
-            // 隐藏面包屑
-            this.isElBreadcrumb=false;
-            
-        }
-
+        this.initTableData();
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
