@@ -1492,29 +1492,38 @@ var homePageVM=new Vue({
     	openConsolePage(){//点击控制台button 事件
       		this.defaultActive= null;
       		$('.menu').css("color","rgb(255, 255, 255)");
-          var dataUrl=""
-          if(user){
-            var roleCode=user.roleCode;
-            console.log(roleCode);
-            if(roleCode=="DXCYGW"){//电销顾问
-              this.isRoleCodeDX=true;//电销顾问
-              dataUrl = "/console/console/index?sourceType=1";
-            }else if(roleCode=="SWJL"){
-              this.isRoleCodeSW=true;//商务经理
-              dataUrl = "/console/console/index?sourceType=1";
-            }else{
-              dataUrl = "/console/console/index?type=1";
-            }
-          }
-      		// var dataUrl = "/console/console/index?type=1";
+      		var dataUrl = "/console/console/index?type=1";
     			$("#iframeBox").attr({
     				"src":dataUrl //设置ifream地址
     			});
+    	},
+      openConsolePageCm(){//点击控制台button 事件
+          this.defaultActive= null;
+          $('.menu').css("color","rgb(255, 255, 255)");
+          // var dataUrl=""
+          // if(user){
+          //   var roleCode=user.roleCode;
+          //   console.log(roleCode);
+          //   if(roleCode=="DXCYGW"){//电销顾问
+          //     this.isRoleCodeDX=true;//电销顾问
+          //     dataUrl = "/console/console/index?sourceType=1";
+          //   }else if(roleCode=="SWJL"){
+          //     this.isRoleCodeSW=true;//商务经理
+          //     dataUrl = "/console/console/index?sourceType=1";
+          //   }else{
+          //     dataUrl = "/console/console/index?type=1";
+          //   }
+          // }
+          // $("#iframeBox").attr({
+          //   "src":dataUrl //设置ifream地址
+          // });
           // 给餐盟首页加高亮
-          this.isCurrent=true;
+          // this.isCurrent=true;
           // 给左侧餐盟菜单取消高亮
           // this.$el.querySelector('.elAsideCm .el-menu-item.is-active').classList.remove("is-active");
-    	},
+          // 刷新页面
+          window.location.href=""
+      },
     	validClientNo(cno){//验证坐席是否属于自己
     			var isPass =false;
     			$.ajax({  
