@@ -271,6 +271,7 @@ var homePageVM=new Vue({
           unionTipdialogVisible:false,
           isTipbgShow:false,//默认不显示提示框图片2
           isCurrent:true,//首页按钮默认高亮
+          issearchLoading:false,
 	    }
 	},
  	methods: {
@@ -312,6 +313,7 @@ var homePageVM=new Vue({
           });
       },
       searchDatabaseFun(){
+          this.issearchLoading=true;
           var keyword=this.searchDatabaseKeyword;
           var join_fee=this.dataBaseInvestMoneyVal;
           var join_area=this.dataBaseInvestAreaVal;
@@ -334,10 +336,12 @@ var homePageVM=new Vue({
                                     
               }else{
                   homePageVM.$message.error(result.msg);
-              }                    
+              }    
+              homePageVM.issearchLoading=false;                
           })
           .catch(function (error) {
                console.log(error);
+               homePageVM.issearchLoading=false;
           });
       },
       opendataBase(){
