@@ -165,6 +165,10 @@ public interface MyCustomerFeignClient {
     @RequestMapping(method = RequestMethod.POST, value = "/listTodayFollowClue")
     JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(CustomerClueQueryDTO queryDto);
 
+    @RequestMapping(method = RequestMethod.POST, value = "/telelistTodayFollowClue")
+    JSONResult<PageBean<CustomerClueDTO>> telelistTodayFollowClue(CustomerClueQueryDTO queryDto);
+
+
     @Component
     static class HystrixClientFallback implements MyCustomerFeignClient {
 
@@ -268,6 +272,10 @@ public interface MyCustomerFeignClient {
             return fallBackError("电销 人员待跟进客户资源");
         }
 
+        @Override
+        public JSONResult<PageBean<CustomerClueDTO>> telelistTodayFollowClue(CustomerClueQueryDTO queryDto) {
+            return fallBackError("电销 今日回访");
+        }
 
 
     }
