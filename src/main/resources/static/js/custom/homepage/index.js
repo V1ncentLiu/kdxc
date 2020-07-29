@@ -1498,8 +1498,7 @@ var homePageVM=new Vue({
     			});
     	},
       openConsolePageCm(){//点击控制台button 事件
-          this.defaultActive= null;
-          $('.menu').css("color","rgb(255, 255, 255)");
+          // this.defaultActive= null;
           // var dataUrl=""
           // if(user){
           //   var roleCode=user.roleCode;
