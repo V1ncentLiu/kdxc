@@ -759,14 +759,18 @@ public class LoginController {
 
     /**
      * 删除用户缓存信息(防止非正常登录事session存在导致权限不刷新)
-     * 
+     *
+     *
+     *
      * @author fanjd 2019/05/9 20:05:08
      * @param userId 当前登陆用户id
      */
     private void kickOutUser(Long userId) {
         // 处理session
         DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+
         DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
+
         // 从redis获取sessionId
         String sessionId = redisTemplate.opsForValue().get(Constants.SESSION_ID + userId);
         if (StringUtils.isBlank(sessionId)) {
