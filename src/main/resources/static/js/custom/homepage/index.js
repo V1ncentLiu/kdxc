@@ -29,7 +29,7 @@ var homePageVM=new Vue({
 		       ,
 		    user:user,//用戶信息
         defaultOpeneds:showBtnIndex,//默认打开菜单索引
-		    defaultOpenedsCm:["1","2"],//默认打开菜单索引
+		    defaultOpenedsCm:[],//默认打开菜单索引
 		    initUrl:showMenuUrl,//默认展示页面
 	       // defaultActive:'0-0',//默认激活菜单
 	        defaultActive:defaultActive,//默认激活菜单
@@ -1621,9 +1621,11 @@ var homePageVM=new Vue({
         if(roleCode=="DXCYGW"){//电销顾问
           this.isRoleCodeDX=true;//电销顾问
           setLocalStore("union","unionStorage");
+          this.defaultOpenedsCm=["1","2"]
         }else if(roleCode=="SWJL"){
           this.isRoleCodeSW=true;//商务经理
           setLocalStore("union","unionStorage");
+          this.defaultOpenedsCm=["3","4"]
         }
       }
       // 首次登陆显示
