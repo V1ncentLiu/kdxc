@@ -8,16 +8,16 @@ var mainDivVM = new Vue({
                 url:"/aggregation/businessMyCustomer/initPendingList",                
             },{
                 isActive:false,
-                name:"未补齐尾款",
+                name:"未补齐尾款客户",
                 url:"/aggregation/businessMyCustomer/listPage?type=1",                
             },{
                 isActive:false,
-                name:"未签约",
+                name:"未签约客户",
                 url:"/aggregation/businessMyCustomer/listPage?type=2"
             },
             {
                 isActive:false,
-                name:"已签约",
+                name:"已签约客户",
                 url:"/aggregation/businessMyCustomer/listPage?type=3"
             }]
         },
