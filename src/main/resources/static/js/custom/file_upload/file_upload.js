@@ -231,6 +231,8 @@ var uploader = new plupload.Uploader({
                 // document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = 'upload to oss success, object name:' + get_uploaded_object_name(file.name);
                 up.removeFile(file);
                 // uploadCallBack();
+                // 上传成功回调
+                fileUploadCallback();
             }
             else
             {
