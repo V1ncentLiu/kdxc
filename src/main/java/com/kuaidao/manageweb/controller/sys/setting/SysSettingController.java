@@ -52,7 +52,7 @@ public class SysSettingController {
      */
     @RequiresPermissions("sys:setting:delete")
     @RequestMapping("/deleteSysSettingByCode")
-    public @ResponseBody JSONResult<Boolean> deleteSysSettingByCode(@RequestBody Map<String,String> map) throws IllegalAccessException {
+    public @ResponseBody JSONResult<Boolean> deleteSysSettingByCode(@RequestBody Map<String,String> map) {
         String codes = map.get("codes");
         if(StringUtils.isBlank(codes)){
             return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
