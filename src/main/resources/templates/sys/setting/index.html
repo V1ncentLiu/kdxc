@@ -76,11 +76,11 @@
     <template>
         <el-dialog title="添加字典" :visible.sync="dialogFormVisible" width="540px">
             <el-form :model="add" ref="add" :rules="rules">
-                <el-form-item label="名称：" :label-width="formLabelWidth" prop="name">
-                    <el-input v-model="add.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+                <el-form-item label="参数编码：" :label-width="formLabelWidth" prop="code">
+                    <el-input v-model="add.code" autocomplete="off"  maxlength="20" style="width: 290px;" ></el-input>
                 </el-form-item>
-                <el-form-item label="编码：" :label-width="formLabelWidth" prop="code">
-                    <el-input v-model="add.code" autocomplete="off" maxlength="20"  style="width: 290px;"></el-input>
+                <el-form-item label="参数值：" :label-width="formLabelWidth" prop="value">
+                    <el-input v-model="add.value" autocomplete="off" maxlength="20"  style="width: 290px;"></el-input>
                 </el-form-item>
                 <el-form-item label="描述：" :label-width="formLabelWidth" prop="description">
                     <el-input type="textarea" v-model="add.description" autocomplete="off" maxlength="200" :rows="3"  placeholder="填写描述信息（200字以内）" style="width: 290px;"></el-input>
@@ -99,11 +99,11 @@
     <template>
         <el-dialog title="编辑字典"  :visible.sync="updateDialogFormVisible"  width="540px">
             <el-form :model="add" ref="add" :rules="rules">
-                <el-form-item label="名称："  :label-width="formLabelWidth"  prop="name">
-                    <el-input v-model="add.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+                <el-form-item label="参数编码："  :label-width="formLabelWidth"  prop="code">
+                    <el-input v-model="add.code" autocomplete="off"  maxlength="20" style="width: 290px;" readonly></el-input>
                 </el-form-item>
-                <el-form-item label="编码："  :label-width="formLabelWidth"  prop="code">
-                    <el-input v-model="add.code" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
+                <el-form-item label="参数值："  :label-width="formLabelWidth"  prop="value">
+                    <el-input v-model="add.value" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
                 </el-form-item>
                 <el-form-item label="描述：" :label-width="formLabelWidth"   prop="description">
                     <el-input  type="textarea" v-model="add.description" autocomplete="off" maxlength="200" :rows="3" placeholder="填写描述信息（200字以内）" style="width: 290px;"></el-input>
@@ -131,17 +131,17 @@
             formLabelWidth:"120px",
             updateDialogFormVisible:false,
             add:{
-                name:"",
                 code:"",
+                value:"",
                 description:""
             },
             rules: {
-                name: [
-                    {required: true, message: '请输入字典主题', trigger: 'blur'},
+                code: [
+                    {required: true, message: '请输入参数编码', trigger: 'blur'},
                     {min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur'}
                 ],
-                code: [
-                    {required: true, message: '请输入字典编码', trigger: 'blur'},
+                value: [
+                    {required: true, message: '请输入参数值', trigger: 'blur'},
                     {min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur'}
                 ],
                 description:[
@@ -150,10 +150,10 @@
             }
         },
         methods:{
-            initUpdateData(v_id){
+            initUpdateData(code){
                 var param = {};
-                param.id = v_id;
-                axios.post('/dictionary/Dictionary/findByPrimaryKey', param)
+                param.code = code;
+                axios.post('/sys/setting/findSysSettingByCode', param)
                     .then(function (response) {
                         updateDialogVm.add = response.data.data;
                     })
@@ -165,7 +165,7 @@
                 var param =  updateDialogVm.add;
                 param.id =  paginationVm.multipleSelection[0].id;
                 this.btnDisabled = true;
-                axios.post('/dictionary/Dictionary/updateDictionary', param)
+                axios.post('/sys/setting/updateSysSettingByCode', param)
                     .then(function (response) {
                         console.log(response.data)
                         if(response.data.code==0){
@@ -206,17 +206,17 @@
             formLabelWidth:"120px",
             dialogFormVisible:false,
             add:{
-                name:"",
                 code:"",
+                value:"",
                 description:""
             },
             rules: {
-                name: [
-                    {required: true, message: '请输入字典主题', trigger: 'blur'},
+                code: [
+                    {required: true, message: '请输入参数编码', trigger: 'blur'},
                     {min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur'}
                 ],
-                code: [
-                    {required: true, message: '请输入字典编码', trigger: 'blur'},
+                value: [
+                    {required: true, message: '请输入参数值', trigger: 'blur'},
                     {min: 1, max: 20, message: '长度在 1 到 20 个字符', trigger: 'blur'}
                 ],
                 description:[
@@ -237,7 +237,7 @@
                 this.$refs['add'].validate((valid) => {
                     if (valid) {
                         addDialogVm.btnDisabled = true;
-                        axios.post('/dictionary/Dictionary/saveDictionary', param)
+                        axios.post('/sys/setting/addSysSetting', param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     addDialogVm.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
@@ -286,7 +286,7 @@
                 updateDialogVm.resetForm('add');
                 updateDialogVm.updateDialogFormVisible = true;
                 var row = paginationVm.multipleSelection[0];
-                updateDialogVm.initUpdateData(row.id);
+                updateDialogVm.initUpdateData(row.code);
             },
             deleteDic:function(){
                 var rows = paginationVm.multipleSelection;
@@ -310,7 +310,8 @@
                         var param={};
                         param.codes = rowIds.join(",");
 
-                        axios.post('/sys/Dictionary/deleteSysSettingByCode', param)
+                        console.info(param);
+                        axios.post('/sys/setting/deleteSysSettingByCode', param)
                             .then(function (response) {
                                 // console.log()
                                 // if(response.data.){
