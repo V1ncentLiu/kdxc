@@ -2442,7 +2442,7 @@
 <script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
-
+    var result=null;
     function clueUploadFile() {
         var result = uploadFile();
         if(result ==null){
@@ -2450,10 +2450,29 @@
             addCustomerVM.$message({message: '请选择上传文件', type: 'warning'});
             return ;
         }
+        // var param = {};
+        // param.clueId = clueId;
+        // param.filePath = result;
+        // param.stage = 1; // 话务阶段
+        // axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
+        //     addCustomerVM.$message({
+        //         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+        //             axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+        //                 .then(function (response) {
+        //                     addCustomerVM.tableDataC1 = response.data.data;
+        //                     var ossfile = document.getElementById("ossfile");
+        //                     ossfile.innerHTML = "";
+        //                 });
+        //         }
+        //     });
+        // });
+    }
+    function fileUploadCallback(){
         var param = {};
         param.clueId = clueId;
-        param.filePath = result;
-        param.stage = 1; // 话务阶段
+        param.filePath = uploadFileResult;
+        // 判断是话务    
+        param.stage = 1; // 话务阶段 
         axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
             addCustomerVM.$message({
                 message: '操作成功', type: 'success', duration: 2000, onClose: function () {
