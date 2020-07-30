@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.BusinessLineTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -243,7 +244,7 @@ public class LoginController {
         // 餐盟用户登录增加判断
         boolean cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource());
         if (cmFlag) {
-            if (null != user.getBusinessLine() && BusinessLineTypeConstant.SHANGJI == user.getBusinessLine()) {
+            if (null != user.getBusinessLine() && (BusinessLineConstant.SHANGJI == user.getBusinessLine() ||BusinessLineConstant.SHCS == user.getBusinessLine())) {
                 if (!RoleCodeEnum.DXCYGW.name().equals(roleInfoDTO.getRoleCode()) && !RoleCodeEnum.SWJL.name().equals(roleInfoDTO.getRoleCode())) {
                     return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
                 }
