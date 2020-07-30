@@ -94,10 +94,8 @@ public class SysSettingController {
     @RequiresPermissions("sys:setting:add")
     @RequestMapping("/addSysSetting")
     public @ResponseBody JSONResult<Boolean> addSysSetting(@RequestBody SysSettingReq sysSettingReq){
-
         if(null == sysSettingReq || StringUtils.isBlank(sysSettingReq.getCode()) || StringUtils.isBlank(sysSettingReq.getValue())){
-            return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         return sysSettingFeignClient.addSysSetting(sysSettingReq) ;
     }
