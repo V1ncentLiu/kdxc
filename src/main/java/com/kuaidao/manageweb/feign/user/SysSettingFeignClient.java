@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service-t", path = "/sys/sysSetting",
+@FeignClient(name = "sys-service", path = "/sys/sysSetting",
         fallback = SysSettingFeignClient.HystrixClientFallback.class)
 public interface SysSettingFeignClient {
 
