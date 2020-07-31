@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.controller.sys.setting;
+package com.kuaidao.manageweb.controller.syssetting;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
