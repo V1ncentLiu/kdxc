@@ -81,8 +81,11 @@ public class SysSettingController {
     @RequestMapping("/updateSysSettingByCode")
     public @ResponseBody JSONResult<Boolean> updateSysSettingByCode(@RequestBody SysSettingReq sysSettingReq){
         if(null == sysSettingReq || StringUtils.isBlank(sysSettingReq.getCode()) || StringUtils.isBlank(sysSettingReq.getValue())){
+
             return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
+        sysSettingReq.setCode(sysSettingReq.getCode().trim());
+        sysSettingReq.setValue(sysSettingReq.getValue().trim());
         return sysSettingFeignClient.updateSysSettingByCode(sysSettingReq) ;
     }
 
@@ -95,8 +98,11 @@ public class SysSettingController {
     @RequestMapping("/addSysSetting")
     public @ResponseBody JSONResult<Boolean> addSysSetting(@RequestBody SysSettingReq sysSettingReq){
         if(null == sysSettingReq || StringUtils.isBlank(sysSettingReq.getCode()) || StringUtils.isBlank(sysSettingReq.getValue())){
+
             return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
+        sysSettingReq.setCode(sysSettingReq.getCode().trim());
+        sysSettingReq.setValue(sysSettingReq.getValue().trim());
         return sysSettingFeignClient.addSysSetting(sysSettingReq) ;
     }
 }
