@@ -31,7 +31,7 @@ public class SysSettingController {
     @RequiresPermissions("sys:setting:view")
     @RequestMapping("/index")
     public String page() {
-        return "sys/setting/index";
+        return "syssetting/index";
     }
 
     /**
