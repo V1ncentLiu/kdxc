@@ -4,15 +4,6 @@
     <title>后台管理系统</title>
     <style>
         button a{color:#fff!important;}
-        /*页面不可复制*/
-        html,body{
-            -moz-user-select:none; /* Firefox私有属性 */
-            -webkit-user-select:none; /* WebKit内核私有属性 */
-            -ms-user-select:none; /* IE私有属性(IE10及以后) */
-            -khtml-user-select:none; /* KHTML内核私有属性 */
-            -o-user-select:none; /* Opera私有属性 */
-            user-select:none; /* CSS3属性 */
-        }
     </style>
 </head>
 <body>
@@ -536,6 +527,8 @@
     var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户状态
     var levelList=[[${levelList}]];//客户级别
     var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+    // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
+    var businessLine=[[${businessLine}]];;
     var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -1334,6 +1327,10 @@
             if(ownOrgId){this.isDXZDisabled= true;}//电销总监电销组筛选按钮不可点击
             this.initColumn();
             this.searchTable();
+            // 除1、5、6、10、11、12、13业务线之外不可复制
+            if(businessLine!=1&&businessLine!=5&&businessLine!=6&&businessLine!=10&&businessLine!=11&&businessLine!=12&&businessLine!=13){
+                document.getElementsByTagName('body')[0].className = 'noCopy'; //设置为新的
+            }
 
         },//created方法 结束
         mounted(){
