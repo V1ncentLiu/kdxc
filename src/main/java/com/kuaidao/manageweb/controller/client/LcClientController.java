@@ -8,7 +8,9 @@ import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.client.LcClientFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -19,6 +21,8 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
@@ -50,6 +54,14 @@ public class LcClientController {
 
     @Autowired
     private LcClientFeignClient lcClientFeignClient;
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
+
+    public static final String CALLER = "caller";
+    public static final String CALLKEY = "callKey";
+    public static final String LINEAPPID = "lineAppId";
+    public static final String LINEAPPKEY = "lineAppkey";
+
 
     /**
      *  跳转乐创页面
@@ -254,13 +266,64 @@ public class LcClientController {
         return uploadTrClientData;
     }
 
+    @PostMapping("/lcLogin")
+    @ResponseBody
+    public JSONResult lcLogin(@RequestBody LcLoginReqDTO reqDTO ) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long userId = curLoginUser.getId();
+        LcClientQueryDTO lcClientQueryDTO = new LcClientQueryDTO();
+        lcClientQueryDTO.setCaller(reqDTO.getCaller());
+        lcClientQueryDTO.setUserId(userId);
+        JSONResult<LcClientRespDTO> lcClientReq = lcClientFeignClient.queryLcClient(lcClientQueryDTO);
+
+        if(JSONResult.SUCCESS.equals(lcClientReq.getCode())) {
+            LcClientRespDTO lcClientRespDTO = lcClientReq.getData();
+            if(null == lcClientRespDTO) {
+                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该坐席号不属于您");
+            }
+            String[] callLines = reqDTO.getCallLine().split(",");
+            Session session = SecurityUtils.getSubject().getSession();
+            session.setAttribute(CALLER,lcClientRespDTO.getCaller());
+            session.setAttribute(CALLKEY,lcClientRespDTO.getCallKey());
+            session.setAttribute(LINEAPPID,callLines[0]);
+            session.setAttribute(LINEAPPKEY,callLines[1]);
+            return new JSONResult<>().success(true);
+        }
+        return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+    }
+
+    @PostMapping("/lcLogout")
+    @ResponseBody
+    public JSONResult lcLogout(HttpServletRequest request) {
+        Session session = SecurityUtils.getSubject().getSession();
+        if(StringUtils.isBlank((String)session.getAttribute("caller"))) {
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_UNLOGINCLIENT_FAIL.getCode(),SysErrorCodeEnum.ERR_UNLOGINCLIENT_FAIL.getMessage());
+        }
+        session.removeAttribute(CALLER);
+        session.removeAttribute(CALLKEY);
+        session.removeAttribute(LINEAPPID);
+        session.removeAttribute(LINEAPPKEY);
+        return new JSONResult<>().success(true);
+    }
+
     /**
      * 七陌 外呼
      */
     @PostMapping("/lcOutboundCall")
     @ResponseBody
     public JSONResult lcOutboundCall(@RequestBody LcClientOutboundDTO  callDTO){
-        return null;
+        String customerPhoneNumber = callDTO.getCustomerPhone();
+        if(StringUtils.isBlank(customerPhoneNumber)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"客户手机号为null");
+        }
+
+        Session session = SecurityUtils.getSubject().getSession();
+        callDTO.setCaller((String)session.getAttribute(CALLER));
+        callDTO.setCallKey((String)session.getAttribute(CALLKEY));
+        callDTO.setLineAppId((String)session.getAttribute(LINEAPPID));
+        callDTO.setLineAppKey((String)session.getAttribute(LINEAPPKEY));
+        callDTO.setCustomerPhone(customerPhoneNumber);
+        return lcClientFeignClient.lcOutbound(callDTO);
     }
 
     /**

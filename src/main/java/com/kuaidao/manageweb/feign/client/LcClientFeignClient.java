@@ -38,6 +38,12 @@ public interface LcClientFeignClient {
     @PostMapping("/uploadLcClientData")
     public JSONResult<List<ImportLcClientDTO>> uploadLcClientData(@RequestBody UploadLcClientDataDTO<ImportLcClientDTO> reqDTO);
 
+    @PostMapping("/queryLcClient")
+    public JSONResult<LcClientRespDTO> queryLcClient(@RequestBody LcClientQueryDTO lcClientQueryDTO);
+
+    @PostMapping("/lcOutbound")
+    public JSONResult lcOutbound(@RequestBody LcClientOutboundDTO lcClientOutboundDTO);
+
     @Component
     static class HystrixClientFallback implements LcClientFeignClient {
         private static Logger logger = LoggerFactory.getLogger(LcClientFeignClient.class);
@@ -60,7 +66,7 @@ public interface LcClientFeignClient {
 
         @Override
         public JSONResult<PageBean<LcClientRespDTO>> listLcClientPage(LcClientQueryDTO queryClientDTO) {
-            return fallBackError("查询乐创列表");
+            return fallBackError("分页查询乐创列表");
         }
 
         @Override
@@ -76,6 +82,16 @@ public interface LcClientFeignClient {
         @Override
         public JSONResult<List<ImportLcClientDTO>> uploadLcClientData(UploadLcClientDataDTO<ImportLcClientDTO> reqDTO) {
             return fallBackError("上传乐创坐席");
+        }
+
+        @Override
+        public JSONResult<LcClientRespDTO> queryLcClient(LcClientQueryDTO lcClientQueryDTO) {
+            return fallBackError("查询乐创列表");
+        }
+
+        @Override
+        public JSONResult lcOutbound(LcClientOutboundDTO lcClientOutboundDTO) {
+            return fallBackError("乐创外呼");
         }
     }
 
