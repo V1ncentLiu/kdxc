@@ -111,19 +111,19 @@ var clientVm = new Vue({
              for(var i=0;i<rows.length;i++){
                  var curRow = rows[i];
                  rowIds.push(curRow.id);
-                 rowNames.push("【"+curRow.clientNo+"】");
+                 rowNames.push("【"+curRow.caller+"】");
              }
              var clientNos = rowNames.join(" ");
 
 
-             this.$confirm('确定要删除 '+clientNos+'坐席吗？', '提示', {
+             this.$confirm('确定要删除 '+clientNos+'主叫手机号？', '提示', {
             	 closeOnClickModal:false,
                  confirmButtonText: '确定',
                  cancelButtonText: '取消',
                  type: 'warning'
                }).then(() => {
             	  var param  = {idList:rowIds};
-        	      axios.post('/client/client/deleteQimoClient', param)
+        	      axios.post('/client/lcClient/deleteLcClient', param)
                   .then(function (response) {
                       var resData = response.data;
                       if(resData.code=='0'){
@@ -180,7 +180,7 @@ var clientVm = new Vue({
               	    clientVm.userList = resData.data;
 
                	 var param={id:rows[0].id};
-                 axios.post('/client/client/queryQimoClientById', param)
+                 axios.post('/client/lcClient/queryLcClientById', param)
                  .then(function (response) {
                      var resData = response.data;
                      if(resData.code=='0'){
@@ -201,7 +201,7 @@ var clientVm = new Vue({
                   	    }
                         clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }else{
-                  	     clientVm.$message({message:'查询七陌坐席失败',type:'error'});
+                  	     clientVm.$message({message:'查询乐创坐席失败',type:'error'});
                         //  console.error(resData);
                          clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }
@@ -300,7 +300,7 @@ var clientVm = new Vue({
         	 var param = this.searchForm;
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
-        	 axios.post('/client/client/listQimoClientPage',param)
+        	 axios.post('/client/lcClient/listLcClientPage',param)
              .then(function (response) {
             	 var data =  response.data
                  if(data.code=='0'){
@@ -313,7 +313,6 @@ var clientVm = new Vue({
 
                  }else{
                 	 clientVm.$message({message:'初始化坐席列表错误',type:'error'});
-                 	 console.error(data);
                  }
 
              })
@@ -384,7 +383,7 @@ var clientVm = new Vue({
                 	 this.uploadBtnDisabled=true;
                 	 this.uploadBtnText='导入中';
 
-              	   axios.post('/client/client/submitQimoClientData',{})
+              	   axios.post('/client/lcClient/submitLcClientData',{})
                      .then(function (response) {
                     	 var data =  response.data;
                          if(data.code=='0'){
