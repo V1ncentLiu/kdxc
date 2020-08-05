@@ -1,5 +1,9 @@
 package com.kuaidao.manageweb.config;
 
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoReq;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -10,14 +14,12 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
+import org.springframework.context.annotation.Lazy;
 
 // 实现AuthorizingRealm接口用户用户认证
 public class MyShiroRealm extends AuthorizingRealm {
 
+    @Lazy
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
 
