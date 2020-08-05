@@ -22,6 +22,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -66,7 +67,7 @@ public class LcClientController {
     /**
      *  跳转乐创页面
      */
-//    @RequiresPermissions("callcenter:lcClient:view")
+    @RequiresPermissions("callcenter:lcClient:view")
     @RequestMapping("/toLcClientPage")
     public String toLcClientPage(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
@@ -95,7 +96,7 @@ public class LcClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:lcClient:view")
+    @RequiresPermissions("callcenter:lcClient:view")
     @PostMapping("/listLcClientPage")
     @ResponseBody
     public JSONResult<PageBean<LcClientRespDTO>> listLcClientPage(
@@ -113,7 +114,7 @@ public class LcClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:lcClient:add")
+    @RequiresPermissions("callcenter:lcClient:add")
     @PostMapping("/saveLcClient")
     @ResponseBody
     public JSONResult<Boolean> saveLcClient(@Valid @RequestBody AddOrUpdateLcClientDTO reqDTO,
@@ -135,7 +136,7 @@ public class LcClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:lcClient:edit")
+    @RequiresPermissions("callcenter:lcClient:edit")
     @PostMapping("/updateLcClient")
     @ResponseBody
     public JSONResult<Boolean> updateLcClient(@Valid @RequestBody AddOrUpdateLcClientDTO reqDTO,
@@ -182,7 +183,7 @@ public class LcClientController {
         return lcClientRespDTOJSONResult;
     }
 
-//    @RequiresPermissions("callcenter:lcClient:delete")
+    @RequiresPermissions("callcenter:lcClient:delete")
     @PostMapping("/deleteLcClient")
     @ResponseBody
     public JSONResult<Boolean> deleteLcClient(@RequestBody IdListReq idListReq) {
@@ -198,7 +199,7 @@ public class LcClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:lcClient:import")
+    @RequiresPermissions("callcenter:lcClient:import")
     @PostMapping("/uploadLcClient")
     @ResponseBody
     public JSONResult uploadLcClient(@RequestParam("file") MultipartFile file) throws Exception {
@@ -249,7 +250,7 @@ public class LcClientController {
         return new JSONResult<>().success(resMap);
     }
 
-//    @RequiresPermissions("callcenter:lcClient:import")
+    @RequiresPermissions("callcenter:lcClient:import")
     @ResponseBody
     @PostMapping("/submitLcClientData")
     public JSONResult<List<ImportLcClientDTO>> submitLcClientData() {
