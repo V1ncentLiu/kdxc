@@ -307,7 +307,7 @@ public class LcClientController {
     }
 
     /**
-     * 七陌 外呼
+     * 乐创 外呼
      */
     @PostMapping("/lcOutboundCall")
     @ResponseBody
@@ -316,13 +316,15 @@ public class LcClientController {
         if(StringUtils.isBlank(customerPhoneNumber)) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"客户手机号为null");
         }
-
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Session session = SecurityUtils.getSubject().getSession();
         callDTO.setCaller((String)session.getAttribute(CALLER));
         callDTO.setCallKey((String)session.getAttribute(CALLKEY));
         callDTO.setLineAppId((String)session.getAttribute(LINEAPPID));
         callDTO.setLineAppKey((String)session.getAttribute(LINEAPPKEY));
         callDTO.setCustomerPhone(customerPhoneNumber);
+        callDTO.setAccountId(curLoginUser.getId());
+        callDTO.setOrgId(curLoginUser.getOrgId());
         return lcClientFeignClient.lcOutbound(callDTO);
     }
 
