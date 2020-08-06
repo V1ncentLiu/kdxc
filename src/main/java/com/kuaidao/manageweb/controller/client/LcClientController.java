@@ -320,6 +320,9 @@ public class LcClientController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Session session = SecurityUtils.getSubject().getSession();
         callDTO.setCaller((String)session.getAttribute(CALLER));
+        if(null == session.getAttribute(CALLER)){
+            return new JSONResult().fail(SysErrorCodeEnum.CALL_NOT_EXIT.getCode(),SysErrorCodeEnum.CALL_NOT_EXIT.getMessage());
+        }
         callDTO.setCallKey((String)session.getAttribute(CALLKEY));
         callDTO.setLineAppId((String)session.getAttribute(LINEAPPID));
         callDTO.setLineAppKey((String)session.getAttribute(LINEAPPKEY));
