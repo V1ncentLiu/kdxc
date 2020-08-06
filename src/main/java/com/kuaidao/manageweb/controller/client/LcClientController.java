@@ -282,6 +282,12 @@ public class LcClientController {
             if(null == lcClientRespDTO) {
                 return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该坐席号不属于您");
             }
+            if(StringUtils.isBlank(lcClientRespDTO.getCaller())){
+                return new JSONResult<>().fail(SysErrorCodeEnum.CALLER_NOT_EXIT.getCode(),SysErrorCodeEnum.CALLER_NOT_EXIT.getMessage());
+            }
+            if(StringUtils.isBlank(reqDTO.getCallLine())){
+                return new JSONResult<>().fail(SysErrorCodeEnum.CALL_LINE_NOT_EXIT.getCode(),SysErrorCodeEnum.CALL_LINE_NOT_EXIT.getMessage());
+            }
             String[] callLines = reqDTO.getCallLine().split(",");
             Session session = SecurityUtils.getSubject().getSession();
             session.setAttribute(CALLER,lcClientRespDTO.getCaller());

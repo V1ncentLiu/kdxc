@@ -220,6 +220,22 @@ var homePageVM=new Vue({
                     { required: true, message: '请选择绑定类型',trigger: 'change'}
                 ],
             },
+            lcClientFormRules:{
+                caller:[
+                    { required: true, message: '主叫手机号不能为空',trigger: 'blur'},
+                    {validator:function(rule,value,callback){
+                            if(!/^[0-9]*$/.test(value)){
+                                callback(new Error("只可以输入数字,不超过11位"));
+                            }else{
+                                callback();
+                            }
+
+                        },trigger:'blur'},
+                ],
+                callLine:[
+                    { required: true, message: '请选择线路',trigger: 'change'}
+                ],
+            },
             rlClientFormRules:{//登录坐席校验规则
                 clientType:[
                     { required: true, message: '请选择呼叫中心',trigger: 'change'}
@@ -1741,6 +1757,8 @@ var homePageVM=new Vue({
                  return this.ktClientFormRules;
             }else if(clientType==5){//容联
                  return this.rlClientFormRules;
+            }else if(clientType==6){
+                return this.lcClientFormRules;
             }
 	    }
 	 }

@@ -47,6 +47,7 @@ var clientVm = new Vue({
 
         	],
              caller:[
+                 { required: true, message: '主叫手机号',trigger: 'blur'},
         		 {validator:function(rule,value,callback){
         			 if(value){
         				  if(!/^[0-9]*$/.test(value)){
