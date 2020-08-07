@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
+    <title>参数管理</title>
+    <style>
+        .formBox .el-form-item__content{width: 100%;}
+    </style>
+</head>
+<body>
+
+<div id="queryForm"  class="mainPadding" style="display: none;padding-bottom: 0;">
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>参数管理</el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <el-row type="flex" class="row-bg" justify="start">
+        <el-col :span="18">
+            <el-button type="primary" @click="openAddDialog()"><i class="el-icon-plus"></i>添加</el-button>
+            <el-button type="success" @click="openUpdateDialog()"><i class="el-icon-edit"></i>编辑</el-button>
+            <el-button type="danger" @click="deleteDic()"><i class="el-icon-delete"></i>删除</el-button>
+        </el-col>
+        <el-col :span="6" style="text-align: right;">
+            <el-form :inline="true" :model="formInline" class="formBox" ref="queryForm" >
+                <el-form-item label="" prop="name" style="margin-right: 0;width: 100%">
+                    <el-input v-model="formInline.code" placeholder="请输入参数编码进行查询">
+                        <el-button slot="append" icon="el-icon-search" @click="onSubmit">搜索</el-button>
+                    </el-input>
+                </el-form-item>
+            </el-form>
+        </el-col>
+    </el-row>
+</div>
+
+<div id="pagination" class="mainPadding" style="padding-top: 0;">
+    <div class="mainSearchBg">
+        <template>
+            <el-table :data="tableData3" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow" @row-dblclick="rowDblClick()" @selection-change="handleSelectionChange" border>
+                <el-table-column type="selection" width="55" prop="id" align="center"></el-table-column>
+                <el-table-column prop="code" label="参数编码" align="center"></el-table-column>
+                <el-table-column prop="value" label="参数值" align="center"></el-table-column>
+                <el-table-column prop="description" label="描述" align="center"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
+
+                <el-table-column prop="updateTime" label="修改时间"  :formatter="dateFormat"  align="center"></el-table-column>
+            </el-table>
+        </template>
+
+        <template>
+            <div class="block">
+                <el-pagination @size-change="handleSizeChange"
+                               @current-change="handleCurrentChange" :current-page="currentPage"
+                               :page-sizes="[20, 50, 100]" :page-size="pageSize"
+                               layout="total, sizes, prev, pager, next, jumper" :total="total">
+                </el-pagination>
+            </div>
+        </template>
+    </div>
+</div>
+
+<!--添加弹窗-->
+<div id="addDialog">
+    <template>
+        <el-dialog title="添加参数" :visible.sync="dialogFormVisible" width="540px">
+            <el-form :model="add" ref="add" :rules="rules">
+                <el-form-item label="参数编码：" :label-width="formLabelWidth" prop="code">
+                    <el-input v-model="add.code" autocomplete="off"  maxlength="50" style="width: 290px;" ></el-input>
+                </el-form-item>
+                <el-form-item label="参数值：" :label-width="formLabelWidth" prop="value">
+                    <el-input v-model="add.value" autocomplete="off" maxlength="200"  style="width: 290px;"></el-input>
+                </el-form-item>
+                <el-form-item label="描述：" :label-width="formLabelWidth" prop="description">
+                    <el-input type="textarea" v-model="add.description" autocomplete="off" maxlength="200" :rows="3"  placeholder="填写描述信息（200字以内）" style="width: 290px;"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer" style="text-align:center;">
+                <el-button type="primary" :disabled="btnDisabled" @click="saveOneDictionary">确 定</el-button>
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+            </div>
+        </el-dialog>
+    </template>
+</div>
+
+
+<div id="updateDialog">
+    <template>
+        <el-dialog title="编辑参数"  :visible.sync="updateDialogFormVisible"  width="540px">
+            <el-form :model="add" ref="add" :rules="rules">
+                <el-form-item label="参数编码："  :label-width="formLabelWidth"  prop="code">
+                    <el-input v-model="add.code" autocomplete="off"  maxlength="50" style="width: 290px;" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="参数值："  :label-width="formLabelWidth"  prop="value">
+                    <el-input v-model="add.value" autocomplete="off"  maxlength="200" style="width: 290px;"></el-input>
+                </el-form-item>
+                <el-form-item label="描述：" :label-width="formLabelWidth"   prop="description">
+                    <el-input  type="textarea" v-model="add.description" autocomplete="off" maxlength="200" :rows="3" placeholder="填写描述信息（200字以内）" style="width: 290px;"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer"  style="text-align:center;">
+                <el-button type="primary" :disabled="btnDisabled" @click="update">确 定</el-button>
+                <el-button @click="updateDialogFormVisible = false">取 消</el-button>
+            </div>
+        </el-dialog>
+
+    </template>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<script>
+    // <!--删除提示弹窗 -->
+
+    // <!--更新弹窗-->
+    var updateDialogVm = new Vue({
+        el: '#updateDialog',
+        data:{
+            btnDisabled: false,
+            formLabelWidth:"120px",
+            updateDialogFormVisible:false,
+            add:{
+                code:"",
+                value:"",
+                description:""
+            },
+            rules: {
+                code: [
+                    {required: true, message: '请输入参数编码', trigger: 'blur'},
+                    {min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur'}
+                ],
+                value: [
+                    {required: true, message: '请输入参数值', trigger: 'blur'},
+                    {min: 1, max: 200, message: '长度在 1 到 200 个字符', trigger: 'blur'}
+                ],
+                description:[
+                    {min: 1, max: 200, message: '长度在 1 到 200 个字符', trigger: 'blur'}
+                ]
+            }
+        },
+        methods:{
+            initUpdateData(code){
+                var param = {};
+                param.code = code;
+                axios.post('/sys/setting/findSysSettingByCode', param)
+                    .then(function (response) {
+                        updateDialogVm.add = response.data.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            update(){
+                var param =  updateDialogVm.add;
+                param.id =  paginationVm.multipleSelection[0].id;
+                this.btnDisabled = true;
+                axios.post('/sys/setting/updateSysSettingByCode', param)
+                    .then(function (response) {
+                        console.log(response.data)
+                        if(response.data.code==0){
+                            updateDialogVm.updateDialogFormVisible=false;
+                            updateDialogVm.$message({type: 'success', message: '更新成功!',duration:2000,onClose:function(){
+                                    updateDialogVm.btnDisabled = false;
+                                    paginationVm.initTableData(paginationVm.pageNum);
+                                }});
+                        }else{
+                            updateDialogVm.$message.error(response.data.msg);
+                            updateDialogVm.btnDisabled = false;
+                        }
+                    })
+                    .catch(function (error) {
+                        updateDialogVm.btnDisabled = false;
+                        console.log(error);
+                    });
+            },
+            resetForm(formName) {
+                if(updateDialogVm.$refs[formName])
+                    updateDialogVm.$refs[formName].resetFields();
+            },
+            showOutVisiable:function(){
+                this.updateDialogFormVisible = true
+            }
+        },
+        created() {
+            console.info("create method");
+            // this.initUpdateData(1);
+        }
+
+    });
+    // <!--新增弹窗 -->
+    var addDialogVm = new Vue({
+        el: '#addDialog',
+        data:{
+            btnDisabled: false,
+            formLabelWidth:"120px",
+            dialogFormVisible:false,
+            add:{
+                code:"",
+                value:"",
+                description:""
+            },
+            rules: {
+                code: [
+                    {required: true, message: '请输入参数编码', trigger: 'blur'},
+                    {min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur'}
+                ],
+                value: [
+                    {required: true, message: '请输入参数值', trigger: 'blur'},
+                    {min: 1, max: 200, message: '长度在 1 到 200 个字符', trigger: 'blur'}
+                ],
+                description:[
+                    {min: 1, max: 200, message: '长度在 1 到 200 个字符', trigger: 'blur'}
+                ]
+            }
+        },
+        methods:{
+            resetForm(formName) {
+                if(addDialogVm.$refs[formName])
+                    addDialogVm.$refs[formName].resetFields();
+            },
+            showOutVisiable:function(){
+                this.dialogFormVisible = true
+            },
+            saveOneDictionary:function(){
+                var param = addDialogVm.add;
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        addDialogVm.btnDisabled = true;
+                        axios.post('/sys/setting/addSysSetting', param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    addDialogVm.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
+                                            paginationVm.btnDisabled = false;
+                                            paginationVm.initTableData(1);
+                                        }});
+                                    addDialogVm.dialogFormVisible = false;
+                                    addDialogVm.btnDisabled = false;
+                                } else {
+                                    console.log(response.data)
+                                    addDialogVm.$message.error(response.data.msg);
+                                    addDialogVm.btnDisabled = false;
+                                }
+
+                            })
+                            .catch(function (error) {
+                                addDialogVm.btnDisabled = false;
+                                console.log(error);
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+        }
+    });
+    // 查询 模块
+    var queryFormVM = new Vue({
+        el: '#queryForm',
+        data: {
+            formInline: {
+                "name": '',
+            }
+        },
+        methods: {
+            openAddDialog:function(){
+                addDialogVm.dialogFormVisible = true
+                addDialogVm.resetForm('add');
+            },
+            openUpdateDialog:function(){
+                if(paginationVm.multipleSelection.length!=1){
+                    // queryFormVM.$message.error('请选择一条编辑数据');
+                    queryFormVM.$message({message: '请选择一条数据进行编辑',type: 'warning'});
+                    return false;
+                }
+                updateDialogVm.resetForm('add');
+                updateDialogVm.updateDialogFormVisible = true;
+                var row = paginationVm.multipleSelection[0];
+                updateDialogVm.initUpdateData(row.code);
+            },
+            deleteDic:function(){
+                var rows = paginationVm.multipleSelection;
+                if(rows.length==0){
+                    this.$message({message: '请选择删除数据', type: 'warning'});
+                    return false;
+                }else{
+                    var codes = "";
+                    for(var i=0;i<rows.length;i++){
+                        codes = codes + '【'+rows[i].code+'】';
+                    }
+                    var str = '确定要删除'+codes+'系统参数吗?';
+                    this.$confirm(str, '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
+                        //拼接rowIds
+                        var rowIds = [];
+                        for(var i=0;i<rows.length;i++){
+                            rowIds.push(rows[i].code)
+                        }
+                        //调用后台数据删除操作。
+                        var param={};
+                        param.codes = rowIds.join(",");
+
+                        console.info(param);
+                        axios.post('/sys/setting/deleteSysSettingByCode', param)
+                            .then(function (response) {
+                                // console.log()
+                                // if(response.data.){
+                                //
+                                // }
+                                queryFormVM.$message({type: 'success', message: '确定删除!',duration:2000,onClose:function(){
+                                        paginationVm.initTableData(1);
+                                    }});
+                            })
+                            .catch(function (error) {
+                                queryFormVM.$message.error(error);
+                                console.log(error);
+                            });
+
+                    }).catch(() => {
+                        this.$message({type: 'info', message: '已取消删除'});
+                    });
+                }
+            },
+            onSubmit() {
+                var param = queryFormVM.formInline;
+                param.pageSize = paginationVm.pageSize;
+                param.pageNum = paginationVm.pageNum;
+                console.log(param)
+                axios.post('/sys/setting/querySysSettingByPage', param)
+                    .then(function (response) {
+                        var data = response.data.data;
+                        paginationVm.tableData3 = data.data;
+                        paginationVm.total = data.total;
+                        paginationVm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            resetForm(formName) {
+                queryFormVM.$refs[formName].resetFields();
+                this.$refs[formName].resetFields();
+            }
+        },
+        mounted(){
+            document.getElementById('queryForm').style.display = 'block';
+        }
+    });
+
+    //带分页的table
+    var paginationVm = new Vue({
+        el: '#pagination',
+        data: {
+            tableData3: [],
+            multipleSelection:[],
+            currentPage: 1,
+            total: 0,
+            pageNum: 1,
+            pageSize: 20
+        },
+        methods: {
+            rowDblClick(row, event){
+                // alert("行双击事件")
+            },
+            selectRow(row){
+            },
+            handleSelectionChange(val) {
+                console.info(val);
+                this.multipleSelection = val;
+            },
+            handleSizeChange(val) {
+                //下拉框  每页 10,20条切换 调用
+                console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                localStorage.setItem('allChangePageSize', val);
+                this.initTableData(1);
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                this.pageNum = val;
+                this.initTableData(val);
+            },
+            //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            initTableData(v_pageNum) {
+                var param = queryFormVM.formInline;
+                param.pageSize = this.pageSize;
+                param.pageNum = v_pageNum;
+                axios.post('/sys/setting/querySysSettingByPage', param)
+                    .then(function (response) {
+                        var data = response.data.data;
+                        console.log(data)
+                        paginationVm.tableData3 = data.data;
+                        paginationVm.total = data.total;
+                        paginationVm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+            }
+        },
+        created() {
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pageSize = localVal;}
+            this.initTableData(1);
+        },
+        mounted() {
+            console.info("mounted method");
+        }
+
+    });
+
+</script>
+</body>
+</html>

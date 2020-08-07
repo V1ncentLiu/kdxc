@@ -60,20 +60,22 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="创建时间:">
+                <el-form-item label="分配时间:">
                     <el-date-picker
-                        v-model="form.createTimeStart"
-                        type="datetime"
-                        placeholder="选择日期时间"
-                        >
+
+                            v-model="form.distributionTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间"
+                            :disabled="disabledCreateTime">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
                     <el-date-picker
-                        v-model="form.createTimeEnd"
-                        type="datetime"
-                        placeholder="选择日期时间"
-                        >
+
+                            v-model="form.distributionTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间"
+                            :disabled="disabledCreateTime">
                     </el-date-picker>
                 </el-form-item>
                 <!--
@@ -122,22 +124,20 @@
                              </el-option>
                          </el-select>
                      </el-form-item> -->
-                    <el-form-item label="分配时间:">
+                    <el-form-item label="创建时间:">
                         <el-date-picker
-
-                            v-model="form.distributionTimeStart"
-                            type="datetime"
-                            placeholder="选择日期时间"
-                            :disabled="disabledCreateTime">
+                                v-model="form.createTimeStart"
+                                type="datetime"
+                                placeholder="选择日期时间"
+                        >
                         </el-date-picker>
                     </el-form-item>
                     <el-form-item label="—" class="widthauto">
                         <el-date-picker
-
-                            v-model="form.distributionTimeEnd"
-                            type="datetime"
-                            placeholder="选择日期时间"
-                            :disabled="disabledCreateTime">
+                                v-model="form.createTimeEnd"
+                                type="datetime"
+                                placeholder="选择日期时间"
+                        >
                         </el-date-picker>
                     </el-form-item>
 
@@ -1895,9 +1895,10 @@
                 this.dataUrlParam.dataUrlArr[3].isActive=true;
                 this.disabledTeleReceiveSource=true;
             }
+        }else{
+            this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
+            this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
         }
-      
-
       //初始化数据列表
       this.initTableData();
     }

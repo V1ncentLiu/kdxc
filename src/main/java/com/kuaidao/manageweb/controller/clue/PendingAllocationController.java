@@ -191,6 +191,7 @@ public class PendingAllocationController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("type", type);
+        request.setAttribute("businessLine", user.getBusinessLine());
         return "clue/pendingAllocationManagerPage";
     }
 

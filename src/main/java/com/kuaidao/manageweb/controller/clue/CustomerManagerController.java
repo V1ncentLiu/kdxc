@@ -146,6 +146,7 @@ public class CustomerManagerController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
+        request.setAttribute("businessLine", user.getBusinessLine());
         return "clue/customManagement";
     }
 
