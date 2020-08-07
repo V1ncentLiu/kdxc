@@ -282,7 +282,7 @@ var myCallRecordVm = new Vue({
                 window.parent.open(httpUrl);
     			return;
     		}
-    		if(callSource == '4'){
+    		if(callSource == '4'||callSource == '6'){//6是乐创
     		    var realUrl = url.substring(0,url.lastIndexOf("/"));
                 var page = window.open();
                 var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+realUrl+"' controls='controls' autoplay></audio></div></body>";
