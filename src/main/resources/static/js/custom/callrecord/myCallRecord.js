@@ -282,12 +282,19 @@ var myCallRecordVm = new Vue({
                 window.parent.open(httpUrl);
     			return;
     		}
-    		if(callSource == '4'||callSource == '6'){//6是乐创
+    		if(callSource == '4'){
     		    var realUrl = url.substring(0,url.lastIndexOf("/"));
                 var page = window.open();
                 var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+realUrl+"' controls='controls' autoplay></audio></div></body>";
                 page.document.write(html);
     		    return;
+            }
+            if(callSource == '6'){
+                var realUrl = url.substring(0,url.lastIndexOf("/"));
+                var page = window.open();
+                var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio preload="auto"  src='"+realUrl+"' controls="controls" v-if="getWeb" ></audio><embed height="36" width="300" src='"+realUrl+"' menu="true" loop="false" align="center" preload="auto" autostart="false"  style="margin:0px auto;border:3px solid gray; border-radius: 30px;padding:10px;background-color:#F8F8F8"  v-if="getWebIE"></div></body>";
+                page.document.write(html);
+                return;
             }
             var newWindow = window.open();
     		var param = {};
