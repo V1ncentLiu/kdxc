@@ -61,22 +61,3 @@ if(canment=="unionStorage"){
         elBreadcrumb[0].style.display="none";
     }
 }
-
-function getWeb() {
-    var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
-    if ((userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0"))||((userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1))) {
-        return false;
-    } //判断是否IE浏览器
-    else{
-        return true;
-    }
-}
-function getWebIE(){
-   var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
-   if ((userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0"))||(userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1)) {
-    return true;
-  } //判断是否IE浏览器
-  else{
-    return false;
-  }
-}

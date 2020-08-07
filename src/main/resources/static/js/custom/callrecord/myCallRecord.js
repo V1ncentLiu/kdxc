@@ -290,9 +290,8 @@ var myCallRecordVm = new Vue({
     		    return;
             }
             if(callSource == '6'){
-                var realUrl = url.substring(0,url.lastIndexOf("/"));
                 var page = window.open();
-                var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio preload="auto"  src='"+realUrl+"' controls="controls" v-if="getWeb" ></audio><embed height="36" width="300" src='"+realUrl+"' menu="true" loop="false" align="center" preload="auto" autostart="false"  style="margin:0px auto;border:3px solid gray; border-radius: 30px;padding:10px;background-color:#F8F8F8"  v-if="getWebIE"></div></body>";
+                var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+url+"' controls='controls' autoplay></audio></div></body>";
                 page.document.write(html);
                 return;
             }
