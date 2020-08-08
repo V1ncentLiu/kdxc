@@ -1811,20 +1811,7 @@
     },
     created(){
       // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
-      // 进入页面判断有是否有存储值
-      if(!this.paginationShow){
-        var storeVal = this.getSessionStore("storeForm");
-        var otherVal = this.getSessionStore("otherVal");
-        if(storeVal && otherVal){
-          this.form = storeVal;
-          this.$set(this.pager,"currentPage",otherVal.currentPage);
-          this.storeId = otherVal.clueId;
-          this.scrollTop = otherVal.scrollTop;
-        }
-        // 取页数存储
-        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;}
-      }
+      
       //是否已签约 -默认查未签约的
         this.form.isSign = 0;
       
@@ -1898,6 +1885,20 @@
         }else{
             this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
             this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
+            // 进入页面判断有是否有存储值
+          if(!this.paginationShow){
+            var storeVal = this.getSessionStore("storeForm");
+            var otherVal = this.getSessionStore("otherVal");
+            if(storeVal && otherVal){
+              this.form = storeVal;
+              this.$set(this.pager,"currentPage",otherVal.currentPage);
+              this.storeId = otherVal.clueId;
+              this.scrollTop = otherVal.scrollTop;
+            }
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+          }
         }
       //初始化数据列表
       this.initTableData();
