@@ -1,7 +1,5 @@
 package com.kuaidao.manageweb.controller.pubcustomer;
 
-import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
-import com.kuaidao.manageweb.service.telelayout.ITelemarketingLayoutService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
@@ -30,6 +32,7 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.service.telelayout.ITelemarketingLayoutService;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
@@ -131,7 +134,8 @@ public class PublicCustomerResourcesController {
      * 分页查询
      */
     @RequestMapping("/listPage")
-    public String listPage(HttpServletRequest request, @RequestParam(required = false) Integer type) {
+    public String listPage(HttpServletRequest request,
+            @RequestParam(required = false) Integer type) {
         logger.info("------------ 公共客户资源列表 ---------------");
         // 电销组
         List dxzList = new ArrayList();
@@ -257,14 +261,14 @@ public class PublicCustomerResourcesController {
                 || RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             logger.info("共有池电销相关角色:{}", roleCode);
             dto.setRoleCode(roleInfoDTO.getRoleCode());
-            Long orgId = user.getOrgId();
+            // Long orgId = user.getOrgId();
             // 获取电销组所在集团
-            Long cmpanyGroupId = telemarketingLayoutService.getTelemarketingLayout(orgId);
+            // Long cmpanyGroupId = telemarketingLayoutService.getTelemarketingLayout(orgId);
             // 获取集团所在包好全部电销组
-            List<Long> teleTeamIdOnCompanyGroup = telemarketingLayoutService
-                .getTeleTeamIdOnCompanyGroup(cmpanyGroupId);
+            // List<Long> teleTeamIdOnCompanyGroup = telemarketingLayoutService
+            // .getTeleTeamIdOnCompanyGroup(cmpanyGroupId);
             // 设置参数
-            dto.setTeleGroupIdList(teleTeamIdOnCompanyGroup);
+            // dto.setTeleGroupIdList(teleTeamIdOnCompanyGroup);
         }
         dto.setBusinessLine(user.getBusinessLine());
         return publicCustomerFeignClient.queryListPage(dto);
