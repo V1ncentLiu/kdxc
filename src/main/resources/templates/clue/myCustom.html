@@ -213,19 +213,19 @@
                         <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                     </el-form-item>
                     <el-form-item label="最后拨打时间:">
-	                    <el-date-picker
-	                        v-model="form.telEndTimeStart"
-	                        type="datetime"
-	                        placeholder="选择日期时间">
-	                    </el-date-picker>
-	                </el-form-item>
-	                <el-form-item label="—" class="widthauto">
-	                    <el-date-picker
-	                        v-model="form.telEndTimeEnd"
-	                        type="datetime"
-	                        placeholder="选择日期时间">
-	                    </el-date-picker>
-	                </el-form-item>
+                        <el-date-picker
+                            v-model="form.telEndTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.telEndTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
                     <el-form-item label="QQ:">
                         <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
                     </el-form-item>
@@ -268,10 +268,10 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源来源:">
-	                    <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源" :disabled="disabledTeleReceiveSource">
-	                        <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-	                    </el-select>
-	                </el-form-item>
+                        <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源" :disabled="disabledTeleReceiveSource">
+                            <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
@@ -893,9 +893,9 @@
           teleReceiveSource:"",
         },
         teleReceiveSourceArr:[
-        	 {value:"1",name:"分配"},
+             {value:"1",name:"分配"},
              {value:"3",name:"领取"},
-        	 {value:"4",name:"自建"},
+             {value:"4",name:"自建"},
              {value:"5",name:"分发"}
         ],
         consultResultsArr:[
@@ -1203,21 +1203,21 @@
             this.repeatCurClueArr=[];
         },
         async gettelNumberIcon(tel,clueId) {
-        	var isReturn =false;
-        	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
+            var isReturn =false;
+            await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
             .then(function (response) {
-            	if(response.data !=""){
-            		mycustomVM.$message({
+                if(response.data !=""){
+                    mycustomVM.$message({
                         message: response.data,
                         type: 'warning'
                     });
-            		isReturn = true; ;
-            	}
+                    isReturn = true; ;
+                }
                ;
             });
-        	if(isReturn){
-        		return;
-        	}
+            if(isReturn){
+                return;
+            }
         //外呼手机
         var param = {};
         param.clueId = clueId;
@@ -1688,21 +1688,21 @@
       },
       //外呼号码
       async outboundCall(outboundInputPhone,clueId){//外呼
-    	  var isReturn =false;
-      	await axios.post('/call/callRecord/missedCalPhone?phone='+outboundInputPhone, {})
+          var isReturn =false;
+        await axios.post('/call/callRecord/missedCalPhone?phone='+outboundInputPhone, {})
           .then(function (response) {
-          	if(response.data !=""){
-          		mycustomVM.$message({
+            if(response.data !=""){
+                mycustomVM.$message({
                       message: response.data,
                       type: 'warning'
                   });
-          		isReturn = true; ;
-          	}
+                isReturn = true; ;
+            }
              ;
           });
-      	if(isReturn){
-      		return;
-      	}
+        if(isReturn){
+            return;
+        }
         var  param={};
         param.clueId=clueId;
         window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){
@@ -1811,20 +1811,7 @@
     },
     created(){
       // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
-      // 进入页面判断有是否有存储值
-      if(!this.paginationShow){
-        var storeVal = this.getSessionStore("storeForm");
-        var otherVal = this.getSessionStore("otherVal");
-        if(storeVal && otherVal){
-          this.form = storeVal;
-          this.$set(this.pager,"currentPage",otherVal.currentPage);
-          this.storeId = otherVal.clueId;
-          this.scrollTop = otherVal.scrollTop;
-        }
-        // 取页数存储
-        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;}
-      }
+      
       //是否已签约 -默认查未签约的
         this.form.isSign = 0;
       
@@ -1898,6 +1885,20 @@
         }else{
             this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
             this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
+            // 进入页面判断有是否有存储值
+          if(!this.paginationShow){
+            var storeVal = this.getSessionStore("storeForm");
+            var otherVal = this.getSessionStore("otherVal");
+            if(storeVal && otherVal){
+              this.form = storeVal;
+              this.$set(this.pager,"currentPage",otherVal.currentPage);
+              this.storeId = otherVal.clueId;
+              this.scrollTop = otherVal.scrollTop;
+            }
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+          }
         }
       //初始化数据列表
       this.initTableData();
