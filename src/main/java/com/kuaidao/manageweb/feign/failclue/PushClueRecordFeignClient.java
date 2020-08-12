@@ -18,7 +18,7 @@ import com.kuaidao.publish.dto.clue.PushClueRecord;
  * @date: 2019年3月14日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/pushClueRecord",
+@FeignClient(name = "aggregation-service", path = "/aggregation/pushClueRecord",
         fallback = PushClueRecordFeignClient.HystrixClientFallback.class)
 public interface PushClueRecordFeignClient {
 
