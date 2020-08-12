@@ -3,13 +3,15 @@
  */
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -73,7 +75,8 @@ public class PendingAllocationController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
-
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
     /***
      * 待分配资源列表页
      * 
@@ -192,6 +195,8 @@ public class PendingAllocationController {
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("type", type);
         request.setAttribute("businessLine", user.getBusinessLine());
+        Boolean canCopy = handleCanCopy(user.getBusinessLine());
+        request.setAttribute("canCopy", canCopy);
         return "clue/pendingAllocationManagerPage";
     }
 
@@ -465,4 +470,36 @@ public class PendingAllocationController {
         return orgJr.getData();
     }
 
+    /**
+     * @Description:处理当前登录业务线是否能复制
+     * @Param:
+     * @return:
+     * @author: fanjd
+     * @date: 2020/8/12 14:32
+     * @version: V1.0
+     */
+    private Boolean handleCanCopy(Integer businessLine) {
+        // 获取外包业务线
+        String wbBusinessLine = getSysSetting(SysConstant.WB_BUSINESSLINE);
+        if (null== wbBusinessLine) {
+            return  false;
+        }
+        List<String> wbBusinessLineList = Arrays.asList(wbBusinessLine.split(","));
+        if (wbBusinessLineList.contains(String.valueOf(businessLine))) {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * 查询系统参数
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
 }
