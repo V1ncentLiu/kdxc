@@ -32,7 +32,9 @@ public class TrackingRecordController {
      */
     @RequestMapping("/queryList")
     public JSONResult<List<TrackingRespDTO>> queryPageList(@RequestBody TrackingReqDTO dto) {
-        dto.setStage(StageContant.STAGE_TELE);
+        if(dto ==null || dto.getStage() ==null){
+            dto.setStage(StageContant.STAGE_TELE);
+        }
         JSONResult<List<TrackingRespDTO>> listJSONResult = trackingFeignClient.queryList(dto);
         return listJSONResult;
     }
