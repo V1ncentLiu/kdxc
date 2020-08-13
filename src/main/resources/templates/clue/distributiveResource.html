@@ -86,7 +86,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源项目:">
-                        <el-select v-model="form.resourceProject" placeholder="资源项目" clearable filterable>
+                        <el-select v-model="form.resourceProjectList" placeholder="资源项目" clearable filterable multiple>
                             <el-option
                                     v-for="item in proSelectArr"
                                     :key="item.id"
@@ -120,7 +120,7 @@
                         </el-date-picker>
                     </el-form-item>
                     <el-form-item label="资源类别:">
-                        <el-select v-model="form.resourceType" placeholder="资源类别" clearable filterable>
+                        <el-select v-model="form.resourceTypeList" placeholder="资源类别" clearable filterable multiple>
                             <el-option
                                     v-for="item in categoryArr"
                                     :key="item.value"
@@ -254,6 +254,36 @@
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="业务线:">
+                        <el-select v-model="form.businessLine" placeholder="业务线" clearable   filterable>
+                            <el-option
+                                    v-for="item in businessLineArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="话务专员:">
+                        <el-select v-model="form.operatorId" placeholder="话务专员" clearable   filterable >
+                            <el-option
+                                    v-for="item in hwzyUserArr"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="首次分配话务组:">
+                        <el-select v-model="form.firstAsssignTrafficGroupId" placeholder="首次分配话务组" clearable filterable>
+                            <el-option
+                                    v-for="item in hwzyGroupList"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -452,6 +482,7 @@
 <script th:inline="javascript" >
     var proSelect=[[${proSelect}]];
     var userList=[[${userList}]];
+    var hwzyUserList=[[${hwzyUserList}]];
     var fieldList=[[${fieldList}]];//自定义字段
     var userFieldList=[[${userFieldList}]];//用户自定义字段
     var ocmVM = new Vue({
@@ -502,6 +533,11 @@
                     email:"",
                     siteIsNull:"",
                     buildSelf:"",
+                    resourceProjectList:[],
+                    resourceTypeList:[],
+                    businessLine:"",
+                    operatorId:"",
+                    firstAsssignTrafficGroupId:"",
                 },
                 pager:{
                     total: 0,
@@ -515,15 +551,18 @@
                 dialogForm:{},
                 formLabelWidth: '120px',
                 dxBusinessList:[],
+                hwzyGroupList:[],
                 industryCategoryArr:[],
                 categoryArr:[],
                 typeArr:[],
                 mediumArry:[],
                 phaseArr:[],
                 dxList:[],
+                businessLineArr:[],
                 dxCauseBList:[],
                 proSelectArr:proSelect,
                 userArr:userList,
+                hwzyUserArr:hwzyUserList,
                 comArr:[
                     {value:"",name:"全部"},
                     {value:"1",name:"是"},
@@ -648,6 +687,14 @@
                 param.searchWord=this.form.searchWord;
                 param.sourcetwo=this.form.sourcetwo;
                 param.buildSelf = this.form.buildSelf;
+
+                param.projectList = this.form.resourceProjectList;
+                param.categoryList = this.form.resourceTypeList;
+                param.businessLine = this.form.businessLine;
+                param.businessLine = this.form.businessLine;
+                param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
+                param.operatorId = this.form.operatorId;
+
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(pageNum > 5000){
@@ -845,6 +892,8 @@
                     // param.parentId = this.form.telemarketingBranch;
                 }else if(type ==0){
                     param.orgType="8";
+                }else if(type ==21){
+                    param.orgType="21";
                 }
                 axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
                     //    console.log(response);
@@ -852,6 +901,8 @@
                         ocmVM.dxList = response.data.data;
                     }else if(type ==7){
                         ocmVM.dxCauseBList = response.data.data;
+                    }else if(type ==21){
+                        ocmVM.hwzyGroupList = response.data.data;
                     }else{
                         ocmVM.dxBusinessList = response.data.data;
                     }
@@ -1252,7 +1303,13 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 ocmVM.industryCategoryArr=response.data.data;
             });
-
+            //初始化业务线数据
+            param={};
+            param.groupCode="businessLine";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                // console.log(response.data.data)
+                ocmVM.businessLineArr=response.data.data;
+            });
             //初始化线索阶段
             param={};
             param.groupCode="phase";
@@ -1272,6 +1329,8 @@
             this.showTele(0);
             this.showTele(7);
             this.showTele(1);
+            //话务组
+            this.showTele(21);
         }
     })
 
