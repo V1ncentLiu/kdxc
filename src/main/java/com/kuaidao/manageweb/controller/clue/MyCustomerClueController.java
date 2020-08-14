@@ -93,6 +93,8 @@ public class MyCustomerClueController {
     private static final Integer DAY_15 = 15;
     private static final Integer DAY_7 = 7;
     private static final Integer DIFF_MIN = 10;
+    /**今日跟访次数0次**/
+    private static  final  String TODAYFOLLOWNUM_ZERO = "0";
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -180,7 +182,7 @@ public class MyCustomerClueController {
         }
         request.setAttribute("isShowRepetition", isShowRepetition);
         request.setAttribute("type", type);
-        List<String> todayFollowNumList =  buildTodayFollowNum();
+        List<String> todayFollowNumList =  buildTodayFollowNum(user.getRoleList().get(0).getRoleCode());
         request.setAttribute("todayFollowNumList", todayFollowNumList);
         return "clue/myCustom";
     }
@@ -1780,14 +1782,23 @@ public class MyCustomerClueController {
      * @date: 2020/8/12 14:32
      * @version: V1.0
      */
-    private List<String> buildTodayFollowNum() {
+    private List<String> buildTodayFollowNum(String  roleCode) {
+        List<String> todayFollowNumList =    new ArrayList<>();
         // 获取外包业务线
         String todayFollowNumStr = getSysSetting(SysConstant.TODAYFOLLOWNUM);
         if (StringUtils.isBlank(todayFollowNumStr)) {
-            return  new ArrayList<>();
+           return  todayFollowNumList;
         }
-        List<String> todayFollowNumList = Arrays.asList(todayFollowNumStr.split(","));
-
+        String []  todayFollowNumArr = todayFollowNumStr.split(",");
+        for (String str : todayFollowNumArr) {
+            if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+                if (!TODAYFOLLOWNUM_ZERO.equals(str)) {
+                    todayFollowNumList.add(str) ;
+                }
+            }else{
+                todayFollowNumList.add(str) ;
+            }
+        }
         return todayFollowNumList;
     }
 }
