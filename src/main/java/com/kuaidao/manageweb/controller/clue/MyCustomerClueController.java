@@ -1736,20 +1736,23 @@ public class MyCustomerClueController {
             pushClueReq.setDay(DAY_15);
         }
         // 渠道拓展业务线手机号微信验证
-        if (user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)) {
+        /*if (user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)) {
             pushClueReq.setBusinessLine(BusinessLineConstant.QUDAOTUOZHAN);
             pushClueReq.setDay(DAY_7);
-        }
+        }*/
         // 商机盒子业务线手机号微信验证
         if (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)) {
             pushClueReq.setBusinessLine(BusinessLineConstant.SHANGJI);
             pushClueReq.setDay(DAY_15);
         }
-        JSONResult<Boolean> clueByParamRes =
-                deduplicationDetailFeignClient.getClueByParam(pushClueReq);
-        if (JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()) {
-            return "此号码已存在，不允许进行再次进行创建";
+        if (user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) || user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)) {
+            JSONResult<Boolean> clueByParamRes =
+                    deduplicationDetailFeignClient.getClueByParam(pushClueReq);
+            if (JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()) {
+                return "此号码已存在，不允许进行再次进行创建";
+            }
         }
+
         return "";
     }
 
