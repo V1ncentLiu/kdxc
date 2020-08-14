@@ -26,6 +26,10 @@
 		<shiro:hasPermission name="apply:transferApply">
 			<el-button type="warning" @click="dealButton" >转发给顾问</a></el-button>
 		</shiro:hasPermission>
+		<shiro:hasPermission name="apply:customerDefinitionApply">
+			<el-button type="warning" @click="applyButton" >申请客户界定</a></el-button>
+		</shiro:hasPermission>
+
 
     </el-row>
     <div class="mainSearchBg">        
@@ -36,6 +40,16 @@
 				</el-form-item>
 				<el-form-item label="客户姓名:">
 					<el-input v-model="name" maxLength="20" placeholder="客户姓名" ></el-input>
+				</el-form-item>
+				<el-form-item label="电销组:">
+					<el-select v-model="teleGroupId" placeholder="电销组" style="width: 100%;" clearable  filterable >
+						<el-option
+								v-for="item in teleGroupList"
+								:key="item.id"
+								:label="item.name"
+								:value="item.id">
+						</el-option>
+					</el-select>
 				</el-form-item>
 				<el-form-item label="提交时间:">
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
@@ -70,6 +84,9 @@
                 <el-table-column align="center" prop="totalMoney" label="投入资金" ></el-table-column>
                 <el-table-column align="center" prop="inspectTime" label="考察日期" ></el-table-column>
                 <el-table-column align="center" prop="createTime" label="提交时间":formatter="dateFormat" ></el-table-column>
+				<el-table-column align="center" prop="customerDefinitionName" label="客户界定" ></el-table-column>
+				<el-table-column align="center" prop="teleGroupName" label="电销组" ></el-table-column>
+				<el-table-column align="center" prop="consultantName" label="您的顾问" ></el-table-column>
                 <el-table-column align="center" prop="teleSaleName" label="当前转发顾问" ></el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
@@ -96,7 +113,25 @@
 			<el-button @click="distributionPdzySyc= false">取消</el-button>
 		</div>
 	</el-dialog>
-
+	<!-- dialog -->
+	<el-dialog title="标记申请客户界定" :visible.sync="distriappbution" width="540px">
+		<el-form :model="applyform" ref="applyform" :rules="applyformrules">
+			<el-form-item label="申请客户界定：" :label-width="formLabelWidth"  prop="customerDefinition">
+				<el-select filterable v-model="applyform.customerDefinition" placeholder="申请客户界定" style="width:80%;">
+					<el-option
+							v-for="item in customerDefinitionList"
+							:key="item.value"
+							:label="item.name"
+							:value="item.value">
+					</el-option>
+				</el-select>
+			</el-form-item>
+		</el-form>
+		<div slot="footer" style="text-align: center" class="dialog-footer">
+			<el-button type="primary" :disabled="btnDisabled" @click="addApplybutton('applyform')">提交</el-button>
+			<el-button @click="distriappbution= false">取消</el-button>
+		</div>
+	</el-dialog>
 	<!-- dialog -->
 	<el-dialog title="申请详情" :visible.sync="viewFormVisible" width="870px">
 		<el-form :model="viewForm" ref="viewForm" class="marginB20 dialogForm" >
@@ -194,9 +229,16 @@
 <script th:inline="javascript">
 
 	var userInfoList = [[${saleList}]];
+	var teleGroupList =[[${teleGroupList}]]
+	var ownOrgId = [[${ownOrgId}]]
+	var customerDefinitionList = [[${customerDefinitionList}]]
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+			distriappbution:false,
+			customerDefinitionList:customerDefinitionList,
+			teleGroupId:ownOrgId,
+			teleGroupList:teleGroupList,
         	isElBreadcrumb:true,
 			confirmBtnDisabled:false,
 			viewFormVisible:false,
@@ -210,6 +252,9 @@
 			endTime:"",
 			pdzyform:{
 				teleSaleId:""
+			},
+			applyform:{
+				customerDefinition:""
 			},
 			teleSaleId:"",
         	formLabelWidth: '150px',
@@ -262,7 +307,12 @@
 					{ required: true, message: '请选择电销顾问', trigger: 'change' },
 				]
 			},
-             
+			applyformrules:{
+				customerDefinition: [
+					{ required: true, message: '请选择客户界定', trigger: 'change' },
+				]
+			},
+
         },
         methods: {
 			rowDblClick(row){
@@ -355,6 +405,7 @@
 				  param.brandName = this.brandName;
                   param.pageNum = pageNum;
                   param.pageSize = pageSize;
+                  param.teleGroupId= this.teleGroupId;
 				if(endTime && startTime) {
 					beginTimes = new Date(this.beginTime);
 					endTimes = new Date(this.endTime);
@@ -478,6 +529,65 @@
 					clearInterval(this.timer)
 				}
 			},
+			applyButton(){
+				var rows = this.multipleSelection;
+				if(rows.length <1){
+					this.$message({
+						message: '选择要申请客户界定的数据',
+						type: 'warning'
+					});
+					return;
+				}
+				this.applyform.customerDefinition="";
+				if (this.$refs['applyform']!==undefined) {
+					this.$refs['applyform'].resetFields();
+				}
+				if(this.customerDefinitionList !=null && this.customerDefinitionList.length>0){
+					this.applyform.customerDefinition = this.customerDefinitionList[0].value;
+				}
+				this.distriappbution = true;
+			},
+			addApplybutton(formName){
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.btnDisabled =true;
+						var param = {};
+						var idList = [];
+						var rows = this.multipleSelection;
+						for ( var i = 0; i <rows.length; i++){
+							idList.push(rows[i].id)
+						}
+						if(idList.length==0){
+							orgVM.$message({
+								message: '选择要申请客户界定的数据',
+								type: 'success'
+							});
+							this.btnDisabled =false;
+							return;
+						}
+						param.idList = idList;
+						param.customerDefinition = this.applyform.customerDefinition;
+						axios.post('/apply/customerDefinitionApply', param).then(function (response) {
+							if(response.data.code==0){
+								orgVM.distriappbution = false;
+								orgVM.$message({
+									message: '申请客户界定成功',
+									type: 'success'
+								});
+								orgVM.search();
+							}else{
+								orgVM.$message({
+									message: '申请客户界定请重试',
+									type: 'warning'
+								});
+							}
+
+						});
+					}
+
+
+				})
+			},
         },
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
@@ -491,6 +601,7 @@
 	            // 隐藏面包屑
 	            this.isElBreadcrumb=false;                
 	        }
+
         }
     })
 </script>
