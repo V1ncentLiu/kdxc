@@ -5,11 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
@@ -184,6 +180,8 @@ public class MyCustomerClueController {
         }
         request.setAttribute("isShowRepetition", isShowRepetition);
         request.setAttribute("type", type);
+        List<String> todayFollowNumList =  buildTodayFollowNum();
+        request.setAttribute("todayFollowNumList", todayFollowNumList);
         return "clue/myCustom";
     }
 
@@ -1773,5 +1771,23 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<RepeatClueRecordDTO>> getRepeatClueRecordDTOList(@RequestBody RepeatClueRecordQueryDTO recordQueryDTO){
         return repeatClueRecordFeignClient.queryList(recordQueryDTO);
+    }
+    /**
+     * @Description:构建电销今日跟访次数下拉列表值
+     * @Param:
+     * @return:
+     * @author: fanjd
+     * @date: 2020/8/12 14:32
+     * @version: V1.0
+     */
+    private List<String> buildTodayFollowNum() {
+        // 获取外包业务线
+        String todayFollowNumStr = getSysSetting(SysConstant.TODAYFOLLOWNUM);
+        if (StringUtils.isBlank(todayFollowNumStr)) {
+            return  new ArrayList<>();
+        }
+        List<String> todayFollowNumList = Arrays.asList(todayFollowNumStr.split(","));
+
+        return todayFollowNumList;
     }
 }

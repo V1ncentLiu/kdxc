@@ -50,15 +50,8 @@
                 <el-form-item label="客户姓名:" >
                     <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="客户级别:" >
-                    <el-select v-model="form.cusLeve" placeholder="客户级别" clearable>
-                        <el-option
-                            v-for="item in cusLevelArr"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="资源ID:">
+                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                 </el-form-item>
                 <el-form-item label="分配时间:">
                     <el-date-picker
@@ -209,8 +202,15 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="资源ID:">
-                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                    <el-form-item label="客户级别:" >
+                        <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple>
+                            <el-option
+                                    v-for="item in cusLevelArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="最后拨打时间:">
                         <el-date-picker
@@ -270,6 +270,16 @@
                     <el-form-item label="资源来源:">
                         <el-select v-model="form.teleReceiveSource" clearable placeholder="资源来源" :disabled="disabledTeleReceiveSource">
                             <el-option v-for="item in teleReceiveSourceArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="当日跟访次数:" >
+                        <el-select v-model="form.todayFollowNum" placeholder="当日跟访次数" clearable>
+                            <el-option
+                                    v-for="(item,index) in todayFollowNumArr"
+                                    :key="index"
+                                    :label="`${item}次`"
+                                    :value="item">
+                            </el-option>
                         </el-select>
                     </el-form-item>
                 </el-row>
@@ -891,6 +901,7 @@
   var userFieldList=[[${userFieldList}]];//用户自定义字段
   var proSelect = [[${proSelect}]];//可签约项目
   var isShowRepetition = [[${isShowRepetition}]];//业务线
+  var todayFollowNumList = [[${todayFollowNumList}]];//电销今日跟访次数下拉列表值
   var mycustomVM=new Vue({
     el: '#myCustom',
     data: function() {
@@ -968,6 +979,7 @@
           customerName:'',
           cusStatus:'',
           cusLeve:'',
+            cusLevelList:'',
           updateTimeStart:'',
           updateTimeEnd:'',
           createTimeStart:'',
@@ -994,7 +1006,9 @@
           isTailMoney:"",
           isSign:"",
           teleReceiveSource:"",
+            todayFollowNum:"",
         },
+          todayFollowNumArr:todayFollowNumList,
         teleReceiveSourceArr:[
              {value:"1",name:"分配"},
              {value:"3",name:"领取"},
@@ -1362,6 +1376,7 @@
         param.cusName=this.form.customerName;
         param.customerStatus=this.form.cusStatus;
         param.cusLevel=this.form.cusLeve;
+          param.cusLevels = this.form.cusLevelList;
         param.updateTimeStart=this.form.updateTimeStart;
         param.updateTimeEnd=this.form.updateTimeEnd;
         param.createTimeStart=this.form.createTimeStart;
@@ -1387,6 +1402,7 @@
         param.isSign = this.form.isSign;
         param.isTailMoney = this.form.isTailMoney;
         param.teleReceiveSource = this.form.teleReceiveSource;
+        param.todayFollowNum = this.form.todayFollowNum;
         this.loading=true;
         axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
           if(!response){
