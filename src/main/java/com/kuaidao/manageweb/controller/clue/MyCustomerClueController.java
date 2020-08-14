@@ -1764,4 +1764,14 @@ public class MyCustomerClueController {
     public String customerVisitToday(HttpServletRequest request, Model model) {
         return "visit/customerVisitToday";
     }
+
+    /**
+     * 查询当前资源对应的重复资源
+     * @return
+     */
+    @RequestMapping("/getRepeatClueRecordDTOList")
+    @ResponseBody
+    public JSONResult<List<RepeatClueRecordDTO>> getRepeatClueRecordDTOList(@RequestBody RepeatClueRecordQueryDTO recordQueryDTO){
+        return repeatClueRecordFeignClient.queryList(recordQueryDTO);
+    }
 }

@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.common.constant.*;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -19,11 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListReq;
@@ -159,7 +156,15 @@ public class OrganizationController {
         orgDto.setOrgType(dto.getOrgType());
         orgDto.setParentId(dto.getParentId());
         if (user.getBusinessLine() != null) {
-            orgDto.setBusinessLine(user.getBusinessLine());
+            //小物种和天良可以互相查询 里程碑 4-4
+            if(user.getBusinessLine() == BusinessLineConstant.XIAOWUZHONG || user.getBusinessLine() == BusinessLineConstant.TILIANG){
+                List<Integer> businessLineList = new ArrayList<>();
+                businessLineList.add(BusinessLineConstant.XIAOWUZHONG);
+                businessLineList.add(BusinessLineConstant.TILIANG);
+                orgDto.setBusinessLineList(businessLineList);
+            }else{
+                orgDto.setBusinessLine(user.getBusinessLine());
+            }
         }
         JSONResult<List<OrganizationRespDTO>> orgJson =
                 organizationFeignClient.queryOrgByParam(orgDto);
