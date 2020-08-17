@@ -863,6 +863,9 @@ public class BusinessSignController {
         } else {
             request.setAttribute("showSignButton", "");
         }
+        if(sign.getContractTime() ==null &&  ("1".equals(sign.getPayType()) || "2".equals(sign.getPayType()))){
+            request.setAttribute("showContractTimeButton", true);
+        }
         // 查询赠送类型集合
         request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         request.setAttribute("clueId", clueId);
@@ -1016,5 +1019,14 @@ public class BusinessSignController {
             }
         }
         return new JSONResult<List<DictionaryItemRespDTO>>().success(shopList);
+    }
+
+    /**
+     * 确认合同时间
+     */
+    @RequestMapping("/updateContractTime")
+    @ResponseBody
+    public JSONResult<Boolean> updateContractTime(@RequestBody BusinessSignDTO businessSignDTO){
+        return businessSignFeignClient.updateContractTime(businessSignDTO);
     }
 }
