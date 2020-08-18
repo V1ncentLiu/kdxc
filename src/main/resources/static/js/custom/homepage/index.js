@@ -283,9 +283,11 @@ var homePageVM=new Vue({
           dataBaseInvestMoneyArr:[],//投资金额list
           dataBaseInvestAreaArr:[],//投资区域list
           dataBaseCategoryArr:[],//意向品类list
+          dataBaseCategoryArr2:[],//意向品类二级分类list
           dataBaseInvestMoneyVal:"0",//默认是不限
-          dataBaseInvestAreaVal: "0",//默认是不限
-          dataBaseCategoryVal: "0",//默认是不限
+          // dataBaseInvestAreaVal: "",//默认是不限
+          dataBaseCategoryVal: "",//默认是不限
+          dataBaseCategoryVal2: [],//意向品类2级菜单,可多选
           dataBaseResultArr:[],//搜索结果
           isshowsearch:false,//暂无搜索结果
           isshowsearchTip:false,//暂无搜索结果不显示
@@ -311,29 +313,60 @@ var homePageVM=new Vue({
         this.dataBaseCategoryVal=val;
       },
       // 获取搜索条件
-      searchDataList1() {//投资金额
-          var param = {};
-          param.groupCode = "dataBaseInvestMoney";
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            // console.log(response)
-            homePageVM.dataBaseInvestMoneyArr = response.data.data;
+      searchDataList1() {//投资金额+意向品类
+          // var param = {};
+          // param.groupCode = "dataBaseInvestMoney";
+          // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+          //   // console.log(response)
+          //   homePageVM.dataBaseInvestMoneyArr = response.data.data;
+          // });
+          // axios.get("http://192.168.13.137/api/condition")
+          console.log(dataBaseUrl)
+          var url=dataBaseUrl.replace('/api/search','/api/condition')
+          axios.get(url)
+          .then(function (response) {
+              console.log(response)
+              var result =  response.data;
+              if(result.code==0){
+                  if(result.data.join_fee&&result.data.join_fee.length>0){
+                      homePageVM.dataBaseInvestMoneyArr = result.data.join_fee;//投资金额
+                  }
+                  if(result.data.category&&result.data.category.length>0){
+                      homePageVM.dataBaseCategoryArr = result.data.category;//意向品类
+                  }                                    
+              }else{
+                  homePageVM.$message.error(result.msg);
+              }    
+          })
+          .catch(function (error) {
+               console.log(error);
+               homePageVM.issearchLoading=false;
           });
       },
-      searchDataList2() {//投资区域
-          var param = {};
-          param.groupCode = "dataBaseInvestArea";
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            // console.log(response)
-            homePageVM.dataBaseInvestAreaArr = response.data.data;
-          });
-      },
-      searchDataList3() {//意向品类
-          var param = {};
-          param.groupCode = "dataBaseCategory";
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            // console.log(response)
-            homePageVM.dataBaseCategoryArr = response.data.data;
-          });
+      // searchDataList2() {//投资区域
+      //     var param = {};
+      //     param.groupCode = "dataBaseInvestArea";
+      //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+      //       // console.log(response)
+      //       homePageVM.dataBaseInvestAreaArr = response.data.data;
+      //     });
+      // },
+      // searchDataList3() {//意向品类
+      //     var param = {};
+      //     param.groupCode = "dataBaseCategory";
+      //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+      //       // console.log(response)
+      //       homePageVM.dataBaseCategoryArr = response.data.data;
+      //     });
+      // },
+      changeCategoryArr(val){//意向品类一级切换筛选二级
+        this.dataBaseCategoryVal2=[]
+        for(var i=0;i<homePageVM.dataBaseCategoryArr.length;i++){
+          if(val==homePageVM.dataBaseCategoryArr[i].id){
+            this.dataBaseCategoryArr2 = homePageVM.dataBaseCategoryArr[i].sub_category;
+
+          }
+        }
       },
     searchLcCallLine() {//乐创外呼线路
         var param = {};
@@ -347,18 +380,38 @@ var homePageVM=new Vue({
           this.issearchLoading=true;
           var keyword=this.searchDatabaseKeyword;
           var join_fee=this.dataBaseInvestMoneyVal;
-          var join_area=this.dataBaseInvestAreaVal;
-          var category_name=this.dataBaseCategoryVal;
-          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
+          // var join_area=this.dataBaseInvestAreaVal;
+          var join_area="";
+          var valProvince=$("#dataProvince").val();
+          var valCity=$("#dataCity").val();
+          var valDistrict=$("#dataDistrict").val();          
+          if(valProvince&&valCity&&valDistrict){
+              join_area=valProvince+'-'+valCity+'-'+valDistrict
+          }
+          if(valProvince&&valCity){
+              join_area=valProvince+'-'+valCity
+          }
+          if(valProvince){
+              join_area=valProvince
+          }          
+          // var category_name=this.dataBaseCategoryVal;
+          var category_id=this.dataBaseCategoryVal2.join(',');
+          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_id='+category_id)
           .then(function (response) {
               // console.log(response)
               var result =  response.data;
               if(result.code==0){
+                  if(keyword==""&&join_fee=="0"&&join_area==""&&category_id==""){//筛选条件为空跳转到资料库网站
+                      var tempwindow=window.open('_blank');//打开一个窗口，然后用 
+                      tempwindow.location=result.data.home_url;
+                      // window.location.href=result.data.home_url;
+                  }
                   if(result.data.list&&result.data.list.length>0){
                       homePageVM.isshowsearch=true;
                       homePageVM.issearchResult=true;
                       homePageVM.isshowsearchTip=false;
                       homePageVM.dataBaseResultArr=result.data.list; 
+                      
                   }else{
                       homePageVM.isshowsearch=true;
                       homePageVM.issearchResult=false;
@@ -376,7 +429,11 @@ var homePageVM=new Vue({
           });
       },
       opendataBase(){
-          this.dataBasedialogVisible=true
+          this.dataBasedialogVisible=true;
+          // 省市区初始化
+          setTimeout(function(){
+            $("#distpicker").distpicker('reset');
+          },0)
       },
       // 切换七陌里的呼叫方式
       changeCallPhoneType(val){
@@ -1701,8 +1758,10 @@ var homePageVM=new Vue({
   closeDataBasedialog(){//关闭资料库清空搜索框和搜索结果,默认显示不限
     this.searchDatabaseKeyword="";
     this.dataBaseInvestMoneyVal="0";
-    this.dataBaseInvestAreaVal="0";
-    this.dataBaseCategoryVal="0";
+    // this.dataBaseInvestAreaVal="";
+    $("#distpicker").distpicker('reset');
+    this.dataBaseCategoryVal="";
+    this.dataBaseCategoryVal2=[];
     this.isshowsearch=false;
     this.isshowsearchTip=false;
     this.issearchResult=false;
@@ -1721,8 +1780,8 @@ var homePageVM=new Vue({
         this.isDataBase=true;
       }
       this.searchDataList1();//资料库投资金额list
-      this.searchDataList2();//资料库投资区域list
-      this.searchDataList3();//资料库意向品类list
+      // this.searchDataList2();//资料库投资区域list
+      // this.searchDataList3();//资料库意向品类list
       this.searchLcCallLine();
       // 通过用户信息判断餐盟菜单显示
       if(user){
@@ -1741,7 +1800,7 @@ var homePageVM=new Vue({
       // 首次登陆显示
       if(showIKonwFlag==1){
         this.unionTipdialogVisible=true;
-      }
+      }      
 	},
 	computed: {
 	    clientRules:function() {
