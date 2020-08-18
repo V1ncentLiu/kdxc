@@ -429,7 +429,11 @@ var homePageVM=new Vue({
           });
       },
       opendataBase(){
-          this.dataBasedialogVisible=true
+          this.dataBasedialogVisible=true;
+          // 省市区初始化
+          setTimeout(function(){
+            $("#distpicker").distpicker('reset');
+          },0)
       },
       // 切换七陌里的呼叫方式
       changeCallPhoneType(val){
@@ -1796,9 +1800,7 @@ var homePageVM=new Vue({
       // 首次登陆显示
       if(showIKonwFlag==1){
         this.unionTipdialogVisible=true;
-      }
-      // 省市区初始化
-      $("#distpicker").distpicker();
+      }      
 	},
 	computed: {
 	    clientRules:function() {
