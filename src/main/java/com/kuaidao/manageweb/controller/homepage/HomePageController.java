@@ -122,7 +122,7 @@ public class HomePageController {
         }
         request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
         boolean isShowDataBase = false;
-        if((user.getBusinessLine() !=null && user.getBusinessLine() == BusinessLineConstant.SHANGJI) || roleCode.equals(RoleCodeEnum.GLY.name()) ){
+        if((user.getBusinessLine() !=null && (user.getBusinessLine() == BusinessLineConstant.SHANGJI || user.getBusinessLine() == BusinessLineConstant.SHCS)) || roleCode.equals(RoleCodeEnum.GLY.name()) ){
             isShowDataBase = true;
         }
         request.setAttribute("isShowDataBase", isShowDataBase);
