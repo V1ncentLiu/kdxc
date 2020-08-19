@@ -401,7 +401,7 @@ var homePageVM=new Vue({
               // console.log(response)
               var result =  response.data;
               if(result.code==0){
-                  if(keyword==""&&join_fee=="0"&&join_area==""&&category_id==""){//筛选条件为空跳转到资料库网站
+                  if(keyword==""&&join_fee=="0"&&join_area==""&&category_id==""&&category_level==""){//筛选条件为空跳转到资料库网站
                       var tempwindow=window.open('_blank');//打开一个窗口，然后用 
                       tempwindow.location=result.data.home_url;
                       // window.location.href=result.data.home_url;
