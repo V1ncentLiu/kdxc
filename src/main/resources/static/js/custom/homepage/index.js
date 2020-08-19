@@ -384,24 +384,24 @@ var homePageVM=new Vue({
           var join_area="";
           var valProvince=$("#dataProvince").val();
           var valCity=$("#dataCity").val();
-          var valDistrict=$("#dataDistrict").val();          
-          if(valProvince&&valCity&&valDistrict){
-              join_area=valProvince+'-'+valCity+'-'+valDistrict
-          }
-          if(valProvince&&valCity){
-              join_area=valProvince+'-'+valCity
-          }
+          var valDistrict=$("#dataDistrict").val(); 
           if(valProvince){
               join_area=valProvince
+              if(valProvince&&valCity){
+                  join_area=valProvince+'-'+valCity
+                  if(valProvince&&valCity&&valDistrict){
+                      join_area=valProvince+'-'+valCity+'-'+valDistrict
+                  }
+              }
           }          
-          // var category_name=this.dataBaseCategoryVal;
           var category_id=this.dataBaseCategoryVal2.join(',');
-          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_id='+category_id)
+          var category_level=this.dataBaseCategoryVal;
+          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_id='+category_id+'&category_level='+category_level)
           .then(function (response) {
               // console.log(response)
               var result =  response.data;
               if(result.code==0){
-                  if(keyword==""&&join_fee=="0"&&join_area==""&&category_id==""){//筛选条件为空跳转到资料库网站
+                  if(keyword==""&&join_fee=="0"&&join_area==""&&category_id==""&&category_level==""){//筛选条件为空跳转到资料库网站
                       var tempwindow=window.open('_blank');//打开一个窗口，然后用 
                       tempwindow.location=result.data.home_url;
                       // window.location.href=result.data.home_url;
