@@ -9,6 +9,7 @@ import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -16,6 +17,7 @@ import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.CustomerManagerFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
@@ -26,6 +28,8 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.shiro.SecurityUtils;
@@ -65,6 +69,8 @@ public class RepeatPhoneController {
 
     @Autowired
     private ClueBasicFeignClient clueBasicFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     @RequestMapping("/repeatPhonePage")
     public String initmyCustomer(HttpServletRequest request, Model model) {
@@ -104,7 +110,10 @@ public class RepeatPhoneController {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setBusinessLine(user.getBusinessLine());
-        dto.setIsRepeatPhone(1);
+        String maxDay = getSysSetting(SysConstant.PD_PHONE_MAX_DAY);
+        Date startDate = DateUtil.addDays(new Date(), -Integer.parseInt(maxDay));
+        dto.setAppiontmentCreateTime1(startDate);
+        dto.setAppiontmentCreateTime2(new Date());
         JSONResult<PageBean<CustomerManagerDTO>> jsonResult =
                 customerManagerFeignClient.findcustomerPage(dto);
         return jsonResult;
@@ -247,5 +256,17 @@ public class RepeatPhoneController {
             return null;
         }
         return orgJr.getData();
+    }
+    /**
+     * 查询系统参数
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
     }
 }

@@ -107,6 +107,9 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = this.queryUserByRole(user);
 
         request.setAttribute("userList", userList);
+        //话务员集合
+        List<UserInfoDTO> hwzyUserList =  queryUserByRole(RoleCodeEnum.HWY.name());
+        request.setAttribute("hwzyUserList", hwzyUserList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("DistributiveResource");
@@ -988,5 +991,21 @@ public class ExtendClueDistributionedTaskController {
             return listJSONResult;
         }
         return jsonResult;
+    }
+
+    /**
+     * 根据角色查询用户
+     * @return
+     */
+
+    private List<UserInfoDTO> queryUserByRole(String roleCode) {
+        List<UserInfoDTO> userList = new ArrayList<>();
+        UserOrgRoleReq userRole = new UserOrgRoleReq();
+        userRole.setRoleCode(RoleCodeEnum.HWY.name());
+        JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.listByOrgAndRole(userRole);
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && CollectionUtils.isNotEmpty(listJSONResult.getData())) {
+            userList.addAll(listJSONResult.getData());
+        }
+        return userList;
     }
 }
