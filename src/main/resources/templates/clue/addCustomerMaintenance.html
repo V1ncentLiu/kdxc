@@ -317,7 +317,15 @@
                            </div>
                          </template>
                         </el-table-column> -->
-                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
+
+
+                        <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%">
+                            <template slot-scope="scope">
+                                {{scope.row.callDetailsName}} {{scope.row.focusPoint}}
+                            </template>
+                        </el-table-column>
+
+
                     <!--<el-table-column-->
                     <!--prop="visitStatus" label="是否继续回访" align="center" width="210">-->
                     <!--<template-->
@@ -350,9 +358,12 @@
                                 </el-form-item>
                             </div>
                             <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通" :disabled="isDisabledCustomer" style="width: 70%;display: block;margin:0 auto;" clearable>
+                                <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer" style="width: 30%;display: block;margin:0 auto;" clearable>
                                     <el-option label="是" value="1"></el-option>
                                     <el-option label="否" value="0"></el-option>
+                                </el-select>
+                                <el-select v-model="formInline.callDetails" placeholder="请选择"   @change="callDetailsChange"   v-show="formInline.callDetailShow"  style="width: 100%;height: 35px!important;" clearable>
+                                    <el-option v-for="item in callDetailsArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
                             </el-form-item>
                             <!--
@@ -363,10 +374,16 @@
                                 </el-select>
                               </el-form-item>
                               -->
-                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
-                                <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
-                                <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
-                            </el-form-item>
+                            <div>
+                                <div>
+                                    {{callDetailsText}}
+                                </div>
+                                <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
+                                    <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
+                                    <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
+                                </el-form-item>
+                            </div>
+
                             <!--<el-form-item label="" size="mini">-->
                             <!--<el-select-->
                             <!--v-model="formInline.visitStatus" placeholder="是否继续回访">-->
@@ -548,7 +565,14 @@
                     <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
                     <el-table-column prop="createUserName" label="审核人姓名" align="center"></el-table-column>
                     <el-table-column prop="createTime" label="审核时间" align="center"></el-table-column>
-                    <el-table-column prop="remark" label="审核无效原因" align="center"></el-table-column>
+                    <el-table-column prop="remark" label="审核无效原因" align="center">
+                        <template slot-scope="scope">
+                            {{scope.row.remark}}
+                            <div v-if="scope.row.updateTime != null">
+                                <span>{{scope.row.updateTime}}</span> <span>{{scope.row.updateRemark}}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
                 </el-table>
             </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
@@ -946,6 +970,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                callDetailsText:'',
                 isElBreadcrumb:true,
                 addButtons:true,
                 mediumList:mediumList,
@@ -1064,6 +1089,7 @@
                 ussmArr: [],
                 StorefrontAreaArr: [],
                 customerStatusSubArr: [],
+                callDetailsArr:[],
                 provinceArr: [],
                 cityArr: [],
                 districtArr: [],
@@ -1233,6 +1259,8 @@
                     visitStatus: '1',
                     nextVisitTime: '',
                     customerStatusSub: '',
+                    callDetails:'',
+                    callDetailShow:false,
                 },
                 uploadOssHost:'',
                 uploadParamData: {
@@ -1430,6 +1458,8 @@
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus = '';
                 this.formInline.visitStatus = "1";
+                this.formInline.callDetails="";
+                this.callDetailsText="";
                 //this.formInline.callTime =new Date(teleEndTime);
                 this.formInline.callTime =new Date();
             },
@@ -1487,6 +1517,29 @@
                     this.substatus = true;
                     // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
                 }
+            },
+            isCallChange(selVal){
+                if (selVal == 1){
+                    this.formInline.callDetails = "";
+                    this.formInline.callDetailShow = true;
+                    //客户状态
+                    param = {};
+                    param.groupCode = "callDetails";
+                    axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                        addCustomerVM.callDetailsArr = response.data.data;
+                    });
+                }else{
+                    this.formInline.callDetailShow = false;
+                    this.callDetailsText = "";
+                }
+
+            },
+            callDetailsChange(selVal) {
+                let  obj = {};
+                obj = this.callDetailsArr.find((item) => { // 这里的callDetailsArr就是上面遍历的数据源
+                    return item.value === selVal; // 筛选出匹配数据
+                });
+                this.callDetailsText = obj.name;
             },
             projectChangeSelect(selVal) {
                 var param = {};
@@ -1806,6 +1859,7 @@
                     clue.clueId = clueId;
                     clue.clueCustomer = clueCustomer;
                     clue.clueIntention = clueIntention;
+                    debugger;
                     clue.tracking = tracking;
                     if (this.formInline.customerStatus == '3') {//如果选择的是不跟进则弹出弹窗
                         this.saveDisabled = false;
@@ -2041,6 +2095,9 @@
 
 
             editRecord() {
+                this.formInline.callDetailShow = false;
+                this.formInline.callDetails =  "";
+                this.callDetailsText = "";
                 //编辑跟进记录
                 var rows = this.multipleTrackingSelection;
                 if (rows.length != 1) {
@@ -2064,7 +2121,7 @@
                 this.formInline.id = rows[0].id;
                 this.formInline.callTime = rows[0].callTime;
                 this.formInline.customerStatus = rows[0].customerStatus;
-                ;
+
                 this.formInline.isCall = rows[0].isCall + "";
                 // this.formInline.resourceStatus=rows[0].resourceStatus+"";
                 this.formInline.focusPoint = rows[0].focusPoint;
@@ -2087,6 +2144,17 @@
                 this.formInline.visitStatus = rows[0].visitStatus + "";
                 this.formInline.nextVisitTime = rows[0].nextVisitTime;
                 isEdit = true;
+                if (1 == rows[0].isCall){
+                    this.callDetailsText = rows[0].callDetailsName;
+                    this.formInline.callDetailShow = true;
+                    //客户状态
+                    param = {};
+                    param.groupCode = "callDetails";
+                    axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                        addCustomerVM.callDetailsArr = response.data.data;
+                    });
+                   this.formInline.callDetails = rows[0].callDetails + "";
+                }
             },
             onConfirmAdd(index, row) {
                 // var _this = this;
@@ -2123,6 +2191,10 @@
                 }
                 if (this.formInline.customerStatus == '3') {//如果选择的是不跟进在传此字段
                     param.customerStatusSub = this.formInline.customerStatusSub;
+                }
+                //只有接通才传值
+                if (this.formInline.isCall == 1){
+                    param. callDetails = this.formInline.callDetails;
                 }
                 param.stage = 2;
                 if (isEdit) {

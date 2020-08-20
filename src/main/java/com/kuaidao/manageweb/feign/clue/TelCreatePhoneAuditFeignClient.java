@@ -31,7 +31,13 @@ public interface TelCreatePhoneAuditFeignClient {
      */
     @PostMapping("/insert")
     JSONResult<String> insert(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
-
+    /**
+     * 新建手机号审核-无效原因审核
+     * @param
+     * @return
+     */
+    @PostMapping("/update")
+    JSONResult<String> update(@RequestBody TelCreatePhoneAuditReqDTO reqDTO);
     /**
      * 根据资源id查询最新的审核不通过记录
      */
@@ -55,7 +61,10 @@ public interface TelCreatePhoneAuditFeignClient {
         public JSONResult<String> insert(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
             return fallBackError("新建手机号审核插入");
         }
-
+        @Override
+        public JSONResult<String> update(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
+            return fallBackError("新建手机号审核无效原因修改");
+        }
         @Override
         public JSONResult<TelCreatePhoneAuditDTO> findNewestByClueId(TelCreatePhoneAuditReqDTO reqDTO) {
             return fallBackError("根据资源id查询最新的审核不通过记录");

@@ -5,11 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
@@ -97,6 +93,8 @@ public class MyCustomerClueController {
     private static final Integer DAY_15 = 15;
     private static final Integer DAY_7 = 7;
     private static final Integer DIFF_MIN = 10;
+    /**今日跟访次数0次**/
+    private static  final  String TODAYFOLLOWNUM_ZERO = "0";
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -184,6 +182,8 @@ public class MyCustomerClueController {
         }
         request.setAttribute("isShowRepetition", isShowRepetition);
         request.setAttribute("type", type);
+        List<String> todayFollowNumList =  buildTodayFollowNum(user.getRoleList().get(0).getRoleCode());
+        request.setAttribute("todayFollowNumList", todayFollowNumList);
         return "clue/myCustom";
     }
 
@@ -1736,20 +1736,23 @@ public class MyCustomerClueController {
             pushClueReq.setDay(DAY_15);
         }
         // 渠道拓展业务线手机号微信验证
-        if (user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)) {
+        /*if (user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN)) {
             pushClueReq.setBusinessLine(BusinessLineConstant.QUDAOTUOZHAN);
             pushClueReq.setDay(DAY_7);
-        }
+        }*/
         // 商机盒子业务线手机号微信验证
         if (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)) {
             pushClueReq.setBusinessLine(BusinessLineConstant.SHANGJI);
             pushClueReq.setDay(DAY_15);
         }
-        JSONResult<Boolean> clueByParamRes =
-                deduplicationDetailFeignClient.getClueByParam(pushClueReq);
-        if (JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()) {
-            return "此号码已存在，不允许进行再次进行创建";
+        if (user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG) || user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)) {
+            JSONResult<Boolean> clueByParamRes =
+                    deduplicationDetailFeignClient.getClueByParam(pushClueReq);
+            if (JSONResult.SUCCESS.equals(clueByParamRes.getCode()) && clueByParamRes.getData()) {
+                return "此号码已存在，不允许进行再次进行创建";
+            }
         }
+
         return "";
     }
 
@@ -1763,5 +1766,42 @@ public class MyCustomerClueController {
     @RequestMapping("/customerVisitToday")
     public String customerVisitToday(HttpServletRequest request, Model model) {
         return "visit/customerVisitToday";
+    }
+
+    /**
+     * 查询当前资源对应的重复资源
+     * @return
+     */
+    @RequestMapping("/getRepeatClueRecordDTOList")
+    @ResponseBody
+    public JSONResult<List<RepeatClueRecordDTO>> getRepeatClueRecordDTOList(@RequestBody RepeatClueRecordQueryDTO recordQueryDTO){
+        return repeatClueRecordFeignClient.queryList(recordQueryDTO);
+    }
+    /**
+     * @Description:构建电销今日跟访次数下拉列表值
+     * @Param:
+     * @return:
+     * @author: fanjd
+     * @date: 2020/8/12 14:32
+     * @version: V1.0
+     */
+    private List<String> buildTodayFollowNum(String  roleCode) {
+        List<String> todayFollowNumList =    new ArrayList<>();
+        // 获取外包业务线
+        String todayFollowNumStr = getSysSetting(SysConstant.TODAYFOLLOWNUM);
+        if (StringUtils.isBlank(todayFollowNumStr)) {
+           return  todayFollowNumList;
+        }
+        String []  todayFollowNumArr = todayFollowNumStr.split(",");
+        for (String str : todayFollowNumArr) {
+            if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+                if (!TODAYFOLLOWNUM_ZERO.equals(str)) {
+                    todayFollowNumList.add(str) ;
+                }
+            }else{
+                todayFollowNumList.add(str) ;
+            }
+        }
+        return todayFollowNumList;
     }
 }

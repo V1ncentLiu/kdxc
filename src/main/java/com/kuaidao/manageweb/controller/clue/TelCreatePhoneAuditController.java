@@ -61,6 +61,18 @@ public class TelCreatePhoneAuditController {
         return jsonResult;
     }
     /**
+     * 审核无效原因修改
+     */
+    @ResponseBody
+    @PostMapping("/update")
+    public JSONResult<String> update(@RequestBody TelCreatePhoneAuditReqDTO reqDTO) {
+        UserInfoDTO user = getUser();
+        reqDTO.setUpdateUser(user.getId());
+        reqDTO.setUpdateTime(new Date());
+        JSONResult<String> jsonResult = telCreatePhoneAuditFeignClient.update(reqDTO);
+        return jsonResult;
+    }
+    /**
      * 根据资源id查询最新的审核不通过记录
      */
     @ResponseBody
