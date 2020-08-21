@@ -37,6 +37,8 @@ public class Constants {
     public static String QIMO_CLIENT_KEY = "huiju:aggregation:client:qimo";
     // 乐创坐席 redis key
     public static String LC_CLIENT_KEY = "huiju:aggregation:client:lc";
+    // 中科坐席 redis key
+    public static String ZK_CLIENT_KEY = "huiju:aggregation:client:zk";
     // 天润坐席 reids key
     public static String TR_CLIENT_KEY = "huiju:aggregation:client:tr";
     // 合力坐席 reids key
