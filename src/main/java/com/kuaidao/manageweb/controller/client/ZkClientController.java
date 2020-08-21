@@ -60,7 +60,7 @@ public class ZkClientController {
     public static final String SIP = "2";
     public static final String SIP_NAME = "sip外呼";
     public static final String MOBILE = "1";
-    public static final String MOBILE_NAME = "绑定手机外呼";
+    public static final String MOBILE_NAME = "绑定手机号外呼";
 
 
     /**

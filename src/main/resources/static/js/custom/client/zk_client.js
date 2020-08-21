@@ -46,12 +46,13 @@ var clientVm = new Vue({
          },
          requestTypes: [
              {
-                 value: "2",
-                 label: 'sip外呼'
-             },{
                  value: "1",
                  label: '绑定手机号外呼'
-         }],
+            },
+             {
+                 value: "2",
+                 label: 'sip外呼'
+             }],
          rules:{
              clientNo:[
         		 { required: true, message: '坐席编号不能为空'},
