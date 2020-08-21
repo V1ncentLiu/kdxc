@@ -104,7 +104,7 @@ public class ApplyController {
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
-                if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+                if (roleCode.equals(RoleCodeEnum.DXZJ.name()) || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     // 如果当前登录的为电销总监,查询所有下属电销员工
                     List<Integer> statusList = new ArrayList<Integer>();
                     statusList.add(SysConstant.USER_STATUS_ENABLE);
