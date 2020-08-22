@@ -331,6 +331,7 @@ public class ZkClientController {
         callDTO.setCustomerPhone(customerPhoneNumber);
         callDTO.setAccountId(curLoginUser.getId());
         callDTO.setOrgId(curLoginUser.getOrgId());
+        callDTO.setRequestType(String.valueOf(session.getAttribute(REQUEST_TYPE)));
         return zkClientFeignClient.zkOutbound(callDTO);
     }
 
