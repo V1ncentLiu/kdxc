@@ -477,6 +477,8 @@
                     <el-table-column :prop="col.prop" :label="col.label" header-align="center">
                         <template slot-scope="scope">
                             <span style="white-space: pre-wrap">{{scope.row.content_ }}</span><el-button size="mini" v-if="scope.row.type=='1'" @click="gotoInfoUrl(scope.row.url)">点击查看详情</el-button>
+                            <span style="white-space: pre-wrap">{{scope.row.content_ }}</span><el-button size="mini" v-if="scope.row.type==1" @click="gotoInfoUrl(scope.row.url)">点击查看详情1</el-button>
+                            <span style="white-space: pre-wrap">{{scope.row.content_ }}</span><el-button size="mini"  @click="gotoInfoUrl(scope.row.url)">点击查看详情3</el-button>
                         </template>
                     </el-table-column>
                 </template>
@@ -585,7 +587,9 @@
             content:"",
             bussRevid:"",
             bussDialogTableData:[],
-            colss:[]
+            colss:[],
+            urlVal:"",
+            typeVal:0,
         },
         methods:{
             updateStatusBuss(index){
@@ -624,7 +628,7 @@
                 var cols ={
                     bussRevid:bussRevid,
                     bussDialogTableData:[{content_:bussDialogVm.content}],
-                    cols:[{ label: this.title, prop: "content_", type: type,url:url }],
+                    cols:[{ label: this.title, prop: "content_", type: this.typeVal,url:this.urlVal }],
                     bussdialogVisible: true,
                 }
                 bussDialogVm.colss.push(cols)
@@ -696,6 +700,8 @@
                     bussDialogVm.bussRevid =bussRevid
                     bussDialogVm.title = title;
                     bussDialogVm.content = ccontent;
+                    bussDialogVm.typeVal=0
+                    bussDialogVm.urlVal="";
                     // bussDialogVm.bussdialogVisible=true;
                     bussDialogVm.initDialogData(title,ccontent,bussRevid);
                 }else   if(msg.indexOf("mestoUrl") != -1){
@@ -709,6 +715,8 @@
                     bussDialogVm.bussRevid =bussRevid
                     bussDialogVm.title = title;
                     bussDialogVm.content = ccontent;
+                    bussDialogVm.typeVal=type
+                    bussDialogVm.urlVal=url;
                     // bussDialogVm.bussdialogVisible=true;
                     bussDialogVm.initDialogDataTourl(title,ccontent,bussRevid,type,url);
                 }
