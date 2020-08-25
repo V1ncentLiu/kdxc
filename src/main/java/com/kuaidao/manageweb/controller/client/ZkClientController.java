@@ -66,7 +66,7 @@ public class ZkClientController {
     /**
      *  跳转中科页面
      */
-//    @RequiresPermissions("callcenter:zkClient:view")
+    @RequiresPermissions("callcenter:zkClient:view")
     @RequestMapping("/toZkClientPage")
     public String toZkClientPage(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
@@ -95,7 +95,7 @@ public class ZkClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:zkClient:view")
+    @RequiresPermissions("callcenter:zkClient:view")
     @PostMapping("/listZkClientPage")
     @ResponseBody
     public JSONResult<PageBean<ZkClientRespDTO>> listZkClientPage(@RequestBody ZkClientQueryDTO queryClientDTO) {
@@ -112,7 +112,7 @@ public class ZkClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:zkClient:add")
+    @RequiresPermissions("callcenter:zkClient:add")
     @PostMapping("/saveZkClient")
     @ResponseBody
     public JSONResult<Boolean> saveZkClient(@Valid @RequestBody AddOrUpdateZkClientDTO reqDTO,BindingResult result) throws Exception {
@@ -133,7 +133,7 @@ public class ZkClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:zkClient:edit")
+    @RequiresPermissions("callcenter:zkClient:edit")
     @PostMapping("/updateZkClient")
     @ResponseBody
     public JSONResult<Boolean> updateZkClient(@Valid @RequestBody AddOrUpdateZkClientDTO reqDTO,BindingResult result) throws Exception {
@@ -178,7 +178,7 @@ public class ZkClientController {
         return zkClientRespDTOJSONResult;
     }
 
-//    @RequiresPermissions("callcenter:zkClient:delete")
+    @RequiresPermissions("callcenter:zkClient:delete")
     @PostMapping("/deleteZkClient")
     @ResponseBody
     public JSONResult<Boolean> deleteZkClient(@RequestBody IdListReq idListReq) {
@@ -194,7 +194,7 @@ public class ZkClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:zkClient:import")
+    @RequiresPermissions("callcenter:zkClient:import")
     @PostMapping("/uploadZkClient")
     @ResponseBody
     public JSONResult uploadZkClient(@RequestParam("file") MultipartFile file) throws Exception {
@@ -254,7 +254,7 @@ public class ZkClientController {
         return new JSONResult<>().success(resMap);
     }
 
-//    @RequiresPermissions("callcenter:zkClient:import")
+    @RequiresPermissions("callcenter:zkClient:import")
     @ResponseBody
     @PostMapping("/submitZkClientData")
     public JSONResult<List<ImportZkClientDTO>> submitZkClientData() {
