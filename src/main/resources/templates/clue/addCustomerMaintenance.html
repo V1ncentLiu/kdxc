@@ -295,12 +295,12 @@
             </el-row>
             <el-row>
                 <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
-                    <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
+                    <el-table-column prop="id" type="selection" width="50" @selection-change="handleTrackingSelection" align="center"></el-table-column>
                     <el-table-column prop="callTime" label="跟进时间" align="center" min-width="12%">
                     </el-table-column>
-                    <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="20%">
+                    <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="16%">
                     </el-table-column>
-                    <el-table-column min-width="10%" prop="isCall" label="是否接通" align="center">
+                    <el-table-column min-width="16%" prop="isCall" label="是否接通" align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isCall === 0">未接通</div>
                             <div v-else-if="scope.row.isCall ===1">已接通</div>
@@ -334,38 +334,43 @@
                     <!--<div v-else-if="scope.row.visitStatus ==1">是</div>-->
                     <!--</template>-->
                     <!--</el-table-column>-->
-                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="12%">
+                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="10%">
                     </el-table-column>
                     <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
                     </el-table-column>
                     <div slot="append" v-show="lineFormShow" class="lineFormShow">
                         <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
-                            <div style="float: left; width: 48px;">&nbsp;</div>
+                            <div style="float: left; width: 50px;">&nbsp;</div>
                             <!-- :picker-options="expireTimeOption" -->
                             <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
                                 <el-date-picker v-model="formInline.callTime" :disabled="isDisabledCustomer" type="datetime" placeholder="选择日期时间" :default-value="timeDefaultShow" style="width: 90%;display: block;margin:0 auto;" @change="chooseToday"></el-date-picker>
                             </el-form-item>
-                            <div style="width: 24%;float: left;text-align: center;">
+                            <div style="width: 19.3%;float: left;text-align: center;">
                                 <el-form-item label="" prop="customerStatus" class="lineForm_customerStatus" style="width: 100px;">
                                     <el-select v-model="formInline.customerStatus" @change="customerStatusChange" :disabled="isDisabledCustomer" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
                                         <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 160px;">
+                                <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 100px;">
                                     <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="isDisabledCustomer" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
                             </div>
-                            <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer" style="width: 30%;display: block;margin:0 auto;" clearable>
-                                    <el-option label="是" value="1"></el-option>
-                                    <el-option label="否" value="0"></el-option>
-                                </el-select>
-                                <el-select v-model="formInline.callDetails" placeholder="请选择"   @change="callDetailsChange"   v-show="formInline.callDetailShow"  style="width: 100%;height: 35px!important;" clearable>
-                                    <el-option v-for="item in callDetailsArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
+                            <div style="width: 19.2%;float: left;text-align: center;">
+                                    <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 100px;">
+                                        <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                            <el-option label="是" value="1"></el-option>
+                                            <el-option label="否" value="0"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 100px;" v-show="formInline.callDetailShow">
+                                        <el-select v-model="formInline.callDetails" placeholder="请选择"   @change="callDetailsChange" style="width: 100%;height: 35px!important;" clearable>
+                                            <el-option v-for="item in callDetailsArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                            </div>
+
                             <!--
                               <el-form-item label="" size="mini" prop="resourceStatus">
                                 <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
@@ -375,13 +380,11 @@
                               </el-form-item>
                               -->
                             <div>
-                                <div>
-                                    {{callDetailsText}}
-                                </div>
-                                <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
+                                <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19.%;float: left;">
                                     <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
-                                    <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
-                                </el-form-item>
+                                    <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 85%;display:block;margin:0 auto;"></el-input>
+                                    <p style="text-align: center;">{{callDetailsText}}</p>
+                                </el-form-item>                                
                             </div>
 
                             <!--<el-form-item label="" size="mini">-->
@@ -392,7 +395,7 @@
                             <!--<el-option label="否" value="0"></el-option>-->
                             <!--</el-select>-->
                             <!--</el-form-item>-->
-                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
+                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 13%;float: left;">
                                 <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;" @change="chooseTodayAfter">
                                 </el-date-picker>
                             </el-form-item>
