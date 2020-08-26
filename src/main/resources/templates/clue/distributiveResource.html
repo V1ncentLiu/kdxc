@@ -26,13 +26,18 @@
 	        <el-button type="success" @click="toRecall">撤回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportCRecord">
-            <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportFun(1)">导出资源沟通记录</el-button>
-            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源沟通记录中</el-button>
+            <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportFun(1)">导出电销资源沟通记录中</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出电销资源沟通记录中</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="DistributiveResource:exportPhtraRecord">
+            <el-button v-if="isExport3" icon="el-icon-download" type="warning" @click="exportFun(3)">导出话务资源沟通记录</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出话务资源沟通记录中</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportClues">
             <el-button v-if="isExport2" icon="el-icon-download" type="warning" @click="exportFun(2)">导出资源情况</el-button>
             <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源情况中</el-button>
         </shiro:hasPermission>
+
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
@@ -493,6 +498,7 @@
                 timer:null,//计时器
                 isExport1:true,
                 isExport2:true,
+                isExport3:true,
                 oldPage:1,
                 paginationShow: false,
                 isShow:false,
@@ -1053,31 +1059,9 @@
                         return;
                     }
                 }
-           /*      if(falg==1){ // 沟通情况
-                    this.isExport1=false;
-                    // 存localstorage
-                    localStorage.setItem('distributeExport1','1');
-                }else{ // 资源记录
-                    this.isExport2=false;
-                    // 存localstorage
-                    localStorage.setItem('distributeExport2','2');
-                } */
-                
-                // var methodStr;
-                // if(falg==1){ // 沟通情况
-                //     methodStr = 'findCommunicateRecords';
-                // }else{ // 资源记录
-                //     methodStr = 'findClues';
-                // }
-                // axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
-                // .then(function (response) {
-                //     var data =  response.data;
-                //     var fileName = response.headers.filename;
-                //     saveAs(data,decodeURI(fileName));
-                // }).catch(function (error) {
-                //     console.log(error);
-                // }).then(function(){
-                // });
+                if (falg == 3){
+                    param.phtraExport = true;
+                }
                 var falgNew=falg;
                 axios.post('/exetend/distributionedTaskManager/findCluesCount', param)
                 .then(function (response) {
@@ -1094,11 +1078,15 @@
                          type: 'warning'
                      }).then(() => {
                     	
-                    	 if(falg==1){ // 沟通情况
+                    	 if(falg==1){ // 导出电销沟通情况
                     		 ocmVM.isExport1=false;
                              // 存localstorage
                              localStorage.setItem('distributeExport1','1');
-                         }else{ // 资源记录
+                         }else if(falg==3){ // 导出话务沟通情况
+                            ocmVM.isExport3=false;
+                            // 存localstorage
+                            localStorage.setItem('distributeExport3','3');
+                        }else{ // 资源记录
                         	 ocmVM.isExport2=false;
                              // 存localstorage
                              localStorage.setItem('distributeExport2','2');
@@ -1122,6 +1110,7 @@
                 clearInterval(this.timer);
                 var storageDistributeExport1 = localStorage.getItem("distributeExport1");
                 var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+                var storageDistributeExport3 = localStorage.getItem("distributeExport3");
                 if(storageDistributeExport1){
                     this.isExport1=false;
                 }else{
@@ -1132,7 +1121,13 @@
                 }else{
                     this.isExport2=true;
                 }
-                if(storageDistributeExport1||storageDistributeExport2){
+                if(storageDistributeExport3){
+                    this.isExport3=false;
+                }else{
+                    this.isExport3=true;
+                }
+
+                if(storageDistributeExport1||storageDistributeExport2||storageDistributeExport3){
                     this.timer=setInterval(this.timedown,1000)
                 }else{
                     clearInterval(this.timer)
@@ -1242,6 +1237,7 @@
         	document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
+
         /*   var a = new Date();
           var year = a.getFullYear();
           var month = a.getMonth();
@@ -1251,6 +1247,7 @@
           this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59"); */
             var storageDistributeExport1 = localStorage.getItem("distributeExport1");
             var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+            var storageDistributeExport3 = localStorage.getItem("distributeExport3");
             if(storageDistributeExport1){
                 this.isExport1=false;
             }else{
@@ -1261,7 +1258,12 @@
             }else{
                 this.isExport2=true;
             }
-            if(storageDistributeExport1 || storageDistributeExport2){
+            if(storageDistributeExport3){
+                this.isExport3=false;
+            }else{
+                this.isExport3=true;
+            }
+            if(storageDistributeExport1 || storageDistributeExport2 || storageDistributeExport3){
                 this.timedown();
             }
             // 进入页面判断有是否有存储值

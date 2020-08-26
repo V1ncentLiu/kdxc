@@ -8,6 +8,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kuaidao.common.entity.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -35,10 +36,6 @@ import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.ClueCommunicateExportModel;
-import com.kuaidao.common.entity.ClueExportModel;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -590,37 +587,55 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getWechat());
                 // 搜索词
                 curList.add(taskDTO.getSearchWord());
-                // 首次分配电销组
-                curList.add(taskDTO.getFirstAsssignTeleGroupName());
-                // 首次分配电销总监
-                curList.add(taskDTO.getFirstAsssignTeleDirectorName());
-                // 电销组
-                curList.add(taskDTO.getTeleGorupName());
-                // 电销顾问
-                curList.add(taskDTO.getTeleSaleName());
+                if (queryDto.getPhtraExport()) {
+                    // 首次分配话务组
+                    curList.add(taskDTO.getFirstAsssignTrafficGroupId());
+                    // 首次分配话务主管
+                    curList.add(taskDTO.getPhtraDirectorName());
+                    // 首次分配话务员
+                    curList.add(taskDTO.getOperatorName());
+                }else{
+                    // 首次分配电销组
+                    curList.add(taskDTO.getFirstAsssignTeleGroupName());
+                    // 首次分配电销总监
+                    curList.add(taskDTO.getFirstAsssignTeleDirectorName());
+                    // 电销组
+                    curList.add(taskDTO.getTeleGorupName());
+                    // 电销顾问
+                    curList.add(taskDTO.getTeleSaleName());
+                }
+
                 // 首次响应间隔
                 curList.add(taskDTO.getFirstResponseInterval());
                 // 这两个要进行转换
                 String isCall = null;
-                if (taskDTO.getIsCall() != null) {
-                    if (taskDTO.getIsCall() == 1) {
-                        isCall = "是";
-                    } else {
-                        isCall = "否";
-                    }
+                Integer call;
+                if (queryDto.getPhtraExport()) {
+                    call =  taskDTO.getPhtraIsCall();
+                }else{
+                    call = taskDTO.getIsCall();
+                }
+                if (null != call && AggregationConstant.YES.equals(call)) {
+                    isCall = "是";
+                } else {
+                    isCall = "否";
                 }
                 // 是否接通
                 curList.add(isCall);
-                String status = null;
-                if (taskDTO.getStatus() != null) {
-                    if (taskDTO.getStatus() == 1) {
-                        status = "是";
-                    } else {
-                        status = "否";
-                    }
+                String statusStr = null;
+                Integer status;
+                if (queryDto.getPhtraExport()) {
+                    status =  taskDTO.getPhstatus();
+                }else{
+                    status = taskDTO.getStatus();
+                }
+                if (null != status && AggregationConstant.YES.equals(status)) {
+                    statusStr = "是";
+                } else {
+                    statusStr = "否";
                 }
                 // 是否有效
-                curList.add(status);
+                curList.add(statusStr);
                 // 第一次拨打时间
                 curList.add(
                         DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
@@ -653,8 +668,10 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     isSelfBuild = "否";
                 }
-                // 是否自建
-                curList.add(isSelfBuild);
+                if(!queryDto.getPhtraExport()){
+                    // 是否自建
+                    curList.add(isSelfBuild);
+                }
                 // ip
                 curList.add(taskDTO.getIp());
                 //手机号1异常标签
@@ -692,8 +709,13 @@ public class ExtendClueDistributionedTaskController {
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
-            ExcelWriter excelWriter =
-                    EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            ExcelWriter excelWriter = null;
+            if (queryDto.getPhtraExport()) {
+                excelWriter = EasyExcel.write(outputStream, ClueCommunicatePhtraExportModel.class).build();
+            }else{
+                excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            }
+
 
             if(CollectionUtils.isNotEmpty(dataList)){
                 List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
