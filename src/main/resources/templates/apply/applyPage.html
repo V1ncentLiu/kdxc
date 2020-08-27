@@ -42,7 +42,7 @@
 					<el-input v-model="name" maxLength="20" placeholder="客户姓名" ></el-input>
 				</el-form-item>
 				<el-form-item label="电销组:">
-					<el-select v-model="teleGroupId" placeholder="电销组" style="width: 100%;" clearable  filterable >
+					<el-select v-model="teleGroupId" placeholder="电销组" :disabled="saveDisabled" style="width: 100%;" clearable  filterable >
 						<el-option
 								v-for="item in teleGroupList"
 								:key="item.id"
@@ -246,6 +246,7 @@
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+			saveDisabled:false,
 			customerDefinition:"",
 			distriappbution:false,
 			customerDefinitionList:customerDefinitionList,
@@ -603,6 +604,9 @@
 			},
         },
         created(){
+        	if(ownOrgId !=null){
+				this.saveDisabled = true;
+			}
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
         	this.inviteAreaListPage();
