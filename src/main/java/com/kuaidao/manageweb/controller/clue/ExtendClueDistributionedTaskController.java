@@ -589,7 +589,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSearchWord());
                 if (queryDto.getPhtraExport()) {
                     // 首次分配话务组
-                    curList.add(taskDTO.getFirstAsssignTrafficGroupId());
+                    curList.add(String.valueOf(taskDTO.getFirstAsssignTrafficGroupId()));
                     // 首次分配话务主管
                     curList.add(taskDTO.getPhtraDirectorName());
                     // 首次分配话务员
