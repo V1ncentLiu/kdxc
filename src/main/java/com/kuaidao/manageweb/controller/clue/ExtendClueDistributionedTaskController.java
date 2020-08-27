@@ -636,9 +636,16 @@ public class ExtendClueDistributionedTaskController {
                 }
                 // 是否有效
                 curList.add(statusStr);
-                // 第一次拨打时间
-                curList.add(
-                        DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                if (queryDto.getPhtraExport()) {
+                    // 第一次拨打时间
+                    curList.add(
+                            DateUtil.convert2String(taskDTO.getPhtraFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                }else{
+                    // 第一次拨打时间
+                    curList.add(
+                            DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                }
+
                 // 第一次沟通时间
                 curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(),
                         "yyyy/MM/dd HH:mm:ss"));
