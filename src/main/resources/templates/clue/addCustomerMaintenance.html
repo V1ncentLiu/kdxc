@@ -321,7 +321,7 @@
 
                         <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%">
                             <template slot-scope="scope">
-                                {{scope.row.callDetailsName}} {{scope.row.focusPoint}}
+                                {{scope.row.callDetailsName}} <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">-</span> {{scope.row.focusPoint}}
                             </template>
                         </el-table-column>
 
@@ -364,8 +364,8 @@
                                             <el-option label="否" value="0"></el-option>
                                         </el-select>
                                     </el-form-item>
-                                    <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 100px;" v-show="formInline.callDetailShow">
-                                        <el-select v-model="formInline.callDetails" placeholder="请选择"   @change="callDetailsChange" style="width: 100%;height: 35px!important;" clearable>
+                                    <el-form-item label="" prop="callDetails" class="lineForm_isCall" style="width: 100px;"   v-if="formInline.callDetailShow">
+                                        <el-select v-model="formInline.callDetails" placeholder="请选择" :disabled="isDisabledCustomer"   @change="callDetailsChange" style="width: 100%;height: 35px!important;" clearable>
                                             <el-option v-for="item in callDetailsArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                         </el-select>
                                     </el-form-item>
@@ -1194,6 +1194,9 @@
                     },
                     focusPoint: [
                         {required: true, message: '请填写客户关注点', trigger: 'change'}
+                    ],
+                    callDetails: [
+                        {required: true, message: '请选择接通细化', trigger: 'change'}
                     ],
                     // nextVisitTime: [
                     //     {required: true, message: '请选择下次回访时间', trigger: 'blur'}
