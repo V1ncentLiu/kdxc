@@ -760,7 +760,7 @@ public class UserController {
         if(req.getStatusList() != null && req.getStatusList().size()>0){
             userRole.setStatusList(req.getStatusList());
         }
-        if (userInfoDTO.getBusinessLine() != null && userInfoDTO.getBusinessLine() !=BusinessLineConstant.XIAOWUZHONG && userInfoDTO.getBusinessLine() !=BusinessLineConstant.SHANGJI) {
+        if (userInfoDTO.getBusinessLine() != null && userInfoDTO.getBusinessLine() !=BusinessLineConstant.XIAOWUZHONG && userInfoDTO.getBusinessLine() !=BusinessLineConstant.TILIANG) {
             userRole.setBusinessLine(userInfoDTO.getBusinessLine());
         }
         return userInfoFeignClient.listByOrgAndRole(userRole);
