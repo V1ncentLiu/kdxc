@@ -710,8 +710,16 @@ public class ExtendClueDistributionedTaskController {
         // outputStream.close();
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
+            String title = "";
+            if(queryDto !=null && queryDto.getPhtraExport() !=null){
+                if(queryDto.getPhtraExport()){
+                    title = "话务";
+                }else{
+                    title = "电销";
+                }
+            }
             String name =
-                    "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+                    title+ "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition",
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
