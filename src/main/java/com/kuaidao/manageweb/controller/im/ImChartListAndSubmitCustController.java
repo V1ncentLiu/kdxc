@@ -3,7 +3,10 @@ package com.kuaidao.manageweb.controller.im;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.im.dto.custservice.CustomerInfoDTO;
 import com.kuaidao.im.dto.submitCust.SubmitCustsDTO;
+import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +19,9 @@ import java.util.List;
 @RequestMapping("/im")
 public class ImChartListAndSubmitCustController {
 
+
+    @Autowired
+    CustomerInfoFeignClient customerInfoFeignClient;
     /**
      * 顾问提交资源
      */
@@ -48,9 +54,9 @@ public class ImChartListAndSubmitCustController {
      */
     @PostMapping("/brandAndIssubmit")
     @ResponseBody
-    public JSONResult<List> brandAndIssubmit(@RequestBody IdListReq ids) {
-        // 直接调用集合Id查询即可 接口完成
-        return  null;
+    public JSONResult<List<CustomerInfoDTO>> brandAndIssubmit(@RequestBody IdListReq ids) {
+        JSONResult<List<CustomerInfoDTO>> result = customerInfoFeignClient.brandAndIssubmit(ids);
+        return result;
     }
 
 }
