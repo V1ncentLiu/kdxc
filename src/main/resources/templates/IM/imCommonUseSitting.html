@@ -15,7 +15,7 @@
     <div class="mainSearchBg"> 
         <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
             <el-row>
-                <div class="titleBox"><span>常用语设置</span><el-button  @click="add" type="primary"  size="small">IM授权修改</el-button></div>
+                <div class="titleBox"><span>常用语设置</span><el-button  @click="addbutton" type="primary"  size="small">IM授权修改</el-button></div>
                 <el-table 
                     ref="tableData"
                     tooltip-effect="dark"
@@ -33,10 +33,10 @@
                     <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
                         <template slot-scope="scope">
                             <div v-if="scope.row.status === 1">
-                                <el-button  @click="updateStatus(scope.row.id)" type="primary"  size="small">IM授权修改</el-button>
+                                <el-button  @click="delete(scope.row.id)" type="danger"  size="small">删除</el-button>
                             </div>                    
                             <div v-else-if="scope.row.status === 0">
-                                <el-button @click="updateStatus(scope.row.id)"  type="success"  size="small">IM授权</el-button>
+                                <el-button @click="update(scope.row.id)"  type="success"  size="small">修改</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -87,6 +87,21 @@
         </el-form>
     </div>
 </div>
+<!-- dialog -->
+<el-dialog  :title="showTitle"  :visible.sync="addVisible" width="540px">
+    <template>
+        <el-form :model="addForm" ref="addForm" :rules="allocationFormRules">
+            <el-form-item label="备注:"  label-width="100px"  prop="remark">
+                <el-input type="textarea" v-model="addForm.remark" class="input-with-select" maxlength="200" style="width: 350px;" :rows="4" placeholder="输入分发备注"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" :disabled="submitDisable" @click="addSubmit('addForm')">提 交</el-button>
+            <el-button  @click="addCancel('addForm')">取 消</el-button>
+        </div>
+    </template>
+</el-dialog>
+<input id="addOrUpdate" type="hidden" >
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
@@ -108,11 +123,6 @@
                     startTime: '',
                     endTime: '',
                     orgId: curOrgId,
-                },
-                export: {
-                    startTime: '',
-                    endTime: '',
-                    orgId: curOrgId
                 },
                 tableData: [
                     // {
@@ -152,17 +162,91 @@
                     // }
                 ],
                 orgTeleArr: queryOrg, // 电销组
+                addVisible:false,
+                showTitle:"",
+                addForm:{
+                    remark:''
+                }
             }             
         },
-        methods: {  
-            updateStatus(id,status) {
-                //状态调整
-                if(status==1){//1是已授权，跳转到已授权设置
-                    window.location.href=""
-                }else{//跳转到新建授权设置
-                    window.location.href=""
+        methods: { 
+            addbutton(){
+                this.showTitle="添加布局"
+                $("#addOrUpdate").val(1);
+                this.addVisible=true;
+                if (this.$refs['addForm']!=undefined) {
+                    this.addForm.remark = "";
+                    this.$refs['addForm'].resetFields();
+                  }
+            }
+            update(id) {
+                this.addVisible=true;
+                $("#addOrUpdate").val(2);
+                if (this.$refs['addForm']!=undefined) {
+                    this.$refs['addForm'].resetFields();
+                  }
+                if(id){
+                    this.showTitle="更新常用语"
+                }else{
+                    this.showTitle="添加常用语"
                 }
-            },          
+            }, 
+            delete(id,status) {
+                this.addVisible=true;
+                var param  = {}
+                param.id=id;
+                this.$confirm('确认删除吗？删除后数据将不存在。', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {                
+                   axios.post('/area/sysregion/delete',param)
+                   .then(function (response) {
+                       console.info(response);
+                       var data =  response.data;
+                       if(data.code=='0'){
+                           var resData = data.data;
+                           var delText="";
+                           if(resData){
+                               delText="删除成功";
+                           }else{
+                               delText="删除失败"
+                           }
+                           
+                         orgVM.$message({message:delText,type:'success',duration:2000,onClose:function(){
+                             orgVM.initOrgTree();
+                             orgVM.getQuery();
+                        }});
+                           
+                       }else{
+                           orgVM.$message({
+                               message: "接口调用失败",
+                               type: 'warning'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                     orgVM.$message({
+                         message: "系统错误",
+                         type: 'error'
+                       }); 
+                   })
+                   .then(function () {
+                       
+                   });  
+                  
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+            }, 
+            addCancel(formName){//取消
+               this.$refs[formName].resetFields();
+               this.addVisible = false;
+           },         
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -245,9 +329,6 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
                     }else{
                         mainDivVM.loading = false;
                     }  
@@ -378,24 +459,6 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
             },
-            exportRs(){
-                var param = {};
-                param.startTime = this.export.startTime;
-                param.endTime = this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
-                    .then(function (response) {
-                        var data =  response.data;
-                        var fileName = response.headers.filename;
-                        saveAs(data,decodeURI(fileName));
-                    })
-                    .catch(function (error) {
-                        mainDivVM.$message({
-                            message: "导出失败，请稍后重试",
-                            type: "error"
-                        });
-                    });
-            }
         },
         created(){
             // 默认进入显示当天时间
@@ -405,8 +468,6 @@
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
             if(curOrgId){this.isDisabled= true;}
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();

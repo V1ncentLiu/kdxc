@@ -18,13 +18,14 @@
                 
             </el-form-item>
             <el-form-item label="每日接待IM客户上限:"> 
-                <el-input v-model="cusName" placeholder="会话内容"></el-input>
+                <el-input v-model="cusName" placeholder="" value="10"></el-input>
             </el-form-item> 
             <el-form-item label="服务品牌选择:"> 
                 <el-button  @click="open" type="danger"  size="small">添加服务品牌</el-button>
-                <el-button  @click="open" type="text"  size="small">设定全部品牌</el-button>
+                <el-button  @click="settingAll" type="text"  size="small">设定全部品牌</el-button>
             </el-form-item>
         </div>
+        已选服务品牌
         <el-row>
             <el-table 
                 ref="tableData"
@@ -35,30 +36,23 @@
                 v-loading="loading"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" align="center" label="电销组">
+                <el-table-column prop="orgName" align="center" label="品牌名称">
                 </el-table-column>
-                <el-table-column prop="callCount" align="center" label="电销顾问" width="80">
-                </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="IM状态" width="100">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" label="授权状态">
+                <el-table-column prop="callCount" align="center" label="品牌分类" width="80">
                 </el-table-column>
                 <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            <el-button  @click="updateStatus(scope.row.id)" type="danger"  size="small">IM授权修改</el-button>
-                        </div>                    
-                        <div v-else-if="scope.row.status === 0">
-                            <el-button @click="updateStatus(scope.row.id)"  type="success"  size="small">IM授权</el-button>
-                        </div>
+                        <el-button @click="delete" type="success"  size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
-        <el-button  @click="submit" type="primary"  size="small">确定</el-button>
-        <el-button  @click="goback" type="text"  size="small">取消</el-button>
-        <el-button  @click="goback" type="text"  size="small">返回身份列表</el-button>
+        <div class="padding20 f-tac"> 
+            <el-button  @click="submit" type="primary"  size="small">确定</el-button>
+            <el-button  @click="goback" type="text"  size="small">取消</el-button>
+            <el-button  @click="goback" type="text"  size="small">返回身份列表</el-button>
+        </div> 
     </div>
 </div>
 <!-- import common js-->
