@@ -3,23 +3,39 @@
  */
 package com.kuaidao.manageweb.controller;
 
-import java.awt.image.BufferedImage;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.BusinessLineConstant;
-import com.kuaidao.common.constant.BusinessLineTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.entity.LoginReq;
+import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
+import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
+import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
+import com.kuaidao.msgpush.dto.SmsCodeSendReq;
+import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -45,34 +61,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.google.code.kaptcha.impl.DefaultKaptcha;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.MD5Util;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.LoginReq;
-import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
-import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.IdUtil;
-import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
-import com.kuaidao.msgpush.dto.SmsCodeSendReq;
-import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.*;
+import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.awt.image.BufferedImage;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -100,6 +98,8 @@ public class LoginController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RedisSessionDAO redisSessionDAO;
+    @Autowired
+    private CustomerInfoFeignClient customerInfoFeignClient;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
@@ -383,6 +383,14 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
                 SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
+                /** 添加在线离线日志 */
+                SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
+                saleOnlineLeaveLogReq.setOperationType(1);
+                saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
+                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleName).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+                if(collect.containsKey("电销组")){
+                    customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+                }
                 return new JSONResult<>().success(null);
 
             } catch (UnknownAccountException uae) {
@@ -652,6 +660,17 @@ public class LoginController {
             userInfoFeignClient.update(update);
             if ("3".equals(type)) {
                 subject.getSession().setAttribute("isShowLogoutBox", type);
+            }
+            // 离线日志
+            SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
+            saleOnlineLeaveLogReq.setOperationType(2);
+            saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
+            List<RoleInfoDTO> roleList = user.getRoleList();
+            if(CollectionUtils.isNotEmpty(roleList)){
+                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleName).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+                if(collect.containsKey("电销组")){
+                    customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+                }
             }
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);

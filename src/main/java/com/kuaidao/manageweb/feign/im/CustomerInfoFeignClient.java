@@ -1,18 +1,19 @@
 package com.kuaidao.manageweb.feign.im;
 
-import com.kuaidao.aggregation.dto.financing.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.*;
+import com.kuaidao.common.entity.IdListReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.im.dto.custservice.CustomerInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  *  退返款 
@@ -26,6 +27,10 @@ public interface CustomerInfoFeignClient {
     @PostMapping(value = "/brandAndIssubmit")
     JSONResult<List<CustomerInfoDTO>> brandAndIssubmit(@RequestBody IdListReq ids);
 
+    @Async
+    @PostMapping(value = "/onlineleave")
+    JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq);
+
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
 
@@ -37,10 +42,14 @@ public interface CustomerInfoFeignClient {
                     SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
 
-
         @Override
         public JSONResult<List<CustomerInfoDTO>> brandAndIssubmit(IdListReq ids) {
             return fallBackError("品牌信息以及是否提交接口");
+        }
+
+        @Override
+        public JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq) {
+            return fallBackError("在线离线日志");
         }
     }
 
