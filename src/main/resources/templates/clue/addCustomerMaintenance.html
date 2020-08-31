@@ -289,12 +289,12 @@
                     </el-button>
                 </el-col>
                 <el-col :span="4" :offset="4" class="f-tar">
-                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
+                    <el-button size="small" type="primary" @click="lineFormShowFun()"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
             </el-row>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
+                <el-table ref="tableDataC2" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
                     <el-table-column prop="id" type="selection" width="50" @selection-change="handleTrackingSelection" align="center"></el-table-column>
                     <el-table-column prop="callTime" label="跟进时间" align="center" min-width="12%">
                     </el-table-column>
@@ -1453,7 +1453,7 @@
                 addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
                     addCustomerVM.uploadParamData.realName= file.name
             },
-            lineFormShowFun() {
+            lineFormShowFun(rows) {
             	this.isDisabledCustomer = false;
                 if(this.lineFormShow){
                     this.lineFormShow = false
@@ -1469,6 +1469,15 @@
                 this.callDetailsText="";
                 //this.formInline.callTime =new Date(teleEndTime);
                 this.formInline.callTime =new Date();
+                // 清除编辑状态
+                isEdit=false;
+                if (rows) {//清除选中状态
+                  rows.forEach(row => {
+                    this.$refs.tableDataC2.toggleRowSelection(row);
+                  });
+                } else {
+                  this.$refs.tableDataC2.clearSelection();
+                }
             },
             async gettelNumberIcon(tel) {
             	var isReturn =false;
