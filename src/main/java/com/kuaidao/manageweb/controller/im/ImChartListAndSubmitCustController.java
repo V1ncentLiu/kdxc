@@ -58,5 +58,4 @@ public class ImChartListAndSubmitCustController {
         JSONResult<List<CustomerInfoDTO>> result = customerInfoFeignClient.brandAndIssubmit(ids);
         return result;
     }
-
 }

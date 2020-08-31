@@ -65,7 +65,9 @@ public enum MenuEnum {
     /**
      * 报表（商务模块）
      */
-    VISIT_SIGN("签约来访");
+    VISIT_SIGN("签约来访"),
+
+    IM_CHAR_RECORD("im聊天记录");
 
 
     /**
