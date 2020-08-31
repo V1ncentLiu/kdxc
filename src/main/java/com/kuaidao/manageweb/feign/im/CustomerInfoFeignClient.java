@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.im;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.im.dto.custservice.CustomerInfoDTO;
 import org.slf4j.Logger;
@@ -31,6 +32,9 @@ public interface CustomerInfoFeignClient {
     @PostMapping(value = "/onlineleave")
     JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq);
 
+    @PostMapping(value = "/calCusNum")
+    JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq);
+
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
 
@@ -50,6 +54,11 @@ public interface CustomerInfoFeignClient {
         @Override
         public JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq) {
             return fallBackError("在线离线日志");
+        }
+
+        @Override
+        public JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq) {
+            return fallBackError("提交客户量/提交会话客户量");
         }
     }
 
