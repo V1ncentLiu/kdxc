@@ -12,6 +12,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.custservice.constant.SaleOLOperationTypeEnum;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -385,7 +386,7 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
                 /** 添加在线离线日志 */
                 SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-                saleOnlineLeaveLogReq.setOperationType(1);
+                saleOnlineLeaveLogReq.setOperationType(SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
                 saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
                 Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleName).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
                 if(collect.containsKey("电销组")){
@@ -663,7 +664,7 @@ public class LoginController {
             }
             // 离线日志
             SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-            saleOnlineLeaveLogReq.setOperationType(2);
+            saleOnlineLeaveLogReq.setOperationType(SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
             saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
             List<RoleInfoDTO> roleList = user.getRoleList();
             if(CollectionUtils.isNotEmpty(roleList)){
