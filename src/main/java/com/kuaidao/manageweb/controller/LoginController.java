@@ -388,8 +388,9 @@ public class LoginController {
                 SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
                 saleOnlineLeaveLogReq.setOperationType(SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
                 saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
-                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleName).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-                if(collect.containsKey("电销组")){
+                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+                // 电销顾问&业务线是2的
+                if(collect.containsKey("DXCYGW") && "2".equals(user.getBusinessLine())){
                     customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
                 }
                 return new JSONResult<>().success(null);
@@ -668,8 +669,8 @@ public class LoginController {
             saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
             List<RoleInfoDTO> roleList = user.getRoleList();
             if(CollectionUtils.isNotEmpty(roleList)){
-                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleName).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-                if(collect.containsKey("电销组")){
+                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+                if(collect.containsKey("DXCYGW") && "2".equals(user.getBusinessLine())){
                     customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
                 }
             }
