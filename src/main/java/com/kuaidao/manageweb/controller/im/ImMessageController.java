@@ -4,10 +4,12 @@ package com.kuaidao.manageweb.controller.im;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.im.dto.MessageRecordData;
 import com.kuaidao.im.dto.MessageRecordExportSearchReq;
 import com.kuaidao.im.dto.MessageRecordPageReq;
 import com.kuaidao.im.util.JSONPageResult;
+import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
 import com.kuaidao.manageweb.feign.im.ImFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -34,6 +36,9 @@ public class ImMessageController {
 
     @Resource
     private ImFeignClient imFeignClient;
+
+    @Resource
+    private CustomerInfoFeignClient customerInfoFeignClient;
     /**
      * 聊天记录历史分页
      * @param messageRecordPageReq
@@ -122,5 +127,17 @@ public class ImMessageController {
         headTitleList.add("聊天时间（年月日时分秒）");
         headTitleList.add("聊天内容");
         return headTitleList;
+    }
+
+
+    /**
+     * 监控分页
+     * @param saleMonitorCalReq
+     * @return
+     */
+    @PostMapping("/calCusNum")
+    public JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq){
+
+        return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
     }
 }
