@@ -33,13 +33,11 @@
                     <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                     <el-table-column prop="projectName" align="center" label="品牌名称">
                     </el-table-column>
-                    <el-table-column prop="category" align="center" label="品牌分类" width="80">
-                    </el-table-column>
-                    <el-table-column prop="groupName" align="center" label="品牌分类" width="80">
+                    <el-table-column prop="category" align="center" label="品牌分类">
                     </el-table-column>
                     <el-table-column prop="" align="center" label="操作">
                         <template slot-scope="scope">
-                            <el-button @click.native.prevent="delete(scope.$index, form.tableData)" type="text" size="small">删除</el-button>
+                            <el-button @click.native.prevent="deleteRow(scope.$index, form.tableData)" type="text" size="small">删除</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -47,10 +45,54 @@
             <div class="padding20 f-tac"> 
                 <el-button  @click="submit" type="primary"  size="small">确定</el-button>
                 <el-button  @click="cancel" type="warning"  size="small">取消</el-button>
-                <el-button  @click="goback" type="success"  size="small">返回身份列表</el-button>
             </div>  
         </el-form> 
-    </div>     
+    </div>  
+    <!-- dialog -->
+    <el-dialog title="选择服务品牌" :visible.sync="selectDialog">
+        <el-col class="marginB20">
+            <el-form :model="selectForm" :inline="true" class="demo-form-inline mainSearchForm" ref="selectForm">
+                <el-form-item label="品牌名称：">
+                    <el-input placeholder="输入品牌名称" v-model="selectForm.projectName" style="width: 100%;"></el-input>
+                </el-form-item>
+                <el-form-item label="项目分类：">  
+                    <el-select v-model="selectForm.category" placeholder="项目分类" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in categoryArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="所属公司：">  
+                    <el-select v-model="selectForm.groupName" placeholder="所属公司" style="width: 100%;margin-right: 10px;" clearable filterable>
+                        <el-option
+                            v-for="item in groupNameArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label=""> 
+                    <el-button icon="el-icon-search" type="primary" @click="selectList">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </el-col>
+        <el-table
+            ref="selectTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="selectTable"
+        >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="品牌名称"></el-table-column>
+            <el-table-column align="center" prop="category" label="项目分类"></el-table-column>
+            <el-table-column align="center" prop="groupName" label="所属公司"></el-table-column>
+        </el-table>
+    </el-dialog>   
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -87,7 +129,18 @@
                     tableData:[]
                 },
                 tableDataDialog: [],
-                rules:{}
+                rules:{},
+                selectTable:[],
+                selectDialog:true,
+                projectName:'',
+                selectForm:{
+                    projectName:'',
+                    category:'',
+                    groupName:'',
+                },
+                categoryArr:categoryList,
+                groupNameArr:userInfoList,
+
             }             
         },
         methods: {   
@@ -101,29 +154,30 @@
 
             },
             cancel(){
-
+                window.location.href="/custservice/saleIm/initListPage"
             },
-            goback(){
+            deleteRow(index, rows) {//删除一行表格
 
-            }, 
-            delete(index, rows) {//删除一行表格
-                debugger
                 rows.splice(index, 1);
             },
-            searchTable(firstPage) {                 
+            selectList(firstPage) {                 
                 var param = {};
-                param.pageNum = this.pager.currentPage
-                param.pageSize = this.pager.pageSize; 
+                param.projectName = this.selectForm.projectName
+                param.category = this.selectForm.category; 
+                param.groupName = this.selectForm.groupName;
+                var notInListArr=[];
+                for(var i=0;i<this.form.tableData.length;i++){
+                    notInListArr.push(this.form.tableData[i].id)
+                }                
+                param.notInList = notInListArr;
                 this.loading = true; 
-                axios.post('/custservice/saleIm/list',param).then(function (response) { 
+                axios.post('/custservice/saleIm/getBrandList',param).then(function (response) { 
                    mainDivVM.loading = false;
                    console.log(response)
                    var result =  response.data;
                     if(result.code==0){
                         var table=result.data;
                         mainDivVM.tableData= table.data;
-                        mainDivVM.pager.total =  table.total;
-                        mainDivVM.pager.currentPage = table.currentPage;
                     }else{
                         mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
@@ -135,16 +189,20 @@
                         type: "error"
                     });
                 });
-            },
-            tableInit(){
-                this.form.tableData=allBrandList;
             }
         },
         created(){  
-            this.tableInit();
+            
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
+            var isId=saleIm.id;
+            if(isId){
+                this.form.tableData=brandList;
+            }else{//没有id取所有的
+                this.form.tableData=allBrandList;
+            }
+            
         }
     })
     
