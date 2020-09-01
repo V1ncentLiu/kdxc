@@ -38,7 +38,7 @@
                     </el-select>
                 </el-form-item>  
                 <el-form-item label="授权状态:">  
-                    <el-select v-model="form.isAuthorize" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.imAuthorizeStatus" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in isAuthorizeArr"
                             :key="item.id"
@@ -65,9 +65,9 @@
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                 <el-table-column prop="teleGroupName" align="center" label="电销组">
                 </el-table-column>
-                <el-table-column prop="teleSaleName" align="center" label="电销顾问" width="80">
+                <el-table-column prop="teleSaleName" align="center" label="电销顾问">
                 </el-table-column>
-                <el-table-column prop="imStatus" align="center" label="IM状态" width="100">
+                <el-table-column prop="imStatus" align="center" label="IM状态">
                     <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
                     <template slot-scope="scope">
                         <div v-if="scope.row.imStatus === 1">
@@ -94,13 +94,9 @@
                 </el-table-column>
                 <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.imAuthorizeStatus === 1">
-                            <el-button  @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small">IM授权修改</el-button>
-                        </div>                    
-                        <div v-else-if="scope.row.imAuthorizeStatus === 2">
-                            <el-button @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small">IM授权</el-button>
-                        </div>
-                        <el-button @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)"  type="text">名片</el-button>
+                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small">IM授权修改</el-button>
+                        <el-button  v-else-if="scope.row.imAuthorizeStatus === 2" @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small">IM授权</el-button>
+                        <el-button @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)"  type="text" style="margin-left: 10px;">名片</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -174,7 +170,7 @@
                 form: {
                     teleGroupId: '',
                     teleSaleId: '',
-                    isAuthorize: '',
+                    imAuthorizeStatus: '',
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
@@ -227,7 +223,7 @@
                 var param = {};
                 param.teleGroupId = this.form.teleGroupId;
                 param.teleSaleId = this.form.teleSaleId;
-                param.isAuthorize = this.form.isAuthorize;
+                param.imAuthorizeStatus = this.form.imAuthorizeStatus;
                 param.pageNum = this.pager.currentPage
                 param.pageSize = this.pager.pageSize;                
                 this.loading = true; 
