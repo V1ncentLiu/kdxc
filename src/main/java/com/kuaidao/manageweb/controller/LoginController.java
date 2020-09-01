@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -36,7 +37,6 @@ import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -384,15 +384,7 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
                 SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
-                /** 添加在线离线日志 */
-                SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-                saleOnlineLeaveLogReq.setOperationType(SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
-                saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
-                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-                // 电销顾问&业务线是2的
-                if(collect.containsKey("DXCYGW") && "2".equals(user.getBusinessLine())){
-                    customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-                }
+                this.transOnlineLeaveLog(user, roleList , SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
                 return new JSONResult<>().success(null);
 
             } catch (UnknownAccountException uae) {
@@ -448,6 +440,28 @@ public class LoginController {
             }
         }
         return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+    }
+
+    /**
+     * 在线离线日志
+     * @param user
+     * @param roleList
+     * @param onlineLeaveType
+     */
+    public void transOnlineLeaveLog(UserInfoDTO user, List<RoleInfoDTO> roleList , Integer onlineLeaveType ) {
+        if(null == user || null == roleList){
+            logger.warn("user or roleList is null! user = {} , roleList = {} " , JSON.toJSONString(user), JSON.toJSONString(roleList));
+            return ;
+        }
+        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+        // 电销顾问 & 业务线是的商机盒子的
+        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer)BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+
+            SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
+            saleOnlineLeaveLogReq.setOperationType(onlineLeaveType);
+            saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
+            customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+        }
     }
 
     /**
@@ -663,17 +677,7 @@ public class LoginController {
             if ("3".equals(type)) {
                 subject.getSession().setAttribute("isShowLogoutBox", type);
             }
-            // 离线日志
-            SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-            saleOnlineLeaveLogReq.setOperationType(SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
-            saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
-            List<RoleInfoDTO> roleList = user.getRoleList();
-            if(CollectionUtils.isNotEmpty(roleList)){
-                Map<String, String> collect = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-                if(collect.containsKey("DXCYGW") && "2".equals(user.getBusinessLine())){
-                    customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-                }
-            }
+            this.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);
         }
