@@ -16,7 +16,7 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -26,9 +26,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="顾问名称:">  
-                    <el-select v-model="form.new_resource" placeholder="会话顾问" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleSaleId" placeholder="顾问" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in distributionSource"
+                            v-for="item in teleSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -36,9 +36,9 @@
                     </el-select>
                 </el-form-item>  
                 <el-form-item label="授权状态:">  
-                    <el-select v-model="form.new_resource" placeholder="会话顾问" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.isAuthorize" placeholder="全部" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in distributionSource"
+                            v-for="item in isAuthorizeArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -62,21 +62,42 @@
                 v-loading="loading"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" align="center" label="电销组">
+                <el-table-column prop="teleGroupName" align="center" label="电销组">
                 </el-table-column>
-                <el-table-column prop="callCount" align="center" label="电销顾问" width="80">
+                <el-table-column prop="teleSaleName" align="center" label="电销顾问" width="80">
                 </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="IM状态" width="100">
+                <el-table-column prop="imStatus" align="center" label="IM状态" width="100">
+                    <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            在线
+                        </div>                    
+                        <div v-else-if="scope.row.status === 2">
+                            忙碌
+                        </div>
+                        <div v-else-if="scope.row.status === 3">
+                            离线
+                        </div>
+                    </template>
                 </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" label="授权状态">
+                <el-table-column prop="isAuthorize" align="center" label="授权状态">
+                    <!-- 授权状态 1-已授权、2-未授权 -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            已授权
+                        </div>                    
+                        <div v-else-if="scope.row.status === 2">
+                            未授权
+                        </div>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
                     <template slot-scope="scope">
                         <div v-if="scope.row.status === 1">
-                            <el-button  @click="updateStatus(scope.row.id)" type="primary"  size="small">IM授权修改</el-button>
+                            <el-button  @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small">IM授权修改</el-button>
                         </div>                    
-                        <div v-else-if="scope.row.status === 0">
-                            <el-button @click="updateStatus(scope.row.id)"  type="success"  size="small">IM授权</el-button>
+                        <div v-else-if="scope.row.status === 2">
+                            <el-button @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small">IM授权</el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -90,7 +111,7 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
-    var curOrgId = [[${curOrgId}]];
+    var teleSale = [[${teleSaleList}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -103,62 +124,33 @@
                     pageSize: 20
                 },
                 form: {
-                    startTime: '',
-                    endTime: '',
-                    orgId: curOrgId,
+                    teleGroupId: '',
+                    teleSaleId: '',
+                    isAuthorize: '',
                 },
-                export: {
-                    startTime: '',
-                    endTime: '',
-                    orgId: curOrgId
-                },
-                tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '电销组1',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0.1,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 0
-                    // },
-                    // {
-                    //     orgId: "3",
-                    //     orgName: '电销组3',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     // callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     // userAvgDayValidCallTime: 155799
-                    // }
-                ],
+                tableData: [],
                 orgTeleArr: queryOrg, // 电销组
+                teleSaleArr: teleSale, // 电销组
+                isAuthorize:0,
+                isAuthorizeArr:[{
+                    id:0,
+                    name:'全部'
+                },{
+                    id:1,
+                    name:'已授权'
+                },{
+                    id:2,
+                    name:'未授权'
+                }]
             }             
         },
         methods: {  
             updateStatus(id,status) {
                 //状态调整
                 if(status==1){//1是已授权，跳转到已授权设置
-                    window.location.href=""
+                    window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id
                 }else{//跳转到新建授权设置
-                    window.location.href=""
+                    window.location.href="/custservice/saleIm/initUpdatePage"
                 }
             },          
             searchTable(firstPage) { 
