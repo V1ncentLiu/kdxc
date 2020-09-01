@@ -32,6 +32,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -153,6 +154,18 @@ public class ImMessageController {
     public @ResponseBody JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(@RequestBody TSaleMonitorReq tSaleMonitorReq){
 
         JSONResult<PageBean<SaleMonitorDTO>> result = customerInfoFeignClient.getSaleMonitor(tSaleMonitorReq);
+
+        return result;
+    }
+
+    /**
+     * 顾问在线离线忙碌状态数量
+     * @return
+     */
+    @PostMapping("/getSaleImStateNum")
+    public @ResponseBody JSONResult<Map<String,Object>> getSaleImStateNum(){
+
+        JSONResult<Map<String,Object>> result = customerInfoFeignClient.getSaleImStateNum();
 
         return result;
     }

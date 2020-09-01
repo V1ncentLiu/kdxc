@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *  退返款 
@@ -38,6 +39,9 @@ public interface CustomerInfoFeignClient {
 
     @PostMapping(value = "/getSaleMonitor")
     JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq);
+
+    @PostMapping(value = "/getSaleImStateNum")
+    JSONResult<Map<String, Object>> getSaleImStateNum();
 
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
@@ -68,6 +72,11 @@ public interface CustomerInfoFeignClient {
         @Override
         public JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq) {
             return fallBackError("顾问监控量查询");
+        }
+
+        @Override
+        public JSONResult<Map<String, Object>> getSaleImStateNum() {
+            return fallBackError("顾问在线离线忙碌状态数量");
         }
 
     }
