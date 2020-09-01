@@ -50,8 +50,8 @@ import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -90,9 +90,9 @@ public class SaleImController {
         organizationQueryDTO.setBusinessLine(BusinessLineConstant.SHANGJI);
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
         // 查询下级电销组(查询使用)
-        JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
-                organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
-        List<OrganizationDTO> data = listDescenDantByParentId.getData();
+        JSONResult<List<OrganizationRespDTO>> listDescenDantByParentId =
+                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
+        List<OrganizationRespDTO> data = listDescenDantByParentId.getData();
         // 餐盟严选所有电销顾问
         List<UserInfoDTO> userList =
                 getUserListByBusliness(BusinessLineConstant.SHANGJI, RoleCodeEnum.DXCYGW.name());
