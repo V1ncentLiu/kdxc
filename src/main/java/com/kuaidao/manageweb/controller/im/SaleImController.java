@@ -119,7 +119,7 @@ public class SaleImController {
             JSONResult<SaleImDTO> byTeleSaleId =
                     saleImFeignClient.getByTeleSaleId(new IdEntityLong(teleSaleId));
             request.setAttribute("saleIm", byTeleSaleId.getData());
-            if (allBrandList.getData() != null) {
+            if (allBrandList.getData() != null && byTeleSaleId.getData().getBrandIdList() != null) {
                 Map<Long, ProjectInfoDTO> allBrandMap = allBrandList.getData().stream()
                         .collect(Collectors.toMap(ProjectInfoDTO::getId, a -> a, (k1, k2) -> k1));
                 List<Long> brandIdList = byTeleSaleId.getData().getBrandIdList();
