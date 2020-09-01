@@ -20,10 +20,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">  
                 <el-form-item label="会话内容:"> 
-                    <el-input v-model="cusName" placeholder="会话内容"></el-input>
+                    <el-input v-model="form.body" placeholder="会话内容"></el-input>
                 </el-form-item>  
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.teleGorupId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -33,7 +33,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="会话顾问:">  
-                    <el-select v-model="form.new_resource" placeholder="会话顾问" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleSaleName" placeholder="会话顾问" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in distributionSource"
                             :key="item.id"
@@ -44,10 +44,10 @@
                 </el-form-item>  
                           
                 <el-form-item label="聊天时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.chatBegin" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.chatEnd" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>   
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="btnDisabled">搜索</el-button>
@@ -66,17 +66,15 @@
                 v-loading="loading"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" align="center" label="电销组">
+                <el-table-column prop="teleGorupName" align="center" label="电销组">
                 </el-table-column>
-                <el-table-column prop="callCount" align="center" label="会话顾问" width="80">
+                <el-table-column prop="teleSaleName" align="center" label="会话顾问" width="80">
                 </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="身份别名" width="100">
+                <el-table-column prop="cusName" align="center" label="会话客户">
                 </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" label="会话客户">
+                <el-table-column prop="msgTimestamp" align="center" :formatter="timeFormat" label="聊天时间">
                 </el-table-column>
-                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="聊天时间">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" label="聊天内容">
+                <el-table-column prop="body" align="center" label="聊天内容">
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -101,62 +99,30 @@
                     pageSize: 20
                 },
                 form: {
-                    startTime: '',
-                    endTime: '',
-                    orgId: curOrgId,
+                    body: '',
+                    teleGorupId: '',
+                    teleSaleName: '',
+                    chatBegin: '',
+                    chatEnd: '',
                 },
                 export: {
-                    startTime: '',
-                    endTime: '',
-                    orgId: curOrgId
+                    body: '',
+                    teleGorupId: '',
+                    teleSaleName: '',
+                    chatBegin: '',
+                    chatEnd: '',
                 },
-                tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '电销组1',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0.1,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 0
-                    // },
-                    // {
-                    //     orgId: "3",
-                    //     orgName: '电销组3',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     // callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     // userAvgDayValidCallTime: 155799
-                    // }
-                ],
+                tableData: [],
                 orgTeleArr: queryOrg, // 电销组
             }             
         },
         methods: {            
             searchTable(firstPage) { 
-                var startTime = this.form.startTime;
-                var endTime = this.form.endTime;
+                var startTime = this.form.chatBegin;
+                var endTime = this.form.chatEnd;
                 if(endTime && startTime){
-                    startTime = new Date(this.form.startTime);
-                    endTime = new Date(this.form.endTime);
+                    startTime = new Date(this.form.chatBegin);
+                    endTime = new Date(this.form.chatEnd);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -199,7 +165,8 @@
                 param.orgId = this.form.orgId;
                 param.callType = this.form.callType;
                 this.loading = true; 
-                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
+                // axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
+                axios.post('/message/im/getChatRecordPage',param).then(function (response) {     
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -368,10 +335,13 @@
             },
             exportRs(){
                 var param = {};
-                param.startTime = this.export.startTime;
-                param.endTime = this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                param.body = this.export.body;
+                param.teleGorupId = this.export.teleGorupId;
+                param.teleSaleName =  this.export.teleSaleName; 
+                param.chatBegin = this.export.chatBegin;
+                param.chatEnd = this.export.chatEnd;
+                // axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                axios.post('/message/im/export',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
