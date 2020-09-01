@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.im;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
@@ -35,8 +36,8 @@ public interface CustomerInfoFeignClient {
     @PostMapping(value = "/calCusNum")
     JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq);
 
-    @PostMapping(value = "/saleMonitor")
-    JSONResult<List<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq);
+    @PostMapping(value = "/getSaleMonitor")
+    JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq);
 
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
@@ -65,7 +66,7 @@ public interface CustomerInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq) {
+        public JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq) {
             return fallBackError("顾问监控量查询");
         }
 

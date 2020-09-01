@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.im;
 
 
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -48,7 +50,7 @@ public class ImMessageController {
      * @param response
      */
     @PostMapping("/getChatRecordPage")
-    public JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq, HttpServletRequest request, HttpServletResponse response){
+    public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq, HttpServletRequest request, HttpServletResponse response){
 
         return imFeignClient.getChatRecordPage(messageRecordPageReq);
     }
@@ -137,7 +139,7 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/calCusNum")
-    public JSONResult<Boolean> calCusNum(@RequestBody SaleMonitorCalReq saleMonitorCalReq){
+    public @ResponseBody JSONResult<Boolean> calCusNum(@RequestBody SaleMonitorCalReq saleMonitorCalReq){
 
         return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
     }
@@ -148,9 +150,9 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/saleMonitor")
-    public JSONResult<List<SaleMonitorDTO>> getSaleMonitor(@RequestBody TSaleMonitorReq tSaleMonitorReq){
+    public @ResponseBody JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(@RequestBody TSaleMonitorReq tSaleMonitorReq){
 
-        JSONResult<List<SaleMonitorDTO>> result = customerInfoFeignClient.getSaleMonitor(tSaleMonitorReq);
+        JSONResult<PageBean<SaleMonitorDTO>> result = customerInfoFeignClient.getSaleMonitor(tSaleMonitorReq);
 
         return result;
     }
