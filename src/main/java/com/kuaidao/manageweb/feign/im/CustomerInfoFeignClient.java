@@ -11,7 +11,6 @@ import com.kuaidao.im.dto.custservice.CustomerInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +29,6 @@ public interface CustomerInfoFeignClient {
     @PostMapping(value = "/brandAndIssubmit")
     JSONResult<List<CustomerInfoDTO>> brandAndIssubmit(@RequestBody IdListReq ids);
 
-    @Async
     @PostMapping(value = "/onlineleave")
     JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq);
 
