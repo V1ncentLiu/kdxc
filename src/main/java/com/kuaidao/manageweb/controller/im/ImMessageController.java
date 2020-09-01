@@ -5,6 +5,8 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
+import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
+import com.kuaidao.custservice.dto.onlineleave.TSaleMonitorReq;
 import com.kuaidao.im.dto.MessageRecordData;
 import com.kuaidao.im.dto.MessageRecordExportSearchReq;
 import com.kuaidao.im.dto.MessageRecordPageReq;
@@ -129,15 +131,27 @@ public class ImMessageController {
         return headTitleList;
     }
 
-
     /**
-     * 监控分页
+     * 提交会话客户量/客户提交量
      * @param saleMonitorCalReq
      * @return
      */
     @PostMapping("/calCusNum")
-    public JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq){
+    public JSONResult<Boolean> calCusNum(@RequestBody SaleMonitorCalReq saleMonitorCalReq){
 
         return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
+    }
+
+    /**
+     * 顾问监控分页
+     * @param tSaleMonitorReq
+     * @return
+     */
+    @PostMapping("/saleMonitor")
+    public JSONResult<List<SaleMonitorDTO>> getSaleMonitor(@RequestBody TSaleMonitorReq tSaleMonitorReq){
+
+        JSONResult<List<SaleMonitorDTO>> result = customerInfoFeignClient.getSaleMonitor(tSaleMonitorReq);
+
+        return result;
     }
 }
