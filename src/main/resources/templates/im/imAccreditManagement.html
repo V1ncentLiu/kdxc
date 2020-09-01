@@ -16,7 +16,7 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -46,7 +46,7 @@
                     </el-select>
                 </el-form-item>  
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="btnDisabled">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
                 </div>  
@@ -99,6 +99,7 @@
                         <div v-else-if="scope.row.status === 2">
                             <el-button @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small">IM授权</el-button>
                         </div>
+                        <el-button @click="openCard(scope.row.teleSaleId)"  type="text">名片</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -106,12 +107,57 @@
         </el-row>
     </div>
 </div>
+<!-- 名片弹窗 -->
+<el-dialog title="名片" :visible.sync="cardVisible" width="540px">
+    <template>
+        <el-form :model="cardForm" ref="cardForm" :rules="allocationFormRules">
+            <el-form-item label="姓名:"  label-width="100px">
+                <span>{{teleSaleName}}</span>
+            </el-form-item>
+            <el-form-item label="职级:"  label-width="100px"  prop="rank">
+                <el-select v-model="cardForm.rank" placeholder="全部" style="width: 100%;" clearable filterable>
+                    <el-option
+                        v-for="item in rankArr"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="客户评价:"  label-width="100px"  prop="judge">
+                <el-select v-model="cardForm.judge" placeholder="全部" style="width: 100%;" clearable multiple filterable>
+                    <el-option
+                        v-for="item in judgeArr"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="工作年限:"  label-width="100px"  prop="remark">
+                <el-input-number v-model="year" controls-position="right" :min="0.1" :max="100" step="0.1"></el-input-number>
+            </el-form-item>
+            <el-form-item label="综合评分:"  label-width="100px"  prop="remark">
+                <el-input-number v-model="score" controls-position="right" :min="0.1" :max="5" step="0.1"></el-input-number>
+            </el-form-item>
+            <el-form-item label="服务人数:"  label-width="100px"  prop="remark">
+                <el-input v-model="servicesNum" placeholder="服务人数"></el-input>人
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" :disabled="submitDisable" @click="cardSubmit('cardForm')">提 交</el-button>
+            <el-button  @click="cardCancel('cardForm')">取 消</el-button>
+        </div>
+    </template>
+</el-dialog>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
     var teleSale = [[${teleSaleList}]];
+    var rankList = [[${teleSaleList}]];
+    var judgeList = [[${teleSaleList}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -141,10 +187,28 @@
                 },{
                     id:2,
                     name:'未授权'
-                }]
+                }], 
+                cardVisible:false,//名片
+                cardForm: {
+                    rank: '',
+                    judge: '',
+                    year: 3,
+                    score: 4.5,
+                    servicesNum:3523,
+                },
+                rankArr:rankList,
+                judgeArr:judgeList,
             }             
         },
         methods: {  
+            openCard(id){// 打开名片
+                this.cardVisible=true;
+
+            },
+            cardCancel(formName){// 关闭名片
+                this.cardVisible=false;
+                this.$refs[formName].resetFields();
+            },
             updateStatus(id,status) {
                 //状态调整
                 if(status==1){//1是已授权，跳转到已授权设置
@@ -152,7 +216,10 @@
                 }else{//跳转到新建授权设置
                     window.location.href="/custservice/saleIm/initUpdatePage"
                 }
-            },          
+            }, 
+            cardSubmit(){
+
+            }         
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -394,7 +461,6 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-            if(curOrgId){this.isDisabled= true;}
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
