@@ -131,10 +131,9 @@
                 loading: false,
                 isDisabled: false,
                 form: {
-                    dayReceiveMax:'',
+                    dayReceiveMax:'10',
                     tableData:[]
                 },
-                tableDataDialog: [],
                 rules:{},
                 selectTable:[],
                 selectDialog:false,
@@ -147,13 +146,23 @@
                 categoryArr:categoryList,
                 groupNameArr:userInfoList,
                 multipleSelection:[],
-                allBrands:[],
 
             }             
         },
         methods: {
             addBrand(){
-
+                var selectRows=this.multipleSelection;
+                console.log(selectRows);
+                console.log(this.form.tableData);                
+                if(selectRows.length>0){
+                    this.selectDialog=false;
+                    this.form.tableData.push(...selectRows);//展开二维数组
+                }else{
+                    this.$message({
+                        message: "请选择服务品牌",
+                        type: "error"
+                    });
+                }               
             },
             cancelAdd(rows){
                 this.selectDialog=false;
@@ -174,7 +183,7 @@
                 this.selectList();
             },
             settingAll(){
-                this.form.tableData=allBrandList;
+                this.form.tableData=JSON.parse(JSON.stringify(allBrandList));;
             },
             submit(){
                 var param = {};
@@ -188,19 +197,15 @@
                     brandIdListArr.push(this.form.tableData[i].id)
                 }                
                 param.brandIdList = brandIdListArr;
-                this.loading = true; 
                 axios.post('/custservice/saleIm/save',param).then(function (response) { 
-                    mainDivVM.loading = false;
                     console.log(response);
                     var result =  response.data;
                     if(result.code==0){
                         window.location.href="/custservice/saleIm/initListPage"
                     }else{
-                        mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
                     }                     
                 }).catch(function (error) {
-                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
@@ -223,19 +228,19 @@
                     notInListArr.push(this.form.tableData[i].id)
                 }                
                 param.notInList = notInListArr;
-                this.loading = true; 
                 axios.post('/custservice/saleIm/getBrandList',param).then(function (response) { 
-                    mainDivVM.loading = false;
                     console.log(response)
                     var result =  response.data;
                     if(result.code==0){
                         mainDivVM.selectTable= result.data;
+                        // 品牌分类
+                        for(var i=0;i<mainDivVM.selectTable.length;i++){
+                            
+                        }
                     }else{
-                        mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
                     }  
                 }).catch(function (error) {
-                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
@@ -250,9 +255,9 @@
             document.getElementById('maindiv').style.display = 'block';
             var isId=saleIm.id;
             if(isId){
-                this.form.tableData=brandList;
+                this.form.tableData=JSON.parse(JSON.stringify(brandList));
             }else{//没有id取所有的
-                this.form.tableData=allBrandList;
+                this.form.tableData=JSON.parse(JSON.stringify(allBrandList));
             }
             
         }
