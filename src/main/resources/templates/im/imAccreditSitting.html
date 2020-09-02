@@ -13,10 +13,10 @@
     <div class="mainSearchBg"> 
         <el-form :model="form" :rules="rules" ref="form">       
             <div class="mainSearchFormBox">
-                <el-form-item label="每日接待IM客户上限:"> 
+                <el-form-item label="每日接待IM客户上限："> 
                     <el-input v-model="form.dayReceiveMax" placeholder="" style="width: 100px;margin-right: 10px;"></el-input>人
                 </el-form-item> 
-                <el-form-item label="服务品牌选择:"> 
+                <el-form-item label="服务品牌选择："> 
                     <el-button  @click="open" type="danger"  size="small">添加服务品牌</el-button>
                     <el-button  @click="settingAll" type="text"  size="small">设定全部品牌</el-button>
                 </el-form-item>
@@ -29,7 +29,7 @@
                     style="width: 100%"
                     border
                     :data="form.tableData"
-                    v-loading="loading">
+                    v-loading="loading">                    
                     <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                     <el-table-column prop="projectName" align="center" label="品牌名称">
                     </el-table-column>
@@ -86,12 +86,18 @@
             style="width: 100%"
             border
             :data="selectTable"
+            @selection-change="handleSelectionChange"
         >
-            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
             <el-table-column align="center" prop="projectName" label="品牌名称"></el-table-column>
             <el-table-column align="center" prop="category" label="项目分类"></el-table-column>
-            <el-table-column align="center" prop="groupName" label="所属公司"></el-table-column>
+            <el-table-column align="center" prop="groupName" label="所属公司"></el-table-column>             
         </el-table>
+        <div class="padding20 f-tac"> 
+            <el-button  @click="addBrand" type="primary"  size="small">确定</el-button>
+            <el-button  @click="cancelAdd()" type="warning"  size="small">取消</el-button>
+        </div>
     </el-dialog>   
 </div>
 <!-- import common js-->
@@ -131,7 +137,7 @@
                 tableDataDialog: [],
                 rules:{},
                 selectTable:[],
-                selectDialog:true,
+                selectDialog:false,
                 projectName:'',
                 selectForm:{
                     projectName:'',
@@ -140,24 +146,65 @@
                 },
                 categoryArr:categoryList,
                 groupNameArr:userInfoList,
+                multipleSelection:[],
+                allBrands:[],
 
             }             
         },
-        methods: {   
-            open(){
+        methods: {
+            addBrand(){
 
             },
-            settingAll  (){
-
+            cancelAdd(rows){
+                this.selectDialog=false;
+                // 取消选中
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.selectTable.toggleRowSelection(row);
+                    });
+                } else {
+                  this.$refs.selectTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            open(){
+                this.selectDialog=true;
+                this.selectList();
+            },
+            settingAll(){
+                this.form.tableData=allBrandList;
             },
             submit(){
-
+                var param = {};
+                if(saleIm.id){
+                    param.id=saleIm.id;
+                }
+                param.teleSaleId=saleIm.teleSaleId;
+                param.dayReceiveMax=this.form.dayReceiveMax;
+                var brandIdListArr=[];
+                for(var i=0;i<this.form.tableData.length;i++){
+                    brandIdListArr.push(this.form.tableData[i].id)
+                }                
+                param.brandIdList = brandIdListArr;
+                this.loading = true; 
+                axios.post('/custservice/saleIm/save',param).then(function (response) { 
+                   mainDivVM.loading = false;
+                   console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             cancel(){
                 window.location.href="/custservice/saleIm/initListPage"
             },
             deleteRow(index, rows) {//删除一行表格
-
                 rows.splice(index, 1);
             },
             selectList(firstPage) {                 
@@ -176,8 +223,7 @@
                    console.log(response)
                    var result =  response.data;
                     if(result.code==0){
-                        var table=result.data;
-                        mainDivVM.tableData= table.data;
+                        mainDivVM.selectTable= result.data;
                     }else{
                         mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
