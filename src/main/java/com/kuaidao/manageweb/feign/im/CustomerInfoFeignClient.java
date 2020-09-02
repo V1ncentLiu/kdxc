@@ -8,7 +8,7 @@ import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.custservice.dto.onlineleave.TSaleMonitorReq;
-import com.kuaidao.im.dto.custservice.CustomerInfoDTO;
+import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
