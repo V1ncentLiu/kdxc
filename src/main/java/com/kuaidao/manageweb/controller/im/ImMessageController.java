@@ -5,6 +5,7 @@ import com.kuaidao.common.constant.*;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
@@ -26,16 +27,20 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -92,27 +97,24 @@ public class ImMessageController {
     /**
      * 聊天记录历史分页
      * @param messageRecordPageReq
-     * @param request
-     * @param response
      */
     @PostMapping("/getChatRecordPage")
-    public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq, HttpServletRequest request, HttpServletResponse response){
+    public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq ){
 
         return imFeignClient.getChatRecordPage(messageRecordPageReq);
     }
 
-
     /**
      * 客户聊天记录
      * @param messageRecordPageReq
-     * @param request
-     * @param response
      * @return
      */
     @PostMapping("/listChatRecord")
-    public @ResponseBody JSONPageResult<List<MessageRecordData>> listChatRecord(@RequestBody MessageRecordPageReq messageRecordPageReq, HttpServletRequest request, HttpServletResponse response){
-
-        // 根据客户Id查询客户accid
+    public @ResponseBody JSONPageResult<List<MessageRecordData>> listChatRecord(@Valid @RequestBody MessageRecordPageReq messageRecordPageReq , BindingResult result ){
+        if (result.hasErrors()) {
+            return validateParam(result);
+        }
+        // 根据客户Id查询客户accId
         IdListReq idListReq = new IdListReq();
         List<String> idList = new ArrayList<>();
         // 封装客户Id
@@ -126,9 +128,13 @@ public class ImMessageController {
 
             return new JSONPageResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
         }
-
         CustomerInfoDTO customerInfoDTO = data.get(0);
-        // 设置accid
+        // 客户Im无值?
+        if(StringUtils.isBlank(customerInfoDTO.getImId())){
+
+            return new JSONPageResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        // 设置accId
         messageRecordPageReq.setAccId(customerInfoDTO.getImId());
         return imFeignClient.listChatRecord(messageRecordPageReq);
     }
@@ -136,12 +142,11 @@ public class ImMessageController {
     /**
      * 导出聊天记录
      * @param messageRecordExportSearchReq
-     * @param request
      * @param response
      * @throws Exception
      */
     @PostMapping("/export")
-    public void export(@RequestBody MessageRecordExportSearchReq messageRecordExportSearchReq, HttpServletRequest request, HttpServletResponse response){
+    public void export(@RequestBody MessageRecordExportSearchReq messageRecordExportSearchReq , HttpServletResponse response){
         // 获得历史聊天记录
         try {
             JSONPageResult<List<MessageRecordData>> chatRecordList = imFeignClient.getChatRecordList(messageRecordExportSearchReq);
@@ -248,12 +253,16 @@ public class ImMessageController {
     }
 
     /**
-     * 在线忙碌离线
+     * 在线忙碌离线操作
      * @param saleOnlineLeaveLogReq
      * @return
      */
     @PostMapping("/onlineleave")
-    public @ResponseBody JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq){
+    public @ResponseBody JSONResult<Boolean> onlineleave(@Valid @RequestBody  SaleOnlineLeaveLogReq saleOnlineLeaveLogReq , BindingResult result){
+        if (result.hasErrors()) {
+            // 参数校验
+            return CommonUtil.validateParam(result);
+        }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         if(null == user ){
             log.warn("user is null!");
@@ -272,5 +281,18 @@ public class ImMessageController {
             return customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
         }
         return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+    }
+
+    /**
+     * 分页参数校验
+     * @param result
+     * @return
+     */
+    private static JSONPageResult validateParam(BindingResult result) {
+        List<ObjectError> list = result.getAllErrors();
+        for (ObjectError error : list) {
+            log.error("参数校验失败：{},错误信息：{}", error.getArguments(), error.getDefaultMessage());
+        }
+        return new JSONPageResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
     }
 }

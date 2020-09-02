@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "im-service", path = "/v1.0/message", fallback = ImFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "im-service", path = "/im/v1.0/message", fallback = ImFeignClient.HystrixClientFallback.class)
 public interface ImFeignClient {
 
     @PostMapping(value = "/getChatRecordPage")
