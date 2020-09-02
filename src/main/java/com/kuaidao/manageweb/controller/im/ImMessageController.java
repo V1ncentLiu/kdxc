@@ -1,12 +1,14 @@
 package com.kuaidao.manageweb.controller.im;
 
 
+import com.kuaidao.common.constant.*;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
+import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.custservice.dto.onlineleave.TSaleMonitorReq;
 import com.kuaidao.im.dto.MessageRecordData;
 import com.kuaidao.im.dto.MessageRecordExportSearchReq;
@@ -14,14 +16,19 @@ import com.kuaidao.im.dto.MessageRecordPageReq;
 import com.kuaidao.im.util.JSONPageResult;
 import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
 import com.kuaidao.manageweb.feign.im.ImFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -33,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -44,6 +52,28 @@ public class ImMessageController {
 
     @Resource
     private CustomerInfoFeignClient customerInfoFeignClient;
+
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
+    /**
+     * 聊天记录跳转
+     */
+    @GetMapping("/chatRecordIndex")
+    public String chatRecordIndex( HttpServletRequest request ){
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        List dxzList = new ArrayList();
+        if (roleList != null && roleList.get(0) != null) {
+            OrganizationQueryDTO dto = new OrganizationQueryDTO();
+            dto.setSystemCode(SystemCodeConstant.HUI_JU);
+            dto.setOrgType(OrgTypeConstant.DXZ);
+            dto.setBusinessLine(user.getBusinessLine());
+            JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+            dxzList = dzList.getData();
+        }
+        request.setAttribute("dzList", dxzList);
+        return "";
+    }
     /**
      * 聊天记录历史分页
      * @param messageRecordPageReq
@@ -168,5 +198,32 @@ public class ImMessageController {
         JSONResult<Map<String,Object>> result = customerInfoFeignClient.getSaleImStateNum();
 
         return result;
+    }
+
+    /**
+     * 在线离线
+     * @param saleOnlineLeaveLogReq
+     * @return
+     */
+    @PostMapping("/onlineleave")
+    public @ResponseBody JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq){
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        if(null == user ){
+            log.warn("user is null!");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if(CollectionUtils.isEmpty(roleList)){
+            log.warn("roleList is null");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+        // 电销顾问 & 业务线是的商机盒子的
+        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+            // 设置顾问Id
+            saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
+            return customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+        }
+        return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
     }
 }
