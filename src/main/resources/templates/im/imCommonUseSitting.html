@@ -12,68 +12,78 @@
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item>IM常用设置</el-breadcrumb-item>
     </el-breadcrumb>  
-    <div class="mainSearchBg"> 
+    <div class="mainSearchBg">         
+        <el-row>
+            <div class="titleBox">
+                <span>常用语设置</span>
+                <!-- <el-button  @click="addbutton" type="primary"  size="small">IM授权修改</el-button> -->
+            </div>
+            <el-button  @click="addbutton" type="primary"  size="small">添加常用语</el-button>
+            <!-- <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="callCount" align="center" label="常用语">
+                </el-table-column>
+                <el-table-column prop="" align="center" label="权重">
+                    <el-input v-model="" placeholder=""></el-input>
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            <el-button  @click="delete(scope.row.id)" type="danger"  size="small">删除</el-button>
+                        </div>                    
+                        <div v-else-if="scope.row.status === 0">
+                            <el-button @click="update(scope.row.id)"  type="success"  size="small">修改</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination> -->
+            
+            <!-- 调用组件  -->
+            <draggable element="ul" v-model="myArray">
+              <li v-for="item in myArray">{{item.name}}</li>
+            </draggable>
+            <!-- 输出list数据 -->
+            {{myArray}}
+        </el-row>
         <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-            <el-row>
-                <div class="titleBox"><span>常用语设置</span><el-button  @click="addbutton" type="primary"  size="small">IM授权修改</el-button></div>
-                <el-table 
-                    ref="tableData"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    border
-                    :data="tableData"
-                    v-loading="loading"
-                    :span-method="arraySpanMethod">
-                    <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                    <el-table-column prop="callCount" align="center" label="常用语">
-                    </el-table-column>
-                    <el-table-column prop="" align="center" label="权重">
-                        <el-input v-model="" placeholder=""></el-input>
-                    </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
-                        <template slot-scope="scope">
-                            <div v-if="scope.row.status === 1">
-                                <el-button  @click="delete(scope.row.id)" type="danger"  size="small">删除</el-button>
-                            </div>                    
-                            <div v-else-if="scope.row.status === 0">
-                                <el-button @click="update(scope.row.id)"  type="success"  size="small">修改</el-button>
-                            </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
-            </el-row>
             <el-row>
                 <div class="titleBox"><span>自动回复设置</span></div>
                 <el-form-item label="开场白设置:"> 
-                    <el-button  @click="" type="primary"  size="small">编辑开场白</el-button>
+                    <el-button  @click="edit" type="primary"  size="small">编辑开场白</el-button>
                 </el-form-item>
                 <el-form-item label="超时自动恢复设置:"> 
-                    <el-radio-group v-model="annForm.radio" @change="redioChange">
+                    <el-radio-group v-model="form.radio" @change="redioChange">
                         <el-radio  label="0">启用</el-radio>
                         <el-radio  label="1">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="超时自动恢复时间:"> 
-                    <el-input v-model="" placeholder=""></el-input>秒
+                    <el-input v-model="form.content" placeholder=""></el-input>秒
                 </el-form-item>
                 <el-form-item label="超时自动恢复内容:"> 
                     <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3"></el-input>
                     <p>不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="非工作时间自动恢复设置:"> 
-                    <el-radio-group v-model="annForm.radio" @change="redioChange">
+                    <el-radio-group v-model="form.radio" @change="redioChange">
                         <el-radio  label="0">启用</el-radio>
                         <el-radio  label="1">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="非工作时间段:"></el-form-item>
                 <el-form-item label="每日">
-                    <el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker  v-model="form.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <span>-</span>
                 <el-form-item label="次日">
-                    <el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker  v-model="form.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="非工作时间自动恢复内容:"> 
                     <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3"></el-input>
@@ -86,24 +96,30 @@
             </div> 
         </el-form>
     </div>
+    <!-- dialog -->
+    <!-- <el-dialog  :title="showTitle"  :visible.sync="addVisible" width="540px">
+        <template>
+            <el-form :model="addForm" ref="addForm" :rules="addFormRules">
+                <el-form-item label="备注:"  label-width="100px"  prop="remark">
+                    <el-input type="textarea" v-model="addForm.remark" class="input-with-select" maxlength="200" style="width: 350px;" :rows="4" placeholder="输入分发备注"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="addSubmit('addForm')">提 交</el-button>
+                <el-button  @click="addCancel('addForm')">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog> -->
 </div>
-<!-- dialog -->
-<el-dialog  :title="showTitle"  :visible.sync="addVisible" width="540px">
-    <template>
-        <el-form :model="addForm" ref="addForm" :rules="allocationFormRules">
-            <el-form-item label="备注:"  label-width="100px"  prop="remark">
-                <el-input type="textarea" v-model="addForm.remark" class="input-with-select" maxlength="200" style="width: 350px;" :rows="4" placeholder="输入分发备注"></el-input>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" :disabled="submitDisable" @click="addSubmit('addForm')">提 交</el-button>
-            <el-button  @click="addCancel('addForm')">取 消</el-button>
-        </div>
-    </template>
-</el-dialog>
+
 <input id="addOrUpdate" type="hidden" >
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script> -->
+<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
@@ -120,56 +136,40 @@
                     pageSize: 20
                 },
                 form: {
-                    startTime: '',
-                    endTime: '',
-                    orgId: curOrgId,
+                    
                 },
-                tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '电销组1',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0.1,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 0
-                    // },
-                    // {
-                    //     orgId: "3",
-                    //     orgName: '电销组3',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     // callPercent: 0,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     // userAvgDayValidCallTime: 155799
-                    // }
-                ],
+                tableData: [],
                 orgTeleArr: queryOrg, // 电销组
                 addVisible:false,
                 showTitle:"",
                 addForm:{
                     remark:''
-                }
+                },
+                myArray:[{
+                    name:'123'
+                },{
+                    name:'456'
+                },{
+                    name:'789'
+                },{
+                    name:'000'
+                }],
+                addFormRules:{}
             }             
         },
         methods: { 
+            edit(){
+
+            },
+            redioChange(){
+
+            },
+            submitForm(){
+
+            },
+            cancelForm(){
+
+            },
             addbutton(){
                 this.showTitle="添加布局"
                 $("#addOrUpdate").val(1);
@@ -178,7 +178,7 @@
                     this.addForm.remark = "";
                     this.$refs['addForm'].resetFields();
                   }
-            }
+            },
             update(id) {
                 this.addVisible=true;
                 $("#addOrUpdate").val(2);
@@ -363,24 +363,6 @@
                     return end;
                 }
             },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
-                }
-            },
-            indexFun (index) { // 表格序号
-                return index;
-            },
-            nullToZero(row, column, value, index){
-                if(value){
-                    return value;
-                }
-                return 0;
-            },
             minuteFormat (m) { // 时间格式化201905050505fn
                 if (!m) {return "";}
                 var timeStr = new Date(m);
@@ -422,52 +404,9 @@
                 if(sec < 10){t += "0";}
                 t += sec + "秒";
                 return t;
-            },
-            searchYesterday(){ // 昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
-            },
-            searchWeek(){ // 近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable(1);
-            },
-            searchMonth(){ // 本月 
-                var a = new Date();
-                var year = a.getFullYear();
-                var month = a.getMonth();
-                var date = a.getDate();
-                var b = new Date(year,month,date);
-                var f= new Date(year,month,01);
-                var c = f.valueOf();
-                var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable(1);
-            },
+            }
         },
         created(){
-            // 默认进入显示当天时间
-            var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-            if(curOrgId){this.isDisabled= true;}
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
