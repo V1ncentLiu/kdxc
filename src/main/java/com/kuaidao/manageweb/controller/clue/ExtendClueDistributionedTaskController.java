@@ -8,6 +8,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kuaidao.common.entity.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -35,10 +36,6 @@ import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.ClueCommunicateExportModel;
-import com.kuaidao.common.entity.ClueExportModel;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -107,6 +104,9 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = this.queryUserByRole(user);
 
         request.setAttribute("userList", userList);
+        //话务员集合
+        List<UserInfoDTO> hwzyUserList =  queryUserByRole(RoleCodeEnum.HWY.name());
+        request.setAttribute("hwzyUserList", hwzyUserList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("DistributiveResource");
@@ -587,40 +587,65 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getWechat());
                 // 搜索词
                 curList.add(taskDTO.getSearchWord());
-                // 首次分配电销组
-                curList.add(taskDTO.getFirstAsssignTeleGroupName());
-                // 首次分配电销总监
-                curList.add(taskDTO.getFirstAsssignTeleDirectorName());
-                // 电销组
-                curList.add(taskDTO.getTeleGorupName());
-                // 电销顾问
-                curList.add(taskDTO.getTeleSaleName());
+                if (queryDto.getPhtraExport()) {
+                    // 首次分配话务组
+                    curList.add(taskDTO.getFirstAsssignTrafficGroupName());
+                    // 首次分配话务主管
+                    curList.add(taskDTO.getPhtraDirectorName());
+                    // 首次分配话务员
+                    curList.add(taskDTO.getOperatorName());
+                }else{
+                    // 首次分配电销组
+                    curList.add(taskDTO.getFirstAsssignTeleGroupName());
+                    // 首次分配电销总监
+                    curList.add(taskDTO.getFirstAsssignTeleDirectorName());
+                    // 电销组
+                    curList.add(taskDTO.getTeleGorupName());
+                    // 电销顾问
+                    curList.add(taskDTO.getTeleSaleName());
+                }
+
                 // 首次响应间隔
                 curList.add(taskDTO.getFirstResponseInterval());
                 // 这两个要进行转换
                 String isCall = null;
-                if (taskDTO.getIsCall() != null) {
-                    if (taskDTO.getIsCall() == 1) {
-                        isCall = "是";
-                    } else {
-                        isCall = "否";
-                    }
+                Integer call;
+                if (queryDto.getPhtraExport()) {
+                    call =  taskDTO.getPhtraIsCall();
+                }else{
+                    call = taskDTO.getIsCall();
+                }
+                if (null != call && AggregationConstant.YES.equals(call)) {
+                    isCall = "是";
+                } else {
+                    isCall = "否";
                 }
                 // 是否接通
                 curList.add(isCall);
-                String status = null;
-                if (taskDTO.getStatus() != null) {
-                    if (taskDTO.getStatus() == 1) {
-                        status = "是";
-                    } else {
-                        status = "否";
-                    }
+                String statusStr = null;
+                Integer status;
+                if (queryDto.getPhtraExport()) {
+                    status =  taskDTO.getPhstatus();
+                }else{
+                    status = taskDTO.getStatus();
+                }
+                if (null != status && AggregationConstant.YES.equals(status)) {
+                    statusStr = "是";
+                } else {
+                    statusStr = "否";
                 }
                 // 是否有效
-                curList.add(status);
-                // 第一次拨打时间
-                curList.add(
-                        DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                curList.add(statusStr);
+                if (queryDto.getPhtraExport()) {
+                    // 第一次拨打时间
+                    curList.add(
+                            DateUtil.convert2String(taskDTO.getPhtraFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                }else{
+                    // 第一次拨打时间
+                    curList.add(
+                            DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                }
+
                 // 第一次沟通时间
                 curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(),
                         "yyyy/MM/dd HH:mm:ss"));
@@ -650,8 +675,10 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     isSelfBuild = "否";
                 }
-                // 是否自建
-                curList.add(isSelfBuild);
+                if(!queryDto.getPhtraExport()){
+                    // 是否自建
+                    curList.add(isSelfBuild);
+                }
                 // ip
                 curList.add(taskDTO.getIp());
                 //手机号1异常标签
@@ -683,14 +710,27 @@ public class ExtendClueDistributionedTaskController {
         // outputStream.close();
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
+            String title = "";
+            if(queryDto !=null && queryDto.getPhtraExport() !=null){
+                if(queryDto.getPhtraExport()){
+                    title = "话务";
+                }else{
+                    title = "电销";
+                }
+            }
             String name =
-                    "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+                    title+ "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition",
                     "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
-            ExcelWriter excelWriter =
-                    EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            ExcelWriter excelWriter = null;
+            if (queryDto.getPhtraExport()) {
+                excelWriter = EasyExcel.write(outputStream, ClueCommunicatePhtraExportModel.class).build();
+            }else{
+                excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            }
+
 
             if(CollectionUtils.isNotEmpty(dataList)){
                 List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
@@ -988,5 +1028,21 @@ public class ExtendClueDistributionedTaskController {
             return listJSONResult;
         }
         return jsonResult;
+    }
+
+    /**
+     * 根据角色查询用户
+     * @return
+     */
+
+    private List<UserInfoDTO> queryUserByRole(String roleCode) {
+        List<UserInfoDTO> userList = new ArrayList<>();
+        UserOrgRoleReq userRole = new UserOrgRoleReq();
+        userRole.setRoleCode(RoleCodeEnum.HWY.name());
+        JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.listByOrgAndRole(userRole);
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && CollectionUtils.isNotEmpty(listJSONResult.getData())) {
+            userList.addAll(listJSONResult.getData());
+        }
+        return userList;
     }
 }

@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -383,7 +384,7 @@ public class CustomerManagerController {
     private Boolean handleCanCopy(Integer businessLine) {
         // 获取外包业务线
         String wbBusinessLine = getSysSetting(SysConstant.WB_BUSINESSLINE);
-        if (null== wbBusinessLine) {
+        if (StringUtils.isBlank(wbBusinessLine)) {
             return  false;
         }
         List<String> wbBusinessLineList = Arrays.asList(wbBusinessLine.split(","));

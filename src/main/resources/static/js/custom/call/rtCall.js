@@ -46,7 +46,11 @@ $(function(){
             homePageVM.loginClientForm.caller = clientInfoObj.caller;
             homePageVM.loginClientForm.callLine = clientInfoObj.callLine;
             homePageVM.loginLcClient();
-		}
+		}else if(loginClientType=="zk"){
+            homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+            homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+            homePageVM.loginZkClient();
+        }
 	}
 	
 });
@@ -69,7 +73,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 	}
 	stopSound();//停止播放录音
 	clearTimer();//清除定时器
-	if(!homePageVM.isQimoClient && !homePageVM.isTrClient && !homePageVM.isHeliClient && !homePageVM.isKeTianClient && !homePageVM.isRongLianClient && !homePageVM.isLcClient){
+	if(!homePageVM.isQimoClient && !homePageVM.isTrClient && !homePageVM.isHeliClient && !homePageVM.isKeTianClient && !homePageVM.isRongLianClient && !homePageVM.isLcClient && !homePageVM.isZkClient){
 		   homePageVM.$message({message:"请登录呼叫中心",type:'warning'});
 		   return ;
  	}
@@ -197,7 +201,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
           .then(function () {
             // always executed
           });
-	}else if(homePageVM.isLcClient){
+	}else if(homePageVM.isLcClient){ //乐创
         homePageVM.$message({message:"外呼中",type:'success'});
         if(callSource==1){
             homePageVM.dialogOutboundVisible =true;
@@ -253,6 +257,62 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
                 // always executed
             });
 	}
+    else if(homePageVM.isZkClient){ //中科
+        homePageVM.$message({message:"外呼中",type:'success'});
+        if(callSource==1){
+            homePageVM.dialogOutboundVisible =true;
+            $('#outboundPhoneLocaleArea').html("");
+            getPhoneLocale(outboundInputPhone,callSource);
+        }else if(callSource==2) {
+            homePageVM.tmOutboundCallDialogVisible =true;
+            $('#tmOutboundPhoneLocaleArea').html("");
+            //查询手机号归属地
+            getPhoneLocale(outboundInputPhone,callSource);
+        }
+
+
+        var param = {};
+        param.clueId = clueId;
+        param.customerPhone = outboundInputPhone;
+        param.accountType = homePageVM.accountType;
+        axios.post('/client/zkClient/zkOutboundCall',param)
+            .then(function (response) {
+                var data =  response.data;
+                if(data.code=='0'){
+                    //10分钟后红色字体显示
+                    // intervalTimer("outboundCallTime",1,2);
+
+                    if(callSource==1){
+                        homePageVM.dialogOutboundVisible =true;
+                        $("#outboundCallTime").html("");
+                        //$('#outboundPhoneLocaleArea').html("");
+                        intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
+                        // getPhoneLocale(outboundInputPhone,callSource);
+                    }else if(callSource==2) {
+                        homePageVM.tmOutboundCallDialogVisible =true;
+                        $("#tmOutboundCallTime").html("");
+                        //$('#tmOutboundPhoneLocaleArea').html("");
+                        intervalTimer("tmOutboundCallTime",10,2);
+                        //查询手机号归属地
+                        // getPhoneLocale(outboundInputPhone,callSource);
+                    }
+
+
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                }else{
+                    clearTimer();//清除定时器
+                    homePageVM.$message({message:data.msg,type:'error'});
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+            .then(function () {
+                // always executed
+            });
+    }
 	
 } 
 

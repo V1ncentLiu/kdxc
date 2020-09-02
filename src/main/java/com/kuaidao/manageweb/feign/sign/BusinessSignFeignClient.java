@@ -79,6 +79,8 @@ public interface BusinessSignFeignClient {
 	public JSONResult<BusSignRespDTO> querySignById(@RequestBody IdEntityLong idEntityLong);
 	@RequestMapping("/updateSignDetail")
 	public JSONResult<Boolean> updateSignDetail(@Valid @RequestBody BusSignInsertOrUpdateDTO dto);
+	@RequestMapping("/updateContractTime")
+	public JSONResult<Boolean> updateContractTime(@Valid @RequestBody BusinessSignDTO dto);
 
 	/**
 	 * 分配判单用户
@@ -159,6 +161,11 @@ public interface BusinessSignFeignClient {
 		@Override
 		public JSONResult<Boolean> updateSignDetail(BusSignInsertOrUpdateDTO dto) {
 			return fallBackError("更新签约单");
+		}
+
+		@Override
+		public JSONResult<Boolean> updateContractTime(@Valid BusinessSignDTO dto) {
+			return fallBackError("确认合同时间");
 		}
 
 		@Override

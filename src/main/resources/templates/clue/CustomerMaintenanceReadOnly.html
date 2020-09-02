@@ -512,7 +512,11 @@
                         <div v-else-if="scope.row.isCall ===1">已接通</div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="focusPoint" label="客户关注点" align="center"></el-table-column>
+                <el-table-column prop="focusPoint" label="客户关注点" align="center">
+                    <template slot-scope="scope">
+                        {{scope.row.callDetailsName}} <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">-</span> {{scope.row.focusPoint}}
+                    </template>
+                </el-table-column>
                 <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="140"></el-table-column>
                 <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
             </el-table> 
@@ -622,7 +626,18 @@
                     <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
                     <el-table-column prop="createUserName" label="审核人姓名" align="center"></el-table-column>
                     <el-table-column prop="createTime" label="审核时间" align="center"></el-table-column>
-                    <el-table-column prop="remark" label="审核无效原因" align="center"></el-table-column>
+                    <el-table-column prop="remark" label="审核原因" align="center">
+                        <template slot-scope="scope">
+                            {{scope.row.remark}}
+                            <span v-if="scope.row.updateTime == null"  style="float:right" >
+                                 <el-button   v-if="scope.row.update == null" type="text" @click.stop="editRemark(scope.row)">修改原因
+                                </el-button>
+                            </span>
+                            <div v-if="scope.row.updateTime != null">
+                                <span> 修改时间：</span> <span>{{scope.row.updateTime}}</span> <span>{{scope.row.updateRemark}}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
                 </el-table>
             </div>
         </el-form>
@@ -882,14 +897,27 @@
     <!-- dialog -->
     <el-dialog title="新建号码审核" :visible.sync="dialogFormVisibleAudit" width="670px">
         <el-form :model="submitForm" :rules="dialogAuditRules" ref="submitForm">
-            <el-form-item label="新建号码审核无效原因：" :label-width="formLabelWidth160"  prop="remark">
-                <el-input type="textarea" rows="4" maxlength="150" v-model="submitForm.remark" placeholder="请输入审核新建手机号无效原因&#13;&#10; 例：手机号2 130**2323无效 原因是通话记录不实"
+            <el-form-item label="新建号码审核原因：" :label-width="formLabelWidth160"  prop="remark">
+                <el-input type="textarea" rows="4" maxlength="150" v-model="submitForm.remark" placeholder="请输入审核新建手机号原因&#13;&#10; 例：手机号2 130**2323无效 原因是通话记录不实"
                           class="marginB20" style="width:80%;"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" :disabled="btnDisabled" @click="submitFormMethod('submitForm')">提交</el-button>
             <el-button @click="dialogFormVisibleAudit = false ">取消</el-button>
+        </div>
+    </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="编辑无效原因" :visible.sync="dialogFormVisibleEdit" width="670px">
+        <el-form :model="submitEditForm" :rules="dialogAuditRules" ref="submitEditForm">
+            <el-form-item label="新建号码审核原因：" :label-width="formLabelWidth160"  prop="remark">
+                <el-input type="textarea" rows="4" maxlength="150" v-model="submitEditForm.remark" placeholder="请输入审核新建手机号原因&#13;&#10; 例：手机号2 130**2323无效 原因是通话记录不实"
+                          class="marginB20" style="width:80%;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnEditDisabled" @click="submitEditFormMethod('submitEditForm')">提交</el-button>
+            <el-button @click="dialogFormVisibleEdit = false ">取消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -1500,7 +1528,12 @@ function dateFormat(val) {
                 formLabelWidth160: '160px',
                 saveDisabled: false,
                 btnDisabled: false,
+                btnEditDisabled:false,
                 submitForm: {
+                    remark: "",
+                },
+                submitEditForm: {
+                    id:"",
                     remark: "",
                 },
                 isShowMoreBtn:false,
@@ -1530,6 +1563,7 @@ function dateFormat(val) {
                 radioProject:'',
                 dialogFormVisible: false,
                 dialogFormVisibleAudit:false,
+                dialogFormVisibleEdit:false,
                 dialogFormImg:false,
                 deleteShow:false,//删除新增手机号输入框
                 dialogFormUploadImg:false,
@@ -1578,7 +1612,7 @@ function dateFormat(val) {
                 },
                 dialogAuditRules: {
                     remark: [
-                        {required: true, message: '请输入新建号码审核无效原因', trigger: 'blur'}
+                        {required: true, message: '请输入新建号码审核原因', trigger: 'blur'}
                     ]
                 },
                 statusOptions: [{
@@ -1734,8 +1768,13 @@ function dateFormat(val) {
                         // always executed
                     });
             },
+            editRemark(row){
+                this.resetForm("submitEditForm");
+                this.dialogFormVisibleEdit =true;
+                addCustomerVM.submitEditForm.remark = row.remark;
+                addCustomerVM.submitEditForm.id = row.id;
+            },
             submitFormMethod(form) {
-                debugger;
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         var param = {};
@@ -1758,6 +1797,36 @@ function dateFormat(val) {
                                 console.log(error);
                             addCustomerVM.btnDisabled = false;
                             });
+                        console.log('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            submitEditFormMethod(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.id = addCustomerVM.submitEditForm.id;
+                        param.updateRemark = addCustomerVM.submitEditForm.remark;
+                        debugger;
+                        this.btnEditDisabled = true;
+                        axios.post('/telCreatePhoneAudit/update', param).then(function (response) {
+                            if (null === response || response.data == null || response.data.code != '0') {
+                                addCustomerVM.$message({
+                                    message: response.data.msg,
+                                    type: 'warning'
+                                });
+                                addCustomerVM.btnEditDisabled = false;
+                                return;
+                            }else{
+                                window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&telCreatePhoneAuditFlag=1&clueId="+clueId;
+                            }
+                        }).catch(function (error) {
+                            console.log(error);
+                            addCustomerVM.btnEditDisabled = false;
+                        });
                         console.log('submit!');
                     } else {
                         console.log('error submit!!');
@@ -1913,7 +1982,7 @@ function dateFormat(val) {
             switchSoundBtn(id,url,callSource){
                 // 播放器显示
                 // this.audioShow=true;
-                if(callSource=='2'){
+                if(callSource=='2' || callSource=='7'){
                     // switchSound(id,url);
                     window.parent.open(url)
                     return;
@@ -1987,7 +2056,11 @@ function dateFormat(val) {
                         if(callSource=='3'){
                         	var decodeUrl = encodeURI(url);
                              url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                         }
+                         }else if(callSource == 7){
+                            var httpUrl = url.replace("https","http");
+                            window.parent.open(httpUrl);
+                            return;
+                        }
                       var x=new XMLHttpRequest();
                       x.open("GET", url, true);
                       x.responseType = 'blob';
