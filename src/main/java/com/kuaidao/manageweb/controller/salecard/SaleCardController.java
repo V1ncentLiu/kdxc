@@ -1,12 +1,15 @@
 package com.kuaidao.manageweb.controller.salecard;
 
 import com.alibaba.fastjson.JSON;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.custservice.dto.salecard.SaleCardReqDto;
 import com.kuaidao.custservice.dto.salecard.SaleCardRespDto;
 import com.kuaidao.manageweb.controller.dictionary.DictionaryController;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.salecard.SaleCardFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.SecurityUtils;
@@ -33,7 +36,7 @@ public class SaleCardController {
     @Autowired
     private SaleCardFeignClient saleCardFeignClient;
     @Autowired
-    private DictionaryController dictionaryFeignClient;
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
 
     /**
@@ -54,32 +57,15 @@ public class SaleCardController {
 
     @RequestMapping(value = "/getDictionaryRank")
     @ResponseBody
-    public JSONResult<List<DictionaryRespDTO>> getDictionaryRank() {
-        List<DictionaryRespDTO> list = new ArrayList<>();
-        DictionaryRespDTO dictionaryRespDTO = new DictionaryRespDTO();
-        dictionaryRespDTO.setId(1L);
-        dictionaryRespDTO.setName("高级");
-        list.add(dictionaryRespDTO);
-        DictionaryRespDTO dictionaryRespDTO1 = new DictionaryRespDTO();
-        dictionaryRespDTO1.setId(2L);
-        dictionaryRespDTO1.setName("中级");
-        list.add(dictionaryRespDTO1);
-        return new JSONResult<List<DictionaryRespDTO>>().success(list);
+    public JSONResult<List<DictionaryItemRespDTO>> getDictionaryRank() {
+       return  dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.SALERANKDEATILS.getCode());
     }
 
     @RequestMapping(value = "/getDictionaryEvaluation")
     @ResponseBody
-    public JSONResult<List<DictionaryRespDTO>> getDictionaryEvaluation() {
-        List<DictionaryRespDTO> list1 = new ArrayList<>();
-        DictionaryRespDTO dictionaryRespDTO2 = new DictionaryRespDTO();
-        dictionaryRespDTO2.setId(3L);
-        dictionaryRespDTO2.setName("服务态度好");
-        list1.add(dictionaryRespDTO2);
-        DictionaryRespDTO dictionaryRespDTO3 = new DictionaryRespDTO();
-        dictionaryRespDTO3.setId(4L);
-        dictionaryRespDTO3.setName("细致全面");
-        list1.add(dictionaryRespDTO3);
-        return new JSONResult<List<DictionaryRespDTO>>().success(list1);
+    public JSONResult<List<DictionaryItemRespDTO>> getDictionaryEvaluation() {
+        return  dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.USEREVALUATIONDEATILS.getCode());
+
     }
 
 
@@ -98,7 +84,7 @@ public class SaleCardController {
         if (jsonResult.getCode().equals(JSONResult.FAIL)) {
             return jsonResult;
         }
-        long userId = 1;
+        long userId = getUserId();
         if (saleCardReqDto.getId() != null) {
             saleCardReqDto.setUpdateUser(userId);
         } else {
