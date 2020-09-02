@@ -60,6 +60,19 @@ public class ImMessageController {
      */
     @GetMapping("/chatRecordIndex")
     public String chatRecordIndex( HttpServletRequest request ){
+        List dxzList = getDxzList();
+        request.setAttribute("dzList", dxzList);
+        return "im/imChattingRecords";
+    }
+
+    @GetMapping("/saleMonitorIndex")
+    public String saleMonitorIndex( HttpServletRequest request ){
+        List dxzList = getDxzList();
+        request.setAttribute("dzList", dxzList);
+        return "im/imManagement";
+    }
+
+    private List getDxzList() {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxzList = new ArrayList();
@@ -71,9 +84,9 @@ public class ImMessageController {
             JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
             dxzList = dzList.getData();
         }
-        request.setAttribute("dzList", dxzList);
-        return "";
+        return dxzList;
     }
+
     /**
      * 聊天记录历史分页
      * @param messageRecordPageReq
