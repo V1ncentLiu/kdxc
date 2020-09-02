@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,19 +68,19 @@ public class ImMessageController {
      */
     @GetMapping("/chatRecordIndex")
     public String chatRecordIndex( HttpServletRequest request ){
-        List dxzList = getDxzList();
+        List dxzList = getCommonDxzList();
         request.setAttribute("dzList", dxzList);
         return "im/imChattingRecords";
     }
 
     @GetMapping("/saleMonitorIndex")
     public String saleMonitorIndex( HttpServletRequest request ){
-        List dxzList = getDxzList();
+        List dxzList = getCommonDxzList();
         request.setAttribute("dzList", dxzList);
         return "im/imManagement";
     }
 
-    private List getDxzList() {
+    private List getCommonDxzList() {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxzList = new ArrayList();
@@ -152,26 +153,30 @@ public class ImMessageController {
             JSONPageResult<List<MessageRecordData>> chatRecordList = imFeignClient.getChatRecordList(messageRecordExportSearchReq);
             List<List<Object>> dataList = new ArrayList<>();
             dataList.add(getHeadTitleList());
-            if(JSONResult.SUCCESS.equals(chatRecordList.getCode()) && chatRecordList.getData() != null && chatRecordList.getData().size() != 0) {
-                    List<MessageRecordData> resultList = chatRecordList.getData();
-                    int size = resultList.size();
-                    for (int i = 0; i < size; i++) {
-                        MessageRecordData dto = resultList.get(i);
-                        List<Object> t = new ArrayList<>();
-                        // 序号，电销组，会话顾问，会话客户，聊天时间（年月日时分秒），聊天内容
-                        t.add(i + 1);
-                        // 电销组
-                        t.add(dto.getTeleGorupName());
-                        // 会话顾问
-                        t.add(dto.getTeleSaleName());
-                        // 会话客户
-                        t.add(dto.getCusName());
-                        // 聊天时间
-                        t.add(dto.getMsgTimestamp());
-                        // 聊天内容
-                        t.add(dto.getBody());
-                        dataList.add(t);
+            if(null != chatRecordList && JSONResult.SUCCESS.equals(chatRecordList.getCode()) && chatRecordList.getData() != null && chatRecordList.getData().size() != 0) {
+                List<MessageRecordData> resultList = chatRecordList.getData();
+                int size = resultList.size();
+                for (int i = 0; i < size; i++) {
+                    MessageRecordData dto = resultList.get(i);
+                    List<Object> t = new ArrayList<>();
+                    // 序号，电销组，会话顾问，会话客户，聊天时间（年月日时分秒），聊天内容
+                    t.add(i + 1);
+                    // 电销组
+                    t.add(dto.getTeleGorupName());
+                    // 会话顾问
+                    t.add(dto.getTeleSaleName());
+                    // 会话客户
+                    t.add(dto.getCusName());
+                    // 聊天时间
+                    if(StringUtils.isNotBlank(dto.getMsgTimestamp())){
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        // 设置导出日期
+                        t.add(sdf.format(Long.valueOf(dto.getMsgTimestamp())));
                     }
+                    // 聊天内容
+                    t.add(dto.getBody());
+                    dataList.add(t);
+                }
              }
             // 创建一个工作薄
             XSSFWorkbook workBook = new XSSFWorkbook();
@@ -194,9 +199,9 @@ public class ImMessageController {
             wbWorkbook.write(outputStream);
             outputStream.close();
         } catch (IOException e) {
-            log.error("io-e",e);
+            log.error("导出聊天记录io-e",e);
         }catch (Exception e){
-            log.error("e",e);
+            log.error("导出聊天记录e",e);
         }
     }
 
