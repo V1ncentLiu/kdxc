@@ -2,10 +2,12 @@ package com.kuaidao.manageweb.controller.im;
 
 
 import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
@@ -97,6 +99,38 @@ public class ImMessageController {
     public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq, HttpServletRequest request, HttpServletResponse response){
 
         return imFeignClient.getChatRecordPage(messageRecordPageReq);
+    }
+
+
+    /**
+     * 客户聊天记录
+     * @param messageRecordPageReq
+     * @param request
+     * @param response
+     * @return
+     */
+    @PostMapping("/listChatRecord")
+    public @ResponseBody JSONPageResult<List<MessageRecordData>> listChatRecord(@RequestBody MessageRecordPageReq messageRecordPageReq, HttpServletRequest request, HttpServletResponse response){
+
+        // 根据客户Id查询客户accid
+        IdListReq idListReq = new IdListReq();
+        List<String> idList = new ArrayList<>();
+        // 封装客户Id
+        idList.add(messageRecordPageReq.getCusId());
+        idListReq.setIdList(idList);
+        JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.brandAndIssubmit(idListReq);
+
+        List<CustomerInfoDTO> data ;
+
+        if(null == listJSONResult || !"0".equals(listJSONResult.getCode()) || CollectionUtils.isEmpty(data = listJSONResult.getData())){
+
+            return new JSONPageResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+
+        CustomerInfoDTO customerInfoDTO = data.get(0);
+        // 设置accid
+        messageRecordPageReq.setAccId(customerInfoDTO.getImId());
+        return imFeignClient.listChatRecord(messageRecordPageReq);
     }
 
     /**
@@ -214,7 +248,7 @@ public class ImMessageController {
     }
 
     /**
-     * 在线离线
+     * 在线忙碌离线
      * @param saleOnlineLeaveLogReq
      * @return
      */
