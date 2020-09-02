@@ -1,34 +1,24 @@
 package com.kuaidao.manageweb.controller.autoresponse;
 
 
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.custservice.dto.autoresponse.AutoResponseReqDto;
-import com.kuaidao.custservice.dto.autoresponse.AutoResponseRespDto;
-import com.kuaidao.custservice.dto.language.CommonLanguageReqDto;
-import com.kuaidao.custservice.dto.language.CommonLanguageRespDto;
-import com.kuaidao.manageweb.feign.autoresponse.AutoResponseFeignClient;
-import com.kuaidao.manageweb.feign.language.CommonLanguageFeignClient;
-import org.apache.commons.collections4.ListUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 接口层
  * Created  on 2020-9-1 10:42:23
  */
-@RestController
+@Controller
 @RequestMapping("/imCommonUseSitting")
 public class ImCommonUseSettingController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
+//
 //    @Autowired
 //    private AutoResponseFeignClient autoResponseFeignClient;
 //    @Autowired
@@ -71,10 +61,10 @@ public class ImCommonUseSettingController {
      *
      * @return
      */
-    @RequestMapping("/imCommonUseSittingTestIndex")
+    @RequestMapping("/imCommonUseSitting")
     public String imCommonUseSittingTestIndex(ModelMap modelMap) {
 
-        return "/im/imCommonUseSitting";
+        return "im/imCommonUseSitting";
     }
 
 
