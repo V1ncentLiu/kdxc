@@ -23,6 +23,9 @@ public interface ImFeignClient {
     @PostMapping(value = "/getChatRecordList")
     JSONPageResult<List<MessageRecordData>> getChatRecordList(MessageRecordExportSearchReq messageRecordExportSearchReq);
 
+    @PostMapping(value = "/listChatRecord")
+    JSONPageResult<List<MessageRecordData>> listChatRecord(MessageRecordPageReq messageRecordPageReq);
+
     @Component
     static class HystrixClientFallback implements ImFeignClient {
 
@@ -41,6 +44,11 @@ public interface ImFeignClient {
         @Override
         public JSONPageResult<List<MessageRecordData>> getChatRecordList(MessageRecordExportSearchReq messageRecordExportSearchReq) {
             return fallBackError("历史纪录导出");
+        }
+
+        @Override
+        public JSONPageResult<List<MessageRecordData>> listChatRecord(MessageRecordPageReq messageRecordPageReq) {
+            return fallBackError("客户聊天记录");
         }
     }
 
