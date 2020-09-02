@@ -13,16 +13,17 @@
     <div class="mainSearchBg"> 
         <el-form :model="form" :rules="rules" ref="form">       
             <div class="mainSearchFormBox">
-                <el-form-item label="每日接待IM客户上限："> 
-                    <el-input v-model="form.dayReceiveMax" placeholder="" style="width: 100px;margin-right: 10px;"></el-input>人
+                <el-form-item label="每日接待IM客户上限：" label-width="135px" style="position: relative;">
+                    <em style="position: absolute;left:-135px;top: 0;color: red;">*</em> 
+                    <el-input v-model="form.dayReceiveMax" placeholder="" style="width: 100px;margin-right: 10px;" @keyup.native="number"></el-input>人
                 </el-form-item> 
-                <el-form-item label="服务品牌选择："> 
+                <el-form-item label="服务品牌选择：" label-width="135px"> 
                     <el-button  @click="open" type="danger"  size="small">添加服务品牌</el-button>
                     <el-button  @click="settingAll" type="text"  size="small">设定全部品牌</el-button>
                 </el-form-item>
             </div>
-            已选服务品牌
-             <el-row>
+            <div style="margin-bottom: 10px;"><em style="color: red;margin-right: 5px;">*</em>已选服务品牌</div>
+            <el-row>
                 <el-table 
                     ref="tableData"
                     tooltip-effect="dark"
@@ -119,10 +120,10 @@
     var categoryList = [[${categoryList}]];
     var userInfoList = [[${userInfoList}]];
     var saleIm = [[${saleIm}]];
-    console.log(brandList)
+    // console.log(brandList)
     console.log(allBrandList)
     console.log(categoryList)
-    console.log(userInfoList)
+    // console.log(userInfoList)
     console.log(saleIm)
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -131,10 +132,9 @@
                 loading: false,
                 isDisabled: false,
                 form: {
-                    dayReceiveMax:'',
+                    dayReceiveMax:'10',
                     tableData:[]
                 },
-                tableDataDialog: [],
                 rules:{},
                 selectTable:[],
                 selectDialog:false,
@@ -147,13 +147,28 @@
                 categoryArr:categoryList,
                 groupNameArr:userInfoList,
                 multipleSelection:[],
-                allBrands:[],
 
             }             
         },
         methods: {
+            number(){
+    　　　     this.form.dayReceiveMax=this.form.dayReceiveMax.replace(/[^\.\d]/g,'');
+               this.form.dayReceiveMax=this.form.dayReceiveMax.replace('.','');
+            },
             addBrand(){
-
+                var selectRows=this.multipleSelection;
+                console.log(selectRows);
+                console.log(this.form.tableData);                
+                if(selectRows.length>0){
+                    this.selectDialog=false;
+                    this.form.tableData.push(...selectRows);//展开二维数组
+                    this.brandChange();
+                }else{
+                    this.$message({
+                        message: "请选择服务品牌",
+                        type: "error"
+                    });
+                }               
             },
             cancelAdd(rows){
                 this.selectDialog=false;
@@ -174,9 +189,24 @@
                 this.selectList();
             },
             settingAll(){
-                this.form.tableData=allBrandList;
+                this.form.tableData=JSON.parse(JSON.stringify(allBrandList));
+                this.brandChange(); 
             },
             submit(){
+                if(!this.form.dayReceiveMax){
+                    this.$message({
+                        message: "每日接待IM客户上限不能为空",
+                        type: "error"
+                    });
+                    return;
+                }
+                if(!this.form.tableData.length>0){
+                    this.$message({
+                        message: "服务品牌选择不能为空",
+                        type: "error"
+                    });
+                    return;
+                }
                 var param = {};
                 if(saleIm.id){
                     param.id=saleIm.id;
@@ -188,19 +218,15 @@
                     brandIdListArr.push(this.form.tableData[i].id)
                 }                
                 param.brandIdList = brandIdListArr;
-                this.loading = true; 
                 axios.post('/custservice/saleIm/save',param).then(function (response) { 
-                    mainDivVM.loading = false;
                     console.log(response);
                     var result =  response.data;
                     if(result.code==0){
                         window.location.href="/custservice/saleIm/initListPage"
                     }else{
-                        mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
                     }                     
                 }).catch(function (error) {
-                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
@@ -223,38 +249,56 @@
                     notInListArr.push(this.form.tableData[i].id)
                 }                
                 param.notInList = notInListArr;
-                this.loading = true; 
                 axios.post('/custservice/saleIm/getBrandList',param).then(function (response) { 
-                    mainDivVM.loading = false;
                     console.log(response)
                     var result =  response.data;
                     if(result.code==0){
                         mainDivVM.selectTable= result.data;
+                        // 品牌转换
+                        var categoryObj=JSON.parse(JSON.stringify(categoryList));
+                        for(var i=0;i<categoryObj.length;i++){
+                            for(var j=0;j<mainDivVM.selectTable.length;j++){
+                                if(categoryObj[i].value==mainDivVM.selectTable[j].category){
+                                    mainDivVM.selectTable[j].category=categoryObj[i].name
+                                }
+                            }
+                        } 
                     }else{
-                        mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
                     }  
                 }).catch(function (error) {
-                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
                 });
+            },
+            brandChange(){// 品牌转换
+                var categoryObj=JSON.parse(JSON.stringify(categoryList));
+                for(var i=0;i<categoryObj.length;i++){
+                    for(var j=0;j<this.form.tableData.length;j++){
+                        if(categoryObj[i].value==this.form.tableData[j].category){
+                            this.form.tableData[j].category=categoryObj[i].name
+                        }
+                    }
+                }  
             }
         },
         created(){  
-            
-        },
-        mounted(){
-            document.getElementById('maindiv').style.display = 'block';
             var isId=saleIm.id;
             if(isId){
-                this.form.tableData=brandList;
+                this.form.tableData=JSON.parse(JSON.stringify(brandList));
             }else{//没有id取所有的
-                this.form.tableData=allBrandList;
-            }
-            
+                this.form.tableData=JSON.parse(JSON.stringify(allBrandList));
+            }   
+            this.brandChange(); 
+            // 回显最大值
+            if(saleIm.dayReceiveMax){
+                this.form.dayReceiveMax=saleIm.dayReceiveMax; 
+            }  
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';                                       
         }
     })
     
