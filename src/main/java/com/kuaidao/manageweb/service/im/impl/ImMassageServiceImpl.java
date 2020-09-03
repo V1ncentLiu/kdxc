@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,7 +36,6 @@ public class ImMassageServiceImpl implements ImMassageService {
      * @param roleList
      * @param onlineLeaveType
      */
-    @Async
     public boolean transOnlineLeaveLog(UserInfoDTO user, List<RoleInfoDTO> roleList , Integer onlineLeaveType ) {
         if(null == user || StringUtils.isBlank(user.getUsername())){
             log.warn("user is null or username is null! user = {} " , JSON.toJSONString(user));
