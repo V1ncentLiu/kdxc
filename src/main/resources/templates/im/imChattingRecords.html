@@ -63,9 +63,8 @@
                 style="width: 100%"
                 border
                 :data="tableData"
-                v-loading="loading"
-                :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
+                v-loading="loading">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                 <el-table-column prop="teleGorupName" align="center" label="电销组">
                 </el-table-column>
                 <el-table-column prop="teleSaleName" align="center" label="会话顾问" width="80">
@@ -86,7 +85,7 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
-    var curOrgId = [[${curOrgId}]];
+    var teleSale = [[${teleSaleList}]];// 顾问
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -114,6 +113,7 @@
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
+                teleSaleArr: teleSale, // 顾问
             }             
         },
         methods: {            
@@ -223,37 +223,19 @@
                 if(startTime){
                     var s = startTime.slice(0,8);
                     if(s < data){
-                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
-                        return this.form.startTime;
+                        this.form.chatBegin = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.chatBegin;
                     }
                     return start;
                 }
                 if(endTime){
                     var e = endTime.slice(0,8);
                     if(e < data){
-                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
-                        return this.form.endTime;                        
+                        this.form.chatEnd = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.chatEnd;                        
                     }
                     return end;
                 }
-            },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
-                }
-            },
-            indexFun (index) { // 表格序号
-                return index;
-            },
-            nullToZero(row, column, value, index){
-                if(value){
-                    return value;
-                }
-                return 0;
             },
             minuteFormat (m) { // 时间格式化201905050505fn
                 if (!m) {return "";}
@@ -297,42 +279,6 @@
                 t += sec + "秒";
                 return t;
             },
-            searchYesterday(){ // 昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
-            },
-            searchWeek(){ // 近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable(1);
-            },
-            searchMonth(){ // 本月 
-                var a = new Date();
-                var year = a.getFullYear();
-                var month = a.getMonth();
-                var date = a.getDate();
-                var b = new Date(year,month,date);
-                var f= new Date(year,month,01);
-                var c = f.valueOf();
-                var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable(1);
-            },
             exportRs(){
                 var param = {};
                 param.body = this.export.body;
@@ -360,11 +306,10 @@
             var today = new Date();
             var startTime = moment(today).format("YYYY-MM-DD 00:00");
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-            if(curOrgId){this.isDisabled= true;}
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.form.chatBegin=startTime;
+            this.form.chatEnd=endTime; 
+            this.export.chatBegin = this.minuteFormat(this.form.chatBegin);
+            this.export.chatEnd = this.minuteFormat(this.form.chatEnd);
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
