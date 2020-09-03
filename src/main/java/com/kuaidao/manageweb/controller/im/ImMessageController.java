@@ -228,8 +228,29 @@ public class ImMessageController {
      */
     @PostMapping("/calCusNum")
     public @ResponseBody JSONResult<Boolean> calCusNum(@RequestBody SaleMonitorCalReq saleMonitorCalReq){
-
-        return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
+        if(null == saleMonitorCalReq.getSessionCusNum() && null == saleMonitorCalReq.getCommitCusNum()){
+            // 参数校验
+            return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        saleMonitorCalReq.setSessionCusNum( null == saleMonitorCalReq.getSessionCusNum() ? null : 1L);
+        saleMonitorCalReq.setCommitCusNum( null == saleMonitorCalReq.getCommitCusNum() ? null : 1L);
+        // session获得用户
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        if( null == user){
+            log.warn("user is null!");
+            return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if( CollectionUtils.isEmpty(roleList)){
+            log.warn("roleList is null");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+            saleMonitorCalReq.setTeleSaleId(user.getId());
+            return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
+        }
+        return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
     }
 
     /**
@@ -250,9 +271,9 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/getSaleImStateNum")
-    public @ResponseBody JSONResult<Map<String,Object>> getSaleImStateNum(){
+    public @ResponseBody JSONResult<List<Map<String, Object>>> getSaleImStateNum(){
 
-        JSONResult<Map<String,Object>> result = customerInfoFeignClient.getSaleImStateNum();
+        JSONResult<List<Map<String, Object>>> result = customerInfoFeignClient.getSaleImStateNum();
 
         return result;
     }
