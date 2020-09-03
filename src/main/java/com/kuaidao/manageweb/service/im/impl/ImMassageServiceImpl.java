@@ -36,7 +36,6 @@ public class ImMassageServiceImpl implements ImMassageService {
      * @param roleList
      * @param onlineLeaveType
      */
-    @SuppressWarnings("all")
     public boolean transOnlineLeaveLog(UserInfoDTO user, List<RoleInfoDTO> roleList , Integer onlineLeaveType ) {
         if(null == user || StringUtils.isBlank(user.getUsername())){
             log.warn("user is null or username is null! user = {} " , JSON.toJSONString(user));
