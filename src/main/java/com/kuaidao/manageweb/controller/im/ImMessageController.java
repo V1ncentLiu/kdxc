@@ -44,10 +44,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -250,11 +247,22 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/getSaleImStateNum")
-    public @ResponseBody JSONResult<Map<String,Object>> getSaleImStateNum(){
+    public @ResponseBody JSONResult<List<Map<String, Object>>> getSaleImStateNum(){
 
-        JSONResult<Map<String,Object>> result = customerInfoFeignClient.getSaleImStateNum();
+        JSONResult<List<Map<String, Object>>> result = customerInfoFeignClient.getSaleImStateNum();
 
         return result;
+    }
+
+    public static void main(String[] args) {
+        JSONResult<List<Map<String, Object>>> result = new  JSONResult<List<Map<String, Object>>>();
+        Map<String, Object> o = new HashMap<>();
+        o.put("imStatus","imStatus");
+        List<Map<String, Object>>  tttt = new ArrayList<>();
+        tttt.add(o);
+        result.setData(tttt);
+        System.out.println(result);
+
     }
 
     /**
