@@ -35,7 +35,7 @@
                 <el-form-item label="会话顾问:">  
                     <el-select v-model="form.teleSaleName" placeholder="会话顾问" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in distributionSource"
+                            v-for="item in teleSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -44,13 +44,13 @@
                 </el-form-item>  
                           
                 <el-form-item label="聊天时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.chatBegin" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" v-model="form.chatBegin" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.chatEnd" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" v-model="form.chatEnd" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>   
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" :disabled="btnDisabled">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
                 </div>  
@@ -84,7 +84,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${teleGroupList}]]; // 电销组
+    var queryOrg=[[${dzList}]]; // 电销组
     var teleSale = [[${teleSaleList}]];// 顾问
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -117,7 +117,7 @@
             }             
         },
         methods: {            
-            searchTable(firstPage) { 
+            searchTable() { 
                 var startTime = this.form.chatBegin;
                 var endTime = this.form.chatEnd;
                 if(endTime && startTime){
@@ -131,9 +131,9 @@
                         return;
                     }
                     var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59:59");
                     date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
                     if(startTime < beforeSixMonthRes || endTime > currentDateRes){
@@ -154,16 +154,13 @@
                 }   
                 
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                param.chatBegin = startTime;
+                param.chatEnd = endTime;
                 param.pageSize = this.pager.pageSize;
-                if(firstPage){
-                    param.pageNum = firstPage;
-                }else{
-                    param.pageNum = this.pager.currentPage;
-                }
-                param.orgId = this.form.orgId;
-                param.callType = this.form.callType;
+                param.pageNum = this.pager.currentPage;
+                param.body = this.form.body;
+                param.teleGorupId = this.form.teleGorupId;
+                param.teleSaleName = this.form.teleSaleName;
                 this.loading = true; 
                 // axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
                 axios.post('/message/im/getChatRecordPage',param).then(function (response) {     
@@ -223,7 +220,7 @@
                 if(startTime){
                     var s = startTime.slice(0,8);
                     if(s < data){
-                        this.form.chatBegin = moment(start).format("YYYY-MM-DD 00:00");
+                        this.form.chatBegin = moment(start).format("YYYY-MM-DD 00:00:00");
                         return this.form.chatBegin;
                     }
                     return start;
@@ -231,7 +228,7 @@
                 if(endTime){
                     var e = endTime.slice(0,8);
                     if(e < data){
-                        this.form.chatEnd = moment(end).format("YYYY-MM-DD 23:59");
+                        this.form.chatEnd = moment(end).format("YYYY-MM-DD 23:59:59");
                         return this.form.chatEnd;                        
                     }
                     return end;
@@ -304,8 +301,8 @@
         created(){
             // 默认进入显示当天时间
             var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
+            var startTime = moment(today).format("YYYY-MM-DD 00:00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59:59");
             this.form.chatBegin=startTime;
             this.form.chatEnd=endTime; 
             this.export.chatBegin = this.minuteFormat(this.form.chatBegin);
