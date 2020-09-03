@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.im;
 
+import com.kuaidao.aggregation.dto.clue.IMSubmitQueryDTO;
+import com.kuaidao.aggregation.dto.es.EsQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -44,6 +46,9 @@ public interface CustomerInfoFeignClient {
     @PostMapping(value = "/getSaleImStateNum")
     JSONResult<List<Map<String, Object>>> getSaleImStateNum();
 
+    @PostMapping(value = "/costomerList")
+    JSONResult<PageBean<IMSubmitQueryDTO>> costomerList(@RequestBody EsQueryDTO submitQuery);
+
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
 
@@ -78,6 +83,11 @@ public interface CustomerInfoFeignClient {
         @Override
         public JSONResult<List<Map<String, Object>>> getSaleImStateNum() {
             return fallBackError("顾问在线离线忙碌状态数量");
+        }
+
+        @Override
+        public JSONResult<PageBean<IMSubmitQueryDTO>> costomerList(EsQueryDTO submitQuery) {
+            return fallBackError("右侧客户列表");
         }
 
     }
