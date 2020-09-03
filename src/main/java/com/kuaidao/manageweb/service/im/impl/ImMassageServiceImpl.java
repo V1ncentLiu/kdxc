@@ -31,7 +31,7 @@ public class ImMassageServiceImpl implements ImMassageService {
     @Autowired
     private CustomerInfoFeignClient customerInfoFeignClient;
     /**
-     * 在线离线日志
+     * 在线离线后台调用日志接口
      * @param user
      * @param roleList
      * @param onlineLeaveType
