@@ -3,7 +3,17 @@
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        .titleBox{font-size: 14px;margin-bottom: 10px;}
+        .titleBox{font-size: 14px;margin-bottom: 10px;border-bottom: 1px solid #ecedf2;padding-bottom: 10px;}
+        .titleBox span{border-left: 3px solid #ecedf2;padding-left: 20px;height: 20px;line-height: 20px;}
+        .el-form-item__label{font-size: 14px;}
+        .tip{color: #c0c4cc;}
+        .el-card{border: none;margin-bottom: 10px;width: 500px;height: 30px;line-height: 30px;padding-left: 10px;}
+        .el-card__body{padding:0;}
+        .el-form-item__error{padding-top: 4px;}
+        .draggableUl{overflow: hidden;}
+        .draggableUl li{min-height: 30px;}
+        .draggableUl li .cnt{padding: 5px;border:1px dashed #fff;min-width: 300px;display: inline-block;}
+        .draggableUl li:hover .cnt{border:1px dashed #ecedf2;}
     </style>
 </head>
 <body>
@@ -13,13 +23,13 @@
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item>IM常用设置</el-breadcrumb-item>
     </el-breadcrumb>  
-    <div class="mainSearchBg marginB20">         
-        <el-row>
+    <div class="mainSearchBg marginB20 fs14">         
+        <el-row class="mainSearchForm">
             <div class="titleBox">
-                <span>常用语设置</span>
+                <span class="fs16">常用语设置</span>
                 <!-- <el-button  @click="addbutton" type="primary"  size="small">IM授权修改</el-button> -->
             </div>
-            <el-button  @click="addbutton" type="primary"  size="small">添加常用语</el-button>
+            <el-button  @click="addbutton" type="primary" size="small" class="marginB20">添加常用语</el-button>
             <!-- <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
@@ -47,37 +57,50 @@
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination> -->
             
             <!-- 调用组件  -->
-            <draggable element="ul" v-model="myArray">
-              <li v-for="item in myArray">{{item.name}}</li>
+            <draggable element="ul" v-model="myArray" class="draggableUl">
+              <li v-for="(item,index) in myArray"><span class="cnt">{{item.name}}</span></li>
+              <!-- <el-col v-for="(item,index) in myArray">   
+                <span style="float: left;margin-top: 5px;">{{index+1}}、</span>           
+                <el-card shadow="hover">
+                  {{item.name}}
+                </el-card>
+              </el-col> -->
             </draggable>
             <!-- 输出list数据 -->
-            {{myArray}}
+            <!-- {{myArray}} -->
         </el-row>
     </div>
-    <div class="mainSearchBg">
+    <div class="mainSearchBg fs14">
         <el-form :model="form" class="mainSearchForm" ref="form">
             <el-row>
-                <div class="titleBox"><span>自动回复设置</span></div>
+                <div class="titleBox"><span class="fs16">自动回复设置</span></div>
                 <el-form-item label="开场白设置：" :label-width="labelWidth"> 
-                    <el-button  @click="edit" type="primary"  size="small">编辑开场白</el-button>
+                    <el-button  @click="editPrologue" type="primary"  size="small">编辑开场白</el-button>
+                </el-form-item>
+                <!-- 开场白list -->
+                <el-form-item label="" :label-width="labelWidth"> 
+                    <ul>
+                        <li v-for="(item,index) in prologuesArr"><span>{{index+1}}、</span><span class="cnt">{{item.value}}</span></li>
+                    </ul>
+                    
                 </el-form-item>
                 <el-form-item label="超时自动恢复设置：" :label-width="labelWidth"> 
-                    <el-radio-group v-model="form.radio" @change="redioChange">
-                        <el-radio  label="0">启用</el-radio>
-                        <el-radio  label="1">禁用</el-radio>
+                    <el-radio-group v-model="form.timeOutEnable" @change="redioChange">
+                        <el-radio  label="1">启用</el-radio>
+                        <el-radio  label="0">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="超时自动恢复时间：" :label-width="labelWidth"> 
-                    <el-input v-model="form.content" placeholder=""></el-input>秒
+                    <el-input v-model="form.timeOut" placeholder="" style="margin-right: 10px;"></el-input>秒
                 </el-form-item>
-                <el-form-item label="超时自动恢复内容:" :label-width="labelWidth"> 
+                <el-form-item label="超时自动恢复内容：" :label-width="labelWidth"> 
                     <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;"></el-input>
-                    <p>不超过500个字</p>
+                    <p class="tip">不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="非工作时间自动恢复设置：" :label-width="labelWidth"> 
-                    <el-radio-group v-model="form.radio" @change="redioChange">
-                        <el-radio  label="0">启用</el-radio>
-                        <el-radio  label="1">禁用</el-radio>
+                    <el-radio-group v-model="form.nonWorktimeEnable" @change="redioChange">
+                        <el-radio  label="1">启用</el-radio>
+                        <el-radio  label="0">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="非工作时间段：" :label-width="labelWidth">
@@ -100,8 +123,12 @@
                     </el-time-picker>
                 </el-form-item>                
                 <el-form-item label="非工作时间自动恢复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;"></el-input>
-                    <p>不超过500个字</p>
+                    <el-input type="textarea" v-model="form.noWork" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <p class="tip">不超过500个字</p>
+                </el-form-item>
+                <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
+                    <el-input type="textarea" v-model="form.lixian" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <p class="tip">不超过500个字</p>
                 </el-form-item>
             </el-row>
             <div class="padding20 f-tac">            
@@ -111,19 +138,30 @@
         </el-form>
     </div>
     <!-- dialog -->
-    <!-- <el-dialog  :title="showTitle"  :visible.sync="addVisible" width="540px">
+    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="540px">
         <template>
-            <el-form :model="addForm" ref="addForm" :rules="addFormRules">
-                <el-form-item label="备注:"  label-width="100px"  prop="remark">
-                    <el-input type="textarea" v-model="addForm.remark" class="input-with-select" maxlength="200" style="width: 350px;" :rows="4" placeholder="输入分发备注"></el-input>
+            <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
+                <el-button type="primary" @click="addDomain" style="margin-bottom: 10px;">添加</el-button>
+                <!-- <el-form-item label=""  label-width="0"  prop="prologue">
+                    <el-input type="textarea" v-model="prologueForm.prologue" class="input-with-select" maxlength="500" style="width: 350px;" :rows="4" placeholder="不超过500个字"></el-input>
+                </el-form-item> -->
+                <el-form-item
+                    v-for="(domain, index) in dynamicValidateForm.domains"
+                    :key="domain.key"
+                    :prop="'domains.' + index + '.value'"
+                    :rules="{
+                      required: true, message: '开场白文字不允许为空', trigger: 'blur'
+                    }"
+                  >
+                    <el-input type="textarea" maxlength="500" style="width: 350px;margin-right: 10px;" :rows="4" placeholder="不超过500个字" v-model="domain.value"></el-input><el-button @click.prevent="removeDomain(domain)" v-if="isshowDelete">删除</el-button>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="addSubmit('addForm')">提 交</el-button>
-                <el-button  @click="addCancel('addForm')">取 消</el-button>
+                <el-button type="primary" @click="submitdialogForm('dynamicValidateForm')">提 交</el-button>
+                <el-button  @click="resetdialogForm('dynamicValidateForm')">取 消</el-button>
             </div>
         </template>
-    </el-dialog> -->
+    </el-dialog>
 </div>
 
 <input id="addOrUpdate" type="hidden" >
@@ -169,13 +207,54 @@
                     name:'000'
                 }],
                 addFormRules:{},
-                labelWidth:"150px",
+                labelWidth:"190px",
+                dynamicVisible:false,//开场白弹窗
+                dynamicValidateForm: {
+                    domains: [{
+                        value: ''
+                    }],
+                },
+                isshowDelete:false,
+                prologuesArr:[],//开场白
             }             
         },
         methods: { 
-            edit(){
-
+            //开场白开始
+            editPrologue(){
+                this.dynamicVisible=true;
             },
+            submitdialogForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.dynamicVisible=false;
+                        this.prologuesArr=this.dynamicValidateForm.domains;
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
+            },
+            resetdialogForm(formName) {
+                this.$refs[formName].resetFields();
+                this.dynamicVisible=false;
+            },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item)
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+                if(this.dynamicValidateForm.domains.length==1){
+                    this.isshowDelete=false;
+                }
+            },
+            addDomain() {
+                this.dynamicValidateForm.domains.push({
+                    value: '',
+                    key: Date.now()
+                });
+                this.isshowDelete=true;
+            },
+            //开场白结束
             redioChange(){
 
             },
