@@ -25,6 +25,32 @@
     </el-breadcrumb>  
     <div class="mainSearchBg marginB20 fs14">         
         <el-row class="mainSearchForm">
+            <template>
+                <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+                    <el-tab-pane label="常用语设置" name="first">
+                        <!-- 调用组件  -->
+                        <draggable element="ul" v-model="commonuseArr" class="draggableUl">
+                          <li v-for="(item,index) in commonuseArr"><span class="cnt">{{item.name}}</span></li>
+                          <!-- <el-col v-for="(item,index) in myArray">   
+                            <span style="float: left;margin-top: 5px;">{{index+1}}、</span>           
+                            <el-card shadow="hover">
+                              {{item.name}}
+                            </el-card>
+                          </el-col> -->
+                        </draggable>
+                        <!-- 输出list数据 -->
+                        <!-- {{commonuseArr}} -->
+                    </el-tab-pane>
+                    <el-tab-pane label="用户常用语" name="second">
+
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+
+
+
+
+
             <div class="titleBox">
                 <span class="fs16">常用语设置</span>
                 <!-- <el-button  @click="addbutton" type="primary"  size="small">IM授权修改</el-button> -->
@@ -187,7 +213,7 @@
                     currentPage: 1,
                     pageSize: 20
                 },
-                form: {
+                form: {//自动回复设置
                     
                 },
                 tableData: [],
@@ -197,6 +223,7 @@
                 addForm:{
                     remark:''
                 },
+                activeName: 'first',//
                 commonuseArr:[],//常用语设置
                 addFormRules:{},
                 labelWidth:"190px",
@@ -208,9 +235,14 @@
                 },
                 isshowDelete:false,
                 prologuesArr:[],//开场白
+                
             }             
         },
         methods: { 
+            // 常用语设置
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
             //开场白开始
             editPrologue(){
                 this.dynamicVisible=true;
@@ -332,7 +364,7 @@
             addCancel(formName){//取消
                this.$refs[formName].resetFields();
                this.addVisible = false;
-           },         
+            },         
             searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -475,7 +507,7 @@
             timeFormat (row, column) { // 时间格式化：时分秒fn
                 var time = row[column.property];
                 if(!time){return "00时00分00秒";}
-                var timeResult = this.timeFun (time); 
+                var timeResult = this.timeFun (time); 
                 return timeResult;
             },
             timeFun(s){
