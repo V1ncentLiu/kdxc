@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
+        .titleBox{font-size: 14px;margin-bottom: 10px;}
     </style>
 </head>
 <body>
@@ -12,7 +13,7 @@
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item>IM常用设置</el-breadcrumb-item>
     </el-breadcrumb>  
-    <div class="mainSearchBg">         
+    <div class="mainSearchBg marginB20">         
         <el-row>
             <div class="titleBox">
                 <span>常用语设置</span>
@@ -52,41 +53,54 @@
             <!-- 输出list数据 -->
             {{myArray}}
         </el-row>
-        <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+    </div>
+    <div class="mainSearchBg">
+        <el-form :model="form" class="mainSearchForm" ref="form">
             <el-row>
                 <div class="titleBox"><span>自动回复设置</span></div>
-                <el-form-item label="开场白设置:"> 
+                <el-form-item label="开场白设置：" :label-width="labelWidth"> 
                     <el-button  @click="edit" type="primary"  size="small">编辑开场白</el-button>
                 </el-form-item>
-                <el-form-item label="超时自动恢复设置:"> 
+                <el-form-item label="超时自动恢复设置：" :label-width="labelWidth"> 
                     <el-radio-group v-model="form.radio" @change="redioChange">
                         <el-radio  label="0">启用</el-radio>
                         <el-radio  label="1">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item label="超时自动恢复时间:"> 
+                <el-form-item label="超时自动恢复时间：" :label-width="labelWidth"> 
                     <el-input v-model="form.content" placeholder=""></el-input>秒
                 </el-form-item>
-                <el-form-item label="超时自动恢复内容:"> 
-                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3"></el-input>
+                <el-form-item label="超时自动恢复内容:" :label-width="labelWidth"> 
+                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                     <p>不超过500个字</p>
                 </el-form-item>
-                <el-form-item label="非工作时间自动恢复设置:"> 
+                <el-form-item label="非工作时间自动恢复设置：" :label-width="labelWidth"> 
                     <el-radio-group v-model="form.radio" @change="redioChange">
                         <el-radio  label="0">启用</el-radio>
                         <el-radio  label="1">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <el-form-item label="非工作时间段:"></el-form-item>
-                <el-form-item label="每日">
-                    <el-date-picker  v-model="form.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <span>-</span>
-                <el-form-item label="次日">
-                    <el-date-picker  v-model="form.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="非工作时间自动恢复内容:"> 
-                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3"></el-input>
+                <el-form-item label="非工作时间段：" :label-width="labelWidth">
+                    <span>每日</span>
+                    <el-time-picker
+                        v-model="form.startTime"
+                        :picker-options="{
+                          selectableRange: '00:00:00 - 23:59:59'
+                        }"
+                        placeholder="每日">
+                    </el-time-picker>
+                    <span>——</span>
+                    <span>次日</span>
+                    <el-time-picker
+                        v-model="form.endTime"
+                        :picker-options="{
+                          selectableRange: '00:00:00 - 23:59:59'
+                        }"
+                        placeholder="次日">
+                    </el-time-picker>
+                </el-form-item>                
+                <el-form-item label="非工作时间自动恢复内容：" :label-width="labelWidth"> 
+                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                     <p>不超过500个字</p>
                 </el-form-item>
             </el-row>
@@ -154,7 +168,8 @@
                 },{
                     name:'000'
                 }],
-                addFormRules:{}
+                addFormRules:{},
+                labelWidth:"150px",
             }             
         },
         methods: { 
@@ -409,7 +424,7 @@
         created(){
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
-            this.searchTable();
+            // this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
