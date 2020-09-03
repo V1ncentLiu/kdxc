@@ -3,7 +3,6 @@
  */
 package com.kuaidao.manageweb.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -14,7 +13,6 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.MD5Util;
 import com.kuaidao.custservice.constant.SaleOLOperationTypeEnum;
-import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
@@ -24,10 +22,10 @@ import com.kuaidao.manageweb.entity.LoginReq;
 import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.service.im.ImMassageService;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
 import com.kuaidao.msgpush.dto.SmsCodeSendReq;
@@ -69,9 +67,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 
 /**
@@ -84,8 +84,6 @@ import java.util.stream.Collectors;
 @Controller
 public class LoginController {
     @Autowired
-    private RoleManagerFeignClient roleManagerFeignClient;
-    @Autowired
     private LoginRecordFeignClient loginRecordFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
@@ -97,8 +95,6 @@ public class LoginController {
     private DefaultKaptcha captchaProducer;
     @Autowired
     private StringRedisTemplate redisTemplate;
-    @Autowired
-    private RedisSessionDAO redisSessionDAO;
     @Autowired
     private CustomerInfoFeignClient customerInfoFeignClient;
 
@@ -130,6 +126,8 @@ public class LoginController {
     private boolean verificationCodeShow;
     @Autowired
     OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    ImMassageService imMassageService;
 
     /***
      * 登录页
@@ -384,7 +382,7 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
                 SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
-                this.transOnlineLeaveLog(user, roleList , SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
+                imMassageService.transOnlineLeaveLog(user, roleList , SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
                 return new JSONResult<>().success(null);
 
             } catch (UnknownAccountException uae) {
@@ -440,28 +438,6 @@ public class LoginController {
             }
         }
         return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
-    }
-
-    /**
-     * 在线离线日志
-     * @param user
-     * @param roleList
-     * @param onlineLeaveType
-     */
-    public void transOnlineLeaveLog(UserInfoDTO user, List<RoleInfoDTO> roleList , Integer onlineLeaveType ) {
-        if(null == user || null == roleList){
-            logger.warn("user or roleList is null! user = {} , roleList = {} " , JSON.toJSONString(user), JSON.toJSONString(roleList));
-            return ;
-        }
-        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-        // 电销顾问 & 业务线是的商机盒子的
-        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer)BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
-
-            SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-            saleOnlineLeaveLogReq.setOperationType(onlineLeaveType);
-            saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
-            customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-        }
     }
 
     /**
@@ -677,7 +653,7 @@ public class LoginController {
             if ("3".equals(type)) {
                 subject.getSession().setAttribute("isShowLogoutBox", type);
             }
-            this.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
+            imMassageService.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);
         }
