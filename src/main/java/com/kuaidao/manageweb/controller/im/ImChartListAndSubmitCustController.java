@@ -1,11 +1,15 @@
 package com.kuaidao.manageweb.controller.im;
 
+import com.kuaidao.aggregation.dto.clue.IMSubmitQueryDTO;
+import com.kuaidao.aggregation.dto.es.EsQueryDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
 import com.kuaidao.custservice.dto.submitCust.SubmitCustsDTO;
 import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
+import com.kuaidao.manageweb.feign.im.ImSubmitCustomerRecordClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,31 +26,26 @@ public class ImChartListAndSubmitCustController {
 
     @Autowired
     CustomerInfoFeignClient customerInfoFeignClient;
+
+    @Autowired
+    ImSubmitCustomerRecordClient submitCustomerRecordClient;
+
     /**
      * 顾问提交资源
      */
     @PostMapping("/submit")
     @ResponseBody
-    public JSONResult<Boolean> submit(@RequestBody SubmitCustsDTO submitCusts) {
-
-        /**
-         * 1:插入提交记录  接口完成
-         * -- 线索插入流程待确认!!
-         * 2:线索表插入线索
-         * 3:返回clueID
-         * 4:更新绑定关系  接口完成
-         */
-
-        return  null;
+    public JSONResult<Long> submit(@RequestBody SubmitCustsDTO submitCusts) {
+        return submitCustomerRecordClient.submit(submitCusts);
     }
+
     /**
      * 查询提交客户列表
      */
     @PostMapping("/submitCustList")
     @ResponseBody
-    public JSONResult<List> submitCustList(@RequestBody IdEntityLong id) {
-        // 这块的一套操作待确认啊
-        return  null;
+    public JSONResult<PageBean<IMSubmitQueryDTO>> submitCustList(@RequestBody EsQueryDTO submitQuery) {
+        return customerInfoFeignClient.costomerList(submitQuery);
     }
 
     /**
