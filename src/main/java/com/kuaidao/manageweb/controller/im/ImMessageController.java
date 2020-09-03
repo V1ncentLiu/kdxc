@@ -225,7 +225,18 @@ public class ImMessageController {
      */
     @PostMapping("/calCusNum")
     public @ResponseBody JSONResult<Boolean> calCusNum(@RequestBody SaleMonitorCalReq saleMonitorCalReq){
-
+        if(null == saleMonitorCalReq.getSessionCusNum() && null == saleMonitorCalReq.getCommitCusNum()){
+            // 参数校验
+            return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        saleMonitorCalReq.setSessionCusNum( null == saleMonitorCalReq.getSessionCusNum() ? null : 1L);
+        saleMonitorCalReq.setCommitCusNum( null == saleMonitorCalReq.getCommitCusNum() ? null : 1L);
+        // session获得用户
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        if(null == user){
+            return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+        saleMonitorCalReq.setTeleSaleId(user.getId());
         return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
     }
 
