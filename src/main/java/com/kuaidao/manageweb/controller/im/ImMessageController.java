@@ -44,7 +44,10 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -233,11 +236,21 @@ public class ImMessageController {
         saleMonitorCalReq.setCommitCusNum( null == saleMonitorCalReq.getCommitCusNum() ? null : 1L);
         // session获得用户
         UserInfoDTO user = CommUtil.getCurLoginUser();
-        if(null == user){
+        if( null == user){
+            log.warn("user is null!");
             return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
         }
-        saleMonitorCalReq.setTeleSaleId(user.getId());
-        return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if( CollectionUtils.isEmpty(roleList)){
+            log.warn("roleList is null");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+            saleMonitorCalReq.setTeleSaleId(user.getId());
+            return customerInfoFeignClient.calCusNum(saleMonitorCalReq);
+        }
+        return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
     }
 
     /**
@@ -263,17 +276,6 @@ public class ImMessageController {
         JSONResult<List<Map<String, Object>>> result = customerInfoFeignClient.getSaleImStateNum();
 
         return result;
-    }
-
-    public static void main(String[] args) {
-        JSONResult<List<Map<String, Object>>> result = new  JSONResult<List<Map<String, Object>>>();
-        Map<String, Object> o = new HashMap<>();
-        o.put("imStatus","imStatus");
-        List<Map<String, Object>>  tttt = new ArrayList<>();
-        tttt.add(o);
-        result.setData(tttt);
-        System.out.println(result);
-
     }
 
     /**
