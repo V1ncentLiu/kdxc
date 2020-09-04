@@ -218,29 +218,15 @@
                 }
                 return obj;
             },
-            minuteFormat (m) { // 时间格式化201905050505fn
-                if (!m) {return "";}
-                var timeStr = new Date(m);
-                var yearRes = timeStr.getFullYear();
-                var monthRea = timeStr.getMonth()+1;
-                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
-                var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
-                var hoursRes = timeStr.getHours();
-                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
-                var minRes = timeStr.getMinutes();
-                minRes = minRes < 10 ?  "0" + minRes : minRes;                
-                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
-                return timeRes;
-            },
             exportRs(){
+                // 判断不能超过一天
+
                 var param = {};
                 param.body = this.export.body;
                 param.teleGorupId = this.export.teleGorupId;
                 param.teleSaleName =  this.export.teleSaleName; 
                 param.chatBegin = this.export.chatBegin;
                 param.chatEnd = this.export.chatEnd;
-                // axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
                 axios.post('/message/im/export',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
