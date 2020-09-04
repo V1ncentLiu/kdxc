@@ -169,9 +169,10 @@ public class ImMessageController {
                     t.add(dto.getCusName());
                     // 聊天时间
                     if(StringUtils.isNotBlank(dto.getMsgTimestamp())){
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        /*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         // 设置导出日期
-                        t.add(sdf.format(Long.valueOf(dto.getMsgTimestamp())));
+                        t.add(sdf.format(Long.valueOf(dto.getMsgTimestamp())));*/
+                        t.add(dto.getMsgTimestamp());
                     }
                     // 聊天内容
                     t.add(dto.getBody());
