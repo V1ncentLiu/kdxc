@@ -120,7 +120,7 @@ public class ImMessageController {
         // 封装客户Id
         idList.add(messageRecordPageReq.getCusId());
         idListReq.setIdList(idList);
-        JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.brandAndIssubmit(idListReq);
+        JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(idListReq);
 
         List<CustomerInfoDTO> data ;
 
@@ -130,7 +130,10 @@ public class ImMessageController {
         }
 
         if(CollectionUtils.isEmpty(data = listJSONResult.getData())){
-
+            // 直接返回
+            JSONPageResult jsonPageResult = new JSONPageResult();
+            jsonPageResult.setPageSize(messageRecordPageReq.getPageSize());
+            jsonPageResult.setPageNum(messageRecordPageReq.getPageNum());
             return new JSONPageResult().success(new ArrayList<>());
         }
         CustomerInfoDTO customerInfoDTO = data.get(0);
