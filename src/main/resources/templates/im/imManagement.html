@@ -45,10 +45,10 @@
                     <el-input v-model="cusName" placeholder="身份别名"></el-input>
                 </el-form-item>  -->          
                 <el-form-item label="搜索时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.belongDateBegin" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.belongDateBegin" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.belongDateEnd" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.belongDateEnd" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>   
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
@@ -128,8 +128,7 @@
                 var startTime = this.form.belongDateBegin;
                 var endTime = this.form.belongDateEnd;
                 if(endTime && startTime){
-                    startTime = new Date(this.form.belongDateBegin);
-                    endTime = new Date(this.form.belongDateEnd);
+                    
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -137,21 +136,21 @@
                         });
                         return;
                     }
+                    var startTime1 = new Date(this.form.belongDateBegin);
+                    var endTime1 = new Date(this.form.belongDateEnd);
                     var date = new Date();
-                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-6);
-                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDate = moment(date).format("YYYY-MM-DD");
+                    date.setMonth(date.getMonth()-1);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(startTime1 < beforeSixMonthRes || endTime1 > currentDateRes){
                         this.$message({
-                            message: '请选择近6个月内的时间',
+                            message: '请选择近1个月内的时间',
                             type: 'warning'
                         });
                         return;
-                    }
-                    startTime = this.limitTime(startTime, null);
-                    endTime = this.limitTime(null, endTime);
+                    }                    
                 }else{
                     this.$message({
                         message: '请选择起止时间',
@@ -161,8 +160,8 @@
                 }   
                 
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                param.belongDateBegin = this.form.belongDateBegin;
+                param.belongDateEnd = this.form.belongDateEnd;
                 param.pageNum = this.pager.currentPage
                 param.pageSize = this.pager.pageSize; 
                 
@@ -200,7 +199,7 @@
                 if(startTime){
                     var s = startTime.slice(0,8);
                     if(s < data){
-                        this.form.belongDateBegin = moment(start).format("YYYY-MM-DD 00:00");
+                        this.form.belongDateBegin = moment(start).format("YYYY-MM-DD");
                         return this.form.belongDateBegin;
                     }
                     return start;
@@ -208,7 +207,7 @@
                 if(endTime){
                     var e = endTime.slice(0,8);
                     if(e < data){
-                        this.form.belongDateEnd = moment(end).format("YYYY-MM-DD 23:59");
+                        this.form.belongDateEnd = moment(end).format("YYYY-MM-DD");
                         return this.form.belongDateEnd;                        
                     }
                     return end;
@@ -251,8 +250,8 @@
             searchToday(){ // 今天
                var today = new Date();
                today.setTime(today.getTime());
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.belongDateBegin=startTime;
                this.form.belongDateEnd=endTime;
                this.searchTable(1);
@@ -260,8 +259,8 @@
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
                this.form.belongDateBegin=startTime;
                this.form.belongDateEnd=endTime;
                this.searchTable(1);
@@ -276,8 +275,8 @@
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
-                 this.form.belongDateBegin=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.belongDateEnd=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                 this.form.belongDateBegin=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
+                 this.form.belongDateEnd=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate();
                  this.searchTable(1);
             },
             searchMonth(){ // 本月 
@@ -289,16 +288,16 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.belongDateBegin=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                this.form.belongDateEnd=year+"-"+(month+1)+"-"+date+" 23:59";
+                this.form.belongDateBegin=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
+                this.form.belongDateEnd=year+"-"+(month+1)+"-"+date;
                 this.searchTable(1);
             },
         },
         created(){
             // 默认进入显示当天时间
             var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
+            var startTime = moment(today).format("YYYY-MM-DD");
+            var endTime = moment(today).format("YYYY-MM-DD");
             this.form.belongDateBegin=startTime;
             this.form.belongDateEnd=endTime; 
 
