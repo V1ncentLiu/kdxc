@@ -2,7 +2,6 @@ package com.kuaidao.manageweb.controller.im;
 
 
 import com.kuaidao.common.constant.*;
-import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
@@ -43,10 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -114,13 +110,10 @@ public class ImMessageController {
         if (result.hasErrors()) {
             return validateParam(result);
         }
-        // 根据客户Id查询客户accId
-        IdListReq idListReq = new IdListReq();
-        List<String> idList = new ArrayList<>();
         // 封装客户Id
-        idList.add(messageRecordPageReq.getCusId());
-        idListReq.setIdList(idList);
-        JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(idListReq);
+        Map<String,Object> map = new HashMap<>();
+        map.put("clueId",messageRecordPageReq.getCusId());
+        JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(map);
 
         List<CustomerInfoDTO> data ;
 
