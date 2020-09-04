@@ -821,15 +821,15 @@
                         <!-- 发送类型 0-自己发送，1-对方发送 -->
                         <p class="padding10 bluecolor" v-if="item.fromType==0">
                             <span class="marginR10">在线客服</span>
-                            <span>{{item.messageTime}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p class="padding10 yellowcolor" v-else>
                             <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
-                            <span>{{item.messageTime}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p style="padding:0 10px;">
                             <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
-                            <span v-else>{{item.message}}</span>
+                            <span v-else>{{item.msgTimestamp}}</span>
                         </p>
                     </li>
                 </ul>
@@ -981,7 +981,7 @@
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
-                isShowOnlineRecordBtn:false,
+                isShowOnlineRecordBtn:true,
                 onlineRecordData:[],
                 onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
@@ -1293,15 +1293,16 @@
                 param.clueId = clueId;
                 param.pageNum = 1;
                 param.pageSize = 10;
-                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                axios.post('/message/im/listChatRecord', param).then(function (response) {    
                     var recordData=response.data;
                     if(recordData){
                         var dataList=recordData.data
                         if(dataList){
                             addCustomerVM.onlineRecordData=dataList;
                             for(var i=0;i<dataList.length;i++){
-                                if(dataList[i].messageTime){
-                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                if(dataList[i].msgTimestamp){
+                                    dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
                                 }
                             }
                             if(dataList.length>0){
