@@ -124,9 +124,14 @@ public class ImMessageController {
 
         List<CustomerInfoDTO> data ;
 
-        if(null == listJSONResult || !"0".equals(listJSONResult.getCode()) || CollectionUtils.isEmpty(data = listJSONResult.getData())){
+        if(null == listJSONResult || !"0".equals(listJSONResult.getCode())){
 
             return new JSONPageResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        }
+
+        if(CollectionUtils.isEmpty(data = listJSONResult.getData())){
+
+            return new JSONPageResult().success(new ArrayList<>());
         }
         CustomerInfoDTO customerInfoDTO = data.get(0);
         // 客户Im无值?
