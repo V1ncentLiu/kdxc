@@ -112,7 +112,7 @@ public class ImMessageController {
         }
         // 封装客户Id
         Map<String,Object> map = new HashMap<>();
-        map.put("clueId",messageRecordPageReq.getCusId());
+        map.put("accountId",messageRecordPageReq.getCusId());
         JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(map);
 
         List<CustomerInfoDTO> data ;
