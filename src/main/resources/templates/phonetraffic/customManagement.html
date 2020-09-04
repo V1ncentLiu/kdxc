@@ -129,6 +129,16 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="话务组:">
+                        <el-select v-model="form.firstAsssignTrafficGroupId" placeholder="话务组" clearable filterable>
+                            <el-option
+                                    v-for="item in hwzyGroupList"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox"> 
                     <el-button icon="el-icon-search" type="primary"  @click="initTableData" class="searchBtn">搜索</el-button>
@@ -498,6 +508,7 @@ var phoneButton = false;
                 allocateFormVisible: false, //分配资源
                 reasonArr:[],
                 hwArr:[],
+                hwzyGroupList:[],
                 proArr:proSelect,
                 dailogTitleType:'',
                 formAllocat:{
@@ -540,6 +551,7 @@ var phoneButton = false;
                     dealStatus:"0",
                     type: [],
                     phtraIsCall:"",
+                    firstAsssignTrafficGroupId:"",
                 },
                 cusStatusArr:[],
                 //mediumArr:[],
@@ -1093,6 +1105,15 @@ var phoneButton = false;
             paramCategory.groupCode="clueCategory";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',paramCategory).then(function (response) {
                 customerManVM.categoryArr=response.data.data;
+            });
+            //话务组
+            var param = {};
+            param.orgType = "21";
+            axios.post('/organization/organization/queryOrgByType', param).then(function (response) {
+                customerManVM.hwzyGroupList = response.data.data;
+            }).catch(function (error) {
+                console.log(error);
+            }).then(function () {
             });
             this.initColumn();
     	}
