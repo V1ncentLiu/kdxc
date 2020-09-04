@@ -51,7 +51,6 @@ public class SaleCardController {
         logger.info("manager-web SaleCardController queryById:param{}", telSaleId);
         SaleCardReqDto saleCardReqDto = new SaleCardReqDto();
         saleCardReqDto.setTeleSaleId(telSaleId);
-        saleCardReqDto.setQuerySource(2);
         return saleCardFeignClient.queryById(saleCardReqDto);
     }
 
