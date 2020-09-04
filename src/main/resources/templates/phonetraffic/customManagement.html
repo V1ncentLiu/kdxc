@@ -119,6 +119,16 @@
                     <el-form-item label="">
                         <el-input v-model="form.defineValue" placeholder=""></el-input>
                     </el-form-item>
+                    <el-form-item label="话务是否接通:">
+                        <el-select v-model="form.phtraIsCall" placeholder="话务是否接通" clearable >
+                            <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox"> 
                     <el-button icon="el-icon-search" type="primary"  @click="initTableData" class="searchBtn">搜索</el-button>
@@ -513,7 +523,11 @@ var phoneButton = false;
                 },
                 adviserValue: '', //电销顾问
                 dealStatusArr:[{value: '', label: '全部' },{value: '0', label: readyStatusVal }, {value: '1', label: statusVal}],
-
+                comArr:[
+                    {value:"",name:"全部"},
+                    {value:"1",name:"是"},
+                    {value:"0",name:"否"}
+                ],
                 form: {
                     defineColumn:"phone",
                     defineValue:"",
@@ -525,6 +539,7 @@ var phoneButton = false;
                     operatorId:"",
                     dealStatus:"0",
                     type: [],
+                    phtraIsCall:"",
                 },
                 cusStatusArr:[],
                 //mediumArr:[],
@@ -1055,7 +1070,6 @@ var phoneButton = false;
     		//初始化数据列表
     		this.initTableData();
     		//客户状态
-            debugger;
             var paramStatus={};
             paramStatus.groupCode="PhCustomerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',paramStatus).then(function (response) {
