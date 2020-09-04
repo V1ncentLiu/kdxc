@@ -12,8 +12,10 @@
         .el-form-item__error{padding-top: 4px;}
         .draggableUl{overflow: hidden;}
         .draggableUl li{min-height: 30px;}
-        .draggableUl li .cnt{padding: 5px;border:1px dashed #fff;min-width: 300px;display: inline-block;}
-        .draggableUl li:hover .cnt{border:1px dashed #ecedf2;}
+        .draggableUl li .cnt{padding: 5px;border:1px dashed #fff;min-width: 300px;display: inline-block;font-size: 14;}
+        .draggableUl li:hover .cnt{border:1px dashed #ecedf2;font-size: 14;}
+        .round{width: 20px;height: 20px;border-radius: 50%;border: 1px solid;text-align: center;display: inline-block;line-height: 20px;margin-right: 10px;}
+        .dynamic .el-input{width: 680px;}
     </style>
 </head>
 <body>
@@ -24,26 +26,40 @@
         <el-breadcrumb-item>IM常用设置</el-breadcrumb-item>
     </el-breadcrumb>  
     <div class="mainSearchBg marginB20 fs14">         
-        <el-row class="mainSearchForm">
+        <el-row class="mainSearchForm">   
             <template>
                 <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
                     <el-tab-pane label="常用语设置" name="first">
-                        <el-button  @click="addCommonuse" type="primary" size="small" class="marginB20">添加常用语</el-button>
-                        <!-- 调用组件  -->
-                        <draggable element="ul" v-model="commonuseArr" class="draggableUl">
-                          <li v-for="(item,index) in commonuseArr"><span class="cnt">{{item.name}}</span></li>
-                          <!-- <el-col v-for="(item,index) in myArray">   
-                            <span style="float: left;margin-top: 5px;">{{index+1}}、</span>           
-                            <el-card shadow="hover">
-                              {{item.name}}
-                            </el-card>
-                          </el-col> -->
-                        </draggable>
+                        <el-button  @click="addDomain1" type="success" size="small" class="marginB20" icon="el-icon-plus">添加常用语</el-button>
+                        <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave">
+                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl">
+                                <el-form-item
+                                    v-for="(domain, index) in dynamicValidateForm1.domains"
+                                    :label=" index+1 + '、'"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.value'"
+                                    :rules="{
+                                      required: true, message: '常用语不能为空', trigger: 'blur'
+                                    }"
+                                    label-width="0"
+                                    style="margin-bottom: 20px;" 
+                                    
+                                    >
+                                    <el-input v-model="domain.value" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1')"  :disabled="iptDisabled"></el-input>
+                                    <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button>
+                                    <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>                                    
+                                </el-form-item>
+                                <!-- <el-form-item>
+                                    <el-button type="primary" @click="submitdialogForm1('dynamicValidateForm1')">提交</el-button>
+                                </el-form-item> -->
+                            </draggable>
+                        </el-form>
+                       
                         <!-- 输出list数据 -->
-                        <!-- {{commonuseArr}} -->
+                        <!-- {{dynamicValidateForm1.domains}} -->
                     </el-tab-pane>
                     <el-tab-pane label="用户常用语" name="second">
-                        <el-button  @click="addCommonuse1" type="primary" size="small" class="marginB20">添加用户常用语</el-button>
+                        <el-button   type="success" size="small" class="marginB20" icon="el-icon-plus">添加用户常用语</el-button>
 
                     </el-tab-pane>
                 </el-tabs>
@@ -96,7 +112,7 @@
                 <!-- 开场白list -->
                 <el-form-item label="" :label-width="labelWidth"> 
                     <ul>
-                        <li v-for="(item,index) in prologuesArr"><span>{{index+1}}、</span><span class="cnt">{{item.value}}</span></li>
+                        <li v-for="(item,index) in prologuesArr"><span class="round">{{index+1}}</span><span class="cnt">{{item.value}}</span></li>
                     </ul>
                     
                 </el-form-item>
@@ -154,13 +170,10 @@
         </el-form>
     </div>
     <!-- dialog -->
-    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="540px">
+    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="800px">
         <template>
             <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
-                <el-button type="primary" @click="addDomain" style="margin-bottom: 10px;">添加</el-button>
-                <!-- <el-form-item label=""  label-width="0"  prop="prologue">
-                    <el-input type="textarea" v-model="prologueForm.prologue" class="input-with-select" maxlength="500" style="width: 350px;" :rows="4" placeholder="不超过500个字"></el-input>
-                </el-form-item> -->
+                <el-button type="success" @click="addDomain" style="margin-bottom: 10px;">添加</el-button>
                 <el-form-item
                     v-for="(domain, index) in dynamicValidateForm.domains"
                     :key="domain.key"
@@ -169,7 +182,8 @@
                       required: true, message: '开场白文字不允许为空', trigger: 'blur'
                     }"
                   >
-                    <el-input type="textarea" maxlength="500" style="width: 350px;margin-right: 10px;" :rows="4" placeholder="不超过500个字" v-model="domain.value"></el-input><el-button @click.prevent="removeDomain(domain)" v-if="isshowDelete">删除</el-button>
+                    <el-input type="textarea" maxlength="500" style="width: 600px;margin-right: 10px;" :rows="4" placeholder="不超过500个字" v-model="domain.value"></el-input>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-if="isshowDelete">删除</el-button>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -215,8 +229,12 @@
                 },
                 activeName: 'first',//
                 commonuseArr:[],//常用语设置
-                addFormRules:{},
+                dynamicValidateForm1: {
+                    domains: [],
+                },
                 labelWidth:"190px",
+                isShowEdit:false,
+                iptDisabled:false,
                 dynamicVisible:false,//开场白弹窗
                 dynamicValidateForm: {
                     domains: [{
@@ -230,14 +248,40 @@
         },
         methods: { 
             // 常用语设置
+            mouseOver(){
+                if(this.iptDisabled==true){
+                    this.isShowEdit=true;
+                }                
+            },
+            mouseLeave(){
+                this.isShowEdit=false;
+            },
             handleClick(tab, event) {
                 console.log(tab, event);
             },
-            addCommonuse(){
-
+            submitdialogForm1(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.commonuseArr=JSON.parse(JSON.stringify(this.dynamicValidateForm1.domains));
+                        this.iptDisabled=true;
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
             },
-            addCommonuse1(){
-
+            removeDomain1(item) {
+                var index = this.dynamicValidateForm1.domains.indexOf(item)
+                if (index !== -1) {
+                    this.dynamicValidateForm1.domains.splice(index, 1)
+                }
+            },
+            addDomain1() {
+                this.dynamicValidateForm1.domains.push({
+                    value: '',
+                    key: Date.now()
+                });
+                this.iptDisabled=false;
             },
             //开场白开始
             editPrologue(){
@@ -247,7 +291,7 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.dynamicVisible=false;
-                        this.prologuesArr=this.dynamicValidateForm.domains;
+                        this.prologuesArr=JSON.parse(JSON.stringify(this.dynamicValidateForm.domains));
                     } else {
                         console.log('error submit!!');
                         return;
@@ -255,7 +299,6 @@
                 });
             },
             resetdialogForm(formName) {
-                this.$refs[formName].resetFields();
                 this.dynamicVisible=false;
             },
             removeDomain(item) {
