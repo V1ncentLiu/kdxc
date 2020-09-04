@@ -202,7 +202,7 @@
              <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
                   <span style="color:red;">当前项目为给品牌商结算</span>
               </el-form-item>
-              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
+              <el-form-item v-if="roleCode== 'CYCW' && businessLine == 8" label="退款审批时间：" :label-width="formLabelWidth" prop="refundTime">
                   <el-date-picker
                       style="width: 290px;"
                       v-model="allocationForm.refundTime"
@@ -210,6 +210,14 @@
                       placeholder="选择日期时间">
                   </el-date-picker>
               </el-form-item>
+                  <el-form-item v-else  label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
+                      <el-date-picker
+                              style="width: 290px;"
+                              v-model="allocationForm.refundTime"
+                              type="datetime"
+                              placeholder="选择日期时间">
+                      </el-date-picker>
+                  </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
               		<el-upload
                     class="upload-demo"
@@ -423,9 +431,13 @@ var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 var payModeItem =[[${payModeItem}]];
 var giveTypeList =[[${giveTypeList}]];
+var businessLine = [[${businessLine}]];
+var roleCode = [[${roleCode}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            businessLine:businessLine,
+            roleCode:roleCode,
           paginationShow: false,
           isShow:false,
           btnDisabled:false,

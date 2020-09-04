@@ -98,6 +98,8 @@ public class RefundRebateManagerController {
         request.setAttribute("ossUrl", ossUrl);
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
+        request.setAttribute("businessLine", user.getBusinessLine());
+        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         return "financing/refundRebateManagerPage";
     }
 
