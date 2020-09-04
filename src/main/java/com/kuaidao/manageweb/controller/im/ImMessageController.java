@@ -114,14 +114,10 @@ public class ImMessageController {
         Map<String,Object> map = new HashMap<>();
         map.put("accountId",messageRecordPageReq.getCusId());
         JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(map);
-
-        List<CustomerInfoDTO> data ;
-
         if(null == listJSONResult || !"0".equals(listJSONResult.getCode())){
-
             return new JSONPageResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
         }
-
+        List<CustomerInfoDTO> data ;
         if(CollectionUtils.isEmpty(data = listJSONResult.getData())){
             // 直接返回
             JSONPageResult jsonPageResult = new JSONPageResult();
@@ -132,7 +128,6 @@ public class ImMessageController {
         CustomerInfoDTO customerInfoDTO = data.get(0);
         // 客户Im无值?
         if(StringUtils.isBlank(customerInfoDTO.getImId())){
-
             return new JSONPageResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         // 设置accId
