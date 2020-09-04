@@ -43,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -169,10 +168,8 @@ public class ImMessageController {
                     t.add(dto.getCusName());
                     // 聊天时间
                     if(StringUtils.isNotBlank(dto.getMsgTimestamp())){
-                        /*SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        // 设置导出日期
-                        t.add(sdf.format(Long.valueOf(dto.getMsgTimestamp())));*/
-                        t.add(dto.getMsgTimestamp());
+                        // 去除时间戳最后逗号数字
+                        t.add(dto.getMsgTimestamp().substring(0 , dto.getMsgTimestamp().lastIndexOf(".")));
                     }
                     // 聊天内容
                     t.add(dto.getBody());
