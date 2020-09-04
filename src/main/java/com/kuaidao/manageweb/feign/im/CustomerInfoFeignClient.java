@@ -11,7 +11,6 @@ import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.custservice.dto.onlineleave.TSaleMonitorReq;
-import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -48,6 +47,9 @@ public interface CustomerInfoFeignClient {
 
     @PostMapping(value = "/costomerList")
     JSONResult<PageBean<IMSubmitQueryDTO>> costomerList(@RequestBody EsQueryDTO submitQuery);
+
+    @PostMapping(value = "/getCustomerInfoListByClueId")
+    JSONResult<List<CustomerInfoDTO>> getCustomerInfoListByClueId(@RequestBody  Map<String,Object> map);
 
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
@@ -88,6 +90,11 @@ public interface CustomerInfoFeignClient {
         @Override
         public JSONResult<PageBean<IMSubmitQueryDTO>> costomerList(EsQueryDTO submitQuery) {
             return fallBackError("右侧客户列表");
+        }
+
+        @Override
+        public JSONResult<List<CustomerInfoDTO>> getCustomerInfoListByClueId( Map<String,Object> map) {
+            return fallBackError("根据客户Id获得客户Im信息集合");
         }
 
     }
