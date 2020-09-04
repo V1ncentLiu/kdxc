@@ -23,7 +23,7 @@
                     <el-input v-model="form.body" placeholder="会话内容"></el-input>
                 </el-form-item>  
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGorupId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
+                    <el-select v-model="form.teleGorupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -85,7 +85,6 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${dzList}]]; // 电销组
-    var teleSale = [[${teleSaleList}]];// 顾问
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -113,16 +112,32 @@
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
-                teleSaleArr: teleSale, // 顾问
+                teleSaleArr: [], // 顾问
             }             
         },
-        methods: {            
+        methods: {     
+            changeTeleGroup(selectedValue) {//改变电销组
+                this.teleSaleArr = [];
+                if (!selectedValue) {
+                    return;
+                }
+                var param = {};
+                param.orgId = selectedValue;
+                axios.post('/business/busAllocation/getSaleList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        mainDivVM.teleSaleArr = table;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },       
             searchTable() { 
                 var startTime = this.form.chatBegin;
                 var endTime = this.form.chatEnd;
                 if(endTime && startTime){
-                    startTime = new Date(this.form.chatBegin);
-                    endTime = new Date(this.form.chatEnd);
+                    
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -130,29 +145,28 @@
                         });
                         return;
                     }
+                    var startTime1 = new Date(this.form.chatBegin);
+                    var endTime1 = new Date(this.form.chatEnd);
                     var date = new Date();
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59:59");
                     date.setMonth(date.getMonth()-6);
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(startTime1 < beforeSixMonthRes || endTime1 > currentDateRes){
                         this.$message({
                             message: '请选择近6个月内的时间',
                             type: 'warning'
                         });
                         return;
                     }
-                    startTime = this.limitTime(startTime, null);
-                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
-                }   
-                
+                } 
                 var param = {};
                 param.chatBegin = startTime;
                 param.chatEnd = endTime;
@@ -162,47 +176,19 @@
                 param.teleGorupId = this.form.teleGorupId;
                 param.teleSaleName = this.form.teleSaleName;
                 this.loading = true; 
-                // axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
-                axios.post('/message/im/getChatRecordPage',param).then(function (response) {     
-                    if(!response){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    var resobj= response.data;
-                    if(!resobj){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    if(resobj.code!='0'){
-                        mainDivVM.loading = false;
-                        mainDivVM.$message({
-                            message: resobj.msg,
-                            type: 'error'
-                        });
-                        return ;
-                    }else if(resobj.data && resobj.data.tableData && resobj.data.totalData ){
-                        var resobjData = resobj.data;    
-                        var tableData = resobjData.tableData;
-                        mainDivVM.tableData = tableData.data;
-                        if(tableData.data && tableData.data.length){
-                            var totalData = resobjData.totalData;
-                            mainDivVM.tableData.unshift(totalData);
-                        }
-                        mainDivVM.pager.currentPage = tableData.currentPage;
-                        mainDivVM.pager.total = tableData.total;
-                        mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                axios.post('/message/im/getChatRecordPage',param).then(function (response) {   
+                    mainDivVM.loading = false;  
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.tableData= table;
+                        mainDivVM.pager.total =  result.total;
+                        mainDivVM.pager.currentPage = result.currentPage;
                     }else{
-                        mainDivVM.loading = false;
-                    }  
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }   
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
@@ -211,28 +197,20 @@
                     });
                 });
             },
-            limitTime (start, end) {
-                var startTime = this.minuteFormat (start);
-                var endTime = this.minuteFormat (end);
-                var date = new Date();
-                data = this.minuteFormat (date);// 现在的时间
-                data = data.slice(0,8);
-                if(startTime){
-                    var s = startTime.slice(0,8);
-                    if(s < data){
-                        this.form.chatBegin = moment(start).format("YYYY-MM-DD 00:00:00");
-                        return this.form.chatBegin;
-                    }
-                    return start;
+            timeFormat(row, column) { // 时间格式化：时分秒fn                
+                var time = row.msgTimestamp;
+                if(!time){return "";}
+                var timeResult = this.getCaption(time,0);
+                return timeResult;
+            },
+            getCaption(obj,state) {
+                var index=obj.lastIndexOf("\.");
+                if(state==0){
+                    obj=obj.substring(0,index);
+                }else {
+                    obj=obj.substring(index+1,obj.length);
                 }
-                if(endTime){
-                    var e = endTime.slice(0,8);
-                    if(e < data){
-                        this.form.chatEnd = moment(end).format("YYYY-MM-DD 23:59:59");
-                        return this.form.chatEnd;                        
-                    }
-                    return end;
-                }
+                return obj;
             },
             minuteFormat (m) { // 时间格式化201905050505fn
                 if (!m) {return "";}
@@ -248,33 +226,6 @@
                 minRes = minRes < 10 ?  "0" + minRes : minRes;                
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
-            },
-            percentFormat (row, column) { // 百分比格式化fn
-                var percent = row[column.property];
-                if(!percent){ // 如果没有值或值为0
-                    return 0 + "%";
-                }
-                percent = (percent * 1000)/10 + "%";
-                return percent;
-            },
-            timeFormat (row, column) { // 时间格式化：时分秒fn
-                var time = row[column.property];
-                if(!time){return "00时00分00秒";}
-                var timeResult = this.timeFun (time); 
-                return timeResult;
-            },
-            timeFun(s){
-                var t="";
-                var hour = Math.floor(s/3600);
-                var min = Math.floor(s/60) % 60;
-                var sec = s % 60;
-                if(hour<10){t+="0";}
-                t+=hour+"时"
-                if(min < 10){t += "0";}
-                t += min + "分";
-                if(sec < 10){t += "0";}
-                t += sec + "秒";
-                return t;
             },
             exportRs(){
                 var param = {};
