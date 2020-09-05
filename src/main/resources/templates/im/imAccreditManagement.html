@@ -190,7 +190,7 @@
                     dictionaryEvaluationId: '',
                     workYear: 3,
                     serviceScore: 4.5,
-                    serviceNum:3523,
+                    serviceNum:'3523',
                 },
                 rankArr:[],
                 judgeArr:[],
@@ -203,6 +203,7 @@
                 axios.get("/saleCard/getDictionaryRank")
                 .then(function (response) {
                     console.log(response);
+                    var table=response.data;
                     mainDivVM.rankArr=table.data;
                 })
                 .catch(function (error) {
@@ -214,6 +215,7 @@
                 axios.get("/saleCard/getDictionaryEvaluation")
                 .then(function (response) {
                     console.log(response);
+                    var table=response.data;
                     mainDivVM.judgeArr=table.data;
                 })
                 .catch(function (error) {
@@ -226,25 +228,31 @@
                 this.cardTeleSale=name;
                 this.cardForm.teleSaleId=id;
                 var param = {};
-                param.teleSaleId = id;
-
+                param.telSaleId = id;
                 this.loading = true; 
                 axios.post('/saleCard/getSaleCard',param).then(function (response) { 
                     mainDivVM.loading = false;
                     console.log(response)
+                    var result=response.data;
                     if(result.code==0){
                         var table=result.data;
-                        mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
-                        mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId;
-                        mainDivVM.cardForm.workYear=table.workYear;
-                        mainDivVM.cardForm.serviceScore=table.serviceScore;
-                        mainDivVM.cardForm.serviceNum=table.serviceNum;
+                        if(table.id){
+                            mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
+                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId;
+                            mainDivVM.cardForm.workYear=table.workYear;
+                            mainDivVM.cardForm.serviceScore=table.serviceScore;
+                            mainDivVM.cardForm.serviceNum=table.serviceNum;
+                        }else{
+                            mainDivVM.cardForm.dictionaryRankId='';
+                            mainDivVM.cardForm.dictionaryEvaluationId='';
+                            mainDivVM.cardForm.workYear=3;
+                            mainDivVM.cardForm.serviceScore=4.5;
+                            mainDivVM.cardForm.serviceNum='3523';
+                        }                        
                     }else{
                         mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
                     }
-                    
-                    
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
@@ -255,7 +263,6 @@
             },
             cardCancel(formName){// 关闭名片
                 this.cardVisible=false;
-                this.$refs[formName].resetFields();
             },
             updateStatus(id) {
                 //状态调整
