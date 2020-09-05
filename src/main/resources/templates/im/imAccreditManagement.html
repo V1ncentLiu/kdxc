@@ -104,7 +104,7 @@
         </el-row>
     </div>
     <!-- 名片弹窗 -->
-    <el-dialog title="名片" :visible.sync="cardVisible" width="540px">
+    <el-dialog title="名片" :visible.sync="cardVisible" width="540px" @close="cardCancel">
         <template>
             <el-form :model="cardForm" ref="cardForm" :rules="cardFormRules">
                 <el-form-item label="姓名："  label-width="180px">
@@ -142,7 +142,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="cardSubmit('cardForm')">提 交</el-button>
-                <el-button  @click="cardCancel('cardForm')">取 消</el-button>
+                <el-button  @click="cardCancel">取 消</el-button>
             </div>
         </template>
     </el-dialog>
@@ -187,7 +187,7 @@
                 cardForm: {
                     teleSaleId:'',
                     dictionaryRankId: '',
-                    dictionaryEvaluationId: '',
+                    dictionaryEvaluationId: [],
                     workYear: 3,
                     serviceScore: 4.5,
                     serviceNum:'3523',
@@ -238,13 +238,13 @@
                         var table=result.data;
                         if(table.id){
                             mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
-                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId;
+                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId.split(',');
                             mainDivVM.cardForm.workYear=table.workYear;
                             mainDivVM.cardForm.serviceScore=table.serviceScore;
                             mainDivVM.cardForm.serviceNum=table.serviceNum;
                         }else{
                             mainDivVM.cardForm.dictionaryRankId='';
-                            mainDivVM.cardForm.dictionaryEvaluationId='';
+                            mainDivVM.cardForm.dictionaryEvaluationId=[];
                             mainDivVM.cardForm.workYear=3;
                             mainDivVM.cardForm.serviceScore=4.5;
                             mainDivVM.cardForm.serviceNum='3523';
@@ -261,8 +261,13 @@
                     });
                 });
             },
-            cardCancel(formName){// 关闭名片
+            cardCancel(){// 关闭名片
                 this.cardVisible=false;
+                this.cardForm.dictionaryRankId='';
+                this.cardForm.dictionaryEvaluationId=[];
+                this.cardForm.workYear=3;
+                this.cardForm.serviceScore=4.5;
+                this.cardForm.serviceNum='3523';
             },
             updateStatus(id) {
                 //状态调整
@@ -272,7 +277,7 @@
                 var param = {};
                 param.teleSaleId = this.cardForm.teleSaleId;
                 param.dictionaryRankId = this.cardForm.dictionaryRankId;
-                param.dictionaryEvaluationId = this.cardForm.dictionaryEvaluationId;
+                param.dictionaryEvaluationId = this.cardForm.dictionaryEvaluationId.join(',');
                 param.workYear = this.cardForm.workYear;
                 param.serviceScore = this.cardForm.serviceScore;
                 param.serviceNum = this.cardForm.serviceNum;
