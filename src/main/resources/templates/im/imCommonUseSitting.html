@@ -194,16 +194,6 @@
                     currentPage: 1,
                     pageSize: 20
                 },
-                form: {//自动回复设置
-                    timeOutEnable:'',
-                    timeOut:'',
-                    content:'',
-                    nonWorktimeEnable:'',
-                    startTime:'',
-                    endTime:'',
-                    noWork:'',
-                    lixian:'',
-                },
                 tableData: [],
                 activeName: 'first',//
                 commonuseArr:[],//常用语设置
@@ -220,11 +210,69 @@
                     }],
                 },
                 isshowDelete:false,
-                prologuesArr:[],//开场白
-                
+                prologuesArr:[],//开场白                
+                form: {//自动回复设置
+                    timeOutEnable:'',//超时自动恢复设置
+                    timeOut:'',//超时自动恢复时间
+                    content:'',//超时自动恢复内容
+                    nonWorktimeEnable:'',//非工作时间自动恢复设置
+                    startTime:'',//非工作时间段
+                    endTime:'',
+                    noWork:'',//非工作时间自动恢复内容
+                    lixian:'',//离线/忙碌状态自动回复语
+                },
             }             
         },
         methods: { 
+            //开场白结束
+            submitForm(){
+                var param = {};
+                var kaichangListParm={};
+                var timeOutParm={};
+                var noWorkParm={};
+                var lixianParm={};
+                //开场lsit
+                kaichangListParm=this.dynamicValidateForm.domains; 
+                if(timeOut.id){
+                    timeOutParm.id=timeOut.id;
+                }
+                // 超时对象
+                timeOutParm.content=this.form.content;
+                timeOutParm.timeOutEnable=this.form.timeOutEnable;
+                timeOutParm.timeOut=this.form.timeOut;
+
+                if(noWork.id){
+                    noWorkParm.id=noWork.id;
+                }
+                noWorkParm.nonWorktimeEnable=this.form.nonWorktimeEnable;
+                noWorkParm.startTime=this.form.startTime;
+                noWorkParm.endTime=this.form.endTime;
+                if(lixian.id){
+                  lixianParm.id=lixian.id; 
+                }
+                lixianParm.content=this.form.lixian; 
+
+                param.kaichangList=kaichangListParm;
+                param.timeOut=timeOutParm;
+                param.nonWorkTime=noWorkParm;
+                param.lixian=lixianParm;
+                console.log(param)
+                this.loading = true; 
+                axios.post('/message/im/saleMonitor',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            cancelForm(){
+
+            },
             // 常用语设置
             mouseOver(){
                 if(this.iptDisabled==true){
@@ -297,46 +345,6 @@
                     key: Date.now()
                 });
                 this.isshowDelete=true;
-            },
-            //开场白结束
-            submitForm(){
-                var param = {};
-                var kaichangListParm={};
-                var timeOutParm={};
-                var noWorkParm={};
-                var lixianParm={};
-                kaichangListParm.content=""; 
-                if(timeOut.id){
-                    timeOutParm.id=timeOut.id;
-                }
-                if(noWork.id){
-                    noWorkParm.id=noWork.id;
-                }
-                if(lixian.id){
-                  lixianParm.id=lixian.id; 
-                }
-                lixianParm.content=""; 
-
-                param.kaichangList=kaichangListParm;
-                param.timeOut=timeOutParm;
-                param.nonWorkTime=noWorkParm;
-                param.lixian=lixianParm;
-                console.log(param)
-                this.loading = true; 
-                axios.post('/message/im/saleMonitor',param).then(function (response) { 
-                    mainDivVM.loading = false;
-                    console.log(response)
-                    
-                }).catch(function (error) {
-                    mainDivVM.loading = false;
-                    mainDivVM.$message({
-                        message: "请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
-            },
-            cancelForm(){
-
             },
         },
         created(){
