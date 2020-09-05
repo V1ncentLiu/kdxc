@@ -37,7 +37,7 @@ public class CommonLanguageController {
      * @param commonLanguageReq
      * @return
      */
-    @PostMapping(value = "/save")
+    @RequestMapping(value = "/save")
     public JSONResult<Boolean> save(CommonLanguageReqDto commonLanguageReq) {
         commonLanguageReq.setId(null);
         logger.info("manager-web CommonLanguageController saveOrUpdate:param{}", JSON.toJSONString(commonLanguageReq));
@@ -59,7 +59,7 @@ public class CommonLanguageController {
      * @param commonLanguageReq
      * @return
      */
-    @PostMapping(value = "/update")
+    @RequestMapping(value = "/update")
     public JSONResult<Boolean> update(CommonLanguageReqDto commonLanguageReq) {
         if(commonLanguageReq.getId()==null){
             return new JSONResult<Boolean>().fail("-1","修改操作常用语不能为空");
@@ -81,7 +81,7 @@ public class CommonLanguageController {
      * 根据ID查处常用词
      * @return
      */
-    @PostMapping(value = "/deleteById")
+    @RequestMapping(value = "/deleteById")
     public JSONResult<Boolean> deleteById(Long  id) {
         CommonLanguageReqDto commonLanguageReqDto = new CommonLanguageReqDto();
         commonLanguageReqDto.setId(id);
