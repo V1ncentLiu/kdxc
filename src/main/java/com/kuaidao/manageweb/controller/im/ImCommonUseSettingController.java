@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.im;
 
 
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.custservice.constant.CommonLanguageTypeEnum;
 import com.kuaidao.custservice.dto.autoresponse.AutoResponseReqDto;
 import com.kuaidao.custservice.dto.autoresponse.AutoResponseRespDto;
 import com.kuaidao.custservice.dto.language.CommonLanguageReqDto;
@@ -47,20 +48,18 @@ public class ImCommonUseSettingController {
     public String imCommonUseSittingIndex(ModelMap modelMap) {
         //1、查询常用语
         CommonLanguageReqDto commonLanguageReqDto  = new CommonLanguageReqDto();
+        commonLanguageReqDto.setType(CommonLanguageTypeEnum.用户常用语.getCode());
         JSONResult<List<CommonLanguageRespDto>> commonLanguageResult = commonLanguageFeignClient.queryListByType(commonLanguageReqDto);
         if (commonLanguageResult != null && JSONResult.SUCCESS.equals(commonLanguageResult.getCode()) && commonLanguageResult.getData() != null) {
             List<CommonLanguageRespDto> commonLanguageRespDtoList = commonLanguageResult.getData();
-            Map<Integer, List<CommonLanguageRespDto>> comMap = ListUtils.emptyIfNull(commonLanguageRespDtoList).stream()
-                    .filter(e -> e != null)
-                    .collect(Collectors.groupingBy(CommonLanguageRespDto::getType));
-            if(comMap.size()>0){
-                List<CommonLanguageRespDto> userLangList = comMap.get(1);
-                List<CommonLanguageRespDto> saleLangList = comMap.get(2);
-                modelMap.put("userLangList",userLangList);
-                modelMap.put("saleLangList",saleLangList);
-            }
-        } else {
-            logger.error("query module tree,res{{}}", commonLanguageResult);
+                modelMap.put("userLangList",commonLanguageRespDtoList);
+        }
+
+        commonLanguageReqDto.setType(CommonLanguageTypeEnum.顾问常用语.getCode());
+        JSONResult<List<CommonLanguageRespDto>> languageResult = commonLanguageFeignClient.queryListByType(commonLanguageReqDto);
+        if (languageResult != null && JSONResult.SUCCESS.equals(languageResult.getCode()) && languageResult.getData() != null) {
+            List<CommonLanguageRespDto> commonLanguageRespDtoList = languageResult.getData();
+            modelMap.put("saleLangList",commonLanguageRespDtoList);
         }
         //2、查询自动提交
         AutoResponseReqDto dto = new AutoResponseReqDto();

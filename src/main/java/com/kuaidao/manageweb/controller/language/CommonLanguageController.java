@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -27,7 +28,7 @@ import java.util.*;
 public class CommonLanguageController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
+    @Resource
     private CommonLanguageFeignClient commonLanguageFeignClient;
 
 
@@ -38,6 +39,7 @@ public class CommonLanguageController {
      */
     @PostMapping(value = "/save")
     public JSONResult<Boolean> save(CommonLanguageReqDto commonLanguageReq) {
+        commonLanguageReq.setId(null);
         logger.info("manager-web CommonLanguageController saveOrUpdate:param{}", JSON.toJSONString(commonLanguageReq));
         if(commonLanguageReq.getType()==null){
             return new JSONResult<Boolean>().fail("-1","新增常用词类型不能为空");
