@@ -66,12 +66,6 @@
                     </el-tab-pane>
                 </el-tabs>
             </template>
-
-
-
-
-
-
             <!-- <div class="titleBox">
                 <span class="fs16">常用语设置</span>
                 <el-button  @click="addbutton" type="primary"  size="small">IM授权修改</el-button>
@@ -206,8 +200,38 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${teleGroupList}]]; // 电销组
-    var curOrgId = [[${curOrgId}]];
+    // 常用语列表：
+    // 用户type=1：userLangList
+    // 顾问type=2：saleLangList
+
+    // 子段：
+
+    // {
+    // id:"id"，
+    // type:"类型，1=用户，2:顾问"，
+    // comText:“常用语内容”，
+    // weight:"权重"
+    // }
+
+    // 自动提交：
+    // 1、开场白：kaichangList
+    // 2、超时:timeOut
+    // 3、非工作时间：noWork
+    // 4、离线：lixian
+    // {
+    // id:"id",
+    // "type":"类型" 1、开场白，2、超时，3、非工作时间，4、离线
+    // “content”：内容
+    // timeOutEnable :超时自动回复启用状态 1:启用，0:禁用
+    // timeOut ：超时自动回复时间 秒
+    // nonWorktimeEnable:非工作时间自动回复启用状态1:启用，0:禁用
+    // startTime  非工作时间开始时间
+    // endTime   非工作时间结束时间~~~~
+    // }
+    var userLangList=[[${userLangList}]]; // 用户
+    var saleLangList = [[${saleLangList}]];//顾问
+    console.log(userLangList)
+    console.log(saleLangList)
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -223,7 +247,6 @@
                     
                 },
                 tableData: [],
-                orgTeleArr: queryOrg, // 电销组
                 addVisible:false,
                 showTitle:"",
                 addForm:{
