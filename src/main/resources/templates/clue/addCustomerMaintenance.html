@@ -28,7 +28,7 @@
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户</el-button>
                 <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button>
-                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
                 <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </div>
 
@@ -815,25 +815,24 @@
     </el-dialog>
     <!-- 在线聊天记录弹窗 -->
     <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
-        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>
-        <p class="marginB10">聊天内容：</p>
         <div class="borderbox padding10">
-            <!-- <div class="listBox listScroll"> -->
-            <div :class="['listBox',{'listScroll':isActive}]">
+            <div class="listBox listScroll">
+            <!-- <div :class="['listBox',{'listScroll':isActive}]"> -->
                 <ul>
                     <li  v-for="(item,i) in onlineRecordData" :key="item.id">
                         <!-- 发送类型 0-自己发送，1-对方发送 -->
-                        <p class="padding10 bluecolor" v-if="item.fromType==0">
-                            <span class="marginR10">在线客服</span>
-                            <span>{{item.messageTime}}</span>
+                        <!-- /* 1、顾问为发送方 2、客户为发送方*/ -->
+                        <p class="padding10 bluecolor" v-if="item.cusIs==1">
+                            <span class="marginR10">{{item.teleSaleName}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p class="padding10 yellowcolor" v-else>
-                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
-                            <span>{{item.messageTime}}</span>
+                            <span class="marginR10">{{item.cusName}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p style="padding:0 10px;">
                             <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
-                            <span v-else>{{item.message}}</span>
+                            <span v-else>{{item.body}}</span>
                         </p>
                     </li>
                 </ul>
@@ -985,7 +984,7 @@
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
-                isShowOnlineRecordBtn:false,
+                isShowOnlineRecordBtn:true,
                 onlineRecordData:[],
                 onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
@@ -1297,23 +1296,25 @@
             },
             initData(){
                 var param = {};
-                param.clueId = clueId;
+                param.cusId = clueId;
                 param.pageNum = 1;
                 param.pageSize = 10;
-                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                axios.post('/message/im/listChatRecord', param).then(function (response) {    
                     var recordData=response.data;
                     if(recordData){
                         var dataList=recordData.data
                         if(dataList){
                             addCustomerVM.onlineRecordData=dataList;
                             for(var i=0;i<dataList.length;i++){
-                                if(dataList[i].messageTime){
-                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                if(dataList[i].msgTimestamp){
+                                    dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
                                 }
                             }
                             if(dataList.length>0){
                                 addCustomerVM.isShowOnlineRecordBtn=true;
-                                if(dataList.length>10){
+                                // if(dataList.length>10){
+                                if(dataList.pages>1){
                                     addCustomerVM.isShowMoreBtn=true;
                                 }else{
                                     addCustomerVM.isShowMoreBtn=false;
