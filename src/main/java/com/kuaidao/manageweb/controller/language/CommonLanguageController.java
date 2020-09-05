@@ -94,7 +94,7 @@ public class CommonLanguageController {
      * 更新顺序
      * @return
      */
-    @PostMapping(value = "/updateOrder")
+    @RequestMapping(value = "/updateOrder")
     public JSONResult<Boolean> updateOrder(CommonLanguageReqDto commonLanguageReqDto  ) {
         if(commonLanguageReqDto.getStartId()==null || commonLanguageReqDto.getEndId()==null){
             return new JSONResult<Boolean>().fail("-1","常用词更新ID不能为空");
