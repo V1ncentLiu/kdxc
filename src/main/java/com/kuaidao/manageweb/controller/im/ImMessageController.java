@@ -29,6 +29,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -61,6 +62,7 @@ public class ImMessageController {
     /**
      * 聊天记录跳转
      */
+    @RequiresPermissions("message:record:view")
     @GetMapping("/chatRecordIndex")
     public String chatRecordIndex( HttpServletRequest request ){
         List dxzList = getCommonDxzList();
@@ -68,6 +70,7 @@ public class ImMessageController {
         return "im/imChattingRecords";
     }
 
+    @RequiresPermissions("message:monitor:view")
     @GetMapping("/saleMonitorIndex")
     public String saleMonitorIndex( HttpServletRequest request ){
         List dxzList = getCommonDxzList();
