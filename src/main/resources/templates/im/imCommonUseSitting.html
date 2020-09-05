@@ -47,7 +47,7 @@
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1')"  :disabled="iptDisabled"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1(domain)"  :disabled="iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
@@ -292,33 +292,26 @@
             handleClick(tab, event) {
                 console.log(tab, event);
             },
-            submitdialogForm1(formName) {
-                var id=this.editId;
+            submitdialogForm1(item) {
+                console.log(item)
+                var id=item.id;
                 var type=2;//类型：1=用户常用语  2:顾问常用语
-                var comText=""
+                var comText=item.comText
                 var url="";
                 if(id){
                     url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
                 }else{
-                    url="/commonLanguage/save"
+                    url="/commonLanguage/save?type="+type+'&comText='+comText
                 }
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {                        
-                        axios.get(url).then(function (response) { 
-                            console.log(response)
-                            
-                        }).catch(function (error) {
-                            mainDivVM.$message({
-                                message: "请求失败，请稍后重试",
-                                type: "error"
-                            });
-                        });                        
-
-                    } else {
-                        console.log('error submit!!');
-                        return;
-                    }
-                });
+                axios.post(url).then(function (response) { 
+                    console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
             },
             removeDomain1(item) {
                 // var index = this.dynamicValidateForm1.domains.indexOf(item)
@@ -327,15 +320,24 @@
                 // }
                 var id=item.id;
                 console.log(id)
-                axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
-                            console.log(response)
-                            
-                }).catch(function (error) {
-                    mainDivVM.$message({
-                        message: "请求失败，请稍后重试",
-                        type: "error"
+                this.$confirm('是否确认删除?').then(() => {
+                    axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
+                        console.log(response)
+                        window.location.href="/im/imCommonUseSitting/index"        
+                    }).catch(function (error) {
+                        mainDivVM.$message({
+                            message: "请求失败，请稍后重试",
+                            type: "error"
+                        });
+                    }); 
+
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
                     });
-                }); 
+                });
+                    
             },
             addDomain1() {
                 this.dynamicValidateForm1.domains.push({
@@ -443,8 +445,8 @@
             }
             if(userLangList){
                 this.dynamicValidateForm1.domains=userLangList;
-                this.isShowEdit=false;
-                this.isDisabled=true;
+                this.isShowEdit=true;
+                this.iptDisabled=true;
             }
 
         },
