@@ -17,6 +17,10 @@
             user-select:none; /* CSS3属性 */
         }
         .el-tooltip__popper{max-width: 500px}
+        .widthauto1 .el-form-item__label {
+            width: auto!important;
+            color: #606266;
+        }
     </style>
 </head>
 <body>
@@ -45,15 +49,25 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                 <el-form-item label="客户手机号:" >
-                    <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
+                    <el-input v-model="form.customerPhone" placeholder="客户手机号" class="ipt100"></el-input>
                 </el-form-item>
-                <el-form-item label="客户姓名:" >
-                    <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                <el-form-item label="客户姓名:" class="widthauto1">
+                    <el-input v-model="form.customerName" placeholder="客户姓名" class="ipt100"></el-input>
                 </el-form-item>
-                <el-form-item label="资源ID:">
-                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                <el-form-item label="资源ID:" class="widthauto1">
+                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number" class="ipt100"></el-input>
                 </el-form-item>
-                <el-form-item label="分配时间:">
+                <el-form-item label="客户级别:" class="widthauto1">
+                    <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple>
+                        <el-option
+                                v-for="item in cusLevelArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="分配时间:" class="widthauto1">
                     <el-date-picker
 
                             v-model="form.distributionTimeStart"
@@ -202,7 +216,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="客户级别:" >
+                    <!-- <el-form-item label="客户级别:" >
                         <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple>
                             <el-option
                                     v-for="item in cusLevelArr"
@@ -211,6 +225,9 @@
                                     :value="item.value">
                             </el-option>
                         </el-select>
+                    </el-form-item> -->
+                    <el-form-item label="QQ:">
+                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
                     </el-form-item>
                     <el-form-item label="最后拨打时间:">
                         <el-date-picker
@@ -226,9 +243,7 @@
                             placeholder="选择日期时间">
                         </el-date-picker>
                     </el-form-item>
-                    <el-form-item label="QQ:">
-                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
-                    </el-form-item>
+                    
                     <el-form-item label="微信:">
                         <el-input v-model="form.wechat" placeholder="微信"></el-input>
                     </el-form-item>
@@ -255,11 +270,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="是否签约:" prop="isSign">
-                        <el-select v-model="form.isSign" clearable placeholder="是否签约" :disabled="disabledIsSign">
-                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                        </el-select>
-                    </el-form-item>
+                    <br>
                     <el-form-item label="是否补齐尾款:">
                         <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable>
                             <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
@@ -280,6 +291,11 @@
                                     :label="`${item}次`"
                                     :value="item">
                             </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否签约:" prop="isSign">
+                        <el-select v-model="form.isSign" clearable placeholder="是否签约" :disabled="disabledIsSign">
+                            <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
                 </el-row>

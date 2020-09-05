@@ -467,7 +467,11 @@
                             <div v-else-if="scope.row.isCall ===1">已接通</div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
+                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%">
+                        <template slot-scope="scope">
+                            {{scope.row.callDetailsName}} <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">-</span> {{scope.row.focusPoint}}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="12%">
                     </el-table-column>
                     <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
@@ -1025,7 +1029,7 @@ var loginUserId=[[${loginUserId}]];
             switchSoundBtn(id,url,callSource){
                 // 播放器显示
                 // this.audioShow=true;
-                if(callSource=='2'){
+                if(callSource=='2' || callSource=='7'){
                     // switchSound(id,url);
                     window.parent.open(url)
                     return;
@@ -1103,6 +1107,10 @@ var loginUserId=[[${loginUserId}]];
                                 x.send();
                             }
 
+                        }else if(callSource == 7){
+                            var httpUrl = url.replace("https","http");
+                            window.parent.open(httpUrl);
+                            return;
                         }else{
                             console.error(data);
                             addCustomerVM.$message({message:data.msg,type:'error'});

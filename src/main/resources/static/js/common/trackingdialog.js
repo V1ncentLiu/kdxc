@@ -9,7 +9,9 @@ var trackingDialogTempate=
     +'<el-table-column prop="isCall" width="90" :formatter="formatIsCall" label="是否接通" align="center"></el-table-column>'
     // +'<el-table-column prop="resourceStatus" :formatter="formatResourceStatus" label="资源有效性"  align="center" show-overflow-tooltip></el-table-column>'
     // +'<el-table-column prop="invitationStatus" :formatter="formatInvitationStatus" label="是否邀约"  align="center" show-overflow-tooltip></el-table-column>'
-    +'<el-table-column prop="focusPoint" label="客户关注点" align="center" show-overflow-tooltip></el-table-column>'
+    +'<el-table-column prop="focusPoint" label="客户关注点" align="center" show-overflow-tooltip>                               <template slot-scope="scope">\n' +
+    '                                {{scope.row.callDetailsName}}<span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != \'\'">-</span>{{scope.row.focusPoint}}\n' +
+    '                            </template>  </el-table-column>'
     //+'<el-table-column prop="visitStatus" :formatter="formatVisitStatus" label="是否继续回访"  align="center" show-overflow-tooltip></el-table-column>'
     +'<el-table-column prop="nextVisitTime" label="下次回访时间" width="150" align="center"></el-table-column>'
     +'<el-table-column prop="createUserName" label="创建人" align="center" width="130"></el-table-column>'

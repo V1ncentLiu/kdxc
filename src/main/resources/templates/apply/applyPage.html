@@ -42,7 +42,7 @@
 					<el-input v-model="name" maxLength="20" placeholder="客户姓名" ></el-input>
 				</el-form-item>
 				<el-form-item label="电销组:">
-					<el-select v-model="teleGroupId" placeholder="电销组" style="width: 100%;" clearable  filterable >
+					<el-select v-model="teleGroupId" placeholder="电销组" :disabled="saveDisabled" style="width: 100%;" clearable  filterable >
 						<el-option
 								v-for="item in teleGroupList"
 								:key="item.id"
@@ -51,6 +51,7 @@
 						</el-option>
 					</el-select>
 				</el-form-item>
+
 				<el-form-item label="提交时间:">
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
 					</el-date-picker>
@@ -58,6 +59,16 @@
 				<el-form-item label="—" class="widthauto">
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
 					</el-date-picker>
+				</el-form-item>
+				<el-form-item label="客户界定:">
+					<el-select v-model="customerDefinition" placeholder="客户界定" style="width: 100%;" clearable  filterable >
+						<el-option
+								v-for="item in customerDefinitionList"
+								:key="item.value"
+								:label="item.name"
+								:value="item.value">
+						</el-option>
+					</el-select>
 				</el-form-item>
 				<el-form-item label="">
 					<el-button icon="el-icon-search" type="primary" @click="search" style="margin-left: 10px;">搜索</el-button>
@@ -235,6 +246,8 @@
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+			saveDisabled:false,
+			customerDefinition:"",
 			distriappbution:false,
 			customerDefinitionList:customerDefinitionList,
 			teleGroupId:ownOrgId,
@@ -406,6 +419,7 @@
                   param.pageNum = pageNum;
                   param.pageSize = pageSize;
                   param.teleGroupId= this.teleGroupId;
+                  param.customerDefinition =this.customerDefinition;
 				if(endTime && startTime) {
 					beginTimes = new Date(this.beginTime);
 					endTimes = new Date(this.endTime);
@@ -500,6 +514,8 @@
 						return;
 					}
 				}
+				param.teleGroupId= this.teleGroupId;
+				param.customerDefinition =this.customerDefinition;
 				localStorage.setItem('exportApply','1');
 				this.timedown();
 				axios.post('/apply/exportApply',param,{responseType:'blob'})
@@ -590,6 +606,9 @@
 			},
         },
         created(){
+        	if(ownOrgId !=null){
+				this.saveDisabled = true;
+			}
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
         	this.inviteAreaListPage();
