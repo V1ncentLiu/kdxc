@@ -111,7 +111,7 @@
                     <span>{{cardTeleSale?cardTeleSale:""}}</span>
                 </el-form-item>
                 <el-form-item label="职级："  label-width="180px"  prop="rank">
-                    <el-select v-model="cardForm.rank" placeholder="全部"  style="width: 180px;margin-right: 10px;" clearable filterable>
+                    <el-select v-model="cardForm.dictionaryRankId" placeholder="全部"  style="width: 180px;margin-right: 10px;" clearable filterable>
                         <el-option
                             v-for="item in rankArr"
                             :key="item.id"
@@ -121,7 +121,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="客户评价："  label-width="180px"  prop="judge">
-                    <el-select v-model="cardForm.judge" placeholder="全部" style="width: 180px;margin-right: 10px;" clearable multiple filterable>
+                    <el-select v-model="cardForm.dictionaryEvaluationId" placeholder="全部" style="width: 180px;margin-right: 10px;" clearable multiple filterable>
                         <el-option
                             v-for="item in judgeArr"
                             :key="item.id"
@@ -131,13 +131,13 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="工作年限："  label-width="180px"  prop="remark">
-                    <el-input-number v-model="cardForm.year" controls-position="right" :min="0.1" :max="100" :step="0.1"></el-input-number>
+                    <el-input-number v-model="cardForm.workYear" controls-position="right" :min="0.1" :max="100" :step="0.1"></el-input-number>
                 </el-form-item>
                 <el-form-item label="综合评分："  label-width="180px"  prop="remark">
-                    <el-input-number v-model="cardForm.score" controls-position="right" :min="0.1" :max="5" :step="0.1"></el-input-number>
+                    <el-input-number v-model="cardForm.serviceScore" controls-position="right" :min="0.1" :max="5" :step="0.1"></el-input-number>
                 </el-form-item>
                 <el-form-item label="服务人数："  label-width="180px"  prop="remark">
-                    <el-input v-model="cardForm.servicesNum" placeholder="服务人数" style="width: 180px;margin-right: 10px;"></el-input>人
+                    <el-input v-model="cardForm.serviceNum" placeholder="服务人数" style="width: 180px;margin-right: 10px;"></el-input>人
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -154,8 +154,6 @@
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
     var teleSale = [[${teleSaleList}]];// 顾问
-    var rankList = [[${teleSaleList}]];
-    var judgeList = [[${teleSaleList}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -187,22 +185,73 @@
                 }], 
                 cardVisible:false,//名片
                 cardForm: {
-                    rank: '',
-                    judge: '',
-                    year: 3,
-                    score: 4.5,
-                    servicesNum:3523,
+                    teleSaleId:'',
+                    dictionaryRankId: '',
+                    dictionaryEvaluationId: '',
+                    workYear: 3,
+                    serviceScore: 4.5,
+                    serviceNum:3523,
                 },
-                rankArr:rankList,
-                judgeArr:judgeList,
+                rankArr:[],
+                judgeArr:[],
                 cardFormRules:{},
                 cardTeleSale:'',
             }             
         },
         methods: {  
+            getRanklist(){// 职级
+                axios.get("/saleCard/getDictionaryRank")
+                .then(function (response) {
+                    console.log(response);
+                    mainDivVM.rankArr=table.data;
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                });
+            },
+            getJudgelist(){// 职级
+                axios.get("/saleCard/getDictionaryEvaluation")
+                .then(function (response) {
+                    console.log(response);
+                    mainDivVM.judgeArr=table.data;
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                });
+            },
             openCard(id,name){// 打开名片
                 this.cardVisible=true;
                 this.cardTeleSale=name;
+                this.cardForm.teleSaleId=id;
+                var param = {};
+                param.teleSaleId = id;
+
+                this.loading = true; 
+                axios.post('/saleCard/getSaleCard',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
+                        mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId;
+                        mainDivVM.cardForm.workYear=table.workYear;
+                        mainDivVM.cardForm.serviceScore=table.serviceScore;
+                        mainDivVM.cardForm.serviceNum=table.serviceNum;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }
+                    
+                    
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             cardCancel(formName){// 关闭名片
                 this.cardVisible=false;
@@ -213,7 +262,26 @@
                 window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id                
             }, 
             cardSubmit(){
+                var param = {};
+                param.teleSaleId = this.cardForm.teleSaleId;
+                param.dictionaryRankId = this.cardForm.dictionaryRankId;
+                param.dictionaryEvaluationId = this.cardForm.dictionaryEvaluationId;
+                param.workYear = this.cardForm.workYear;
+                param.serviceScore = this.cardForm.serviceScore;
+                param.serviceNum = this.cardForm.serviceNum;
 
+                this.loading = true; 
+                axios.post('/saleCard/saveOrUpdate',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    mainDivVM.cardVisible=false;
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },       
             searchTable(firstPage) {                
                 var param = {};
@@ -250,6 +318,8 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
+            this.getRanklist();
+            this.getJudgelist();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
