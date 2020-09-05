@@ -47,7 +47,6 @@ public class ImCommonUseSettingController {
     public String imCommonUseSittingIndex(ModelMap modelMap) {
         //1、查询常用语
         CommonLanguageReqDto commonLanguageReqDto  = new CommonLanguageReqDto();
-        commonLanguageReqDto.setType(1);
         JSONResult<List<CommonLanguageRespDto>> commonLanguageResult = commonLanguageFeignClient.queryListByType(commonLanguageReqDto);
         if (commonLanguageResult != null && JSONResult.SUCCESS.equals(commonLanguageResult.getCode()) && commonLanguageResult.getData() != null) {
             List<CommonLanguageRespDto> commonLanguageRespDtoList = commonLanguageResult.getData();
@@ -75,8 +74,8 @@ public class ImCommonUseSettingController {
             if(autoResponseMap.size()>0){
                 List<AutoResponseRespDto> kaichangList = autoResponseMap.get(1);
                 List<AutoResponseRespDto> timeoutList = autoResponseMap.get(2);
-                List<AutoResponseRespDto> noWorkList = autoResponseMap.get(2);
-                List<AutoResponseRespDto> lixianList = autoResponseMap.get(2);
+                List<AutoResponseRespDto> noWorkList = autoResponseMap.get(3);
+                List<AutoResponseRespDto> lixianList = autoResponseMap.get(4);
                 modelMap.put("kaichangList",kaichangList);
                 modelMap.put("timeOut", CollectionUtils.isNotEmpty(timeoutList)?timeoutList.get(0):null);
                 modelMap.put("noWork",CollectionUtils.isNotEmpty(noWorkList)?noWorkList.get(0):null);

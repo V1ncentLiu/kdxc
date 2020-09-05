@@ -21,6 +21,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -75,7 +76,7 @@ public class SaleCardController {
      * @param saleCardReqDto
      * @return
      */
-    @PostMapping(value = "/saveOrUpdate")
+    @RequestMapping(value = "/saveOrUpdate")
     @ResponseBody
     public JSONResult<Boolean> saveOrUpdate( SaleCardReqDto saleCardReqDto) {
         logger.info("custservice SaleCardController saveOrUpdate:param{}", JSON.toJSONString(saleCardReqDto));
@@ -83,11 +84,14 @@ public class SaleCardController {
         if (jsonResult.getCode().equals(JSONResult.FAIL)) {
             return jsonResult;
         }
+        Date date = new Date();
         long userId = getUserId();
         if (saleCardReqDto.getId() != null) {
             saleCardReqDto.setUpdateUser(userId);
+            saleCardReqDto.setUpdateTime(date);
         } else {
             saleCardReqDto.setCreateUser(userId);
+            saleCardReqDto.setCreateTime(date);
         }
         return saleCardFeignClient.saveOrUpdate(saleCardReqDto);
     }
