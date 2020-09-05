@@ -7,15 +7,6 @@
     <link rel="stylesheet" href="css/element-ui.css">
     <link rel="stylesheet" href="css/base.css">
     <style>
-        /*页面不可复制*/
-        html,body{
-            -moz-user-select:none; /* Firefox私有属性 */
-            -webkit-user-select:none; /* WebKit内核私有属性 */
-            -ms-user-select:none; /* IE私有属性(IE10及以后) */
-            -khtml-user-select:none; /* KHTML内核私有属性 */
-            -o-user-select:none; /* Opera私有属性 */
-            user-select:none; /* CSS3属性 */
-        }
         /*button a{color:#fff!important;}
         .el-checkbox { width: 100%; }*/
     </style>
@@ -374,6 +365,14 @@
                     <template slot-scope="scope">
                         <div v-if="scope.row.status == 0">否</div>
                         <div v-else-if="scope.row.status ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'hasRepeatClue'">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.hasRepeatClue ==1">
+                           <el-button @click="showHasRepeatClue(scope.row)" type="text" size="small">点击查看</el-button>
+                        </span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'updateTimeStr'||item.fieldCode == 'storeArea'"></el-table-column>
@@ -768,6 +767,93 @@
             <el-button @click="dialogChooseList = false">取 消</el-button>
         </div>
     </el-dialog>
+    <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB10 dialogForm" v-for="item in repeatClueList" height="600">
+            <div class="fs16 redcolor marginB20">重复时间：{{formatTimeFn(item.discoverTime)}}</div>
+            <div class="borderbox padding10">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{item.clueDTO.clueCustomer.cusName}}</el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="手机号：" :label-width="formLabelWidth" >{{getPhones(item.clueDTO.clueCustomer)}}</el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="微信：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.wechat}}<span @click="lookWechat(item.clueDTO.clueCustomer)" v-if="(item.clueDTO.clueCustomer.wechat2 !=null && item.clueDTO.clueCustomer.wechat2 !='')||(item.clueDTO.clueCustomer.wechatCode !=null && item.clueDTO.clueCustomer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.email}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.qq}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.typeName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            {{formatTimeFn(item.clueDTO.clueBasic.messageTime)}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.categoryName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.messagePoint}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueIntention.address}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.remark}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+    </el-dialog>
+
+    <el-dialog title="查看微信/二维码" :visible.sync="repeatWechatVisible">
+        <el-form :model="repeatWeDialogForm" ref="repeatWeDialogForm">
+            <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{repeatCustomer.wechat2}}</el-button>
+            </el-form-item>
+            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
+                <img v-show="repeatCustomer.wechatCode!=''"  :src="repeatCustomer.wechatCode">
+            </el-form-item>
+        </el-form>
+    </el-dialog>
     </template>
 </div>
 </body>
@@ -784,10 +870,21 @@
   //角色编码
   var roleCode = [[${roleCode}]];
   // var userFieldList=[];
+  // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
+  var businessLine=[[${businessLine}]];
+  var canCopy=[[${canCopy}]];
   var  customerManVM=new Vue({
     el: '#myCustom',
     data: function() {
       return {
+          dialogForm: {
+              phoneNum: ''
+          },
+          repeatWeDialogForm:{},
+          repeatWechatVisible:false,
+          repeatCustomer:{},
+          dialogFormVisible1:false,
+          repeatClueList:[],
         paginationShow: false,//分页是否显示
         isShow:false,
         phoneDisabled:false,
@@ -896,7 +993,8 @@
        	 {value:"1",name:"分配"},
             {value:"3",name:"领取"},
        	 {value:"4",name:"自建"},
-            {value:"5",name:"分发"}
+            {value:"5",name:"分发"},
+            {value:"6",name:"平台"}
        ],
         form: {
           teleReceiveSource:"",
@@ -1647,6 +1745,71 @@
         if (!name) return
         return window.sessionStorage.removeItem(name)
       },
+        showHasRepeatClue(row){
+            var param ={};
+            param.clueId = row.clueId;
+            this.repeatClueList=[];
+            axios.post('/tele/clueMyCustomerInfo/getRepeatClueRecordDTOList', param).then(function (response) {
+                customerManVM.repeatClueList = response.data.data;
+                customerManVM.dialogFormVisible1 =true;
+            })
+
+        },
+        formatTimeFn(date) {
+            if (null == date) {
+                return "";
+            }
+            var dateNew = new Date(date);
+            var year = dateNew.getFullYear()
+            var month = dateNew.getMonth() + 1
+            var day = dateNew.getDate()
+            var hour = dateNew.getHours()
+            var minute = dateNew.getMinutes()
+            var second = dateNew.getSeconds()
+            return year + "-" + this.formatNumberFn(month) + "-" + this.formatNumberFn(day) + " " + this.formatNumberFn(hour) + ":" + this.formatNumberFn(minute) + ":" + this.formatNumberFn(second);
+        },
+        formatNumberFn(n) {
+            n = n.toString()
+            return n[1] ? n : '0' + n
+        },
+        getPhones(cus){
+            var phones = '';
+            phones = cus.phone;
+            if(cus.phone2 != null && cus.phone2 != ''){
+                if(phones != ''){
+                    phones = phones +","+cus.phone2;
+                }else {
+                    phones = cus.phone2;
+                }
+            }
+            if(cus.phone3 != null && cus.phone3 != ''){
+                if(phones != ''){
+                    phones = phones +","+cus.phone3;
+                }else {
+                    phones = cus.phone3;
+                }
+            }
+            if(cus.phone4 != null && cus.phone4 != ''){
+                if(phones != ''){
+                    phones = phones +","+cus.phone4;
+                }else {
+                    phones = cus.phone4;
+                }
+            }
+            if(cus.phone4 != null && cus.phone5 != ''){
+                if(phones != ''){
+                    phones = phones +","+cus.phone5;
+                }else {
+                    phones = cus.phone5;
+                }
+            }
+            return phones;
+        },
+        lookWechat(val){
+            customerManVM.repeatCustomer = {};
+            customerManVM.repeatWechatVisible =true;
+            customerManVM.repeatCustomer = val;
+        },
     },
     mounted(){
       document.getElementById('myCustom').style.display = 'block';
@@ -1724,6 +1887,11 @@
       // });
 
       this.initColumn();
+      // 除1、5、6、10、11、12、13业务线之外不可复制
+        // if(businessLine!=1&&businessLine!=5&&businessLine!=6&&businessLine!=10&&businessLine!=11&&businessLine!=12&&businessLine!=13){
+        if(canCopy!=true){
+            document.getElementsByTagName('body')[0].className = 'noCopy'; //设置为新的
+        }
 
     }
   })

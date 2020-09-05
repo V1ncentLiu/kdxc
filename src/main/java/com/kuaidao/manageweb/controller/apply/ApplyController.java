@@ -16,10 +16,7 @@ import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
@@ -45,6 +42,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -89,6 +87,8 @@ public class ApplyController {
     private ApplyClient applyClient;
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 有效性签约单确认列表页面
@@ -100,21 +100,46 @@ public class ApplyController {
     public String applyPage(HttpServletRequest request, @RequestParam(required = false) Integer type) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        List<OrganizationDTO> teleGroupList = new ArrayList<>();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
-                if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+                if (roleCode.equals(RoleCodeEnum.DXZJ.name()) || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     // 如果当前登录的为电销总监,查询所有下属电销员工
                     List<Integer> statusList = new ArrayList<Integer>();
                     statusList.add(SysConstant.USER_STATUS_ENABLE);
                     statusList.add(SysConstant.USER_STATUS_LOCK);
                     List<UserInfoDTO> userList =
                             getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
+                    OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(user.getOrgId().toString());
+                    if (curOrgGroupByOrgId != null) {
+                        teleGroupList.add(curOrgGroupByOrgId);
+                    }
+                    request.setAttribute("ownOrgId", user.getOrgId().toString());
                     request.setAttribute("saleList", userList);
 
+                }else if(roleCode.equals(RoleCodeEnum.DXZJL.name()) || roleCode.equals(RoleCodeEnum.DXFZ.name()) ||  roleCode.equals(RoleCodeEnum.GLY.name())){
+                    OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+                    organizationQueryDTO.setParentId(user.getOrgId());
+                    organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+                    // 查询下级电销组(查询使用)
+                    JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                            organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+                    if (JSONResult.SUCCESS.equals(listDescenDantByParentId.getCode()) && listDescenDantByParentId.getData() != null
+                            && listDescenDantByParentId.getData().size() != 0) {
+                        teleGroupList = listDescenDantByParentId.getData();
+                    }
                 }
             }
         }
+        JSONResult<List<DictionaryItemRespDTO>> customerDefinitionListResult = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CUSTOMERDEFINITION.getCode()); // 申请客户界定
+        List<DictionaryItemRespDTO> customerDefinitionList = new ArrayList<>();
+        if (JSONResult.SUCCESS.equals(customerDefinitionListResult.getCode()) && customerDefinitionListResult.getData() != null
+                && customerDefinitionListResult.getData().size() != 0) {
+            customerDefinitionList = customerDefinitionListResult.getData();
+        }
+        request.setAttribute("customerDefinitionList", customerDefinitionList);
+        request.setAttribute("teleGroupList", teleGroupList);
         request.setAttribute("type", type);
         return "apply/applyPage";
 
@@ -150,7 +175,7 @@ public class ApplyController {
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
-                if (roleCode.equals(RoleCodeEnum.DXFZ.name())) {
+                if (roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
                     OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
                     orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
                     orgDto.setOrgType(OrgTypeConstant.DXZ);
@@ -381,4 +406,55 @@ public class ApplyController {
         }
         return ship;
     }
+    /**
+     * 获取所有组织组
+     *
+     * @return
+     */
+    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type,
+                                                 Integer businessLine) {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setParentId(parentId);
+        queryDTO.setOrgType(type);
+        queryDTO.setBusinessLine(businessLine);
+        // 查询所有组织
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> data = queryOrgByParam.getData();
+        return data;
+    }
+    /**
+     * 获取当前 orgId所在的组织
+     *
+     * @param orgId
+     * @param
+     * @return
+     */
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId + "");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if (!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}", idEntity, orgJr);
+            return null;
+        }
+        return orgJr.getData();
+    }
+    /**
+     *
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/customerDefinitionApply")
+    @ResponseBody
+    @LogRecord(description = "申请客户界定", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.TELE_CUSTOMER_APPLY)
+    @RequiresPermissions("apply:customerDefinitionApply")
+    public JSONResult customerDefinitionApply(@Valid @RequestBody TeleCooperateApplyDTO teleCooperateApplyDTO,
+                                    BindingResult result) {
+        return applyClient.transferApply(teleCooperateApplyDTO);
+    }
+
 }

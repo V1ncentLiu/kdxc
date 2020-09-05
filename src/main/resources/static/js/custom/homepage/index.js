@@ -29,7 +29,7 @@ var homePageVM=new Vue({
 		       ,
 		    user:user,//用戶信息
         defaultOpeneds:showBtnIndex,//默认打开菜单索引
-		    defaultOpenedsCm:["1","2"],//默认打开菜单索引
+		    defaultOpenedsCm:[],//默认打开菜单索引
 		    initUrl:showMenuUrl,//默认展示页面
 	       // defaultActive:'0-0',//默认激活菜单
 	        defaultActive:defaultActive,//默认激活菜单
@@ -56,6 +56,7 @@ var homePageVM=new Vue({
             isHeliClient:false,//合力坐席是否登录
             isKeTianClient:false,//科天坐席是否登录
 		   	isRongLianClient:false,//容联坐席是否登录
+            isLcClient:false,//乐创坐席是否登录
 	    	callTitle:'呼叫中心',
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
@@ -87,6 +88,10 @@ var homePageVM=new Vue({
             {
                 value: 5,
                 label: '登录容联呼叫中心'
+            },
+            {
+                value: 6,
+                label: '登录乐创呼叫中心'
             }],
             bindPhoneTypeOptions: [
                 	{
@@ -96,6 +101,7 @@ var homePageVM=new Vue({
     						value: 1,
     						label: '普通电话'
 		       }],
+           callLineTypeOptions: [],
            bindPhoneTypeOptions1: [{
                 value: 1,
                 label: '普通电话'
@@ -214,6 +220,22 @@ var homePageVM=new Vue({
                     { required: true, message: '请选择绑定类型',trigger: 'change'}
                 ],
             },
+            lcClientFormRules:{
+                caller:[
+                    { required: true, message: '主叫手机号不能为空',trigger: 'blur'},
+                    {validator:function(rule,value,callback){
+                            if(!/^[0-9]*$/.test(value)){
+                                callback(new Error("只可以输入数字,不超过11位"));
+                            }else{
+                                callback();
+                            }
+
+                        },trigger:'blur'},
+                ],
+                callLine:[
+                    { required: true, message: '请选择线路',trigger: 'change'}
+                ],
+            },
             rlClientFormRules:{//登录坐席校验规则
                 clientType:[
                     { required: true, message: '请选择呼叫中心',trigger: 'change'}
@@ -261,9 +283,11 @@ var homePageVM=new Vue({
           dataBaseInvestMoneyArr:[],//投资金额list
           dataBaseInvestAreaArr:[],//投资区域list
           dataBaseCategoryArr:[],//意向品类list
+          dataBaseCategoryArr2:[],//意向品类二级分类list
           dataBaseInvestMoneyVal:"0",//默认是不限
-          dataBaseInvestAreaVal: "0",//默认是不限
-          dataBaseCategoryVal: "0",//默认是不限
+          // dataBaseInvestAreaVal: "",//默认是不限
+          dataBaseCategoryVal: "",//默认是不限
+          dataBaseCategoryVal2: [],//意向品类2级菜单,可多选
           dataBaseResultArr:[],//搜索结果
           isshowsearch:false,//暂无搜索结果
           isshowsearchTip:false,//暂无搜索结果不显示
@@ -289,46 +313,105 @@ var homePageVM=new Vue({
         this.dataBaseCategoryVal=val;
       },
       // 获取搜索条件
-      searchDataList1() {//投资金额
-          var param = {};
-          param.groupCode = "dataBaseInvestMoney";
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            // console.log(response)
-            homePageVM.dataBaseInvestMoneyArr = response.data.data;
+      searchDataList1() {//投资金额+意向品类
+          // var param = {};
+          // param.groupCode = "dataBaseInvestMoney";
+          // axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+          //   // console.log(response)
+          //   homePageVM.dataBaseInvestMoneyArr = response.data.data;
+          // });
+          // axios.get("http://192.168.13.137/api/condition")
+          console.log(dataBaseUrl)
+          var url=dataBaseUrl.replace('/api/search','/api/condition')
+          axios.get(url)
+          .then(function (response) {
+              console.log(response)
+              var result =  response.data;
+              if(result.code==0){
+                  if(result.data.join_fee&&result.data.join_fee.length>0){
+                      homePageVM.dataBaseInvestMoneyArr = result.data.join_fee;//投资金额
+                  }
+                  if(result.data.category&&result.data.category.length>0){
+                      homePageVM.dataBaseCategoryArr = result.data.category;//意向品类
+                  }                                    
+              }else{
+                  homePageVM.$message.error(result.msg);
+              }    
+          })
+          .catch(function (error) {
+               console.log(error);
+               homePageVM.issearchLoading=false;
           });
       },
-      searchDataList2() {//投资区域
-          var param = {};
-          param.groupCode = "dataBaseInvestArea";
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-            // console.log(response)
-            homePageVM.dataBaseInvestAreaArr = response.data.data;
-          });
+      // searchDataList2() {//投资区域
+      //     var param = {};
+      //     param.groupCode = "dataBaseInvestArea";
+      //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+      //       // console.log(response)
+      //       homePageVM.dataBaseInvestAreaArr = response.data.data;
+      //     });
+      // },
+      // searchDataList3() {//意向品类
+      //     var param = {};
+      //     param.groupCode = "dataBaseCategory";
+      //     axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+      //       // console.log(response)
+      //       homePageVM.dataBaseCategoryArr = response.data.data;
+      //     });
+      // },
+      changeCategoryArr(val){//意向品类一级切换筛选二级
+        this.dataBaseCategoryVal2=[]
+        for(var i=0;i<homePageVM.dataBaseCategoryArr.length;i++){
+          if(val==homePageVM.dataBaseCategoryArr[i].id){
+            this.dataBaseCategoryArr2 = homePageVM.dataBaseCategoryArr[i].sub_category;
+
+          }
+        }
       },
-      searchDataList3() {//意向品类
-          var param = {};
-          param.groupCode = "dataBaseCategory";
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+    searchLcCallLine() {//乐创外呼线路
+        var param = {};
+        param.groupCode = "lcCallLine";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
             // console.log(response)
-            homePageVM.dataBaseCategoryArr = response.data.data;
-          });
-      },
+            homePageVM.callLineTypeOptions = response.data.data;
+        });
+    },
       searchDatabaseFun(){
           this.issearchLoading=true;
           var keyword=this.searchDatabaseKeyword;
           var join_fee=this.dataBaseInvestMoneyVal;
-          var join_area=this.dataBaseInvestAreaVal;
-          var category_name=this.dataBaseCategoryVal;
-          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_name='+category_name)
+          // var join_area=this.dataBaseInvestAreaVal;
+          var join_area="";
+          var valProvince=$("#dataProvince").val();
+          var valCity=$("#dataCity").val();
+          var valDistrict=$("#dataDistrict").val(); 
+          if(valProvince){
+              join_area=valProvince
+              if(valProvince&&valCity){
+                  join_area=valProvince+'-'+valCity
+                  if(valProvince&&valCity&&valDistrict){
+                      join_area=valProvince+'-'+valCity+'-'+valDistrict
+                  }
+              }
+          }          
+          var category_id=this.dataBaseCategoryVal2.join(',');
+          var category_level=this.dataBaseCategoryVal;
+          axios.get(dataBaseUrl+'?keyword='+keyword+'&join_fee='+join_fee+'&join_area='+join_area+'&category_id='+category_id+'&category_level='+category_level)
           .then(function (response) {
               // console.log(response)
               var result =  response.data;
               if(result.code==0){
+                  if(keyword==""&&join_fee=="0"&&join_area==""&&category_id==""&&category_level==""){//筛选条件为空跳转到资料库网站
+                      var tempwindow=window.open('_blank');//打开一个窗口，然后用 
+                      tempwindow.location=result.data.home_url;
+                      // window.location.href=result.data.home_url;
+                  }
                   if(result.data.list&&result.data.list.length>0){
                       homePageVM.isshowsearch=true;
                       homePageVM.issearchResult=true;
                       homePageVM.isshowsearchTip=false;
                       homePageVM.dataBaseResultArr=result.data.list; 
+                      
                   }else{
                       homePageVM.isshowsearch=true;
                       homePageVM.issearchResult=false;
@@ -346,7 +429,11 @@ var homePageVM=new Vue({
           });
       },
       opendataBase(){
-          this.dataBasedialogVisible=true
+          this.dataBasedialogVisible=true;
+          // 省市区初始化
+          setTimeout(function(){
+            $("#distpicker").distpicker('reset');
+          },0)
       },
       // 切换七陌里的呼叫方式
       changeCallPhoneType(val){
@@ -517,7 +604,10 @@ var homePageVM=new Vue({
                 }else if(this.isRongLianClient){
                     this.loginClientForm.clientType=5;
                     this.dialogLogoutClientVisible  = true;
-        		}else{
+        		}else if(this.isLcClient){
+                    this.loginClientForm.clientType=6;
+                    this.dialogLogoutClientVisible  = true;
+                }else{
         			 if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
         				 this.$refs.loginClientForm.clearValidate(function(){
@@ -585,8 +675,9 @@ var homePageVM=new Vue({
                     this.loginKeTianClient();
                 }else if(clientType==5){//容联坐席登录
                     this.loginRongLianClient();
-                }
-             	
+                }else if(clientType==6){
+                     this.loginLcClient();
+                 }
              } else {
                return false;
              }
@@ -623,6 +714,7 @@ var homePageVM=new Vue({
 	                 homePageVM.isTrClient=false;
 	                 homePageVM.isQimoClient = false;
 	                 homePageVM.isRongLianClient = false;
+                     homePageVM.isLcClient = false;
 	                 homePageVM.isKeTianClient = false;
 	                 //sessionStorage.setItem("loginClient","qimo");
 	                 //sessionStorage.setItem("accountId",homePageVM.accountId);
@@ -685,6 +777,7 @@ var homePageVM=new Vue({
                      homePageVM.isHeliClient=false;
                      homePageVM.isKeTianClient=false;
                      homePageVM.isRongLianClient=false;
+                     homePageVM.isLcClient=false;
                      //sessionStorage.setItem("loginClient","qimo");
                      //sessionStorage.setItem("accountId",homePageVM.accountId);
                      var clientInfo={};
@@ -837,6 +930,7 @@ var homePageVM=new Vue({
 			                     homePageVM.isHeliClient=false;
 			                     homePageVM.isKeTianClient=false;
 			                     homePageVM.isRongLianClient = false;
+                                 homePageVM.isLcClient = false;
 			                     //sessionStorage.setItem("loginClient","tr");
 			                    // sessionStorage.setItem("accountId",homePageVM.accountId);
 			                     
@@ -1080,6 +1174,7 @@ var homePageVM=new Vue({
 					homePageVM.isHeliClient=false;
 					homePageVM.isKeTianClient=true;
 					homePageVM.isRongLianClient = false;
+                    homePageVM.isLcClient = false;
 
 					var clientInfo={};
 					clientInfo.loginClientType="ketian";
@@ -1104,41 +1199,81 @@ var homePageVM=new Vue({
 		},
 
       loginRongLianClient(){//容联登录
-          var loginClient = this.loginClientForm.loginClient;
-          var param={};
-          param.loginName = loginClient;
-          param.accountType = homePageVM.accountType;
-          param.clientType = homePageVM.loginClientForm.clientType;
-           axios.post('/client/ronglianClient/login',param)
-             .then(function (response) {
-                 var data =  response.data;                 
-                 if(data.code=='0'){
-                    var resData = data.data;
-                    homePageVM.$message({message:"登录成功",type:'success'});
-                    homePageVM.callTitle="呼叫中心（容联ON）";
-                    homePageVM.dialogLoginClientVisible =false;
-                    homePageVM.isQimoClient=false;
-                    homePageVM.isTrClient=false;
-                    homePageVM.isHeliClient=false;
-                    homePageVM.isKeTianClient=false;
-                    homePageVM.isRongLianClient=true;
-                    var clientInfo={};
-                    clientInfo.loginClientType="ronglian";
-                    clientInfo.loginClient = homePageVM.loginClientForm.loginClient
-                    clientInfo.clientType = homePageVM.loginClientForm.clientType;
-                    clientInfo.acountType = homePageVM.accountType;
-                    localStorage.setItem("clientInfo",JSON.stringify(clientInfo));                     
-                }else{
-                    console.error(data);
-                    homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
-                }
-             })
-             .catch(function (error) {
-                console.log(error);
-             })
-             .then(function () {
-               // always executed
-             });
+            var loginClient = this.loginClientForm.loginClient;
+            var param={};
+            param.loginName = loginClient;
+            param.accountType = homePageVM.accountType;
+            param.clientType = homePageVM.loginClientForm.clientType;
+            axios.post('/client/ronglianClient/login',param)
+                .then(function (response) {
+                    var data =  response.data;
+                    if(data.code=='0'){
+                        var resData = data.data;
+                        homePageVM.$message({message:"登录成功",type:'success'});
+                        homePageVM.callTitle="呼叫中心（容联ON）";
+                        homePageVM.dialogLoginClientVisible =false;
+                        homePageVM.isQimoClient=false;
+                        homePageVM.isTrClient=false;
+                        homePageVM.isHeliClient=false;
+                        homePageVM.isKeTianClient=false;
+                        homePageVM.isRongLianClient=true;
+                        homePageVM.isLcClient=false;
+                        var clientInfo={};
+                        clientInfo.loginClientType="ronglian";
+                        clientInfo.loginClient = homePageVM.loginClientForm.loginClient
+                        clientInfo.clientType = homePageVM.loginClientForm.clientType;
+                        clientInfo.acountType = homePageVM.accountType;
+                        localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+                    }else{
+                        console.error(data);
+                        homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                    // always executed
+                });
+        },
+        loginLcClient(){//乐创登录
+            var caller = this.loginClientForm.caller;
+            var callLine = this.loginClientForm.callLine;
+            var param={};
+            param.caller = caller;
+            param.callLine = callLine;
+            axios.post('/client/lcClient/lcLogin',param)
+                .then(function (response) {
+                    var data =  response.data;
+                    if(data.code=='0'){
+                        var resData = data.data;
+                        homePageVM.$message({message:"登录成功",type:'success'});
+                        homePageVM.callTitle="呼叫中心（乐创ON）";
+                        homePageVM.dialogLoginClientVisible =false;
+                        homePageVM.isHeliClient=false;
+                        homePageVM.isTrClient=false;
+                        homePageVM.isQimoClient = false;
+                        homePageVM.isRongLianClient = false;
+                        homePageVM.isLcClient = true;
+                        homePageVM.isKeTianClient = false;
+
+                        var clientInfo={};
+                        clientInfo.loginClientType="lc";
+                        clientInfo.caller = homePageVM.loginClientForm.caller;
+                        clientInfo.callLine = homePageVM.loginClientForm.callLine;
+                        localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+                        console.info("clientInfo"+JSON.stringify(clientInfo));
+                    }else{
+                        console.error(data);
+                        homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                    // always executed
+                });
         },
         logoutClient(formName){//坐席退出          
         	if(this.isQimoClient){// 七陌退出
@@ -1154,6 +1289,7 @@ var homePageVM=new Vue({
                          homePageVM.isHeliClient=false;
                          homePageVM.isKeTianClient=false;
                          homePageVM.isRongLianClient=false;
+                         homePageVM.isLcClient=false;
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -1212,6 +1348,32 @@ var homePageVM=new Vue({
         	}else if(this.isKeTianClient){//科天退出
                 this.KeTianClientLogout();
                 homePageVM.isRingOff = false;//退出之后不显示挂断按钮
+            }else if(this.isLcClient){
+                axios.post('/client/lcClient/lcLogout',{})
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                            homePageVM.dialogLogoutClientVisible =false;
+                            homePageVM.$message({message:"退出成功",type:'success'});
+                            homePageVM.callTitle="呼叫中心";
+                            homePageVM.isQimoClient=false;
+                            homePageVM.isTrClient=false;
+                            homePageVM.isHeliClient=false;
+                            homePageVM.isKeTianClient=false;
+                            homePageVM.isRongLianClient=false;
+                            homePageVM.isLcClient=false;
+                            localStorage.removeItem("clientInfo");
+                            homePageVM.$message({message:"退出成功",type:'success'});
+                        }else{
+                            homePageVM.$message({message:data.msg,type:'error'});
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
             }else if(this.isRongLianClient){//容联退出
                 var loginClient = this.loginClientForm.loginClient;
                 var param={};
@@ -1228,6 +1390,7 @@ var homePageVM=new Vue({
                          homePageVM.isHeliClient=false;
                          homePageVM.isKeTianClient=false;
                          homePageVM.isRongLianClient=false;
+                         homePageVM.isLcClient=false;
                       // sessionStorage.removeItem("loginClient");
                       // sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -1260,6 +1423,7 @@ var homePageVM=new Vue({
                  homePageVM.isHeliClient=false;
                  homePageVM.isKeTianClient = false;
                  homePageVM.isRongLianClient = false;
+                 homePageVM.isLcClient = false;
              	// sessionStorage.removeItem("loginClient");
              	// sessionStorage.removeItem("accountId");
                  localStorage.removeItem("clientInfo");
@@ -1295,6 +1459,7 @@ var homePageVM=new Vue({
                      homePageVM.isHeliClient=false;
                      homePageVM.isKeTianClient =false;
                      homePageVM.isRongLianClient = false;
+                     homePageVM.isLcClient = false;
                      homePageVM.callTitle="呼叫中心";
                     // sessionStorage.removeItem("loginClient");
                    //  sessionStorage.removeItem("accountId");
@@ -1343,6 +1508,7 @@ var homePageVM=new Vue({
 			homePageVM.isHeliClient=false;
 			homePageVM.isKeTianClient = false;
 			homePageVM.isRongLianClient = false;
+            homePageVM.isLcClient = false;
 		},
         RongLianClientLogout(){
 
@@ -1592,8 +1758,10 @@ var homePageVM=new Vue({
   closeDataBasedialog(){//关闭资料库清空搜索框和搜索结果,默认显示不限
     this.searchDatabaseKeyword="";
     this.dataBaseInvestMoneyVal="0";
-    this.dataBaseInvestAreaVal="0";
-    this.dataBaseCategoryVal="0";
+    // this.dataBaseInvestAreaVal="";
+    $("#distpicker").distpicker('reset');
+    this.dataBaseCategoryVal="";
+    this.dataBaseCategoryVal2=[];
     this.isshowsearch=false;
     this.isshowsearchTip=false;
     this.issearchResult=false;
@@ -1612,8 +1780,9 @@ var homePageVM=new Vue({
         this.isDataBase=true;
       }
       this.searchDataList1();//资料库投资金额list
-      this.searchDataList2();//资料库投资区域list
-      this.searchDataList3();//资料库意向品类list
+      // this.searchDataList2();//资料库投资区域list
+      // this.searchDataList3();//资料库意向品类list
+      this.searchLcCallLine();
       // 通过用户信息判断餐盟菜单显示
       if(user){
         var roleCode=user.roleCode;
@@ -1621,15 +1790,17 @@ var homePageVM=new Vue({
         if(roleCode=="DXCYGW"){//电销顾问
           this.isRoleCodeDX=true;//电销顾问
           setLocalStore("union","unionStorage");
+          this.defaultOpenedsCm=["1","2"]
         }else if(roleCode=="SWJL"){
           this.isRoleCodeSW=true;//商务经理
           setLocalStore("union","unionStorage");
+          this.defaultOpenedsCm=["3","4"]
         }
       }
       // 首次登陆显示
       if(showIKonwFlag==1){
         this.unionTipdialogVisible=true;
-      }
+      }      
 	},
 	computed: {
 	    clientRules:function() {
@@ -1645,6 +1816,8 @@ var homePageVM=new Vue({
                  return this.ktClientFormRules;
             }else if(clientType==5){//容联
                  return this.rlClientFormRules;
+            }else if(clientType==6){
+                return this.lcClientFormRules;
             }
 	    }
 	 }

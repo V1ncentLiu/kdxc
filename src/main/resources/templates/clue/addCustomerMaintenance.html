@@ -28,7 +28,7 @@
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户</el-button>
                 <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button>
-                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
                 <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </div>
 
@@ -317,7 +317,15 @@
                            </div>
                          </template>
                         </el-table-column> -->
-                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
+
+
+                        <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%">
+                            <template slot-scope="scope">
+                                {{scope.row.callDetailsName}} {{scope.row.focusPoint}}
+                            </template>
+                        </el-table-column>
+
+
                     <!--<el-table-column-->
                     <!--prop="visitStatus" label="是否继续回访" align="center" width="210">-->
                     <!--<template-->
@@ -350,9 +358,12 @@
                                 </el-form-item>
                             </div>
                             <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通" :disabled="isDisabledCustomer" style="width: 70%;display: block;margin:0 auto;" clearable>
+                                <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer" style="width: 30%;display: block;margin:0 auto;" clearable>
                                     <el-option label="是" value="1"></el-option>
                                     <el-option label="否" value="0"></el-option>
+                                </el-select>
+                                <el-select v-model="formInline.callDetails" placeholder="请选择"   @change="callDetailsChange"   v-show="formInline.callDetailShow"  style="width: 100%;height: 35px!important;" clearable>
+                                    <el-option v-for="item in callDetailsArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
                             </el-form-item>
                             <!--
@@ -363,10 +374,16 @@
                                 </el-select>
                               </el-form-item>
                               -->
-                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
-                                <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
-                                <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
-                            </el-form-item>
+                            <div>
+                                <div>
+                                    {{callDetailsText}}
+                                </div>
+                                <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
+                                    <!-- <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input> -->
+                                    <el-input type="textarea" maxlength="1000" autosize placeholder="客户关注点" v-model="formInline.focusPoint" style="width: 80%;display:block;margin:0 auto;"></el-input>
+                                </el-form-item>
+                            </div>
+
                             <!--<el-form-item label="" size="mini">-->
                             <!--<el-select-->
                             <!--v-model="formInline.visitStatus" placeholder="是否继续回访">-->
@@ -548,7 +565,14 @@
                     <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
                     <el-table-column prop="createUserName" label="审核人姓名" align="center"></el-table-column>
                     <el-table-column prop="createTime" label="审核时间" align="center"></el-table-column>
-                    <el-table-column prop="remark" label="审核无效原因" align="center"></el-table-column>
+                    <el-table-column prop="remark" label="审核无效原因" align="center">
+                        <template slot-scope="scope">
+                            {{scope.row.remark}}
+                            <div v-if="scope.row.updateTime != null">
+                                <span>{{scope.row.updateTime}}</span> <span>{{scope.row.updateRemark}}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
                 </el-table>
             </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
@@ -557,8 +581,7 @@
                     <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                     <el-button type="text" disabled>只允许上传图片／音频文件，支持格式：jpg,png,jpeg,gif,bmp,mp3,mp4,wav,wma,3gpp,m4a,ape,midi,amr。不允许超过500MB。</el-button>
                 </el-col>
-                <el-col :span="5"
-                        class="f-fr">
+                <el-col :span="4" class="f-fr">
                     <form name=theform v-show="false">
                         <input type="radio" name="myradio" value="local_name" checked=true/>上传文件名字保持本地文件名字 <input
                             type="radio" name="myradio" value="random_name"/>上传文件名字是随机文件名 <br/>上传到指定目录:<input
@@ -788,25 +811,24 @@
     </el-dialog>
     <!-- 在线聊天记录弹窗 -->
     <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
-        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>
-        <p class="marginB10">聊天内容：</p>
         <div class="borderbox padding10">
-            <!-- <div class="listBox listScroll"> -->
-            <div :class="['listBox',{'listScroll':isActive}]">
+            <div class="listBox listScroll">
+            <!-- <div :class="['listBox',{'listScroll':isActive}]"> -->
                 <ul>
                     <li  v-for="(item,i) in onlineRecordData" :key="item.id">
                         <!-- 发送类型 0-自己发送，1-对方发送 -->
-                        <p class="padding10 bluecolor" v-if="item.fromType==0">
-                            <span class="marginR10">在线客服</span>
-                            <span>{{item.messageTime}}</span>
+                        <!-- /* 1、顾问为发送方 2、客户为发送方*/ -->
+                        <p class="padding10 bluecolor" v-if="item.cusIs==1">
+                            <span class="marginR10">{{item.teleSaleName}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p class="padding10 yellowcolor" v-else>
-                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
-                            <span>{{item.messageTime}}</span>
+                            <span class="marginR10">{{item.cusName}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p style="padding:0 10px;">
                             <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
-                            <span v-else>{{item.message}}</span>
+                            <span v-else>{{item.body}}</span>
                         </p>
                     </li>
                 </ul>
@@ -841,7 +863,8 @@
     }
 
     .progress {
-        width: 100% !important;
+        /*width: 100% !important;*/
+        float: right;
     }
 
     #ossfile {
@@ -946,6 +969,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                callDetailsText:'',
                 isElBreadcrumb:true,
                 addButtons:true,
                 mediumList:mediumList,
@@ -956,7 +980,7 @@
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
-                isShowOnlineRecordBtn:false,
+                isShowOnlineRecordBtn:true,
                 onlineRecordData:[],
                 onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
@@ -1064,6 +1088,7 @@
                 ussmArr: [],
                 StorefrontAreaArr: [],
                 customerStatusSubArr: [],
+                callDetailsArr:[],
                 provinceArr: [],
                 cityArr: [],
                 districtArr: [],
@@ -1233,6 +1258,8 @@
                     visitStatus: '1',
                     nextVisitTime: '',
                     customerStatusSub: '',
+                    callDetails:'',
+                    callDetailShow:false,
                 },
                 uploadOssHost:'',
                 uploadParamData: {
@@ -1262,23 +1289,25 @@
             },
             initData(){
                 var param = {};
-                param.clueId = clueId;
+                param.cusId = clueId;
                 param.pageNum = 1;
                 param.pageSize = 10;
-                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                axios.post('/message/im/listChatRecord', param).then(function (response) {    
                     var recordData=response.data;
                     if(recordData){
                         var dataList=recordData.data
                         if(dataList){
                             addCustomerVM.onlineRecordData=dataList;
                             for(var i=0;i<dataList.length;i++){
-                                if(dataList[i].messageTime){
-                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                if(dataList[i].msgTimestamp){
+                                    dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
                                 }
                             }
                             if(dataList.length>0){
                                 addCustomerVM.isShowOnlineRecordBtn=true;
-                                if(dataList.length>10){
+                                // if(dataList.length>10){
+                                if(dataList.pages>1){
                                     addCustomerVM.isShowMoreBtn=true;
                                 }else{
                                     addCustomerVM.isShowMoreBtn=false;
@@ -1430,6 +1459,8 @@
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus = '';
                 this.formInline.visitStatus = "1";
+                this.formInline.callDetails="";
+                this.callDetailsText="";
                 //this.formInline.callTime =new Date(teleEndTime);
                 this.formInline.callTime =new Date();
             },
@@ -1487,6 +1518,29 @@
                     this.substatus = true;
                     // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
                 }
+            },
+            isCallChange(selVal){
+                if (selVal == 1){
+                    this.formInline.callDetails = "";
+                    this.formInline.callDetailShow = true;
+                    //客户状态
+                    param = {};
+                    param.groupCode = "callDetails";
+                    axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                        addCustomerVM.callDetailsArr = response.data.data;
+                    });
+                }else{
+                    this.formInline.callDetailShow = false;
+                    this.callDetailsText = "";
+                }
+
+            },
+            callDetailsChange(selVal) {
+                let  obj = {};
+                obj = this.callDetailsArr.find((item) => { // 这里的callDetailsArr就是上面遍历的数据源
+                    return item.value === selVal; // 筛选出匹配数据
+                });
+                this.callDetailsText = obj.name;
             },
             projectChangeSelect(selVal) {
                 var param = {};
@@ -1806,6 +1860,7 @@
                     clue.clueId = clueId;
                     clue.clueCustomer = clueCustomer;
                     clue.clueIntention = clueIntention;
+                    debugger;
                     clue.tracking = tracking;
                     if (this.formInline.customerStatus == '3') {//如果选择的是不跟进则弹出弹窗
                         this.saveDisabled = false;
@@ -2041,6 +2096,9 @@
 
 
             editRecord() {
+                this.formInline.callDetailShow = false;
+                this.formInline.callDetails =  "";
+                this.callDetailsText = "";
                 //编辑跟进记录
                 var rows = this.multipleTrackingSelection;
                 if (rows.length != 1) {
@@ -2064,7 +2122,7 @@
                 this.formInline.id = rows[0].id;
                 this.formInline.callTime = rows[0].callTime;
                 this.formInline.customerStatus = rows[0].customerStatus;
-                ;
+
                 this.formInline.isCall = rows[0].isCall + "";
                 // this.formInline.resourceStatus=rows[0].resourceStatus+"";
                 this.formInline.focusPoint = rows[0].focusPoint;
@@ -2087,6 +2145,17 @@
                 this.formInline.visitStatus = rows[0].visitStatus + "";
                 this.formInline.nextVisitTime = rows[0].nextVisitTime;
                 isEdit = true;
+                if (1 == rows[0].isCall){
+                    this.callDetailsText = rows[0].callDetailsName;
+                    this.formInline.callDetailShow = true;
+                    //客户状态
+                    param = {};
+                    param.groupCode = "callDetails";
+                    axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                        addCustomerVM.callDetailsArr = response.data.data;
+                    });
+                   this.formInline.callDetails = rows[0].callDetails + "";
+                }
             },
             onConfirmAdd(index, row) {
                 // var _this = this;
@@ -2123,6 +2192,10 @@
                 }
                 if (this.formInline.customerStatus == '3') {//如果选择的是不跟进在传此字段
                     param.customerStatusSub = this.formInline.customerStatusSub;
+                }
+                //只有接通才传值
+                if (this.formInline.isCall == 1){
+                    param. callDetails = this.formInline.callDetails;
                 }
                 param.stage = 2;
                 if (isEdit) {
@@ -2686,6 +2759,13 @@
                     page.document.write(html);
                     return;
                 }
+                if(callSource == '6'){
+                    var httpUrl = url.replace("https","http");
+                    var page = window.open();
+                    var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+httpUrl+"' controls='controls' autoplay></audio></div></body>";
+                    page.document.write(html);
+                    return;
+                }
 
                 var newWindow = window.open();
                 var param = {};
@@ -3239,14 +3319,31 @@
 <script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
-
+    var result=null;
     function clueUploadFile() {
-        var result = uploadFile();
+        result = uploadFile();
         if (result == null) {
             // alert("请选择上传文件");
             addCustomerVM.$message({message: '请选择上传文件', type: 'warning'});
             return;
         }
+        // var param = {};
+        // param.clueId = clueId;
+        // param.filePath = result;
+        // axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
+        //     addCustomerVM.$message({
+        //         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+        //             axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+        //                 .then(function (response) {
+        //                     addCustomerVM.tableDataC1 = response.data.data;
+        //                     var ossfile = document.getElementById("ossfile");
+        //                     ossfile.innerHTML = "";
+        //                 });
+        //         }
+        //     });
+        // });
+    }
+    function fileUploadCallback(){
         var param = {};
         param.clueId = clueId;
         param.filePath = result;

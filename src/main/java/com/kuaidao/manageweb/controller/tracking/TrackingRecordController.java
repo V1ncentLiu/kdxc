@@ -1,6 +1,8 @@
 package com.kuaidao.manageweb.controller.tracking;
 
 import java.util.List;
+
+import com.kuaidao.common.constant.StageContant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class TrackingRecordController {
      */
     @RequestMapping("/queryList")
     public JSONResult<List<TrackingRespDTO>> queryPageList(@RequestBody TrackingReqDTO dto) {
+        if(dto ==null || dto.getStage() ==null){
+            dto.setStage(StageContant.STAGE_TELE);
+        }
         JSONResult<List<TrackingRespDTO>> listJSONResult = trackingFeignClient.queryList(dto);
         return listJSONResult;
     }

@@ -492,8 +492,7 @@
                 <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                 <el-button type="text" disabled>只允许上传图片／音频文件，支持格式：jpg,png,jpeg,gif,bmp,mp3,mp4,wav,wma,3gpp,m4a,ape,midi,amr。不允许超过500MB。</el-button>
             </el-col>
-            <el-col :span="5"
-                    class="f-fr">
+            <el-col :span="4" class="f-fr">
                 <form name=theform v-show="false">
                     <input type="radio" name="myradio" value="local_name" checked=true/>上传文件名字保持本地文件名字 <input
                         type="radio" name="myradio" value="random_name"/>上传文件名字是随机文件名 <br/>上传到指定目录:<input
@@ -670,7 +669,8 @@
     }
 
     .progress {
-        width: 100% !important;
+        /*width: 100% !important;*/
+        float: right;
     }
 
     #ossfile {
@@ -2294,6 +2294,13 @@
                     window.parent.open(url)
                     return;
                 }
+                if(callSource == '6'){
+                    var httpUrl = url.replace("https","http");
+                    var page = window.open();
+                    var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+httpUrl+"' controls='controls' autoplay></audio></div></body>";
+                    page.document.write(html);
+                    return;
+                }
                 var newWindow = window.open();
                 var param = {};
                 param.id = id;
@@ -2780,14 +2787,31 @@
 <script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
-
+    var result=null;
     function clueUploadFile() {
-        var result = uploadFile();
+        result = uploadFile();
         if (result == null) {
             // alert("请选择上传文件");
             addCustomerVM.$message({message: '请选择上传文件', type: 'warning'});
             return;
         }
+        // var param = {};
+        // param.clueId = clueId;
+        // param.filePath = result;
+        // axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
+        //     addCustomerVM.$message({
+        //         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+        //             axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+        //                 .then(function (response) {
+        //                     addCustomerVM.tableDataC1 = response.data.data;
+        //                     var ossfile = document.getElementById("ossfile");
+        //                     ossfile.innerHTML = "";
+        //                 });
+        //         }
+        //     });
+        // });
+    }
+    function fileUploadCallback(){
         var param = {};
         param.clueId = clueId;
         param.filePath = result;

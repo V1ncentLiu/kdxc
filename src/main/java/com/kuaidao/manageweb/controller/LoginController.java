@@ -3,22 +3,38 @@
  */
 package com.kuaidao.manageweb.controller;
 
-import java.awt.image.BufferedImage;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.kuaidao.common.constant.BusinessLineTypeConstant;
+import com.google.code.kaptcha.impl.DefaultKaptcha;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.custservice.constant.SaleOLOperationTypeEnum;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.entity.LoginReq;
+import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
+import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.service.im.ImMassageService;
+import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
+import com.kuaidao.msgpush.dto.SmsCodeSendReq;
+import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
@@ -44,34 +60,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.google.code.kaptcha.impl.DefaultKaptcha;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.MD5Util;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.LoginReq;
-import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
-import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.IdUtil;
-import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
-import com.kuaidao.msgpush.dto.SmsCodeSendReq;
-import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.*;
+import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.awt.image.BufferedImage;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -83,8 +83,6 @@ import com.kuaidao.sys.dto.user.*;
  */
 @Controller
 public class LoginController {
-    @Autowired
-    private RoleManagerFeignClient roleManagerFeignClient;
     @Autowired
     private LoginRecordFeignClient loginRecordFeignClient;
     @Autowired
@@ -98,7 +96,7 @@ public class LoginController {
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
-    private RedisSessionDAO redisSessionDAO;
+    private CustomerInfoFeignClient customerInfoFeignClient;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
@@ -128,6 +126,8 @@ public class LoginController {
     private boolean verificationCodeShow;
     @Autowired
     OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    ImMassageService imMassageService;
 
     /***
      * 登录页
@@ -243,7 +243,7 @@ public class LoginController {
         // 餐盟用户登录增加判断
         boolean cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource());
         if (cmFlag) {
-            if (null != user.getBusinessLine() && BusinessLineTypeConstant.SHANGJI == user.getBusinessLine()) {
+            if (null != user.getBusinessLine() && (BusinessLineConstant.SHANGJI == user.getBusinessLine() ||BusinessLineConstant.SHCS == user.getBusinessLine())) {
                 if (!RoleCodeEnum.DXCYGW.name().equals(roleInfoDTO.getRoleCode()) && !RoleCodeEnum.SWJL.name().equals(roleInfoDTO.getRoleCode())) {
                     return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
                 }
@@ -382,6 +382,7 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
                 SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
+                imMassageService.transOnlineLeaveLog(user, roleList , SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
                 return new JSONResult<>().success(null);
 
             } catch (UnknownAccountException uae) {
@@ -652,6 +653,7 @@ public class LoginController {
             if ("3".equals(type)) {
                 subject.getSession().setAttribute("isShowLogoutBox", type);
             }
+            imMassageService.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);
         }
@@ -759,14 +761,18 @@ public class LoginController {
 
     /**
      * 删除用户缓存信息(防止非正常登录事session存在导致权限不刷新)
-     * 
+     *
+     *
+     *
      * @author fanjd 2019/05/9 20:05:08
      * @param userId 当前登陆用户id
      */
     private void kickOutUser(Long userId) {
         // 处理session
         DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+
         DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
+
         // 从redis获取sessionId
         String sessionId = redisTemplate.opsForValue().get(Constants.SESSION_ID + userId);
         if (StringUtils.isBlank(sessionId)) {

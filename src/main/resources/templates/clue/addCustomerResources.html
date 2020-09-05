@@ -498,6 +498,7 @@
 
     .progress {
         /*width: 100% !important;*/
+        float: right;
     }
 
     #ossfile {
@@ -1470,6 +1471,7 @@
 <script type="text/javascript"
         src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
 <script type="text/javascript">
+    var result=null;
     function extname(filename){
       if(!filename||typeof filename!='string'){
          return false
@@ -1489,10 +1491,10 @@
     }
 
     function clueUploadFile() {
-        var result = uploadFile();
-        var resultName = uploadFileName();
+        result = uploadFile();
+        // var resultName = uploadFileName();
         
-        if (resultName == null) {
+        if (result == null) {
             addCustomerVM.$message({message: '请选择上传文件', type: 'warning'});
             return;
         }
@@ -1511,15 +1513,18 @@
         //         }
         //     });
         // });  
+        
+    }
+    function fileUploadCallback(){
         var resultType="";
-        resultType=extname(resultName);//获取文件格式
+        resultType=extname(oldfilename);//获取文件格式
         var resultUrl="";
         resultUrl=getCaption(result,0);  //截取符号前面部分
  
         addCustomerVM.$message({
             message: '操作成功', type: 'success', duration: 2000, onClose: function () {
                 this.addCustomerVM.tableDataC1.push({
-                    fileName: resultName,
+                    fileName: oldfilename,
                     fileType: resultType,
                     filePath: resultUrl
                 });

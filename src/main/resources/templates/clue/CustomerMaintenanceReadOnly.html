@@ -21,7 +21,7 @@
             <el-breadcrumb separator="  " class="elBreadcrumb">
                 <el-breadcrumb-item><font color="red" class="fs16">资源ID：<span th:text="${clueId}"></span></font> <span v-show="repeatShowFalg">[{{teleReceiveSource}}] {{teleReceiveTime}}</span></el-breadcrumb-item>
                 <el-breadcrumb-item><el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button></el-breadcrumb-item>
-                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
                 <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </el-breadcrumb>
             <div class="marginB20 fs16">资源信息</div>
@@ -622,7 +622,18 @@
                     <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
                     <el-table-column prop="createUserName" label="审核人姓名" align="center"></el-table-column>
                     <el-table-column prop="createTime" label="审核时间" align="center"></el-table-column>
-                    <el-table-column prop="remark" label="审核无效原因" align="center"></el-table-column>
+                    <el-table-column prop="remark" label="审核无效原因" align="center">
+                        <template slot-scope="scope">
+                            {{scope.row.remark}}
+                            <span v-if="scope.row.updateTime == null"  style="float:right" >
+                                 <el-button   v-if="scope.row.update == null" type="text" @click.stop="editRemark(scope.row)">修改原因
+                                </el-button>
+                            </span>
+                            <div v-if="scope.row.updateTime != null">
+                                <span>{{scope.row.updateTime}}</span> <span>{{scope.row.updateRemark}}</span>
+                            </div>
+                        </template>
+                    </el-table-column>
                 </el-table>
             </div>
         </el-form>
@@ -890,6 +901,19 @@
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" :disabled="btnDisabled" @click="submitFormMethod('submitForm')">提交</el-button>
             <el-button @click="dialogFormVisibleAudit = false ">取消</el-button>
+        </div>
+    </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="编辑无效原因" :visible.sync="dialogFormVisibleEdit" width="670px">
+        <el-form :model="submitEditForm" :rules="dialogAuditRules" ref="submitEditForm">
+            <el-form-item label="新建号码审核无效原因：" :label-width="formLabelWidth160"  prop="remark">
+                <el-input type="textarea" rows="4" maxlength="150" v-model="submitEditForm.remark" placeholder="请输入审核新建手机号无效原因&#13;&#10; 例：手机号2 130**2323无效 原因是通话记录不实"
+                          class="marginB20" style="width:80%;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" :disabled="btnEditDisabled" @click="submitEditFormMethod('submitEditForm')">提交</el-button>
+            <el-button @click="dialogFormVisibleEdit = false ">取消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -1500,7 +1524,12 @@ function dateFormat(val) {
                 formLabelWidth160: '160px',
                 saveDisabled: false,
                 btnDisabled: false,
+                btnEditDisabled:false,
                 submitForm: {
+                    remark: "",
+                },
+                submitEditForm: {
+                    id:"",
                     remark: "",
                 },
                 isShowMoreBtn:false,
@@ -1530,6 +1559,7 @@ function dateFormat(val) {
                 radioProject:'',
                 dialogFormVisible: false,
                 dialogFormVisibleAudit:false,
+                dialogFormVisibleEdit:false,
                 dialogFormImg:false,
                 deleteShow:false,//删除新增手机号输入框
                 dialogFormUploadImg:false,
@@ -1734,8 +1764,13 @@ function dateFormat(val) {
                         // always executed
                     });
             },
+            editRemark(row){
+                this.resetForm("submitEditForm");
+                this.dialogFormVisibleEdit =true;
+                addCustomerVM.submitEditForm.remark = row.remark;
+                addCustomerVM.submitEditForm.id = row.id;
+            },
             submitFormMethod(form) {
-                debugger;
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         var param = {};
@@ -1758,6 +1793,36 @@ function dateFormat(val) {
                                 console.log(error);
                             addCustomerVM.btnDisabled = false;
                             });
+                        console.log('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            submitEditFormMethod(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.id = addCustomerVM.submitEditForm.id;
+                        param.updateRemark = addCustomerVM.submitEditForm.remark;
+                        debugger;
+                        this.btnEditDisabled = true;
+                        axios.post('/telCreatePhoneAudit/update', param).then(function (response) {
+                            if (null === response || response.data == null || response.data.code != '0') {
+                                addCustomerVM.$message({
+                                    message: response.data.msg,
+                                    type: 'warning'
+                                });
+                                addCustomerVM.btnEditDisabled = false;
+                                return;
+                            }else{
+                                window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?repeatFlag=1&telCreatePhoneAuditFlag=1&clueId="+clueId;
+                            }
+                        }).catch(function (error) {
+                            console.log(error);
+                            addCustomerVM.btnEditDisabled = false;
+                        });
                         console.log('submit!');
                     } else {
                         console.log('error submit!!');
@@ -1916,6 +1981,13 @@ function dateFormat(val) {
                 if(callSource=='2'){
                     // switchSound(id,url);
                     window.parent.open(url)
+                    return;
+                }
+                if(callSource == '6'){
+                    var httpUrl = url.replace("https","http");
+                    var page = window.open();
+                    var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+httpUrl+"' controls='controls' autoplay></audio></div></body>";
+                    page.document.write(html);
                     return;
                 }
                 var newWindow = window.open();

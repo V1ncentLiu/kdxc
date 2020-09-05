@@ -69,6 +69,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/login/resetPwd", "anon");
         filterChainDefinitionMap.put("/merchantLogin/resetPwd", "anon");
         filterChainDefinitionMap.put("/cmLogin/resetPwd", "anon");
+
         filterChainDefinitionMap.put("/login/index", "anon");
         filterChainDefinitionMap.put("/login/sendmsg", "anon");
         filterChainDefinitionMap.put("/login/sendmsgPwd", "anon");
@@ -134,6 +135,7 @@ public class ShiroConfig {
      * @return
      */
     public RedisManager redisManager() {
+
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxIdle(Integer.parseInt(maxIdle));
         jedisPoolConfig.setMinIdle(Integer.parseInt(minIdle));
