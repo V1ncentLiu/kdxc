@@ -3,11 +3,41 @@
  */
 package com.kuaidao.manageweb.controller.user;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import com.alibaba.fastjson.JSON;
+import com.kuaidao.aggregation.dto.changeorg.ChangeOrgRecordReqDto;
+import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
+import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
+import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.TreeData;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.custservice.constant.SaleOLOperationTypeEnum;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
+import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
+import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.service.im.ImMassageService;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.role.RoleQueryDTO;
+import com.kuaidao.sys.dto.user.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -20,39 +50,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import com.kuaidao.aggregation.dto.changeorg.ChangeOrgRecordReqDto;
-import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.common.constant.*;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.entity.TreeData;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.MD5Util;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
-import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
-import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
-import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.manageweb.util.IdUtil;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  * @author gpc
@@ -63,9 +66,6 @@ import com.kuaidao.sys.dto.user.*;
 @RequestMapping("/user/userManager")
 public class UserController {
     private static Logger logger = LoggerFactory.getLogger(UserController.class);
-    @Autowired
-    private RoleManagerFeignClient roleManagerFeignClient;
-
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
     @Autowired
@@ -84,6 +84,8 @@ public class UserController {
     private ClueRelateFeignClient clueRelateFeignClient;
     @Autowired
     private ChangeOrgFeignClient changeOrgFeignClient;
+    @Autowired
+    private ImMassageService imMassageService;
 
     /***
      * 用户列表页
@@ -395,7 +397,13 @@ public class UserController {
             }).start();
         }
         userInfoReq.setDisableTime(new Date());
-        return userInfoFeignClient.update(userInfoReq);
+        JSONResult<String> update = userInfoFeignClient.update(userInfoReq);
+        // 禁用更改用户Im离线
+        if(null!= update && JSONResult.SUCCESS.equals(update.getCode())){
+            logger.info("onlineLeave-user={}" ,  JSON.toJSONString(user));
+            imMassageService.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
+        }
+        return update;
     }
 
     /**

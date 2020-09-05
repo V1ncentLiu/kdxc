@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>IM监督管理</el-breadcrumb-item>
+    </el-breadcrumb>    
+    <el-row class="marginB20">
+        <el-button type="primary" @click="searchToday">今日</el-button>
+        <el-button type="success" @click="searchYesterday">昨日</el-button>
+        <el-button type="warning" @click="searchWeek">近七天</el-button>
+        <el-button type="danger" @click="searchMonth">本月</el-button>
+        <span style="padding-left: 20px;font-size: 14px;">当前在线顾问：{{onlineNum}} 人 ，忙碌顾问：{{busyNum}} 人，离线顾问：{{offlineNum}}人。</span>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">   
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup">
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="会话顾问:">  
+                    <el-select v-model="form.teleSaleId" placeholder="会话顾问" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in teleSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <!-- <el-form-item label="身份别名:"> 
+                    <el-input v-model="cusName" placeholder="身份别名"></el-input>
+                </el-form-item>  -->          
+                <el-form-item label="搜索时间:">
+                    <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.belongDateBegin" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                   <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.belongDateEnd" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>   
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                </div>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="teleGroupName" align="center" label="电销组">
+                </el-table-column>
+                <el-table-column prop="teleUserName" align="center" label="顾问姓名">
+                </el-table-column>
+                <el-table-column prop="imStatus" align="center" label="当前在线状态" width="100">
+                    <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.imStatus === 1">
+                            在线
+                        </div>                    
+                        <div v-else-if="scope.row.imStatus === 2">
+                            忙碌
+                        </div>
+                        <div v-else-if="scope.row.imStatus === 3">
+                            离线
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="dateLength" align="center" label="在线时长">
+                </el-table-column>
+                <el-table-column prop="sessionCusNum" align="center" label="会话客户量">
+                </el-table-column>
+                <el-table-column prop="commitCusNum" align="center" label="提交客户量">
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+        </el-row>
+    </div>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var queryOrg=[[${dzList}]]; // 电销组
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                loading: false,
+                isDisabled: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                form: {
+                    teleGroupId:'',
+                    teleSaleName:'',
+                    belongDateBegin:'',
+                    belongDateEnd:'',
+                },
+                tableData: [],
+                orgTeleArr: queryOrg, // 电销组
+                teleSaleArr: [], // 顾问
+                onlineNum:'',
+                busyNum:'',
+                offlineNum:'',
+            }             
+        },
+        methods: {            
+            number(){
+                var param = {};
+                axios.post('/message/im/getSaleImStateNum',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                   console.log(response)
+                   var result =  response.data;
+                    if(result.code==0){
+                        var resultData=result.data;
+                        for(var i=0;i<resultData.length;i++){
+                            if(resultData[i].imStatus&&resultData[i].imStatus==1){
+                                mainDivVM.onlineNum=resultData[i].num;
+                            }else if(resultData[i].imStatus&&result[i].imStatus==2){
+                                mainDivVM.busyNum=resultData[i].num;
+                            }if(resultData[i].imStatus&&resultData[i].imStatus==3){
+                                mainDivVM.offlineNum=resultData[i].num;
+                            }
+                        }                        
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            changeTeleGroup(selectedValue) {//改变电销组
+                this.teleSaleArr = [];
+                if (!selectedValue) {
+                    return;
+                }
+                var param = {};
+                param.orgId = selectedValue;
+                axios.post('/business/busAllocation/getSaleList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        mainDivVM.teleSaleArr = table;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },                
+            searchTable(firstPage) { 
+                var startTime = this.form.belongDateBegin;
+                var endTime = this.form.belongDateEnd;
+                if(endTime && startTime){
+                    
+                    if(startTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    var startTime1 = new Date(this.form.belongDateBegin);
+                    var endTime1 = new Date(this.form.belongDateEnd);
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD");
+                    date.setMonth(date.getMonth()-1);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime1 < beforeSixMonthRes || endTime1 > currentDateRes){
+                        this.$message({
+                            message: '请选择近1个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }                    
+                }else{
+                    this.$message({
+                        message: '请选择起止时间',
+                        type: 'warning'
+                    });
+                    return;
+                }   
+                
+                var param = {};
+                param.belongDateBegin = this.form.belongDateBegin;
+                param.belongDateEnd = this.form.belongDateEnd;
+                param.pageNum = this.pager.currentPage
+                param.pageSize = this.pager.pageSize; 
+                
+                param.teleGroupId = this.form.teleGroupId;
+                param.teleSaleId = this.form.teleSaleId;
+
+                this.loading = true; 
+                axios.post('/message/im/saleMonitor',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                   // console.log(response)
+                   var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.tableData= table.data;
+                        mainDivVM.pager.total =  table.total;
+                        mainDivVM.pager.currentPage = table.currentPage;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            searchToday(){ // 今天
+               var today = new Date();
+               today.setTime(today.getTime());
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+               this.form.belongDateBegin=startTime;
+               this.form.belongDateEnd=endTime;
+               this.searchTable(1);
+            },
+            searchYesterday(){ // 昨天
+               var today = new Date();
+               today.setTime(today.getTime()-24*60*60*1000);
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate();
+               this.form.belongDateBegin=startTime;
+               this.form.belongDateEnd=endTime;
+               this.searchTable(1);
+            },
+            searchWeek(){ // 近七天
+                 var a = new Date();
+                 var year = a.getFullYear();
+                 var month = a.getMonth();
+                 var date = a.getDate();
+                 var b = new Date(year,month,date);
+                 var c = b.valueOf()-6*24*60*60*1000;
+                 var d = b.valueOf();
+                 var startTime= new Date(c);
+                 var endTime = new Date(d);
+                 this.form.belongDateBegin=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
+                 this.form.belongDateEnd=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate();
+                 this.searchTable(1);
+            },
+            searchMonth(){ // 本月 
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var f= new Date(year,month,01);
+                var c = f.valueOf();
+                var startTime= new Date(c);
+                this.form.belongDateBegin=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate();
+                this.form.belongDateEnd=year+"-"+(month+1)+"-"+date;
+                this.searchTable(1);
+            },
+        },
+        created(){
+            // 默认进入显示当天时间
+            var today = new Date();
+            var startTime = moment(today).format("YYYY-MM-DD");
+            var endTime = moment(today).format("YYYY-MM-DD");
+            this.form.belongDateBegin=startTime;
+            this.form.belongDateEnd=endTime; 
+
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable();
+            this.number();
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>

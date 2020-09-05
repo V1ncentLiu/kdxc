@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+    .el-input-number.is-controls-right .el-input-number__decrease, .el-input-number.is-controls-right .el-input-number__increase{    line-height: 14px;}
+    .el-input-number__decrease, .el-input-number__increase{top:4px;}
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>顾问IM授权管理</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="顾问名称:">  
+                    <el-select v-model="form.teleSaleId" placeholder="顾问" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in teleSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="授权状态:">  
+                    <el-select v-model="form.imAuthorizeStatus" placeholder="全部" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in isAuthorizeArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                </div>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="teleGroupName" align="center" label="电销组">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="电销顾问">
+                </el-table-column>
+                <el-table-column prop="imStatus" align="center" label="IM状态">
+                    <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.imStatus === 1">
+                            在线
+                        </div>                    
+                        <div v-else-if="scope.row.imStatus === 2">
+                            忙碌
+                        </div>
+                        <div v-else-if="scope.row.imStatus === 3">
+                            离线
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="imAuthorizeStatus" align="center" label="授权状态">
+                    <!-- 授权状态 1-已授权、2-未授权 -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.imAuthorizeStatus === 1">
+                            已授权
+                        </div>                    
+                        <div v-else-if="scope.row.imAuthorizeStatus === 2">
+                            未授权
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small">IM授权修改</el-button>
+                        <el-button  v-else-if="scope.row.imAuthorizeStatus === 2" @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small">IM授权</el-button>
+                        <el-button @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)"  type="text" style="margin-left: 10px;">名片</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+        </el-row>
+    </div>
+    <!-- 名片弹窗 -->
+    <el-dialog title="名片" :visible.sync="cardVisible" width="540px">
+        <template>
+            <el-form :model="cardForm" ref="cardForm" :rules="cardFormRules">
+                <el-form-item label="姓名："  label-width="180px">
+                    <span>{{cardTeleSale?cardTeleSale:""}}</span>
+                </el-form-item>
+                <el-form-item label="职级："  label-width="180px"  prop="rank">
+                    <el-select v-model="cardForm.rank" placeholder="全部"  style="width: 180px;margin-right: 10px;" clearable filterable>
+                        <el-option
+                            v-for="item in rankArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="客户评价："  label-width="180px"  prop="judge">
+                    <el-select v-model="cardForm.judge" placeholder="全部" style="width: 180px;margin-right: 10px;" clearable multiple filterable>
+                        <el-option
+                            v-for="item in judgeArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="工作年限："  label-width="180px"  prop="remark">
+                    <el-input-number v-model="cardForm.year" controls-position="right" :min="0.1" :max="100" :step="0.1"></el-input-number>
+                </el-form-item>
+                <el-form-item label="综合评分："  label-width="180px"  prop="remark">
+                    <el-input-number v-model="cardForm.score" controls-position="right" :min="0.1" :max="5" :step="0.1"></el-input-number>
+                </el-form-item>
+                <el-form-item label="服务人数："  label-width="180px"  prop="remark">
+                    <el-input v-model="cardForm.servicesNum" placeholder="服务人数" style="width: 180px;margin-right: 10px;"></el-input>人
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="cardSubmit('cardForm')">提 交</el-button>
+                <el-button  @click="cardCancel('cardForm')">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var queryOrg=[[${teleGroupList}]]; // 电销组
+    var teleSale = [[${teleSaleList}]];// 顾问
+    var rankList = [[${teleSaleList}]];
+    var judgeList = [[${teleSaleList}]];
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                loading: false,
+                isDisabled: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                form: {
+                    teleGroupId: '',
+                    teleSaleId: '',
+                    imAuthorizeStatus: '',
+                },
+                tableData: [],
+                orgTeleArr: queryOrg, // 电销组
+                teleSaleArr: teleSale, // 顾问
+                isAuthorizeArr:[{
+                    id:"",
+                    name:'全部'
+                },{
+                    id:1,
+                    name:'已授权'
+                },{
+                    id:2,
+                    name:'未授权'
+                }], 
+                cardVisible:false,//名片
+                cardForm: {
+                    rank: '',
+                    judge: '',
+                    year: 3,
+                    score: 4.5,
+                    servicesNum:3523,
+                },
+                rankArr:rankList,
+                judgeArr:judgeList,
+                cardFormRules:{},
+                cardTeleSale:'',
+            }             
+        },
+        methods: {  
+            openCard(id,name){// 打开名片
+                this.cardVisible=true;
+                this.cardTeleSale=name;
+            },
+            cardCancel(formName){// 关闭名片
+                this.cardVisible=false;
+                this.$refs[formName].resetFields();
+            },
+            updateStatus(id) {
+                //状态调整
+                window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id                
+            }, 
+            cardSubmit(){
+
+            },       
+            searchTable(firstPage) {                
+                var param = {};
+                param.teleGroupId = this.form.teleGroupId;
+                param.teleSaleId = this.form.teleSaleId;
+                param.imAuthorizeStatus = this.form.imAuthorizeStatus;
+                param.pageNum = this.pager.currentPage
+                param.pageSize = this.pager.pageSize;                
+                this.loading = true; 
+                axios.post('/custservice/saleIm/list',param).then(function (response) { 
+                   mainDivVM.loading = false;
+                   console.log(response)
+                   var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.tableData= table.data;
+                        mainDivVM.pager.total =  table.total;
+                        mainDivVM.pager.currentPage = table.currentPage;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>

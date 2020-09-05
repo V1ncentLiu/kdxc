@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>        
+        <el-breadcrumb-item>IM授权设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <div class="mainSearchBg"> 
+        <el-form :model="form" :rules="rules" ref="form">       
+            <div class="mainSearchFormBox">
+                <el-form-item label="每日接待IM客户上限：" label-width="135px" style="position: relative;">
+                    <em style="position: absolute;left:-135px;top: 0;color: red;">*</em> 
+                    <el-input v-model="form.dayReceiveMax" placeholder="" style="width: 100px;margin-right: 10px;" @keyup.native="number"></el-input>人
+                </el-form-item> 
+                <el-form-item label="服务品牌选择：" label-width="135px"> 
+                    <el-button  @click="open" type="danger"  size="small">添加服务品牌</el-button>
+                    <el-button  @click="settingAll" type="text"  size="small">设定全部品牌</el-button>
+                </el-form-item>
+            </div>
+            <div style="margin-bottom: 10px;"><em style="color: red;margin-right: 5px;">*</em>已选服务品牌</div>
+            <el-row>
+                <el-table 
+                    ref="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="form.tableData"
+                    v-loading="loading">                    
+                    <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                    <el-table-column prop="projectName" align="center" label="品牌名称">
+                    </el-table-column>
+                    <el-table-column prop="category" align="center" label="品牌分类">
+                    </el-table-column>
+                    <el-table-column prop="" align="center" label="操作">
+                        <template slot-scope="scope">
+                            <el-button @click.native.prevent="deleteRow(scope.$index, form.tableData)" type="text" size="small">删除</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+            <div class="padding20 f-tac"> 
+                <el-button  @click="submit" type="primary"  size="small">确定</el-button>
+                <el-button  @click="cancel" type="warning"  size="small">取消</el-button>
+            </div>  
+        </el-form> 
+    </div>  
+    <!-- dialog -->
+    <el-dialog title="选择服务品牌" :visible.sync="selectDialog">
+        <el-col class="marginB20">
+            <el-form :model="selectForm" :inline="true" class="demo-form-inline mainSearchForm" ref="selectForm">
+                <el-form-item label="品牌名称：">
+                    <el-input placeholder="输入品牌名称" v-model="selectForm.projectName" style="width: 100%;"></el-input>
+                </el-form-item>
+                <el-form-item label="项目分类：">  
+                    <el-select v-model="selectForm.category" placeholder="项目分类" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in categoryArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="所属公司：">  
+                    <el-select v-model="selectForm.groupName" placeholder="所属公司" style="width: 100%;margin-right: 10px;" clearable filterable>
+                        <el-option
+                            v-for="item in groupNameArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label=""> 
+                    <el-button icon="el-icon-search" type="primary" @click="selectList">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </el-col>
+        <el-table
+            ref="selectTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="selectTable"
+            @selection-change="handleSelectionChange"
+        >
+            <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="品牌名称"></el-table-column>
+            <el-table-column align="center" prop="category" label="项目分类"></el-table-column>
+            <el-table-column align="center" prop="groupName" label="所属公司"></el-table-column>             
+        </el-table>
+        <div class="padding20 f-tac"> 
+            <el-button  @click="addBrand" type="primary"  size="small">确定</el-button>
+            <el-button  @click="cancelAdd()" type="warning"  size="small">取消</el-button>
+        </div>
+    </el-dialog>   
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    // 已选品牌集合 brandList
+    // 所有品牌集合 allBrandList
+    // 项目分类字典  categoryList
+    // 所属公司       userInfoList
+    // 授权信息 saleIm {
+    //         "id":"",
+    //         "teleSaleId",""                        //电销顾问id
+    //         "dayReceiveMax":"",            //每日上限数
+    //         "brandIdList":[]                    //已选品牌列dList
+    // }
+    var brandList=[[${brandList}]]; 
+    var allBrandList = [[${allBrandList}]];
+    var categoryList = [[${categoryList}]];
+    var userInfoList = [[${userInfoList}]];
+    var saleIm = [[${saleIm}]];
+    // console.log(brandList)
+    console.log(allBrandList)
+    console.log(categoryList)
+    // console.log(userInfoList)
+    console.log(saleIm)
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                loading: false,
+                isDisabled: false,
+                form: {
+                    dayReceiveMax:'10',
+                    tableData:[]
+                },
+                rules:{},
+                selectTable:[],
+                selectDialog:false,
+                projectName:'',
+                selectForm:{
+                    projectName:'',
+                    category:'',
+                    groupName:'',
+                },
+                categoryArr:categoryList,
+                groupNameArr:userInfoList,
+                multipleSelection:[],
+
+            }             
+        },
+        methods: {
+            number(){
+    　　　     this.form.dayReceiveMax=this.form.dayReceiveMax.replace(/[^\.\d]/g,'');
+               this.form.dayReceiveMax=this.form.dayReceiveMax.replace('.','');
+            },
+            addBrand(){
+                var selectRows=this.multipleSelection;
+                console.log(selectRows);
+                console.log(this.form.tableData);                
+                if(selectRows.length>0){
+                    this.selectDialog=false;
+                    this.form.tableData.push(...selectRows);//展开二维数组
+                    this.brandChange();
+                }else{
+                    this.$message({
+                        message: "请选择服务品牌",
+                        type: "error"
+                    });
+                }               
+            },
+            cancelAdd(rows){
+                this.selectDialog=false;
+                // 取消选中
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.selectTable.toggleRowSelection(row);
+                    });
+                } else {
+                  this.$refs.selectTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            open(){
+                this.selectDialog=true;
+                this.selectList();
+            },
+            settingAll(){
+                this.form.tableData=JSON.parse(JSON.stringify(allBrandList));
+                this.brandChange(); 
+            },
+            submit(){
+                if(!this.form.dayReceiveMax){
+                    this.$message({
+                        message: "每日接待IM客户上限不能为空",
+                        type: "error"
+                    });
+                    return;
+                }
+                if(!this.form.tableData.length>0){
+                    this.$message({
+                        message: "服务品牌选择不能为空",
+                        type: "error"
+                    });
+                    return;
+                }
+                var param = {};
+                if(saleIm.id){
+                    param.id=saleIm.id;
+                }
+                param.teleSaleId=saleIm.teleSaleId;
+                param.dayReceiveMax=this.form.dayReceiveMax;
+                var brandIdListArr=[];
+                for(var i=0;i<this.form.tableData.length;i++){
+                    brandIdListArr.push(this.form.tableData[i].id)
+                }                
+                param.brandIdList = brandIdListArr;
+                axios.post('/custservice/saleIm/save',param).then(function (response) { 
+                    console.log(response);
+                    var result =  response.data;
+                    if(result.code==0){
+                        window.location.href="/custservice/saleIm/initListPage"
+                    }else{
+                        mainDivVM.$message.error(result.msg);
+                    }                     
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            cancel(){
+                window.location.href="/custservice/saleIm/initListPage"
+            },
+            deleteRow(index, rows) {//删除一行表格
+                rows.splice(index, 1);
+            },
+            selectList(firstPage) {                 
+                var param = {};
+                param.projectName = this.selectForm.projectName
+                param.category = this.selectForm.category; 
+                param.groupName = this.selectForm.groupName;
+                var notInListArr=[];
+                for(var i=0;i<this.form.tableData.length;i++){
+                    notInListArr.push(this.form.tableData[i].id)
+                }                
+                param.notInList = notInListArr;
+                axios.post('/custservice/saleIm/getBrandList',param).then(function (response) { 
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        mainDivVM.selectTable= result.data;
+                        // 品牌转换
+                        var categoryObj=JSON.parse(JSON.stringify(categoryList));
+                        for(var i=0;i<categoryObj.length;i++){
+                            for(var j=0;j<mainDivVM.selectTable.length;j++){
+                                if(categoryObj[i].value==mainDivVM.selectTable[j].category){
+                                    mainDivVM.selectTable[j].category=categoryObj[i].name
+                                }
+                            }
+                        } 
+                    }else{
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            brandChange(){// 品牌转换
+                var categoryObj=JSON.parse(JSON.stringify(categoryList));
+                for(var i=0;i<categoryObj.length;i++){
+                    for(var j=0;j<this.form.tableData.length;j++){
+                        if(categoryObj[i].value==this.form.tableData[j].category){
+                            this.form.tableData[j].category=categoryObj[i].name
+                        }
+                    }
+                }  
+            }
+        },
+        created(){  
+            var isId=saleIm.id;
+            if(isId){
+                this.form.tableData=JSON.parse(JSON.stringify(brandList));
+            }else{//没有id取所有的
+                this.form.tableData=JSON.parse(JSON.stringify(allBrandList));
+            }   
+            this.brandChange(); 
+            // 回显最大值
+            if(saleIm.dayReceiveMax){
+                this.form.dayReceiveMax=saleIm.dayReceiveMax; 
+            }  
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';                                       
+        }
+    })
+    
+</script>
+</html>
