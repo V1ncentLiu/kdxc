@@ -12,6 +12,7 @@ import com.kuaidao.manageweb.feign.salecard.SaleCardFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +110,7 @@ public class SaleCardController {
         if (saleCardReqDto.getDictionaryRankId() == null) {
             new JSONResult<Boolean>().fail("-1", "字典表职级不能为空");
         }
-        if (saleCardReqDto.getDictionaryEvaluationId() == null) {
+        if (StringUtils.isBlank(saleCardReqDto.getDictionaryEvaluationId())) {
             new JSONResult<Boolean>().fail("-1", "字典表客户评价不能为空");
         }
         if (saleCardReqDto.getServiceNum() == null) {
