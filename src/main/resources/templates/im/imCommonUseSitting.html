@@ -39,7 +39,7 @@
                                     v-for="(domain, index) in dynamicValidateForm1.domains"
                                     :label=" index+1 + '、'"
                                     :key="domain.key"
-                                    :prop="'domains.' + index + '.value'"
+                                    :prop="'domains.' + index + '.comText'"
                                     :rules="{
                                       required: true, message: '常用语不能为空', trigger: 'blur'
                                     }"
@@ -47,7 +47,7 @@
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.value" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1')"  :disabled="iptDisabled"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1')"  :disabled="iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
@@ -206,7 +206,7 @@
                 dynamicVisible:false,//开场白弹窗
                 dynamicValidateForm: {
                     domains: [{
-                        value: ''
+                        content: ''
                     }],
                 },
                 isshowDelete:false,
@@ -265,7 +265,7 @@
                 param.lixian=lixianParm;
                 console.log(param)
                 this.loading = true; 
-                axios.post('/message/im/saleMonitor',param).then(function (response) { 
+                axios.post('/autoResponse/saveOrUpdate',param).then(function (response) { 
                     mainDivVM.loading = false;
                     console.log(response)
                     // window.location.href="/im/imCommonUseSitting/index"
@@ -296,8 +296,24 @@
                 debugger
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        this.commonuseArr=JSON.parse(JSON.stringify(this.dynamicValidateForm1.domains));
-                        this.iptDisabled=true;
+                        var param = {};
+                        param.teleSaleId = id;
+                        axios.post('/saleCard/getSaleCard',param).then(function (response) { 
+                            console.log(response)
+                            var result=response.data;
+                            if(result.code==0){
+                                mainDivVM.commonuseArr=JSON.parse(JSON.stringify(this.dynamicValidateForm1.domains));
+                                mainDivVM.iptDisabled=true;                      
+                            }else{
+                                mainDivVM.isDisabled=false;
+                                mainDivVM.$message.error(result.msg);
+                            }
+                        }).catch(function (error) {
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });                        
 
                     } else {
                         console.log('error submit!!');
@@ -313,7 +329,7 @@
             },
             addDomain1() {
                 this.dynamicValidateForm1.domains.push({
-                    value: '',
+                    comText: '',
                     key: Date.now()
                 });
                 this.iptDisabled=false;
@@ -414,6 +430,9 @@
             }
             if(lixian){
                 this.form.content2=lixian.content;
+            }
+            if(userLangList){
+                this.dynamicValidateForm1.domains=userLangList;
             }
 
         },
