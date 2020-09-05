@@ -121,11 +121,11 @@
                     </el-time-picker>
                 </el-form-item>                
                 <el-form-item label="非工作时间自动恢复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.noWork" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.lixian" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
             </el-row>
@@ -136,7 +136,7 @@
         </el-form>
     </div>
     <!-- dialog -->
-    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="800px">
+    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="800px" :close-on-click-modal="false">
         <template>
             <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
                 <el-button type="success" @click="addDomain" style="margin-bottom: 10px;">添加</el-button>
@@ -220,6 +220,11 @@
                     endTime:'',
                     noWork:'',//非工作时间自动恢复内容
                     lixian:'',//离线/忙碌状态自动回复语
+                    content1:'',//非工作时间自动回复内容
+                    content2:'',//离线自动回复内容
+                    id:'',
+                    id1:'',
+                    id2:'',
                 },
             }             
         },
@@ -238,19 +243,21 @@
                 }
                 // 超时对象
                 timeOutParm.content=this.form.content;
-                timeOutParm.timeOutEnable=this.form.timeOutEnable;
+                timeOutParm.timeOutEnable=parseInt(this.form.timeOutEnable);
                 timeOutParm.timeOut=this.form.timeOut;
-
+                // 非工作时间
                 if(noWork.id){
                     noWorkParm.id=noWork.id;
                 }
-                noWorkParm.nonWorktimeEnable=this.form.nonWorktimeEnable;
+                noWorkParm.nonWorktimeEnable=parseInt(this.form.nonWorktimeEnable);
                 noWorkParm.startTime=this.form.startTime;
                 noWorkParm.endTime=this.form.endTime;
+                noWorkParm.content=this.form.content1;
+                // 离线
                 if(lixian.id){
                   lixianParm.id=lixian.id; 
                 }
-                lixianParm.content=this.form.lixian; 
+                lixianParm.content=this.form.content2; 
 
                 param.kaichangList=kaichangListParm;
                 param.timeOut=timeOutParm;
@@ -261,7 +268,7 @@
                 axios.post('/message/im/saleMonitor',param).then(function (response) { 
                     mainDivVM.loading = false;
                     console.log(response)
-                    
+                    // window.location.href="/im/imCommonUseSitting/index"
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
@@ -377,13 +384,34 @@
             // nonWorktimeEnable:非工作时间自动回复启用状态1:启用，0:禁用
             // startTime  非工作时间开始时间
             // endTime   非工作时间结束时间~~~~
-            // }   
+            // }  
+            // form: {//自动回复设置
+            //         timeOutEnable:'',//超时自动恢复设置
+            //         timeOut:'',//超时自动恢复时间
+            //         content:'',//超时自动恢复内容
+            //         nonWorktimeEnable:'',//非工作时间自动恢复设置
+            //         startTime:'',//非工作时间段
+            //         endTime:'',
+            //         noWork:'',//非工作时间自动恢复内容
+            //         lixian:'',//离线/忙碌状态自动回复语
+            //     }, 
             if(kaichangList){
                 this.prologuesArr=JSON.parse(JSON.stringify(kaichangList));
                 this.dynamicValidateForm.domains=JSON.parse(JSON.stringify(kaichangList));
             }
             if(timeOut){
-                
+                this.form.timeOutEnable=timeOut.timeOutEnable+"";
+                this.form.timeOut=timeOut.timeOut;
+                this.form.content=timeOut.content;
+            }
+            if(noWork){
+                this.form.nonWorktimeEnable=noWork.nonWorktimeEnable+"";
+                this.form.startTime=noWork.startTime;
+                this.form.endTime=noWork.endTime;
+                this.form.content1=noWork.content;
+            }
+            if(lixian){
+                this.form.content2=lixian.content;
             }
 
         },
