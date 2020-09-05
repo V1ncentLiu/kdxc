@@ -293,12 +293,18 @@
                 console.log(tab, event);
             },
             submitdialogForm1(formName) {
-                debugger
+                var id=this.editId;
+                var type=2;//类型：1=用户常用语  2:顾问常用语
+                var comText=""
+                var url="";
+                if(id){
+                    url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                }else{
+                    url="/commonLanguage/save"
+                }
                 this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        var param = {};
-                        
-                        axios.post('/saleCard/getSaleCard',param).then(function (response) { 
+                    if (valid) {                        
+                        axios.get(url).then(function (response) { 
                             console.log(response)
                             
                         }).catch(function (error) {
@@ -315,10 +321,21 @@
                 });
             },
             removeDomain1(item) {
-                var index = this.dynamicValidateForm1.domains.indexOf(item)
-                if (index !== -1) {
-                    this.dynamicValidateForm1.domains.splice(index, 1)
-                }
+                // var index = this.dynamicValidateForm1.domains.indexOf(item)
+                // if (index !== -1) {
+                //     this.dynamicValidateForm1.domains.splice(index, 1)
+                // }
+                var id=item.id;
+                console.log(id)
+                axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
+                            console.log(response)
+                            
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                }); 
             },
             addDomain1() {
                 this.dynamicValidateForm1.domains.push({
@@ -426,6 +443,8 @@
             }
             if(userLangList){
                 this.dynamicValidateForm1.domains=userLangList;
+                this.isShowEdit=false;
+                this.isDisabled=true;
             }
 
         },
