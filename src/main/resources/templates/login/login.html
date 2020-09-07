@@ -199,6 +199,15 @@ var vm =  new Vue({
     	            		$("#errorSpan").text(data.msg);
     	            		$("#errorSpan").show();
     	            	}else{
+                            console.log(data.data+'sdktoken、uid、appkey');
+                            if(data.data){
+                                that.saveCookie('sdktoken',data.data.imToken);
+                                that.saveCookie('uid',data.data.imId);
+                                sessionStorage.setItem("appkey", data.data.imAppKey);
+                            }else{
+                                sessionStorage.removeItem('appkey')
+                            }
+
                             vm.$message({message:'登录成功',type:'success'});
                             localStorage.removeItem("clientInfo");
                             var isUpdatePassword=vm.loginForm.isUpdatePassword;
@@ -207,10 +216,7 @@ var vm =  new Vue({
                             }else{
                             	document.location.href='/homePage/index';
                             }
-
-                            that.saveCookie('sdktoken',imToken);
-                            that.saveCookie('uid',imId);
-                            sessionStorage.setItem("appkey", imAppKey);
+                            
     	            	}
     	            })
     	            .catch(function (error) {

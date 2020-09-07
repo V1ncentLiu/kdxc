@@ -58,9 +58,9 @@ YX.fn.searchListInputOnmouse = function () {
           if (timer) clearTimeout(timer)
           timer = setTimeout(() => {
                 if(!$('#searchListInput').val()){
-                    $("#inputSearchImg").attr('src','images/newImages/fada@3x.png');
+                    $("#inputSearchImg").attr('src','../../../im/images/newImages/fada@3x.png');
                 }else{
-                    $("#inputSearchImg").attr('src','images/newImages/qx@3x.png');
+                    $("#inputSearchImg").attr('src','../../../im/images/newImages/qx@3x.png');
                 }
               that.fuzzyQuerySearch($('#searchListInput').val())
           }, 800)
@@ -99,7 +99,7 @@ YX.fn.fuzzyQuerySearch = function (value) {
 }
 YX.fn.inputSearchImgClick = function () {
     $("#searchListInput").val('');
-    $("#inputSearchImg").attr('src','images/newImages/fada@3x.png');
+    $("#inputSearchImg").attr('src','../../../im/images/newImages/fada@3x.png');
     this.fuzzyQuerySearch()
 }
 

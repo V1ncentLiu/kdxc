@@ -7,21 +7,21 @@ var emojiList = {
 }
 
 var pinupList = {
-	'ajmd':[],
-	'xxy':[],
-	'lt':[]
+	// 'ajmd':[],
+	// 'xxy':[],
+	// 'lt':[]
 };
-(function(){
-	for (var i = 1; i <=48; i++) {
-		pinupList['ajmd'].push('ajmd0'+ (i>=10?i:'0'+i)+'.png')
-	};
-	for (var i = 1; i <=40; i++) {
-		pinupList['xxy'].push('xxy0'+ (i>=10?i:'0'+i)+'.png')
-	};
-	for (var i = 1; i <=20; i++) {
-		pinupList['lt'].push('lt0'+ (i>=10?i:'0'+i)+'.png')
-	};
-})();
+// (function(){
+// 	for (var i = 1; i <=48; i++) {
+// 		pinupList['ajmd'].push('ajmd0'+ (i>=10?i:'0'+i)+'.png')
+// 	};
+// 	for (var i = 1; i <=40; i++) {
+// 		pinupList['xxy'].push('xxy0'+ (i>=10?i:'0'+i)+'.png')
+// 	};
+// 	for (var i = 1; i <=20; i++) {
+// 		pinupList['lt'].push('lt0'+ (i>=10?i:'0'+i)+'.png')
+// 	};
+// })();
 
 /**
 * 通过正则替换掉文本消息中的emoji表情

@@ -35,9 +35,9 @@ YX.fn.searchListInputFriendsOnmouse = function () {
         if (timer) clearTimeout(timer)
         timer = setTimeout(() => {
             if (!$('#searchListInputFriends').val()) {
-                $("#inputSearchImgFriends").attr('src', 'images/newImages/fada@3x.png');
+                $("#inputSearchImgFriends").attr('src', '../../../im/images/newImages/fada@3x.png');
             } else {
-                $("#inputSearchImgFriends").attr('src', 'images/newImages/qx@3x.png');
+                $("#inputSearchImgFriends").attr('src', '../../../im/images/newImages/qx@3x.png');
             }
             that.buildFriends()
         }, 800)
@@ -46,7 +46,7 @@ YX.fn.searchListInputFriendsOnmouse = function () {
 
 YX.fn.inputSearchImgFriendsClick = function () {
     $("#searchListInputFriends").val('');
-    $("#inputSearchImgFriends").attr('src', 'images/newImages/fada@3x.png');
+    $("#inputSearchImgFriends").attr('src', '../../../im/images/newImages/fada@3x.png');
     this.buildFriends()
 }
 
@@ -121,7 +121,6 @@ YX.fn.friendListConcat = function () {
     ]  
     
     var param={};
-    // param.teleSaleId=sessionStorage.getItem('userId');
     param.teleSaleId=userId;
     axios.post("/im/submitCustList", param)
     .then(function (response) {
