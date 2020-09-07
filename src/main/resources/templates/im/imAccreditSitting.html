@@ -93,7 +93,7 @@
             <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
             <el-table-column align="center" prop="projectName" label="品牌名称"></el-table-column>
             <el-table-column align="center" prop="category" label="项目分类"></el-table-column>
-            <el-table-column align="center" prop="groupName" label="所属公司"></el-table-column>             
+            <el-table-column align="center" prop="groupId" label="所属公司" :formatter="transGroupName" ></el-table-column>             
         </el-table>
         <div class="padding20 f-tac"> 
             <el-button  @click="addBrand" type="primary"  size="small">确定</el-button>
@@ -282,7 +282,18 @@
                         }
                     }
                 }  
-            }
+            },
+            transGroupName(row, column, cellValue, index) {
+          	  var text="";
+          	  if(userInfoList){
+	                  for(var i=0;i<userInfoList.length;i++){
+	                		if(cellValue==userInfoList[i].id){
+	                			text=userInfoList[i].name;
+	                		}
+	                	}
+          	  }
+                return text;
+            },
         },
         created(){  
             var isId=saleIm.id;
