@@ -519,7 +519,11 @@
                 </el-table-column>
                 <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="140"></el-table-column>
                 <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
-            </el-table> 
+            </el-table>
+            <div   v-show="trackingRemarkFlag">
+                <div class="marginB20 fs16 paddingT20" style="color: #EA7500;">客户跟进备注</div>
+                {{trackingRemark}}
+            </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
             <el-row>
                 <el-table
@@ -1127,6 +1131,8 @@ var ossUrl = [[${ossUrl}]];//上传文件地址
 var telCreatePhoneAuditFlag=[[${telCreatePhoneAuditFlag}]];//电销创建手机号审核按钮是否显示标志
 var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
 var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
+var  trackingRemarkFlag = false; //跟进备注标识
+var trackingRemark = null;//跟进内容
 if(commonPool==1){
     showPhone = false;
 }
@@ -1156,7 +1162,10 @@ if(relate){
 if (null != telCreatePhoneAudits && telCreatePhoneAudits.length> 0 ){
     telCreatePhoneAuditsFlag  = true;
 }
-
+if (null != base.trackingRemark && '' != base.trackingRemark) {
+    trackingRemarkFlag = true;
+    trackingRemark = base.trackingRemark;
+}
 function transTeleReceiveSource(source){
     if(!source){
         return "";
@@ -1524,7 +1533,8 @@ function dateFormat(val) {
         data: function() {
             return {
                 isActive:false,
-
+                trackingRemark:trackingRemark,
+                trackingRemarkFlag:trackingRemarkFlag,
                 formLabelWidth160: '160px',
                 saveDisabled: false,
                 btnDisabled: false,
