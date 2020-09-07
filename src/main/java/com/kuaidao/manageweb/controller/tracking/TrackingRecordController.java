@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.kuaidao.aggregation.dto.tracking.TrackingRemarkDTO;
 import com.kuaidao.common.constant.StageContant;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class TrackingRecordController {
      * 查询：不分页
      */
     @RequestMapping("/updateTrackingRemark")
+    @RequiresPermissions("customerManager:updateTrackingRemark")
     public JSONResult<String> updateTrackingRemark(@RequestBody TrackingRemarkDTO dto) {
         JSONResult<String> jsonResult =  trackingFeignClient.updateTrackingRemark(dto);
         return jsonResult;
