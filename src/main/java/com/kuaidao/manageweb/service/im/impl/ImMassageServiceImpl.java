@@ -83,6 +83,7 @@ public class ImMassageServiceImpl implements ImMassageService {
                 newHashMap.put("imId", byTeleSaleId.getData().getImId());
                 newHashMap.put("imToken", byTeleSaleId.getData().getToken());
                 newHashMap.put("imAppKey", neteaseAppKey);
+                return newHashMap;
             }
         }
         return null;
