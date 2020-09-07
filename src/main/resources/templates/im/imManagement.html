@@ -135,15 +135,15 @@
                    var result =  response.data;
                     if(result.code==0){
                         var resultData=result.data;
-                        for(var i=0;i<resultData.length;i++){
-                            if(resultData[i].imStatus&&resultData[i].imStatus==1){
-                                mainDivVM.onlineNum=resultData[i].num;
-                            }else if(resultData[i].imStatus&&result[i].imStatus==2){
-                                mainDivVM.busyNum=resultData[i].num;
-                            }if(resultData[i].imStatus&&resultData[i].imStatus==3){
-                                mainDivVM.offlineNum=resultData[i].num;
-                            }
-                        }                        
+                        let map = {}
+                        if(resultData && '' !== resultData){
+                            resultData.forEach(row => {
+                                map[row.imStatus] = {imStatus: row.imStatus, num: row.num}
+                            });
+                        }
+                        mainDivVM.onlineNum= ( map && map[1] ? ( map[1].num ? map[1].num :0  ) : 0 );
+                        mainDivVM.busyNum= (  map && map[2] ? ( map[2].num ? map[2].num :0  )  : 0 );
+                        mainDivVM.offlineNum= ( map &&  map[3] ? ( map[3].num ? map[3].num :0  ) : 0 );
                     }else{
                         mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);

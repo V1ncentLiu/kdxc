@@ -3,6 +3,53 @@
  */
 package com.kuaidao.manageweb.controller;
 
+import java.awt.image.BufferedImage;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.Authenticator;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.LogoutAware;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.crazycake.shiro.RedisSessionDAO;
+import org.crazycake.shiro.exception.SerializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -34,44 +81,13 @@ import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.*;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.*;
-import org.apache.shiro.session.Session;
-import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.subject.support.DefaultSubjectContext;
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
-import org.crazycake.shiro.RedisSessionDAO;
-import org.crazycake.shiro.exception.SerializationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.awt.image.BufferedImage;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import com.kuaidao.sys.dto.user.LoginRecordDTO;
+import com.kuaidao.sys.dto.user.LoginRecordReq;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoReq;
 
 
 /**
@@ -159,7 +175,7 @@ public class LoginController {
         } else if (serverName.equals(cmServletName)) {
             // 汇聚餐盟：跳转
             return "canmengLogin/login";
-        }else {
+        } else {
             // 系统默认 汇聚登录页
             return "login/login";
         }
@@ -196,11 +212,11 @@ public class LoginController {
     }
 
 
-    @RequestMapping(value = "/login/index", method = { RequestMethod.POST })
+    @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
     @ResponseBody
     @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
-    public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model, RedirectAttributes redirectAttributes)
-            throws Exception {
+    public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
+            RedirectAttributes redirectAttributes) throws Exception {
         String username = loginReq.getUsername();
         String password = loginReq.getPassword();
         redirectAttributes.addFlashAttribute("username", username);
@@ -219,7 +235,8 @@ public class LoginController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         // TODO使用工具类判断
         if (roleList == null || roleList.size() == 0) {
-            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "当前账号没有角色");
+            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                    "当前账号没有角色");
         }
         // TODO修改错误码
         RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -228,11 +245,13 @@ public class LoginController {
             List<String> ipList = roleInfoDTO.getIpList();
             logger.info("login_ip_address{{}},ipList{{}}", ipAddr, ipList);
             if (!ipList.contains(ipAddr)) {
-                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "当前登录系统IP异常，请联系管理员");
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                        "当前登录系统IP异常，请联系管理员");
             }
         }
         // 查询登录用户所属业务线放入登录对象中
-        JSONResult<OrganizationDTO> organizationDTOJSONResult = organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
+        JSONResult<OrganizationDTO> organizationDTOJSONResult =
+                organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
         if (JSONResult.SUCCESS.equals(organizationDTOJSONResult.getCode())) {
             OrganizationDTO organizationDTO = organizationDTOJSONResult.getData();
             if (organizationDTO != null && organizationDTO.getBusinessLine() != null) {
@@ -241,14 +260,20 @@ public class LoginController {
             user.setPromotionCompany(organizationDTO.getPromotionCompany());
         }
         // 餐盟用户登录增加判断
-        boolean cmFlag = null != loginReq.getLoginSource() && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource());
+        boolean cmFlag = null != loginReq.getLoginSource()
+                && LoginReq.LOGIN_SOURCE.equals(loginReq.getLoginSource());
         if (cmFlag) {
-            if (null != user.getBusinessLine() && (BusinessLineConstant.SHANGJI == user.getBusinessLine() ||BusinessLineConstant.SHCS == user.getBusinessLine())) {
-                if (!RoleCodeEnum.DXCYGW.name().equals(roleInfoDTO.getRoleCode()) && !RoleCodeEnum.SWJL.name().equals(roleInfoDTO.getRoleCode())) {
-                    return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
+            if (null != user.getBusinessLine()
+                    && (BusinessLineConstant.SHANGJI == user.getBusinessLine()
+                            || BusinessLineConstant.SHCS == user.getBusinessLine())) {
+                if (!RoleCodeEnum.DXCYGW.name().equals(roleInfoDTO.getRoleCode())
+                        && !RoleCodeEnum.SWJL.name().equals(roleInfoDTO.getRoleCode())) {
+                    return new JSONResult<>().fail(
+                            ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
                 }
             } else {
-                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), "抱歉您的账号暂未开放餐盟端");
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                        "抱歉您的账号暂未开放餐盟端");
             }
         }
         Date date = new Date();
@@ -281,25 +306,32 @@ public class LoginController {
                     // 判断账号是否禁用
                     if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
                         errorMessage = "帐号已禁用，请联系管理员修改！";
-                        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                        return new JSONResult<>().fail(
+                                ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                     }
                     // 判断账号是否锁定
                     if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
                         errorMessage = "账号锁定，请联系管理员修改！";
-                        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                        return new JSONResult<>().fail(
+                                ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                     }
                     // 判断密码是否过期。
                     String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
                     if (StringUtils.isNotBlank(passwordExpires)) {
                         long pwdTime = Long.parseLong(passwordExpires);
                         if (isRepwdNotify(user, pwdTime)) {// 是否到密码提醒修改日期
-                            int differentDays = DateUtil.differentDays(user.getResetPasswordTime(), new Date());
-                            redirectAttributes.addFlashAttribute("isNotify", pwdTime - differentDays);
+                            int differentDays =
+                                    DateUtil.differentDays(user.getResetPasswordTime(), new Date());
+                            redirectAttributes.addFlashAttribute("isNotify",
+                                    pwdTime - differentDays);
                         }
                         Date resetpwdTime = user.getResetPasswordTime();
-                        if (date.getTime() - resetpwdTime.getTime() > pwdTime * 24 * 60 * 60 * 1000) {
+                        if (date.getTime() - resetpwdTime.getTime() > pwdTime * 24 * 60 * 60
+                                * 1000) {
                             errorMessage = "账号过期，请忘记密码方式找回！";
-                            return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                            return new JSONResult<>().fail(
+                                    ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                                    errorMessage);
                         }
                     }
                 }
@@ -312,7 +344,8 @@ public class LoginController {
                 subject.login(token);
                 SecurityUtils.getSubject().getSession().setTimeout(sessionTimeOut);
                 SecurityUtils.getSubject().getSession().setAttribute("userId", "" + user.getId());
-                SecurityUtils.getSubject().getSession().setAttribute("userName", "" + user.getUsername());
+                SecurityUtils.getSubject().getSession().setAttribute("userName",
+                        "" + user.getUsername());
                 SecurityUtils.getSubject().getSession().setAttribute("user", user);
                 // 登录成功，保存登录状态
                 userInfoReq.setId(user.getId());
@@ -323,7 +356,8 @@ public class LoginController {
                 loginRecord.setIsChangeMachine(SysConstant.NO);
                 // 判断是否是踢下线操作
                 String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
-                String string = redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
+                String string =
+                        redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
                 logger.warn("newSessionId:" + sessionid);
                 logger.warn("OldSessionId:" + string);
                 if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
@@ -338,8 +372,8 @@ public class LoginController {
                             }
                         }).start();
                         // 判断累计次数
-                        List<LoginRecordDTO> findList2 = findLoginRecordList(username, null, new Date(date.getTime() - 1800000), date, null,
-                                                                             SysConstant.YES);
+                        List<LoginRecordDTO> findList2 = findLoginRecordList(username, null,
+                                new Date(date.getTime() - 1800000), date, null, SysConstant.YES);
                         // 30分钟内互踢5次 ，加上这次共6次锁定账号
                         if (findList2 != null && findList2.size() >= 5) {
                             // 锁定账号
@@ -354,8 +388,9 @@ public class LoginController {
                 redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(), sessionid, 3,
                         TimeUnit.DAYS);
                 loginRecordFeignClient.create(loginRecord);
-                List<LoginRecordDTO> findList = findLoginRecordList(username, null, new Date(date.getTime() - 60000), date,
-                                                                    Constants.LOGIN_STATUS_SUCCESS, null);
+                List<LoginRecordDTO> findList =
+                        findLoginRecordList(username, null, new Date(date.getTime() - 60000), date,
+                                Constants.LOGIN_STATUS_SUCCESS, null);
                 // 同一账号 60秒内登陆成功6次
                 if (findList != null && findList.size() >= 6) {
                     // 锁定账号
@@ -364,10 +399,12 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                    return new JSONResult<>()
+                            .fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                 }
-                List<LoginRecordDTO> findList2 = findLoginRecordList(username, null, new Date(date.getTime() - 600000), date,
-                                                                     Constants.LOGIN_STATUS_SUCCESS, null);
+                List<LoginRecordDTO> findList2 =
+                        findLoginRecordList(username, null, new Date(date.getTime() - 600000), date,
+                                Constants.LOGIN_STATUS_SUCCESS, null);
                 // 同一账号 10分钟内登陆成功20次
                 if (findList2 != null && findList2.size() >= 20) {
                     // 锁定账号
@@ -376,14 +413,17 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+                    return new JSONResult<>()
+                            .fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttp", wsUrlHttp);
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
                 SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
-                imMassageService.transOnlineLeaveLog(user, roleList , SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
-                return new JSONResult<>().success(null);
+                Map<String, Object> im = imMassageService.transOnlineLeaveLog(user, roleList,
+                        SaleOLOperationTypeEnum.LOGIN_TYPE.getCode());
+
+                return new JSONResult<>().success(im);
 
             } catch (UnknownAccountException uae) {
                 errorMessage = "账号没有权限";// 产品要求账号不存在是展示"账号没有权限"
@@ -408,7 +448,8 @@ public class LoginController {
             // 累计当日错误次数
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
             String format = simpleDateFormat.format(date);
-            String string = redisTemplate.opsForValue().get(Constants.PASSWORD_ERROR + user.getId() + format);
+            String string = redisTemplate.opsForValue()
+                    .get(Constants.PASSWORD_ERROR + user.getId() + format);
             if (string != null) {
                 int parseInt = Integer.parseInt(string);
                 if (parseInt >= 5) {
@@ -426,18 +467,23 @@ public class LoginController {
                         errorMessage = "密码错误，您还可以尝试2次";
                     }
                 }
-                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format, Integer.toString(parseInt + 1), 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format,
+                        Integer.toString(parseInt + 1), 1, TimeUnit.DAYS);
             } else {
-                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format, "1", 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.PASSWORD_ERROR + user.getId() + format,
+                        "1", 1, TimeUnit.DAYS);
             }
             // 判断密码错误次数 是否需要提示验证码
-            List<LoginRecordDTO> findList = findLoginRecordList(null, ipAddr, new Date(date.getTime() - 60000), date,
-                                                                Constants.LOGIN_STATUS_PASSWORD_ERROR, null);
+            List<LoginRecordDTO> findList =
+                    findLoginRecordList(null, ipAddr, new Date(date.getTime() - 60000), date,
+                            Constants.LOGIN_STATUS_PASSWORD_ERROR, null);
             if (findList != null && findList.size() >= 3) {
-                redisTemplate.opsForValue().set(Constants.SHOW_CAPTCHA + ipAddr, SysConstant.YES.toString(), 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(Constants.SHOW_CAPTCHA + ipAddr,
+                        SysConstant.YES.toString(), 1, TimeUnit.DAYS);
             }
         }
-        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(), errorMessage);
+        return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
+                errorMessage);
     }
 
     /**
@@ -653,7 +699,8 @@ public class LoginController {
             if ("3".equals(type)) {
                 subject.getSession().setAttribute("isShowLogoutBox", type);
             }
-            imMassageService.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
+            imMassageService.transOnlineLeaveLog(user, user.getRoleList(),
+                    SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);
         }
@@ -769,9 +816,11 @@ public class LoginController {
      */
     private void kickOutUser(Long userId) {
         // 处理session
-        DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+        DefaultWebSecurityManager securityManager =
+                (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
 
-        DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
+        DefaultWebSessionManager sessionManager =
+                (DefaultWebSessionManager) securityManager.getSessionManager();
 
         // 从redis获取sessionId
         String sessionId = redisTemplate.opsForValue().get(Constants.SESSION_ID + userId);
@@ -785,7 +834,8 @@ public class LoginController {
         String keyPrefix = redisSessionDAO.getKeyPrefix();
         try {
             byte[] key = redisSessionDAO.getKeySerializer().serialize(keyPrefix + sessionId);
-            Session session = (Session) redisSessionDAO.getValueSerializer().deserialize(redisSessionDAO.getRedisManager().get(key));
+            Session session = (Session) redisSessionDAO.getValueSerializer()
+                    .deserialize(redisSessionDAO.getRedisManager().get(key));
             if (null == session) {
                 return;
             }
