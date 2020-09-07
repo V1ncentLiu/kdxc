@@ -282,11 +282,16 @@
             </div>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row class="marginB10">
-                <el-col :span="16">
+                <el-col :span="8">
                     <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
                     <!--</el-button>-->
                     <el-button size="small" type="primary" @click="editRecord">编辑
                     </el-button>
+                </el-col>
+                <el-col :span="8">
+                    <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
+                    <!--</el-button>-->
+                    <el-button size="small" type="primary" @click="openTrackingRemark  ">维护客户跟进备注</el-button>
                 </el-col>
                 <el-col :span="4" :offset="4" class="f-tar">
                     <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
@@ -841,7 +846,21 @@
             <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
-
+    <!--添加客户跟进备注-->
+    <el-dialog title="填写客户跟进备注" :visible.sync="trackingRemarkVisible" width="540px">
+        <template>
+            <el-form :model="trackingRemarkForm" :rules="dialogTrackingRemarRules" ref="trackingRemarkForm" >
+                <el-form-item label="填写客户跟进备注：" :label-width="formLabelWidth160"  prop="trackingRemark">
+                    <el-input type="textarea" rows="4" maxlength="500" v-model="trackingRemarkForm.trackingRemark" placeholder="填写客户跟进注意事项"
+                              class="marginB20" style="width:80%;"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" :disabled="btnEditDisabled"  @click="trackingRemarkSumbit('trackingRemarkForm')">提 交</el-button>
+                <el-button  @click="trackingRemarkVisible=false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -974,6 +993,8 @@
         el: '#addCustomer',
         data: function () {
             return {
+                formLabelWidth160: '160px',
+                btnEditDisabled:false,
                 callDetailsText:'',
                 isElBreadcrumb:true,
                 addButtons:true,
@@ -1015,6 +1036,7 @@
                 wechatVisible: false,//新增微信号
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
+                trackingRemarkVisible:false,//跟进备注
                 radio: '1',
                 radio1: '1',
                 dialogFormUploadImg: false, //上传资源图片弹框
@@ -1078,6 +1100,9 @@
                     wechatUrl:'',
                     fileList:[]
                 },
+                trackingRemarkForm: {
+                    trackingRemark:''
+                },
                 clueBase: base,
                 intention:intention,
                 categoryArr: [],
@@ -1101,6 +1126,11 @@
                 proSelect: [],
                 formLabelWidth: '120px',
                 formLabelWidth1: '140px',
+                dialogTrackingRemarRules: {
+                    trackingRemark: [
+                        {required: true, message: '请输入客户跟进备注', trigger: 'blur'}
+                    ]
+                },
                 rules: {
                     customerName: [
                         {required: true, message: '客户姓名不能为空', trigger: 'blur'}
@@ -2858,6 +2888,44 @@
                 this.wechatForm.wechat2=this.form.wechat2;
                 this.wechatForm.wechatUrl=this.form.wechatUrl;
             },
+            openTrackingRemark() {
+                this.trackingRemarkForm.trackingRemark = "";
+                this.trackingRemarkVisible = true;
+            },
+            trackingRemarkSumbit(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.clueId = this.clueId;
+                        param.trackingRemark = addCustomerVM.trackingRemarkForm.trackingRemark;
+                        addCustomerVM.btnEditDisabled = true;
+                        axios.post('/aggregation/tracking/updateTrackingRemark', param).then(function (response) {
+                            if (null === response || response.data == null || response.data.code != '0') {
+                                addCustomerVM.$message({
+                                    message: response.data.msg,
+                                    type: 'warning'
+                                });
+                                addCustomerVM.btnEditDisabled = false;
+                                return;
+                            } else {
+                                if(zjFalg){
+                                    window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                }else{
+                                    window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                }
+                            }
+                        }).catch(function (error) {
+                            console.log(error);
+                            addCustomerVM.btnEditDisabled = false;
+                        });
+                        console.log('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
             wechatSumbit() {
                 this.form.wechat2=this.wechatForm.wechat2;
                 this.form.wechatUrl=this.wechatForm.wechatUrl;
