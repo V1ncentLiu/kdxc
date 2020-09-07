@@ -1,6 +1,6 @@
 function distributeExportFun(falgNew,param){
     var methodStr;
-    if(falgNew==1){ // 沟通情况
+    if(falgNew==1  || falgNew==3){ // 沟通情况
         methodStr = 'findCommunicateRecords';
     }else{ // 资源记录
         methodStr = 'findClues';
@@ -10,15 +10,24 @@ function distributeExportFun(falgNew,param){
         var data =  response.data;
         var fileName = response.headers.filename;
         saveAs(data,decodeURI(fileName));
-        if(falgNew==1){ // 沟通情况
+        if(falgNew==1){ //导出电销沟通情况
             homePageVM.$notify({
                 type: 'success',
                 title: '提示',
-                message: '资源沟通记录下载完成',
+                message: '电销资源沟通记录下载完成',
                 position: 'bottom-right',
                 duration: 0
             });
             localStorage.removeItem("distributeExport1");
+        }else if(falgNew == 3){ // 导出话务沟通情况
+            homePageVM.$notify({
+                type: 'success',
+                title: '提示',
+                message: '话务资源沟通记录下载完成',
+                position: 'bottom-right',
+                duration: 0
+            });
+            localStorage.removeItem("distributeExport3");
         }else{ // 资源记录
             homePageVM.$notify({
                 type: 'success',
@@ -46,6 +55,7 @@ function distributeExportFun(falgNew,param){
         }        
         localStorage.removeItem("distributeExport1");
         localStorage.removeItem("distributeExport2");
+        localStorage.removeItem("distributeExport3");
     }).then(function(){
     });
 }

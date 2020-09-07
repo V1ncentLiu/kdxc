@@ -752,4 +752,25 @@ public class UserController {
         return userInfoFeignClient.listUserInfoByParam(reqDTO);
     }
 
+    /**
+     * 小物种和天良互通查询
+     * @param request
+     * @param req
+     * @return
+     */
+    @RequestMapping("/listByOrgAndRoleAndGroups")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> listByOrgAndRoleAndGroups(HttpServletRequest request, @RequestBody UserOrgRoleReq req) {
+        UserInfoDTO userInfoDTO = getUser();
+        UserOrgRoleReq userRole = new UserOrgRoleReq();
+        userRole.setOrgId(req.getOrgId());
+        userRole.setRoleCode(req.getRoleCode());
+        if(req.getStatusList() != null && req.getStatusList().size()>0){
+            userRole.setStatusList(req.getStatusList());
+        }
+        if (userInfoDTO.getBusinessLine() != null && userInfoDTO.getBusinessLine() !=BusinessLineConstant.XIAOWUZHONG && userInfoDTO.getBusinessLine() !=BusinessLineConstant.TILIANG) {
+            userRole.setBusinessLine(userInfoDTO.getBusinessLine());
+        }
+        return userInfoFeignClient.listByOrgAndRole(userRole);
+    }
 }

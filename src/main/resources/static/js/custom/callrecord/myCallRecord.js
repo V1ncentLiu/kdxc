@@ -253,7 +253,11 @@ var myCallRecordVm = new Vue({
                          }else if(callSource=='3'  ||callSource =='5'){
                 			  decodeUrl = encodeURI(url);
                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                		 }
+                		 }else if(callSource == 7){
+                             var httpUrl = url.replace("https","http");
+                             window.parent.open(httpUrl);
+                             return;
+                         }
             			 var x=new XMLHttpRequest();
              			x.open("GET", url, true);
              			x.responseType = 'blob';
@@ -276,7 +280,7 @@ var myCallRecordVm = new Vue({
     	},
     	switchSoundBtn(id,url,callSource){
             // this.audioShow=true;
-    		if(callSource=='2'){
+    		if(callSource=='2' || callSource=='7'){
     			// switchSound(id,url);
                 var httpUrl = url.replace("https","http");
                 window.parent.open(httpUrl);

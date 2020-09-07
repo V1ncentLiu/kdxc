@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.CustomerManagerDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerManagerQueryDTO;
@@ -110,10 +111,11 @@ public class RepeatPhoneController {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setBusinessLine(user.getBusinessLine());
-        String maxDay = getSysSetting(SysConstant.PD_PHONE_MAX_DAY);
+        /*String maxDay = getSysSetting(SysConstant.PD_PHONE_MAX_DAY);
         Date startDate = DateUtil.addDays(new Date(), -Integer.parseInt(maxDay));
         dto.setAppiontmentCreateTime1(startDate);
-        dto.setAppiontmentCreateTime2(new Date());
+        dto.setAppiontmentCreateTime2(new Date());*/
+        dto.setRepeatPhoneQuery(AggregationConstant.YES);
         JSONResult<PageBean<CustomerManagerDTO>> jsonResult =
                 customerManagerFeignClient.findcustomerPage(dto);
         return jsonResult;

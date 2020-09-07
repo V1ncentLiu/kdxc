@@ -326,6 +326,12 @@
                     </el-select>
                 </el-form-item>
             </template>
+            <!-- 中科呼叫中心 -->
+            <template v-if="loginClientForm.clientType==7">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="20" style="width: 350px;"></el-input>
+                </el-form-item>
+            </template>
         </el-form>        
         <div slot="footer" class="dialog-footer" center="true" style="padding-top: 10px;">
             <el-button type="primary" @click="loginClient('loginClientForm')">登录</el-button>
@@ -344,6 +350,7 @@
              <span v-if="loginClientForm.clientType==4">已登录科天呼叫中心</span>
              <span v-if="loginClientForm.clientType==5">已登录容联呼叫中心</span>
              <span v-if="loginClientForm.clientType==6">已登录乐创呼叫中心</span>
+             <span v-if="loginClientForm.clientType==7">已登录中科呼叫中心</span>
             <template v-if="loginClientForm.clientType==1">
                 <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
                     {{loginClientForm.cno}}
@@ -398,6 +405,11 @@
             <template v-if="loginClientForm.clientType==6">
                 <el-form-item label="登录主机号：" :label-width="formLabelWidth105" prop="loginClient">
                     {{loginClientForm.caller}}
+                </el-form-item>
+            </template>
+            <template v-if="loginClientForm.clientType==7">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    {{loginClientForm.loginClient}}
                 </el-form-item>
             </template>
 
@@ -476,7 +488,7 @@
                 <template v-for="(col ,index) in cols.cols">
                     <el-table-column :prop="col.prop" :label="col.label" header-align="center">
                         <template slot-scope="scope">
-                            <span style="white-space: pre-wrap">{{scope.row.content_ }}</span><el-button size="mini" v-if="scope.row.type=='1'" @click="gotoInfoUrl(scope.row.url)">点击查看详情</el-button>
+                            <span style="white-space: pre-wrap">{{scope.row.content_ }}</span><el-button style="margin-left:10px;" type="primary" size="mini" v-if="col.typeVal=='1'"><a style="color:#fff;" :href="col.urlVal" target="_blank">点击查看详情</a></el-button>
                         </template>
                     </el-table-column>
                 </template>
@@ -585,7 +597,9 @@
             content:"",
             bussRevid:"",
             bussDialogTableData:[],
-            colss:[]
+            colss:[],
+            urlVal:"",
+            typeVal:0,
         },
         methods:{
             updateStatusBuss(index){
@@ -624,15 +638,12 @@
                 var cols ={
                     bussRevid:bussRevid,
                     bussDialogTableData:[{content_:bussDialogVm.content}],
-                    cols:[{ label: this.title, prop: "content_", type: type,url:url }],
+                    cols:[{ label: this.title, prop: "content_", typeVal: type,urlVal:url }],
                     bussdialogVisible: true,
                 }
                 bussDialogVm.colss.push(cols)
             },
             showOutVisiable:function(){
-            },
-            gotoInfoUrl(url){
-                window.location.href=url;
             }
         }
     });
@@ -696,6 +707,8 @@
                     bussDialogVm.bussRevid =bussRevid
                     bussDialogVm.title = title;
                     bussDialogVm.content = ccontent;
+                    bussDialogVm.typeVal=0
+                    bussDialogVm.urlVal="";
                     // bussDialogVm.bussdialogVisible=true;
                     bussDialogVm.initDialogData(title,ccontent,bussRevid);
                 }else   if(msg.indexOf("mestoUrl") != -1){
@@ -709,6 +722,8 @@
                     bussDialogVm.bussRevid =bussRevid
                     bussDialogVm.title = title;
                     bussDialogVm.content = ccontent;
+                    bussDialogVm.typeVal=type
+                    bussDialogVm.urlVal=url;
                     // bussDialogVm.bussdialogVisible=true;
                     bussDialogVm.initDialogDataTourl(title,ccontent,bussRevid,type,url);
                 }

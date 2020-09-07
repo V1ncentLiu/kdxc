@@ -1,5 +1,13 @@
 package com.kuaidao.manageweb.service.im.impl;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.kuaidao.common.constant.BusinessLineConstant;
@@ -16,15 +24,6 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoReq;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -49,7 +48,7 @@ public class ImMassageServiceImpl implements ImMassageService {
      * @param onlineLeaveType
      */
     public Map<String, Object> transOnlineLeaveLog(UserInfoDTO user, List<RoleInfoDTO> roleList,
-                                                   Integer onlineLeaveType) {
+            Integer onlineLeaveType) {
         if (null == user || StringUtils.isBlank(user.getUsername())) {
             log.warn("user is null or username is null! user = {} ", JSON.toJSONString(user));
             return null;
@@ -70,15 +69,16 @@ public class ImMassageServiceImpl implements ImMassageService {
         Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode)
                 .collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
         // 电销顾问 & 业务线是的商机盒子的
-        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())) {
+        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name())
+                && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())) {
+            SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
+            saleOnlineLeaveLogReq.setOperationType(onlineLeaveType);
+            saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
+            customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
             // 查询顾问IM账号
-            JSONResult<SaleImDTO> byTeleSaleId = saleImFeignClient.getByTeleSaleId(new IdEntityLong(user.getId()));
+            JSONResult<SaleImDTO> byTeleSaleId =
+                    saleImFeignClient.getByTeleSaleId(new IdEntityLong(user.getId()));
             if (JSONResult.isNotNull(byTeleSaleId)) {
-                SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-                saleOnlineLeaveLogReq.setOperationType(onlineLeaveType);
-                saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
-                customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-
                 Map<String, Object> newHashMap = Maps.newHashMap();
                 newHashMap.put("imId", byTeleSaleId.getData().getImId());
                 newHashMap.put("imToken", byTeleSaleId.getData().getToken());

@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.apply;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.kuaidao.aggregation.dto.apply.TeleCooperateApplyDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.*;
@@ -176,16 +177,15 @@ public class ApplyController {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
                 if (roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
-                    OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-                    orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-                    orgDto.setOrgType(OrgTypeConstant.DXZ);
-                    orgDto.setParentId(user.getOrgId());
-                    JSONResult<List<OrganizationRespDTO>> dzList =
-                            organizationFeignClient.queryOrgByParam(orgDto);
-                    if (dzList.getCode().equals(JSONResult.SUCCESS)
-                            && null != dzList.getData()
-                            && dzList.getData().size() > 0) {
-                        List<Long> orgIds = dzList.getData().stream().map(c -> c.getId()).collect(Collectors.toList());
+
+                    OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+                    organizationQueryDTO.setParentId(user.getOrgId());
+                    organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+                    // 查询下级电销组(查询使用)
+                    JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                            organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+                    if (JSONResult.SUCCESS.equals(listDescenDantByParentId.getCode()) && CollectionUtil.isNotEmpty(listDescenDantByParentId.getData())) {
+                        List<Long> orgIds = listDescenDantByParentId.getData().stream().map(c -> c.getId()).collect(Collectors.toList());
                         dto.setTeleGroupIds(orgIds);
                     }
                 } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
@@ -284,6 +284,9 @@ public class ApplyController {
                 curList.add(getPhone(applyDTO.getInspectPhone()));
                 curList.add(getIsPayAllMoney(applyDTO.getIsPayAllMoney()));
                 curList.add(applyDTO.getPersonalAdvantage());
+                curList.add(applyDTO.getTeleGroupName());
+                curList.add(applyDTO.getConsultantName());
+                curList.add(applyDTO.getCustomerDefinitionName());
                 dataList.add(curList);
             }
         }
@@ -331,6 +334,9 @@ public class ApplyController {
         headTitleList.add("考察人联系方式");
         headTitleList.add("是否全款签约");
         headTitleList.add("浅谈运作优势");
+        headTitleList.add("电销组");
+        headTitleList.add("您的顾问");
+        headTitleList.add("客户界定");
         return headTitleList;
     }
 
