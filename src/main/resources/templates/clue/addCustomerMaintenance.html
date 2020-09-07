@@ -412,6 +412,10 @@
                     </div>
                 </el-table>
             </el-row>
+            <div   v-show="trackingRemarkFlag">
+                <div class="marginB20 fs16 paddingT20" style="color: #EA7500;">客户跟进备注</div>
+                {{trackingRemark}}
+            </div>
             <div class="marginB20 fs16 paddingT20">投资意向信息</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -976,6 +980,8 @@
     var editPhone = 1;
     var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
     var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
+    var  trackingRemarkFlag = false;
+    var trackingRemark = null;
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
@@ -989,10 +995,16 @@
     if (null != telCreatePhoneAudits && telCreatePhoneAudits.length> 0 ){
         telCreatePhoneAuditsFlag  = true;
     }
+    if (null != base.trackingRemark && '' != base.trackingRemark) {
+        trackingRemarkFlag = true;
+        trackingRemark = base.trackingRemark;
+    }
     var addCustomerVM = new Vue({
         el: '#addCustomer',
         data: function () {
             return {
+                trackingRemark:trackingRemark,
+                trackingRemarkFlag:trackingRemarkFlag,
                 formLabelWidth160: '160px',
                 btnEditDisabled:false,
                 callDetailsText:'',
@@ -2889,7 +2901,7 @@
                 this.wechatForm.wechatUrl=this.form.wechatUrl;
             },
             openTrackingRemark() {
-                this.trackingRemarkForm.trackingRemark = "";
+                this.trackingRemarkForm.trackingRemark = trackingRemark;
                 this.trackingRemarkVisible = true;
             },
             trackingRemarkSumbit(form) {
