@@ -3,19 +3,17 @@ package com.kuaidao.manageweb.controller.language;
 
 import com.alibaba.fastjson.JSON;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.custservice.dto.language.CommonLanguagePageReqDTO;
-import com.kuaidao.custservice.dto.language.CommonLanguageReqDto;
-import com.kuaidao.custservice.dto.language.CommonLanguageRespDto;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.custservice.dto.language.*;
 import com.kuaidao.manageweb.feign.language.CommonLanguageFeignClient;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.util.*;
 
 /**
@@ -27,7 +25,7 @@ import java.util.*;
 public class CommonLanguageController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
+    @Resource
     private CommonLanguageFeignClient commonLanguageFeignClient;
 
 
@@ -36,8 +34,9 @@ public class CommonLanguageController {
      * @param commonLanguageReq
      * @return
      */
-    @PostMapping(value = "/save")
+    @RequestMapping(value = "/save")
     public JSONResult<Boolean> save(CommonLanguageReqDto commonLanguageReq) {
+        commonLanguageReq.setId(null);
         logger.info("manager-web CommonLanguageController saveOrUpdate:param{}", JSON.toJSONString(commonLanguageReq));
         if(commonLanguageReq.getType()==null){
             return new JSONResult<Boolean>().fail("-1","新增常用词类型不能为空");
@@ -57,7 +56,7 @@ public class CommonLanguageController {
      * @param commonLanguageReq
      * @return
      */
-    @PostMapping(value = "/update")
+    @RequestMapping(value = "/update")
     public JSONResult<Boolean> update(CommonLanguageReqDto commonLanguageReq) {
         if(commonLanguageReq.getId()==null){
             return new JSONResult<Boolean>().fail("-1","修改操作常用语不能为空");
@@ -79,7 +78,7 @@ public class CommonLanguageController {
      * 根据ID查处常用词
      * @return
      */
-    @PostMapping(value = "/deleteById")
+    @RequestMapping(value = "/deleteById")
     public JSONResult<Boolean> deleteById(Long  id) {
         CommonLanguageReqDto commonLanguageReqDto = new CommonLanguageReqDto();
         commonLanguageReqDto.setId(id);
@@ -93,15 +92,12 @@ public class CommonLanguageController {
      * @return
      */
     @PostMapping(value = "/updateOrder")
-    public JSONResult<Boolean> updateOrder(CommonLanguageReqDto commonLanguageReqDto  ) {
-        if(commonLanguageReqDto.getStartId()==null || commonLanguageReqDto.getEndId()==null){
-            return new JSONResult<Boolean>().fail("-1","常用词更新ID不能为空");
+    public JSONResult<Boolean> updateOrder(@Valid @RequestBody CommonLanguageOrderReq commonLanguageOrderReq,
+                                           BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
         }
-
-        if(commonLanguageReqDto.getStartId()== commonLanguageReqDto.getEndId()){
-            return new JSONResult<Boolean>().fail("-1","常用词更新ID不能相同");
-        }
-        return commonLanguageFeignClient.updateOrder(commonLanguageReqDto);
+        return commonLanguageFeignClient.updateOrder(commonLanguageOrderReq);
 
     }
 

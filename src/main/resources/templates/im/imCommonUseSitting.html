@@ -29,17 +29,17 @@
         <el-row class="mainSearchForm">   
             <template>
                 <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-                    <el-tab-pane label="常用语设置" name="first">
+                    <el-tab-pane label="顾问常用语设置" name="first">
                         <div class="marginB20">
                             <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus">添加常用语</el-button>
                         </div> 
                         <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave">
-                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl">
+                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" :move='allow' @end.native="endEvent">
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm1.domains"
                                     :label=" index+1 + '、'"
                                     :key="domain.key"
-                                    :prop="'domains.' + index + '.value'"
+                                    :prop="'domains.' + index + '.comText'"
                                     :rules="{
                                       required: true, message: '常用语不能为空', trigger: 'blur'
                                     }"
@@ -47,7 +47,7 @@
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.value" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1')"  :disabled="iptDisabled"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1(domain)"  :disabled="iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
@@ -61,8 +61,30 @@
                         <!-- {{dynamicValidateForm1.domains}} -->
                     </el-tab-pane>
                     <el-tab-pane label="用户常用语" name="second">
-                        <el-button   type="success" size="small" class="marginB20" icon="el-icon-plus">添加用户常用语</el-button>
-
+                        <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus">添加用户常用语</el-button>
+                        <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2">
+                            <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" :move='allow2' @end.native="endEvent2">
+                                <el-form-item
+                                    v-for="(domain, index) in dynamicValidateForm2.domains"
+                                    :label=" index+1 + '、'"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.comText'"
+                                    :rules="{
+                                      required: true, message: '常用语不能为空', trigger: 'blur'
+                                    }"
+                                    label-width="30px"
+                                    style="margin-bottom: 20px;" 
+                                    
+                                    >
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2(domain)"  :disabled="iptDisabled2"></el-input>
+                                    <el-button type="warning" @click.prevent="editDomain2(domain)" icon="el-icon-edit-outline" v-if="isShowEdit2">编辑</el-button> 
+                                    <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
+                                </el-form-item>
+                                <!-- <el-form-item>
+                                    <el-button type="primary" @click="submitdialogForm1('dynamicValidateForm2')">提交</el-button>
+                                </el-form-item> -->
+                            </draggable>
+                        </el-form>
                     </el-tab-pane>
                 </el-tabs>
             </template>          
@@ -121,11 +143,11 @@
                     </el-time-picker>
                 </el-form-item>                
                 <el-form-item label="非工作时间自动恢复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.noWork" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.lixian" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
             </el-row>
@@ -136,7 +158,7 @@
         </el-form>
     </div>
     <!-- dialog -->
-    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="800px">
+    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="800px" :close-on-click-modal="false">
         <template>
             <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
                 <el-button type="success" @click="addDomain" style="margin-bottom: 10px;">添加</el-button>
@@ -196,17 +218,21 @@
                 },
                 tableData: [],
                 activeName: 'first',//
-                commonuseArr:[],//常用语设置
-                dynamicValidateForm1: {
+                dynamicValidateForm1: {//常用语设置
+                    domains: [],
+                },
+                dynamicValidateForm2: {//常用语设置
                     domains: [],
                 },
                 labelWidth:"190px",
                 isShowEdit:false,
+                isShowEdit2:false,
                 iptDisabled:false,
+                iptDisabled2:false,
                 dynamicVisible:false,//开场白弹窗
                 dynamicValidateForm: {
                     domains: [{
-                        value: ''
+                        content: ''
                     }],
                 },
                 isshowDelete:false,
@@ -220,7 +246,14 @@
                     endTime:'',
                     noWork:'',//非工作时间自动恢复内容
                     lixian:'',//离线/忙碌状态自动回复语
+                    content1:'',//非工作时间自动回复内容
+                    content2:'',//离线自动回复内容
+                    id:'',
+                    id1:'',
+                    id2:'',
                 },
+                realList:{},
+                realList2:{},
             }             
         },
         methods: { 
@@ -238,30 +271,32 @@
                 }
                 // 超时对象
                 timeOutParm.content=this.form.content;
-                timeOutParm.timeOutEnable=this.form.timeOutEnable;
+                timeOutParm.timeOutEnable=parseInt(this.form.timeOutEnable);
                 timeOutParm.timeOut=this.form.timeOut;
-
+                // 非工作时间
                 if(noWork.id){
                     noWorkParm.id=noWork.id;
                 }
-                noWorkParm.nonWorktimeEnable=this.form.nonWorktimeEnable;
+                noWorkParm.nonWorktimeEnable=parseInt(this.form.nonWorktimeEnable);
                 noWorkParm.startTime=this.form.startTime;
                 noWorkParm.endTime=this.form.endTime;
+                noWorkParm.content=this.form.content1;
+                // 离线
                 if(lixian.id){
                   lixianParm.id=lixian.id; 
                 }
-                lixianParm.content=this.form.lixian; 
+                lixianParm.content=this.form.content2; 
 
-                param.kaichangList=kaichangListParm;
+                param.kaiChangList=kaichangListParm;
                 param.timeOut=timeOutParm;
                 param.nonWorkTime=noWorkParm;
                 param.lixian=lixianParm;
                 console.log(param)
                 this.loading = true; 
-                axios.post('/message/im/saleMonitor',param).then(function (response) { 
+                axios.post('/autoResponse/saveOrUpdate',param).then(function (response) { 
                     mainDivVM.loading = false;
                     console.log(response)
-                    
+                    window.location.href="/im/imCommonUseSitting/index"
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
@@ -271,46 +306,190 @@
                 });
             },
             cancelForm(){
-
+                window.location.href="/im/imCommonUseSitting/index"
             },
             // 常用语设置
+            allow(evt){//拖拽事件
+                // console.log(evt)
+                // console.log(evt.draggedContext.index)
+                // console.log(evt.draggedContext.element)
+                // console.log(evt.draggedContext.futureIndex)
+                // console.log(evt.relatedContext.index)
+                // console.log(evt.relatedContext.element)
+                // console.log(evt.relatedContext.list)
+                // console.log(evt.relatedContext.component)
+                // console.log(evt.relatedContext.element)
+                console.log(evt)
+                // console.log(evt.relatedContext.component.realList)
+                // console.log(evt.relatedContext.component.value)
+                this.realList=evt.relatedContext.component.realList;                
+            },
+            allow2(evt){//拖拽事件
+                // console.log(evt)
+                // console.log(evt.draggedContext.index)
+                // console.log(evt.draggedContext.element)
+                // console.log(evt.draggedContext.futureIndex)
+                // console.log(evt.relatedContext.index)
+                // console.log(evt.relatedContext.element)
+                // console.log(evt.relatedContext.list)
+                // console.log(evt.relatedContext.component)
+                // console.log(evt.relatedContext.element)
+                console.log(evt)
+                // console.log(evt.relatedContext.component.realList)
+                // console.log(evt.relatedContext.component.value)
+                this.realList2=evt.relatedContext.component.realList;                
+            },
+            endEvent(evt){
+                if (this.realList == null) return;
+                var realList=this.realList;
+                var param={};
+                var listArr=[];
+                for(var i=0;i<realList.length;i++){
+                    var listObj={};
+                    listObj.id=realList[i].id;
+                    listObj.order=i+1;
+                    listArr.push(listObj);
+                }
+                param.list=listArr;
+                console.log(param)
+                axios.post('/commonLanguage/updateOrder',param).then(function (response) { 
+                    // console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
+            endEvent2(evt){
+                if (this.realList2 == null) return;
+                var realList=this.realList2;
+                var param={};
+                var listArr=[];
+                for(var i=0;i<realList.length;i++){
+                    var listObj={};
+                    listObj.id=realList[i].id;
+                    listObj.order=i+1;
+                    listArr.push(listObj);
+                }
+                param.list=listArr;
+                console.log(param)
+                axios.post('/commonLanguage/updateOrder',param).then(function (response) { 
+                    // console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
             mouseOver(){
                 if(this.iptDisabled==true){
                     this.isShowEdit=true;
                 }                
             },
+            mouseOver2(){
+                if(this.iptDisabled2==true){
+                    this.isShowEdit2=true;
+                }                
+            },
             mouseLeave(){
                 this.isShowEdit=false;
+            },
+            mouseLeave2(){
+                this.isShowEdit2=false;
             },
             handleClick(tab, event) {
                 console.log(tab, event);
             },
-            submitdialogForm1(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        this.commonuseArr=JSON.parse(JSON.stringify(this.dynamicValidateForm1.domains));
-                        this.iptDisabled=true;
-                    } else {
-                        console.log('error submit!!');
-                        return;
-                    }
-                });
+            submitdialogForm1(item) {
+                console.log(item)
+                var id=item.id;
+                var type=2;//类型：1=用户常用语  2:顾问常用语
+                var comText=item.comText
+                var url="";
+                if(id){
+                    url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                }else{
+                    url="/commonLanguage/save?type="+type+'&comText='+comText
+                }
+                axios.post(url).then(function (response) { 
+                    console.log(response)
+                    window.location.href="/im/imCommonUseSitting/index"
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
+            submitdialogForm2(item) {
+                console.log(item)
+                var id=item.id;
+                var type=1;//类型：1=用户常用语  2:顾问常用语
+                var comText=item.comText
+                var url="";
+                if(id){
+                    url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                }else{
+                    url="/commonLanguage/save?type="+type+'&comText='+comText
+                }
+                axios.post(url).then(function (response) { 
+                    console.log(response)
+                    window.location.href="/im/imCommonUseSitting/index"
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
             },
             removeDomain1(item) {
-                var index = this.dynamicValidateForm1.domains.indexOf(item)
-                if (index !== -1) {
-                    this.dynamicValidateForm1.domains.splice(index, 1)
-                }
+                // var index = this.dynamicValidateForm1.domains.indexOf(item)
+                // if (index !== -1) {
+                //     this.dynamicValidateForm1.domains.splice(index, 1)
+                // }
+                var id=item.id;
+                console.log(id)
+                this.$confirm('是否确认删除?').then(() => {
+                    axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
+                        console.log(response)
+                        window.location.href="/im/imCommonUseSitting/index"        
+                    }).catch(function (error) {
+                        mainDivVM.$message({
+                            message: "请求失败，请稍后重试",
+                            type: "error"
+                        });
+                    }); 
+
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });                    
             },
             addDomain1() {
                 this.dynamicValidateForm1.domains.push({
-                    value: '',
+                    comText: '',
                     key: Date.now()
                 });
                 this.iptDisabled=false;
             },
+            addDomain2() {
+                this.dynamicValidateForm2.domains.push({
+                    comText: '',
+                    key: Date.now()
+                });
+                this.iptDisabled2=false;
+            },
             editDomain1(){
                 this.iptDisabled=false;
+            },
+            editDomain2(){
+                this.iptDisabled2=false;
             },
             //开场白开始
             editPrologue(){
@@ -377,13 +556,44 @@
             // nonWorktimeEnable:非工作时间自动回复启用状态1:启用，0:禁用
             // startTime  非工作时间开始时间
             // endTime   非工作时间结束时间~~~~
-            // }   
+            // }  
+            // form: {//自动回复设置
+            //         timeOutEnable:'',//超时自动恢复设置
+            //         timeOut:'',//超时自动恢复时间
+            //         content:'',//超时自动恢复内容
+            //         nonWorktimeEnable:'',//非工作时间自动恢复设置
+            //         startTime:'',//非工作时间段
+            //         endTime:'',
+            //         noWork:'',//非工作时间自动恢复内容
+            //         lixian:'',//离线/忙碌状态自动回复语
+            //     }, 
             if(kaichangList){
                 this.prologuesArr=JSON.parse(JSON.stringify(kaichangList));
                 this.dynamicValidateForm.domains=JSON.parse(JSON.stringify(kaichangList));
             }
             if(timeOut){
-                
+                this.form.timeOutEnable=timeOut.timeOutEnable+"";
+                this.form.timeOut=timeOut.timeOut;
+                this.form.content=timeOut.content;
+            }
+            if(noWork){
+                this.form.nonWorktimeEnable=noWork.nonWorktimeEnable+"";
+                this.form.startTime=noWork.startTime;
+                this.form.endTime=noWork.endTime;
+                this.form.content1=noWork.content;
+            }
+            if(lixian){
+                this.form.content2=lixian.content;
+            }
+            if(saleLangList){
+                this.dynamicValidateForm1.domains=saleLangList;
+                this.isShowEdit=true;
+                this.iptDisabled=true;
+            }
+            if(userLangList){
+                this.dynamicValidateForm2.domains=userLangList;
+                this.isShowEdit2=true;
+                this.iptDisabled2=true;
             }
 
         },

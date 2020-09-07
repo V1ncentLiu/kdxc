@@ -4,6 +4,7 @@ package com.kuaidao.manageweb.feign.language;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.custservice.dto.language.CommonLanguageOrderReq;
 import com.kuaidao.custservice.dto.language.CommonLanguagePageReqDTO;
 import com.kuaidao.custservice.dto.language.CommonLanguageReqDto;
 import com.kuaidao.custservice.dto.language.CommonLanguageRespDto;
@@ -77,11 +78,11 @@ public interface CommonLanguageFeignClient {
     /**
      * 查询常用词带分页
      *
-     * @param commonLanguageReqDto
+     * @param commonLanguageOrderReq
      * @return
      */
     @PostMapping("/updateOrder")
-    JSONResult<Boolean> updateOrder(CommonLanguageReqDto commonLanguageReqDto);
+    JSONResult<Boolean> updateOrder(CommonLanguageOrderReq commonLanguageOrderReq);
 
     @Component
     static class HystrixClientFallback implements CommonLanguageFeignClient {
@@ -125,7 +126,7 @@ public interface CommonLanguageFeignClient {
         }
 
         @Override
-        public JSONResult<Boolean> updateOrder(CommonLanguageReqDto commonLanguageReqDto) {
+        public JSONResult<Boolean> updateOrder(CommonLanguageOrderReq commonLanguageOrderReq) {
             return fallBackError("常用词分页");
         }
     }
