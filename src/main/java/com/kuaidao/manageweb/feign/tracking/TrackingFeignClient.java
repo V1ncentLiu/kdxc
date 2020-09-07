@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.tracking;
 
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingRemarkDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -39,7 +40,8 @@ public interface TrackingFeignClient {
     @RequestMapping("/queryList")
     public JSONResult<List<TrackingRespDTO>> queryList(@RequestBody TrackingReqDTO dto);
 
-
+    @RequestMapping("/updateTrackingRemark")
+    JSONResult<String> updateTrackingRemark(@RequestBody TrackingRemarkDTO dto);
     @Component
     static class HystrixClientFallback implements TrackingFeignClient {
 
@@ -72,6 +74,11 @@ public interface TrackingFeignClient {
         @Override
         public JSONResult<List<TrackingRespDTO>> queryList(TrackingReqDTO dto) {
             return fallBackError("资源跟进记录-查询（不分页）");
+        }
+
+        @Override
+        public JSONResult<String> updateTrackingRemark(TrackingRemarkDTO dto) {
+            return fallBackError("总监填写跟进备注）");
         }
     }
 
