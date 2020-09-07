@@ -61,8 +61,30 @@
                         <!-- {{dynamicValidateForm1.domains}} -->
                     </el-tab-pane>
                     <el-tab-pane label="用户常用语" name="second">
-                        <el-button   type="success" size="small" class="marginB20" icon="el-icon-plus">添加用户常用语</el-button>
-
+                        <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus">添加用户常用语</el-button>
+                        <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2">
+                            <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" :move='allow2' @end.native="endEvent">
+                                <el-form-item
+                                    v-for="(domain, index) in dynamicValidateForm2.domains"
+                                    :label=" index+1 + '、'"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.comText'"
+                                    :rules="{
+                                      required: true, message: '常用语不能为空', trigger: 'blur'
+                                    }"
+                                    label-width="30px"
+                                    style="margin-bottom: 20px;" 
+                                    
+                                    >
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2(domain)"  :disabled="iptDisabled2"></el-input>
+                                    <el-button type="warning" @click.prevent="editDomain2(domain)" icon="el-icon-edit-outline" v-if="isShowEdit2">编辑</el-button> 
+                                    <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
+                                </el-form-item>
+                                <!-- <el-form-item>
+                                    <el-button type="primary" @click="submitdialogForm1('dynamicValidateForm2')">提交</el-button>
+                                </el-form-item> -->
+                            </draggable>
+                        </el-form>
                     </el-tab-pane>
                 </el-tabs>
             </template>          
@@ -196,13 +218,17 @@
                 },
                 tableData: [],
                 activeName: 'first',//
-                commonuseArr:[],//常用语设置
-                dynamicValidateForm1: {
+                dynamicValidateForm1: {//常用语设置
+                    domains: [],
+                },
+                dynamicValidateForm2: {//常用语设置
                     domains: [],
                 },
                 labelWidth:"190px",
                 isShowEdit:false,
+                isShowEdit2:false,
                 iptDisabled:false,
+                iptDisabled2:false,
                 dynamicVisible:false,//开场白弹窗
                 dynamicValidateForm: {
                     domains: [{
@@ -227,6 +253,7 @@
                     id2:'',
                 },
                 realList:{},
+                realList2:{},
             }             
         },
         methods: { 
@@ -297,6 +324,21 @@
                 // console.log(evt.relatedContext.component.value)
                 this.realList=evt.relatedContext.component.realList;                
             },
+            allow2(evt){//拖拽事件
+                // console.log(evt)
+                // console.log(evt.draggedContext.index)
+                // console.log(evt.draggedContext.element)
+                // console.log(evt.draggedContext.futureIndex)
+                // console.log(evt.relatedContext.index)
+                // console.log(evt.relatedContext.element)
+                // console.log(evt.relatedContext.list)
+                // console.log(evt.relatedContext.component)
+                // console.log(evt.relatedContext.element)
+                console.log(evt)
+                // console.log(evt.relatedContext.component.realList)
+                // console.log(evt.relatedContext.component.value)
+                this.realList2=evt.relatedContext.component.realList;                
+            },
             endEvent(evt){
                 if (this.realList == null) return;
                 var realList=this.realList;
@@ -320,13 +362,44 @@
                     });
                 });  
             },
+            endEvent2(evt){
+                if (this.realList2 == null) return;
+                var realList=this.realList2;
+                var param={};
+                var listArr=[];
+                for(var i=0;i<realList2.length;i++){
+                    var listObj={};
+                    listObj.id=realList2[i].id;
+                    listObj.order=i+1;
+                    listArr.push(listObj);
+                }
+                param.list=listArr;
+                console.log(param)
+                axios.post('/commonLanguage/updateOrder',param).then(function (response) { 
+                    // console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
             mouseOver(){
                 if(this.iptDisabled==true){
                     this.isShowEdit=true;
                 }                
             },
+            mouseOver2(){
+                if(this.iptDisabled2==true){
+                    this.isShowEdit2=true;
+                }                
+            },
             mouseLeave(){
                 this.isShowEdit=false;
+            },
+            mouseLeave2(){
+                this.isShowEdit2=false;
             },
             handleClick(tab, event) {
                 console.log(tab, event);
@@ -344,7 +417,28 @@
                 }
                 axios.post(url).then(function (response) { 
                     console.log(response)
-                    
+                    // window.location.href=""
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
+            submitdialogForm2(item) {
+                console.log(item)
+                var id=item.id;
+                var type=1;//类型：1=用户常用语  2:顾问常用语
+                var comText=item.comText
+                var url="";
+                if(id){
+                    url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                }else{
+                    url="/commonLanguage/save?type="+type+'&comText='+comText
+                }
+                axios.post(url).then(function (response) { 
+                    console.log(response)
+                    // window.location.href=""
                 }).catch(function (error) {
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
@@ -375,8 +469,7 @@
                         type: 'info',
                         message: '已取消删除'
                     });
-                });
-                    
+                });                    
             },
             addDomain1() {
                 this.dynamicValidateForm1.domains.push({
@@ -385,8 +478,18 @@
                 });
                 this.iptDisabled=false;
             },
+            addDomain2() {
+                this.dynamicValidateForm2.domains.push({
+                    comText: '',
+                    key: Date.now()
+                });
+                this.iptDisabled2=false;
+            },
             editDomain1(){
                 this.iptDisabled=false;
+            },
+            editDomain2(){
+                this.iptDisabled2=false;
             },
             //开场白开始
             editPrologue(){
@@ -487,11 +590,11 @@
                 this.isShowEdit=true;
                 this.iptDisabled=true;
             }
-            // if(userLangList){
-            //     this.dynamicValidateForm1.domains=userLangList;
-            //     this.isShowEdit=true;
-            //     this.iptDisabled=true;
-            // }
+            if(userLangList){
+                this.dynamicValidateForm2.domains=userLangList;
+                this.isShowEdit2=true;
+                this.iptDisabled2=true;
+            }
 
         },
         mounted(){
