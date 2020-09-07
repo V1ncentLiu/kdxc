@@ -34,7 +34,7 @@
                             <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus">添加常用语</el-button>
                         </div> 
                         <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave">
-                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" :move='allow'>
+                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" :move='allow' @end.native="endEvent">
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm1.domains"
                                     :label=" index+1 + '、'"
@@ -226,6 +226,7 @@
                     id1:'',
                     id2:'',
                 },
+                realList:{},
             }             
         },
         methods: { 
@@ -282,18 +283,31 @@
             },
             // 常用语设置
             allow(evt){//拖拽事件
-                console.log(evt)
-                console.log(evt.draggedContext.index)
-                console.log(evt.draggedContext.element)
-                console.log(evt.draggedContext.futureIndex)
-                console.log(evt.relatedContext.index)
-                console.log(evt.relatedContext.element)
-                console.log(evt.relatedContext.list)
-                console.log(evt.relatedContext.component)
+                // console.log(evt)
+                // console.log(evt.draggedContext.index)
+                // console.log(evt.draggedContext.element)
+                // console.log(evt.draggedContext.futureIndex)
+                // console.log(evt.relatedContext.index)
+                // console.log(evt.relatedContext.element)
+                // console.log(evt.relatedContext.list)
+                // console.log(evt.relatedContext.component.realList)
+                this.realList=evt.relatedContext.component.realList;                
+            },
+            endEvent(evt){
+                if (this.realList == null) return;
+                var realList=this.realList;
                 var param={};
-                param.list=evt.relatedContext.list;
-                axios.post('/commonLanguage/updateOrder',parm).then(function (response) { 
-                    console.log(response)
+                var listArr=[];
+                for(var i=0;i<realList.length;i++){
+                    var listObj={};
+                    listObj.id=realList[i].id;
+                    listObj.order=i;
+                    listArr.push(listObj);
+                }
+                param.list=listArr;
+                console.log(param)
+                axios.post('/commonLanguage/updateOrder',param).then(function (response) { 
+                    // console.log(response)
                     
                 }).catch(function (error) {
                     mainDivVM.$message({
