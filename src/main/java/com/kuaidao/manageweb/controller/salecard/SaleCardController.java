@@ -44,15 +44,16 @@ public class SaleCardController {
     /**
      * 根据类型查询  根据顾问ID查询
      *
-     * @param telSaleId
+     * @param saleCardReqDto
      * @return
      */
-    @RequestMapping(value = "/getSaleCard")
+    @PostMapping(value = "/getSaleCard")
     @ResponseBody
-    public JSONResult<SaleCardRespDto> getSaleCard(Long telSaleId, ModelMap modelMap) {
-        logger.info("manager-web SaleCardController queryById:param{}", telSaleId);
-        SaleCardReqDto saleCardReqDto = new SaleCardReqDto();
-        saleCardReqDto.setTeleSaleId(telSaleId);
+    public JSONResult<SaleCardRespDto> getSaleCard(@RequestBody SaleCardReqDto saleCardReqDto, ModelMap modelMap) {
+        logger.info("manager-web SaleCardController queryById:param{}", saleCardReqDto);
+        if(null ==saleCardReqDto.getTeleSaleId()){
+            return new JSONResult<SaleCardRespDto>().fail("-1","参数错误！");
+        }
         return saleCardFeignClient.queryById(saleCardReqDto);
     }
 
@@ -77,9 +78,9 @@ public class SaleCardController {
      * @param saleCardReqDto
      * @return
      */
-    @RequestMapping(value = "/saveOrUpdate")
+    @PostMapping(value = "/saveOrUpdate")
     @ResponseBody
-    public JSONResult<Boolean> saveOrUpdate( SaleCardReqDto saleCardReqDto) {
+    public JSONResult<Boolean> saveOrUpdate(@RequestBody SaleCardReqDto saleCardReqDto) {
         logger.info("custservice SaleCardController saveOrUpdate:param{}", JSON.toJSONString(saleCardReqDto));
         JSONResult<Boolean> jsonResult = checkParam(saleCardReqDto);
         if (jsonResult.getCode().equals(JSONResult.FAIL)) {
