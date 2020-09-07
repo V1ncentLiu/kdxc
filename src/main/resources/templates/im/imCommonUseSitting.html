@@ -34,7 +34,7 @@
                             <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus">添加常用语</el-button>
                         </div> 
                         <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave">
-                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl">
+                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" :move='allow'>
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm1.domains"
                                     :label=" index+1 + '、'"
@@ -281,6 +281,27 @@
                 window.location.href="/im/imCommonUseSitting/index"
             },
             // 常用语设置
+            allow(evt){//拖拽事件
+                console.log(evt)
+                console.log(evt.draggedContext.index)
+                console.log(evt.draggedContext.element)
+                console.log(evt.draggedContext.futureIndex)
+                console.log(evt.relatedContext.index)
+                console.log(evt.relatedContext.element)
+                console.log(evt.relatedContext.list)
+                console.log(evt.relatedContext.component)
+                var param={};
+                param.list=evt.relatedContext.list;
+                axios.post('/commonLanguage/updateOrder',parm).then(function (response) { 
+                    console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
             mouseOver(){
                 if(this.iptDisabled==true){
                     this.isShowEdit=true;
@@ -443,11 +464,16 @@
             if(lixian){
                 this.form.content2=lixian.content;
             }
-            if(userLangList){
-                this.dynamicValidateForm1.domains=userLangList;
+            if(saleLangList){
+                this.dynamicValidateForm1.domains=saleLangList;
                 this.isShowEdit=true;
                 this.iptDisabled=true;
             }
+            // if(userLangList){
+            //     this.dynamicValidateForm1.domains=userLangList;
+            //     this.isShowEdit=true;
+            //     this.iptDisabled=true;
+            // }
 
         },
         mounted(){
