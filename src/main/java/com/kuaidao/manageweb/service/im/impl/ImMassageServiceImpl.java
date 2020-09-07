@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
@@ -35,6 +36,9 @@ public class ImMassageServiceImpl implements ImMassageService {
     private SaleImFeignClient saleImFeignClient;
     @Autowired
     private CustomerInfoFeignClient customerInfoFeignClient;
+
+    @Value("${netease.im.appKey}")
+    private String neteaseAppKey;
 
     /**
      * 在线离线后台调用日志接口
@@ -78,6 +82,7 @@ public class ImMassageServiceImpl implements ImMassageService {
                 Map<String, Object> newHashMap = Maps.newHashMap();
                 newHashMap.put("imId", byTeleSaleId.getData().getImId());
                 newHashMap.put("imToken", byTeleSaleId.getData().getToken());
+                newHashMap.put("imAppKey", neteaseAppKey);
             }
         }
         return null;
