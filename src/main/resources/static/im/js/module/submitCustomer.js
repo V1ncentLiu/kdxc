@@ -25,34 +25,6 @@ YX.fn.submitCustomer = function () {
     $('#commonWordsList').find('li').on("click",this.commonWordsListClick.bind(this));
 
 }
-YX.fn.mouseenterHover = function () {//获取常用语
-    debugger
-    if(type=='commonWords'){
-        var that = this;
-        var params = {
-            type: 2
-        };
-        $.ajax({
-          url: '/custservice/v1.0/huiju/getCommonLanguage',
-          type: 'POST',
-          data: params,
-          contentType: 'application/json',
-          success: function(data) {
-            console.log(data)
-            if (data.res === 200) {
-                console.log('获取成功');
-              
-            } else {
-                console.log('获取失败'); 
-            }
-          },
-          error: function() {
-             console.log('请求失败，请重试');
-          }
-        });
-    }
-
-}
 YX.fn.commonWordsListClick = function () {
     var e = e||window.event;
     var tar=$(event.target)
@@ -162,6 +134,34 @@ YX.fn.mouseenterHover = function (type) {
             $('#commonWordsList').css({
                 'display': 'block'
             })
+            // 获取常用语
+            var that = this;
+            var params = {
+                type: 2
+            };
+            $.ajax({
+              url: '/custservice/v1.0/huiju/getCommonLanguage',
+              type: 'POST',
+              data: params,
+              contentType: 'application/json',
+              success: function(data) {
+                console.log(data)
+                if (data.res === 200) {
+                    console.log('获取成功');
+                    var data=data.data;
+                    var html='';
+                    for(var i=0;i<data.length;i++){
+                        html+='<li>'+data[i].comText+'</li>'
+                    }
+                    $("commonWordsList").html(html);
+                } else {
+                    console.log('获取失败'); 
+                }
+              },
+              error: function() {
+                 console.log('请求失败，请重试');
+              }
+            });
             break;
         case 'brandSelection':
             $('#brandSelection img').attr("src", "../../../im/images/newImages/icon_xpp拷贝@3x.png");
