@@ -61,23 +61,20 @@ YX.fn.generalFormLastClick = function (type) {
             teleSaleId: teleSaleId
         };
         $.ajax({
-          url: CONFIG.url + '/im/submit',
+          url: '/im/submit',
           type: 'POST',
           data: params,
-          contentType: 'application/x-www-form-urlencoded',
-          beforeSend: function(req) {
-            req.setRequestHeader('appkey', CONFIG.appkey);
-          },
+          contentType: 'application/json',
           success: function(data) {
             if (data.res === 200) {
-              console.log('提交成功');
+              console.log('保存成功');
               
             } else {
-              that.$errorMsg.html(data.errmsg);
+               console.log('保存失败'); 
             }
           },
           error: function() {
-            that.$errorMsg.html('请求失败，请重试');
+             console.log('请求失败，请重试');
           }
         });
     }
@@ -98,6 +95,33 @@ YX.fn.submitCustomerClick = function () {
     })
     $("#generalFormLastCancel").click(function(){
         layer.close(submitCustomerLayer)
+    });
+    // 回显客户信息
+    var that = this;
+    var params = {
+            id: ""
+    };
+    $.ajax({
+        url: '/custservice/customerInfo/customerInfoByIm',
+        type: 'POST',
+        data: params,
+        contentType: 'application/json',
+        success: function(data) {
+            if (data.res === 200) {
+                var data=data.data;
+                var phoneNumber=data.phoneNumber;
+                var phoneNumber=data.phoneNumber;
+                console.log('回显客户信息');
+                $("#submitCustomerFormName").val('1');      
+                $("#submitCustomerFormIphone").val(phoneNumber);
+              
+            } else {
+                console.log('回显客户信息失败');
+            }
+        },
+        error: function() {
+            console.log('请求失败，请重试');
+        }
     });
 
 }
