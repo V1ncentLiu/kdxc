@@ -7,7 +7,6 @@ import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
-import com.kuaidao.custservice.dto.onlineleave.SaleMonitorCalReq;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.custservice.dto.onlineleave.TSaleMonitorReq;
@@ -35,9 +34,6 @@ public interface CustomerInfoFeignClient {
 
     @PostMapping(value = "/onlineleave")
     JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq);
-
-    @PostMapping(value = "/calCusNum")
-    JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq);
 
     @PostMapping(value = "/getSaleMonitor")
     JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq);
@@ -70,11 +66,6 @@ public interface CustomerInfoFeignClient {
         @Override
         public JSONResult<Boolean> onlineleave(SaleOnlineLeaveLogReq saleOnlineLeaveLogReq) {
             return fallBackError("在线离线日志");
-        }
-
-        @Override
-        public JSONResult<Boolean> calCusNum(SaleMonitorCalReq saleMonitorCalReq) {
-            return fallBackError("提交客户量/提交会话客户量");
         }
 
         @Override
