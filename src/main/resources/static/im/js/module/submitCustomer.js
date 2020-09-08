@@ -42,7 +42,44 @@ YX.fn.commonWordsListClick = function () {
 
 YX.fn.generalFormLastClick = function (type) {
     if(type=='submit'){
-        alert('表单提交');
+        // alert('表单提交');
+        var that = this;
+        var name=$("#submitCustomerFormName").val();
+        var customerId="";
+        var phone=$("#submitCustomerFormIphone").val();
+        var phone2=$("#submitCustomerFormIphoneTwo").val();
+        var wechat=$("#submitCustomerFormWechat").val();
+        var remark=$("#submitCustomerBeizhu").val();
+        var teleSaleId="";
+        var params = {
+            name: name,
+            customerId: customerId,
+            phone: phone,
+            phone2: phone2,
+            wechat: wechat,
+            remark: remark,
+            teleSaleId: teleSaleId
+        };
+        $.ajax({
+          url: CONFIG.url + '/im/submit',
+          type: 'POST',
+          data: params,
+          contentType: 'application/x-www-form-urlencoded',
+          beforeSend: function(req) {
+            req.setRequestHeader('appkey', CONFIG.appkey);
+          },
+          success: function(data) {
+            if (data.res === 200) {
+              console.log('提交成功');
+              
+            } else {
+              that.$errorMsg.html(data.errmsg);
+            }
+          },
+          error: function() {
+            that.$errorMsg.html('请求失败，请重试');
+          }
+        });
     }
 }
 
