@@ -143,7 +143,7 @@ var appUI = {
             buildSender(message) +
             '">',
           '<img class="img j-img" src="' +
-            getAvatar(avatar) +
+          (avatar!='null'?getAvatar(avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png') +
             '" data-account="' +
             from +
             '"/>',

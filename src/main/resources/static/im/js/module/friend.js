@@ -63,89 +63,81 @@ YX.fn.friendListConcat = function () {
             brandName: '本宫的茶',
             clueId: '1111212121',    //线索ID
             isSubmit: 1,
-            account: "p_93640717727557801",    //imId
+            account: "075e46ee54fe4a8fba725460afb22ea2",    //imId
+            time: '06-16',
+        },
+        {
+            brandName: '本宫的茶1',
+            clueId: '1111212121',    //线索ID
+            isSubmit: 1,
+            account: "669f80e2663a4e238728a9c348ac9e36",    //imId
             time: '06-16'
         },
         {
             brandName: '本宫的茶1',
             clueId: '1111212121',    //线索ID
             isSubmit: 1,
-            account: "houjunliang",    //imId
+            account: "36e790ae11674a76a91f6ce98ab93d82",    //imId
             time: '06-16'
         },
         {
             brandName: '本宫的茶1',
             clueId: '1111212121',    //线索ID
             isSubmit: 1,
-            account: "houjunliang111",    //imId
+            account: "3bd44fe0836f45bb888c29a3b165e8bc",    //imId
             time: '06-16'
         },
         {
-            brandName: '本宫的茶2',
+            brandName: '本宫的茶1',
             clueId: '1111212121',    //线索ID
             isSubmit: 1,
-            account: "weichen9694@126.com",    //imId
+            account: "41d07223346d4a8c8260af1c05ac0ab1",    //imId
             time: '06-16'
         },
-        {
-            brandName: '本宫的茶2',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "houjunliang222",    //imId
-            time: '06-16'
-        },{
-            brandName: '本宫的茶2',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "houjunliang333",    //imId
-            time: '06-16'
-        },{
-            brandName: '本宫的茶2',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "houjunliang444",    //imId
-            time: '06-16'  //imId
-          },{
-            brandName: '本宫的茶2',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "houjunliang555",    //imId
-            time: '06-16'  //imId
-          },{
-            brandName: '本宫的茶2',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "18501903418",    //imId
-            time: '06-16'  //imId
-          }
+        
     ]  
-    
-    var param={};
-    param.teleSaleId=userId;
-    axios.post("/im/submitCustList", param)
-    .then(function (response) {
-        console.log(response);
-    })
-    .catch(function (error) {
-            console.log(error);
-    });
-
-    var allData = this.cache.getFriendslistOnShow()
     var newArray = []
-    for (let i = 0; i < allData.length; i++) {
-        for (let j = 0; j < array.length; j++) {
-            if (allData[i].account == array[j].account) {
-                newArray.push(Object.assign(allData[i], array[j]))
+    var param={
+        teleSaleId:userId,
+        cusName:''
+    };
+    $.ajax({
+        url : '/im/submitCustList',
+        type:'POST',
+        data:JSON.stringify(param),
+        async:false,
+        contentType: "application/json; charset=utf-8",
+        dataType:'json',
+        success: function(result){
+            console.log(result,'右侧列表数据');
+            if(result.data){  
+                newArray=result.data.data
+                newArray[0].account='839ff57cdc1c4d3aaf8d85cc2571cc8b'
             }
+        },
+        error:function(request){
+          alert(request)
         }
-    }
-    return newArray && newArray
+    })
+
+    // var allData = []
+    // var newArray = []
+    // for (let i = 0; i < allData.length; i++) {
+    //     for (let j = 0; j < array.length; j++) {
+    //         if (allData[i].account == array[j].account) {
+    //             newArray.push(Object.assign(allData[i], array[j]))
+    //         }
+    //     }
+    // }
+
+    return array 
 }
 
 
 
 YX.fn.buildFriends = function () {
     var allData = this.friendListConcat() || []
+    this.cache.getSessions()
     var searchListInputVal = $('#searchListInputFriends').val()
     var newArray = []
     if (searchListInputVal) {

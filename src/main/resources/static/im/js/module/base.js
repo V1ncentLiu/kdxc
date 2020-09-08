@@ -124,6 +124,7 @@ YX.fn.openChatBox = function(account, scene) {
   YX.fn.stopPlayAudio()
   YX.fn.cancelRecordAudio()
   var info;
+  var infoSession
   var that = this;
   this.mysdk.setCurrSession(scene, account);
   this.crtSession = scene + '-' + account;
@@ -148,6 +149,7 @@ YX.fn.openChatBox = function(account, scene) {
   //根据帐号跟消息类型获取消息数据
   if (scene == 'p2p') {
     info = this.cache.getUserById(account);
+    infoSession=this.cache.getSessions()
     if (info.account == userUID) {
       this.$nickName.text('我的手机');
       this.$chatTitle.find('img').attr('src', 'images/myPhone.png');
@@ -168,12 +170,16 @@ YX.fn.openChatBox = function(account, scene) {
         this.$nickName.text(info.nick);
       // }
       // 聊天图片
-      this.$chatTitle.find('img').attr('src', getAvatar(info.avatar));
+      this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
       // 渲染聊天框信息
       this.getUserInfo(info.account)
-
-      // 将clueId作为标签属性
-      this.$submitCustomer.attr('data-imId', info.clueId)
+      this.$submitCustomer.attr('data-imId', '')
+      for(var i=0;i<infoSession.length;i++){
+        if(infoSession[i].to==info.account){
+          // 将clueId作为标签属性
+          this.$submitCustomer.attr('data-imId', infoSession[i].clueId)
+        }
+      }
     }
     // 群资料入口隐藏
     this.$teamInfo && this.$teamInfo.addClass('hide');
@@ -215,44 +221,33 @@ YX.fn.openChatBox = function(account, scene) {
 
 YX.fn.getUserInfo = function(accountId) {
   console.log(accountId,'聊天面板id');
-
     var params = {
       id:accountId
+      // id:'005d2f43fd034124b386bda8123317b6',
     };
-    // $.ajax({
-    //   url: CONFIG.url + '/custservice/customerInfo/customerInfoByIm',
-    //   type: 'POST',
-    //   data: params,
-    //   contentType:"application/json",
-    //   success: function(data) {
-    //     console.log(data);
-    //   },
-    //   error: function() {
-    //     that.$errorMsg.html('请求失败，请重试');
-    //   }
-    // })
-
-    let data={
-      accountId: 11111111,
-      phoneNumber: 19868976578,
-      brandInvestment: ' 20-30万',
-      sex: '女',
-      createDateStr: '2020-8-30',
-      userId: 11111,
-      imId: 22222,
-      age: '30-50岁',
-      createDate: '时间戳',
-    }
-
-    var str=`
-    <span>注册时间：`+data.createDateStr+`4</span>
-    <span>`+data.age+`</span>|
-    <span>`+data.sex+`</span>|
-    <span>`+data.brandInvestment+`</span>|
-    <span>电话： `+data.phoneNumber+`</span>
-  `
-  $('#otherInformation').html(str)
-     
+    $.ajax({
+      url:'/customerInfo/customerInfoByIm',
+      type: 'POST',
+      data: JSON.stringify(params),
+      contentType:"application/json",
+      success: function(data) {
+        console.log(data,'个人信息请求后端接口');
+        if(data.data){
+          var data=data.data
+          var str=`
+          <span>注册时间：`+data.createDateStr+`4</span>
+          <span>`+data.age+`</span>|
+          <span>`+data.sex+`</span>|
+          <span>`+data.brandInvestment+`</span>|
+          <span>电话： `+data.phoneNumber+`</span>
+        `
+          $('#otherInformation').html(str)
+       }
+      },
+      error: function() {
+        
+      }
+    })
 }
 
 
