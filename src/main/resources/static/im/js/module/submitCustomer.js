@@ -22,10 +22,9 @@ YX.fn.submitCustomer = function () {
     $('#generalFormLastSubmit').on("click", this.generalFormLastClick.bind(this,'submit'));
     
     
-    $('#commonWordsList li').on("click",this.commonWordsListClick.bind(this));
+    $('#commonWordsList').on("click",'li',this.commonWordsListClick.bind(this));
 
 }
-
 YX.fn.commonWordsListClick = function () {
     var e = e||window.event;
     var tar=$(event.target)
@@ -42,7 +41,41 @@ YX.fn.commonWordsListClick = function () {
 
 YX.fn.generalFormLastClick = function (type) {
     if(type=='submit'){
-        alert('表单提交');
+        // alert('表单提交');
+        var that = this;
+        var name=$("#submitCustomerFormName").val();
+        var customerId="";
+        var phone=$("#submitCustomerFormIphone").val();
+        var phone2=$("#submitCustomerFormIphoneTwo").val();
+        var wechat=$("#submitCustomerFormWechat").val();
+        var remark=$("#submitCustomerBeizhu").val();
+        var teleSaleId="";
+        var params = {
+            name: name,
+            customerId: customerId,
+            phone: phone,
+            phone2: phone2,
+            wechat: wechat,
+            remark: remark,
+            teleSaleId: teleSaleId
+        };
+        $.ajax({
+          url: '/im/submit',
+          type: 'POST',
+          data: params,
+          contentType: 'application/json',
+          success: function(data) {
+            if (data.res === 200) {
+              console.log('保存成功');
+              
+            } else {
+               console.log('保存失败'); 
+            }
+          },
+          error: function() {
+             console.log('请求失败，请重试');
+          }
+        });
     }
 }
 
@@ -62,6 +95,33 @@ YX.fn.submitCustomerClick = function () {
     $("#generalFormLastCancel").click(function(){
         layer.close(submitCustomerLayer)
     });
+    // 回显客户信息
+    var that = this;
+    var params = {
+            id: ""
+    };
+    $.ajax({
+        url: '/custservice/customerInfo/customerInfoByIm',
+        type: 'POST',
+        data: params,
+        contentType: 'application/json',
+        success: function(data) {
+            if (data.res === 200) {
+                var data=data.data;
+                var phoneNumber=data.phoneNumber;
+                var phoneNumber=data.phoneNumber;
+                console.log('回显客户信息');
+                $("#submitCustomerFormName").val('1');      
+                $("#submitCustomerFormIphone").val(phoneNumber);
+              
+            } else {
+                console.log('回显客户信息失败');
+            }
+        },
+        error: function() {
+            console.log('请求失败，请重试');
+        }
+    });
 
 }
 YX.fn.mouseenterHover = function (type) {
@@ -74,6 +134,35 @@ YX.fn.mouseenterHover = function (type) {
             $('#commonWordsList').css({
                 'display': 'block'
             })
+            // 获取常用语
+            var that = this;
+            var params = {
+                type: 2
+            };
+            // $.ajax({
+            //   url: '/custservice/v1.0/huiju/getCommonLanguage',
+            //   type: 'POST',
+            //   data: params,
+            //   contentType: 'application/json',
+            //   success: function(data) {
+            //     console.log(data)
+            //     if (data.res === 200) {
+            //         console.log('获取成功');
+            //         var data=data.data;
+                    var data=[{'comText':'123'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'}]
+                    var html='';
+                    for(var i=0;i<data.length;i++){
+                        html+='<li>'+data[i].comText+'</li>'
+                    }
+                    $("#commonWordsList").html(html);
+            //     } else {
+            //         console.log('获取失败'); 
+            //     }
+            //   },
+            //   error: function() {
+            //      console.log('请求失败，请重试');
+            //   }
+            // });
             break;
         case 'brandSelection':
             $('#brandSelection img').attr("src", "../../../im/images/newImages/icon_xpp拷贝@3x.png");
