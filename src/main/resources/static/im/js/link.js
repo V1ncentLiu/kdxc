@@ -174,10 +174,53 @@ var SDKBridge = function(ctr, data) {
     // 订阅好友事件
     that.subscribeMultiPortEvent(subscribeAccounts);
   }
+
+  // 获取后端接口数据合并ws推送的数据
+  function sessionsListConcat (sessions) {
+    var newIdList=[]
+    for(var i=0;i<sessions.length;i++){
+      if(sessions[i].scene=='p2p'){
+        newIdList.push(sessions[i].to)
+      }
+    }
+    var params = {idList: newIdList};
+    $.ajax({
+        url : '/im/brandAndIssubmit',
+        type:'POST',
+        data:JSON.stringify(params),
+        async:false,
+        contentType: "application/json; charset=utf-8",
+        dataType:'json',
+        success: function(result){
+          console.log(result,'左侧请求后端接口数据');
+          if(result.code=='0'){
+            var data=result.data
+            for(let i=0;i<sessions.length;i++){
+              for(let j=0;j<data.length;j++){
+                  if(sessions[i].to==data[j].imId&&sessions[i].scene=='p2p'){
+                      sessions[i].accountId=data[j].accountId
+                      sessions[i].brandName=data[j].brandName
+                      sessions[i].clueId=data[j].clueId
+                      sessions[i].isSubmit=data[j].isSubmit
+                  }
+              }
+            }
+          }else{
+            alert(result.code)
+          }
+        },
+        error:function(request){
+          alert(request)
+        }
+    })
+    return sessions
+  }
+
   function onSessions(sessions) {
     var old = this.cache.getSessions();
-    this.cache.setSessions(this.nim.mergeSessions(old, sessions));
     console.log(old, sessions,'左侧列表原始数据');
+    sessions=sessionsListConcat(sessions)
+    this.cache.setSessions(this.nim.mergeSessions(old, sessions));
     for (var i = 0; i < sessions.length; i++) {
       if (sessions[i].scene === 'p2p') {
         var tmpUser = sessions[i].to;

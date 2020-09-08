@@ -84,19 +84,18 @@ YX.fn.changeState = function (type) {
             break;
         default: return ''
     }
-
-    // $.ajax({
-    //     url: CONFIG.url + '/message/im/onlineleave',
-    //     type: 'POST',
-    //     data: params,
-    //     contentType: "application/json",
-    //     success: function (data) {
-    //         console.log(data);
-    //     },
-    //     error: function () {
-    //         that.$errorMsg.html('请求失败，请重试');
-    //     }
-    // })
+    $.ajax({
+        url:'/message/im/onlineleave',
+        type: 'POST',
+        data: JSON.stringify(params),
+        contentType: "application/json",
+        success: function (data) {
+            console.log(data,'在线离线接口');
+        },
+        error: function () {
+            
+        }
+    })
 }
 
 YX.fn.showMyInfo = function () {

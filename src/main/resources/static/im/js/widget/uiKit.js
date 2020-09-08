@@ -218,9 +218,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var infoText = '[' + multiPortStatus + '] ' + info.text
 	            } else {
 	                infoText = info.text
-	            }
+				}
 	            str = ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="' + info.scene + '" data-account="' + info.account + '">',
-	                            '<div class="panel_avatar"><img class="panel_image" src="'+info.avatar+'"/></div>',
+								'<div class="panel_avatar">',
+								'<img class="panel_image" src="'+(info.avatar==='null'?'https://app.yunxin.163.com/webdemo/im/images/default-icon.png':info.avatar)+'"/>',
+								'</div>',
 	                            '<div class="panel_text">',
 	                                '<p class="panel_multi-row">',
 										'<span class="panel_nick">',
@@ -480,7 +482,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			}else{
 				for (var i = 0; i < list.length; i++) {
 					info = this.provider(list[i],"friend");
-					if (list[i].account !== ACCOUNT) {
 						var account = list[i].account
 						var personSubscribes = data.personSubscribes
 						var multiPortStatus = ''
@@ -499,20 +500,18 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 							
 						html += ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="p2p" data-account="' + info.account + '">',
-									'<div class="panel_avatar"><img class="panel_image" src="'+info.avatar+'"/></div>',
+									'<div class="panel_avatar"><img class="panel_image" src="https://app.yunxin.163.com/webdemo/im/images/default-icon.png"/></div>',
 									'<div class="panel_text">',
 									'<p class="panel_multi-row">',
 										'<span class="panel_nick">',
-										info.nick ,
-										list[i].isSubmit?'<b class="panel_customer">我的客户</b> ':'',
+										list[i].cusName ,
 										list[i].brandName?'<b class="panel_brand">'+list[i].brandName+'</b>':'',
 										'</span>',
-										'<b class="panel_time">' +list[i].time + '</b>',
+										'<b class="panel_time">{' +list[i].time + '}</b>',
 									'</p>',
-											'<span class="panel_lastMsg">' + infoText + '</span>',
+											'<span class="panel_lastMsg">' + 11111111 + '</span>',
 									'</div>',
 								'</li>'].join("");
-					}	
 				}
 			}
 		this._body.innerHTML = html;

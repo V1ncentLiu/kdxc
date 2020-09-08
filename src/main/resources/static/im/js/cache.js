@@ -118,146 +118,14 @@ var Cache = (function() {
     return false;
   };
 
-  async function newGetSessions(sessions){
-    var newIdList=[]
-    var newArray=[]
-    var array=[]
-    for(var i=0;i<sessions.length;i++){
-      if(sessions[i].scene=='p2p'){
-        newIdList.push(sessions[i].to)
-      }
-    }
-
-    var param={};
-    param.idList=newIdList;
-
-    var params = {idList: newIdList};
-    $.ajax({
-        url : '/im/brandAndIssubmit',
-        type:'POST',
-        data:JSON.stringify(params),
-        async:false,
-        contentType: "application/json; charset=utf-8",
-        dataType:'json',
-        success: function(result){
-            console.log(sessions,222222222);
-        },
-        error:function(request){}
-    })
-
-
-
-    await axios.post("/im/brandAndIssubmit", param)
-    .then(function (response) {
-        var data=response.data.data
-        array=response.data.data
-        console.log(data,33333333);
-        // for(let i=0;i<sessions.length;i++){
-        //     for(let j=0;j<data.length;j++){
-        //       console.log(sessions[i].to,data[j].imId,77777777);
-        //         if(sessions[i].to==data[j].imId&&sessions[i].scene=='p2p'){
-        //             newArray.push(Object.assign(sessions[i], data[j]))
-        //         }
-        //     }
-        // }
-        console.log(sessions,222222222);
-      })
-    .catch(function (error) {
-            console.log(error);
-    });
-    console.log(sessions,4444444);
-
-    return sessions
-  }
-
   /**
    * 设置会话列表
    * @param {Array} sessions 会话对象
    */
-  Cache.prototype.sessionsListConcat = function (sessions) {
-    console.log(77777777);
-    // newGetSessions(sessions)
-    var newIdList=[]
-    var newArray=[]
-    var array=[]
-    for(var i=0;i<sessions.length;i++){
-      if(sessions[i].scene=='p2p'){
-        newIdList.push(sessions[i].to)
-      }
-    }
-
-    var params = {idList: newIdList};
-    $.ajax({
-        url : '/im/brandAndIssubmit',
-        type:'POST',
-        data:JSON.stringify(params),
-        async:false,
-        contentType: "application/json; charset=utf-8",
-        dataType:'json',
-        success: function(result){
-            console.log(sessions,222222222);
-            newArray=sessions
-        },
-        error:function(request){}
-    })
-    console.log(888888888);
-
-    return newArray
-
-
-    // var array=[
-    //     {
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "18501903418",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "p_93640717727557801",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "houjunliang",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "houjunliang111",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "weichen9694@126.com",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "houjunliang222",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "houjunliang333",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "houjunliang444",    //imId
-    //     },{
-    //       brandName:'本宫的茶',
-    //       clueId:'1111212121',    //线索ID
-    //       isSubmit:1,
-    //       imId: "houjunliang555",    //imId
-    //     }
-    //   ]
-    
-}
+ 
 
   Cache.prototype.setSessions = function(sessions) {
-    this.sessions =this.sessionsListConcat(sessions);
+    this.sessions =sessions;
   };
 
   /**
