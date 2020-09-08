@@ -91,9 +91,17 @@ YX.fn.submitCustomerClick = function () {
         scrollbar: false,//屏蔽浏览器滚动条
         // maxmin: true,
         // offset: [document.documentElement.clientHeight-800+'px', document.documentElement.clientWidth-400+'px']
+        cancel:function(){
+            $('#submitCustomerFormBar').css({
+                'display':'none'
+            })
+        }
     })
     $("#generalFormLastCancel").click(function(){
         layer.close(submitCustomerLayer)
+        $('#submitCustomerFormBar').css({
+            'display':'none'
+        })
     });
     // 回显客户信息
     var that = this;
@@ -136,33 +144,29 @@ YX.fn.mouseenterHover = function (type) {
             })
             // 获取常用语
             var that = this;
-            var params = {
-                type: 2
-            };
-            // $.ajax({
-            //   url: '/custservice/v1.0/huiju/getCommonLanguage',
-            //   type: 'POST',
-            //   data: params,
-            //   contentType: 'application/json',
-            //   success: function(data) {
-            //     console.log(data)
-            //     if (data.res === 200) {
-            //         console.log('获取成功');
-            //         var data=data.data;
-                    var data=[{'comText':'123'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'}]
+            $.ajax({
+              url: '/commonLanguage/getCommonLanguageByType?type=2',
+              type: 'GET',
+              contentType: 'application/json',
+              success: function(data) {
+                console.log(data)
+                if (data.code === "0") {
+                    console.log('获取成功');
+                    var data=data.data;
+                    // var data=[{'comText':'123'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'}]
                     var html='';
                     for(var i=0;i<data.length;i++){
                         html+='<li>'+data[i].comText+'</li>'
                     }
                     $("#commonWordsList").html(html);
-            //     } else {
-            //         console.log('获取失败'); 
-            //     }
-            //   },
-            //   error: function() {
-            //      console.log('请求失败，请重试');
-            //   }
-            // });
+                } else {
+                    console.log('获取失败'); 
+                }
+              },
+              error: function() {
+                 console.log('请求失败，请重试');
+              }
+            });
             break;
         case 'brandSelection':
             $('#brandSelection img').attr("src", "../../../im/images/newImages/icon_xpp拷贝@3x.png");
