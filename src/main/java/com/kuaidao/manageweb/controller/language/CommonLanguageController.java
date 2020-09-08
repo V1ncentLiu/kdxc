@@ -101,4 +101,16 @@ public class CommonLanguageController {
 
     }
 
+
+    /**
+     * 更新顺序
+     * @return
+     */
+    @RequestMapping(value = "/getCommonLanguageByType")
+    public JSONResult<List<CommonLanguageRespDto>> getCommonLanguageByType(@RequestParam(defaultValue = "2") Integer type) {
+        CommonLanguageReqDto commonLanguageReqDto = new CommonLanguageReqDto();
+        commonLanguageReqDto.setType(type);
+        return commonLanguageFeignClient.queryListByType(commonLanguageReqDto);
+
+    }
 }
