@@ -13,7 +13,7 @@
 			})
             // return url+"?imageView&thumbnail=80x80&quality=85";
         }else{
-            return window.location.host+"/im/images/default-icon.png"
+            return window.location.host+"/im/images/default-icon.png222"
         } 
 	}
 	function logout () {

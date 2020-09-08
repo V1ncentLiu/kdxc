@@ -682,7 +682,7 @@ function getAvatar(url) {
         })
         return url + "?imageView&thumbnail=80x80&quality=85";
     } else {
-        return url || window.location.host+"/im/images/default-icon.png"
+        return url || window.location.host+"/im/images/default-icon.png444"
     }
 }
 

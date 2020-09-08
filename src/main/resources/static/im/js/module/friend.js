@@ -112,28 +112,14 @@ YX.fn.friendListConcat = function () {
             console.log(result,'右侧列表数据');
             if(result.data){  
                 newArray=result.data.data
-                newArray[0].account='839ff57cdc1c4d3aaf8d85cc2571cc8b'
             }
         },
         error:function(request){
           alert(request)
         }
     })
-
-    // var allData = []
-    // var newArray = []
-    // for (let i = 0; i < allData.length; i++) {
-    //     for (let j = 0; j < array.length; j++) {
-    //         if (allData[i].account == array[j].account) {
-    //             newArray.push(Object.assign(allData[i], array[j]))
-    //         }
-    //     }
-    // }
-
-    return array 
+    return newArray 
 }
-
-
 
 YX.fn.buildFriends = function () {
     var allData = this.friendListConcat() || []

@@ -281,7 +281,6 @@ YX.fn.sendTextMessage = function(value) {
     //           account: "houjunliang",    //imId
     //           time: '06-16'
     //       })
-          console.log(text,1111111);
   if (!!to && !!text) {
     if (text.length > 1000) {
       alert('消息长度最大为500字符');
@@ -329,7 +328,6 @@ YX.fn.sendTextMessage = function(value) {
           options.needMsgReceipt = true;
         }
       }
-      console.log(options,2222222);
       this.nim.sendText(options);
     }
   }
@@ -458,7 +456,6 @@ YX.fn.cancelRecordAudio = function () {
  * @param msg：消息主体，类型分为文本、文件、图片、地理位置、语音、视频、自定义消息，通知等
  */
 YX.fn.sendMsgDone = function(error, msg) {
-  console.log(msg,11111111);
   if (error && error.code === 7101) {
     alert('被拉黑');
     msg.blacked = true;
