@@ -22,7 +22,7 @@ YX.fn.submitCustomer = function () {
     $('#generalFormLastSubmit').on("click", this.generalFormLastClick.bind(this,'submit'));
     
     
-    $('#commonWordsList').find('li').on("click",this.commonWordsListClick.bind(this));
+    $('#commonWordsList').on("click",'li',this.commonWordsListClick.bind(this));
 
 }
 YX.fn.commonWordsListClick = function () {
@@ -139,29 +139,30 @@ YX.fn.mouseenterHover = function (type) {
             var params = {
                 type: 2
             };
-            $.ajax({
-              url: '/custservice/v1.0/huiju/getCommonLanguage',
-              type: 'POST',
-              data: params,
-              contentType: 'application/json',
-              success: function(data) {
-                console.log(data)
-                if (data.res === 200) {
-                    console.log('获取成功');
-                    var data=data.data;
+            // $.ajax({
+            //   url: '/custservice/v1.0/huiju/getCommonLanguage',
+            //   type: 'POST',
+            //   data: params,
+            //   contentType: 'application/json',
+            //   success: function(data) {
+            //     console.log(data)
+            //     if (data.res === 200) {
+            //         console.log('获取成功');
+            //         var data=data.data;
+                    var data=[{'comText':'123'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'},{'comText':'456'}]
                     var html='';
                     for(var i=0;i<data.length;i++){
                         html+='<li>'+data[i].comText+'</li>'
                     }
-                    $("commonWordsList").html(html);
-                } else {
-                    console.log('获取失败'); 
-                }
-              },
-              error: function() {
-                 console.log('请求失败，请重试');
-              }
-            });
+                    $("#commonWordsList").html(html);
+            //     } else {
+            //         console.log('获取失败'); 
+            //     }
+            //   },
+            //   error: function() {
+            //      console.log('请求失败，请重试');
+            //   }
+            // });
             break;
         case 'brandSelection':
             $('#brandSelection img').attr("src", "../../../im/images/newImages/icon_xpp拷贝@3x.png");
