@@ -22,10 +22,37 @@ YX.fn.submitCustomer = function () {
     $('#generalFormLastSubmit').on("click", this.generalFormLastClick.bind(this,'submit'));
     
     
-    $('#commonWordsList li').on("click",this.commonWordsListClick.bind(this));
+    $('#commonWordsList').find('li').on("click",this.commonWordsListClick.bind(this));
 
 }
+YX.fn.mouseenterHover = function () {//获取常用语
+    debugger
+    if(type=='commonWords'){
+        var that = this;
+        var params = {
+            type: 2
+        };
+        $.ajax({
+          url: '/custservice/v1.0/huiju/getCommonLanguage',
+          type: 'POST',
+          data: params,
+          contentType: 'application/json',
+          success: function(data) {
+            console.log(data)
+            if (data.res === 200) {
+                console.log('获取成功');
+              
+            } else {
+                console.log('获取失败'); 
+            }
+          },
+          error: function() {
+             console.log('请求失败，请重试');
+          }
+        });
+    }
 
+}
 YX.fn.commonWordsListClick = function () {
     var e = e||window.event;
     var tar=$(event.target)
