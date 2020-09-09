@@ -65,8 +65,23 @@ YX.fn.generalFormLastClick = function (type) {
             contentType: "application/json",
             success: function(data) {
                 if (data.code === "0") {
-                   console.log('保存成功');
-                  
+                    console.log('保存成功');
+                    // 关闭弹窗
+                    $('#submitCustomerFormBar').css({
+                        'display':'none'
+                    })
+                    // 变成维护客户，并赋值id
+                    var id=data.id;
+                    $('#submitCustomer1').css({
+                        'display':'none'
+                    })
+                    $('#submitCustomer2').css({
+                        'display':'block'
+                    })
+                    $('#submitCustomer3').attr({
+                        'herf':'block'
+                    })
+
                 } else {
                    console.log('保存失败'); 
                    layer.alert(data.msg)
