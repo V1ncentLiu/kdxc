@@ -72,7 +72,7 @@ YX.fn.searchListInputOnmouse = function () {
 
 YX.fn.fuzzyQuerySearch = function (value) {
     var allData=this.cache.getSessions()||[]
-    console.log(allData,'聊天列表');
+    console.log(allData,'聊天列表数据展示');
     var newArray=[]
     if(value){
         for(let i=0;i<allData.length;i++){

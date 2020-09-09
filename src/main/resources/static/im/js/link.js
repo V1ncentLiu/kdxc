@@ -246,6 +246,7 @@ var SDKBridge = function(ctr, data) {
   }
 
   function onUpdatesession(session) {
+    console.log('左侧列表更新数据');
     var id = session.id || '';
     var old = this.cache.getSessions();
     var msg = session.lastMsg;
@@ -682,12 +683,14 @@ SDKBridge.prototype.sendTipMsg = function(options) {
  * @param callback：回调
  */
 SDKBridge.prototype.sendCustomMessage = function(scene, to, content, callback) {
-  this.nim.sendCustomMsg({
-    scene: scene || 'p2p',
-    to: to,
-    content: JSON.stringify(content),
-    done: callback
-  });
+  if(content){
+    this.nim.sendCustomMsg({
+      scene: scene || 'p2p',
+      to: to,
+      content: JSON.stringify(content),
+      done: callback
+    });
+  }
 };
 
 /**
