@@ -191,7 +191,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	SessionList.prototype.update = function(data){
 		var html = '',
-	        i,
+			i,
+			unreadNum=0,
 	        str,
 	        info,
 			sessions = data.sessions;
@@ -219,6 +220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	                infoText = info.text
 				}
+				unreadNum+=Number(info.unread)
 	            str = ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="' + info.scene + '" data-account="' + info.account + '">',
 								'<div class="panel_avatar">',
 								'<img class="panel_image" src="'+(info.avatar==='null'?'https://app.yunxin.163.com/webdemo/im/images/default-icon.png':info.avatar)+'"/>',
@@ -242,6 +244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				html += str;
 			}    
 		}
+		dataNum=unreadNum
 		this._body.innerHTML = html;
 	};
 
@@ -456,6 +459,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	/** --------------------------public------------------------------ */
 
+	FriendList.prototype.formatDate=function(now) { 
+		now=new Date(now)
+		var year=now.getFullYear();  //取得4位数的年份
+		var month=now.getMonth()+1;  //取得日期中的月份，其中0表示1月，11表示12月
+		var date=now.getDate();      //返回日期月份中的天数（1到31）
+		var hour=now.getHours();     //返回日期中的小时数（0到23）
+		var minute=now.getMinutes(); //返回日期中的分钟数（0到59）
+		var second=now.getSeconds(); //返回日期中的秒数（0到59）
+		return year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second; 
+	}
+
+
 	/**
 	 * 插入控件
 	 * @param  {Node｜String} node 插入控件的节点
@@ -500,7 +515,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 							
 						html += ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="p2p" data-account="' + info.account + '">',
-									'<div class="panel_avatar"><img class="panel_image" src="https://app.yunxin.163.com/webdemo/im/images/default-icon.png"/></div>',
+									'<div class="panel_avatar"><img class="panel_image" src="'+list[i].icon+'"/></div>',
 									'<div class="panel_text">',
 									'<p class="panel_multi-row">',
 										'<span class="panel_nick">',
@@ -509,7 +524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 										'</span>',
 										'<b class="panel_time">{' +list[i].customerStatus + '}</b>',
 									'</p>',
-											'<span class="panel_lastMsg">' + list[i].createTime + '</span>',
+											'<span class="panel_lastMsg">' +this.formatDate(list[i].createTime)+ '</span>',
 									'</div>',
 								'</li>'].join("");
 				}

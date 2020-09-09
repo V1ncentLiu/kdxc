@@ -74,7 +74,7 @@ var register = {
       success: function(data) {
         if (data.res === 200) {
           alert('注册成功');
-          window.location.href = './login.html';
+          // window.location.href = './login.html';
         } else {
           that.$errorMsg.html(data.errmsg).removeClass('hide');
           that.$submit.html('注册').removeAttr('disabled');
