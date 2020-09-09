@@ -34,7 +34,7 @@
                             <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus">添加常用语</el-button>
                         </div> 
                         <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave">
-                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" :move='allow' @end.native="endEvent">
+                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" @end.native="endEvent">
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm1.domains"
                                     :label=" index+1 + '、'"
@@ -63,7 +63,7 @@
                     <el-tab-pane label="用户常用语" name="second">
                         <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus">添加用户常用语</el-button>
                         <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2">
-                            <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" :move='allow2' @end.native="endEvent2">
+                            <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" @end.native="endEvent2">
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm2.domains"
                                     :label=" index+1 + '、'"
@@ -309,39 +309,8 @@
                 window.location.href="/im/imCommonUseSitting/index"
             },
             // 常用语设置
-            allow(evt){//拖拽事件
-                // console.log(evt)
-                // console.log(evt.draggedContext.index)
-                // console.log(evt.draggedContext.element)
-                // console.log(evt.draggedContext.futureIndex)
-                // console.log(evt.relatedContext.index)
-                // console.log(evt.relatedContext.element)
-                // console.log(evt.relatedContext.list)
-                // console.log(evt.relatedContext.component)
-                // console.log(evt.relatedContext.element)
-                console.log(evt)
-                // console.log(evt.relatedContext.component.realList)
-                // console.log(evt.relatedContext.component.value)
-                this.realList=evt.relatedContext.component.realList;                
-            },
-            allow2(evt){//拖拽事件
-                // console.log(evt)
-                // console.log(evt.draggedContext.index)
-                // console.log(evt.draggedContext.element)
-                // console.log(evt.draggedContext.futureIndex)
-                // console.log(evt.relatedContext.index)
-                // console.log(evt.relatedContext.element)
-                // console.log(evt.relatedContext.list)
-                // console.log(evt.relatedContext.component)
-                // console.log(evt.relatedContext.element)
-                console.log(evt)
-                // console.log(evt.relatedContext.component.realList)
-                // console.log(evt.relatedContext.component.value)
-                this.realList2=evt.relatedContext.component.realList;                
-            },
             endEvent(evt){
-                if (this.realList == null) return;
-                var realList=this.realList;
+                var realList=this.dynamicValidateForm1.domains;
                 var param={};
                 var listArr=[];
                 for(var i=0;i<realList.length;i++){
@@ -363,8 +332,7 @@
                 });  
             },
             endEvent2(evt){
-                if (this.realList2 == null) return;
-                var realList=this.realList2;
+                var realList=this.dynamicValidateForm2.domains;
                 var param={};
                 var listArr=[];
                 for(var i=0;i<realList.length;i++){
