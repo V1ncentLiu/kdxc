@@ -159,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					});
 	        	 	account = target.getAttribute("data-account");
 					scene = target.getAttribute("data-scene");
-	                cbClickList(account,scene);
+					cbClickList(account,scene);
 	                return;
 				}
 				
@@ -221,6 +221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                infoText = info.text
 				}
 				unreadNum+=Number(info.unread)
+				console.log(info.avatar,'列表头像');
 	            str = ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="' + info.scene + '" data-account="' + info.account + '">',
 								'<div class="panel_avatar">',
 								'<img class="panel_image" src="'+(info.avatar==='null'?'https://app.yunxin.163.com/webdemo/im/images/default-icon.png':info.avatar)+'"/>',
@@ -243,6 +244,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        '</li>'].join("");
 				html += str;
 			}    
+		}
+		var str=['<div style="display: flex;align-items: center;">',
+					'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
+					'<span style="margin:0 10px;">'+$('#userName').text()+'</span>',
+					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+unreadNum+'</span>':'',
+				'</div>'].join("")
+		if(!isLayerOpen){
+			$('.mainHtmlLayer .layui-layer-title').html(str)
 		}
 		dataNum=unreadNum
 		this._body.innerHTML = html;

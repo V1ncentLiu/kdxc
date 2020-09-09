@@ -683,9 +683,9 @@
                     <img src="" width="56" height="56" class="radius-circle img" id="headImg" />
                     <div class="customerInformation">
 							<span class="nickName">
-								<span  id="nickName">张三</span>
-								<span> <b></b> 在线</span>
-								<span>正在输入...</span>
+								<span id="nickName">张三</span>
+								<span id="isOnline"> <b></b> 在线</span>
+								<!--<span>正在输入...</span> -->
 							</span>
                         <span id="otherInformation" class="otherInformation">
 								<span>注册时间：2020-08-14</span>
@@ -1322,6 +1322,7 @@
         $(".statusBox").hide()
     },true);
     var dataNum=''
+    var isLayerOpen=true
     if(window.sessionStorage.appkey){
         layer.open({
             type: 1,
@@ -1343,12 +1344,11 @@
                     'padding-left':'10px',
                     'padding-right':'40px'
                 })
-
-
+                isLayerOpen=false
                 var str=['<div style="display: flex;align-items: center;">',
                             '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
                             '<span style="margin:0 10px;">'+$('#userName').text()+'</span>',
-                            '<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+dataNum+'</span>',
+                            dataNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+dataNum+'</span>':'',
                         '</div>'].join("")
                 $('.mainHtmlLayer .layui-layer-title').html(str)
 
@@ -1362,11 +1362,10 @@
                 $('.mainHtmlLayer .layui-layer-content').css({
                     'height':'678px'
                 })
-
                 $('.mainHtmlLayer .layui-layer-close').css({
                     'display':'none'
                 })
-                
+                isLayerOpen=true
             },
             restore:function(){
                 $('.mainHtmlLayer').css({
@@ -1377,11 +1376,7 @@
                     'height':'24px'
                 })
                 $('.mainHtmlLayer .layui-layer-title').html('')
-
-            },
-            cancel: function(){
-                // 右上角关闭事件的逻辑
-                console.log(333333);
+                isLayerOpen=true
             }
         });
     

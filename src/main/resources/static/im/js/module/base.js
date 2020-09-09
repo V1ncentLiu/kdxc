@@ -3,7 +3,6 @@ var YX = function(accid) {
   this.accid = accid;
   this.initModule();
   this.cache = new Cache();
-  console.log(this.cache,1111);
   this.mysdk = new SDKBridge(this, this.cache);
   if (window.nim) {
     this.myNetcall = new NetcallBridge(this);
@@ -152,34 +151,49 @@ YX.fn.openChatBox = function(account, scene) {
     infoSession=this.cache.getSessions()
     if (info.account == userUID) {
       this.$nickName.text('我的手机');
-      this.$chatTitle.find('img').attr('src', 'images/myPhone.png');
+      // this.$chatTitle.find('img').attr('src', 'images/myPhone.png');
     } else {
       // if (window.CONFIG.openSubscription) {
-        console.log(info,'聊天框渲染');
-        // var multiPortStatus = this.cache.getMultiPortStatus(account);
-        // if (multiPortStatus) {
-        //   this.$nickName.text(
-        //     this.getNick(account) + ' [' + multiPortStatus + ']'
-        //   );
-        // } else {
-        //   this.$nickName.text(this.getNick(account) + ' [离线]');
-        // }
+      //   console.log(info,'聊天框渲染');
+      //   var multiPortStatus = this.cache.getMultiPortStatus(account);
+      //   if (multiPortStatus) {
+      //     // this.$nickName.text(
+      //     //   this.getNick(account) + ' [' + multiPortStatus + ']'
+      //     // );
+      //   } else {
+      //     this.$nickName.text(this.getNick(account) + ' [离线]');
+      //   }
       // } else {
-
+        var multiPortStatus = this.cache.getMultiPortStatus(account);
+        
+        if(multiPortStatus){
+          var str=`<b></b> `+'在线'
+          $('#isOnline').html(str)
+          $('#isOnline b').css({
+            'backgroundColor':'#4AB65C'
+          })
+        }else{
+          var str=`<b></b> `+'离线'
+          $('#isOnline').html(str)
+          $('#isOnline b').css({
+            'backgroundColor':'#8F97A0'
+          })
+        }
         // 聊天框名字
         this.$nickName.text(info.nick);
-      // }
-      // 聊天图片
-      this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
-      // 渲染聊天框信息
-      this.getUserInfo(info.account)
-      this.$submitCustomer.attr('data-imId', '')
-      for(var i=0;i<infoSession.length;i++){
-        if(infoSession[i].to==info.account){
-          // 将clueId作为标签属性
-          this.$submitCustomer.attr('data-imId', infoSession[i].clueId)
+        // }
+        // 聊天图片
+        this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
+        // 渲染聊天框信息
+        this.getUserInfo(info.account)
+        this.$submitCustomer.attr('data-imId', '')
+        for(var i=0;i<infoSession.length;i++){
+          if(infoSession[i].to==info.account){
+            // 将clueId作为标签属性
+            this.$submitCustomer.attr('data-imId', infoSession[i].clueId)
+          }
         }
-      }
+      // }
     }
     // 群资料入口隐藏
     this.$teamInfo && this.$teamInfo.addClass('hide');
@@ -223,7 +237,6 @@ YX.fn.getUserInfo = function(accountId) {
   console.log(accountId,'聊天面板id');
     var params = {
       id:accountId
-      // id:'005d2f43fd034124b386bda8123317b6',
     };
     $.ajax({
       url:'/customerInfo/customerInfoByIm',
@@ -242,6 +255,8 @@ YX.fn.getUserInfo = function(accountId) {
           <span>电话： `+data.phoneNumber+`</span>
         `
           $('#otherInformation').html(str)
+       }else{
+        $('#otherInformation').html('')
        }
       },
       error: function() {

@@ -284,12 +284,22 @@ function getMessage (msg) {
                 str = msg.fromNick + '发起了[白板互动]';
             }else if (content.type == 8) {
                 var newData=content.data
-                // console.log(newData,'品牌信息');
-                str = "<div class='f-maxWidBrand'>"+'<img src="'+newData.logo+'" alt=""/>'+ '<span class="content other">'+newData.brandName +'</span>'+'<span class="content">'+newData.categoryName +'</span>'+'<span class="content">投资区间<b>'+newData.investmentName+'</b> </span>'+'<span class="content">总部'+newData.applyPerson +'</span>'+"</div>"
-               
+                function showLittleBit(value,num){
+                    if(value&&value.length>num){
+                        value=value.toString().slice(0,num)+'...'
+                    }
+                    return value
+                }
+                str=['<div class="f-maxWidBrand">',
+                        '<img src="'+newData.sendImageUrl+'" alt=""/>',
+                        '<span class="content other">'+showLittleBit(newData.titleName,9) +'</span>',
+                        '<span class="content">'+showLittleBit(newData.mainPoint,13) +'</span>',
+                        '<span class="content">投资区间:<b>'+newData.subTitle+'</b> </span>',
+                        '<span class="content">总部:'+newData.city +'</span>',
+                    '</div>',
+                    ].join("");
             }else if (content.type == 18) {
                 var newData=content.data
-                // console.log(content.data,'专属项目卡');
                 if(newData){
                     str = ['<div class="f-maxWidProjectCard">',
                             '<div class="maxWidProjectCard_div first"></div>',
@@ -682,7 +692,7 @@ function getAvatar(url) {
         })
         return url + "?imageView&thumbnail=80x80&quality=85";
     } else {
-        return url || window.location.host+"/im/images/default-icon.png444"
+        return url || "../../im/images/default-icon.png"
     }
 }
 
