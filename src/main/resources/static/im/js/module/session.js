@@ -74,9 +74,11 @@ YX.fn.fuzzyQuerySearch = function (value) {
     var allData=this.cache.getSessions()||[]
     console.log(allData,'聊天列表');
     var newArray=[]
-    for(let i=0;i<allData.length;i++){
-        if(allData[i].lastMsg.fromNick.indexOf(value)>-1){
-            newArray.push(allData[i])
+    if(value){
+        for(let i=0;i<allData.length;i++){
+            if(allData[i].lastMsg.fromNick.indexOf(value)>-1){
+                newArray.push(allData[i])
+            }
         }
     }
     var data = {
