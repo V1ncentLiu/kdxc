@@ -87,19 +87,20 @@ YX.fn.generalFormLastClick = function (type) {
                     var id=data.data;
                     var url='';
                     if(id){
+                        layer.msg('保存成功');
+                        $('#submitCustomer1').css({
+                            'display':'none'
+                        })
+                        $('#editCustomer1').css({
+                            'display':'block'
+                        })
                         url='http://localhost:8180/tele/clueMyCustomerInfo/customerEditInfo?clueId='+id;
+                        $('#editCustomer2').attr({
+                            'href':url
+                        })
+                    }else{
+                        layer.msg('保存失败');
                     }
-                    $('#submitCustomer1').css({
-                        'display':'none'
-                    })
-                    $('#editCustomer1').css({
-                        'display':'block'
-                    })
-                    $('#editCustomer2').attr({
-                        'href':url
-                    })
-                    layer.msg('保存成功');
-
                 } else {
                    console.log('保存失败'); 
                    layer.alert(data.msg)
