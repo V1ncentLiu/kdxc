@@ -1,15 +1,17 @@
 YX.fn.submitCustomer = function () {
-    // 常用语  选品牌 提交客户 鼠标hover
+    // 常用语  选品牌 提交客户 维护客户 鼠标hover
     $('#commonWords').on("mouseenter", this.mouseenterHover.bind(this, 'commonWords'));
     $('#brandSelection').on("mouseenter", this.mouseenterHover.bind(this, 'brandSelection'));
     $('#submitCustomer').on("mouseenter", this.mouseenterHover.bind(this, 'submitCustomer'));
+    $('#editCustomer').on("mouseenter", this.mouseenterHover.bind(this, 'editCustomer'));
     $('#cloudMsg').on("mouseenter", this.mouseenterHover.bind(this, 'cloudMsg'));
     
     
-    // 常用语  选品牌 提交客户 鼠标离开
+    // 常用语  选品牌 提交客户 维护客户 鼠标离开
     $('#commonWords').on("mouseleave", this.mouseleaveHover.bind(this, 'commonWords'));
     $('#brandSelection').on("mouseleave", this.mouseleaveHover.bind(this, 'brandSelection'));
     $('#submitCustomer').on("mouseleave", this.mouseleaveHover.bind(this, 'submitCustomer'));
+    $('#editCustomer').on("mouseleave", this.mouseleaveHover.bind(this, 'editCustomer'));
     $('#cloudMsg').on("mouseleave", this.mouseleaveHover.bind(this, 'cloudMsg'));
 
     // 点击提交客户 弹出框
@@ -50,9 +52,18 @@ YX.fn.generalFormLastClick = function (type) {
         var wechat=$("#submitCustomerFormWechat").val();
         var remark=$("#submitCustomerBeizhu").val();
         var teleSaleId=userId;//index里的userId
+        // 判断手机号和姓名为空
+        if(!name){
+            layer.alert("姓名不能为空");
+            return
+        }
+        if(!phone){
+            layer.alert("手机号不能为空");
+            return
+        }        
         var params = {};
         params.name=name;
-        params.customerId='5de7f7996d144a29a24a74f466fb4ad2';
+        params.customerId='669f80e2663a4e238728a9c348ac9e36';
         params.phone=phone;
         params.phone2=phone2;
         params.wechat=wechat;
@@ -65,22 +76,29 @@ YX.fn.generalFormLastClick = function (type) {
             contentType: "application/json",
             success: function(data) {
                 if (data.code === "0") {
-                    console.log('保存成功');
+                    console.log('保存成功'); 
                     // 关闭弹窗
+                    layer.close(submitCustomerLayer)
                     $('#submitCustomerFormBar').css({
                         'display':'none'
                     })
+                    // 关闭弹窗结束                   
                     // 变成维护客户，并赋值id
-                    var id=data.id;
+                    var id=data.data;
+                    var url='';
+                    if(id){
+                        url='http://localhost:8180/tele/clueMyCustomerInfo/customerEditInfo?clueId='+id;
+                    }
                     $('#submitCustomer1').css({
                         'display':'none'
                     })
-                    $('#submitCustomer2').css({
+                    $('#editCustomer1').css({
                         'display':'block'
                     })
-                    $('#submitCustomer3').attr({
-                        'herf':'block'
+                    $('#editCustomer2').attr({
+                        'href':url
                     })
+                    layer.msg('保存成功');
 
                 } else {
                    console.log('保存失败'); 
@@ -93,9 +111,9 @@ YX.fn.generalFormLastClick = function (type) {
         });
     }
 }
-
+var submitCustomerLayer
 YX.fn.submitCustomerClick = function () {
-    var submitCustomerLayer
+    
     submitCustomerLayer=layer.open({
         type: 1,
         title: '提交客户',   //标题
@@ -176,6 +194,12 @@ YX.fn.mouseenterHover = function (type) {
                 'color': '#026ADD'
             })
             break;
+        case 'editCustomer':
+            $('#editCustomer img').attr("src", "../../../im/images/newImages/icon_tj拷贝@3x.png");
+            $('#editCustomer a').css({
+                'color': '#026ADD'
+            })
+            break;    
         case 'cloudMsg':
             $('#cloudMsg img').attr("src", "../../../im/images/newImages/icon_lt拷贝@3x.png");
             $('#cloudMsg p').css({
@@ -208,6 +232,12 @@ YX.fn.mouseleaveHover = function (type) {
         case 'submitCustomer':
             $('#submitCustomer img').attr("src", "../../../im/images/newImages/icon_tj@3x.png");
             $('#submitCustomer p').css({
+                'color': '#666'
+            })
+            break;
+        case 'editCustomer':
+            $('#editCustomer img').attr("src", "../../../im/images/newImages/icon_tj@3x.png");
+            $('#editCustomer a').css({
                 'color': '#666'
             })
             break;
