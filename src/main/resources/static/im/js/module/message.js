@@ -102,11 +102,21 @@ YX.fn.message = function() {
   // 监听iframe传的值，并发送出去
   window.addEventListener('message', function(result){
     var  data=result.data?JSON.parse(result.data):''
-    console.log(data);
-    that.messageIframe(data)
+    var sendMessage={
+      sendImageUrl:data.logo,
+      titleName:data.brandName,
+      mainPoint:data.coreFeatures,
+      subTitle:data.joinInvestMin+'-'+data.joinInvestMax+'万',
+      city:data.applyPerson,
+      sendBrandID:data.id,
+    }
+    console.log(data,sendMessage,'点击发送品牌');
+    that.messageIframe(sendMessage)
     layer.close(brandSelectionLayer)
   })
 };
+
+
 
 YX.fn.messageIframe = function (data) {
   var scene = 'p2p',
