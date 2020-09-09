@@ -837,7 +837,7 @@
                     </li>
                 </ul>
             </div>
-            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多聊天内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
 
@@ -1283,13 +1283,50 @@
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: callRecord,  //通话记录
                 tableDataC4: circulationList,//流转记录
-                tableDataC5:telCreatePhoneAudits//流转记录
-            }
+                tableDataC5:telCreatePhoneAudits,//流转记录
+                pageNum2:2,
+            }           
         },
         methods: {
             isActiveFun(){
                 // this.isActive=true;
                 // this.isShowMoreBtn=false;
+                var param = {};
+                param.cusId = clueId;
+                param.pageNum = this.pageNum2++;
+                param.pageSize = 10;
+                console.log(param)
+                // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                axios.post('/message/im/listChatRecord', param).then(function (response) {    
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){                            
+                            addCustomerVM.onlineRecordData.push(...dataList);
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].msgTimestamp){
+                                    dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
+                                }
+                            } 
+                                                    
+                        }
+                        // 大于一页显示更多按钮
+                        if(recordData.pages>1){
+                            addCustomerVM.isShowMoreBtn=true;
+                        }else{
+                            addCustomerVM.isShowMoreBtn=false;
+                        } 
+                        if(recordData.pages==param.pageNum){//请求页数和总页数相等
+                            addCustomerVM.isShowMoreBtn=false;
+                        }
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                    }
+
+                });
             },
             showOnlineRecord(){
                 this.onlineRecordDialogVisible=true;
