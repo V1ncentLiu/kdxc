@@ -44,37 +44,52 @@ YX.fn.generalFormLastClick = function (type) {
         // alert('表单提交');
         var that = this;
         var name=$("#submitCustomerFormName").val();
-        var customerId="";
+        var customerId=$("#submitCustomer").attr('data-imid');
         var phone=$("#submitCustomerFormIphone").val();
         var phone2=$("#submitCustomerFormIphoneTwo").val();
         var wechat=$("#submitCustomerFormWechat").val();
         var remark=$("#submitCustomerBeizhu").val();
-        var teleSaleId="";
-        var params = {
-            name: name,
-            customerId: customerId,
-            phone: phone,
-            phone2: phone2,
-            wechat: wechat,
-            remark: remark,
-            teleSaleId: teleSaleId
-        };
+        var teleSaleId=userId;//index里的userId
+        var params = {};
+        params.name=name;
+        params.customerId='5de7f7996d144a29a24a74f466fb4ad2';
+        params.phone=phone;
+        params.phone2=phone2;
+        params.wechat=wechat;
+        params.remark=remark;
+        params.teleSaleId=teleSaleId;
         $.ajax({
-          url: '/im/submit',
-          type: 'POST',
-          data: params,
-          contentType: 'application/json',
-          success: function(data) {
-            if (data.res === 200) {
-              console.log('保存成功');
-              
-            } else {
-               console.log('保存失败'); 
+            url: '/im/submit',
+            type: 'POST',
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            success: function(data) {
+                if (data.code === "0") {
+                    console.log('保存成功');
+                    // 关闭弹窗
+                    $('#submitCustomerFormBar').css({
+                        'display':'none'
+                    })
+                    // 变成维护客户，并赋值id
+                    var id=data.id;
+                    $('#submitCustomer1').css({
+                        'display':'none'
+                    })
+                    $('#submitCustomer2').css({
+                        'display':'block'
+                    })
+                    $('#submitCustomer3').attr({
+                        'herf':'block'
+                    })
+
+                } else {
+                   console.log('保存失败'); 
+                   layer.alert(data.msg)
+                }
+            },
+            error: function() {
+                console.log('请求失败，请重试');
             }
-          },
-          error: function() {
-             console.log('请求失败，请重试');
-          }
         });
     }
 }
@@ -95,6 +110,9 @@ YX.fn.submitCustomerClick = function () {
             $('#submitCustomerFormBar').css({
                 'display':'none'
             })
+            $("#submitCustomerFormIphoneTwo").val("")
+            $("#submitCustomerFormWechat").val("");
+            $("#submitCustomerBeizhu").val("");
         }
     })
     $("#generalFormLastCancel").click(function(){
@@ -102,34 +120,12 @@ YX.fn.submitCustomerClick = function () {
         $('#submitCustomerFormBar').css({
             'display':'none'
         })
+        $("#submitCustomerFormIphoneTwo").val("")
+        $("#submitCustomerFormWechat").val("");
+        $("#submitCustomerBeizhu").val("");
     });
     // 回显客户信息
-    var that = this;
-    var params = {
-            id: ""
-    };
-    $.ajax({
-        url: '/custservice/customerInfo/customerInfoByIm',
-        type: 'POST',
-        data: params,
-        contentType: 'application/json',
-        success: function(data) {
-            if (data.res === 200) {
-                var data=data.data;
-                var phoneNumber=data.phoneNumber;
-                var phoneNumber=data.phoneNumber;
-                console.log('回显客户信息');
-                $("#submitCustomerFormName").val('1');      
-                $("#submitCustomerFormIphone").val(phoneNumber);
-              
-            } else {
-                console.log('回显客户信息失败');
-            }
-        },
-        error: function() {
-            console.log('请求失败，请重试');
-        }
-    });
+    
 
 }
 YX.fn.mouseenterHover = function (type) {
