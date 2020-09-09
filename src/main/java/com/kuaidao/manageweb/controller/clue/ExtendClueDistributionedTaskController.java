@@ -579,8 +579,12 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getProjectName());
                 // 手机号
                 curList.add(taskDTO.getPhone());
+                // 手机号归属地
+                curList.add(taskDTO.getPhoneLocale());
                 // 手机号2
                 curList.add(taskDTO.getPhone2());
+                // 手机号2归属地
+                curList.add(taskDTO.getPhone2Locale());
                 // QQ
                 curList.add(taskDTO.getQq());
                 // 微信
@@ -699,16 +703,6 @@ public class ExtendClueDistributionedTaskController {
                 dataList.add(curList);
             }
         }
-        // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
-        // String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        // response.addHeader("Content-Disposition",
-        // "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        // response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-        // response.setContentType("application/octet-stream");
-        // ServletOutputStream outputStream = response.getOutputStream();
-        // wbWorkbook.write(outputStream);
-        // outputStream.close();
-
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             String title = "";
             if(queryDto !=null && queryDto.getPhtraExport() !=null){
