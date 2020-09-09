@@ -94,7 +94,7 @@ YX.fn.generalFormLastClick = function (type) {
                         $('#editCustomer1').css({
                             'display':'block'
                         })
-                        url='http://localhost:8180/tele/clueMyCustomerInfo/customerEditInfo?clueId='+id;
+                        url='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+id;
                         $('#editCustomer2').attr({
                             'href':url
                         })
