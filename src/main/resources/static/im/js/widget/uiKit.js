@@ -192,7 +192,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	SessionList.prototype.update = function(data){
 		var html = '',
 			i,
-			unreadNum,
+			unreadNum=0,
 	        str,
 	        info,
 			sessions = data.sessions;
@@ -220,7 +220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else {
 	                infoText = info.text
 				}
-				unreadNum+=info.unread
+				unreadNum+=Number(info.unread)
 	            str = ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="' + info.scene + '" data-account="' + info.account + '">',
 								'<div class="panel_avatar">',
 								'<img class="panel_image" src="'+(info.avatar==='null'?'https://app.yunxin.163.com/webdemo/im/images/default-icon.png':info.avatar)+'"/>',
@@ -244,7 +244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				html += str;
 			}    
 		}
-		$('#userPic').attr('data-num',unreadNum)
+		dataNum=unreadNum
 		this._body.innerHTML = html;
 	};
 

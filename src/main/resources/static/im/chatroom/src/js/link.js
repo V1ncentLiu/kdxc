@@ -78,7 +78,7 @@ var LinkRoom = function(ctr, data) {
           switch (error.code) {
             // 账号或者密码错误, 请跳转到登录页面并提示错误
             case 302:
-              location.href = './login.html';
+              // location.href = './login.html';
               break;
             case 13003:
               $('#linkStatus').text('抱歉，你已被主播拉入了黑名单');
