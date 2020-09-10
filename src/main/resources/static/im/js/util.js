@@ -525,7 +525,6 @@ function transNotification(item) {
     } else { // 既不是群，也不是讨论组， p2p 音视频通话相关消息
         var netcallType = item.attach.netcallType;
         var netcallTypeText = netcallType === Netcall.NETCALL_TYPE_VIDEO ? '视频' : '音频';
-        console.log(item);
         switch (type) {
             case 'netcallMiss':
                 return '未接听';

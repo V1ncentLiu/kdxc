@@ -186,28 +186,28 @@ YX.fn.openChatBox = function(account, scene) {
         this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
         // 渲染聊天框信息
         this.getUserInfo(info.account)
-        this.$submitCustomer.attr('data-imId', '')
         $('#submitCustomer').css({
           'display':'block'
         })
         $('#editCustomer').css({
           'display':'none'
         })
-        console.log('下面打印的是将clueId赋在div的属性上面 ');
+        console.log('下面打印的是将clueId显示隐藏按钮')
         for(var i=0;i<infoSession.length;i++){
           if(infoSession[i].to==info.account&&infoSession[i].clueId){
-            console.log(infoSession[i].clueId,'将clueId赋在div的属性上面');
-            // 将clueId作为标签属性
-            this.$submitCustomer.attr('data-imId', infoSession[i].clueId)
-            $('#submitCustomer').css({
-              'display':'none'
-            })
-            $('#editCustomer').css({
-              'display':'block'
-            })
-            $('#editCustomer2').attr({
-                'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+infoSession[i].clueId
-            })
+            console.log(infoSession[i].clueId,'将clueId显示隐藏按钮');
+            // 将data-imId作为标签属性
+            if(infoSession[i].clueId){
+              $('#submitCustomer').css({
+                'display':'none'
+              })
+              $('#editCustomer').css({
+                'display':'block'
+              })
+              $('#editCustomer2').attr({
+                  'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+infoSession[i].clueId
+              })
+            }
           }
         }
       // }
@@ -264,13 +264,21 @@ YX.fn.getUserInfo = function(accountId) {
         console.log(data,'个人信息请求后端接口');
         if(data.data){
           var data=data.data
-          var str=`
-          <span>注册时间：`+data.createDateStr+`4</span>
-          <span>`+data.age+`</span>|
-          <span>`+data.sex+`</span>|
-          <span>`+data.brandInvestment+`</span>|
-          <span>电话： `+data.phoneNumber+`</span>
-        `
+          var str=[,
+            data.createDateStr?'<span>'+data.createDateStr+'</span>':'',
+            data.age?'<span>'+data.age+'</span>|':'',
+            data.sex?'<span>'+data.sex+'</span>|':'',
+            data.brandInvestment?'<span>'+data.brandInvestment+'</span>|':'',
+            data.phoneNumber?'<span>'+data.phoneNumber+'</span>':'',
+            ].join("");
+
+        //   var str=`
+        //   <span>注册时间：`+data.createDateStr+`</span>
+        //   <span>`+data.age+`</span>
+        //   <span>`+data.sex+`</span>
+        //   <span>`+data.brandInvestment+`</span>
+        //   <span>电话： `+data.phoneNumber+`</span>
+        // `
           $('#otherInformation').html(str)
        }else{
         $('#otherInformation').html('')

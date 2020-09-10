@@ -246,7 +246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		var str=['<div style="display: flex;align-items: center;">',
 					'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
-					'<span style="margin:0 10px;">'+$('#userName').text()+'</span>',
+					'<span style="margin:0 10px;">我的会话</span>',
 					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+unreadNum+'</span>':'',
 				'</div>'].join("")
 		if(!isLayerOpen){
