@@ -11,7 +11,7 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+			var chatWindow
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 
@@ -121,62 +121,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }else if(target.tagName.toLowerCase() === "li"){
 					let clientHeight=document.documentElement.clientHeight
-					layer.open({
-						type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
-								//   载层）4（tips层）,
-						title: ' ',   //标题
-						// area: ['800px', '720px'],   //宽高
-						area: ['800px', clientHeight*0.7+'px'],   //宽高
-						shade: 0,   //遮罩透明度
-						skin: 'sessionListFrame',
-						// content: $("#chatBox"),//支持获取DOM元素
-						content: $("#rightPanel"),//支持获取DOM元素
-						// btn: ['确定', '取消'], //按钮组
-						scrollbar: false ,//屏蔽浏览器滚动条
-						maxmin: true,
-						success:function(){
-							$('.sessionListFrame .layui-layer-title').css({
-								'backgroundColor': '#ECEDF2',
-								'borderBottom':'none',
-								'height':'24px',
-								'paddingRight':'40px'
-							})
-						},
-						min:function(){
-							$('.sessionListFrame .layui-layer-title').css({
-								'height':'42px'
-							})
-							$('.sessionListFrame .layui-layer-title').css({
-								'height':'42px'
-							})
-							var str=['<div style="display: flex;align-items: center;">',
-									'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
-									'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
-									// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
-								'</div>'].join("")
-							$('.sessionListFrame .layui-layer-title').html(str)
-							isSessionListNum=true
-						},
-						restore:function(){
-							sessionListNum=0
-							isSessionListNum=false
-							$('.sessionListFrame .layui-layer-title').css({
-								'backgroundColor': '#ECEDF2',
-								'borderBottom':'none',
-								'height':'24px',
-							})
-							$('.sessionListFrame .layui-layer-title').html('')
+					if(this.chatWindow){
+						layer.close(this.chatWindow)
+						$('#rightPanel').css({
+							'display':'none'
+						})
+						this.chatWindow=''
+					}
 
-						},
-						cancel:function(){
-							$('#rightPanel').css({
-								'display':'none'
-							})
-						}
-					});
-	        	 	account = target.getAttribute("data-account");
-					scene = target.getAttribute("data-scene");
-					cbClickList(account,scene);
+					setTimeout(()=>{
+						this.chatWindow=layer.open({
+							type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
+									//   载层）4（tips层）,
+							title: ' ',   //标题
+							// area: ['800px', '720px'],   //宽高
+							area: ['800px', clientHeight*0.7+'px'],   //宽高
+							shade: 0,   //遮罩透明度
+							skin: 'sessionListFrame',
+							content: $("#rightPanel"),//支持获取DOM元素
+							scrollbar: false ,//屏蔽浏览器滚动条
+							maxmin: true,
+							success:function(){
+								$('.sessionListFrame .layui-layer-title').css({
+									'backgroundColor': '#ECEDF2',
+									'borderBottom':'none',
+									'height':'24px',
+									'paddingRight':'40px'
+								})
+								sessionListNum=0
+								isSessionListNum=false
+							},
+							min:function(){
+								$('.sessionListFrame .layui-layer-title').css({
+									'height':'42px'
+								})
+								$('.sessionListFrame .layui-layer-title').css({
+									'height':'42px'
+								})
+								var str=['<div style="display: flex;align-items: center;">',
+										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
+										'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
+										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
+									'</div>'].join("")
+								$('.sessionListFrame .layui-layer-title').html(str)
+								isSessionListNum=true
+							},
+							restore:function(){
+								sessionListNum=0
+								isSessionListNum=false
+								$('.sessionListFrame .layui-layer-title').css({
+									'backgroundColor': '#ECEDF2',
+									'borderBottom':'none',
+									'height':'24px',
+								})
+								$('.sessionListFrame .layui-layer-title').html('')
+	
+							},
+							cancel:function(){
+								$('#rightPanel').css({
+									'display':'none'
+								})
+							}
+						});
+						 account = target.getAttribute("data-account");
+						scene = target.getAttribute("data-scene");
+						cbClickList(account,scene);
+					},300)
 	                return;
 				}
 				
@@ -431,48 +441,74 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // cbClickPortrait(account,scene);
 	                return;
 	            }else if(target.tagName.toLowerCase() === "li"){
-					layer.open({
-						type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
-								//   载层）4（tips层）,
-						title: ' ',   //标题
-						// area: ['800px', '720px'],   //宽高
-						area: ['800px', '720px'],   //宽高
-						shade: 0,   //遮罩透明度
-						skin: 'friendsListFrame',
-						// content: $("#chatBox"),//支持获取DOM元素
-						content: $("#rightPanel"),//支持获取DOM元素
-						// btn: ['确定', '取消'], //按钮组
-						scrollbar: false ,//屏蔽浏览器滚动条
-						maxmin: true,
-						success:function(){
-							$('.friendsListFrame .layui-layer-title').css({
-								'backgroundColor': '#ECEDF2',
-								'borderBottom':'none',
-								'height':'24px'
-							})
-						},
-						min:function(){
-							$('.friendsListFrame .layui-layer-title').css({
-								'height':'42px'
-							})
-						},
-						restore:function(){
-							$('.friendsListFrame .layui-layer-title').css({
-								'backgroundColor': '#ECEDF2',
-								'borderBottom':'none',
-								'height':'24px'
-							})
-						},
-						cancel:function(){
-							$('#rightPanel').css({
-								'display':'none'
-							})
-						}
-					});
-	        	 	account = target.getAttribute("data-account");
-					scene = target.getAttribute("data-scene");
-					console.log('打开friend聊天框',account,scene);
-	                cbClickList(account,scene);
+					if(this.chatWindow){
+						layer.close(this.chatWindow)
+						$('#rightPanel').css({
+							'display':'none'
+						})
+						this.chatWindow=''
+					}
+					setTimeout(()=>{
+						this.chatWindow=layer.open({
+							type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
+									//   载层）4（tips层）,
+							title: ' ',   //标题
+							// area: ['800px', '720px'],   //宽高
+							area: ['800px', '720px'],   //宽高
+							shade: 0,   //遮罩透明度
+							skin: 'friendsListFrame',
+							// content: $("#chatBox"),//支持获取DOM元素
+							content: $("#rightPanel"),//支持获取DOM元素
+							// btn: ['确定', '取消'], //按钮组
+							scrollbar: false ,//屏蔽浏览器滚动条
+							maxmin: true,
+							success:function(){
+								$('.sessionListFrame .layui-layer-title').css({
+									'backgroundColor': '#ECEDF2',
+									'borderBottom':'none',
+									'height':'24px',
+									'paddingRight':'40px'
+								})
+								sessionListNum=0
+								isSessionListNum=false
+							},
+							min:function(){
+								$('.sessionListFrame .layui-layer-title').css({
+									'height':'42px'
+								})
+								$('.sessionListFrame .layui-layer-title').css({
+									'height':'42px'
+								})
+								var str=['<div style="display: flex;align-items: center;">',
+										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
+										'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
+										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
+									'</div>'].join("")
+								$('.sessionListFrame .layui-layer-title').html(str)
+								isSessionListNum=true
+							},
+							restore:function(){
+								sessionListNum=0
+								isSessionListNum=false
+								$('.sessionListFrame .layui-layer-title').css({
+									'backgroundColor': '#ECEDF2',
+									'borderBottom':'none',
+									'height':'24px',
+								})
+								$('.sessionListFrame .layui-layer-title').html('')
+	
+							},
+							cancel:function(){
+								$('#rightPanel').css({
+									'display':'none'
+								})
+							}
+						});
+						 account = target.getAttribute("data-account");
+						scene = target.getAttribute("data-scene");
+						console.log('打开friend聊天框',account,scene);
+						cbClickList(account,scene);
+					},500)
 	                return;
 	            }
 	            target = target.parentNode;
