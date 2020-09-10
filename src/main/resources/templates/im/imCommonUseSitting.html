@@ -54,7 +54,7 @@
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain)"  :disabled="iptDisabled"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain)"  :disabled="domain.iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
@@ -80,7 +80,7 @@
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2('dynamicValidateForm2',domain,2)"  :disabled="iptDisabled2"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2('dynamicValidateForm2',domain,2)"  :disabled="domain.iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain2(domain)" icon="el-icon-edit-outline" v-if="isShowEdit2">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain,2)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
                                 </el-form-item>
@@ -106,20 +106,20 @@
                     
                 </el-form-item>
                 <el-form-item label="超时自动回复设置：" :label-width="labelWidth"> 
-                    <el-radio-group v-model="form.timeOutEnable">
+                    <el-radio-group v-model="form.timeOutEnable" @change="timoutChange">
                         <el-radio  label="1">启用</el-radio>
                         <el-radio  label="0">禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="超时自动回复时间：" :label-width="labelWidth"> 
-                    <el-input v-model="form.timeOut" placeholder="" style="margin-right: 10px;"></el-input>秒
+                    <el-input v-model="form.timeOut" placeholder="" style="margin-right: 10px;" :disabled="timeoutDisabled"></el-input>秒
                 </el-form-item>
                 <el-form-item label="超时自动回复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;" placeholder="我现在不在，稍后回归我现在不在，稍后回归"></el-input>
+                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;" placeholder="我现在不在，稍后回归我现在不在，稍后回归" :disabled="timeoutDisabled"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="非工作时间自动回复设置：" :label-width="labelWidth"> 
-                    <el-radio-group v-model="form.nonWorktimeEnable">
+                    <el-radio-group v-model="form.nonWorktimeEnable" @change="nonWorkChange">
                         <el-radio  label="1">启用</el-radio>
                         <el-radio  label="0">禁用</el-radio>
                     </el-radio-group>
@@ -131,7 +131,7 @@
                         :picker-options="{
                           selectableRange: '00:00:00 - 23:59:59'
                         }"
-                        placeholder="每日">
+                        placeholder="每日" :disabled="nonWorkDisabled">
                     </el-time-picker>
                     <span>——</span>
                     <span>次日</span>
@@ -140,11 +140,11 @@
                         :picker-options="{
                           selectableRange: '00:00:00 - 23:59:59'
                         }"
-                        placeholder="次日">
+                        placeholder="次日" :disabled="nonWorkDisabled">
                     </el-time-picker>
                 </el-form-item>                
                 <el-form-item label="非工作时间自动回复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;" placeholder="现在是非工作时间，你可以留言"></el-input>
+                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;" placeholder="现在是非工作时间，你可以留言" :disabled="nonWorkDisabled"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>                
                 <div style="position: relative;">
@@ -234,8 +234,8 @@
                 labelWidth:"190px",
                 isShowEdit:false,
                 isShowEdit2:false,
-                iptDisabled:false,
-                iptDisabled2:false,
+                // iptDisabled:false,
+                // iptDisabled2:false,
                 dynamicVisible:false,//开场白弹窗
                 dynamicValidateForm: {
                     domains: [{
@@ -245,10 +245,10 @@
                 isshowDelete:false,
                 prologuesArr:[],//开场白                
                 form: {//自动回复设置
-                    timeOutEnable:'',//超时自动回复设置
+                    timeOutEnable:'0',//超时自动回复设置
                     timeOut:'',//超时自动回复时间
                     content:'',//超时自动回复内容
-                    nonWorktimeEnable:'',//非工作时间自动回复设置
+                    nonWorktimeEnable:'0',//非工作时间自动回复设置
                     startTime:'',//非工作时间段
                     endTime:'',
                     noWork:'',//非工作时间自动回复内容
@@ -263,10 +263,26 @@
                 realList2:{},
                 isshowTipcnt:false,
                 isshowTipcnt1:false,
+                timeoutDisabled:true,
+                nonWorkDisabled:true,
 
             }             
         },
         methods: { 
+            timoutChange(val){
+                if(val=="0"){
+                    this.timeoutDisabled=true;
+                }else{
+                    this.timeoutDisabled=false;
+                }
+            },
+            nonWorkChange(val){
+                if(val=="0"){
+                    this.nonWorkDisabled=true;
+                }else{
+                    this.nonWorkDisabled=false;
+                }
+            },
             mouseOverTip(){
                 this.isshowTipcnt=true               
             },
@@ -376,14 +392,14 @@
                 });  
             },
             mouseOver(){
-                if(this.iptDisabled==true){
+                // if(this.iptDisabled==true){
                     this.isShowEdit=true;
-                }                
+                // }                
             },
             mouseOver2(){
-                if(this.iptDisabled2==true){
+                // if(this.iptDisabled2==true){
                     this.isShowEdit2=true;
-                }                
+                // }                
             },
             mouseLeave(){
                 this.isShowEdit=false;
@@ -494,24 +510,24 @@
             addDomain1() {
                 this.dynamicValidateForm1.domains.push({
                     comText: '',
+                    iptDisabled:false,
                     key: Date.now()
                 });
-                this.iptDisabled=false;
                 this.isDisabled=true;
             },
             addDomain2() {
                 this.dynamicValidateForm2.domains.push({
                     comText: '',
+                    iptDisabled:false,
                     key: Date.now()
                 });
-                this.iptDisabled2=false;
                 this.isDisabled2=true;
             },
-            editDomain1(){
-                this.iptDisabled=false;
+            editDomain1(item){
+                item.iptDisabled=false;
             },
-            editDomain2(){
-                this.iptDisabled2=false;
+            editDomain2(item){
+                item.iptDisabled=false;
             },
             //开场白开始
             editPrologue(){
@@ -597,12 +613,22 @@
                 this.form.timeOutEnable=timeOut.timeOutEnable+"";
                 this.form.timeOut=timeOut.timeOut;
                 this.form.content=timeOut.content;
+                if(this.form.timeOutEnable=="0"){
+                    this.timeoutDisabled=true;
+                }else{
+                    this.timeoutDisabled=false;
+                }
             }
             if(noWork){
                 this.form.nonWorktimeEnable=noWork.nonWorktimeEnable+"";
                 this.form.startTime=noWork.startTime;
                 this.form.endTime=noWork.endTime;
                 this.form.content1=noWork.content;
+                if(this.form.nonWorktimeEnable=="0"){
+                    this.nonWorkDisabled=true;
+                }else{
+                    this.nonWorkDisabled=false;
+                }
             }
             if(lixian){
                 this.form.content2=lixian.content;
@@ -611,11 +637,22 @@
                 this.dynamicValidateForm1.domains=saleLangList;
                 this.isShowEdit=true;
                 this.iptDisabled=true;
+                if(this.dynamicValidateForm1.domains.length>0){
+                    for(var i=0;i<this.dynamicValidateForm1.domains.length;i++){
+                        this.dynamicValidateForm1.domains[i].iptDisabled=true;
+                    }
+                }
+                
             }
             if(userLangList){
                 this.dynamicValidateForm2.domains=userLangList;
                 this.isShowEdit2=true;
                 this.iptDisabled2=true;
+                if(this.dynamicValidateForm2.domains.length>0){
+                    for(var i=0;i<this.dynamicValidateForm2.domains.length;i++){
+                        this.dynamicValidateForm2.domains[i].iptDisabled=true;
+                    }
+                }
             }
             // 获取地址栏
             var type=getQueryString("type");
