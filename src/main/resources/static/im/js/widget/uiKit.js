@@ -120,11 +120,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // cbClickPortrait(account,scene);
 	                return;
 	            }else if(target.tagName.toLowerCase() === "li"){
+					let clientHeight=document.documentElement.clientHeight
 					layer.open({
 						type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
 								//   载层）4（tips层）,
 						title: ' ',   //标题
-						area: ['800px', '720px'],   //宽高
+						// area: ['800px', '720px'],   //宽高
+						area: ['800px', clientHeight*0.7+'px'],   //宽高
 						shade: 0,   //遮罩透明度
 						skin: 'sessionListFrame',
 						// content: $("#chatBox"),//支持获取DOM元素
@@ -418,6 +420,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
 								//   载层）4（tips层）,
 						title: ' ',   //标题
+						// area: ['800px', '720px'],   //宽高
 						area: ['800px', '720px'],   //宽高
 						shade: 0,   //遮罩透明度
 						skin: 'friendsListFrame',
