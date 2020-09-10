@@ -264,13 +264,21 @@ YX.fn.getUserInfo = function(accountId) {
         console.log(data,'个人信息请求后端接口');
         if(data.data){
           var data=data.data
-          var str=`
-          <span>注册时间：`+data.createDateStr+`4</span>
-          <span>`+data.age+`</span>|
-          <span>`+data.sex+`</span>|
-          <span>`+data.brandInvestment+`</span>|
-          <span>电话： `+data.phoneNumber+`</span>
-        `
+          var str=[,
+            data.createDateStr?'<span>'+data.createDateStr+'</span>':'',
+            data.age?'<span>'+data.age+'</span>|':'',
+            data.sex?'<span>'+data.sex+'</span>|':'',
+            data.brandInvestment?'<span>'+data.brandInvestment+'</span>|':'',
+            data.phoneNumber?'<span>'+data.phoneNumber+'</span>':'',
+            ].join("");
+
+        //   var str=`
+        //   <span>注册时间：`+data.createDateStr+`</span>
+        //   <span>`+data.age+`</span>
+        //   <span>`+data.sex+`</span>
+        //   <span>`+data.brandInvestment+`</span>
+        //   <span>电话： `+data.phoneNumber+`</span>
+        // `
           $('#otherInformation').html(str)
        }else{
         $('#otherInformation').html('')
