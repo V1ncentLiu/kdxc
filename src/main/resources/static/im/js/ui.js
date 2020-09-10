@@ -39,6 +39,19 @@ var appUI = {
    * 更新当前会话聊天面板UI
    */
   updateChatContentUI: function(msg, cache) {
+    console.log(msg, cache,22222222222);
+    if(isSessionListNum){
+      sessionListNum=Number(sessionListNum)
+      sessionListNum+=1
+      var str=['<div style="display: flex;align-items: center;">',
+          '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
+          '<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
+          sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
+        '</div>'].join("")
+      $('.sessionListFrame .layui-layer-title').html(str)
+    }else{
+      sessionListNum=0
+    }
     var lastItem = $('#chatContent .item').last(),
       msgHtml = '',
       user = cache.getUserById(msg.from);

@@ -138,20 +138,35 @@ return /******/ (function(modules) { // webpackBootstrap
 							$('.sessionListFrame .layui-layer-title').css({
 								'backgroundColor': '#ECEDF2',
 								'borderBottom':'none',
-								'height':'24px'
+								'height':'24px',
+								'paddingRight':'40px'
 							})
 						},
 						min:function(){
 							$('.sessionListFrame .layui-layer-title').css({
 								'height':'42px'
 							})
+							$('.sessionListFrame .layui-layer-title').css({
+								'height':'42px'
+							})
+							var str=['<div style="display: flex;align-items: center;">',
+									'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
+									'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
+									// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
+								'</div>'].join("")
+							$('.sessionListFrame .layui-layer-title').html(str)
+							isSessionListNum=true
 						},
 						restore:function(){
+							sessionListNum=0
+							isSessionListNum=false
 							$('.sessionListFrame .layui-layer-title').css({
 								'backgroundColor': '#ECEDF2',
 								'borderBottom':'none',
-								'height':'24px'
+								'height':'24px',
 							})
+							$('.sessionListFrame .layui-layer-title').html('')
+
 						},
 						cancel:function(){
 							$('#rightPanel').css({
