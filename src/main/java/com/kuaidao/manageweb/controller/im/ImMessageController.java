@@ -371,7 +371,7 @@ public class ImMessageController {
                 paramMap.put("saleIdList",idList);
             }else{
                 ArrayList<Long> longs = new ArrayList<>(1);
-                longs.add(-1l);
+                longs.add(-1L);
                 paramMap.put("saleIdList",longs);
             }
         }
