@@ -42,13 +42,13 @@
                                     :prop="'domains.' + index + '.comText'"
                                     :rules="[
                                       { required: true, message: '顾问常用语不能为空', trigger: 'blur' },
-                                      { max: 100, message: '顾问常用语最多不能超过100字', trigger: 'blur' },
+                                      { max: 100, message: '顾问常用语最多不能超过100字', trigger: 'change' },
                                     ]"
                                     label-width="30px"
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.comText" maxlength="100" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1(domain)"  :disabled="iptDisabled"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain)"  :disabled="iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
@@ -72,13 +72,13 @@
                                     :prop="'domains.' + index + '.comText'"
                                     :rules="[
                                       { required: true, message: '客户常用语不能为空', trigger: 'blur' },
-                                      { max: 100, message: '客户常用语最多不能超过100字', trigger: 'blur' },
+                                      { max: 100, message: '客户常用语最多不能超过100字', trigger: 'change' },
                                     ]"
                                     label-width="30px"
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.comText" maxlength="100" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2(domain)"  :disabled="iptDisabled2"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2('dynamicValidateForm2',domain)"  :disabled="iptDisabled2"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain2(domain)" icon="el-icon-edit-outline" v-if="isShowEdit2">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
                                 </el-form-item>
@@ -374,47 +374,63 @@
             handleClick(tab, event) {
                 console.log(tab, event);
             },
-            submitdialogForm1(item) {
+            submitdialogForm1(formName,item) {
                 console.log(item)
-                var id=item.id;
-                var type=2;//类型：1=用户常用语  2:顾问常用语
-                var comText=item.comText
-                var url="";
-                if(id){
-                    url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
-                }else{
-                    url="/commonLanguage/save?type="+type+'&comText='+comText
-                }
-                axios.post(url).then(function (response) { 
-                    console.log(response)
-                    window.location.href="/im/imCommonUseSitting/index"
-                }).catch(function (error) {
-                    mainDivVM.$message({
-                        message: "请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });  
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var id=item.id;
+                        var type=2;//类型：1=用户常用语  2:顾问常用语
+                        var comText=item.comText
+                        var url="";
+                        if(id){
+                            url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                        }else{
+                            url="/commonLanguage/save?type="+type+'&comText='+comText
+                        }
+                        axios.post(url).then(function (response) { 
+                            console.log(response)
+                            window.location.href="/im/imCommonUseSitting/index"
+                        }).catch(function (error) {
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
+                
             },
-            submitdialogForm2(item) {
+            submitdialogForm2(formName,item) {
                 console.log(item)
-                var id=item.id;
-                var type=1;//类型：1=用户常用语  2:顾问常用语
-                var comText=item.comText
-                var url="";
-                if(id){
-                    url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
-                }else{
-                    url="/commonLanguage/save?type="+type+'&comText='+comText
-                }
-                axios.post(url).then(function (response) { 
-                    console.log(response)
-                    window.location.href="/im/imCommonUseSitting/index"
-                }).catch(function (error) {
-                    mainDivVM.$message({
-                        message: "请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });  
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var id=item.id;
+                        var type=1;//类型：1=用户常用语  2:顾问常用语
+                        var comText=item.comText
+                        var url="";
+                        if(id){
+                            url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                        }else{
+                            url="/commonLanguage/save?type="+type+'&comText='+comText
+                        }
+                        axios.post(url).then(function (response) { 
+                            console.log(response)
+                            window.location.href="/im/imCommonUseSitting/index"
+                        }).catch(function (error) {
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });  
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
+                
             },
             removeDomain1(item) {
                 // var index = this.dynamicValidateForm1.domains.indexOf(item)
