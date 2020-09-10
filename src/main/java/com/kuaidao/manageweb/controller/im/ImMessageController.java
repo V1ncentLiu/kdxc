@@ -104,6 +104,14 @@ public class ImMessageController {
             organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
             JSONResult<List<OrganizationDTO>> listDescenDantByParentId = organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
             dxzList = listDescenDantByParentId.getData();
+            // 自己组织加入
+            OrganizationDTO myOrganizationDTO = new OrganizationDTO();
+            myOrganizationDTO.setId(user.getOrgId());
+            myOrganizationDTO.setName(user.getName());
+            if(CollectionUtils.isEmpty(dxzList)){
+                dxzList = new ArrayList(1);
+            }
+            dxzList.add(myOrganizationDTO);
             return dxzList;
         }
     }
