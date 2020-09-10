@@ -217,6 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Void}   
 	 */
 	SessionList.prototype.update = function(data){
+		console.log(data,'渲染左测列表数据');
 		var html = '',
 			i,
 			unreadNum=0,
@@ -463,7 +464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 							scrollbar: false ,//屏蔽浏览器滚动条
 							maxmin: true,
 							success:function(){
-								$('.sessionListFrame .layui-layer-title').css({
+								$('.friendsListFrame .layui-layer-title').css({
 									'backgroundColor': '#ECEDF2',
 									'borderBottom':'none',
 									'height':'24px',
@@ -473,10 +474,10 @@ return /******/ (function(modules) { // webpackBootstrap
 								isSessionListNum=false
 							},
 							min:function(){
-								$('.sessionListFrame .layui-layer-title').css({
+								$('.friendsListFrame .layui-layer-title').css({
 									'height':'42px'
 								})
-								$('.sessionListFrame .layui-layer-title').css({
+								$('.friendsListFrame .layui-layer-title').css({
 									'height':'42px'
 								})
 								var str=['<div style="display: flex;align-items: center;">',
@@ -484,18 +485,18 @@ return /******/ (function(modules) { // webpackBootstrap
 										'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
 										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
 									'</div>'].join("")
-								$('.sessionListFrame .layui-layer-title').html(str)
+								$('.friendsListFrame .layui-layer-title').html(str)
 								isSessionListNum=true
 							},
 							restore:function(){
 								sessionListNum=0
 								isSessionListNum=false
-								$('.sessionListFrame .layui-layer-title').css({
+								$('.friendsListFrame .layui-layer-title').css({
 									'backgroundColor': '#ECEDF2',
 									'borderBottom':'none',
 									'height':'24px',
 								})
-								$('.sessionListFrame .layui-layer-title').html('')
+								$('.friendsListFrame .layui-layer-title').html('')
 	
 							},
 							cancel:function(){
