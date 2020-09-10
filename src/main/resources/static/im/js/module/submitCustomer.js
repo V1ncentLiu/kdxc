@@ -63,7 +63,7 @@ YX.fn.generalFormLastClick = function (type) {
         }        
         var params = {};
         params.name=name;
-        params.customerId='669f80e2663a4e238728a9c348ac9e36';
+        params.customerId=customerId;
         params.phone=phone;
         params.phone2=phone2;
         params.wechat=wechat;
