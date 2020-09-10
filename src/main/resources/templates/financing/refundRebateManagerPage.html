@@ -142,6 +142,17 @@
                     <el-form-item label="签约单编号:" prop="signNo">
                         <el-input v-model="searchForm.signNo" placeholder="签约单编号"></el-input>
                     </el-form-item>
+                    <el-form-item label="签约项目:">
+                        <el-select v-model="searchForm.signProjectId" placeholder="签约项目" style="width: 100%;" clearable
+                                   filterable>
+                            <el-option
+                                    v-for="item in proSelect"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
           		      <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -433,6 +444,7 @@ var payModeItem =[[${payModeItem}]];
 var giveTypeList =[[${giveTypeList}]];
 var businessLine = [[${businessLine}]];
 var roleCode = [[${roleCode}]];
+var proSelect = [[${proSelect}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -442,6 +454,7 @@ var clueVM = new Vue({
           isShow:false,
           btnDisabled:false,
           btnDisabled1:false,
+            projectArr: proSelect,
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -457,7 +470,8 @@ var clueVM = new Vue({
 	       		signProvince: '',
 	       		signStatus: '',
 	       		phone: '',
-	       		signNo: ''
+	       		signNo: '',
+                signProjectId: ''
           },
           allocationForm: {
         	  
@@ -896,7 +910,7 @@ var clueVM = new Vue({
                 param.signStatus = this.searchForm.signStatus;
                 param.phone = this.searchForm.phone;
                 param.signNo = this.searchForm.signNo;
-                
+                param.signProjectId = this.searchForm.signProjectId;
                 //列表只查询正常数据，取消删除数据不查询
                 //param.delFalg = this.searchForm.delFalg;
                 console.info(param);
