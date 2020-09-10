@@ -151,7 +151,7 @@
                     <span class="tipicon1" @mouseover="mouseOverTip1" @mouseout="mouseLeaveTip1">?</span>
                     <p class="tipcnt1" v-show="isshowTipcnt1">在顾问将状态改为在线或离线时，回复该话术。设置自动回复语时，“##电话号码##”放到文中，可动态获取当前顾问的手机号</p>
                     <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
-                        <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;" placeholder="您好，我现在有其他事情在忙，稍后回复您。着急的话可拨打我的电话##电话号码##，给您带来的不变非常抱歉！"></el-input>
+                        <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                         <p class="tip">不超过500个字</p>
                     </el-form-item>
                 </div>
@@ -297,6 +297,31 @@
             },
             //开场白结束
             submitForm(){
+                // 选择启用相关输入框不能为空，为空点击保存给出提示“***不能为空”
+                if(this.form.timeOutEnable=="1"){
+                    if(this.form.timeOut==""){
+                        this.$message({type: 'warning', message:"超时自动回复时间不能为空"});
+                        return
+                    }
+                    if(this.form.content==""){
+                        this.$message({type: 'warning', message:"超时自动回复内容不能为空"});
+                        return
+                    }
+                }
+                if(this.form.nonWorktimeEnable=="1"){
+                    if(!this.form.startTime){
+                        this.$message({type: 'warning', message:"非工作时间段不能为空"});
+                        return
+                    }
+                    if(!this.form.endTime){
+                        this.$message({type: 'warning', message:"非工作时间段不能为空"});
+                        return
+                    }
+                    if(this.form.content1==""){
+                        this.$message({type: 'warning', message:"非工作时间自动回复内容不能为空"});
+                        return
+                    }
+                }
                 var param = {};
                 var kaichangListParm={};
                 var timeOutParm={};
@@ -631,7 +656,12 @@
                 }
             }
             if(lixian){
-                this.form.content2=lixian.content;
+                if(lixian.content){
+                   this.form.content2=lixian.content; 
+               }else{
+                    this.form.content2='好，我现在有其他事情在忙，稍后回复您。着急的话可拨打我的电话##电话号码##，给您带来的不变非常抱歉！';
+               }
+                
             }
             if(saleLangList){
                 this.dynamicValidateForm1.domains=saleLangList;
