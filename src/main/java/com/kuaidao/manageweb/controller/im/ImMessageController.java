@@ -164,7 +164,7 @@ public class ImMessageController {
         }
         // 封装客户Id
         Map<String,Object> map = new HashMap<>();
-        map.put("accountId",messageRecordPageReq.getCusId());
+        map.put("clueId",messageRecordPageReq.getCusId());
         JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(map);
         if(null == listJSONResult || !"0".equals(listJSONResult.getCode())){
             return new JSONPageResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
