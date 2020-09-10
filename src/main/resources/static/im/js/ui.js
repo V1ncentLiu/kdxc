@@ -46,7 +46,7 @@ var appUI = {
       var str=['<div style="display: flex;align-items: center;">',
           '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
           '<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
-          sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
+          sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+(sessionListNum<=10?sessionListNum:10+'+')+'</span>':'',
         '</div>'].join("")
       $('.sessionListFrame .layui-layer-title').html(str)
     }else{

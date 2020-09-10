@@ -67,7 +67,7 @@ YX.fn.initUI = function() {
 YX.fn.showMe = function() {
   var user = this.cache.getUserById(userUID);
   this.$userName.text(user.nick);
-  this.$userPic.attr('src', getAvatar(user.avatar)?getAvatar(user.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
+  this.$userPic.attr('src', getAvatar(user.avatar)!='null'?getAvatar(user.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
   setCookie('nickName', user.nick);
   setCookie('avatar', user.avatar);
 };
