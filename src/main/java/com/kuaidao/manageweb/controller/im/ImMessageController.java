@@ -356,8 +356,27 @@ public class ImMessageController {
      */
     @PostMapping("/getSaleImStateNum")
     public @ResponseBody JSONResult<List<Map<String, Object>>> getSaleImStateNum(){
+        UserInfoDTO userCurrent = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = userCurrent.getRoleList();
+        Map<String,Object> paramMap = new HashMap<>();
+        if(roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
 
-        JSONResult<List<Map<String, Object>>> result = customerInfoFeignClient.getSaleImStateNum();
+            // 管理员
+        }else{
+            // 当前组织下面人员
+            List<UserInfoDTO> userList = getTeleSaleByOrgId(userCurrent.getOrgId());
+            if(CollectionUtils.isNotEmpty(userList)){
+                List<Long> idList = userList.parallelStream()
+                        .filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
+                paramMap.put("saleIdList",idList);
+            }else{
+                ArrayList<Long> longs = new ArrayList<>(1);
+                longs.add(-1l);
+                paramMap.put("saleIdList",longs);
+            }
+        }
+
+        JSONResult<List<Map<String, Object>>> result = customerInfoFeignClient.getSaleImStateNum(paramMap);
 
         return result;
     }
