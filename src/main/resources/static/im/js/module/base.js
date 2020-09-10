@@ -186,28 +186,28 @@ YX.fn.openChatBox = function(account, scene) {
         this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
         // 渲染聊天框信息
         this.getUserInfo(info.account)
-        this.$submitCustomer.attr('data-imId', '')
         $('#submitCustomer').css({
           'display':'block'
         })
         $('#editCustomer').css({
           'display':'none'
         })
-        console.log('下面打印的是将clueId赋在div的属性上面 ');
+        console.log('下面打印的是将clueId显示隐藏按钮')
         for(var i=0;i<infoSession.length;i++){
           if(infoSession[i].to==info.account&&infoSession[i].clueId){
-            console.log(infoSession[i].clueId,'将clueId赋在div的属性上面');
-            // 将clueId作为标签属性
-            this.$submitCustomer.attr('data-imId', infoSession[i].clueId)
-            $('#submitCustomer').css({
-              'display':'none'
-            })
-            $('#editCustomer').css({
-              'display':'block'
-            })
-            $('#editCustomer2').attr({
-                'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+infoSession[i].clueId
-            })
+            console.log(infoSession[i].clueId,'将clueId显示隐藏按钮');
+            // 将data-imId作为标签属性
+            if(infoSession[i].clueId){
+              $('#submitCustomer').css({
+                'display':'none'
+              })
+              $('#editCustomer').css({
+                'display':'block'
+              })
+              $('#editCustomer2').attr({
+                  'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+infoSession[i].clueId
+              })
+            }
           }
         }
       // }

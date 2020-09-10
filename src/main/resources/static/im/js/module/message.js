@@ -107,7 +107,7 @@ YX.fn.message = function() {
       titleName:data.brandName,
       mainPoint:data.coreFeatures,
       subTitle:data.joinInvestMin+'-'+data.joinInvestMax+'万',
-      city:data.applyPerson,
+      city:data.locationName,
       sendBrandID:data.id,
     }
     console.log(data,sendMessage,'点击发送品牌');
