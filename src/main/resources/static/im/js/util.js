@@ -330,11 +330,11 @@ function getMessage (msg) {
                 })
                 str += '<hr /><div>聊天记录</div></div>'
             } else {
-                str = sentStr + '一条[自定义]消息，请到手机或电脑客户端查看';
+                str = "<div class='f-maxWid'>" + sentStr + '一条[自定义]消息，请到手机或电脑客户端查看' + "</div>"
             }
             break;
         case 'robot':
-            str = sentStr + '一条[机器人]消息,请到手机或电脑客户端查看';
+            str = "<div class='f-maxWid'>" + sentStr + '一条[机器人]消息,请到手机或电脑客户端查看' + "</div>"
             break
         default:
             if (msg && msg.attach && msg.attach.netcallType !== undefined) {
@@ -346,7 +346,7 @@ function getMessage (msg) {
                     str = "未接听";
                 }
             } else {
-                str = sentStr + '一条[未知消息类型]消息';
+                str = "<div class='f-maxWid'>" + sentStr + '一条[未知消息类型]消息' + "</div>"
             }
             break;
     }
