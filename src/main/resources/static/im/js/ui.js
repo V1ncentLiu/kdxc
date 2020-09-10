@@ -100,7 +100,6 @@ var appUI = {
         '</span></p>';
     } else {
       //聊天消息
-      console.log(message,22222222);
       var type = message.type,
         from = message.from,
         avatar = user.avatar,
