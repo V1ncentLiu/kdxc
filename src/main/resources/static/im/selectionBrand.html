@@ -14,7 +14,7 @@
 <body>
     <div class="selectionBrandBar" id="selectionBrandBar">
         <div class="selectionBrandSearch">
-            <input v-on:keyup.enter="inputSearch" v-model="inputValue" id="selectionBrandSearchInput" class="selectionBrandSearchInput" type="text"
+            <input autocomplete="off" v-on:keyup.enter="inputSearch" maxlength="15" v-model="inputValue" id="selectionBrandSearchInput" class="selectionBrandSearchInput" type="text"
                 placeholder="请输入品牌关键字">
             <span><img @click="inputSearch" style="cursor: pointer;" src="images/newImages/fada@3x.png" alt=""></span>
         </div>
@@ -38,6 +38,7 @@
                     <img :src="item.logo" alt="">
                     <span>{{showLittleBit(item.brandName)}}</span>
                 </li>
+                <li v-if="isBrandList" style="width:95%">暂无匹配品牌</li>
             </ul>
             <div class="leftSanjiao" @click="turnPpage('pre')">
                 <!-- <img class="imgSanjiao" src="./images/newImages/arrow@3x.png" alt=""> -->
@@ -69,7 +70,8 @@
             pageNum:1,
             brandNameCategory:'',
             investmentRangeNumData:'',
-            pages:''
+            pages:'',
+            isBrandList:true
         },
         methods: {
             showLittleBit(value){
@@ -150,6 +152,9 @@
                         if(data.data){
                             that.brandList=data.data.list
                             that.pages=data.data.pages
+                            that.isBrandList=false
+                        }else{
+                            that.isBrandList=true
                         }
                     },
                     error: function () {
