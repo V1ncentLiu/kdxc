@@ -16,6 +16,10 @@
         .draggableUl li:hover .cnt{border:1px dashed #ecedf2;font-size: 14;}
         .round{width: 20px;height: 20px;border-radius: 50%;border: 1px solid;text-align: center;display: inline-block;line-height: 20px;margin-right: 10px;}
         .dynamic .el-input{width: 680px;}
+        .tipicon{position: absolute;left: 228px;top: 39px;width: 20px;height: 20px;background: #e67020;text-align: center;line-height: 20px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
+        .tipcnt{position: absolute;left: 255px;top: 40px;z-index: 3;font-size: 12px;width: 348px;}
+        .tipicon1{position: absolute;left: -10px;top: 8px;width: 20px;height: 20px;background: #e67020;text-align: center;line-height: 20px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
+        .tipcnt1{position: absolute;left: -9px;top: 35px;z-index: 3;font-size: 12px;width: 180px;}
     </style>
 </head>
 <body>
@@ -27,8 +31,10 @@
     </el-breadcrumb>  
     <div class="mainSearchBg marginB20 fs14">         
         <el-row class="mainSearchForm">   
-            <template>
+            <template style="position: relative;">
                 <div class="titleBox"><span class="fs16">常用语设置</span></div>
+                <span class="tipicon" @mouseover="mouseOverTip" @mouseout="mouseLeaveTip">?</span>
+                <p class="tipcnt" v-show="isshowTipcnt">常用语为用户常问的问题。在用户进入时，推出自动开场语与常用语。同时，点击聊窗中底部标签【常用语】，也可查看相关内容</p>
                 <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
                     <el-tab-pane label="顾问常用语设置" name="first">
                         <div class="marginB20">
@@ -140,11 +146,16 @@
                 <el-form-item label="非工作时间自动回复内容：" :label-width="labelWidth"> 
                     <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;" placeholder="现在是非工作时间，你可以留言"></el-input>
                     <p class="tip">不超过500个字</p>
-                </el-form-item>
-                <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;" placeholder="您好，我现在有其他事情在忙，稍后回复您。着急的话可拨打我的电话##电话号码##，给您带来的不变非常抱歉！"></el-input>
-                    <p class="tip">不超过500个字</p>
-                </el-form-item>
+                </el-form-item>                
+                <div style="position: relative;">
+                    <span class="tipicon1" @mouseover="mouseOverTip1" @mouseout="mouseLeaveTip1">?</span>
+                    <p class="tipcnt1" v-show="isshowTipcnt1">在顾问将状态改为在线或离线时，回复该话术。设置自动回复语时，“##电话号码##”放到文中，可动态获取当前顾问的手机号</p>
+                    <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
+                        <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;" placeholder="您好，我现在有其他事情在忙，稍后回复您。着急的话可拨打我的电话##电话号码##，给您带来的不变非常抱歉！"></el-input>
+                        <p class="tip">不超过500个字</p>
+                    </el-form-item>
+                </div>
+                
             </el-row>
             <div class="padding20 f-tac">            
                 <el-button type="primary" @click="submitForm('form')">保存设置</el-button>
@@ -250,9 +261,24 @@
                 },
                 realList:{},
                 realList2:{},
+                isshowTipcnt:false,
+                isshowTipcnt1:false,
+
             }             
         },
         methods: { 
+            mouseOverTip(){
+                this.isshowTipcnt=true               
+            },
+            mouseLeaveTip(){
+                this.isshowTipcnt=false;
+            },
+            mouseOverTip1(){
+                this.isshowTipcnt1=true               
+            },
+            mouseLeaveTip1(){
+                this.isshowTipcnt1=false;
+            },
             //开场白结束
             submitForm(){
                 var param = {};
@@ -383,15 +409,20 @@
                         }else{
                             url="/commonLanguage/save?type="+type+'&comText='+comText
                         }
-                        axios.post(url).then(function (response) { 
-                            console.log(response)
+                        if(comText){
+                            axios.post(url).then(function (response) { 
+                                console.log(response)
+                                window.location.href="/im/imCommonUseSitting/index"
+                            }).catch(function (error) {
+                                mainDivVM.$message({
+                                    message: "请求失败，请稍后重试",
+                                    type: "error"
+                                });
+                            }); 
+                        }else{
                             window.location.href="/im/imCommonUseSitting/index"
-                        }).catch(function (error) {
-                            mainDivVM.$message({
-                                message: "请求失败，请稍后重试",
-                                type: "error"
-                            });
-                        });  
+                        }
+                         
                     } else {
                         console.log('error submit!!');
                         return;
@@ -411,15 +442,19 @@
                         }else{
                             url="/commonLanguage/save?type="+type+'&comText='+comText
                         }
-                        axios.post(url).then(function (response) { 
-                            console.log(response)
+                        if(comText){
+                            axios.post(url).then(function (response) { 
+                                console.log(response)
+                                window.location.href="/im/imCommonUseSitting/index?type="+urlType
+                            }).catch(function (error) {
+                                mainDivVM.$message({
+                                    message: "请求失败，请稍后重试",
+                                    type: "error"
+                                });
+                            });  
+                        }else{
                             window.location.href="/im/imCommonUseSitting/index?type="+urlType
-                        }).catch(function (error) {
-                            mainDivVM.$message({
-                                message: "请求失败，请稍后重试",
-                                type: "error"
-                            });
-                        });  
+                        }                        
                     } else {
                         console.log('error submit!!');
                         return;
