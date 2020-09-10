@@ -44,6 +44,7 @@ YX.fn.commonWordsListClick = function () {
 YX.fn.generalFormLastClick = function (type) {
     if(type=='submit'){
         // alert('表单提交');
+        debugger
         var that = this;
         var name=$("#submitCustomerFormName").val();
         var customerId=$("#submitCustomer").attr('data-imid');
@@ -88,10 +89,10 @@ YX.fn.generalFormLastClick = function (type) {
                     var url='';
                     if(id){
                         layer.msg('保存成功');
-                        $('#submitCustomer1').css({
+                        $('#submitCustomer').css({
                             'display':'none'
                         })
-                        $('#editCustomer1').css({
+                        $('#editCustomer').css({
                             'display':'block'
                         })
                         url='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+id;
