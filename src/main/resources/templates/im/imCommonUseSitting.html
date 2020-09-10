@@ -28,12 +28,13 @@
     <div class="mainSearchBg marginB20 fs14">         
         <el-row class="mainSearchForm">   
             <template>
+                <div class="titleBox"><span class="fs16">常用语设置</span></div>
                 <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
                     <el-tab-pane label="顾问常用语设置" name="first">
                         <div class="marginB20">
-                            <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus" :disabled="isDisabled">添加常用语</el-button>
+                            <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus" :disabled="isDisabled">添加顾问常用语</el-button>
                         </div> 
-                        <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave">
+                        <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave" @submit.native.prevent>
                             <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" @end.native="endEvent">
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm1.domains"
@@ -41,7 +42,6 @@
                                     :key="domain.key"
                                     :prop="'domains.' + index + '.comText'"
                                     :rules="[
-                                      { required: true, message: '顾问常用语不能为空', trigger: 'blur' },
                                       { max: 100, message: '顾问常用语最多不能超过100字', trigger: 'change' },
                                     ]"
                                     label-width="30px"
@@ -52,9 +52,6 @@
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
-                                <!-- <el-form-item>
-                                    <el-button type="primary" @click="submitdialogForm1('dynamicValidateForm1')">提交</el-button>
-                                </el-form-item> -->
                             </draggable>
                         </el-form>
                        
@@ -62,8 +59,8 @@
                         <!-- {{dynamicValidateForm1.domains}} -->
                     </el-tab-pane>
                     <el-tab-pane label="客户常用语" name="second">
-                        <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus" :disabled="isDisabled2">添加用户常用语</el-button>
-                        <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2">
+                        <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus" :disabled="isDisabled2">添加客户常用语</el-button>
+                        <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2" @submit.native.prevent>
                             <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" @end.native="endEvent2">
                                 <el-form-item
                                     v-for="(domain, index) in dynamicValidateForm2.domains"
@@ -71,20 +68,16 @@
                                     :key="domain.key"
                                     :prop="'domains.' + index + '.comText'"
                                     :rules="[
-                                      { required: true, message: '客户常用语不能为空', trigger: 'blur' },
                                       { max: 100, message: '客户常用语最多不能超过100字', trigger: 'change' },
                                     ]"
                                     label-width="30px"
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2('dynamicValidateForm2',domain)"  :disabled="iptDisabled2"></el-input>
+                                    <el-input v-model="domain.comText" style="margin-right: 10px;" @keyup.enter.native="submitdialogForm2('dynamicValidateForm2',domain,2)"  :disabled="iptDisabled2"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain2(domain)" icon="el-icon-edit-outline" v-if="isShowEdit2">编辑</el-button> 
-                                    <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
+                                    <el-button type="danger" @click.prevent="removeDomain1(domain,2)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
                                 </el-form-item>
-                                <!-- <el-form-item>
-                                    <el-button type="primary" @click="submitdialogForm1('dynamicValidateForm2')">提交</el-button>
-                                </el-form-item> -->
                             </draggable>
                         </el-form>
                     </el-tab-pane>
@@ -116,7 +109,7 @@
                     <el-input v-model="form.timeOut" placeholder="" style="margin-right: 10px;"></el-input>秒
                 </el-form-item>
                 <el-form-item label="超时自动回复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;" placeholder="我现在不在，稍后回归我现在不在，稍后回归"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="非工作时间自动回复设置：" :label-width="labelWidth"> 
@@ -145,11 +138,11 @@
                     </el-time-picker>
                 </el-form-item>                
                 <el-form-item label="非工作时间自动回复内容：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;" placeholder="现在是非工作时间，你可以留言"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
                 <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
-                    <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                    <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;" placeholder="您好，我现在有其他事情在忙，稍后回复您。着急的话可拨打我的电话##电话号码##，给您带来的不变非常抱歉！"></el-input>
                     <p class="tip">不超过500个字</p>
                 </el-form-item>
             </el-row>
@@ -373,15 +366,17 @@
                 this.isShowEdit2=false;
             },
             handleClick(tab, event) {
-                console.log(tab, event);
+                console.log(tab);
+                if(tab.name=="first"){
+                    window.location.href="/im/imCommonUseSitting/index"
+                }
             },
             submitdialogForm1(formName,item) {
-                console.log(item)
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        var id=item.id;
                         var type=2;//类型：1=用户常用语  2:顾问常用语
                         var comText=item.comText
+                        var id=item.id;
                         var url="";
                         if(id){
                             url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
@@ -404,13 +399,12 @@
                 });
                 
             },
-            submitdialogForm2(formName,item) {
-                console.log(item)
+            submitdialogForm2(formName,item,urlType) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        var id=item.id;
                         var type=1;//类型：1=用户常用语  2:顾问常用语
                         var comText=item.comText
+                        var id=item.id; 
                         var url="";
                         if(id){
                             url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
@@ -419,7 +413,7 @@
                         }
                         axios.post(url).then(function (response) { 
                             console.log(response)
-                            window.location.href="/im/imCommonUseSitting/index"
+                            window.location.href="/im/imCommonUseSitting/index?type="+urlType
                         }).catch(function (error) {
                             mainDivVM.$message({
                                 message: "请求失败，请稍后重试",
@@ -433,7 +427,7 @@
                 });
                 
             },
-            removeDomain1(item) {
+            removeDomain1(item,urlType) {
                 // var index = this.dynamicValidateForm1.domains.indexOf(item)
                 // if (index !== -1) {
                 //     this.dynamicValidateForm1.domains.splice(index, 1)
@@ -443,7 +437,11 @@
                 this.$confirm('是否确认删除?').then(() => {
                     axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
                         console.log(response)
-                        window.location.href="/im/imCommonUseSitting/index"        
+                        if(urlType){
+                           window.location.href="/im/imCommonUseSitting/index?type="+urlType 
+                       }else{
+                            window.location.href="/im/imCommonUseSitting/index" 
+                       }                                
                     }).catch(function (error) {
                         mainDivVM.$message({
                             message: "请求失败，请稍后重试",
@@ -583,6 +581,12 @@
                 this.dynamicValidateForm2.domains=userLangList;
                 this.isShowEdit2=true;
                 this.iptDisabled2=true;
+            }
+            // 获取地址栏
+            var type=getQueryString("type");
+            console.log(type)
+            if(type==2){
+                this.activeName="second";
             }
 
         },
