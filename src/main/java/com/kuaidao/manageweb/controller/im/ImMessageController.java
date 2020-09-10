@@ -21,6 +21,7 @@ import com.kuaidao.manageweb.feign.im.ImFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -86,15 +87,25 @@ public class ImMessageController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxzList = new ArrayList();
-        if (roleList != null && roleList.get(0) != null) {
-            OrganizationQueryDTO dto = new OrganizationQueryDTO();
-            dto.setSystemCode(SystemCodeConstant.HUI_JU);
-            dto.setOrgType(OrgTypeConstant.DXZ);
-            dto.setBusinessLine(user.getBusinessLine());
-            JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
-            dxzList = dzList.getData();
+        // 管理员
+        if(roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
+            if (roleList != null && roleList.get(0) != null) {
+                OrganizationQueryDTO dto = new OrganizationQueryDTO();
+                dto.setSystemCode(SystemCodeConstant.HUI_JU);
+                dto.setOrgType(OrgTypeConstant.DXZ);
+                dto.setBusinessLine(user.getBusinessLine());
+                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+                dxzList = dzList.getData();
+            }
+            return dxzList;
+        }else{
+            OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+            organizationQueryDTO.setParentId(user.getOrgId());
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+            JSONResult<List<OrganizationDTO>> listDescenDantByParentId = organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            dxzList = listDescenDantByParentId.getData();
+            return dxzList;
         }
-        return dxzList;
     }
 
     /**
