@@ -44,6 +44,7 @@ YX.fn.commonWordsListClick = function () {
 YX.fn.generalFormLastClick = function (type) {
     if(type=='submit'){
         // alert('表单提交');
+        debugger
         var that = this;
         var name=$("#submitCustomerFormName").val();
         var customerId=$("#submitCustomer").attr('data-imid');
@@ -63,7 +64,7 @@ YX.fn.generalFormLastClick = function (type) {
         }        
         var params = {};
         params.name=name;
-        params.customerId='669f80e2663a4e238728a9c348ac9e36';
+        params.customerId=customerId;
         params.phone=phone;
         params.phone2=phone2;
         params.wechat=wechat;
@@ -88,10 +89,10 @@ YX.fn.generalFormLastClick = function (type) {
                     var url='';
                     if(id){
                         layer.msg('保存成功');
-                        $('#submitCustomer1').css({
+                        $('#submitCustomer').css({
                             'display':'none'
                         })
-                        $('#editCustomer1').css({
+                        $('#editCustomer').css({
                             'display':'block'
                         })
                         url='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+id;
