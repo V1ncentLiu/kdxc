@@ -166,7 +166,7 @@ public class ImMessageController {
                     t.add(dto.getCusName());
                     // 聊天时间
                     if(StringUtils.isNotBlank(dto.getMsgTimestamp())){
-                        t.add(DateUtil.timeStamp2Str(dto.getMsgTimestamp(),null));
+                        t.add(DateUtil.timeStampMills2Str(dto.getMsgTimestamp(),null));
                     }
                     // 聊天内容
                     t.add(dto.getBody());
