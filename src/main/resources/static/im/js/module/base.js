@@ -265,11 +265,11 @@ YX.fn.getUserInfo = function(accountId) {
         if(data.data){
           var data=data.data
           var str=[,
-            data.createDateStr?'<span>'+data.createDateStr+'</span>':'',
+            data.createDateStr?'<span>注册时间：'+data.createDateStr+'</span>':'',
             data.age?'<span>'+data.age+'</span>|':'',
             data.sex?'<span>'+data.sex+'</span>|':'',
             data.brandInvestment?'<span>'+data.brandInvestment+'</span>|':'',
-            data.phoneNumber?'<span>'+data.phoneNumber+'</span>':'',
+            data.phoneNumber?'<span>电话：'+data.phoneNumber+'</span>':'',
             ].join("");
 
         //   var str=`
@@ -277,7 +277,7 @@ YX.fn.getUserInfo = function(accountId) {
         //   <span>`+data.age+`</span>
         //   <span>`+data.sex+`</span>
         //   <span>`+data.brandInvestment+`</span>
-        //   <span>电话： `+data.phoneNumber+`</span>
+        //   <span> `+data.phoneNumber+`</span>
         // `
           $('#otherInformation').html(str)
        }else{
