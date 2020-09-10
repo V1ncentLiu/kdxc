@@ -47,7 +47,7 @@ YX.fn.generalFormLastClick = function (type) {
         debugger
         var that = this;
         var name=$("#submitCustomerFormName").val();
-        var customerId=readCookie('uid')
+        var customerId=$("#submitCustomer").attr('data-imId');
         var phone=$("#submitCustomerFormIphone").val();
         var phone2=$("#submitCustomerFormIphoneTwo").val();
         var wechat=$("#submitCustomerFormWechat").val();

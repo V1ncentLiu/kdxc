@@ -407,10 +407,10 @@ YX.fn.cbUploadAvatar = function (err, data) {
         alert(err)
         return
     } else {
-        if (data.w < 300 || data.h < 300) {
-            alert("图片长宽不能小于300")
-            return
-        }
+        // if (data.w < 300 || data.h < 300) {
+        //     alert("图片长宽不能小于300")
+        //     return
+        // }
         this.showPreAvatar(data.url)
     }
 }

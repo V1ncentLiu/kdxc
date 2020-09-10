@@ -137,19 +137,19 @@ YX.fn.messageIframe = function (data) {
 
 
 
-YX.fn.showBrandHtml = function () {
-  var brandSelectionLayer
-  brandSelectionLayer=layer.open({
-      type: 2,
-      title: '选品牌',
-      shadeClose: true,
-      shade: 0.4,
-      area: ['699px', '420px'],
-      content: '../../../im/selectionBrand.html' //iframe的url
-    });
+// YX.fn.showBrandHtml = function () {
+//   var brandSelectionLayer
+//   brandSelectionLayer=layer.open({
+//       type: 2,
+//       title: '选品牌',
+//       shadeClose: true,
+//       shade: 0.4,
+//       area: ['750px', '520px'],
+//       content: '../../../im/selectionBrand.html' //iframe的url
+//     });
 
    
-}
+// }
 
 /**
  * 处理收到的消息
