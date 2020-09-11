@@ -255,7 +255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				unreadNum+=Number(info.unread)
 	            str = ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="' + info.scene + '" data-account="' + info.account + '">',
 								'<div class="panel_avatar">',
-								'<img class="panel_image" src="'+(info.avatar==='null'?'https://app.yunxin.163.com/webdemo/im/images/default-icon.png':info.avatar)+'"/>',
+								'<img class="panel_image" src="'+(info.avatar==='null'?'https://static-huiju-new.kuaidao.cn/lark/Lark20200911-182905.png':info.avatar)+'"/>',
 								'</div>',
 	                            '<div class="panel_text">',
 	                                '<p class="panel_multi-row">',
@@ -279,7 +279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		var str=['<div style="display: flex;align-items: center;">',
 					'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
 					'<span style="margin:0 10px;">我的会话</span>',
-					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:26px;display: inline-block;width: 26px;height: 26px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
+					unreadNum>0?'<span style="text-align: center;line-height:24px;font-size:12px;display: inline-block;width: 24px;height: 24px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
 				'</div>'].join("")
 		if(!isLayerOpen){
 			$('.mainHtmlLayer .layui-layer-title').html(str)

@@ -35,7 +35,7 @@ YX.fn.myInfoEvt = function () {
     this.$modifyAvatar.delegate('.j-choseFile, .j-reupload', 'click', this.doClickModifyAvatar.bind(this))
     this.$modifyAvatar.delegate('.j-save', 'click', this.doSaveAvatar.bind(this))
     this.$modifyAvatar.delegate('.j-upload', 'change', this.viewAvatar.bind(this))
-    
+    this.changeState(0)
 }
 YX.fn.customerStateClick = function () {
     $(".statusBox").toggle();
