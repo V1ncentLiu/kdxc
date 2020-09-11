@@ -155,7 +155,7 @@ var appUI = {
             buildSender(message) +
             '">',
           '<img class="img j-img" src="' +
-          (avatar!='null'?getAvatar(avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png') +
+          (avatar!='null'?getAvatar(avatar):'https://static-huiju-new.kuaidao.cn/lark/Lark20200911-182905.png') +
             '" data-account="' +
             from +
             '"/>',

@@ -183,9 +183,9 @@ YX.fn.openChatBox = function(account, scene) {
         this.$nickName.text(info.nick);
         // }
         // 聊天图片
-        this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
+        this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://static-huiju-new.kuaidao.cn/lark/Lark20200911-182905.png');
         // 渲染聊天框信息
-        this.getUserInfo(info.account)
+        this.getUserInfo(account)
         $('#submitCustomer').css({
           'display':'block'
         })
@@ -208,6 +208,24 @@ YX.fn.openChatBox = function(account, scene) {
               $('#editCustomer2').attr({
                   'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+infoSession[i].clueId
               })
+            }
+          }else{
+            var newFriendList=localStorage.getItem('friendLists')
+            if(newFriendList){
+              newFriendList=JSON.parse(newFriendList)
+              for(var j=0;j<newFriendList.length;j++){
+                if(newFriendList[j].account==account){
+                  $('#submitCustomer').css({
+                    'display':'none'
+                  })
+                  $('#editCustomer').css({
+                    'display':'block'
+                  })
+                  $('#editCustomer2').attr({
+                      'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+newFriendList[j].clueId
+                  })
+                }
+              } 
             }
           }
         }
