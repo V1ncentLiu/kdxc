@@ -18,10 +18,16 @@
         .draggableUl .el-textarea__inner{height: auto!important;}
         .round{width: 20px;height: 20px;border-radius: 50%;border: 1px solid;text-align: center;display: inline-block;line-height: 20px;margin-right: 10px;}
         .dynamic .el-input{width: 680px;}
-        .tipicon{position: absolute;left: 228px;top: 39px;width: 20px;height: 20px;background: #e67020;text-align: center;line-height: 20px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
+        .tipicon{position: absolute;left: 228px;top: 39px;width: 16px;height: 16px;background: #e67020;text-align: center;line-height: 16px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
         .tipcnt{position: absolute;left: 255px;top: 40px;z-index: 3;font-size: 12px;width: 348px;}
-        .tipicon1{position: absolute;left: -10px;top: 8px;width: 20px;height: 20px;background: #e67020;text-align: center;line-height: 20px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
-        .tipcnt1{position: absolute;left: -9px;top: 35px;z-index: 3;font-size: 12px;width: 180px;}
+        .tipicon1{position: absolute;left: 175px;top: 8px;width: 18px;height: 18px;text-align: center;line-height: 18px;/*border:1px solid #5c6be8;*/background:#5c6be8;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
+        .tipcnt1{position: absolute;left: 200px;top: -5px;z-index: 5;width: 430px;padding: 10px 15px 10px 6px;background: #f5f7fa;    border-radius: 5px;font-size: 14px;line-height: 1.5;margin-bottom: 20px;overflow: hidden;}
+        .tipcnt1 span{width: 16px;height: 16px;border:1px solid #5c6be8;color: #5c6be8;border-radius: 50%;float: left;text-align: center;line-height: 16px;margin: 3px 10px 0 0;}
+        .tipcnt1 p{float: left;}
+        .tipcontent{width: 654px;padding: 10px 15px;background: #f5f7fa;border-radius: 5px;font-size: 14px;line-height: 1.5;margin-bottom: 20px;overflow: hidden;}
+        .tipcontent span{width: 16px;height: 16px;border:1px solid #5c6be8;color: #5c6be8;border-radius: 50%;float: left;text-align: center;line-height: 16px;margin: 3px 10px 0 0;}
+        .tipcontent p{width: 625px;float: left;}
+        .floatL .el-form-item__label{text-align: left;}
     </style>
 </head>
 <body>
@@ -35,8 +41,8 @@
         <el-row class="mainSearchForm">   
             <template style="position: relative;">
                 <div class="titleBox"><span class="fs16">常用语设置</span></div>
-                <span class="tipicon" @mouseover="mouseOverTip" @mouseout="mouseLeaveTip">?</span>
-                <p class="tipcnt" v-show="isshowTipcnt">常用语为用户常问的问题。在用户进入时，推出自动开场语与常用语。同时，点击聊窗中底部标签【常用语】，也可查看相关内容</p>
+                <!-- <span class="tipicon" @mouseover="mouseOverTip" @mouseout="mouseLeaveTip">?</span> -->
+                <!-- <p class="tipcnt" v-show="isshowTipcnt">常用语为用户常问的问题。在用户进入时，推出自动开场语与常用语。同时，点击聊窗中底部标签【常用语】，也可查看相关内容</p> -->
                 <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
                     <el-tab-pane label="顾问常用语设置" name="first">
                         <div class="marginB20">
@@ -67,6 +73,8 @@
                         <!-- {{dynamicValidateForm1.domains}} -->
                     </el-tab-pane>
                     <el-tab-pane label="客户常用语" name="second">
+                        <div class="tipcontent">
+                            <span>!</span><p>常用语为用户常问的问题。在用户进入时，推出自动开场语与常用语。同时，点击聊窗中底部标签【常用语】，也可查看相关内容</p></div>
                         <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus" :disabled="isDisabled2">添加客户常用语</el-button>
                         <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2" @submit.native.prevent>
                             <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" @end.native="endEvent2">
@@ -150,9 +158,12 @@
                     <p class="tip">不超过500个字</p>
                 </el-form-item>                
                 <div style="position: relative;">
-                    <span class="tipicon1" @mouseover="mouseOverTip1" @mouseout="mouseLeaveTip1">?</span>
-                    <p class="tipcnt1" v-show="isshowTipcnt1">在顾问将状态改为忙碌或离线时，回复该话术。设置自动回复语时，“##电话号码##”放到文中，可动态获取当前顾问的手机号</p>
-                    <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth"> 
+                    <span class="tipicon1" @mouseover="mouseOverTip1" @mouseout="mouseLeaveTip1">!</span>
+                    <div class="tipcnt1" v-show="isshowTipcnt1">
+                        <!-- <span>!</span> -->
+                        <p>在顾问将状态改为忙碌或离线时，回复该话术。设置自动回复语时，“##电话号码##”放到文中，可动态获取当前顾问的手机号</p>
+                    </div>
+                    <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth" class="floatL"> 
                         <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;"></el-input>
                         <p class="tip">不超过500个字</p>
                     </el-form-item>
@@ -233,7 +244,7 @@
                 dynamicValidateForm2: {//常用语设置
                     domains: [],
                 },
-                labelWidth:"190px",
+                labelWidth:"200px",
                 isShowEdit:false,
                 isShowEdit2:false,
                 // iptDisabled:false,
