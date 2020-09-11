@@ -134,12 +134,13 @@ return /******/ (function(modules) { // webpackBootstrap
 						$('#rightPanel').css({
 							'display':'block'
 						})
+						let layerWidth='800px'
 						chatWindow=layer.open({
 							type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
 									//   载层）4（tips层）,
 							title: ' ',   //标题
 							// area: ['800px', '720px'],   //宽高
-							area: ['800px', clientHeight*0.7+'px'],   //宽高
+							area: [layerWidth, clientHeight*0.7+'px'],   //宽高
 							shade: 0,   //遮罩透明度
 							skin: 'sessionListFrame',
 							content: $("#rightPanel"),//支持获取DOM元素
@@ -164,7 +165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								})
 								var str=['<div style="display: flex;align-items: center;">',
 										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
-										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),3)+'</span>',
+										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),5)+'</span>',
 										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
 									'</div>'].join("")
 								$('.sessionListFrame .layui-layer-title').html(str)
@@ -184,7 +185,6 @@ return /******/ (function(modules) { // webpackBootstrap
 								$('#rightPanel').css({
 									'display':'none'
 								})
-								// $('#sessions li').removeClass('active')
 							}
 						});
 						 account = target.getAttribute("data-account");
@@ -279,7 +279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		var str=['<div style="display: flex;align-items: center;">',
 					'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
 					'<span style="margin:0 10px;">我的会话</span>',
-					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:23px;display: inline-block;width: 23px;height: 23px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
+					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:26px;display: inline-block;width: 26px;height: 26px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
 				'</div>'].join("")
 		if(!isLayerOpen){
 			$('.mainHtmlLayer .layui-layer-title').html(str)
@@ -489,7 +489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								})
 								var str=['<div style="display: flex;align-items: center;">',
 										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
-										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),3)+'</span>',
+										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),5)+'</span>',
 										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
 									'</div>'].join("")
 								$('.sessionListFrame .layui-layer-title').html(str)

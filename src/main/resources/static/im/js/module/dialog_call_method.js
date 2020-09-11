@@ -79,7 +79,7 @@ NetcallBridge.fn.dialog_call = {
                 $("#devices").addClass('hide')
             }
             if(that.callMethod){
-                $('.radio[data-type=' + that.callMethod + ']').addClass('active')
+                $('.radio[data-type=webrtc]').addClass('active')
             }
 
             if(!that.isWhiteboard){
