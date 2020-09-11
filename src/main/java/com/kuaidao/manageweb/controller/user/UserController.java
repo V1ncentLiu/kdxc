@@ -21,6 +21,7 @@ import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
 import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
+import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
@@ -86,7 +87,8 @@ public class UserController {
     private ChangeOrgFeignClient changeOrgFeignClient;
     @Autowired
     private ImMassageService imMassageService;
-
+    @Autowired
+    private ClientFeignClient clientFeignClient;
     /***
      * 用户列表页
      *
@@ -353,6 +355,8 @@ public class UserController {
                 changeOrgFeignClient.insert(changeOrgRecordReqDto);
 
             }
+            //更新组织修改坐席缓存
+            clientFeignClient.changOrgIdModifyCache(userInfoReq);
             logger.info("修改资源所属组织共耗时：{}", System.currentTimeMillis() - start1);
         }
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
