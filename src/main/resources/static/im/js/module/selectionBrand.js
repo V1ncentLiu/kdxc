@@ -14,7 +14,7 @@ YX.fn.showBrandHtml = function () {
         title: '选品牌',
         shadeClose: true,
         shade: 0.4,
-        area: ['750px', '430px'],
+        area: ['750px', '425px'],
         content: '../../../im/selectionBrand.html' //iframe的url
       });
      
