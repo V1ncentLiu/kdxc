@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.im;
 import com.kuaidao.aggregation.dto.clue.IMSubmitQueryDTO;
 import com.kuaidao.aggregation.dto.es.EsQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -47,6 +48,8 @@ public interface CustomerInfoFeignClient {
     @PostMapping(value = "/getCustomerInfoListByClueId")
     JSONResult<List<CustomerInfoDTO>> getCustomerInfoListByClueId(@RequestBody  Map<String,Object> map);
 
+    @PostMapping(value = "/findCustomerByImID")
+    JSONResult<CustomerInfoDTO> findCustomerByImID(@RequestBody IdEntity idEntity);
     @Component
     static class HystrixClientFallback implements CustomerInfoFeignClient {
 
@@ -86,6 +89,11 @@ public interface CustomerInfoFeignClient {
         @Override
         public JSONResult<List<CustomerInfoDTO>> getCustomerInfoListByClueId( Map<String,Object> map) {
             return fallBackError("根据客户Id获得客户Im信息集合");
+        }
+
+        @Override
+        public JSONResult<CustomerInfoDTO> findCustomerByImID(IdEntity idEntity) {
+            return fallBackError("根据Imid获取客户ID");
         }
 
     }

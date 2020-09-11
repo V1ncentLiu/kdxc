@@ -5,6 +5,7 @@ import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -38,6 +39,16 @@ public interface ClueCustomerFeignClient {
     @RequestMapping("/findcustomersByClueIds")
     public JSONResult<List<CustomerClueDTO>> findcustomersByClueIds(@RequestBody IdListLongReq idListLongReq);
 
+
+
+    /**
+     * 通过ClueId获取客户姓名
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/findNameById")
+    public JSONResult<CustomerClueDTO> findNameById(@RequestBody IdEntityLong idEntity);
+
     @Component
     static class HystrixClientFallback implements ClueCustomerFeignClient {
 
@@ -54,6 +65,11 @@ public interface ClueCustomerFeignClient {
         @Override
         public JSONResult<List<CustomerClueDTO>> findcustomersByClueIds(IdListLongReq idListLongReq) {
             return fallBackError("通过ClueIds获取客户姓名");
+        }
+
+        @Override
+        public JSONResult<CustomerClueDTO> findNameById(IdEntityLong idEntity) {
+            return fallBackError("通过ClueId获取客户姓名");
         }
     }
 
