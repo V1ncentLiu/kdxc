@@ -285,9 +285,11 @@ YX.fn.getUserInfo = function(accountId) {
         // `
           $('#otherInformation').html(str)
           // 给提交客户弹窗赋值姓名、手机号，并清空其他内容
-          var name=data.cusName?data.cusName:'';
-          var phone=data.phoneNumber?data.phoneNumber:'';     
-          $("#submitCustomerFormName").val(name);
+          // var name=data.cusName?data.cusName:'';
+          var phone=data.phoneNumber?data.phoneNumber:'';  
+          setTimeout(function(){
+            $("#submitCustomerFormName").val(that.$nickName.text());
+          },0) 
           $("#submitCustomerFormIphone").val(phone);
           $("#submitCustomerFormIphoneTwo").val("");
           $("#submitCustomerFormWechat").val("");
