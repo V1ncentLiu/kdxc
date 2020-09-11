@@ -184,6 +184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								$('#rightPanel').css({
 									'display':'none'
 								})
+								// $('#sessions li').removeClass('active')
 							}
 						});
 						 account = target.getAttribute("data-account");
@@ -411,7 +412,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var util = __webpack_require__(2);
 
 	var ACCOUNT;
-
 	/**
 	 * 好友列表控件
 	 * @param {Object} options 控件初始化参数
@@ -446,7 +446,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }else if(target.tagName.toLowerCase() === "li"){
 					if(chatWindow){
-						console.log('2323232323');
 						layer.close(chatWindow)
 						$('#rightPanel').css({
 							'display':'none'

@@ -31,6 +31,7 @@ YX.fn.buildSessions = function(id) {
     // }else{
     //     this.sessions.update(data)
     // }
+    this.newRecentList()
     var searchListInputVal=$('#searchListInput').val()
     this.fuzzyQuerySearch(searchListInputVal)
     //导航上加未读示例  
@@ -50,7 +51,15 @@ YX.fn.buildSessions = function(id) {
         event.preventDefault()
     }.bind(this))
 }
-
+YX.fn.newRecentList = function () {
+    var allData=this.cache.getSessions()||[]
+    console.log(allData.length,searchLists,'原始列表和新进列表数量对比');
+    if(allData.length>searchLists){
+        setTimeout(()=>{
+            this.newSessionsListConcat('add')
+        },200)
+    }
+}
 YX.fn.searchListInputOnmouse = function () {
     let timer = null
     var that=this
@@ -68,7 +77,7 @@ YX.fn.searchListInputOnmouse = function () {
 }
 
 
-YX.fn.newSessionsListConcat =function() {
+YX.fn.newSessionsListConcat =function(value) {
     var sessions= this.cache.getSessions()||[]
     var newIdList=[]
     for(var i=0;i<sessions.length;i++){
@@ -97,6 +106,9 @@ YX.fn.newSessionsListConcat =function() {
                       sessions[i].isSubmit=data[j].isSubmit
                   }
               }
+            }
+            if(value){
+                searchLists=sessions.length
             }
           }else{
             alert(result.code)
