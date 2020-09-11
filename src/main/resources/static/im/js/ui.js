@@ -39,14 +39,13 @@ var appUI = {
    * 更新当前会话聊天面板UI
    */
   updateChatContentUI: function(msg, cache) {
-    console.log(msg, cache,22222222222);
     if(isSessionListNum){
       sessionListNum=Number(sessionListNum)
       sessionListNum+=1
       var str=['<div style="display: flex;align-items: center;">',
           '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
-          '<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
-          sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+(sessionListNum<=10?sessionListNum:10+'+')+'</span>':'',
+          '<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),3)+'</span>',
+          sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:23px;display: inline-block;width: 23px;height: 23px;background-color: red;border-radius: 50%;color: #fff;">'+(sessionListNum<=10?sessionListNum:10+'+')+'</span>':'',
         '</div>'].join("")
       $('.sessionListFrame .layui-layer-title').html(str)
     }else{
@@ -217,15 +216,17 @@ var appUI = {
     }
     return msgHtml;
   },
-  formatDate:function(now) { 
-		now=new Date(now)
-		var year=now.getFullYear();  //取得4位数的年份
-		var month=now.getMonth()+1;  //取得日期中的月份，其中0表示1月，11表示12月
-		var date=now.getDate();      //返回日期月份中的天数（1到31）
-		var hour=now.getHours();     //返回日期中的小时数（0到23）
-		var minute=now.getMinutes(); //返回日期中的分钟数（0到59）
-		var second=now.getSeconds(); //返回日期中的秒数（0到59）
-		return year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second; 
+  formatDate:function(shijianchuo){
+		function add0(m){return m<10?'0'+m:m }
+			//shijianchuo是整数，否则要parseInt转换
+			var time = new Date(shijianchuo);
+			var y = time.getFullYear();
+			var m = time.getMonth()+1;
+			var d = time.getDate();
+			var h = time.getHours();
+			var mm = time.getMinutes();
+			var s = time.getSeconds();
+			return y+'-'+add0(m)+'-'+add0(d)+' '+add0(h)+':'+add0(mm)+':'+add0(s);
 	},
   /**
    * 云记录面板UI

@@ -67,7 +67,7 @@ YX.fn.initUI = function() {
 YX.fn.showMe = function() {
   var user = this.cache.getUserById(userUID);
   this.$userName.text(user.nick);
-  this.$userPic.attr('src', getAvatar(user.avatar)!='null'?getAvatar(user.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
+  this.$userPic.attr('src', getAvatar(user.avatar)!='null'?getAvatar(user.avatar):'https://static-huiju-new.kuaidao.cn/lark/Lark20200911-112905.png');
   setCookie('nickName', user.nick);
   setCookie('avatar', user.avatar);
 };
@@ -252,6 +252,7 @@ YX.fn.openChatBox = function(account, scene) {
 };
 
 YX.fn.getUserInfo = function(accountId) {
+  var that=this
   var sessions= this.cache.getSessions()||[]
   console.log(sessions)
   // 给提交客户弹窗赋值姓名
@@ -278,7 +279,9 @@ YX.fn.getUserInfo = function(accountId) {
             data.brandInvestment?'<span>'+data.brandInvestment+'</span>|':'',
             data.phoneNumber?'<span>电话：'+data.phoneNumber+'</span>':'',
             ].join("");
-
+            if(data.cusName){
+              that.$nickName.text(data.cusName);
+            }
         //   var str=`
         //   <span>注册时间：`+data.createDateStr+`</span>
         //   <span>`+data.age+`</span>

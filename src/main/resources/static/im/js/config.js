@@ -15,13 +15,13 @@
       // chatroomAddr: 'https://apptest.netease.im/api/chatroom/requestAddress'
     },
     pre: {
-      appkey: window.sessionStorage.appkey,
+      appkey: window.localStorage.appkey,
       url: 'https://apptest.netease.im',
       // chatroomList: 'https://apptest.netease.im/api/chatroom/homeList',
       // chatroomAddr: 'https://apptest.netease.im/api/chatroom/requestAddress'
     },
     online: {
-      appkey: window.sessionStorage.appkey,
+      appkey: window.localStorage.appkey,
       url: 'https://app.netease.im',
       // chatroomList: 'https://app.netease.im/api/chatroom/homeList',
       // chatroomAddr: 'https://app.netease.im/api/chatroom/requestAddress'
