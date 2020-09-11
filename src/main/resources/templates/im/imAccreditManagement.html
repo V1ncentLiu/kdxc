@@ -18,7 +18,7 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -172,7 +172,7 @@
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
-                teleSaleArr: teleSale, // 顾问
+                teleSaleArr: [], // 顾问
                 isAuthorizeArr:[{
                     id:"",
                     name:'全部'
@@ -200,6 +200,23 @@
             }             
         },
         methods: {  
+            changeTeleGroup(selectedValue) {//改变电销组
+                this.teleSaleArr = [];
+                if (!selectedValue) {
+                    return;
+                }
+                var param = {};
+                param.orgId = selectedValue;
+                axios.post('/business/busAllocation/getSaleList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        mainDivVM.teleSaleArr = table;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }, 
             getRanklist(){// 职级
                 axios.get("/saleCard/getDictionaryRank")
                 .then(function (response) {
