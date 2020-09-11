@@ -53,7 +53,7 @@ public class CustomerInfoController {
         //
         JSONObject data = (JSONObject) jsonObject.get("data");
 
-        data.put("custName", null);
+        data.put("cusName", "");
         //查询客户名称
         JSONResult<CustomerInfoDTO> customerByImID = customerInfoFeignClient.findCustomerByImID(idEntity);
         if (customerByImID != null && customerByImID.getCode().equals(JSONResult.SUCCESS) && customerByImID.getData() != null) {
