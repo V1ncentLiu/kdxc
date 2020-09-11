@@ -311,7 +311,7 @@ function getMessage (msg) {
                             '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_5.png" alt=""/>餐饮经验:'+newData.repastExperience+'</div>',
                             '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_6.png" alt=""/>意向品类:'+newData.intentionBrand+'</div>',
                             '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_7.png" alt=""/>意向品牌:'+newData.interestBrandCategoryList+'</div>',
-                            '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_8.png" alt=""/>备注:'+newData.remark+'</div>',
+                            newData.remark?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_8.png" alt=""/>备注:'+newData.remark+'</div>':'',
                         '</div>'].join("");
                 }
             }   else if (content.type === 15) {
