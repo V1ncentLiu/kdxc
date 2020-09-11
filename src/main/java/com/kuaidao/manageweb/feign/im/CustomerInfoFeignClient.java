@@ -39,7 +39,7 @@ public interface CustomerInfoFeignClient {
     JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(TSaleMonitorReq tSaleMonitorReq);
 
     @PostMapping(value = "/getSaleImStateNum")
-    JSONResult<List<Map<String, Object>>> getSaleImStateNum();
+    JSONResult<List<Map<String, Object>>> getSaleImStateNum( Map<String,Object> map );
 
     @PostMapping(value = "/costomerList")
     JSONResult<PageBean<IMSubmitQueryDTO>> costomerList(@RequestBody EsQueryDTO submitQuery);
@@ -74,7 +74,7 @@ public interface CustomerInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<Map<String, Object>>> getSaleImStateNum() {
+        public JSONResult<List<Map<String, Object>>> getSaleImStateNum( Map<String,Object> map) {
             return fallBackError("顾问在线离线忙碌状态数量");
         }
 

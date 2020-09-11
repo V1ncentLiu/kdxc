@@ -253,6 +253,12 @@ YX.fn.openChatBox = function(account, scene) {
 
 YX.fn.getUserInfo = function(accountId) {
   var that=this
+  var sessions= this.cache.getSessions()||[]
+  console.log(sessions)
+  // 给提交客户弹窗赋值姓名
+  var name=sessions[0].lastMsg.fromNick;
+  $("#submitCustomerFormName").val(name);
+  
   console.log(accountId,'聊天面板id');
     var params = {
       id:accountId
@@ -284,9 +290,16 @@ YX.fn.getUserInfo = function(accountId) {
         //   <span> `+data.phoneNumber+`</span>
         // `
           $('#otherInformation').html(str)
-       }else{
-        $('#otherInformation').html('')
-       }
+          // 给提交客户弹窗赋值手机号，并清空其他内容
+          var phone=data.phoneNumber?data.phoneNumber:'';          
+          $("#submitCustomerFormIphone").val(phone);
+          $("#submitCustomerFormIphoneTwo").val("");
+          $("#submitCustomerFormWechat").val("");
+          $("#submitCustomerBeizhu").val("");
+        
+        }else{
+            $('#otherInformation').html('')
+        }
       },
       error: function() {
         
