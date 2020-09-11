@@ -11,7 +11,7 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-			var chatWindow
+			
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 
@@ -121,16 +121,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return;
 	            }else if(target.tagName.toLowerCase() === "li"){
 					let clientHeight=document.documentElement.clientHeight
-					if(this.chatWindow){
-						layer.close(this.chatWindow)
+					layer.close(chatWindow)
+					if(chatWindow){
+						layer.close(chatWindow)
 						$('#rightPanel').css({
 							'display':'none'
 						})
-						this.chatWindow=''
+						chatWindow=''
 					}
 
 					setTimeout(()=>{
-						this.chatWindow=layer.open({
+						$('#rightPanel').css({
+							'display':'block'
+						})
+						chatWindow=layer.open({
 							type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
 									//   载层）4（tips层）,
 							title: ' ',   //标题
@@ -160,7 +164,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								})
 								var str=['<div style="display: flex;align-items: center;">',
 										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
-										'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
+										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),3)+'</span>',
 										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
 									'</div>'].join("")
 								$('.sessionListFrame .layui-layer-title').html(str)
@@ -175,7 +179,6 @@ return /******/ (function(modules) { // webpackBootstrap
 									'height':'24px',
 								})
 								$('.sessionListFrame .layui-layer-title').html('')
-	
 							},
 							cancel:function(){
 								$('#rightPanel').css({
@@ -275,7 +278,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		var str=['<div style="display: flex;align-items: center;">',
 					'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
 					'<span style="margin:0 10px;">我的会话</span>',
-					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+unreadNum+'</span>':'',
+					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:23px;display: inline-block;width: 23px;height: 23px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
 				'</div>'].join("")
 		if(!isLayerOpen){
 			$('.mainHtmlLayer .layui-layer-title').html(str)
@@ -427,7 +430,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.provider = options.infoprovider;
 		this._body = document.createElement('ul');
 		this._body.className = options.clazz||"m-panel" +" j-friend";	
-
+		var that=this
 		util.addEvent(this._body,'click',function(e){
 			var self = this,
 				evt = e||window.event,
@@ -442,29 +445,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // cbClickPortrait(account,scene);
 	                return;
 	            }else if(target.tagName.toLowerCase() === "li"){
-					if(this.chatWindow){
-						layer.close(this.chatWindow)
+					if(chatWindow){
+						console.log('2323232323');
+						layer.close(chatWindow)
 						$('#rightPanel').css({
 							'display':'none'
 						})
-						this.chatWindow=''
+						chatWindow=''
 					}
 					setTimeout(()=>{
-						this.chatWindow=layer.open({
+						$('#rightPanel').css({
+							'display':'block'
+						})
+
+						chatWindow=layer.open({
 							type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
 									//   载层）4（tips层）,
 							title: ' ',   //标题
 							// area: ['800px', '720px'],   //宽高
 							area: ['800px', '720px'],   //宽高
 							shade: 0,   //遮罩透明度
-							skin: 'friendsListFrame',
+							skin: 'sessionListFrame',
 							// content: $("#chatBox"),//支持获取DOM元素
 							content: $("#rightPanel"),//支持获取DOM元素
 							// btn: ['确定', '取消'], //按钮组
 							scrollbar: false ,//屏蔽浏览器滚动条
 							maxmin: true,
 							success:function(){
-								$('.friendsListFrame .layui-layer-title').css({
+								$('.sessionListFrame .layui-layer-title').css({
 									'backgroundColor': '#ECEDF2',
 									'borderBottom':'none',
 									'height':'24px',
@@ -474,30 +482,29 @@ return /******/ (function(modules) { // webpackBootstrap
 								isSessionListNum=false
 							},
 							min:function(){
-								$('.friendsListFrame .layui-layer-title').css({
+								$('.sessionListFrame .layui-layer-title').css({
 									'height':'42px'
 								})
-								$('.friendsListFrame .layui-layer-title').css({
+								$('.sessionListFrame .layui-layer-title').css({
 									'height':'42px'
 								})
 								var str=['<div style="display: flex;align-items: center;">',
 										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
-										'<span style="margin:0 10px;">'+$('#nickName').text()+'</span>',
+										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),3)+'</span>',
 										// sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
 									'</div>'].join("")
-								$('.friendsListFrame .layui-layer-title').html(str)
+								$('.sessionListFrame .layui-layer-title').html(str)
 								isSessionListNum=true
 							},
 							restore:function(){
 								sessionListNum=0
 								isSessionListNum=false
-								$('.friendsListFrame .layui-layer-title').css({
+								$('.sessionListFrame .layui-layer-title').css({
 									'backgroundColor': '#ECEDF2',
 									'borderBottom':'none',
 									'height':'24px',
 								})
-								$('.friendsListFrame .layui-layer-title').html('')
-	
+								$('.sessionListFrame .layui-layer-title').html('')
 							},
 							cancel:function(){
 								$('#rightPanel').css({
@@ -522,17 +529,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	/** --------------------------public------------------------------ */
 
-	FriendList.prototype.formatDate=function(now) { 
-		now=new Date(now)
-		var year=now.getFullYear();  //取得4位数的年份
-		var month=now.getMonth()+1;  //取得日期中的月份，其中0表示1月，11表示12月
-		var date=now.getDate();      //返回日期月份中的天数（1到31）
-		var hour=now.getHours();     //返回日期中的小时数（0到23）
-		var minute=now.getMinutes(); //返回日期中的分钟数（0到59）
-		var second=now.getSeconds(); //返回日期中的秒数（0到59）
-		return year+"-"+month+"-"+date+" "+hour+":"+minute+":"+second; 
-	}
 
+	FriendList.prototype.formatDate=function(shijianchuo){
+		function add0(m){return m<10?'0'+m:m }
+			//shijianchuo是整数，否则要parseInt转换
+			var time = new Date(shijianchuo);
+			var y = time.getFullYear();
+			var m = time.getMonth()+1;
+			var d = time.getDate();
+			var h = time.getHours();
+			var mm = time.getMinutes();
+			var s = time.getSeconds();
+			return y+'-'+add0(m)+'-'+add0(d)+' '+add0(h)+':'+add0(mm)+':'+add0(s);
+	}
 
 	/**
 	 * 插入控件
@@ -587,7 +596,7 @@ return /******/ (function(modules) { // webpackBootstrap
 										'</span>',
 										'<b class="panel_time">{' +list[i].customerStatus + '}</b>',
 									'</p>',
-											'<span class="panel_lastMsg">' +this.formatDate(list[i].createTime)+ '</span>',
+									list[i].createTime?'<span class="panel_lastMsg">' +this.formatDate(list[i].createTime)+ '</span>':'',
 									'</div>',
 								'</li>'].join("");
 				}
