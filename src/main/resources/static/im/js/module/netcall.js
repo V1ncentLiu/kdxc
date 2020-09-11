@@ -1154,7 +1154,7 @@ fn.onBeCalling = function (obj, scene) {
     var channelId = obj.channelId;
     var netcall = this.netcall;
     var that = this;
-
+    layer.msg('收到音视频呼叫,请打开聊天窗口进行接听！');
     // 如果是同一通呼叫，直接丢掉
     if (obj.channelId === this.channelId) return
 
