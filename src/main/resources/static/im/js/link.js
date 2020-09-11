@@ -178,6 +178,8 @@ var SDKBridge = function(ctr, data) {
   // 获取后端接口数据合并ws推送的数据
   function sessionsListConcat (sessions) {
     var newIdList=[]
+    var newSessionList=[]
+
     for(var i=0;i<sessions.length;i++){
       if(sessions[i].scene=='p2p'){
         newIdList.push(sessions[i].to)
@@ -202,6 +204,7 @@ var SDKBridge = function(ctr, data) {
                       sessions[i].brandName=data[j].brandName
                       sessions[i].clueId=data[j].clueId
                       sessions[i].isSubmit=data[j].isSubmit
+                      newSessionList.push(sessions[i])
                   }
               }
             }
@@ -213,7 +216,7 @@ var SDKBridge = function(ctr, data) {
           alert(request)
         }
     })
-    return sessions
+    return newSessionList
   }
 
   function onSessions(sessions) {
