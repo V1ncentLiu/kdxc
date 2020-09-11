@@ -41,7 +41,6 @@ YX.fn.customerStateClick = function () {
     $(".statusBox").toggle();
     var valueStateText=$('.valueState').text()
     $('#statusBoxClick li').removeClass('active')
-    console.log(valueStateText,11111);
     setTimeout(()=>{
         switch (valueStateText) {
             case '在线':
