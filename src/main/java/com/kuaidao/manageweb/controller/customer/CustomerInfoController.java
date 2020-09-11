@@ -60,7 +60,7 @@ public class CustomerInfoController {
             CustomerInfoDTO customerInfoDTO = customerByImID.getData();
             if (customerInfoDTO != null && customerInfoDTO.getClueId() != null && customerInfoDTO.getClueId() != 0) {
                 IdEntityLong idEntityLong = new IdEntityLong();
-                idEntityLong.setId(Long.parseLong(idEntity.getId()));
+                idEntityLong.setId(customerInfoDTO.getClueId());
                 JSONResult<CustomerClueDTO> customerClueDTOJSONResult = clueCustomerFeignClient.findNameById(idEntityLong);
                 if (customerClueDTOJSONResult != null && customerClueDTOJSONResult.getCode().equals(JSONResult.SUCCESS) && customerClueDTOJSONResult.getData() != null && StringUtils.isNotBlank(customerClueDTOJSONResult.getData().getCusName())) {
                     data.put("cusName", customerClueDTOJSONResult.getData().getCusName());
