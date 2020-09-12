@@ -565,7 +565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			str,
 			info;
 			if (list.length === 0) {
-				html += '<p class="empty">暂无好友展示</p>';
+				html += '<p class="empty">暂无提交客户</p>';
 			}else{
 				for (var i = 0; i < list.length; i++) {
 					info = this.provider(list[i],"friend");
@@ -596,7 +596,7 @@ return /******/ (function(modules) { // webpackBootstrap
 										'</span>',
 										list[i].customerStatus?'<b class="panel_time">[' +list[i].customerStatus + ']</b>':'',
 									'</p>',
-									list[i].createTime?'<span class="panel_lastMsg">' +this.formatDate(list[i].createTime)+ '</span>':'',
+									list[i].createTime?'<span class="panel_lastMsg">提交时间：' +this.formatDate(list[i].createTime)+ '</span>':'',
 									'</div>',
 								'</li>'].join("");
 				}
