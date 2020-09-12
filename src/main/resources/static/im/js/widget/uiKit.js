@@ -263,7 +263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 										sessions[i].nickName?sessions[i].nickName: info.nick,
 										// info.nick ,
 										 sessions[i].isSubmit?'<b class="panel_customer">我的客户</b> ':'',
-										 sessions[i].brandName?'<b class="panel_brand">'+sessions[i].brandName+'</b>':'',
+										 sessions[i].brandName?'<b class="panel_brand">'+(sessions[i].isSubmit?sessions[i].brandName.slice(0,4):sessions[i].brandName.slice(0,9))+'</b>':'',
 										 '</span>',
 										// '<img class="" src="" />',
 	                                    '<b class="panel_time">' + info.time + '</b>',
