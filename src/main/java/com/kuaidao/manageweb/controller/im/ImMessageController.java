@@ -324,9 +324,8 @@ public class ImMessageController {
         brandMap.put("city","");
 
         Integer cardType = 18,brandType = 8;
-        String hiType = "17";
-        String audioType = "AUDIO";
-        String pictureType = "PICTURE";
+        String hiType = "17" , audioType = "AUDIO" , pictureType = "PICTURE";
+
         for (MessageRecordData messageRecordData : messageRecordDataList){
             if(StringUtils.isNotBlank(messageRecordData.getBody())){
                 continue ;
