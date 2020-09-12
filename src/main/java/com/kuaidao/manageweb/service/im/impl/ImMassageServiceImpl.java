@@ -74,11 +74,6 @@ public class ImMassageServiceImpl implements ImMassageService {
             JSONResult<SaleImDTO> byTeleSaleId =
                     saleImFeignClient.getByTeleSaleId(new IdEntityLong(user.getId()));
             if (JSONResult.isNotNull(byTeleSaleId)) {
-                SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
-                saleOnlineLeaveLogReq.setOperationType(onlineLeaveType);
-                saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
-                customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-
                 Map<String, Object> newHashMap = Maps.newHashMap();
                 newHashMap.put("imId", byTeleSaleId.getData().getImId());
                 newHashMap.put("imToken", byTeleSaleId.getData().getToken());
@@ -88,4 +83,47 @@ public class ImMassageServiceImpl implements ImMassageService {
         }
         return null;
     }
+
+    /**
+     * 禁用更改离线
+     * @param user
+     * @param roleList
+     * @param onlineLeaveType
+     * @return
+     */
+    public void transOnlineLeaveLogUpdateStatusEnable(UserInfoDTO user, List<RoleInfoDTO> roleList,
+                                                   Integer onlineLeaveType) {
+        if (null == user || StringUtils.isBlank(user.getUsername())) {
+            log.warn("user is null or username is null! user = {} ", JSON.toJSONString(user));
+            return ;
+        }
+        // 角色为空
+        if (CollectionUtils.isEmpty(roleList)) {
+            UserInfoReq userInfoReq = new UserInfoReq();
+            userInfoReq.setUsername(user.getUsername());
+            // 用户登录名查询
+            JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
+            if (null == getbyUserName || !JSONResult.SUCCESS.equals(getbyUserName.getCode())
+                    || null == getbyUserName.getData()
+                    || CollectionUtils.isEmpty(roleList = getbyUserName.getData().getRoleList())) {
+                log.warn("user is null! user = {} ", JSON.toJSONString(user));
+                return ;
+            }
+        }
+        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode)
+                .collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+        // 电销顾问 & 业务线是的商机盒子的
+        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())) {
+            // 查询顾问IM账号
+            JSONResult<SaleImDTO> byTeleSaleId =
+                    saleImFeignClient.getByTeleSaleId(new IdEntityLong(user.getId()));
+            if (JSONResult.isNotNull(byTeleSaleId)) {
+                SaleOnlineLeaveLogReq saleOnlineLeaveLogReq = new SaleOnlineLeaveLogReq();
+                saleOnlineLeaveLogReq.setOperationType(onlineLeaveType);
+                saleOnlineLeaveLogReq.setTeleSaleId(user.getId()); // 顾问Id
+                customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+            }
+        }
+    }
+
 }
