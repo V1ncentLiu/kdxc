@@ -143,7 +143,7 @@ YX.fn.fuzzyQuerySearch = function (value) {
     var newArray=[]
     if(value){
         for(let i=0;i<allData.length;i++){
-            if(allData[i].nickName.indexOf(value)>-1){
+            if(allData[i].nickName&&allData[i].nickName.indexOf(value)>-1){
                 newArray.push(allData[i])
             }
         }

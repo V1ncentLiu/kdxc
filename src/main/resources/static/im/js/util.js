@@ -252,7 +252,7 @@ function getMessage (msg) {
             break;
         case 'video':
             // str = '<a href="' + url + '" target="_blank" class="download-file"><span class="icon icon-file2"></span>[你收到了一条视频消息]</a>';
-            str = '<video src= "' + url + '" controls>您的浏览器不支持 video 标签。</video>';
+            str = '<video autoplay src= "' + url + '" controls>您的浏览器不支持 video 标签。</video>';
             break;
         case 'audio':
             if (!!window.Audio) {

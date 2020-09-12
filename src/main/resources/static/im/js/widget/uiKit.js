@@ -260,7 +260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            '<div class="panel_text">',
 	                                '<p class="panel_multi-row">',
 										'<span class="panel_nick">',
-										sessions[i].nickName ,
+										sessions[i].nickName?sessions[i].nickName: info.nick,
 										// info.nick ,
 										 sessions[i].isSubmit?'<b class="panel_customer">我的客户</b> ':'',
 										 sessions[i].brandName?'<b class="panel_brand">'+sessions[i].brandName+'</b>':'',
