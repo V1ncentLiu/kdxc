@@ -594,7 +594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 										list[i].cusName ,
 										list[i].brandName?'<b class="panel_brand">'+list[i].brandName+'</b>':'',
 										'</span>',
-										'<b class="panel_time">{' +list[i].customerStatus + '}</b>',
+										list[i].customerStatus?'<b class="panel_time">[' +list[i].customerStatus + ']</b>':'',
 									'</p>',
 									list[i].createTime?'<span class="panel_lastMsg">' +this.formatDate(list[i].createTime)+ '</span>':'',
 									'</div>',
