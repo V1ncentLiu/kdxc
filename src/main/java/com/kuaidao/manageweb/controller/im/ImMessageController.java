@@ -376,12 +376,6 @@ public class ImMessageController {
             if(pictureType.equals(messageRecordData.getMsgType()) &&  null != jsonObject.get("url")){
                 content.append("图片").append(":").append(jsonObject.get("url"));
             }
-            // 视频
-            if(audioType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")){
-                // 视频
-                content.append("语音").append(":").append(jsonObject.get("url"));
-                content.append("后缀").append(":").append(jsonObject.get("ext"));
-            }
             // 语音
             if(audioType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
                 // 语音
