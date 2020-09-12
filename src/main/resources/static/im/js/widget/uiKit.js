@@ -260,7 +260,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            '<div class="panel_text">',
 	                                '<p class="panel_multi-row">',
 										'<span class="panel_nick">',
-										info.nick ,
+										sessions[i].nickName ,
+										// info.nick ,
 										 sessions[i].isSubmit?'<b class="panel_customer">我的客户</b> ':'',
 										 sessions[i].brandName?'<b class="panel_brand">'+sessions[i].brandName+'</b>':'',
 										 '</span>',
@@ -269,7 +270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                '</p>',
 	                                '<p class="panel_multi-row">',
 	                                    '<span class="panel_lastMsg">' + infoText + '</span>',
-	                                    info.unread ? '<b class="panel_count">' + (info.unread>99?90+'+':info.unread) + '</b>':'',
+	                                    info.unread ? (info.unread>99?'<b class="panel_count"  style="padding:0 2px">' +99+'+' + '</b>':'<b class="panel_count">' + info.unread + '</b>'):'',
 	                                '</p>',
 	                            '</div>',
 	                        '</li>'].join("");

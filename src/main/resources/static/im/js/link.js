@@ -204,12 +204,13 @@ var SDKBridge = function(ctr, data) {
                       sessions[i].brandName=data[j].brandName
                       sessions[i].clueId=data[j].clueId
                       sessions[i].isSubmit=data[j].isSubmit
+                      sessions[i].nickName=data[j].nickName
                       newSessionList.push(sessions[i])
                   }
               }
             }
           }else{
-            alert(result.code)
+            console.log(result.code)
           }
         },
         error:function(request){
