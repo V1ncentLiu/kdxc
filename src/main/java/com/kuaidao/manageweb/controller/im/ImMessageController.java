@@ -325,6 +325,8 @@ public class ImMessageController {
 
         Integer cardType = 18,brandType = 8;
         String hiType = "17";
+        String audioType = "AUDIO";
+        String pictureType = "PICTURE";
         for (MessageRecordData messageRecordData : messageRecordDataList){
             if(StringUtils.isNotBlank(messageRecordData.getBody())){
                 continue ;
@@ -372,9 +374,14 @@ public class ImMessageController {
                 }
             }
             // 图片
-            Object ext = jsonObject.get("ext");
-            if( ( "jpg".equals(ext) || "png".equals(ext) ) &&  null != jsonObject.get("url")){
+            if(pictureType.equals(messageRecordData.getMsgType()) &&  null != jsonObject.get("url")){
                 content.append("图片").append(":").append(jsonObject.get("url"));
+            }
+            // 视频
+            if(audioType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")){
+                // 视频
+                content.append("视频").append(":").append(jsonObject.get("url"));
+                content.append("后缀").append(":").append(jsonObject.get("ext"));
             }
             // 设置最终值
             messageRecordData.setBody(content.toString());
