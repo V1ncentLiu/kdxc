@@ -405,7 +405,7 @@ public class UserController {
         // 禁用更改用户Im离线
         if(null!= update && JSONResult.SUCCESS.equals(update.getCode())){
             logger.info("onlineLeave-user={}" ,  JSON.toJSONString(user));
-            imMassageService.transOnlineLeaveLog(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
+            imMassageService.transOnlineLeaveLogUpdateStatusEnable(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         }
         return update;
     }
