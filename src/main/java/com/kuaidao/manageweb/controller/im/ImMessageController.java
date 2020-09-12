@@ -380,7 +380,7 @@ public class ImMessageController {
             // 视频
             if(audioType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")){
                 // 视频
-                content.append("视频").append(":").append(jsonObject.get("url"));
+                content.append("语音").append(":").append(jsonObject.get("url"));
                 content.append("后缀").append(":").append(jsonObject.get("ext"));
             }
             // 设置最终值
