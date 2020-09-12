@@ -677,8 +677,6 @@ public class LoginController {
             if ("3".equals(type)) {
                 subject.getSession().setAttribute("isShowLogoutBox", type);
             }
-            imMassageService.transOnlineLeaveLog(user, user.getRoleList(),
-                    SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);
         }
