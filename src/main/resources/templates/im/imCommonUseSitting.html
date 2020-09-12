@@ -62,7 +62,7 @@
                                     style="margin-bottom: 20px;" 
                                     
                                     >
-                                    <el-input type="textarea"  autosize v-model="domain.comText" style="margin-right: 10px;width: 655px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain)"  :disabled="domain.iptDisabled"></el-input>
+                                    <el-input type="textarea"  autosize v-model="domain.comText" style="margin-right: 10px;width: 655px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain,$event)"  :disabled="domain.iptDisabled"></el-input>
                                     <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button> 
                                     <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
                                 </el-form-item>
@@ -452,6 +452,7 @@
                 }
             },
             submitdialogForm1(formName,item) {
+                debugger
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var type=2;//类型：1=用户常用语  2:顾问常用语
@@ -463,10 +464,13 @@
                         }else{
                             url="/commonLanguage/save?type="+type+'&comText='+comText
                         }
-                        if(comText){
+                        console.log(comText.charCodeAt())
+                        if(comText&&comText.charCodeAt()!=10){//10是只有回车
                             axios.post(url).then(function (response) { 
                                 console.log(response)
-                                window.location.href="/im/imCommonUseSitting/index"
+                                setTimeout(function(){
+                                    window.location.href="/im/imCommonUseSitting/index"
+                                },100)                                
                             }).catch(function (error) {
                                 mainDivVM.$message({
                                     message: "请求失败，请稍后重试",
@@ -496,10 +500,12 @@
                         }else{
                             url="/commonLanguage/save?type="+type+'&comText='+comText
                         }
-                        if(comText){
+                        if(comText&&comText.charCodeAt()!=10){
                             axios.post(url).then(function (response) { 
                                 console.log(response)
-                                window.location.href="/im/imCommonUseSitting/index?type="+urlType
+                                setTimeout(function(){
+                                    window.location.href="/im/imCommonUseSitting/index?type="+urlType
+                                },100)  
                             }).catch(function (error) {
                                 mainDivVM.$message({
                                     message: "请求失败，请稍后重试",
@@ -527,10 +533,14 @@
                     axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
                         console.log(response)
                         if(urlType){
-                           window.location.href="/im/imCommonUseSitting/index?type="+urlType 
-                       }else{
-                            window.location.href="/im/imCommonUseSitting/index" 
-                       }                                
+                            setTimeout(function(){
+                                window.location.href="/im/imCommonUseSitting/index?type="+urlType 
+                            },100) 
+                        }else{
+                            setTimeout(function(){
+                                window.location.href="/im/imCommonUseSitting/index" 
+                            },100) 
+                        }                                
                     }).catch(function (error) {
                         mainDivVM.$message({
                             message: "请求失败，请稍后重试",
@@ -682,7 +692,7 @@
             if(saleLangList){
                 this.dynamicValidateForm1.domains=saleLangList;
                 this.isShowEdit=true;
-                this.iptDisabled=true;
+                // this.iptDisabled=true;
                 if(this.dynamicValidateForm1.domains.length>0){
                     for(var i=0;i<this.dynamicValidateForm1.domains.length;i++){
                         this.dynamicValidateForm1.domains[i].iptDisabled=true;
@@ -693,7 +703,7 @@
             if(userLangList){
                 this.dynamicValidateForm2.domains=userLangList;
                 this.isShowEdit2=true;
-                this.iptDisabled2=true;
+                // this.iptDisabled2=true;
                 if(this.dynamicValidateForm2.domains.length>0){
                     for(var i=0;i<this.dynamicValidateForm2.domains.length;i++){
                         this.dynamicValidateForm2.domains[i].iptDisabled=true;
