@@ -224,7 +224,7 @@ var SDKBridge = function(ctr, data) {
     console.log(old, sessions,'左侧列表原始数据');
     sessions=sessionsListConcat(sessions)
     searchLists=sessions.length
-    this.cache.setSessions(this.nim.mergeSessions(old, sessions));
+    this.cache.setSessions(this.nim.mergeSessions(sessions));
     for (var i = 0; i < sessions.length; i++) {
       if (sessions[i].scene === 'p2p') {
         var tmpUser = sessions[i].to;
