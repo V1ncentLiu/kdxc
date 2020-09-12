@@ -324,7 +324,7 @@ public class ImMessageController {
         brandMap.put("city","");
 
         Integer cardType = 18,brandType = 8;
-        String hiType = "17" , audioType = "AUDIO" , pictureType = "PICTURE";
+        String hiType = "17" , audioType = "AUDIO" , pictureType = "PICTURE" , videoType = "VIDEO";
 
         for (MessageRecordData messageRecordData : messageRecordDataList){
             if(StringUtils.isNotBlank(messageRecordData.getBody())){
@@ -380,6 +380,18 @@ public class ImMessageController {
             if(audioType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")){
                 // 视频
                 content.append("语音").append(":").append(jsonObject.get("url"));
+                content.append("后缀").append(":").append(jsonObject.get("ext"));
+            }
+            // 语音
+            if(audioType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                // 语音
+                content.append("语音").append(":").append(jsonObject.get("url"));
+                content.append("后缀").append(":").append(jsonObject.get("ext"));
+            }
+            // 视频
+            if(videoType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                // 视频
+                content.append("视频").append(":").append(jsonObject.get("url"));
                 content.append("后缀").append(":").append(jsonObject.get("ext"));
             }
             // 设置最终值
