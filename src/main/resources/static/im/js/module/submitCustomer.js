@@ -63,7 +63,11 @@ YX.fn.generalFormLastClick = function (type) {
         if(!phone){
             layer.alert("手机号不能为空");
             return
-        }        
+        }  
+        if(phone==phone2){
+            layer.alert("手机号不能重复");
+            return
+        }      
         var params = {};
         params.name=name;
         params.customerId=customerId;
