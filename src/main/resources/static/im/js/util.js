@@ -300,17 +300,19 @@ function getMessage (msg) {
                     ].join("");
             }else if (content.type == 18) {
                 var newData=content.data
+                console.log(newData,'接受项目卡');
                 if(newData){
                     str = ['<div class="f-maxWidProjectCard">',
                             '<div class="maxWidProjectCard_div first"></div>',
                             '<div class="maxWidProjectCard_div budget">我的总价预算是<b>'+newData.investmentStr+'</b></div>',
                             '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_1.png" alt=""/>开店区域:'+newData.expectedArea+'</div>',
                             '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_2.png" alt=""/>店面:'+newData.hasStore+'</div>',
-                            '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_3.png" alt=""/>年龄:'+newData.ageStr+'</div>',
-                            '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_4.png" alt=""/>职业:'+newData.job+'</div>',
-                            '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_5.png" alt=""/>餐饮经验:'+newData.repastExperience+'</div>',
-                            '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_6.png" alt=""/>意向品类:'+newData.interestBrandCategoryList+'</div>',
-                            '<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_7.png" alt=""/>意向品牌:'+newData.intentionBrand+'</div>',
+                            newData.ageStr?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_3.png" alt=""/>年龄:'+newData.ageStr+'</div>':'',
+                            newData.job?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_4.png" alt=""/>职业:'+newData.job+'</div>':'',
+                            newData.repastExperience?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_5.png" alt=""/>餐饮经验:'+newData.repastExperience+'</div>':'',
+                            newData.interestBrandCategoryList?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_6.png" alt=""/>意向品类:'+newData.interestBrandCategoryList+'</div>':'',
+                            newData.intentionBrand?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_7.png" alt=""/>意向品牌:'+newData.intentionBrand+'</div>':'',
+                            newData.hasIntentionBrand?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_7.png" alt=""/>意向品牌:'+newData.hasIntentionBrand+'</div>':'',
                             newData.remark?'<div class="maxWidProjectCard_div"><img src="https://vine-static.kuaidao.cn/im/icon_8.png" alt=""/>备注:'+newData.remark+'</div>':'',
                         '</div>'].join("");
                 }
