@@ -1206,6 +1206,7 @@ fn.doOpenChatBox = function () {
 
         this.yx.openChatBox(account, 'p2p');
         this.openOne=false
+
     }
 };
 
@@ -1214,6 +1215,7 @@ fn.doOpenChatBox = function () {
  * @param {string} scene 是否是群视频，默认值p2p
  */
 fn.onBeCalling = function (obj, scene) {
+    if(this.openOne){
     scene = scene || 'p2p';
     this.log("收到音视频呼叫");
     console.log("on be calling:", obj);
@@ -1301,6 +1303,10 @@ fn.onBeCalling = function (obj, scene) {
     this.playRing("E", 45);
     $(".asideBox .nick").text(this.yx.getNick(account));
 
+
+
+
+    }
 };
 // 对方接受通话 或者 我方接受通话，都会触发
 fn.onCallAccepted = function (obj) {
