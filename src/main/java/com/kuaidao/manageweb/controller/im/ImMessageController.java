@@ -314,7 +314,6 @@ public class ImMessageController {
         brandMap.put("titleName","");
         brandMap.put("subTitle","投资区间");
         brandMap.put("mainPoint","");
-        brandMap.put("sendImageUrl","");
         brandMap.put("city","");
 
         Integer cardType = 18,brandType = 8;
@@ -340,7 +339,7 @@ public class ImMessageController {
                     String key = map.getKey();
                     String value = map.getValue();
                     if(null != childRenData.get(key)){
-                        content.append(value).append(":").append(childRenData.get(key)+ "\t");
+                        content.append(value).append(":").append(childRenData.get(key)).append("\t");
                     }
                 }
             }
@@ -350,10 +349,10 @@ public class ImMessageController {
                     String key = map.getKey();
                     String value = map.getValue();
                     if(StringUtils.isBlank(value)){
-                        content.append(childRenData.get(key) + "\t");
+                        content.append(childRenData.get(key)).append("\t");
                     }else{
                         if(null != childRenData.get(key)){
-                            content.append(value).append(":").append(childRenData.get(key) + "\t");
+                            content.append(value).append(":").append(childRenData.get(key)).append("\t");
                         }
                     }
                 }
@@ -363,7 +362,7 @@ public class ImMessageController {
                 JSONArray data = (JSONArray) childRenData.get("data");
                 for (Object o : data){
                     JSONObject json = (JSONObject) o;
-                    content.append(json.get("comText")+ "\t");
+                    content.append(json.get("comText")).append("\t");
                 }
             }
             // 图片
