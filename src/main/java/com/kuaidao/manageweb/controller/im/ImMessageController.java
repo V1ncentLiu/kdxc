@@ -160,7 +160,9 @@ public class ImMessageController {
             }
         }
         JSONPageResult<List<MessageRecordData>> chatRecordPage = imFeignClient.getChatRecordPage(messageRecordPageReq);
-
+        if(null != chatRecordPage){
+            transChatRecord(chatRecordPage.getData(),false);
+        }
         return chatRecordPage;
     }
 
@@ -197,6 +199,9 @@ public class ImMessageController {
         // 设置accId
         messageRecordPageReq.setAccId(customerInfoDTO.getImId());
         JSONPageResult<List<MessageRecordData>> listJSONPageResult = imFeignClient.listChatRecord(messageRecordPageReq);
+        if(null != listJSONPageResult){
+            transChatRecord(listJSONPageResult.getData(),false);
+        }
         return listJSONPageResult;
     }
 
@@ -245,7 +250,7 @@ public class ImMessageController {
             dataList.add(getHeadTitleList());
             if(null != chatRecordList && JSONResult.SUCCESS.equals(chatRecordList.getCode()) && chatRecordList.getData() != null && chatRecordList.getData().size() != 0) {
                 List<MessageRecordData> resultList = chatRecordList.getData();
-                transChatRecord(resultList);
+                transChatRecord(resultList , true );
                 int size = resultList.size();
                 for (int i = 0; i < size; i++) {
                     MessageRecordData dto = resultList.get(i);
@@ -295,7 +300,7 @@ public class ImMessageController {
     }
 
     // 消息体Attach自定义消息组装封装到body
-    public void transChatRecord(List<MessageRecordData> messageRecordDataList) {
+    public void transChatRecord(List<MessageRecordData> messageRecordDataList , boolean isCal) {
         if(CollectionUtils.isEmpty(messageRecordDataList)){
             return ;
         }
@@ -314,7 +319,6 @@ public class ImMessageController {
         brandMap.put("titleName","");
         brandMap.put("subTitle","投资区间");
         brandMap.put("mainPoint","");
-        brandMap.put("sendImageUrl","");
         brandMap.put("city","");
 
         Integer cardType = 18,brandType = 8;
@@ -340,7 +344,7 @@ public class ImMessageController {
                     String key = map.getKey();
                     String value = map.getValue();
                     if(null != childRenData.get(key)){
-                        content.append(value).append(":").append(childRenData.get(key)+ "\t");
+                        content.append(value).append(":").append(childRenData.get(key)).append("\t");
                     }
                 }
             }
@@ -350,10 +354,10 @@ public class ImMessageController {
                     String key = map.getKey();
                     String value = map.getValue();
                     if(StringUtils.isBlank(value)){
-                        content.append(childRenData.get(key) + "\t");
+                        content.append(childRenData.get(key)).append("\t");
                     }else{
                         if(null != childRenData.get(key)){
-                            content.append(value).append(":").append(childRenData.get(key) + "\t");
+                            content.append(value).append(":").append(childRenData.get(key)).append("\t");
                         }
                     }
                 }
@@ -363,26 +367,28 @@ public class ImMessageController {
                 JSONArray data = (JSONArray) childRenData.get("data");
                 for (Object o : data){
                     JSONObject json = (JSONObject) o;
-                    content.append(json.get("comText")+ "\t");
+                    content.append(json.get("comText")).append("\t");
                 }
             }
-            // 图片
-            if(pictureType.equals(messageRecordData.getMsgType()) &&  null != jsonObject.get("url")){
-                content.append("图片").append(":").append(jsonObject.get("url"));
-            }
-            // 语音
-            if(audioType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+            if(isCal){
+                // 图片
+                if(pictureType.equals(messageRecordData.getMsgType()) &&  null != jsonObject.get("url")){
+                    content.append("图片").append(":").append(jsonObject.get("url"));
+                }
                 // 语音
-                content.append("语音").append(":").append(jsonObject.get("url"));
-            }
-            // 视频
-            if(videoType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                if(audioType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                    // 语音
+                    content.append("语音").append(":").append(jsonObject.get("url"));
+                }
                 // 视频
-                content.append("视频").append(":").append(jsonObject.get("url"));
-            }
-            if(fileType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
-                // 视频
-                content.append("文件").append(":").append(jsonObject.get("url"));
+                if(videoType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                    // 视频
+                    content.append("视频").append(":").append(jsonObject.get("url"));
+                }
+                if(fileType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                    // 视频
+                    content.append("文件").append(":").append(jsonObject.get("url"));
+                }
             }
             // 设置最终值
             messageRecordData.setBody(content.toString());
