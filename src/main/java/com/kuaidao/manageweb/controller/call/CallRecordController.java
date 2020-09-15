@@ -593,6 +593,8 @@ public class CallRecordController {
            } 
             
         }
+        //角色
+        myCallRecordReqDTO.setRoleCode(roleCode);
         logger.info("callrecord myCallRecordReqDTO {{}}",myCallRecordReqDTO);
         JSONResult<Map<String,Object>> mapss = callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
         logger.info("callrecord mapss {{}}",mapss);
