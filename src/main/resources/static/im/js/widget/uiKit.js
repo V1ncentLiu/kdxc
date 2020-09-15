@@ -163,6 +163,9 @@ return /******/ (function(modules) { // webpackBootstrap
 								$('.sessionListFrame .layui-layer-title').css({
 									'height':'42px'
 								})
+								$('.sessionListFrame').css({
+									'left':'400px'
+								})
 								var str=['<div style="display: flex;align-items: center;">',
 										'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
 										'<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),5)+'</span>',
