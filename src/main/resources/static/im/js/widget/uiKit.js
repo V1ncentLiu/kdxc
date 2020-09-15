@@ -255,21 +255,22 @@ return /******/ (function(modules) { // webpackBootstrap
 				unreadNum+=Number(info.unread)
 	            str = ['<li class="panel_item '+(info.crtSession===info.target?'active':'')+'" data-scene="' + info.scene + '" data-account="' + info.account + '">',
 								'<div class="panel_avatar">',
-								'<img class="panel_image" src="'+(info.avatar==='null'?'https://app.yunxin.163.com/webdemo/im/images/default-icon.png':info.avatar)+'"/>',
+								'<img class="panel_image" src="'+(info.avatar==='null'?'https://static-huiju-new.kuaidao.cn/lark/Lark20200911-182905.png':info.avatar)+'"/>',
 								'</div>',
 	                            '<div class="panel_text">',
 	                                '<p class="panel_multi-row">',
 										'<span class="panel_nick">',
-										info.nick ,
+										(sessions[i].nickName?sessions[i].nickName: info.nick).slice(0,6),
+										// info.nick ,
 										 sessions[i].isSubmit?'<b class="panel_customer">我的客户</b> ':'',
-										 sessions[i].brandName?'<b class="panel_brand">'+sessions[i].brandName+'</b>':'',
+										 sessions[i].brandName?'<b class="panel_brand">'+(sessions[i].isSubmit?sessions[i].brandName.slice(0,4):sessions[i].brandName.slice(0,9))+'</b>':'',
 										 '</span>',
 										// '<img class="" src="" />',
 	                                    '<b class="panel_time">' + info.time + '</b>',
 	                                '</p>',
 	                                '<p class="panel_multi-row">',
 	                                    '<span class="panel_lastMsg">' + infoText + '</span>',
-	                                    info.unread ? '<b class="panel_count">' + (info.unread>99?90+'+':info.unread) + '</b>':'',
+	                                    info.unread ? (info.unread>99?'<b class="panel_count"  style="padding:0 2px">' +99+'+' + '</b>':'<b class="panel_count">' + info.unread + '</b>'):'',
 	                                '</p>',
 	                            '</div>',
 	                        '</li>'].join("");
@@ -279,7 +280,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		var str=['<div style="display: flex;align-items: center;">',
 					'<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
 					'<span style="margin:0 10px;">我的会话</span>',
-					unreadNum>0?'<span style="text-align: center;font-weight:700;line-height:26px;display: inline-block;width: 26px;height: 26px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
+					unreadNum>0?'<span style="text-align: center;line-height:24px;font-size:12px;display: inline-block;width: 24px;height: 24px;background-color: red;border-radius: 50%;color: #fff;">'+(unreadNum>10?10+'+':unreadNum)+'</span>':'',
 				'</div>'].join("")
 		if(!isLayerOpen){
 			$('.mainHtmlLayer .layui-layer-title').html(str)
@@ -564,7 +565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			str,
 			info;
 			if (list.length === 0) {
-				html += '<p class="empty">暂无好友展示</p>';
+				html += '<p class="empty">暂无提交客户</p>';
 			}else{
 				for (var i = 0; i < list.length; i++) {
 					info = this.provider(list[i],"friend");
@@ -593,9 +594,9 @@ return /******/ (function(modules) { // webpackBootstrap
 										list[i].cusName ,
 										list[i].brandName?'<b class="panel_brand">'+list[i].brandName+'</b>':'',
 										'</span>',
-										'<b class="panel_time">{' +list[i].customerStatus + '}</b>',
+										list[i].customerStatus?'<b class="panel_time">[' +list[i].customerStatus + ']</b>':'',
 									'</p>',
-									list[i].createTime?'<span class="panel_lastMsg">' +this.formatDate(list[i].createTime)+ '</span>':'',
+									list[i].createTime?'<span class="panel_lastMsg">提交时间：' +this.formatDate(list[i].createTime)+ '</span>':'',
 									'</div>',
 								'</li>'].join("");
 				}

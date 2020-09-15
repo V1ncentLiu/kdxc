@@ -58,44 +58,6 @@ YX.fn.inputSearchImgFriendsClick = function () {
  */
 
 YX.fn.friendListConcat = function () {
-    var array = [
-        {
-            brandName: '本宫的茶',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "075e46ee54fe4a8fba725460afb22ea2",    //imId
-            time: '06-16',
-        },
-        {
-            brandName: '本宫的茶1',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "669f80e2663a4e238728a9c348ac9e36",    //imId
-            time: '06-16'
-        },
-        {
-            brandName: '本宫的茶1',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "36e790ae11674a76a91f6ce98ab93d82",    //imId
-            time: '06-16'
-        },
-        {
-            brandName: '本宫的茶1',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "3bd44fe0836f45bb888c29a3b165e8bc",    //imId
-            time: '06-16'
-        },
-        {
-            brandName: '本宫的茶1',
-            clueId: '1111212121',    //线索ID
-            isSubmit: 1,
-            account: "41d07223346d4a8c8260af1c05ac0ab1",    //imId
-            time: '06-16'
-        },
-        
-    ]  
     var newArray = []
     var param={
         teleSaleId:userId,
@@ -112,6 +74,7 @@ YX.fn.friendListConcat = function () {
             console.log(result,'右侧列表数据');
             if(result.data){  
                 newArray=result.data.data
+                localStorage.setItem('friendLists',JSON.stringify(newArray))
             }
         },
         error:function(request){

@@ -1,23 +1,24 @@
 package com.kuaidao.manageweb.controller.im;
 
-import com.kuaidao.aggregation.dto.clue.IMSubmitQueryDTO;
-import com.kuaidao.aggregation.dto.es.EsQueryDTO;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
-import com.kuaidao.custservice.dto.submitCust.SubmitCustsDTO;
-import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
-import com.kuaidao.manageweb.feign.im.ImSubmitCustomerRecordClient;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
+import com.kuaidao.aggregation.dto.clue.IMSubmitQueryDTO;
+import com.kuaidao.aggregation.dto.es.EsQueryDTO;
+import com.kuaidao.common.entity.IdListReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.custservice.dto.custservice.BrandAndIsSubmitReq;
+import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
+import com.kuaidao.custservice.dto.submitCust.SubmitCustsDTO;
+import com.kuaidao.manageweb.feign.im.CustomerInfoFeignClient;
+import com.kuaidao.manageweb.feign.im.ImSubmitCustomerRecordClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 @Controller
 @RequestMapping("/im")
@@ -44,7 +45,8 @@ public class ImChartListAndSubmitCustController {
      */
     @PostMapping("/submitCustList")
     @ResponseBody
-    public JSONResult<PageBean<IMSubmitQueryDTO>> submitCustList(@RequestBody EsQueryDTO submitQuery) {
+    public JSONResult<PageBean<IMSubmitQueryDTO>> submitCustList(
+            @RequestBody EsQueryDTO submitQuery) {
         return customerInfoFeignClient.costomerList(submitQuery);
     }
 
@@ -54,7 +56,12 @@ public class ImChartListAndSubmitCustController {
     @PostMapping("/brandAndIssubmit")
     @ResponseBody
     public JSONResult<List<CustomerInfoDTO>> brandAndIssubmit(@RequestBody IdListReq ids) {
-        JSONResult<List<CustomerInfoDTO>> result = customerInfoFeignClient.brandAndIssubmit(ids);
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        BrandAndIsSubmitReq brandAndIsSubmitReq = new BrandAndIsSubmitReq();
+        brandAndIsSubmitReq.setIdList(ids.getIdList());
+        brandAndIsSubmitReq.setTeleSaleId(user.getId());
+        JSONResult<List<CustomerInfoDTO>> result =
+                customerInfoFeignClient.brandAndIssubmit(brandAndIsSubmitReq);
         return result;
     }
 }

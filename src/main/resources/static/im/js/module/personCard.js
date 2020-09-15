@@ -16,10 +16,9 @@ YX.fn.myInfoEvt = function () {
     //修改头像
     this.$modifyAvatar = $('#modifyAvatar')
 
-
     this.$userPic = $('#userPic')
 
-
+    
     //弹出我的信息
     $('#showMyInfo').on('click', this.showMyInfo.bind(this))
     $('#customerStateClick').on('click', this.customerStateClick.bind(this))
@@ -36,10 +35,26 @@ YX.fn.myInfoEvt = function () {
     this.$modifyAvatar.delegate('.j-choseFile, .j-reupload', 'click', this.doClickModifyAvatar.bind(this))
     this.$modifyAvatar.delegate('.j-save', 'click', this.doSaveAvatar.bind(this))
     this.$modifyAvatar.delegate('.j-upload', 'change', this.viewAvatar.bind(this))
-
+    this.changeState(0)
 }
 YX.fn.customerStateClick = function () {
     $(".statusBox").toggle();
+    var valueStateText=$('.valueState').text()
+    $('#statusBoxClick li').removeClass('active')
+    setTimeout(()=>{
+        switch (valueStateText) {
+            case '在线':
+                $('#statusBoxClick li:nth-child(1)').addClass('active')
+                break;
+            case '忙碌':
+                $('#statusBoxClick li:nth-child(2)').addClass('active')
+                break;
+            case '离线':
+                $('#statusBoxClick li:nth-child(3)').addClass('active')
+                break;
+            default: return ''
+        }
+    },0)
 }
 YX.fn.statusBoxClick = function (e) {
     var e = e || window.event;

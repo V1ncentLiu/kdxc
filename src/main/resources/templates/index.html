@@ -529,7 +529,7 @@
             <div class="hide loading" id="loading"></div>
             <div class="title">
                 <img src="" alt="" width="56" height="56" class="radius-circle avatar" id="userPic" />
-                <span id="userName">&nbsp;</span>
+                <span style="font-size:14px;color: #333;" id="userName">&nbsp;</span>
                 <!-- <span>
                     <img src="images/pen.png" class="u-modify" id="showMyInfo">
                 </span> -->
@@ -543,7 +543,7 @@
 						<span class="valueState">在线</span>
 					</span>
                 <ul class="statusBox" id="statusBoxClick">
-                    <li class="statusBoxLi" data="1">
+                    <li class="statusBoxLi active" data="1">
                         <b></b>
                         <span>在线</span>
                     </li>
@@ -592,7 +592,7 @@
                     </div> -->
 
                     <div id="sessions">
-                        <p>正在获取最近联系人...</p>
+                        <!-- <p>正在获取最近联系人...</p> -->
                     </div>
                 </div>
             </div>
@@ -683,7 +683,7 @@
                     <img src="" width="56" height="56" class="radius-circle img" id="headImg" />
                     <div class="customerInformation">
 							<span class="nickName">
-								<span id="nickName">张三</span>
+								<span id="nickName" style="font-size:14px;color:#333;">张三</span>
 								<span id="isOnline"> <b></b> 在线</span>
 								<!--<span>正在输入...</span> -->
 							</span>
@@ -1324,12 +1324,12 @@
     document.addEventListener("click", function(){
         $(".statusBox").hide()
     },true);
-    var dataNum=''
-    var isLayerOpen=true
-    var sessionListNum=0
-    var isSessionListNum=false
-    var chatWindow
-    var searchLists
+    var dataNum=''  //聊天列表最小化 未读消息
+    var isLayerOpen=true   //聊天框最小化 判断
+    var sessionListNum=0    //聊天框最小化未读消息数初始化
+    var isSessionListNum=false  //聊天框最小化未读消息数初始化
+    var chatWindow  //聊天框layer赋值，方便关闭打开
+    var searchLists  //新进线消息数判断是否要请求后端接口
     function showLittleBit(value,num){
         if(value&&value.length>num){
             value=value.toString().slice(0,num)+'...'
@@ -1340,7 +1340,7 @@
         layer.open({
             type: 1,
             title: ' ',   //标题
-            area: ['360px', '700px'],   //宽高
+            area: ['360px', '705px'],   //宽高
             shade: 0,   //遮罩透明度
             skin: 'mainHtmlLayer',
             content: $("#left-panel"),//支持获取DOM元素
@@ -1354,9 +1354,10 @@
                 //     'top':document.documentElement.clientHeight-66+'px'
                 // })
 
-                $('.mainHtmlLayer').css({
-                    'left': '300px',
-                })
+                // $('.mainHtmlLayer').css({
+                //     'left': '300px',
+                //     'height':'76px'
+                // })
                 $('.mainHtmlLayer .layui-layer-title').css({
                     'height':'42px',
                     'padding-left':'10px',
@@ -1366,7 +1367,7 @@
                 var str=['<div style="display: flex;align-items: center;">',
                             '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
                             '<span style="margin:0 10px;">我的会话</span>',
-                            dataNum>0?'<span style="text-align: center;font-weight:700;line-height:23px;display: inline-block;width: 23px;height: 23px;background-color: red;border-radius: 50%;color: #fff;">'+(dataNum>10?10+'+':dataNum)+'</span>':'',
+                            dataNum>0?'<span style="font-size: 12px;text-align: center;line-height:24px;display: inline-block;width: 24px;height: 24px;background-color: red;border-radius: 50%;color: #fff;">'+(dataNum>10?10+'+':dataNum)+'</span>':'',
                         '</div>'].join("")
                 $('.mainHtmlLayer .layui-layer-title').html(str)
 
@@ -1391,6 +1392,9 @@
                     'left':document.documentElement.clientWidth*(0.7)+'px',
                     'top':document.documentElement.clientHeight*(1/5)+'px'
 
+                })
+                $('.mainHtmlLayer .layui-layer-content').css({
+                    'height':'678px'
                 })
                 $('.mainHtmlLayer .layui-layer-title').css({
                     'height':'24px'
@@ -1736,28 +1740,50 @@
 </script>
 <script th:src="@{/im/js/module/whiteboard.js}"></script>
 <script type="text/javascript">
-    window.οnbefοreunlοad=onclose;//浏览器关闭事件监听，关闭浏览器im下线
-    function onclose(){
-        if(event.clientX>document.body.clientWidth&&event.clientY<0||event.altKey){ 
-            var param={};
-            param.teleSaleId=userId;
-            param.operationType=3;//在线离线（im在线状态 1-在线、2-忙碌、3-离线',）
-            param.type="1";//1是PC
-            $.ajax({
-                url : '/message/im/onlineleave',
-                type:'POST',
-                data:JSON.stringify(param),
-                async:false,
-                contentType: "application/json; charset=utf-8",
-                dataType:'json',
-                success: function(result){
-                  console.log(result,'首页');
-                },
-                error:function(request){
-                  alert(request)
-                }
-            })
+    var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+    var isOpera = userAgent.indexOf("Opera") > -1; //判断是否Opera浏览器
+    var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera; //判断是否IE浏览器
+    var isIE11 = userAgent.indexOf("rv:11.0") > -1; //判断是否是IE11浏览器
+    var isEdge = userAgent.indexOf("Edge") > -1 && !isIE; //判断是否IE的Edge浏览器
+    if(!isIE && !isEdge && !isIE11) {//兼容chrome和firefox
+        var _beforeUnload_time = 0, _gap_time = 0;
+        var is_fireFox = navigator.userAgent.indexOf("Firefox")>-1;//是否是火狐浏览器
+        var is_chrome = navigator.userAgent.indexOf("Chrome")>-1;//google
+        window.onunload = function (){
+            _gap_time = new Date().getTime() - _beforeUnload_time;
+            if(_gap_time <= 5){
+                onclose();
+            }else{//浏览器刷新
+            }
         }
+        window.onbeforeunload = function (){
+            _beforeUnload_time = new Date().getTime();
+            if(is_fireFox){//火狐关闭执行
+                onclose();
+            }
+            if(is_chrome){//google关闭执行
+                onclose();
+            }
+        };
+    }
+
+    function onclose(){
+        var param={};
+        param.teleSaleId=userId;
+        param.operationType=3;//在线离线（im在线状态 1-在线、2-忙碌、3-离线',）
+        param.type="1";//1是PC
+        $.ajax({
+            url : '/message/im/onlineleave',
+            type:'POST',
+            data:JSON.stringify(param),
+            contentType: "application/json;charset=utf-8",
+            success: function(result){
+                console.log(result,'首页');
+            },
+            error:function(request){
+                alert(request)
+            }
+        })
     }
 </script>
 </html>

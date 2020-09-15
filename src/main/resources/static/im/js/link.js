@@ -178,6 +178,8 @@ var SDKBridge = function(ctr, data) {
   // 获取后端接口数据合并ws推送的数据
   function sessionsListConcat (sessions) {
     var newIdList=[]
+    var newSessionList=[]
+
     for(var i=0;i<sessions.length;i++){
       if(sessions[i].scene=='p2p'){
         newIdList.push(sessions[i].to)
@@ -202,18 +204,20 @@ var SDKBridge = function(ctr, data) {
                       sessions[i].brandName=data[j].brandName
                       sessions[i].clueId=data[j].clueId
                       sessions[i].isSubmit=data[j].isSubmit
+                      sessions[i].nickName=data[j].nickName
+                      newSessionList.push(sessions[i])
                   }
               }
             }
           }else{
-            alert(result.code)
+            console.log(result.code)
           }
         },
         error:function(request){
           alert(request)
         }
     })
-    return sessions
+    return newSessionList
   }
 
   function onSessions(sessions) {
@@ -221,7 +225,7 @@ var SDKBridge = function(ctr, data) {
     console.log(old, sessions,'左侧列表原始数据');
     sessions=sessionsListConcat(sessions)
     searchLists=sessions.length
-    this.cache.setSessions(this.nim.mergeSessions(old, sessions));
+    this.cache.setSessions(this.nim.mergeSessions(sessions));
     for (var i = 0; i < sessions.length; i++) {
       if (sessions[i].scene === 'p2p') {
         var tmpUser = sessions[i].to;

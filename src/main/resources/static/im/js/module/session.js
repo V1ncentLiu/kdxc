@@ -104,6 +104,7 @@ YX.fn.newSessionsListConcat =function(value) {
                       sessions[i].brandName=data[j].brandName
                       sessions[i].clueId=data[j].clueId
                       sessions[i].isSubmit=data[j].isSubmit
+                      sessions[i].nickName=data[j].nickName
                   }
               }
             }
@@ -111,7 +112,7 @@ YX.fn.newSessionsListConcat =function(value) {
                 searchLists=sessions.length
             }
           }else{
-            alert(result.code)
+            console.log(result.code)
           }
         },
         error:function(request){
@@ -142,7 +143,7 @@ YX.fn.fuzzyQuerySearch = function (value) {
     var newArray=[]
     if(value){
         for(let i=0;i<allData.length;i++){
-            if(allData[i].lastMsg.fromNick.indexOf(value)>-1){
+            if(allData[i].nickName&&allData[i].nickName.indexOf(value)>-1){
                 newArray.push(allData[i])
             }
         }

@@ -66,7 +66,8 @@ function NetcallBridge(yx) {
     this.deviceAudioOutOn = true;
     // 是否全屏状态
     this.isFullScreen = false;
-
+    //只能打开一个聊天窗口
+    this.openOne=true;
     // 本地agent连接状态
     this.signalInited = false;
     // agent程序下载地址
@@ -1039,6 +1040,8 @@ fn.sendLocalMessage = function (text, to) {
 };
 // 挂断通话过程
 fn.hangup = function () {
+    console.log('收到我方挂断通话消息');
+    this.openOne=true
     this.netcall.hangup();
     this.beCalledInfo = null;
     this.beCalling = false;
@@ -1074,6 +1077,7 @@ fn.onCallerAckSync = function (obj) {
 // 2. 请求通话中挂断
 fn.onHangup = function (obj) {
     this.log("收到对方挂断通话消息");
+    this.openOne=true
     console.log("on hange up", obj);
     console.log(this.beCalling, this.beCalledInfo, this.netcallDurationTimer);
     // 是否挂断当前通话
@@ -1126,21 +1130,84 @@ fn.onHangup = function (obj) {
 };
 // 打开当前音视频通话对象的聊天窗口
 fn.doOpenChatBox = function () {
-    /** 群视频处理 */
-    if (this.meetingCall.channelName) {
-        this.yx.openChatBox(this.meetingCall.teamId, 'team');
-        return;
-    }
-    var account = this.netcallAccount;
-    if (!account) {
-        if (this.showTipTimer) {
-            clearTimeout(this.showTipTimer);
-            this.showTipTimer = null;
+    if(this.openOne){
+        /** 群视频处理 */
+        if (this.meetingCall.channelName) {
+            this.yx.openChatBox(this.meetingCall.teamId, 'team');
+            return;
         }
-        // 隐藏右上角悬浮框
-        return this.$goNetcall.addClass("hide");
+        var account = this.netcallAccount;
+        if (!account) {
+            if (this.showTipTimer) {
+                clearTimeout(this.showTipTimer);
+                this.showTipTimer = null;
+            }
+            // 隐藏右上角悬浮框
+            return this.$goNetcall.addClass("hide");
+        }
+
+            $('#rightPanel').css({
+                'display':'block'
+            })
+            chatWindow=layer.open({
+                type: 1, //Layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加                    
+                        //   载层）4（tips层）,
+                title: ' ',   //标题
+                area: ['800px', '720px'],   //宽高
+                shade: 0,   //遮罩透明度
+                skin: 'sessionListFrame',
+                content: $("#rightPanel"),//支持获取DOM元素
+                scrollbar: false ,//屏蔽浏览器滚动条
+                maxmin: true,
+                success:function(){
+                    $('.sessionListFrame .layui-layer-title').css({
+                        'backgroundColor': '#ECEDF2',
+                        'borderBottom':'none',
+                        'height':'24px',
+                        'paddingRight':'40px'
+                    })
+                    sessionListNum=0
+                    isSessionListNum=false
+                },
+                min:function(){
+                    $('.sessionListFrame .layui-layer-title').css({
+                        'height':'42px'
+                    })
+                    $('.sessionListFrame .layui-layer-title').css({
+                        'height':'42px'
+                    })
+                    var str=['<div style="display: flex;align-items: center;">',
+                            '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
+                            '<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),5)+'</span>',
+                            // sessionListNum>0?'<span style="text-align: center;font-weight:700;line-height:16px;display: inline-block;width: 16px;height: 16px;background-color: red;border-radius: 50%;color: #fff;">'+sessionListNum+'</span>':'',
+                        '</div>'].join("")
+                    $('.sessionListFrame .layui-layer-title').html(str)
+                    isSessionListNum=true
+                },
+                restore:function(){
+                    sessionListNum=0
+                    isSessionListNum=false
+                    $('.sessionListFrame .layui-layer-title').css({
+                        'backgroundColor': '#ECEDF2',
+                        'borderBottom':'none',
+                        'height':'24px',
+                    })
+                    $('.sessionListFrame .layui-layer-title').html('')
+                },
+                cancel:function(){
+                    $('#rightPanel').css({
+                        'display':'none'
+                    })
+                }
+            });
+            //  account = target.getAttribute("data-account");
+            // scene = target.getAttribute("data-scene");
+            // cbClickList(account,scene);
+
+        this.yx.openChatBox(account, 'p2p');
+        this.openOne=false
+
     }
-    this.yx.openChatBox(account, 'p2p');
 };
 
 /** 被呼叫，兼容多人音视频
@@ -1148,13 +1215,13 @@ fn.doOpenChatBox = function () {
  * @param {string} scene 是否是群视频，默认值p2p
  */
 fn.onBeCalling = function (obj, scene) {
+    if(this.openOne){
     scene = scene || 'p2p';
     this.log("收到音视频呼叫");
     console.log("on be calling:", obj);
     var channelId = obj.channelId;
     var netcall = this.netcall;
     var that = this;
-
     // 如果是同一通呼叫，直接丢掉
     if (obj.channelId === this.channelId) return
 
@@ -1236,6 +1303,10 @@ fn.onBeCalling = function (obj, scene) {
     this.playRing("E", 45);
     $(".asideBox .nick").text(this.yx.getNick(account));
 
+
+
+
+    }
 };
 // 对方接受通话 或者 我方接受通话，都会触发
 fn.onCallAccepted = function (obj) {

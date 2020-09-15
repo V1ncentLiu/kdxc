@@ -68,13 +68,33 @@
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                 <el-table-column prop="teleGorupName" align="center" label="电销组">
                 </el-table-column>
-                <el-table-column prop="teleSaleName" align="center" label="会话顾问" width="80">
+                <el-table-column prop="teleSaleName" align="center" label="会话顾问" width="120">
                 </el-table-column>
                 <el-table-column prop="cusName" align="center" label="会话客户">
                 </el-table-column>
-                <el-table-column prop="msgTimestamp" align="center" label="聊天时间">
+                <el-table-column prop="msgTimestamp" align="center" label="聊天时间" width="130">
                 </el-table-column>
                 <el-table-column prop="body" align="center" label="聊天内容">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.msgType === 'VIDEO'">
+                            【视频】:  <a :href="JSON.parse(scope.row.attach ).url" target="_blank" class="buttonText" style="color: #1E9FFF">点击查看视频</a>
+                        </div>
+                        <div v-else-if="scope.row.msgType === 'PICTURE'">
+                            【图片】:  <a :href="JSON.parse(scope.row.attach ).url" target="_blank" class="buttonText" style="color: #1E9FFF">点击查看图片</a>
+                        </div>
+                        <div v-else-if="scope.row.msgType === 'FILE'">
+                            【文件】:  <a :href="JSON.parse(scope.row.attach ).url" target="_blank" class="buttonText" style="color: #1E9FFF">点击查看文件</a>
+                        </div>
+                        <div v-else-if="scope.row.msgType === 'AUDIO'">
+                            {{scope.row.body}}<br>
+                            <video width="250" height="20" controls>
+                                <source :src="JSON.parse(scope.row.attach ).url" type="video/mp4">
+                            </video>
+                        </div>
+                        <div v-else>
+                            {{scope.row.body}}
+                        </div>
+                    </template>
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -116,7 +136,7 @@
                 teleSaleArr: [], // 顾问
             }             
         },
-        methods: {     
+        methods: {
             changeTeleGroup(selectedValue) {//改变电销组
                 this.teleSaleArr = [];
                 if (!selectedValue) {
@@ -183,6 +203,23 @@
                     var result =  response.data;
                     if(result.code==0){
                         var table=result.data;
+                        // if(table){// 转换数据显示类型
+                        //     for(var i = 0 ; i < table.length ; i++){
+                        //         var msgType = table[i].msgType;
+                        //         if(msgType == "AUDIO"){
+                        //         }else if(msgType == "VIDEO"){
+                        //             var split = table[i].body.split(":");
+                        //             var splitElement1 = split[0];
+                        //             var splitElement2 = split[1];
+                        //             table[i].body = "["+split[0]+"]:"+"<a href='"+split[1]+"' >"+split[1]+"</a>"
+                        //         }else if(msgType == "PICTURE"){
+                        //             var split = table[i].body.split(":");
+                        //             var splitElement1 = split[0];
+                        //             var splitElement2 = split[1];
+                        //             table[i].body = "["+split[0]+"]:"+"<a href='"+split[1]+"' >"+split[1]+"</a>"
+                        //         }
+                        //     }
+                        // }
                         mainDivVM.tableData= table;
                         mainDivVM.pager.total =  result.total;
                         mainDivVM.pager.currentPage = result.pageNum;

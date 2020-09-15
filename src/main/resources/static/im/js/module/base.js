@@ -183,9 +183,9 @@ YX.fn.openChatBox = function(account, scene) {
         this.$nickName.text(info.nick);
         // }
         // 聊天图片
-        this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://app.yunxin.163.com/webdemo/im/images/default-icon.png');
+        this.$chatTitle.find('img').attr('src', info.avatar!='null'?getAvatar(info.avatar):'https://static-huiju-new.kuaidao.cn/lark/Lark20200911-182905.png');
         // 渲染聊天框信息
-        this.getUserInfo(info.account)
+        this.getUserInfo(account)
         $('#submitCustomer').css({
           'display':'block'
         })
@@ -208,6 +208,24 @@ YX.fn.openChatBox = function(account, scene) {
               $('#editCustomer2').attr({
                   'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+infoSession[i].clueId
               })
+            }
+          }else{
+            var newFriendList=localStorage.getItem('friendLists')
+            if(newFriendList){
+              newFriendList=JSON.parse(newFriendList)
+              for(var j=0;j<newFriendList.length;j++){
+                if(newFriendList[j].account==account){
+                  $('#submitCustomer').css({
+                    'display':'none'
+                  })
+                  $('#editCustomer').css({
+                    'display':'block'
+                  })
+                  $('#editCustomer2').attr({
+                      'href':'/tele/clueMyCustomerInfo/customerEditInfo?clueId='+newFriendList[j].clueId
+                  })
+                }
+              } 
             }
           }
         }
@@ -253,12 +271,6 @@ YX.fn.openChatBox = function(account, scene) {
 
 YX.fn.getUserInfo = function(accountId) {
   var that=this
-  var sessions= this.cache.getSessions()||[]
-  console.log(sessions)
-  // 给提交客户弹窗赋值姓名
-  var name=sessions[0].lastMsg.fromNick;
-  $("#submitCustomerFormName").val(name);
-  
   console.log(accountId,'聊天面板id');
     var params = {
       id:accountId
@@ -290,8 +302,12 @@ YX.fn.getUserInfo = function(accountId) {
         //   <span> `+data.phoneNumber+`</span>
         // `
           $('#otherInformation').html(str)
-          // 给提交客户弹窗赋值手机号，并清空其他内容
-          var phone=data.phoneNumber?data.phoneNumber:'';          
+          // 给提交客户弹窗赋值姓名、手机号，并清空其他内容
+          // var name=data.cusName?data.cusName:'';
+          var phone=data.phoneNumber?data.phoneNumber:'';  
+          setTimeout(function(){
+            $("#submitCustomerFormName").val(that.$nickName.text());
+          },0) 
           $("#submitCustomerFormIphone").val(phone);
           $("#submitCustomerFormIphoneTwo").val("");
           $("#submitCustomerFormWechat").val("");
