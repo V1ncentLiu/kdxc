@@ -161,9 +161,6 @@ public class ImMessageController {
         }
         JSONPageResult<List<MessageRecordData>> chatRecordPage = imFeignClient.getChatRecordPage(messageRecordPageReq);
 
-        if(null != chatRecordPage){
-            transChatRecord(chatRecordPage.getData());
-        }
         return chatRecordPage;
     }
 
@@ -200,9 +197,6 @@ public class ImMessageController {
         // 设置accId
         messageRecordPageReq.setAccId(customerInfoDTO.getImId());
         JSONPageResult<List<MessageRecordData>> listJSONPageResult = imFeignClient.listChatRecord(messageRecordPageReq);
-        if(null != listJSONPageResult){
-            transChatRecord(listJSONPageResult.getData());
-        }
         return listJSONPageResult;
     }
 
@@ -324,7 +318,7 @@ public class ImMessageController {
         brandMap.put("city","");
 
         Integer cardType = 18,brandType = 8;
-        String hiType = "17";
+        String hiType = "17" , audioType = "AUDIO" , pictureType = "PICTURE" , videoType = "VIDEO" , fileType="FILE";
 
         for (MessageRecordData messageRecordData : messageRecordDataList){
             if(StringUtils.isNotBlank(messageRecordData.getBody())){
@@ -371,6 +365,24 @@ public class ImMessageController {
                     JSONObject json = (JSONObject) o;
                     content.append(json.get("comText")+ "\t");
                 }
+            }
+            // 图片
+            if(pictureType.equals(messageRecordData.getMsgType()) &&  null != jsonObject.get("url")){
+                content.append("图片").append(":").append(jsonObject.get("url"));
+            }
+            // 语音
+            if(audioType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                // 语音
+                content.append("语音").append(":").append(jsonObject.get("url"));
+            }
+            // 视频
+            if(videoType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                // 视频
+                content.append("视频").append(":").append(jsonObject.get("url"));
+            }
+            if(fileType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                // 视频
+                content.append("文件").append(":").append(jsonObject.get("url"));
             }
             // 设置最终值
             messageRecordData.setBody(content.toString());
