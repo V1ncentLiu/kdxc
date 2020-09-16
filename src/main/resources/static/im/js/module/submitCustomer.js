@@ -86,8 +86,7 @@ YX.fn.generalFormLastClick = function (type) {
             contentType: "application/json",
             success: function(data) {
                 if (data.code === "0") {
-                    // 可以点击
-                    $("#generalFormLastSubmit").removeAttr("disabled"); 
+                    
                     console.log('保存成功'); 
                     // 关闭弹窗
                     layer.close(submitCustomerLayer)
@@ -99,6 +98,8 @@ YX.fn.generalFormLastClick = function (type) {
                     var id=data.data;
                     var url='';
                     if(id){
+                        // 可以点击
+                        $("#generalFormLastSubmit").removeAttr("disabled"); 
                         layer.msg('保存成功');
                         that.newSessionsListConcat()
                         $('#submitCustomer').css({
