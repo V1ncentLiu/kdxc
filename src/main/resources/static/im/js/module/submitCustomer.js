@@ -76,6 +76,9 @@ YX.fn.generalFormLastClick = function (type) {
         params.wechat=wechat;
         params.remark=remark;
         params.teleSaleId=teleSaleId;
+        // 按钮禁止点击
+        console.log('禁止点击')
+        $("#generalFormLastSubmit").attr('disabled','disabled')
         $.ajax({
             url: '/im/submit',
             type: 'POST',
@@ -83,6 +86,7 @@ YX.fn.generalFormLastClick = function (type) {
             contentType: "application/json",
             success: function(data) {
                 if (data.code === "0") {
+                    
                     console.log('保存成功'); 
                     // 关闭弹窗
                     layer.close(submitCustomerLayer)
@@ -94,6 +98,8 @@ YX.fn.generalFormLastClick = function (type) {
                     var id=data.data;
                     var url='';
                     if(id){
+                        // 可以点击
+                        $("#generalFormLastSubmit").removeAttr("disabled"); 
                         layer.msg('保存成功');
                         that.newSessionsListConcat()
                         $('#submitCustomer').css({
@@ -107,17 +113,23 @@ YX.fn.generalFormLastClick = function (type) {
                             'href':url
                         })
                     }else{
+                        // 可以点击
+                        $("#generalFormLastSubmit").removeAttr("disabled"); 
                         layer.msg('保存失败');
                     }
                 } else {
-                   console.log('保存失败'); 
-                   layer.alert(data.msg)
+                    // 可以点击
+                    $("#generalFormLastSubmit").removeAttr("disabled"); 
+                    console.log('保存失败'); 
+                    layer.alert(data.msg)
                 }
             },
             error: function() {
                 console.log('请求失败，请重试');
+                // 可以点击
+                $("#generalFormLastSubmit").removeAttr("disabled"); 
             }
-        });
+        });      
     }
 }
 var submitCustomerLayer
